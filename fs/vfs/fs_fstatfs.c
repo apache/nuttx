@@ -62,6 +62,7 @@ int fstatfs(int fd, FAR struct statfs *buf)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR struct inode *inode;
 #endif
+  struct statfs kbuf;
   int ret;
 
   DEBUGASSERT(buf != NULL);
@@ -96,8 +97,8 @@ int fstatfs(int fd, FAR struct statfs *buf)
         {
           /* Perform the statfs() operation */
 
-          memset(buf, 0, sizeof(struct statfs));
-          ret = inode->u.i_mops->statfs(inode, buf);
+          memset(&kbuf, 0, sizeof(kbuf));
+          ret = inode->u.i_mops->statfs(inode, &kbuf);
         }
     }
   else
@@ -105,19 +106,23 @@ int fstatfs(int fd, FAR struct statfs *buf)
     {
       /* The node is part of the root pseudo file system */
 
-      memset(buf, 0, sizeof(struct statfs));
-      buf->f_type    = PROC_SUPER_MAGIC;
-      buf->f_namelen = NAME_MAX;
+      memset(&kbuf, 0, sizeof(kbuf));
+      kbuf.f_type    = PROC_SUPER_MAGIC;
+      kbuf.f_namelen = NAME_MAX;
       ret            = OK;
     }
 
-  /* Check if the fstat operation was successful */
+  /* Check if the fstat operation was successful.  Copy the result to the
+   * caller's buffer after file_put(), so that a bad buffer faults with no
+   * file reference held.
+   */
 
   file_put(filep);
   if (ret >= 0)
     {
       /* Successfully statfs'ed the file */
 
+      memcpy(buf, &kbuf, sizeof(kbuf));
       return OK;
     }
 

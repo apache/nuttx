@@ -75,6 +75,7 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
+  struct statfs kbuf;
   int ret = OK;
 
   /* Sanity checks */
@@ -121,10 +122,12 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
     }
 
   /* The way we handle the statfs depends on the type of inode that we
-   * are dealing with.
+   * are dealing with.  Fill a local buffer: it is copied to the caller's
+   * buffer when the inode and the path buffer are released, so that a bad
+   * buffer faults with nothing held.
    */
 
-  memset(buf, 0, sizeof(struct statfs));
+  memset(&kbuf, 0, sizeof(kbuf));
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   if (INODE_IS_MOUNTPT(inode))
     {
@@ -136,7 +139,7 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
         {
           /* Perform the statfs() operation */
 
-          ret = inode->u.i_mops->statfs(inode, buf);
+          ret = inode->u.i_mops->statfs(inode, &kbuf);
         }
     }
   else
@@ -144,7 +147,7 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
     {
       /* The node is part of the root pseudo file system */
 
-      ret = statpseudofs(inode, buf);
+      ret = statpseudofs(inode, &kbuf);
     }
 
   /* Check if the statfs operation was successful */
@@ -158,6 +161,7 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
 
   inode_release(inode);
   inode_search_release(&desc);
+  memcpy(buf, &kbuf, sizeof(kbuf));
   return OK;
 
   /* Failure conditions always set the errno appropriately */

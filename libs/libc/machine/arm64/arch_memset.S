@@ -94,6 +94,15 @@
 
 def_fn ARCH_LIBCFUN(memset) p2align=6
 
+#ifdef __KERNEL__
+	/* The start and the end of the code, for the arm64 fault handler: a
+	 * system call that faults here on a user address can finish.
+	 */
+
+	.global	arm64_memset_start
+arm64_memset_start:
+#endif
+
 	.cfi_sections .debug_frame
 	.cfi_startproc
 	dup	v0.16B, valw
@@ -245,6 +254,10 @@ L(zva_other):
 	sub	dst, dst, 32		/* Bias dst for tail loop.  */
 	b	L(tail64)
 
+#ifdef __KERNEL__
+	.global	arm64_memset_end
+arm64_memset_end:
+#endif
 	.cfi_endproc
 	.size	ARCH_LIBCFUN(memset), . - ARCH_LIBCFUN(memset)
 
