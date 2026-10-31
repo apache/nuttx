@@ -222,7 +222,7 @@
  * - Either PA28 or PC29 may drive D10
  */
 
-#    ifdef CONFIG_ARCH_LEDs
+#    ifdef CONFIG_ARCH_LEDS
 #      error LEDs may not be used with the ITEAD SD card
 #    endif
 
