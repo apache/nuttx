@@ -58,3 +58,18 @@ index 0c6b0771bf0..4b68b8b4121 100644
      /* Map Bus Error trap to its handler for CPU0 */
      IfxCpu_Tsr_CallTSR(IfxCpu_Trap_busError);
      /* Map Assertion trap to its handler for CPU0 */
+diff --git a/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_CompilersTasking.h b/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_CompilersTasking.h
+--- a/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_CompilersTasking.h
++++ b/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_CompilersTasking.h
+@@ -91,10 +91,6 @@
+ 
+ #endif /*IFX_CFG_USE_COMPILER_DEFAULT_LINKER*/
+ 
+-#ifdef __cplusplus
+-#define IFX_SSW_INLINE   static inline
+-#else
+-#define IFX_SSW_INLINE   inline
+-#endif
++#define IFX_SSW_INLINE   static inline
+ 
+ #define IFX_SSW_NULL_PTR ((void *)0x0U)
