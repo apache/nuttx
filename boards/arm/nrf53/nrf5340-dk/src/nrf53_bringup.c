@@ -55,6 +55,10 @@
 #  include "nrf53_sdc.h"
 #endif
 
+#ifdef CONFIG_NRF53_BLE_CONTROLLER
+#  include "nrf53_ble.h"
+#endif
+
 #ifdef CONFIG_RPTUN
 #  include <nuttx/wireless/bluetooth/bt_rpmsghci.h>
 #  ifdef CONFIG_DRIVERS_BLUETOOTH
@@ -149,6 +153,24 @@ static int nrf53_netcore_bleinit(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: nrf53_sdc_initialize() failed: %d\n", ret);
+    }
+#  endif
+#endif
+
+#ifdef CONFIG_NRF53_BLE_CONTROLLER
+#  ifdef CONFIG_BLUETOOTH_RPMSG_SERVER
+  ret = nrf53_ble_rpmsghci_server_initialize("bthci");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: nrf53_ble_rpmsghci_server_initialize() failed: %d\n",
+             ret);
+    }
+#  else
+  ret = nrf53_ble_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf53_ble_initialize() failed: %d\n", ret);
     }
 #  endif
 #endif

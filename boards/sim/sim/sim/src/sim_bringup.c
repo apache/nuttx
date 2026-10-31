@@ -434,6 +434,20 @@ int sim_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SIM_BLE_LL
+  /* Register the BLE Link Layer null radio instances */
+
+  for (int i = 0; i < CONFIG_SIM_BLE_LL_NINSTANCES; i++)
+    {
+      ret = sim_ble_ll_initialize(i);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: sim_ble_ll_initialize(%d) failed: %d\n",
+                 i, ret);
+        }
+    }
+#endif
+
 #ifdef CONFIG_SIM_I2CBUS
   /* Initialize the i2c master bus device */
 

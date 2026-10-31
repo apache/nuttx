@@ -36,23 +36,25 @@
 
 /* Register offsets for RTC *************************************************/
 
-#define NRF53_RTC_TASKS_START_OFFSET       0x0000                  /* Start RTC counter */
-#define NRF53_RTC_TASKS_STOP_OFFSET        0x0004                  /* Stop RTC counter */
-#define NRF53_RTC_TASKS_CLEAR_OFFSET       0x0008                  /* Clear RTC counter */
-#define NRF53_RTC_TASKS_TRIGOVRFLW_OFFSET  0x000c                  /* Clear Set counter to 0xfffff0 */
-                                                                   /* TODO: 0x040 - 0x0c */
-#define NRF53_RTC_EVENTS_TICK_OFFSET       0x0100                  /* Event on counter increment */
-#define NRF53_RTC_EVENTS_OVRFLW_OFFSET     0x0104                  /* Event on counter overflow */
-#define NRF53_RTC_EVENTS_COMPARE_OFFSET(x) (0x0140 + ((x) * 0x04)) /* Compare event on CC[x] match */
-                                                                   /* TODO: 0x180 - 0x200 */
-#define NRF53_RTC_INTENSET_OFFSET          0x0304                  /* Enable interrupt */
-#define NRF53_RTC_INTENCLR_OFFSET          0x0308                  /* Disable interrupt */
-#define NRF53_RTC_EVTEN_OFFSET             0x0340                  /* Enable or disable event routing */
-#define NRF53_RTC_EVTENSET_OFFSET          0x0344                  /* Enable event routing */
-#define NRF53_RTC_EVTENCLR_OFFSET          0x0348                  /* Disable event routing */
-#define NRF53_RTC_COUNTER_OFFSET           0x0504                  /* Current counter value */
-#define NRF53_RTC_PRESCALER_OFFSET         0x0508                  /* 12 bit prescaler for counter frequency */
-#define NRF53_RTC_CC_OFFSET(x)             (0x0540 + ((x) * 0x04)) /* Compare register x */
+#define NRF53_RTC_TASKS_START_OFFSET        0x0000                  /* Start RTC counter */
+#define NRF53_RTC_TASKS_STOP_OFFSET         0x0004                  /* Stop RTC counter */
+#define NRF53_RTC_TASKS_CLEAR_OFFSET        0x0008                  /* Clear RTC counter */
+#define NRF53_RTC_TASKS_TRIGOVRFLW_OFFSET   0x000c                  /* Clear Set counter to 0xfffff0 */
+                                                                    /* TODO: 0x040 - 0x0c */
+#define NRF53_RTC_EVENTS_TICK_OFFSET        0x0100                  /* Event on counter increment */
+#define NRF53_RTC_EVENTS_OVRFLW_OFFSET      0x0104                  /* Event on counter overflow */
+#define NRF53_RTC_EVENTS_COMPARE_OFFSET(x)  (0x0140 + ((x) * 0x04)) /* Compare event on CC[x] match */
+#define NRF53_RTC_PUBLISH_TICK_OFFSET       0x0180                  /* Publish configuration for event TICK */
+#define NRF53_RTC_PUBLISH_OVRFLW_OFFSET     0x0184                  /* Publish configuration for event OVRFLW */
+#define NRF53_RTC_PUBLISH_COMPARE_OFFSET(x) (0x01c0 + ((x) * 0x04)) /* Publish configuration for event COMPARE[x] */
+#define NRF53_RTC_INTENSET_OFFSET           0x0304                  /* Enable interrupt */
+#define NRF53_RTC_INTENCLR_OFFSET           0x0308                  /* Disable interrupt */
+#define NRF53_RTC_EVTEN_OFFSET              0x0340                  /* Enable or disable event routing */
+#define NRF53_RTC_EVTENSET_OFFSET           0x0344                  /* Enable event routing */
+#define NRF53_RTC_EVTENCLR_OFFSET           0x0348                  /* Disable event routing */
+#define NRF53_RTC_COUNTER_OFFSET            0x0504                  /* Current counter value */
+#define NRF53_RTC_PRESCALER_OFFSET          0x0508                  /* 12 bit prescaler for counter frequency */
+#define NRF53_RTC_CC_OFFSET(x)              (0x0540 + ((x) * 0x04)) /* Compare register x */
 
 /* Register offsets for RTC *************************************************/
 

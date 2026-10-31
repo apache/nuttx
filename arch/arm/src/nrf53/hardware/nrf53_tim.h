@@ -40,23 +40,29 @@
 
 /* Register offsets for TIM *************************************************/
 
-#define NRF53_TIM_TASKS_START_OFFSET       0x0000                  /* Start Timer */
-#define NRF53_TIM_TASKS_STOP_OFFSET        0x0004                  /* Stop Timer */
-#define NRF53_TIM_TASKS_COUNT_OFFSET       0x0008                  /* Increment Timer */
-#define NRF53_TIM_TASKS_CLEAR_OFFSET       0x000c                  /* Clear time */
-#define NRF53_TIM_TASKS_SHUTDOWN_OFFSET    0x0010                  /* Shutdown Timer */
-#define NRF53_TIM_TASKS_CAPTURE_OFFSET(x)  (0x0040 + ((x) * 4))    /* Capture Timer value to CC[x] */
-#define NRF53_TIM_EVENTS_COMPARE_OFFSET(x) (0x0140 + ((x) * 4))    /* Compare event on CC[x] */
-                                                                   /* TODO: 0x080-0x1c0 */
-#define NRF53_TIM_SHORTS_OFFSET            0x0200                  /* Shortcuts between local events and tasks */
-#define NRF53_TIM_INTEN_OFFSET             0x0300                  /* Enable or disable interrupt */
-#define NRF53_TIM_INTENSET_OFFSET          0x0304                  /* Enable interrupt */
-#define NRF53_TIM_INTCLR_OFFSET            0x0308                  /* Disable interrupt */
-#define NRF53_TIM_MODE_OFFSET              0x0504                  /* Timer mode selection */
-#define NRF53_TIM_BITMODE_OFFSET           0x0508                  /* Configure the number of bits used by the Timer */
-#define NRF53_TIM_PRESCALER_OFFSET         0x0510                  /* Timer prescaler register */
-#define NRF53_TIM_CC_OFFSET(x)             (0x0540 + ((x) * 4))    /* Capture/Compare register x */
-#define NRF53_TIM_ONESHOT_OFFSET(x)        (0x0580 + ((x) * 4))    /* Enable one-shot operation for Capture/Compare channel x */
+#define NRF53_TIM_TASKS_START_OFFSET          0x0000               /* Start Timer */
+#define NRF53_TIM_TASKS_STOP_OFFSET           0x0004               /* Stop Timer */
+#define NRF53_TIM_TASKS_COUNT_OFFSET          0x0008               /* Increment Timer */
+#define NRF53_TIM_TASKS_CLEAR_OFFSET          0x000c               /* Clear time */
+#define NRF53_TIM_TASKS_SHUTDOWN_OFFSET       0x0010               /* Shutdown Timer */
+#define NRF53_TIM_TASKS_CAPTURE_OFFSET(x)     (0x0040 + ((x) * 4)) /* Capture Timer value to CC[x] */
+#define NRF53_TIM_SUBSCRIBE_START_OFFSET      0x0080               /* Subscribe configuration for task START */
+#define NRF53_TIM_SUBSCRIBE_STOP_OFFSET       0x0084               /* Subscribe configuration for task STOP */
+#define NRF53_TIM_SUBSCRIBE_COUNT_OFFSET      0x0088               /* Subscribe configuration for task COUNT */
+#define NRF53_TIM_SUBSCRIBE_CLEAR_OFFSET      0x008c               /* Subscribe configuration for task CLEAR */
+#define NRF53_TIM_SUBSCRIBE_SHUTDOWN_OFFSET   0x0090               /* Subscribe configuration for task SHUTDOWN */
+#define NRF53_TIM_SUBSCRIBE_CAPTURE_OFFSET(x) (0x00c0 + ((x) * 4)) /* Subscribe configuration for task CAPTURE[x] */
+#define NRF53_TIM_EVENTS_COMPARE_OFFSET(x)    (0x0140 + ((x) * 4)) /* Compare event on CC[x] */
+#define NRF53_TIM_PUBLISH_COMPARE_OFFSET(x)   (0x01c0 + ((x) * 4)) /* Publish configuration for event COMPARE[x] */
+#define NRF53_TIM_SHORTS_OFFSET               0x0200               /* Shortcuts between local events and tasks */
+#define NRF53_TIM_INTEN_OFFSET                0x0300               /* Enable or disable interrupt */
+#define NRF53_TIM_INTENSET_OFFSET             0x0304               /* Enable interrupt */
+#define NRF53_TIM_INTCLR_OFFSET               0x0308               /* Disable interrupt */
+#define NRF53_TIM_MODE_OFFSET                 0x0504               /* Timer mode selection */
+#define NRF53_TIM_BITMODE_OFFSET              0x0508               /* Configure the number of bits used by the Timer */
+#define NRF53_TIM_PRESCALER_OFFSET            0x0510               /* Timer prescaler register */
+#define NRF53_TIM_CC_OFFSET(x)                (0x0540 + ((x) * 4)) /* Capture/Compare register x */
+#define NRF53_TIM_ONESHOT_OFFSET(x)           (0x0580 + ((x) * 4)) /* Enable one-shot operation for Capture/Compare channel x */
 
 /* Register offsets for TIM *************************************************/
 

@@ -81,6 +81,10 @@ endif
 endif
 endif
 
+ifeq ($(CONFIG_NRF54L_BLE_CONTROLLER),y)
+CHIP_CSRCS += nrf54l_ble.c nrf54l_ble_hw.c nrf54l_ble_phy.c
+endif
+
 ifeq ($(CONFIG_NRF54L_TIMER),y)
 CHIP_CSRCS += nrf54l_tim.c
 ifeq ($(CONFIG_TIMER),y)

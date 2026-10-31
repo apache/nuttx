@@ -139,6 +139,10 @@ ifeq ($(CONFIG_NRF52_QSPI),y)
 CHIP_CSRCS += nrf52_qspi.c
 endif
 
+ifeq ($(CONFIG_NRF52_BLE_CONTROLLER),y)
+CHIP_CSRCS += nrf52_ble.c nrf52_ble_hw.c nrf52_ble_phy.c
+endif
+
 ifeq ($(CONFIG_NRF52_SOFTDEVICE_CONTROLLER),y)
 
 NRFXLIB_UNPACK  := sdk-nrfxlib

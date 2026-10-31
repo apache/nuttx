@@ -144,6 +144,13 @@ rpmsghci_nimble_cpuapp
 This configuration enables RPMSG Bluetooth HCI client on the application core
 and uses nimBLE for the host-layer
 
+rpmsghci_blell_cpunet
+---------------------
+
+This configuration enables RPMSG Bluetooth HCI server on the network core
+with the NuttX BLE Link Layer as the controller.  It can be accessed using
+RPMSG Bluetooth HCI client on the application core.
+
 rpmsghci_sdc_cpunet
 -------------------
 

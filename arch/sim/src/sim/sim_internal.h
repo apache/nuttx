@@ -462,6 +462,12 @@ int sim_rpmsg_port_uart_init(const char *localcpu, const char *remotecpu,
 int sim_bthcisock_register(int dev_id);
 #endif
 
+/* sim_ble_ll.c *************************************************************/
+
+#ifdef CONFIG_SIM_BLE_LL
+int sim_ble_ll_initialize(int devid);
+#endif
+
 /* sim_audio.c **************************************************************/
 
 #ifdef CONFIG_SIM_SOUND

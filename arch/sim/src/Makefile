@@ -279,6 +279,10 @@ ifeq ($(CONFIG_SIM_HCISOCKET),y)
   CSRCS += sim_hcisocket.c
 endif
 
+ifeq ($(CONFIG_SIM_BLE_LL),y)
+  CSRCS += sim_ble_ll.c
+endif
+
 ifeq ($(CONFIG_SIM_I2CBUS_LINUX),y)
   HOSTSRCS += sim_linuxi2c.c
 endif

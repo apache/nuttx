@@ -148,6 +148,10 @@ if(CONFIG_NRF52_QSPI)
   list(APPEND SRCS nrf52_qspi.c)
 endif()
 
+if(CONFIG_NRF52_BLE_CONTROLLER)
+  list(APPEND SRCS nrf52_ble.c nrf52_ble_hw.c nrf52_ble_phy.c)
+endif()
+
 if(CONFIG_NRF52_SOFTDEVICE_CONTROLLER)
 
   set(NRFXLIB_VER "2.3.0")

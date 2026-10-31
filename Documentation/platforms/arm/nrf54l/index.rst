@@ -19,7 +19,7 @@ GPIOTE      Yes
 GRTC        Yes     Counter and tickless scheduling
 PWM         Yes
 QDEC        No
-RADIO       Yes     Bluetooth LE through SDC
+RADIO       Yes     Bluetooth LE through SDC or BLE LL
 RRAMC       Yes     Progmem erase/write interface
 SAADC       Yes
 SPIM        Yes
@@ -75,6 +75,9 @@ ECB00, AAR00, CCM00, CLOCK, TEMP and RRAMC, together with their DPPI/PPIB
 resources. TIMER0, TIMER6 and progmem are unavailable while SDC is enabled.
 The remaining GRTC channels can be used by the tickless scheduler. HFXO
 remains running; the LFCLK source is selected with ``CONFIG_NRF54L_USE_LFCLK``.
+
+``CONFIG_NRF54L_BLE_CONTROLLER`` enables the radio lower half for the BLE
+Link Layer, see :doc:`ble_ll`.
 
 RRAMC
 -----
@@ -177,3 +180,4 @@ Supported Boards
    :maxdepth: 1
 
    boards/*/*
+   ble_ll.rst
