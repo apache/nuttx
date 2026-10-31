@@ -199,6 +199,16 @@
 #    define CONFIG_HAVE_BUILTIN_FFSLL 1
 #  endif
 
+  /* An __asm__ label carries __USER_LABEL_PREFIX__ ("_" on RH850 and RX) */
+
+#  ifdef __USER_LABEL_PREFIX__
+#    define __asm_symbol_str(x)  #x
+#    define __asm_symbol_xstr(x) __asm_symbol_str(x)
+#    define __asm_symbol(fn)     __asm_symbol_xstr(__USER_LABEL_PREFIX__) #fn
+#  else
+#    define __asm_symbol(fn)     #fn
+#  endif
+
 #  if CONFIG_FORTIFY_SOURCE > 0
 #    if !defined(__OPTIMIZE__) || (__OPTIMIZE__) <= 0
 #      warning requires compiling with optimization (-O2 or higher)
@@ -221,14 +231,16 @@
 #    if !defined(__clang__)
 #      define fortify_va_arg_pack __builtin_va_arg_pack
 #    endif
-#    define fortify_real(fn) __typeof__(fn) __real_##fn __asm__(#fn)
+#    define fortify_real(fn) __typeof__(fn) __real_##fn \
+                             __asm__(__asm_symbol(fn))
 #    define fortify_function(fn) fortify_real(fn); \
                                  extern __inline__ no_builtin(#fn) \
                                  __attribute__((__always_inline__, \
                                                 __gnu_inline__, __artificial__))
 #  elif defined(__OPTIMIZE__) && __OPTIMIZE__ > 0 && \
          defined(__has_builtin) && !defined(NUTTX_NO_EXTENSIONS)
-#    define builtin_original(fn)  __typeof__(fn)  __orig_##fn __asm__(#fn)
+#    define builtin_original(fn)  __typeof__(fn)  __orig_##fn \
+                                  __asm__(__asm_symbol(fn))
 #    define builtin_function(fn)  builtin_original(fn); \
                                   extern __inline__ no_builtin(#fn) \
                                   __attribute__((__always_inline__, \
