@@ -960,6 +960,7 @@ static int  btnet_req_l2cap_data(FAR struct btnet_driver_s *priv,
   bt_addr_le_t peer;
   FAR struct iob_s *iob;
   FAR struct bt_buf_s *buf;
+
   UNUSED(priv);
 
   /* Create a connection structure for this peer if one does not already
