@@ -117,7 +117,6 @@ SDK_INCDIR += $(ILLD_DIR)/Libraries/Service/CpuGeneric
 SDK_CSRCS += ${CONFIG_DIR}/Ifx_Cfg_Ssw.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Asclin/Std/IfxAsclin.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Cpu/Std/IfxCpu.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Cpu/Trap/IfxCpu_Trap.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxAsclin_cfg.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxCpu_cfg.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxStm_cfg.c
