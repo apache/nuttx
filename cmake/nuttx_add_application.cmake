@@ -182,6 +182,13 @@ function(nuttx_add_application)
                             nx_mode=${MODE})
           endif()
         endif()
+        # send the emulated TLS calls to libc, see tools/Config.mk
+        if(CONFIG_TLS_EMUTLS)
+          set(EMUTLS_WRAP
+              $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--wrap=__emutls_get_address
+              $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--wrap=__emutls_register_common
+          )
+        endif()
         add_custom_command(
           TARGET ${TARGET}
           POST_BUILD
@@ -194,7 +201,7 @@ function(nuttx_add_application)
             $<$<OR:$<BOOL:${KERNEL_ELF_MODE}>,$<BOOL:${LOADABLE_ELF_MODE}>>:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_LINK_OPTIONS>>
             # add local link option last
             ${LINK_FLAGS} ${SYMBOL_STACKSIZE} ${SYMBOL_PRIORITY} ${SYMBOL_UID}
-            ${SYMBOL_GID} ${SYMBOL_MODE}
+            ${SYMBOL_GID} ${SYMBOL_MODE} ${EMUTLS_WRAP}
             # link startup obj if m&kernel link
             $<$<AND:$<TARGET_EXISTS:STARTUP_OBJS>,$<NOT:$<BOOL:${DYNLIB_ELF_MODE}>>>:$<TARGET_OBJECTS:STARTUP_OBJS>>
             $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--start-group
