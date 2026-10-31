@@ -27,7 +27,3 @@ if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
 elseif(CONFIG_TRICORE_TOOLCHAIN_GNU)
   include(${CMAKE_CURRENT_LIST_DIR}/gcc.cmake)
 endif()
-
-if(CONFIG_DEBUG_SYMBOLS)
-  add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
-endif()

@@ -70,4 +70,7 @@ if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
   set(PREPROCESS
       ${TOOLCHAIN_PREFIX}ctc ${CMAKE_C_FLAG_ARGS} -E
       -I${TOOLCHAIN_PREFIX}/../include.lsl -I${C_COMPILER_DIR}/../include.lsl)
+  if(CONFIG_LIBM_TOOLCHAIN)
+    nuttx_find_toolchain_lib(libm.a)
+  endif()
 endif()

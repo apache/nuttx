@@ -31,17 +31,17 @@ elseif(CONFIG_ARCH_CHIP_TC4XX)
   set(ARCH_SUBDIR tc4xx)
 endif()
 
-include(chip.cmake)
+include(chip)
 
 set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PREFIX}cctc)
-set(CMAKE_C_COMPILER ${CMAKE_ASM_COMPILER})
+set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}cctc)
 set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}cctc)
 set(CMAKE_STRIP strip --strip-unneeded)
 set(CMAKE_OBJCOPY echo)
 set(CMAKE_OBJDUMP ${TOOLCHAIN_PREFIX}elfdump)
 
-set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}cctc)
-set(CMAKE_LD ${TOOLCHAIN_PREFIX}cctc)
+set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}ltc)
+set(CMAKE_LD ${TOOLCHAIN_PREFIX}ltc)
 set(CMAKE_AR ${TOOLCHAIN_PREFIX}artc -r)
 set(CMAKE_NM nm)
 set(CMAKE_RANLIB ranlib)
@@ -50,17 +50,71 @@ set(ASMEXT
     asm
     CACHE INTERNAL "")
 
+set(CMAKE_C_COMPILE_OBJECT
+    "<CMAKE_C_COMPILER> <DEFINES> <INCLUDES> <FLAGS> --create <SOURCE> -o <OBJECT>"
+)
+set(CMAKE_CXX_COMPILE_OBJECT
+    "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> --create <SOURCE> -o <OBJECT>"
+)
+
+if(CMAKE_GENERATOR MATCHES "Ninja")
+  set(CMAKE_C_RESPONSE_FILE_FLAG "-f ${CMAKE_BINARY_DIR}/")
+  set(CMAKE_CXX_RESPONSE_FILE_FLAG "-f ${CMAKE_BINARY_DIR}/")
+  set(CMAKE_ASM_RESPONSE_FILE_FLAG "-f ${CMAKE_BINARY_DIR}/")
+  set(CMAKE_C_RESPONSE_FILE_LINK_FLAG "-f ${CMAKE_BINARY_DIR}/")
+  set(CMAKE_CXX_RESPONSE_FILE_LINK_FLAG "-f ${CMAKE_BINARY_DIR}/")
+  set(CMAKE_ASM_RESPONSE_FILE_LINK_FLAG "-f ${CMAKE_BINARY_DIR}/")
+endif()
+
 # override the ARCHIVE command
 
 set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_ASM_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 
+# override the LINK command
+
+add_link_options(-I${CMAKE_BINARY_DIR}/include)
+set(CMAKE_C_LINK_EXECUTABLE
+    "<CMAKE_LINKER> <FLAGS> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
+)
+set(CMAKE_CXX_LINK_EXECUTABLE
+    "<CMAKE_LINKER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
+)
+
 # Architecture flags
 
 add_compile_options(--lsl-core=vtc)
-add_compile_options(--iso=99)
-add_compile_options(--language=+gcc,+volatile,-strings,-kanji)
+add_link_options(-v)
+if(CONFIG_ARCH_CHIP_TC3XX)
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:--iso=11>)
+elseif(CONFIG_ARCH_CHIP_TC4XX)
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:--iso=17>)
+endif()
+add_compile_options(
+  $<$<COMPILE_LANGUAGE:C>:--language=+gcc,+volatile,-strings,-kanji>)
+add_compile_options($<$<COMPILE_LANGUAGE:C>:--no-stdinc>)
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:--no-stdinc>)
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:--c++=14>)
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:--g++>)
+add_compile_options(
+  $<$<COMPILE_LANGUAGE:CXX>:--language=+gcc,+volatile,-strings,-kanji>)
+add_compile_options(--pass-c++=-D__CTC__)
+
+function(get_smartcode_ctc_root OUT_VAR)
+  find_program(_CCTC_PATH cctc)
+  if(NOT _CCTC_PATH)
+    message(FATAL_ERROR "get_smartcode_ctc_root: cannot find 'cctc' in PATH")
+  endif()
+  get_filename_component(_BIN_DIR "${_CCTC_PATH}" DIRECTORY)
+  get_filename_component(_ROOT_DIR "${_BIN_DIR}" DIRECTORY)
+  set(${OUT_VAR}
+      "${_ROOT_DIR}"
+      PARENT_SCOPE)
+endfunction()
+
+get_smartcode_ctc_root(SMARTCODE_CTC_ROOT)
+add_compile_options(-I${SMARTCODE_CTC_ROOT}/include)
 
 if(CONFIG_DEBUG_CUSTOMOPT)
   add_compile_options(${CONFIG_DEBUG_OPTLEVEL})
@@ -79,6 +133,16 @@ add_compile_options(--integer-enumeration)
 # tradeoff between speed (-t0) and size (-t4) (default: 4)
 
 add_compile_options(--tradeoff=2)
+
+# mergering of sections
+
+add_compile_options(--pass-assembler=--concatenate-sections)
+
+# Debug link map
+
+if(CONFIG_DEBUG_LINK_MAP)
+  add_link_options(--map-file=nuttx.map)
+endif()
 
 # enable symbolic debug information
 
@@ -110,11 +174,11 @@ add_compile_options(--branch-target-align)
 # cmake-format: on
 
 add_compile_options(--fp-model=2)
-add_link_options(--no-default-libraries)
-add_link_options(--fp-model=2)
+add_link_options(-lc_fpu)
 add_link_options(-lfp_fpu)
 
-add_link_options(--hex-format=s -Wl-OtxYcL -Wl-mcrfiklsmnoduq)
+add_link_options(--core=mpe:vtc)
+add_link_options(--hex-format=s -mcrfiklsmnoduq)
 add_link_options(-lrt)
 
 # cmake-format: off
@@ -135,9 +199,47 @@ add_link_options(-lrt)
 # ctc W587: ["stdlib/lib_strtold.c" 571/23] underflow on constant of type "double"
 # ctc W588: ["misc/lib_glob.c" 150/13] dead assignment to "i" eliminated
 # ctc W589: ["inode/fs_inodesearch.c" 72/8] pointer assumed to be nonzero - test removed
+# cptc W0068: ["include/libcxx/string" 878] integer conversion resulted in a change of sign
+# cptc W0161: ["SmartCode/ctc/include/math.h" 390] unrecognized #pragma
+# cptc W0940: ["libcxx/src/include/to_chars_floating_point.h" 1073] missing return statement at end of non-void function "
+# cptc W1097: ["include/libcxx/vector" 1347] unknown attribute "__visibility__"
+# cptc W1105: ["libcxx/src/support/runtime/exception_pointer_unimplemented.ipp" 28] #warning directive: exception_ptr not yet implemented
+# cptc W1315: ["include/libcxx/new" 183] function declared with "noreturn" does return (throw triggered)
+# cptc W1858: ["libcxx/__bit/bit_cast.h" 34] attribute "__always_inline__" does not apply here
+# cptc W2213: ["include/libcxx/string" 4110] GNU attributes on a template redeclaration have no effect (the attributes of the original declaration at line 656 apply instead)
+# cptc W2496: ["include/libcxx/vector" 1429] the "always_inline" attribute is ignored on non-inline functions
+# cptc W2529: ["libcxx/__chrono/duration.h" 559] a user-provided literal suffix must begin with "_"
+# cptc W2964: ["libcxx/src/include/to_chars_floating_point.h" 994] constexpr if statements are a C++17 feature
+# cptc W3085: ["include/libcxx/__charconv/tables.h" 26] inline variables are a C++17 feature
 # cmake-format: on
 
 set(TASKING_WARNINGS
     500,507,508,525,526,527,529,544,549,553,560,562,557,558,587,588,589)
+set(TASKING_CXX_WARNINGS
+    68,161,940,1097,1105,1315,1858,2213,2496,2529,2964,3085)
 
 add_compile_options(--pass-c=--no-warnings=${TASKING_WARNINGS})
+add_compile_options(--pass-c++=--no-warnings=${TASKING_CXX_WARNINGS})
+
+if(NOT CONFIG_CXX_EXCEPTION)
+  add_compile_options(--pass-c++=--no-exceptions)
+endif()
+
+if(CONFIG_CXX_RTTI)
+  add_compile_options(--pass-c++=--rtti)
+endif()
+
+set(NUTTX_FIND_TOOLCHAIN_LIB_DEFINED true)
+function(nuttx_find_toolchain_lib)
+  get_filename_component(TASKING_ROOT_PATH "${CMAKE_C_COMPILER}" DIRECTORY)
+  string(REGEX REPLACE "^/([a-zA-Z])/(.*)$" "\\1:/\\2" TASKING_ROOT_TEMP_PATH
+                       "${TASKING_ROOT_PATH}")
+  string(STRIP "${TASKING_ROOT_TEMP_PATH}" TASKING_ROOT_PATH)
+  if(ARGN)
+    if(CONFIG_ARCH_CHIP_TC3XX)
+      nuttx_add_extra_library(${TASKING_ROOT_PATH}/../lib/tc162/${ARGN})
+    elseif(CONFIG_ARCH_CHIP_TC4XX)
+      nuttx_add_extra_library(${TASKING_ROOT_PATH}/../lib/tc18/${ARGN})
+    endif()
+  endif()
+endfunction()
