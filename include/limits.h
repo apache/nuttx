@@ -89,13 +89,7 @@
 #define _POSIX_SYMLINK_MAX                      255
 #define _POSIX_SYMLOOP_MAX                      8
 #define _POSIX_THREAD_DESTRUCTOR_ITERATIONS     4
-#if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM >= 128
-#  define _POSIX_THREAD_KEYS_MAX                128
-#elif defined(CONFIG_TLS_NELEM)
-#  define _POSIX_THREAD_KEYS_MAX                CONFIG_TLS_NELEM
-#else
-#  define _POSIX_THREAD_KEYS_MAX                0
-#endif
+#define _POSIX_THREAD_KEYS_MAX                  128
 #define _POSIX_THREAD_THREADS_MAX               64
 #define _POSIX_TIMER_MAX                        32
 #define _POSIX_TTY_NAME_MAX                     9
@@ -152,6 +146,7 @@
 #define MAX_INPUT                               _POSIX_MAX_INPUT
 #define NAME_MAX                                CONFIG_NAME_MAX
 #define TTY_NAME_MAX                            NAME_MAX
+#define LOGIN_NAME_MAX                          (NAME_MAX + 1)
 
 #if defined(CONFIG_SCHED_NGROUPS) && CONFIG_SCHED_NGROUPS > 0
 #  define NGROUPS_MAX                           CONFIG_SCHED_NGROUPS
@@ -274,11 +269,15 @@
 #define SEM_NSEMS_MAX                           INT_MAX
 #define SEM_VALUE_MAX                           INT_MAX
 
-/* Required for POSIX pthread management */
+/* Required for POSIX pthread management.  POSIX requires at least
+ * _POSIX_THREAD_KEYS_MAX keys: set CONFIG_TLS_NELEM to 128 or more.
+ */
 
 #ifndef PTHREAD_KEYS_MAX
 #  define PTHREAD_KEYS_MAX                      CONFIG_TLS_NELEM
 #endif
+
+#define PTHREAD_DESTRUCTOR_ITERATIONS _POSIX_THREAD_DESTRUCTOR_ITERATIONS
 
 /* Required for readv() and writev() */
 

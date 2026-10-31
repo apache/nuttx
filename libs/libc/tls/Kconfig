@@ -56,6 +56,11 @@ config TLS_NELEM
 		NOTE that the special value of CONFIG_TLS_NELEM disables these
 		TLS interfaces.
 
+		This is also PTHREAD_KEYS_MAX, the number of pthread_key_create()
+		keys.  POSIX requires at least 128 (_POSIX_THREAD_KEYS_MAX).  Each
+		element costs one pointer in every thread and one destructor
+		pointer in every task group.
+
 config TLS_TASK_NELEM
 	int "Number of Task Local Storage elements"
 	depends on !BUILD_KERNEL

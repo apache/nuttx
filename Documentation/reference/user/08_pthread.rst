@@ -795,7 +795,6 @@ No support for the following pthread interfaces is provided by NuttX:
   -  ``key`` is a pointer to the key to create.
   -  ``destructor`` is an optional destructor function that may be
      associated with each key that is invoked when a thread exits.
-     However, this argument is ignored in the current implementation.
 
   **Returned Value:**
 
@@ -813,7 +812,12 @@ No support for the following pthread interfaces is provided by NuttX:
   **POSIX Compatibility:** Comparable to the POSIX interface of the same
   name.
 
-  -  The present implementation ignores the ``destructor`` argument.
+  -  When a thread exits, the destructor of each key with a value that is
+     not ``NULL`` is called with that value; the value is set to ``NULL``
+     first.  If a destructor sets a value again, the destructors are
+     called again, up to ``PTHREAD_DESTRUCTOR_ITERATIONS`` (4) times.
+  -  ``PTHREAD_KEYS_MAX`` is ``CONFIG_TLS_NELEM``.  POSIX requires at
+     least ``_POSIX_THREAD_KEYS_MAX`` (128) keys.
 
 .. c:function:: int pthread_setspecific(pthread_key_t key, void *value)
 

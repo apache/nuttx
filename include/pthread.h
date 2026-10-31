@@ -57,16 +57,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Standard POSIX switches */
-
-#ifndef _POSIX_THREADS
-#  define _POSIX_THREADS
-#endif
-
-#ifndef _POSIX_THREAD_ATTR_STACKSIZE
-#  define _POSIX_THREAD_ATTR_STACKSIZE
-#endif
-
 /* Values for the process shared (pshared) attribute */
 
 #define PTHREAD_PROCESS_PRIVATE       0
