@@ -152,6 +152,8 @@ set(SDK_CSRCS
     "${CONFIG_DIR}/Ifx_Cfg_Ssw.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxAp_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxDma_cfg.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxAsclin_cfg.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/TC4Dx/IfxPort_cfg_TC4Dx.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_PinMap/TC4Dx/IfxAsclin_PinMap_TC4Dx_BGA436_COM.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Asclin/Std/IfxAsclin.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Ap/Std/IfxApApu.c"

@@ -32,12 +32,6 @@ endif
 
 AFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)machine$(DELIM)tricore
 
-# The optimized assembly routines use TC1.8 instructions (e.g. ld.dd/st.dd
-# quad-word access).  Force the assembler to target TC1.8 so the build does
-# not depend on the board's ambient platform flags.
-
-AFLAGS += -Wa,-mtc18
-
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ASRCS += arch_setjmp.$(ASMEXT)
 endif
