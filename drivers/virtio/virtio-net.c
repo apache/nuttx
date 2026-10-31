@@ -516,6 +516,7 @@ static int virtio_net_send(FAR struct netdev_lowerhalf_s *dev,
 {
   FAR struct virtio_net_priv_s *priv = (FAR struct virtio_net_priv_s *)dev;
   FAR struct virtqueue *vq = priv->vdev->vrings_info[VIRTIO_NET_TX].vq;
+  int ret;
 
   /* Check the send length */
 
@@ -527,7 +528,21 @@ static int virtio_net_send(FAR struct netdev_lowerhalf_s *dev,
 
   /* Add buffer to vq and notify the other side */
 
-  virtio_net_addbuffer(dev, vq, pkt, VIRTIO_NET_TX);
+  ret = virtio_net_addbuffer(dev, vq, pkt, VIRTIO_NET_TX);
+  if (ret < 0)
+    {
+      /* The virtqueue has no room.  The packet was not queued, so it is
+       * still owned (and will be recycled) by the upper-half.  Reclaim what
+       * the other side has finished and ask for a TX done callback to
+       * resume the transmission.
+       */
+
+      vrterr("net send failed: %d\n", ret);
+      virtio_net_txfree(dev);
+      virtqueue_enable_cb_lock(vq, &priv->lock[VIRTIO_NET_TX]);
+      return -ENOMEM;
+    }
+
   virtqueue_kick_lock(vq, &priv->lock[VIRTIO_NET_TX]);
 
   /* Try return Netpkt TX buffer to upper-half. */
