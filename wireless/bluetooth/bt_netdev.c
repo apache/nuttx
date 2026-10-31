@@ -1354,4 +1354,4 @@ int bt_netdev_unregister(FAR struct bt_driver_s *btdev)
   return ret;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_skeleton */
+#endif /* CONFIG_NET && CONFIG_NET_SKELETON */
