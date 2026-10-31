@@ -79,28 +79,6 @@ ssize_t env_findvar(FAR struct task_info_s *info, FAR const char *pname,
                     size_t namelen);
 
 /****************************************************************************
- * Name: env_setvar
- *
- * Description:
- *   setenv() with the length of the name, so that putenv() can pass the
- *   name part of its string without a copy.  An empty value removes the
- *   variable, as in setenv().
- *
- * Input Parameters:
- *   name      - The name of the variable.  It needs no terminating NUL.
- *   namelen   - The length of the name.
- *   value     - The new value of the variable.
- *   overwrite - Replace any existing value if non-zero.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int env_setvar(FAR const char *name, size_t namelen,
-               FAR const char *value, int overwrite);
-
-/****************************************************************************
  * Name: env_alloc
  *
  * Description:
