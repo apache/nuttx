@@ -1234,6 +1234,22 @@ config LSM9DS1_I2C_FREQUENCY
 	range 1 400000
 	depends on SENSORS_LSM9DS1 || SENSORS_LSM9DS1_UORB
 
+config SENSORS_LPS22HB
+	bool "STMicro LPS22HB pressure sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the STMicro LPS22HB barometer sensor.
+
+if SENSORS_LPS22HB
+
+config LPS22HB_I2C_FREQUENCY
+	int "LPS22HB I2C frequency"
+	default 400000
+	range 1 400000
+
+endif # SENSORS_LPS22HB
+
 config SENSORS_LPS25H
 	bool "STMicro LPS25H pressure sensor"
 	default n

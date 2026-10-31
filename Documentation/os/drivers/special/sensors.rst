@@ -48,3 +48,4 @@ tool for monitoring sensor activity at runtime.
     sensors/l86xxx.rst
     sensors/gnss_lowerhalf.rst
     sensors/bh1745nuc.rst
+    sensors/lps22hb.rst
