@@ -49,6 +49,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 /* Registers */
 
 #define REG_PU_CTRL 0x00 // power up control
