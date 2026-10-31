@@ -481,20 +481,30 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct rpmsg_port_s *port = priv;
   FAR struct rpmsg_device *rdev = &port->rdev;
-  FAR struct rpmsg_ns_msg *msg = data;
-  FAR const char *name = msg->name;
-  uint32_t dest = msg->addr;
+  struct rpmsg_ns_msg msg;
+  FAR const char *name;
+  uint32_t dest;
   bool decref = false;
 
-  if (len != sizeof(*msg))
+  if (len != sizeof(msg))
     {
       return RPMSG_SUCCESS;
     }
 
+  /* Copy buffer to local message and release the rx buffer early to
+   * improve the buffer utilization.
+   */
+
+  memcpy(&msg, data, sizeof(msg));
+  rpmsg_port_release_rx_buffer(rdev, data);
+
+  name = msg.name;
+  dest = msg.addr;
+
   metal_mutex_acquire(&rdev->lock);
   ept = rpmsg_get_endpoint(rdev, name, RPMSG_ADDR_ANY, dest);
 
-  if (msg->flags == RPMSG_NS_DESTROY)
+  if (msg.flags == RPMSG_NS_DESTROY)
     {
       if (ept != NULL)
         {
@@ -524,7 +534,7 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
           metal_mutex_release(&rdev->lock);
         }
     }
-  else if (msg->flags == RPMSG_NS_CREATE)
+  else if (msg.flags == RPMSG_NS_CREATE)
     {
       if (ept == NULL)
         {
@@ -575,7 +585,7 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
         }
     }
 
-  return RPMSG_SUCCESS;
+  return RPMSG_SUCCESS_BUFFER_RELEASED;
 }
 
 /****************************************************************************
