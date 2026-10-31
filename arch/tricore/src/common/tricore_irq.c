@@ -36,10 +36,6 @@
 
 #include "tricore_internal.h"
 
-#include "IfxSrc.h"
-#include "IfxCpu.h"
-#include "IfxInt_reg.h"
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -74,16 +70,16 @@ static inline void tricore_color_intstack(void)
  * Private Data
  ****************************************************************************/
 
-static const IfxSrc_Tos g_tricore_tos[] =
+static const uint8_t g_tricore_cpu2tos[] =
 {
-  IfxSrc_Tos_cpu0,
-  IfxSrc_Tos_cpu1,
-  IfxSrc_Tos_cpu2,
-  IfxSrc_Tos_cpu3,
-  IfxSrc_Tos_cpu4,
-  IfxSrc_Tos_cpu5,
+  TRICORE_TOS_CPU0,
+  TRICORE_TOS_CPU1,
+  TRICORE_TOS_CPU2,
+  TRICORE_TOS_CPU3,
+  TRICORE_TOS_CPU4,
+  TRICORE_TOS_CPU5,
 #ifdef CONFIG_ARCH_CHIP_TC4XX
-  IfxSrc_Tos_csrm,
+  TRICORE_TOS_CSRM,
 #endif
 };
 
@@ -104,36 +100,24 @@ static irq_t g_srpn_to_irq[TRICORE_IRQ_MAX_PRIORITY + 1];
 
 static void tricore_gpsrinitialize(void)
 {
-  volatile Ifx_SRC_SRCR *src;
-  int cpu_idx;
+  int cpu = up_cpu_index();
+  int irq;
   int i;
-
-  cpu_idx = up_cpu_index();
-  src = &SRC_GPSR00 + cpu_idx;
 
   /* Cpux gpsr init */
 
   for (i = 0; i < 6; i++)
     {
-#ifdef CONFIG_ARCH_CHIP_TC3XX
-      IfxSrc_init(src, g_tricore_tos[cpu_idx],
-                  tricore_irq_to_srpn(TRICORE_SRC2IRQ(src)));
-#else
-      IfxSrc_init(src, g_tricore_tos[cpu_idx],
-                  tricore_irq_to_srpn(TRICORE_SRC2IRQ(src)),
-                  IfxSrc_VmId_none);
-#endif
-
-      src += TRICORE_SRCNUM_PER_GPSR;
+      irq = TRICORE_GPSR_IRQNUM(i, cpu);
+      tricore_src_init(irq, g_tricore_cpu2tos[cpu],
+                       tricore_irq_to_srpn(irq));
     }
 
   /* Cpucs gpsr init */
 
-#ifndef CONFIG_ARCH_CHIP_TC3XX
-  src = &SRC_GPSR6_SR0 + cpu_idx;
-  IfxSrc_init(src, g_tricore_tos[cpu_idx],
-              tricore_irq_to_srpn(TRICORE_SRC2IRQ(src)),
-              IfxSrc_VmId_none);
+#ifdef CONFIG_HAVE_SECURITY_CORE
+  irq = TRICORE_GPSR_IRQNUM(6, cpu);
+  tricore_src_init(irq, g_tricore_cpu2tos[cpu], tricore_irq_to_srpn(irq));
 #endif
 }
 #endif
@@ -239,13 +223,24 @@ int tricore_srpn_to_irq(int srpn)
 
 void tricore_register_irq_srpn(int irq)
 {
-  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
-  int srpn = src->B.SRPN;
+  uintptr_t src = TRICORE_IRQ2SRC(irq);
+  int srpn = (getreg32(src) & SRCR_SRPN_MASK) >> SRCR_SRPN_SHIFT;
 
   DEBUGASSERT(srpn >= TRICORE_IRQ_MIN_PRIORITY &&
               srpn <= TRICORE_IRQ_MAX_PRIORITY);
 
   g_srpn_to_irq[srpn] = irq;
+}
+
+/****************************************************************************
+ * Name: tricore_src_enable
+ ****************************************************************************/
+
+static inline_function void tricore_src_enable(int irq)
+{
+  uintptr_t src = TRICORE_IRQ2SRC(irq);
+
+  putreg32(getreg32(src) | SRCR_SRE, src);
 }
 
 /****************************************************************************
@@ -258,7 +253,7 @@ void tricore_register_irq_srpn(int irq)
 
 void up_irq_enable(void)
 {
-  IfxCpu_enableInterrupts();
+  __asm__ volatile ("enable" ::: "memory");
 }
 
 /****************************************************************************
@@ -290,10 +285,9 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
+  /* Clear SRE and reset TOS to "no service provider" */
 
-  IfxSrc_disable(src);
-  IfxSrc_deinit(src);
+  putreg32(SRCR_TOS_MASK, TRICORE_IRQ2SRC(irq));
 }
 
 /****************************************************************************
@@ -306,16 +300,9 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
-
-#ifdef CONFIG_ARCH_CHIP_TC3XX
-  IfxSrc_init(src, g_tricore_tos[up_cpu_index()], tricore_irq_to_srpn(irq));
-#else
-  IfxSrc_init(src, g_tricore_tos[up_cpu_index()], tricore_irq_to_srpn(irq),
-              IfxSrc_VmId_none);
-#endif
-
-  IfxSrc_enable(src);
+  tricore_src_init(irq, g_tricore_cpu2tos[up_cpu_index()],
+                   tricore_irq_to_srpn(irq));
+  tricore_src_enable(irq);
 }
 
 /****************************************************************************
@@ -328,23 +315,17 @@ void up_enable_irq(int irq)
 
 void up_affinity_irq(int irq, cpu_set_t cpuset)
 {
-  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
-  int irq_prio = tricore_irq_to_srpn(irq);
+  uintptr_t src = TRICORE_IRQ2SRC(irq);
+  int irq_prio = (getreg32(src) & SRCR_SRPN_MASK) >> SRCR_SRPN_SHIFT;
 
-  IfxSrc_disable(src);
+  putreg32(getreg32(src) & ~SRCR_SRE, src);
 
   /* Only support interrupt routing mode 0,
    * so routing to the first cpu in cpuset.
    */
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
-  IfxSrc_init(src, g_tricore_tos[ffs(cpuset) - 1], irq_prio);
-#else
-  IfxSrc_init(src, g_tricore_tos[ffs(cpuset) - 1], irq_prio,
-              IfxSrc_VmId_none);
-#endif
-
-  IfxSrc_enable(src);
+  tricore_src_init(irq, g_tricore_cpu2tos[ffs(cpuset) - 1], irq_prio);
+  tricore_src_enable(irq);
 }
 
 /****************************************************************************
@@ -357,9 +338,9 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
 
 void tricore_ack_irq(int irq)
 {
-  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
+  uintptr_t src = TRICORE_IRQ2SRC(irq);
 
-  IfxSrc_clearRequest(src);
+  putreg32(getreg32(src) | SRCR_CLRR, src);
 }
 
 #ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
@@ -373,9 +354,8 @@ void tricore_ack_irq(int irq)
 
 void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
-  volatile Ifx_INT_SRB *srb = &INT_SRB0 + up_cpu_index();
-
-  srb->U = cpuset;
+  putreg32(cpuset, TRICORE_INT_SRB0_ADDR +
+                   up_cpu_index() * TRICORE_SRC_SPACING);
 }
 #endif
 
@@ -425,3 +405,39 @@ int up_prioritize_irq(int irq, int priority)
   return OK;
 }
 #endif
+
+/****************************************************************************
+ * Name: tricore_src_init
+ *
+ * Description:
+ *   Route the service request of 'irq' to 'tos' with priority 'srpn'.
+ *   The request is left disabled and any pending request is cleared.
+ *
+ ****************************************************************************/
+
+void tricore_src_init(int irq, uint8_t tos, uint8_t srpn)
+{
+  uintptr_t src = TRICORE_IRQ2SRC(irq);
+  uint32_t regval = getreg32(src);
+
+  /* Clear VM (virtual machine) and SRE (service request enable). */
+
+  regval &= ~(SRCR_VM_MASK | SRCR_SRE);
+
+  /* Update tos (target cpu) and srpn (priority) fields. */
+
+  regval &= ~(SRCR_TOS_MASK | SRCR_SRPN_MASK);
+  regval |= (srpn << SRCR_SRPN_SHIFT) | (tos << SRCR_TOS_SHIFT);
+
+  /* Cyber security */
+
+#ifdef CONFIG_TRICORE_CSRM
+  regval |= SRCR_CS;
+#endif
+
+  /* Clear pending request */
+
+  regval |= SRCR_CLRR;
+
+  putreg32(regval, src);
+}

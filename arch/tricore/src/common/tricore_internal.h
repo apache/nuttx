@@ -171,6 +171,7 @@ extern uintptr_t        _eheap[]; /* End+1 of .heap */
 /* Interrupt ****************************************************************/
 
 void tricore_ack_irq(int irq);
+void tricore_src_init(int irq, uint8_t tos, uint8_t srpn);
 int tricore_srpn_to_irq(int srpn);
 int tricore_irq_to_srpn(int irq);
 void tricore_register_irq_srpn(int irq);

@@ -41,17 +41,6 @@
 
 #include "tricore_internal.h"
 
-#include "IfxCpu.h"
-#include "IfxInt_reg.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define TRICORE_INT_LASR0_ADDR    ((uintptr_t)&INT_LASR0)
-#define TRICORE_INT_LASR_SPACING  ((uintptr_t)&INT_LASR1 - \
-                                   (uintptr_t)&INT_LASR0)
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
