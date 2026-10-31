@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_RH850
+comment "RH850 Options"
+
+config ARCH_RH850_G4KH
+	bool
+	select ARCH_HAVE_FPU
+	---help---
+		RH850 G4KH CPU core with the single and double precision FPU.
+
+config ARCH_CHIP
+	string
+
+endif # ARCH_RH850
