@@ -150,15 +150,6 @@ derivative tc39
         map (dest=bus:sri, dest_offset=0xae400000, reserved, size=80K);
     }
 
-    memory cpu_dlmu
-    {
-        mau = 8;
-        size = LCF_DLMU_KERNEL_SIZE;
-        type = ram;
-        map     cached (dest=bus:sri, dest_offset=LCF_DLMU_KERNEL_START, size=LCF_DLMU_KERNEL_SIZE);
-        map not_cached (dest=bus:sri, dest_offset=NC_START(LCF_DLMU_KERNEL_START), reserved, size=LCF_DLMU_KERNEL_SIZE);
-    }
-
     memory kstack
     {
         mau = 8;
@@ -256,6 +247,7 @@ derivative tc39
             "__ISTACK3":="__ISTACK";
             "__ISTACK4":="__ISTACK";
             "__ISTACK5":="__ISTACK";
+            "__ISTACK0_END"="_lc_gb_istack";
 
             group csa_tc(align = 64, attributes=rw, run_addr=mem:dsram[LCF_CSA_OFFSET])
             {
@@ -402,7 +394,7 @@ derivative tc39
         /*Near Absolute Data, selectable with patterns and user defined sections*/
         group
         {
-            group (ordered, attributes=rw, run_addr = mem:cpu_dlmu)
+            group (ordered, attributes=rw, run_addr = mem:dsram)
             {
                 select "(.zdata.zlmudata|.zdata.zlmudata.*)";
                 select "(.zbss.zlmubss|.zbss.zlmubss.*)";
@@ -543,13 +535,13 @@ derivative tc39
         }
 
         /*LMU Data sections*/
-        group uncached_data(ordered, contiguous, align = 4, attributes=rw, run_addr = mem:cpu_dlmu/not_cached)
+        group uncached_data(ordered, contiguous, align = 4, attributes=rw, run_addr = mem:dsram)
         {
             select "(.data.uncached.*)";
             select "(.bss.uncached.*)";
         }
 
-        group (ordered, contiguous, align = 4, attributes=rw, run_addr=mem:cpu_dlmu)
+        group (ordered, contiguous, align = 4, attributes=rw, run_addr=mem:dsram)
         {
             group lmubss(attributes=rw, nocopy)
             {
@@ -561,14 +553,6 @@ derivative tc39
                 select "(.data|.data.*)";
                 select "(.bss|.bss.*)";
             }
-
-            /*Heap2 allocation*/
-            group heap2(attributes=rw)
-            {
-                heap "heap2" (size = LCF_HEAP_SIZE);
-            }
-            "__DLMUHEAP":="_lc_ge_data";
-            "__DLMUHEAP_END":=LCF_DLMU_KERNEL_START + LCF_DLMU_KERNEL_SIZE;
         }
 
         /*Far Const Sections, selectable with patterns and user defined sections*/

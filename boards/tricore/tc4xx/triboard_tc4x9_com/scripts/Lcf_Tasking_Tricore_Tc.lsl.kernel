@@ -104,14 +104,14 @@ derivative tc4D
 {
     core tc
     {
-        architecture = TC1V1.8;
+        architecture = TC1V1.8_DPFPU;
         space_id_offset = 100;           // add 100 to all space IDs in the architecture definition
         copytable_space = vtc:linear;    // use the copy table in the virtual core for 'bss' and initialized data sections
     }
 
     core vtc
     {
-        architecture = TC1V1.8;
+        architecture = TC1V1.8_DPFPU;
         import tc;                     // add all address spaces of core tc to core vtc for linking and locating
     }
 
@@ -266,12 +266,22 @@ derivative tc4D
             }
             "__ISTACK"= sizeof(group:istack) > 0  ? "_lc_ue_istack_tc" : 0;
             "__ISTACK_END"="_lc_gb_istack";
+            "__ISTACK0_END"="_lc_gb_istack";
             "__ISTACK0":="__ISTACK";
             "__ISTACK1":="__ISTACK";
             "__ISTACK2":="__ISTACK";
             "__ISTACK3":="__ISTACK";
             "__ISTACK4":="__ISTACK";
             "__ISTACK5":="__ISTACK";
+
+            group csa_tc(align = 64, attributes=rw, run_addr=mem:dsram[LCF_CSA_OFFSET])
+            {
+                reserved "csa_tc" (size = LCF_CSA_SIZE);
+            }
+            "__CSA"= "_lc_ub_csa_tc";
+            "__CSA_END"= "_lc_ue_csa_tc";
+            "__CSA0":= "__CSA";
+            "__CSA0_END":= "__CSA_END";
         }
 
         /*Fixed memory Allocations for _START*/
