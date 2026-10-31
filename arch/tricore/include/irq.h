@@ -45,8 +45,6 @@
 
 #include <arch/chip/irq.h>
 #include <arch/arch.h>
-#include <IfxCpu_Intrinsics.h>
-#include <IfxCpu_reg.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
@@ -158,6 +156,18 @@
 #define TRICORE_IRQ_MIN_PRIORITY 1
 #define TRICORE_IRQ_MAX_PRIORITY CONFIG_ARCH_IRQ_MAX_PRIORITY
 
+/* ICR (Interrupt Control Register) bit definitions.
+ *   [7:0]   CCPN  - Current CPU Priority Number
+ *   [15]    IE    - Interrupt Enable (global)
+ *   [23:16] PIPN  - Previous Interrupt Priority Number
+ */
+
+#define ICR_CCPN_SHIFT  0
+#define ICR_CCPN_MASK   (0xffu << ICR_CCPN_SHIFT)
+#define ICR_IE          (1u << 15)
+#define ICR_PIPN_SHIFT  16
+#define ICR_PIPN_MASK   (0xffu << ICR_PIPN_SHIFT)
+
 /* For use with EABI and floating point, the stack must be aligned to 8-byte
  * addresses.
  */
@@ -264,22 +274,23 @@ noinstrument_function static inline_function uintptr_t up_getsp(void)
 noinstrument_function static inline_function irqstate_t up_irq_save(void)
 {
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
-  Ifx_CPU_ICR icr;
-  irqstate_t ccpn;
-
-  icr.U = tricore_mfcr(CPU_ICR);
-  ccpn  = icr.B.CCPN;
+  uint32_t icr = tricore_mfcr(CPU_ICR);
+  irqstate_t ccpn = (icr & ICR_CCPN_MASK) >> ICR_CCPN_SHIFT;
 
   if (TRICORE_IRQ_DISABLE_PRIORITY > ccpn)
     {
-      icr.B.CCPN = TRICORE_IRQ_DISABLE_PRIORITY;
-      tricore_mtcr(CPU_ICR, icr.U);
+      icr &= ~ICR_CCPN_MASK;
+      icr |= TRICORE_IRQ_DISABLE_PRIORITY << ICR_CCPN_SHIFT;
+      tricore_mtcr(CPU_ICR, icr);
       UP_ISB();
     }
 
   return ccpn;
 #else
-  return __disable_and_save();
+  irqstate_t flags;
+
+  __asm__ volatile ("disable %0" : "=d"(flags) :: "memory");
+  return flags;
 #endif
 }
 
@@ -298,17 +309,17 @@ noinstrument_function static inline_function
 void up_irq_restore(irqstate_t flags)
 {
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
-  Ifx_CPU_ICR icr;
+  uint32_t icr = tricore_mfcr(CPU_ICR);
 
-  icr.U = tricore_mfcr(CPU_ICR);
-  if (flags < icr.B.CCPN)
+  if (flags < ((icr & ICR_CCPN_MASK) >> ICR_CCPN_SHIFT))
     {
-      icr.B.CCPN = flags;
-      tricore_mtcr(CPU_ICR, icr.U);
+      icr &= ~ICR_CCPN_MASK;
+      icr |= flags << ICR_CCPN_SHIFT;
+      tricore_mtcr(CPU_ICR, icr);
       UP_ISB();
     }
 #else
-  __restore(flags);
+  __asm__ volatile ("restore %0" :: "d"(flags) : "memory");
 #endif
 }
 

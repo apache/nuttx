@@ -178,7 +178,5 @@ if(NOT CONFIG_TRICORE_TOOLCHAIN_TASKING)
   target_compile_options(nuttx PRIVATE -Wno-implicit-fallthrough)
 endif()
 
-target_compile_definitions(
-  arch PRIVATE -DSRC_GPSR00=SRC_GPSR0SR0 -DSRC_CPU_CPU0_SB=SRC_CPU0SB
-               -DMODULE_STM0=MODULE_CPU0 -DSRC_STM0SR0=SRC_STMCPU0_SR2)
-target_compile_definitions(nuttx PRIVATE -DSRC_GPSR00=SRC_GPSR0SR0)
+target_compile_definitions(arch PRIVATE -DMODULE_STM0=MODULE_CPU0
+                                        -DSRC_STM0SR0=SRC_STMCPU0_SR2)
