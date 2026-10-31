@@ -74,6 +74,19 @@ static inline void tricore_color_intstack(void)
  * Private Data
  ****************************************************************************/
 
+static const IfxSrc_Tos g_tricore_tos[] =
+{
+  IfxSrc_Tos_cpu0,
+  IfxSrc_Tos_cpu1,
+  IfxSrc_Tos_cpu2,
+  IfxSrc_Tos_cpu3,
+  IfxSrc_Tos_cpu4,
+  IfxSrc_Tos_cpu5,
+#ifdef CONFIG_ARCH_CHIP_TC4XX
+  IfxSrc_Tos_csrm,
+#endif
+};
+
 static spinlock_t g_irqlock = SP_UNLOCKED;
 static int g_irqmap_count = 1;
 
@@ -92,18 +105,22 @@ static int g_irqmap_count = 1;
 
 static void tricore_gpsrinitialize(void)
 {
-  volatile Ifx_SRC_SRCR *src = &SRC_GPSR00 + up_cpu_index();
+  volatile Ifx_SRC_SRCR *src;
+  int cpu_idx;
   int i;
+
+  cpu_idx = up_cpu_index();
+  src = &SRC_GPSR00 + cpu_idx;
 
   /* Cpux gpsr init */
 
   for (i = 0; i < 6; i++)
     {
 #ifdef CONFIG_ARCH_CHIP_TC3XX
-      IfxSrc_init(src, IfxSrc_Tos_cpu0 + up_cpu_index(),
+      IfxSrc_init(src, g_tricore_tos[cpu_idx],
                   IRQ_TO_NDX(TRICORE_SRC2IRQ(src)));
 #else
-      IfxSrc_init(src, IfxSrc_Tos_cpu0 + up_cpu_index(),
+      IfxSrc_init(src, g_tricore_tos[cpu_idx],
                   IRQ_TO_NDX(TRICORE_SRC2IRQ(src)),
                   IfxSrc_VmId_none);
 #endif
@@ -114,8 +131,8 @@ static void tricore_gpsrinitialize(void)
   /* Cpucs gpsr init */
 
 #ifndef CONFIG_ARCH_CHIP_TC3XX
-  src = &SRC_GPSR6_SR0 + up_cpu_index();
-  IfxSrc_init(src, IfxSrc_Tos_cpu0 + up_cpu_index(),
+  src = &SRC_GPSR6_SR0 + cpu_idx;
+  IfxSrc_init(src, g_tricore_tos[cpu_idx],
               IRQ_TO_NDX(TRICORE_SRC2IRQ(src)),
               IfxSrc_VmId_none);
 #endif
@@ -189,9 +206,10 @@ void up_enable_irq(int irq)
   volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
 
 #ifdef CONFIG_ARCH_CHIP_TC3XX
-  IfxSrc_init(src, IfxSrc_Tos_cpu0, IRQ_TO_NDX(irq));
+  IfxSrc_init(src, g_tricore_tos[up_cpu_index()], IRQ_TO_NDX(irq));
 #else
-  IfxSrc_init(src, IfxSrc_Tos_cpu0, IRQ_TO_NDX(irq), IfxSrc_VmId_none);
+  IfxSrc_init(src, g_tricore_tos[up_cpu_index()], IRQ_TO_NDX(irq),
+              IfxSrc_VmId_none);
 #endif
 
   IfxSrc_enable(src);
@@ -217,9 +235,10 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
    */
 
 #ifdef CONFIG_ARCH_CHIP_TC3XX
-  IfxSrc_init(src, ffs(cpuset) - 1, irq_prio);
+  IfxSrc_init(src, g_tricore_tos[ffs(cpuset) - 1], irq_prio);
 #else
-  IfxSrc_init(src, ffs(cpuset) - 1, irq_prio, IfxSrc_VmId_none);
+  IfxSrc_init(src, g_tricore_tos[ffs(cpuset) - 1], irq_prio,
+              IfxSrc_VmId_none);
 #endif
 
   IfxSrc_enable(src);
