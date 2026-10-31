@@ -25,12 +25,6 @@
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 
-if(CONFIG_ARCH_CHIP_TC3XX)
-  set(ARCH_SUBDIR tc3xx)
-elseif(CONFIG_ARCH_CHIP_TC4XX)
-  set(ARCH_SUBDIR tc4xx)
-endif()
-
 include(chip.cmake)
 
 set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PREFIX}cctc)

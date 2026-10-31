@@ -65,12 +65,23 @@ if(CONFIG_ARCH_HAVE_DEBUG)
   list(APPEND SRCS tricore_hwdebug.c)
 endif()
 
-set(IFXFLAGS -DIFX_CFG_EXTEND_TRAP_HOOKS -DIFX_USE_SW_MANAGED_INT)
+set(IFXFLAGS -DIFX_USE_SW_MANAGED_INT)
 
 target_sources(arch PRIVATE ${SRCS})
-target_sources(nuttx PRIVATE tricore_doirq.c)
+target_sources(nuttx PRIVATE tricore_doirq.c tricore_vectors.c)
 target_compile_options(arch PRIVATE ${IFXFLAGS})
 target_compile_options(nuttx PRIVATE ${IFXFLAGS})
 target_include_directories(
   nuttx SYSTEM PRIVATE ${NUTTX_DIR}/include ${NUTTX_BINARY_DIR}/include
                        ${NUTTX_BINARY_DIR}/include_arch)
+
+# TASKING toolchain: build a fake libc_fpu.a to override the toolchain's default
+# C library and provide stubs for the symbols the linker still references (see
+# tricore_libc.c for details).
+
+if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
+  nuttx_add_kernel_library(c_fpu)
+  target_sources(c_fpu PRIVATE tricore_libc.c)
+  target_link_options(nuttx PRIVATE
+                      --library-directory=${CMAKE_CURRENT_BINARY_DIR})
+endif()

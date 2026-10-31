@@ -20,7 +20,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ARCH_CHIP_TC397),y)
+ifeq ($(CONFIG_ARCH_CHIP_TC39X),y)
   ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
     ARCHCPUFLAGS += --cpu=tc39xb
     LDFLAGS      += -Ctc39xb
@@ -31,6 +31,7 @@ ifeq ($(CONFIG_ARCH_CHIP_TC397),y)
 
   ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/iLLD/TC3xx/Tricore/Cpu/Std
   ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Platform
+  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Sfr/TC39xB
   ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Configurations
 endif
 

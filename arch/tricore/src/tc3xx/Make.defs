@@ -25,28 +25,6 @@ CHIP_CSRCS += tc3xx_serial.c
 
 VPATH += tc3xx
 
-ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
-
-tc3xx_libc$(OBJEXT): tc3xx_libc.c
-	$(call COMPILE, $<, $@)
-
-libc_fpu$(LIBEXT): tc3xx_libc$(OBJEXT)
-	$(call ARCHIVE, $@, $<)
-
-EXTRA_LIBS += libc_fpu$(LIBEXT)
-
-else
-
-tc3xx_dummy$(OBJEXT): tc3xx_dummy.c
-	$(call COMPILE, $<, $@)
-
-libos$(LIBEXT): tc3xx_dummy$(OBJEXT)
-	$(call ARCHIVE, $@, $<)
-
-EXTRA_LIBS += libos$(LIBEXT)
-
-endif
-
 ILLD_UNPACK = illd/tc3xx
 ILLD_TARBALL = $(ILLD_UNPACK)/illd.tar.gz
 ILLD_UNPACK_NAME = illd_release_tc3x-main
@@ -117,7 +95,6 @@ SDK_INCDIR += $(ILLD_DIR)/Libraries/Service/CpuGeneric
 SDK_CSRCS += ${CONFIG_DIR}/Ifx_Cfg_Ssw.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Asclin/Std/IfxAsclin.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Cpu/Std/IfxCpu.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Cpu/Trap/IfxCpu_Trap.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxAsclin_cfg.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxCpu_cfg.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxStm_cfg.c

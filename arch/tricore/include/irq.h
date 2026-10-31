@@ -46,6 +46,7 @@
 #include <arch/chip/irq.h>
 #include <arch/arch.h>
 #include <IfxCpu_Intrinsics.h>
+#include <IfxCpu_reg.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
@@ -138,6 +139,15 @@
 #define TRICORE_GPSR_IRQNUM(src_cpu, dest_cpu)  \
   TRICORE_SRC2IRQ(&SRC_GPSR00 + src_cpu * 8 + dest_cpu)
 
+/* TriCore interrupt priority range, higher value means higher priority. */
+
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  #define TRICORE_IRQ_DISABLE_PRIORITY CONFIG_ARCH_IRQ_DISABLE_PRIORITY
+#endif
+
+#define TRICORE_IRQ_MIN_PRIORITY 1
+#define TRICORE_IRQ_MAX_PRIORITY 255
+
 /* For use with EABI and floating point, the stack must be aligned to 8-byte
  * addresses.
  */
@@ -186,14 +196,6 @@ struct xcptcontext
 };
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* g_interrupt_context store irq status */
-
-extern volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -236,50 +238,73 @@ noinstrument_function static inline_function uintptr_t up_getsp(void)
  * Name: up_irq_save
  *
  * Description:
- *   Disable interrupts and return the previous value of the mstatus register
+ *   Disable interrupts and return the previous interrupt state.
+ *
+ *   When CONFIG_ARCH_HIPRI_INTERRUPT is enabled, this raises ICR.CCPN
+ *   to TRICORE_IRQ_DISABLE_PRIORITY so that high-priority interrupts
+ *   (SRPN > TRICORE_IRQ_DISABLE_PRIORITY) remain unmasked. up_irq_save
+ *   only raises CCPN, up_irq_restore only lowers it. This prevents the
+ *   masking level from being accidentally lowered.
+ *
+ *   Otherwise, uses the hardware disable instruction (ICR.IE = 0)
+ *   for minimal overhead.
  *
  ****************************************************************************/
 
 noinstrument_function static inline_function irqstate_t up_irq_save(void)
 {
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  Ifx_CPU_ICR icr;
+  irqstate_t ccpn;
+
+  icr.U = tricore_mfcr(CPU_ICR);
+  ccpn  = icr.B.CCPN;
+
+  if (TRICORE_IRQ_DISABLE_PRIORITY > ccpn)
+    {
+      icr.B.CCPN = TRICORE_IRQ_DISABLE_PRIORITY;
+      tricore_mtcr(CPU_ICR, icr.U);
+      UP_ISB();
+    }
+
+  return ccpn;
+#else
   return __disable_and_save();
+#endif
 }
 
 /****************************************************************************
  * Name: up_irq_restore
  *
  * Description:
- *   Restore the value of the mstatus register
+ *   Restore the previous interrupt state saved by up_irq_save().
+ *
+ *   When CONFIG_ARCH_HIPRI_INTERRUPT is enabled, restores ICR.CCPN.
+ *   Otherwise, restores ICR.IE via the hardware restore instruction.
  *
  ****************************************************************************/
 
 noinstrument_function static inline_function
 void up_irq_restore(irqstate_t flags)
 {
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  Ifx_CPU_ICR icr;
+
+  icr.U = tricore_mfcr(CPU_ICR);
+  if (flags < icr.B.CCPN)
+    {
+      icr.B.CCPN = flags;
+      tricore_mtcr(CPU_ICR, icr.U);
+      UP_ISB();
+    }
+#else
   __restore(flags);
+#endif
 }
 
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_set_interrupt_context
- *
- * Description:
- *   Set the interrupt handler context.
- *
- ****************************************************************************/
-
-noinstrument_function
-static inline_function void up_set_interrupt_context(bool flag)
-{
-#ifdef CONFIG_SMP
-  g_interrupt_context[up_this_cpu()] = flag;
-#else
-  g_interrupt_context[0] = flag;
-#endif
-}
 
 /****************************************************************************
  * Name: up_interrupt_context
@@ -293,16 +318,7 @@ static inline_function void up_set_interrupt_context(bool flag)
 noinstrument_function
 static inline_function bool up_interrupt_context(void)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags = up_irq_save();
-  bool ret = g_interrupt_context[up_this_cpu()];
-
-  up_irq_restore(flags);
-
-  return ret;
-#else
-  return g_interrupt_context[0];
-#endif
+  return (tricore_mfcr(CPU_PSW) & PSW_IS) != 0;
 }
 
 /****************************************************************************
