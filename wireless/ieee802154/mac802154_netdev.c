@@ -1354,4 +1354,4 @@ errout:
   return ret;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_skeleton */
+#endif /* CONFIG_NET && CONFIG_NET_SKELETON */
