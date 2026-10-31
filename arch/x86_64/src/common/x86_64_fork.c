@@ -51,9 +51,10 @@
  *
  * Description:
  *   The high end of the part of a task's stack that a fork copies:  the
- *   bottom of the register save area that up_initial_state() reserved at the
- *   very top of the stack.  The save area itself is not stack and must not
- *   be copied over -- it is where the child's own resume frame is built.
+ *   top of the stack of a task with a kernel stack, else the bottom of the
+ *   register save area that up_initial_state() reserved at the very top of
+ *   the stack.  The save area itself is not stack and must not be copied
+ *   over -- it is where the child's own resume frame is built.
  *
  * Input Parameters:
  *   tcb - The task whose stack is in question
@@ -65,6 +66,16 @@
 
 static uint64_t x86_64_fork_stacktop(struct tcb_s *tcb)
 {
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* The register area is on the kernel stack: copy up to the top */
+
+  if (tcb->xcp.kstack != NULL)
+    {
+      return ((uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size) &
+             ~(uint64_t)15;
+    }
+#endif
+
   return (uint64_t)XCP_ALIGN_DOWN((uintptr_t)tcb->stack_base_ptr +
                                   tcb->adj_stack_size - XCPTCONTEXT_SIZE);
 }
