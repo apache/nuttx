@@ -41,22 +41,53 @@
 
 /* Trap Call */
 
-#define IFX_CFG_CPU_TRAP_TSR_HOOK(trapInfo)             tricore_trapcall(&trapInfo)
-#define IFX_CFG_CPU_TRAP_NMI_HOOK(trapInfo)             tricore_trapcall(&trapInfo)
-#define IFX_CFG_CPU_TRAP_MME_HOOK(trapInfo)             tricore_trapcall(&trapInfo)
-#define IFX_CFG_CPU_TRAP_IPE_HOOK(trapInfo)             tricore_trapcall(&trapInfo)
-#define IFX_CFG_CPU_TRAP_IE_HOOK(trapInfo)              tricore_trapcall(&trapInfo)
-#define IFX_CFG_CPU_TRAP_CME_HOOK(trapInfo)             tricore_trapcall(&trapInfo)
-#define IFX_CFG_CPU_TRAP_BE_HOOK(trapInfo)              tricore_trapcall(&trapInfo)
-#define IFX_CFG_CPU_TRAP_ASSERT_HOOK(trapInfo)          tricore_trapcall(&trapInfo)
+#define IFX_CFG_CPU_TRAP_COMMON_HOOK(trapWatch)        \
+  do                                                   \
+    {                                                  \
+      Ifx__moveToAddrParam0((void *)&trapWatch);       \
+      Ifx__jumpToFunctionWithLink(tricore_trapcall);   \
+    }                                                  \
+  while (0)
 
-#define IFX_CFG_CPU_TRAP_SYSCALL_CPU0_HOOK(trapWatch)   tricore_svcall(&trapWatch)
-#define IFX_CFG_CPU_TRAP_SYSCALL_CPU1_HOOK(trapWatch)   tricore_svcall(&trapWatch)
-#define IFX_CFG_CPU_TRAP_SYSCALL_CPU2_HOOK(trapWatch)   tricore_svcall(&trapWatch)
-#define IFX_CFG_CPU_TRAP_SYSCALL_CPU3_HOOK(trapWatch)   tricore_svcall(&trapWatch)
-#define IFX_CFG_CPU_TRAP_SYSCALL_CPU4_HOOK(trapWatch)   tricore_svcall(&trapWatch)
-#define IFX_CFG_CPU_TRAP_SYSCALL_CPU5_HOOK(trapWatch)   tricore_svcall(&trapWatch)
-#define IFX_CFG_CPU_TRAP_SYSCALL_CPU6_HOOK(trapWatch)   tricore_svcall(&trapWatch)
+#define IFX_CFG_CPU_TRAP_SYSCALL_HOOK(trapWatch)       \
+  do                                                   \
+    {                                                  \
+      Ifx__moveToAddrParam0((void *)&trapWatch);       \
+      Ifx__jumpToFunctionWithLink(tricore_svcall);     \
+    }                                                  \
+  while (0)
+
+#define IFX_CFG_CPU_TRAP_TSR_HOOK(trapWatch)           \
+  IFX_CFG_CPU_TRAP_COMMON_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_NMI_HOOK(trapWatch)           \
+  IFX_CFG_CPU_TRAP_COMMON_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_MME_HOOK(trapWatch)           \
+  IFX_CFG_CPU_TRAP_COMMON_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_IPE_HOOK(trapWatch)           \
+  IFX_CFG_CPU_TRAP_COMMON_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_IE_HOOK(trapWatch)            \
+  IFX_CFG_CPU_TRAP_COMMON_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_CME_HOOK(trapWatch)           \
+  IFX_CFG_CPU_TRAP_COMMON_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_BE_HOOK(trapWatch)            \
+  IFX_CFG_CPU_TRAP_COMMON_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_ASSERT_HOOK(trapWatch)        \
+  IFX_CFG_CPU_TRAP_COMMON_HOOK(trapWatch)
+
+#define IFX_CFG_CPU_TRAP_SYSCALL_CPU0_HOOK(trapWatch)  \
+  IFX_CFG_CPU_TRAP_SYSCALL_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_SYSCALL_CPU1_HOOK(trapWatch)  \
+  IFX_CFG_CPU_TRAP_SYSCALL_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_SYSCALL_CPU2_HOOK(trapWatch)  \
+  IFX_CFG_CPU_TRAP_SYSCALL_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_SYSCALL_CPU3_HOOK(trapWatch)  \
+  IFX_CFG_CPU_TRAP_SYSCALL_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_SYSCALL_CPU4_HOOK(trapWatch)  \
+  IFX_CFG_CPU_TRAP_SYSCALL_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_SYSCALL_CPU5_HOOK(trapWatch)  \
+  IFX_CFG_CPU_TRAP_SYSCALL_HOOK(trapWatch)
+#define IFX_CFG_CPU_TRAP_SYSCALL_CPU6_HOOK(trapWatch)  \
+  IFX_CFG_CPU_TRAP_SYSCALL_HOOK(trapWatch)
 
 #endif /* IFX_CFG_EXTEND_TRAP_HOOKS */
 
