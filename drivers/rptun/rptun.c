@@ -875,6 +875,13 @@ static int rptun_start_thread(int argc, FAR char *argv[])
   ret = rptun_do_start(&priv->rproc);
   if (ret >= 0)
     {
+      /* Tell the host that we are waiting for it to set up the devices */
+
+      if (!RPTUN_IS_MASTER(priv->dev))
+        {
+          RPTUN_KICK_HOST(priv->dev);
+        }
+
       while (!priv->stop)
         {
           ret = rptun_create_devices(priv);

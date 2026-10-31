@@ -91,6 +91,19 @@ config IMX9_RPTUN_ALWAYS_COPY_RSC_TABLE
 		If disabled, the table is only copied when RESOURCE_TABLE_BASE
 		does not already hold a table.
 
+config IMX9_RPTUN_KICK_HOST
+	bool "Kick the host on rptun start"
+	default n
+	depends on RPTUN
+	---help---
+		Ring MU general purpose interrupt 1 when rptun starts, to signal
+		the host that the core is waiting for it to set up the virtio
+		devices. The Linux imx_rproc driver receives it on its "rxdb"
+		mailbox channel; a host can use it to attach again after the core
+		rebooted while the host kept running.
+
+		A host that does not listen to the doorbell ignores it.
+
 menu "i.MX9 Peripheral Selection"
 
 config IMX9_EDMA

@@ -29,6 +29,7 @@
 #include "arm_internal.h"
 #include "imx9_mu.h"
 #include "imx9_rsctable.h"
+#include "hardware/imx9_mu.h"
 #include "hardware/imx9_rptun.h"
 #include "hardware/imx9_rsctable.h"
 #include <nuttx/debug.h>
@@ -89,6 +90,9 @@ static int imx9_rptun_notify(struct rptun_dev_s *dev, uint32_t vqid);
 static int imx9_rptun_register_callback(struct rptun_dev_s *dev,
                                         rptun_callback_t callback,
                                         void *arg);
+#ifdef CONFIG_IMX9_RPTUN_KICK_HOST
+static void imx9_rptun_kick_host(struct rptun_dev_s *dev);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -106,6 +110,9 @@ static const struct rptun_ops_s g_imx9_rptun_ops =
   .stop              = imx9_rptun_stop,
   .notify            = imx9_rptun_notify,
   .register_callback = imx9_rptun_register_callback,
+#ifdef CONFIG_IMX9_RPTUN_KICK_HOST
+  .kick_host         = imx9_rptun_kick_host,
+#endif
 };
 
 struct imx9_rptun_dev_s g_rptun_dev;
@@ -238,6 +245,24 @@ static int imx9_rptun_register_callback(struct rptun_dev_s *dev,
 
   return 0;
 }
+
+/****************************************************************************
+ * Name: imx9_rptun_kick_host
+ ****************************************************************************/
+
+#ifdef CONFIG_IMX9_RPTUN_KICK_HOST
+static void imx9_rptun_kick_host(struct rptun_dev_s *dev)
+{
+  struct imx9_rptun_dev_s *priv =
+      container_of(dev, struct imx9_rptun_dev_s, rptun);
+
+  /* Ring general purpose interrupt 1, the doorbell ("rxdb") of the host.
+   * -ECOMM only means that the previous doorbell is still pending.
+   */
+
+  imx9_mu_trigger_interrupts(priv->mu, IMX9_MU_GCR_GIR1_FLAG);
+}
+#endif
 
 /****************************************************************************
  * Name: imx9_mu_callback
