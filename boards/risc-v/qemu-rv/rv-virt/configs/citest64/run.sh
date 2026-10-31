@@ -28,9 +28,6 @@ olddir=$(pwd)
 nuttdir=${CURRENTCONFDIR}/../../../../../../
 cd ${nuttdir}
 
-# enable venv
-source ${NTFCDIR}/venv/bin/activate
-
 # run NTFC
 confpath=${CURRENTCONFDIR}/config.yaml
 jsonconf=${CURRENTCONFDIR}/session.json
@@ -39,9 +36,6 @@ ntfc test --testpath=${testpath} --confpath=${confpath} --jsonconf=${jsonconf}
 
 ret="$?"
 echo $ret
-
-# disable venv
-deactivate
 
 # export test results
 artifacts=${ARTIFACTCONFDIR}/ntfc
