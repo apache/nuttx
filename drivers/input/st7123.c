@@ -835,7 +835,7 @@ static int st7123_probe_device(struct st7123_dev_t *dev)
     {
       ierr("failed to read device capabilities: %d", ret);
       return -EIO;
-  }
+    }
 
   return OK;
 }
@@ -957,6 +957,17 @@ int st7123_register(FAR struct i2c_master_s *i2c, uint8_t minor,
       ierr("device reports no touch areas");
       ret = -ENODEV;
       goto errout_with_lock;
+    }
+
+  /* Clamp device-reported touches to the supported maximum to prevent
+   * buffer overflow in frame and sample buffers.
+   */
+
+  if (priv->device_caps.max_touches > ST7123_MAX_TOUCH_AREAS)
+    {
+      iwarn("reported touches (%u) exceeds max (%u), clamping\n",
+            priv->device_caps.max_touches, ST7123_MAX_TOUCH_AREAS);
+      priv->device_caps.max_touches = ST7123_MAX_TOUCH_AREAS;
     }
 
   priv->lower.maxpoint = priv->device_caps.max_touches;
