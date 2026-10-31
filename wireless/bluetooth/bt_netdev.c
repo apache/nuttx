@@ -960,6 +960,7 @@ static int  btnet_req_l2cap_data(FAR struct btnet_driver_s *priv,
   bt_addr_le_t peer;
   FAR struct iob_s *iob;
   FAR struct bt_buf_s *buf;
+
   UNUSED(priv);
 
   /* Create a connection structure for this peer if one does not already
@@ -1354,4 +1355,4 @@ int bt_netdev_unregister(FAR struct bt_driver_s *btdev)
   return ret;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_skeleton */
+#endif /* CONFIG_NET && CONFIG_NET_SKELETON */
