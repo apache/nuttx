@@ -25,28 +25,6 @@ CHIP_CSRCS += tc4xx_serial.c
 
 VPATH += tc4xx
 
-ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
-
-tc4xx_libc$(OBJEXT): tc4xx_libc.c
-	$(call COMPILE, $<, $@)
-
-libc_fpu$(LIBEXT): tc4xx_libc$(OBJEXT)
-	$(call ARCHIVE, $@, $<)
-
-EXTRA_LIBS += libc_fpu$(LIBEXT)
-
-else
-
-tc4xx_dummy$(OBJEXT): tc4xx_dummy.c
-	$(call COMPILE, $<, $@)
-
-libos$(LIBEXT): tc4xx_dummy$(OBJEXT)
-	$(call ARCHIVE, $@, $<)
-
-EXTRA_LIBS += libos$(LIBEXT)
-
-endif
-
 ILLD_UNPACK = illd/tc4xx
 ILLD_TARBALL = $(ILLD_UNPACK)/illd.tar.gz
 ILLD_UNPACK_NAME = illd_release_tc4x-main
@@ -155,7 +133,6 @@ SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Src/Std/IfxSrc.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxCpu_cfg.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxStm_cfg.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Cpu/Std/IfxCpu.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Cpu/Trap/IfxCpu_Trap.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Scu/Std/IfxScuEru.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Stm/Std/IfxStm.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Smm/Std/IfxSmm.c

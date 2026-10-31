@@ -181,12 +181,6 @@ void tricore_ack_irq(int irq);
 
 void tricore_sigdeliver(void);
 
-/* Exception Handler ********************************************************/
-
-void tricore_svcall(volatile void *trap);
-void tricore_trapcall(volatile void *trap);
-void tricore_trapinit(void);
-
 /* Context Save Areas *******************************************************/
 
 uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,

@@ -30,6 +30,7 @@
 #include <arch/board/board.h>
 
 #include "tricore_internal.h"
+#include "tricore_vectors.h"
 
 /****************************************************************************
  * Public Data
@@ -63,7 +64,7 @@ volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 void up_initialize(void)
 {
 #ifdef CONFIG_ARCH_PERF_EVENTS
-  up_perf_init((void *)IFX_CFG_CPU_CLOCK_FREQUENCY);
+  up_perf_init((void *)CONFIG_CPU_CLOCK_FREQUENCY);
 #endif
 
   tricore_trapinit();
