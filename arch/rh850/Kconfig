@@ -6,6 +6,25 @@
 if ARCH_RH850
 comment "RH850 Options"
 
+choice
+	prompt "RH850 chip selection"
+	default ARCH_CHIP_R7F702600
+
+config ARCH_CHIP_R7F702600
+	bool "R7F702600 (RH850/U2C8)"
+	select ARCH_CHIP_U2C
+	---help---
+		Renesas RH850/U2C8 microcontroller, CPU0 (G4KH core).
+
+endchoice
+
+config ARCH_CHIP_U2C
+	bool
+	select ARCH_RH850_G4KH
+	select ALARM_ARCH
+	select ONESHOT
+	select ONESHOT_COUNT
+
 config ARCH_RH850_G4KH
 	bool
 	select ARCH_HAVE_FPU
@@ -14,5 +33,31 @@ config ARCH_RH850_G4KH
 
 config ARCH_CHIP
 	string
+	default "u2c"		if ARCH_CHIP_U2C
+
+config RH850_CLK_HSB_FREQUENCY
+	int "CLKC_HSB frequency (Hz)"
+	default 20000000
+	---help---
+		Frequency of CLKC_HSB, the clock of RLIN3 and OSTM (QEMU rh850-u2c
+		machine property clk-hsb, default 20 MHz).
+
+menu "RH850 Peripheral Selection"
+
+config RH850_RLIN311
+	bool "RLIN311 (UART0)"
+	default y
+	select UART0_SERIALDRIVER
+	---help---
+		RLIN3 unit 11 in UART mode, UART0 (QEMU serial0).
+
+config RH850_OSTM0_PRIORITY
+	int "OSTM0 interrupt priority (0 highest, 15 lowest)"
+	default 1
+	range 0 15
+	---help---
+		EIP of the system timer interrupt (OSTM0, channel 63).
+
+endmenu
 
 endif # ARCH_RH850
