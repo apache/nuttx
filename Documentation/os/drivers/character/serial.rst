@@ -41,7 +41,9 @@ Serial Device Drivers
    NuttX does not implement POSIX sessions or process groups, so the
    foreground process group is collapsed onto a single PID stored in
    the driver (``pgrp == pid``, one member per group); the signal is
-   delivered with ``nxsig_kill(pid, signo)``.
+   delivered with ``nxsig_kill(pid, signo)``.  The driver discards the
+   character that sends the signal, so the task does not read it (the
+   DMA receive path still passes it on).
 
    The following terminal ``ioctl`` commands manage this PID:
 
@@ -59,10 +61,10 @@ Serial Device Drivers
       a ``NULL`` pointer or a PID that is not positive gives ``EINVAL``.
 
    The C library exposes these through ``tcgetpgrp()``, ``tcsetpgrp()``,
-   ``tcgetsid()``, ``setsid()``, ``getsid()`` and ``setpgid()``.  Because
-   sending a signal to a process group (``kill(-pgrp, signo)``) is not
-   supported, TTY signals always target the single foreground PID rather
-   than an entire group.
+   ``tcgetsid()``, ``setsid()``, ``getsid()`` and ``setpgid()``.  A process
+   group is one process, so ``kill(-pgrp, signo)`` and ``killpg()`` send
+   the signal to the process ``pgrp``, and TTY signals go to the single
+   foreground PID.
 
 -  **User Access**. Serial drivers are, ultimately, normal
    `character drivers <#chardrivers>`__ and are accessed as other

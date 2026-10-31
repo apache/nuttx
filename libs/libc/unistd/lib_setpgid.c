@@ -64,7 +64,12 @@ int setpgid(pid_t pid, pid_t pgid)
       return -1;
     }
 
-  if (pid == 0)
+  if (pid < 0)
+    {
+      set_errno(ESRCH);
+      return -1;
+    }
+  else if (pid == 0)
     {
       pid = _SCHED_GETPID();
     }
