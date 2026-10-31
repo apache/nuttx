@@ -1373,6 +1373,15 @@
 
 #elif defined(__TASKING__)
 
+/* Map the GCC keyword spellings: the TASKING VX-toolset accepts
+ * __asm, asm and the __asm volatile sequence, but neither __asm__
+ * nor __volatile__ nor the asm volatile sequence, so redirect the
+ * double underscore spellings to __asm and plain volatile.
+ */
+
+#  define __asm__       __asm
+#  define __volatile__  volatile
+
 /* Define these here and allow specific architectures to override as needed */
 
 #  define CONFIG_HAVE_FLOAT             1
@@ -1479,16 +1488,16 @@
 #    define atomic_store_8(obj, val, memorder)     __c11_atomic_store(obj, val, memorder)
 #    define atomic_load_4(obj, memorder)           __c11_atomic_load(obj, memorder)
 #    define atomic_load_8(obj, memorder)           __c11_atomic_load(obj, memorder)
-#    define atomic_fetch_add_4(obj, val, memorder) __c11_atomic_add(obj, val, memorder)
-#    define atomic_fetch_add_8(obj, val, memorder) __c11_atomic_add(obj, val, memorder)
-#    define atomic_fetch_sub_4(obj, val, memorder) __c11_atomic_sub(obj, val, memorder)
-#    define atomic_fetch_sub_8(obj, val, memorder) __c11_atomic_sub(obj, val, memorder)
-#    define atomic_fetch_and_4(obj, val, memorder) __c11_atomic_and(obj, val, memorder)
-#    define atomic_fetch_and_8(obj, val, memorder) __c11_atomic_and(obj, val, memorder)
-#    define atomic_fetch_or_4(obj, val, memorder)  __c11_atomic_or(obj, val, memorder)
-#    define atomic_fetch_or_8(obj, val, memorder)  __c11_atomic_or(obj, val, memorder)
-#    define atomic_fetch_xor_4(obj, val, memorder) __c11_atomic_xor(obj, val, memorder)
-#    define atomic_fetch_xor_8(obj, val, memorder) __c11_atomic_xor(obj, val, memorder)
+#    define atomic_fetch_add_4(obj, val, memorder) __c11_atomic_fetch_add(obj, val, memorder)
+#    define atomic_fetch_add_8(obj, val, memorder) __c11_atomic_fetch_add(obj, val, memorder)
+#    define atomic_fetch_sub_4(obj, val, memorder) __c11_atomic_fetch_sub(obj, val, memorder)
+#    define atomic_fetch_sub_8(obj, val, memorder) __c11_atomic_fetch_sub(obj, val, memorder)
+#    define atomic_fetch_and_4(obj, val, memorder) __c11_atomic_fetch_and(obj, val, memorder)
+#    define atomic_fetch_and_8(obj, val, memorder) __c11_atomic_fetch_and(obj, val, memorder)
+#    define atomic_fetch_or_4(obj, val, memorder)  __c11_atomic_fetch_or(obj, val, memorder)
+#    define atomic_fetch_or_8(obj, val, memorder)  __c11_atomic_fetch_or(obj, val, memorder)
+#    define atomic_fetch_xor_4(obj, val, memorder) __c11_atomic_fetch_xor(obj, val, memorder)
+#    define atomic_fetch_xor_8(obj, val, memorder) __c11_atomic_fetch_xor(obj, val, memorder)
 #    define atomic_exchange_4(obj, val, memorder)  __c11_atomic_exchange(obj, val, memorder)
 #    define atomic_exchange_8(obj, val, memorder)  __c11_atomic_exchange(obj, val, memorder)
 #    define atomic_compare_exchange_4(obj, expected, desired, weak, success, failure) \

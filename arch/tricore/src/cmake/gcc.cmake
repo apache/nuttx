@@ -146,7 +146,7 @@ if(CONFIG_DEBUG_LINK_MAP)
 endif()
 
 if(CONFIG_DEBUG_SYMBOLS)
-  add_compile_options(-g)
+  add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
 endif()
 
 add_link_options(-Wl,--no-warn-rwx-segments)
@@ -201,4 +201,8 @@ endif()
 
 if(CONFIG_DEBUG_LINK_ORPHAN_WARN)
   add_link_options(-Wl,--orphan-handling=warn)
+endif()
+
+if(NOT CONFIG_ARCH_HAVE_FPU)
+  list(APPEND PLATFORM_FLAGS -msoft-sp-float -msoft-dp-float)
 endif()
