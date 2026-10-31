@@ -63,12 +63,14 @@ group/group_signal.c: ``group_signal()``
 
 .. code-block:: c
 
-  int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo);
+  int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo,
+                   FAR const void *source);
 
 Send a signal to the appropriate member(s) of the group.
 This is typically called from ``nxsig_dispatch()`` as described above
 but may also be called from ``task/task_exithook.c`` to handle
 Death-of-Child (``SIGCHLD``) signals.
+``source`` is the POSIX timer that sends the signal, or NULL.
 
 group/group_signal.c: ``group_signal_handler()``
 ------------------------------------------------

@@ -59,7 +59,7 @@ struct posix_timer_s
   uint8_t          pt_flags;       /* See PT_FLAGS_* definitions */
   uint8_t          pt_crefs;       /* Reference count */
   pid_t            pt_owner;       /* Creator of timer */
-  int              pt_overrun;     /* Overrun time */
+  int              pt_overrun;     /* Overruns since the last signal */
   clock_t          pt_delay;       /* If non-zero, used to reset repetitive timers */
   clock_t          pt_expected;    /* Expected absolute time */
   struct wdog_s    pt_wdog;        /* The watchdog that provides the timing */

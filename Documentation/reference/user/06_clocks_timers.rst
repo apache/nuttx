@@ -325,8 +325,6 @@ Clocks and Timers
   delivered for the timer, or if the *Realtime Signals Extension* is not
   supported, the return value of ``timer_getoverrun()`` is unspecified.
 
-  **NOTE:** This interface is not currently implemented in NuttX.
-
   :param timerid: Specifies pre-thread timer, previously created by the
     call to ``timer_create()``, whose overrun count will be returned.
 
@@ -339,9 +337,7 @@ Clocks and Timers
        ``timer_delete()``.
 
   **POSIX Compatibility:** Comparable to the POSIX interface of the same
-  name. Differences from the full POSIX implementation include:
-
-  -  This interface is not currently implemented by NuttX.
+  name.
 
   **Assumptions/Limitations:**
 

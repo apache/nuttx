@@ -89,7 +89,8 @@ FAR struct task_group_s *task_getgroup(pid_t pid);
 
 /* Signaling group members */
 
-int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo);
+int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo,
+                 FAR const void *source);
 
 /* Parent/child data management */
 
