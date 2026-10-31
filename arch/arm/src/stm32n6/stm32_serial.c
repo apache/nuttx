@@ -438,6 +438,33 @@ static void stm32serial_setformat(struct uart_dev_s *dev)
   uint32_t brr;
   uint32_t cr1;
   uint32_t usartdiv8;
+  uint32_t cr1_ue;
+  irqstate_t flags;
+  int timeout;
+
+  /* Wait for any ongoing transmission to complete before disabling UE */
+
+  regval = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  if ((regval & (USART_CR1_UE | USART_CR1_TE)) ==
+      (USART_CR1_UE | USART_CR1_TE))
+    {
+      timeout = 5000;
+      while ((stm32serial_getreg(priv, STM32_USART_ISR_OFFSET) &
+              USART_ISR_TC) == 0 && --timeout > 0)
+        {
+        }
+    }
+
+  flags = enter_critical_section();
+
+  /* Disable UE: the baud rate, parity and word length bits can not be
+   * written while UE = 1.
+   */
+
+  regval = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  cr1_ue = regval & USART_CR1_UE;
+  stm32serial_putreg(priv, STM32_USART_CR1_OFFSET,
+                     regval & ~USART_CR1_UE);
 
   /* In case of oversampling by 8, the equation is:
    *
@@ -557,6 +584,13 @@ static void stm32serial_setformat(struct uart_dev_s *dev)
 #endif
 
   stm32serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
+
+  /* Restore UE */
+
+  regval = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, regval | cr1_ue);
+
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
@@ -635,7 +669,9 @@ static void stm32serial_pm_setsuspend(bool suspend)
   /* Already in desired state? */
 
   if (suspend == g_serialpm.serial_suspended)
-    return;
+    {
+      return;
+    }
 
   g_serialpm.serial_suspended = suspend;
 
@@ -677,14 +713,14 @@ static void stm32serial_setapbclock(struct uart_dev_s *dev, bool on)
 
   switch (priv->usartbase)
     {
-    default:
-      return;
+      default:
+        return;
 #ifdef CONFIG_STM32_USART1_SERIALDRIVER
-    case STM32_USART1_BASE:
-      rcc_en = RCC_APB2ENR_USART1EN;
-      regaddr_set = STM32_RCC_APB2ENSR;
-      regaddr_clr = STM32_RCC_APB2ENCR;
-      break;
+      case STM32_USART1_BASE:
+        rcc_en = RCC_APB2ENR_USART1EN;
+        regaddr_set = STM32_RCC_APB2ENSR;
+        regaddr_clr = STM32_RCC_APB2ENCR;
+        break;
 #endif
     }
 
@@ -942,6 +978,7 @@ static void stm32serial_detach(struct uart_dev_s *dev)
 {
   struct stm32_serial_s *priv =
     (struct stm32_serial_s *)dev->priv;
+
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
 }
@@ -963,6 +1000,7 @@ static int stm32serial_interrupt(int irq, void *context, void *arg)
   struct stm32_serial_s *priv = (struct stm32_serial_s *)arg;
   int  passes;
   bool handled;
+
   DEBUGASSERT(priv != NULL);
 
   /* Report serial activity to the power management logic */
@@ -1076,120 +1114,120 @@ static int stm32serial_ioctl(struct file *filep, int cmd,
   switch (cmd)
     {
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
-    case TIOCSERGSTRUCT:
-      {
-        struct stm32_serial_s *user;
+      case TIOCSERGSTRUCT:
+        {
+          struct stm32_serial_s *user;
 
-        user = (struct stm32_serial_s *)arg;
+          user = (struct stm32_serial_s *)arg;
 
-        if (!user)
-          {
-            ret = -EINVAL;
-          }
-        else
-          {
-            memcpy(user, dev, sizeof(struct stm32_serial_s));
-          }
-      }
-      break;
+          if (!user)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              memcpy(user, dev, sizeof(struct stm32_serial_s));
+            }
+        }
+        break;
 #endif
 
 #ifdef CONFIG_SERIAL_TERMIOS
-    case TCGETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
+      case TCGETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        cfsetispeed(termiosp, priv->baud);
+          cfsetispeed(termiosp, priv->baud);
 
-        /* Note that since we only support 8/9 bit modes and
-         * there is no way to report 9-bit mode, we always claim 8.
-         */
+          /* Note that since we only support 8/9 bit modes and
+           * there is no way to report 9-bit mode, we always claim 8.
+           */
 
-        termiosp->c_cflag =
-          ((priv->parity != 0) ? PARENB : 0) |
-          ((priv->parity == 1) ? PARODD : 0) |
-          ((priv->stopbits2) ? CSTOPB : 0) |
+          termiosp->c_cflag =
+            ((priv->parity != 0) ? PARENB : 0) |
+            ((priv->parity == 1) ? PARODD : 0) |
+            ((priv->stopbits2) ? CSTOPB : 0) |
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-          ((priv->oflow) ? CCTS_OFLOW : 0) |
+            ((priv->oflow) ? CCTS_OFLOW : 0) |
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-          ((priv->iflow) ? CRTS_IFLOW : 0) |
+            ((priv->iflow) ? CRTS_IFLOW : 0) |
 #endif
-          CS8;
-      }
-      break;
+            CS8;
+        }
+        break;
 
-    case TCSETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
+      case TCSETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        /* Perform some sanity checks before accepting any changes */
+          /* Perform some sanity checks before accepting any changes */
 
-        if (((termiosp->c_cflag & CSIZE) != CS8)
+          if (((termiosp->c_cflag & CSIZE) != CS8)
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-            || ((termiosp->c_cflag & CCTS_OFLOW) && (priv->cts_gpio == 0))
+              || ((termiosp->c_cflag & CCTS_OFLOW) && (priv->cts_gpio == 0))
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-            || ((termiosp->c_cflag & CRTS_IFLOW) && (priv->rts_gpio == 0))
+              || ((termiosp->c_cflag & CRTS_IFLOW) && (priv->rts_gpio == 0))
 #endif
-           )
-          {
-            ret = -EINVAL;
-            break;
-          }
+             )
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        if (termiosp->c_cflag & PARENB)
-          {
-            priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
-          }
-        else
-          {
-            priv->parity = 0;
-          }
+          if (termiosp->c_cflag & PARENB)
+            {
+              priv->parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+            }
+          else
+            {
+              priv->parity = 0;
+            }
 
-        priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
+          priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-        priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
+          priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-        priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
+          priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
 #endif
 
-        /* Note that since there is no way to request 9-bit mode
-         * and no way to support 5/6/7-bit modes, we ignore them
-         * all here.
-         */
+          /* Note that since there is no way to request 9-bit mode
+           * and no way to support 5/6/7-bit modes, we ignore them
+           * all here.
+           */
 
-        /* Note that only cfgetispeed is used because we have knowledge
-         * that only one speed is supported.
-         */
+          /* Note that only cfgetispeed is used because we have knowledge
+           * that only one speed is supported.
+           */
 
-        priv->baud = cfgetispeed(termiosp);
+          priv->baud = cfgetispeed(termiosp);
 
-        /* Effect the changes immediately - note that we do not implement
-         * TCSADRAIN / TCSAFLUSH
-         */
+          /* Effect the changes immediately - note that we do not implement
+           * TCSADRAIN / TCSAFLUSH
+           */
 
-        stm32serial_setformat(dev);
-      }
-      break;
+          stm32serial_setformat(dev);
+        }
+        break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
@@ -1547,54 +1585,54 @@ static int stm32serial_pmprepare(struct pm_callback_s *cb, int domain,
 
   switch (pmstate)
     {
-    case PM_NORMAL:
-    case PM_IDLE:
-      break;
+      case PM_NORMAL:
+      case PM_IDLE:
+        break;
 
-    case PM_STANDBY:
-    case PM_SLEEP:
+      case PM_STANDBY:
+      case PM_SLEEP:
 
-      /* Check if any of the active ports have data pending on Tx/Rx
-       * buffers.
-       */
+        /* Check if any of the active ports have data pending on Tx/Rx
+         * buffers.
+         */
 
-      for (n = 0; n < STM32_NUSART; n++)
-        {
-          struct stm32_serial_s *priv = g_uart_devs[n];
+        for (n = 0; n < STM32_NUSART; n++)
+          {
+            struct stm32_serial_s *priv = g_uart_devs[n];
 
-          if (!priv || !priv->initialized)
-            {
-              /* Not active, skip. */
+            if (!priv || !priv->initialized)
+              {
+                /* Not active, skip. */
 
-              continue;
-            }
+                continue;
+              }
 
-          if (priv->suspended)
-            {
-              /* Port already suspended, skip. */
+            if (priv->suspended)
+              {
+                /* Port already suspended, skip. */
 
-              continue;
-            }
+                continue;
+              }
 
-          /* Check if port has data pending (Rx & Tx). */
+            /* Check if port has data pending (Rx & Tx). */
 
-          if (priv->dev.xmit.head != priv->dev.xmit.tail)
-            {
-              return ERROR;
-            }
+            if (priv->dev.xmit.head != priv->dev.xmit.tail)
+              {
+                return ERROR;
+              }
 
-          if (priv->dev.recv.head != priv->dev.recv.tail)
-            {
-              return ERROR;
-            }
-        }
-      break;
+            if (priv->dev.recv.head != priv->dev.recv.tail)
+              {
+                return ERROR;
+              }
+          }
+        break;
 
-    default:
+      default:
 
-      /* Should not get here */
+        /* Should not get here */
 
-      break;
+        break;
     }
 
   return OK;
