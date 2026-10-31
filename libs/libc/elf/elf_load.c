@@ -144,6 +144,110 @@ static int libelf_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
 #endif
 
 /****************************************************************************
+ * Name: libelf_gotcount
+ *
+ * Description:
+ *   The linker makes no GOT for a relocatable object, but its code can still
+ *   use GOT relocations, for example to test the address of an undefined
+ *   weak symbol.  Give each symbol that they name a slot of a GOT that the
+ *   loader makes behind the data.
+ *
+ ****************************************************************************/
+
+#ifdef LIBELF_MAKE_GOT
+static int libelf_gotcount(FAR struct mod_loadinfo_s *loadinfo)
+{
+  FAR Elf_Rela *relas;
+  size_t nrelas;
+  size_t symidx;
+  size_t n;
+  size_t j;
+  size_t k;
+  int ret = OK;
+  int i;
+
+  if (loadinfo->ehdr.e_type != ET_REL || loadinfo->fdpic)
+    {
+      return OK;
+    }
+
+  relas = lib_malloc(CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT *
+                     sizeof(Elf_Rela));
+  if (relas == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  for (i = 0; i < loadinfo->ehdr.e_shnum && ret == OK; i++)
+    {
+      FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
+
+      if (shdr->sh_type != SHT_RELA || shdr->sh_entsize == 0 ||
+          shdr->sh_info >= loadinfo->ehdr.e_shnum ||
+          shdr->sh_link >= loadinfo->ehdr.e_shnum ||
+          (loadinfo->shdr[shdr->sh_info].sh_flags & SHF_ALLOC) == 0)
+        {
+          continue;
+        }
+
+      /* A relocatable object has one symbol table */
+
+      if (loadinfo->gotslot == NULL)
+        {
+          loadinfo->gotnsyms = loadinfo->shdr[shdr->sh_link].sh_size /
+                               sizeof(Elf_Sym);
+          loadinfo->gotslot  = lib_zalloc(loadinfo->gotnsyms *
+                                          sizeof(uint32_t));
+          if (loadinfo->gotslot == NULL)
+            {
+              ret = -ENOMEM;
+              break;
+            }
+        }
+
+      nrelas = shdr->sh_size / sizeof(Elf_Rela);
+      for (j = 0; j < nrelas && ret == OK; j += n)
+        {
+          n = MIN(nrelas - j, CONFIG_LIBC_ELF_RELOCATION_BUFFERCOUNT);
+          ret = libelf_read(loadinfo, (FAR uint8_t *)relas,
+                            n * sizeof(Elf_Rela),
+                            shdr->sh_offset + j * sizeof(Elf_Rela));
+          if (ret < 0)
+            {
+              break;
+            }
+
+          for (k = 0; k < n; k++)
+            {
+              if (!ARCH_ELF_RELOC_GOT(ELF_R_TYPE(relas[k].r_info)))
+                {
+                  continue;
+                }
+
+              symidx = ELF_R_SYM(relas[k].r_info);
+              if (symidx >= loadinfo->gotnsyms)
+                {
+                  ret = -EINVAL;
+                  break;
+                }
+
+              if (loadinfo->gotslot[symidx] == 0)
+                {
+                  loadinfo->gotslot[symidx] = ++loadinfo->gotslots;
+                }
+            }
+        }
+    }
+
+  lib_free(relas);
+  binfo("GOT: %zu slots behind the data\n", loadinfo->gotslots);
+  return ret;
+}
+#else
+#  define libelf_gotcount(l) OK
+#endif
+
+/****************************************************************************
  * Name: libelf_elfsize
  *
  * Description:
@@ -241,6 +345,21 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
             }
         }
     }
+
+#ifdef LIBELF_MAKE_GOT
+  /* Reserve the GOT that the loader makes, behind the data */
+
+  if (loadinfo->gotslots > 0)
+    {
+      datasize = _ALIGN_UP(datasize, sizeof(uintptr_t));
+      loadinfo->gotoffset = datasize;
+      datasize += loadinfo->gotslots * sizeof(uintptr_t);
+      if (loadinfo->dataalign < sizeof(uintptr_t))
+        {
+          loadinfo->dataalign = sizeof(uintptr_t);
+        }
+    }
+#endif
 
   /* Reserve the descriptor pool.  R_ARM_FUNCDESC asks the loader to
    * manufacture a descriptor after the segment is placed, and a library
@@ -749,6 +868,15 @@ int libelf_load(FAR struct mod_loadinfo_s *loadinfo)
       libelf_xipacquire(loadinfo);
     }
 
+  /* Count the slots of the GOT that the loader makes */
+
+  ret = libelf_gotcount(loadinfo);
+  if (ret < 0)
+    {
+      berr("ERROR: libelf_gotcount failed: %d\n", ret);
+      goto errout_with_buffers;
+    }
+
   /* Determine total size to allocate */
 
   libelf_elfsize(loadinfo, true);
@@ -1000,6 +1128,15 @@ int libelf_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo)
     {
       binfo("GOT section found! index %d\n", gotidx);
       libelf_xipacquire(loadinfo);
+    }
+
+  /* Count the slots of the GOT that the loader makes */
+
+  ret = libelf_gotcount(loadinfo);
+  if (ret < 0)
+    {
+      berr("ERROR: libelf_gotcount failed: %d\n", ret);
+      goto errout_with_buffers;
     }
 
   /* Determine total size to allocate */

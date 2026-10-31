@@ -552,6 +552,11 @@ static int libelf_relocateadd(FAR struct module_s *modp,
   int               ret = OK;
   int               i;
   int               j;
+#ifdef LIBELF_MAKE_GOT
+  FAR uintptr_t    *slot;
+  Elf_Rela          gotrela;
+  Elf_Sym           gotsym;
+#endif
 
   /* Define potential architecture specific elf data container */
 
@@ -761,9 +766,40 @@ static int libelf_relocateadd(FAR struct module_s *modp,
 
       addr = dstsec->sh_addr + rela->r_offset;
 
-      /* Now perform the architecture-specific relocation */
+#ifdef LIBELF_MAKE_GOT
+      /* A GOT relocation: put S + A in the slot of the symbol, and relocate
+       * against the slot.
+       */
 
-      ret = up_relocateadd(rela, sym, addr, ARCH_ELFDATA_PARM);
+      if (ARCH_ELF_RELOC_GOT(ELF_R_TYPE(rela->r_info)))
+        {
+          if (loadinfo->gotslot == NULL || symidx >= loadinfo->gotnsyms ||
+              loadinfo->gotslot[symidx] == 0)
+            {
+              berr("ERROR: Section %d reloc %d: No GOT slot\n", relidx, i);
+              ret = -EINVAL;
+              break;
+            }
+
+          slot = (FAR uintptr_t *)(loadinfo->datastart +
+                                   loadinfo->gotoffset) +
+                 loadinfo->gotslot[symidx] - 1;
+          *slot = (sym != NULL ? sym->st_value : 0) + rela->r_addend;
+
+          memset(&gotsym, 0, sizeof(gotsym));
+          gotsym.st_value = (uintptr_t)slot;
+          gotrela = *rela;
+          gotrela.r_addend = 0;
+          ret = up_relocateadd(&gotrela, &gotsym, addr, ARCH_ELFDATA_PARM);
+        }
+      else
+#endif
+        {
+          /* Now perform the architecture-specific relocation */
+
+          ret = up_relocateadd(rela, sym, addr, ARCH_ELFDATA_PARM);
+        }
+
       if (ret < 0)
         {
           berr("ERROR: Section %d reloc %d: Relocation failed: %d\n",
