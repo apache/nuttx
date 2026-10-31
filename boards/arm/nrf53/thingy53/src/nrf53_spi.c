@@ -133,15 +133,15 @@ void nrf53_spi1select(struct spi_dev_s *dev, uint32_t devid,
 
 #ifdef CONFIG_SENSORS_ADXL362
       case SPIDEV_ACCELEROMETER(1):
-      {
-        spiinfo("ADXL362 device %s\n",
-                selected ? "asserted" : "de-asserted");
+        {
+          spiinfo("ADXL362 device %s\n",
+                  selected ? "asserted" : "de-asserted");
 
-        /* Set the GPIO low to select and high to de-select */
+          /* Set the GPIO low to select and high to de-select */
 
-        nrf53_gpio_write(GPIO_ADXL362_CS, !selected);
-        break;
-      }
+          nrf53_gpio_write(GPIO_ADXL362_CS, !selected);
+          break;
+        }
 #endif
 
       default:
