@@ -581,6 +581,20 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                   ninfo("ACK: wrb=%p trim %u bytes\n", wrb, trimlen);
 
                   TCP_WBTRIM(wrb, trimlen);
+#ifdef CONFIG_NET_TCPURGDATA
+                  if (wrb->wb_urg > 0)
+                    {
+                      if (trimlen >= wrb->wb_urg)
+                        {
+                          wrb->wb_urg = 0;
+                        }
+                      else
+                        {
+                          wrb->wb_urg -= trimlen;
+                        }
+                    }
+#endif
+
                   TCP_WBSEQNO(wrb) += trimlen;
                   TCP_WBSENT(wrb) -= trimlen;
 
@@ -613,10 +627,6 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                       FAR uint8_t *buf = dev->d_buf;
                       FAR uint8_t *appdata = dev->d_appdata;
                       uint16_t len = dev->d_len;
-#ifdef CONFIG_NET_TCPURGDATA
-                      FAR uint8_t *urgdata = dev->d_urgdata;
-                      uint16_t urglen = dev->d_urglen;
-#endif
                       FAR struct iob_s *iob = dev->d_iob;
 
                       dev->d_buf = NULL;
@@ -633,10 +643,6 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                       dev->d_buf = buf;
                       dev->d_appdata = appdata;
                       dev->d_len = len;
-#ifdef CONFIG_NET_TCPURGDATA
-                      dev->d_urgdata = urgdata;
-                      dev->d_urglen = urglen;
-#endif
                       return flags;
                     }
 
@@ -696,6 +702,20 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           /* Trim the ACKed bytes from the beginning of the write buffer. */
 
           TCP_WBTRIM(wrb, nacked);
+#ifdef CONFIG_NET_TCPURGDATA
+          if (wrb->wb_urg > 0)
+            {
+              if (nacked >= wrb->wb_urg)
+                {
+                  wrb->wb_urg = 0;
+                }
+              else
+                {
+                  wrb->wb_urg -= nacked;
+                }
+            }
+#endif
+
           TCP_WBSEQNO(wrb) += nacked;
           TCP_WBSENT(wrb) -= nacked;
 
@@ -798,6 +818,17 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             {
               return flags;
             }
+
+#ifdef CONFIG_NET_TCPURGDATA
+          if (wrb->wb_urg > 0)
+            {
+              conn->urg_offset = wrb->wb_urg;
+            }
+          else
+            {
+              conn->urg_offset = 0;
+            }
+#endif
 
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
           /* After Fast retransmitted, set ssthresh to the maximum of
@@ -1138,6 +1169,17 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             {
               return flags;
             }
+
+#ifdef CONFIG_NET_TCPURGDATA
+          if (wrb->wb_urg > TCP_WBSENT(wrb))
+            {
+              conn->urg_offset = wrb->wb_urg - TCP_WBSENT(wrb);
+            }
+          else
+            {
+              conn->urg_offset = 0;
+            }
+#endif
 
           /* Remember how much data we send out now so that we know
            * when everything has been acknowledged.  Just increment
@@ -1519,9 +1561,16 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
           max_wrb_size = tcp_max_wrb_size(conn);
           wrb = (FAR struct tcp_wrbuffer_s *)sq_tail(&conn->write_q);
+#ifdef CONFIG_NET_TCPURGDATA
+          if ((flags & MSG_OOB) == 0 && wrb != NULL && wrb->wb_urg == 0 &&
+              TCP_WBSENT(wrb) == 0 && TCP_WBNRTX(wrb) == 0 &&
+              TCP_WBPKTLEN(wrb) < max_wrb_size &&
+              (TCP_WBPKTLEN(wrb) % conn->mss) != 0)
+#else
           if (wrb != NULL && TCP_WBSENT(wrb) == 0 && TCP_WBNRTX(wrb) == 0 &&
               TCP_WBPKTLEN(wrb) < max_wrb_size &&
               (TCP_WBPKTLEN(wrb) % conn->mss) != 0)
+#endif
             {
               wrb = (FAR struct tcp_wrbuffer_s *)sq_remlast(&conn->write_q);
               ninfo("coalesce %zu bytes to wrb %p (%" PRIu16 ")\n", len, wrb,
@@ -1564,6 +1613,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
           TCP_WBSEQNO(wrb) = (unsigned)-1;
           TCP_WBNRTX(wrb)  = 0;
+#ifdef CONFIG_NET_TCPURGDATA
+          wrb->wb_urg      = 0;
+#endif
 
           off = TCP_WBPKTLEN(wrb);
           if (off + chunk_len > max_wrb_size)
@@ -1660,6 +1712,13 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       /* psock_send_eventhandler() will send data in FIFO order from the
        * conn->write_q
        */
+
+#ifdef CONFIG_NET_TCPURGDATA
+      if ((flags & MSG_OOB) != 0 && chunk_result >= len)
+        {
+          wrb->wb_urg = TCP_WBPKTLEN(wrb);
+        }
+#endif
 
       sq_addlast(&wrb->wb_node, &conn->write_q);
       ninfo("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
