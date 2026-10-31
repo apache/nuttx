@@ -21,6 +21,7 @@
 ############################################################################
 
 HEAD_CSRC += tricore_doirq.c
+HEAD_CSRC += tricore_vectors.c
 
 CMN_CSRCS += tricore_allocateheap.c
 CMN_CSRCS += tricore_cache.c
@@ -66,5 +67,20 @@ ifeq ($(CONFIG_ARCH_HAVE_DEBUG),y)
   CMN_CSRCS += tricore_hwdebug.c
 endif
 
-CFLAGS += -DIFX_CFG_EXTEND_TRAP_HOOKS
 CFLAGS += -DIFX_USE_SW_MANAGED_INT
+
+# TASKING toolchain: build a fake libc_fpu.a to override the toolchain's
+# default C library and provide stubs for the symbols the linker still
+# references (see tricore_libc.c for details).
+
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
+
+tricore_libc$(OBJEXT): tricore_libc.c
+	$(call COMPILE, $<, $@)
+
+libc_fpu$(LIBEXT): tricore_libc$(OBJEXT)
+	$(call ARCHIVE, $@, $<)
+
+EXTRA_LIBS += libc_fpu$(LIBEXT)
+
+endif

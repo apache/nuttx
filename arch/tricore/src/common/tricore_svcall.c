@@ -59,30 +59,26 @@ void tricore_svcall(volatile void *trap)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   struct tcb_s *tcb = this_task();
-  uintptr_t *regs;
+  uintptr_t *plregs;
+  uintptr_t *puregs;
   uint32_t cmd;
 
-  regs = (uintptr_t *)tricore_mfcr(CPU_PCXI);
-
-  /* DSYNC instruction should be executed immediately prior to the MTCR */
+  /* DSYNC instruction should be executed immediately prior to the MFCR */
 
   UP_DSB();
 
-  regs = tricore_csa2addr((uintptr_t)regs);
+  plregs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
+  puregs = tricore_csa2addr(plregs[REG_LPCXI]);
 
-  /* Set irq flag */
-
-  up_set_interrupt_context(true);
-
-  cmd = regs[REG_D8];
+  cmd = puregs[REG_D8];
 
   if (cmd != SYS_restore_context)
     {
-      (*running_task)->xcp.regs = tricore_csa2addr(regs[REG_UPCXI]);
+      (*running_task)->xcp.regs = plregs;
     }
   else
     {
-      tricore_reclaim_csa(regs[REG_UPCXI]);
+      tricore_reclaim_csa(tricore_addr2csa(plregs));
     }
 
   /* Handle the SVCall according to the command in R0 */
@@ -94,16 +90,14 @@ void tricore_svcall(volatile void *trap)
 
       case SYS_restore_context:
         *running_task = tcb;
-        regs[REG_UPCXI] = tricore_addr2csa(tcb->xcp.regs);
+        tricore_mtcr(CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
         UP_ISB();
         break;
 
       default:
-        svcerr("ERROR: Bad SYS call: %d\n", (int)regs[REG_D0]);
+        svcerr("ERROR: Bad SYS call: %d\n", (int)puregs[REG_D8]);
         break;
     }
 
-  /* Set irq flag */
-
-  up_set_interrupt_context(false);
+  __jumpBackToLink();
 }

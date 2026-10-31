@@ -25,12 +25,6 @@
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 
-if(CONFIG_ARCH_CHIP_TC3XX)
-  set(ARCH_SUBDIR tc3xx)
-elseif(CONFIG_ARCH_CHIP_TC4XX)
-  set(ARCH_SUBDIR tc4xx)
-endif()
-
 include(${CMAKE_CURRENT_LIST_DIR}/chip.cmake)
 
 set(TOOLCHAIN_PREFIX tricore-elf)
