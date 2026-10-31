@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -43,6 +44,10 @@
 #include "signal/signal.h"
 #include "exc_return.h"
 #include "arm_internal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -67,6 +72,15 @@ int arm_svcall(int irq, void *context, void *arg)
   uint32_t cmd;
 
   cmd = regs[REG_R0];
+
+#ifdef CONFIG_BUILD_PROTECTED
+  if ((regs[REG_CONTROL] & CONTROL_NPRIV) != 0 &&
+      cmd < CONFIG_SYS_RESERVED)
+    {
+      regs[REG_R0] = -ENOSYS;
+      return OK;
+    }
+#endif
 
   /* The SVCall software interrupt is called with R0 = system call command
    * and R1..R7 =  variable number of arguments depending on the system call.
@@ -293,7 +307,11 @@ int arm_svcall(int irq, void *context, void *arg)
 
           /* Set up to return to the kernel-mode signal dispatching logic. */
 
-          DEBUGASSERT(rtcb->xcp.sigreturn != 0);
+          if (rtcb->xcp.sigreturn == 0)
+            {
+              regs[REG_R0] = -EINVAL;
+              break;
+            }
 
           regs[REG_PC]         = rtcb->xcp.sigreturn & ~1;
           regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;

@@ -266,7 +266,7 @@ struct xcptcontext
 
   uint32_t *saved_regs;
 
-#ifdef CONFIG_BUILD_PROTECTED
+#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
   /* This is the saved address to use when returning from a user-space
    * signal handler.
    */
