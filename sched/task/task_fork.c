@@ -282,6 +282,12 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
            */
 
           ret = addrenv_join(parent, child);
+          if (ret >= 0)
+            {
+              /* The child uses the heap of the parent: see group_leave() */
+
+              child->group->tg_flags |= GROUP_FLAG_VFORK;
+            }
         }
 #ifdef CONFIG_ARCH_HAVE_FORK
       else

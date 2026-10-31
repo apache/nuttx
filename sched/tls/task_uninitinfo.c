@@ -128,10 +128,11 @@ void task_uninit_info(FAR struct task_group_s *group)
 #ifdef CONFIG_BUILD_KERNEL
   /* The user heap is reclaimed with the address environment.  Its lists
    * may have been corrupted by the exiting task; neither traversing them
-   * nor freeing their user allocations is necessary in the kernel.
+   * nor freeing their user allocations is necessary in the kernel.  A
+   * vfork() child uses the heap of its parent, which stays.
    */
 
-  if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) == 0)
+  if ((group->tg_flags & (GROUP_FLAG_PRIVILEGED | GROUP_FLAG_VFORK)) == 0)
     {
       return;
     }

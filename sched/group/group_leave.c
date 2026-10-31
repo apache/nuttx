@@ -43,6 +43,7 @@
 #  include <nuttx/binfmt/binfmt.h>
 #endif
 
+#include "sched/sched.h"
 #include "signal/signal.h"
 #include "pthread/pthread.h"
 #include "mqueue/mqueue.h"
@@ -231,6 +232,32 @@ void group_leave(FAR struct tcb_s *tcb)
       spin_unlock_irqrestore(&group->tg_lock, flags);
 
       /* Have all of the members left the group? */
+#endif
+
+#ifdef CONFIG_BUILD_KERNEL
+      /* A vfork() child uses the heap of its parent.  Free into it only
+       * when it is the current heap: the child ends itself.
+       */
+
+      if (release && (group->tg_flags & GROUP_FLAG_VFORK) != 0 &&
+          (tcb->addrenv_own == NULL ||
+           tcb->addrenv_own != this_task()->addrenv_curr))
+        {
+          group->tg_flags &= ~GROUP_FLAG_VFORK;
+        }
+
+      /* The heap of an ending user group goes away with its address
+       * environment, and a stack overflow can break it: do not free the
+       * stack into it.  The heap of a vfork() child stays.
+       */
+
+      if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL &&
+          (group->tg_flags &
+           (GROUP_FLAG_PRIVILEGED | GROUP_FLAG_VFORK)) == 0 &&
+          (release || (group->tg_flags & GROUP_FLAG_EXITING) != 0))
+        {
+          tcb->flags &= ~TCB_FLAG_FREE_STACK;
+        }
 #endif
 
       if (release)
