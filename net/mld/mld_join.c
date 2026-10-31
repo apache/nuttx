@@ -173,10 +173,6 @@ int mld_joingroup(FAR const struct ipv6_mreq *mrec)
           return -ENOMEM;
         }
 
-      /* Indicate one request to join the group from this host */
-
-      group->njoins = 1;
-
       /* Set up the group startup operations */
 
       ret = mld_group_startup(mrec, dev, group);

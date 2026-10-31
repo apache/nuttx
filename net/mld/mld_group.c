@@ -118,6 +118,10 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
       net_ipv6addr_copy(group->grpaddr, addr);
       nxsem_init(&group->sem, 0, 0);
 
+      /* Initialize the number of joins to 1 */
+
+      group->njoins = 1;
+
       /* Save the interface index */
 
       group->ifindex = dev->d_ifindex;
