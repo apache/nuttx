@@ -162,9 +162,17 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm4, uintptr_t parm5,
                                   uintptr_t parm6)
 {
-  uint64_t ret;
+  register uint64_t rax __asm__("rax") = nbr;
+  register uint64_t rdi __asm__("rdi") = parm1;
+  register uint64_t rsi __asm__("rsi") = parm2;
+  register uint64_t rdx __asm__("rdx") = parm3;
+  register uint64_t r10 __asm__("r10") = parm4;
+  register uint64_t r8  __asm__("r8")  = parm5;
+  register uint64_t r9  __asm__("r9")  = parm6;
 
-  /* Registers modified by syscall instruction:
+  /* Each parameter is in its register before the syscall instruction.
+   * The kernel can change them, so they are outputs too.
+   * Registers modified by the syscall instruction:
    *   RCX = RIP
    *   R11 = RFLAGS
    *   RIP = IA32_LSTAR (x86_64_syscall_entry)
@@ -172,23 +180,14 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
   __asm__ volatile
   (
-    "movl %1, %%eax\n"
-    "movq %2, %%rdi\n"
-    "movq %3, %%rsi\n"
-    "movq %4, %%rdx\n"
-    "movq %5, %%r10\n"
-    "movq %6, %%r8\n"
-    "movq %7, %%r9\n"
     "syscall\n"
-    "movq %%rax, %0\n"
-    : "=r"(ret)
-    : "rm"(nbr), "rm"(parm1), "rm"(parm2),
-      "rm"(parm3), "rm"(parm4), "rm"(parm5),
-      "rm"(parm6)
+    : "+r"(rax), "+r"(rdi), "+r"(rsi), "+r"(rdx), "+r"(r10), "+r"(r8),
+      "+r"(r9)
+    :
     : "memory", "rcx", "r11"
   );
 
-  return ret;
+  return rax;
 }
 
 #ifdef __cplusplus
