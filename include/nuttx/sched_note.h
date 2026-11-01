@@ -148,9 +148,13 @@
 #define NOTE_PRINTF_INT_TYPE(arg) (sizeof((arg) + 0) <= sizeof(uint32_t) ? \
                                    NOTE_PRINTF_UINT32 : NOTE_PRINTF_UINT64)
 
-/* Use object_size to mark strings of known size */
+/* Use the object size to mark strings of known size.  This is the builtin:
+ * a program can expand this macro, and NUTTX_NO_EXTENSIONS removes
+ * object_size().
+ */
 
-#define NOTE_PRINTF_OBJECT_SIZE(arg) object_size((FAR void *)(uintptr_t)(arg), 2)
+#define NOTE_PRINTF_OBJECT_SIZE(arg) \
+        __builtin_object_size((FAR void *)(uintptr_t)(arg), 2)
 
 /* Use _Generic to determine the type of the parameter */
 
