@@ -362,7 +362,7 @@ static inline uint16_t ieee80211_sn_sub(uint16_t sn1, uint16_t sn2)
 
 #define IEEE80211_HT_CTL_LEN  4
 
-struct ieee80211_hdr
+begin_packed_struct struct ieee80211_hdr
 {
   uint16_t frame_control;
   uint16_t duration_id;
@@ -371,9 +371,10 @@ struct ieee80211_hdr
   uint8_t addr3[ETH_ALEN];
   uint16_t seq_ctrl;
   uint8_t addr4[ETH_ALEN];
-};
+}
+end_packed_struct aligned_data(2);
 
-struct ieee80211_hdr_3addr
+begin_packed_struct struct ieee80211_hdr_3addr
 {
   uint16_t frame_control;
   uint16_t duration_id;
@@ -381,9 +382,10 @@ struct ieee80211_hdr_3addr
   uint8_t addr2[ETH_ALEN];
   uint8_t addr3[ETH_ALEN];
   uint16_t seq_ctrl;
-};
+}
+end_packed_struct aligned_data(2);
 
-struct ieee80211_qos_hdr
+begin_packed_struct struct ieee80211_qos_hdr
 {
   uint16_t frame_control;
   uint16_t duration_id;
@@ -392,7 +394,8 @@ struct ieee80211_qos_hdr
   uint8_t addr3[ETH_ALEN];
   uint16_t seq_ctrl;
   uint16_t qos_ctrl;
-};
+}
+end_packed_struct aligned_data(2);
 
 /* ieee80211_has_tods - Check if IEEE80211_FCTL_TODS is set.
  * fc: Frame control bytes in little-endian byte order.
@@ -865,14 +868,15 @@ static inline bool ieee80211_is_frag(FAR struct ieee80211_hdr *hdr)
     hdr->seq_ctrl & htole16(IEEE80211_SCTL_FRAG);
 }
 
-struct ieee80211s_hdr
+begin_packed_struct struct ieee80211s_hdr
 {
   uint8_t flags;
   uint8_t ttl;
   uint32_t seqnum;
   uint8_t eaddr1[ETH_ALEN];
   uint8_t eaddr2[ETH_ALEN];
-};
+}
+end_packed_struct;
 
 /* Mesh flags */
 
@@ -908,13 +912,14 @@ enum ieee80211_preq_target_flags
  * This structure refers to the "Quiet information element".
  */
 
-struct ieee80211_quiet_ie
+begin_packed_struct struct ieee80211_quiet_ie
 {
   uint8_t count;
   uint8_t period;
   uint16_t duration;
   uint16_t offset;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_msrment_ie
  *
@@ -922,13 +927,14 @@ struct ieee80211_quiet_ie
  * element".
  */
 
-struct ieee80211_msrment_ie
+begin_packed_struct struct ieee80211_msrment_ie
 {
   uint8_t token;
   uint8_t mode;
   uint8_t type;
   uint8_t request[];
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_channel_sw_ie
  *
@@ -936,12 +942,13 @@ struct ieee80211_msrment_ie
  * element".
  */
 
-struct ieee80211_channel_sw_ie
+begin_packed_struct struct ieee80211_channel_sw_ie
 {
   uint8_t mode;
   uint8_t new_ch_num;
   uint8_t count;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_ext_chansw_ie
  *
@@ -949,13 +956,14 @@ struct ieee80211_channel_sw_ie
  * "Extended Channel Switch Announcement element".
  */
 
-struct ieee80211_ext_chansw_ie
+begin_packed_struct struct ieee80211_ext_chansw_ie
 {
   uint8_t mode;
   uint8_t new_operating_class;
   uint8_t new_ch_num;
   uint8_t count;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_sec_chan_offs_ie - Secondary channel offset IE.
  * sec_chan_offs: Secondary channel offset.
@@ -963,10 +971,11 @@ struct ieee80211_ext_chansw_ie
  * This structure represents the "Secondary Channel Offset element"
  */
 
-struct ieee80211_sec_chan_offs_ie
+begin_packed_struct struct ieee80211_sec_chan_offs_ie
 {
   uint8_t sec_chan_offs;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_mesh_chansw_params_ie - Mesh channel switch
  *                                           parameters IE.
@@ -974,30 +983,32 @@ struct ieee80211_sec_chan_offs_ie
  * This structure represents the "Mesh Channel Switch Parameters element".
  */
 
-struct ieee80211_mesh_chansw_params_ie
+begin_packed_struct struct ieee80211_mesh_chansw_params_ie
 {
   uint8_t mesh_ttl;
   uint8_t mesh_flags;
   uint16_t mesh_reason;
   uint16_t mesh_pre_value;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_wide_bw_chansw_ie - Wide bandwidth channel switch IE.
  */
 
-struct ieee80211_wide_bw_chansw_ie
+begin_packed_struct struct ieee80211_wide_bw_chansw_ie
 {
   uint8_t new_channel_width;
   uint8_t new_center_freq_seg0;
   uint8_t new_center_freq_seg1;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_tim
  *
  * This structure refers to the "Traffic Indication Map information element".
  */
 
-struct ieee80211_tim_ie
+begin_packed_struct struct ieee80211_tim_ie
 {
   uint8_t dtim_count;
   uint8_t dtim_period;
@@ -1006,14 +1017,15 @@ struct ieee80211_tim_ie
   /* Variable size: 1-251 bytes. */
 
   uint8_t virtual_map[1];
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_meshconf_ie
  *
  * This structure refers to the "Mesh Configuration information element".
  */
 
-struct ieee80211_meshconf_ie
+begin_packed_struct struct ieee80211_meshconf_ie
 {
   uint8_t meshconf_psel;
   uint8_t meshconf_pmetric;
@@ -1022,7 +1034,8 @@ struct ieee80211_meshconf_ie
   uint8_t meshconf_auth;
   uint8_t meshconf_form;
   uint8_t meshconf_cap;
-};
+}
+end_packed_struct;
 
 /* enum mesh_config_capab_flags
  * Mesh Configuration IE capability field flags.
@@ -1058,7 +1071,7 @@ enum mesh_config_capab_flags
  * This structure refers to the "Root Announcement information element".
  */
 
-struct ieee80211_rann_ie
+begin_packed_struct struct ieee80211_rann_ie
 {
   uint8_t rann_flags;
   uint8_t rann_hopcount;
@@ -1067,7 +1080,8 @@ struct ieee80211_rann_ie
   uint32_t rann_seq;
   uint32_t rann_interval;
   uint32_t rann_metric;
-};
+}
+end_packed_struct;
 
 enum ieee80211_rann_flags
 {
@@ -1136,90 +1150,99 @@ enum ieee80211_s1g_chanwidth
  * This structure refers to the "TPC Report element".
  */
 
-struct ieee80211_tpc_report_ie
+begin_packed_struct struct ieee80211_tpc_report_ie
 {
   uint8_t tx_power;
   uint8_t link_margin;
-};
+}
+end_packed_struct;
 
 #define IEEE80211_ADDBA_EXT_FRAG_LEVEL_MASK   GENMASK(2, 1)
 #define IEEE80211_ADDBA_EXT_FRAG_LEVEL_SHIFT  1
 #define IEEE80211_ADDBA_EXT_NO_FRAG           BIT(0)
 
-struct ieee80211_addba_ext_ie
+begin_packed_struct struct ieee80211_addba_ext_ie
 {
   uint8_t data;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_s1g_bcn_compat_ie
  *
  * S1G Beacon Compatibility element.
  */
 
-struct ieee80211_s1g_bcn_compat_ie
+begin_packed_struct struct ieee80211_s1g_bcn_compat_ie
 {
   uint16_t compat_info;
   uint16_t beacon_int;
   uint32_t tsf_completion;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_s1g_oper_ie
  *
  * S1G Operation element.
  */
 
-struct ieee80211_s1g_oper_ie
+begin_packed_struct struct ieee80211_s1g_oper_ie
 {
   uint8_t ch_width;
   uint8_t oper_class;
   uint8_t primary_ch;
   uint8_t oper_ch;
   uint16_t basic_mcs_nss;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_aid_response_ie
  *
  * AID Response element.
  */
 
-struct ieee80211_aid_response_ie
+begin_packed_struct struct ieee80211_aid_response_ie
 {
   uint16_t aid;
   uint8_t switch_count;
   uint16_t response_int;
-};
+}
+end_packed_struct;
 
-struct ieee80211_s1g_cap
+begin_packed_struct struct ieee80211_s1g_cap
 {
   uint8_t capab_info[10];
   uint8_t supp_mcs_nss[5];
-};
+}
+end_packed_struct;
 
-struct ieee80211_ext
+begin_packed_struct struct ieee80211_ext
 {
   uint16_t frame_control;
   uint16_t duration;
   union
     {
-      struct
+      begin_packed_struct struct
         {
           uint8_t sa[ETH_ALEN];
           uint32_t timestamp;
           uint8_t change_seq;
           uint8_t variable[0];
-        } s1g_beacon;
-      struct
+        }
+      end_packed_struct s1g_beacon;
+      begin_packed_struct struct
         {
           uint8_t sa[ETH_ALEN];
           uint32_t timestamp;
           uint8_t change_seq;
           uint8_t next_tbtt[3];
           uint8_t variable[0];
-        } s1g_short_beacon;
+        }
+      end_packed_struct s1g_short_beacon;
     } u;
-};
+}
+end_packed_struct aligned_data(2);
 
-struct ieee80211_mgmt
+begin_packed_struct struct ieee80211_mgmt
 {
   uint16_t frame_control;
   uint16_t duration;
@@ -1229,7 +1252,7 @@ struct ieee80211_mgmt
   uint16_t seq_ctrl;
   union
     {
-      struct
+      begin_packed_struct struct
         {
           uint16_t auth_alg;
           uint16_t auth_transaction;
@@ -1238,12 +1261,14 @@ struct ieee80211_mgmt
           /* Possibly followed by challenge text. */
 
           uint8_t variable[0];
-        } auth;
-      struct
+        }
+      end_packed_struct auth;
+      begin_packed_struct struct
         {
           uint16_t reason_code;
-        } deauth;
-      struct
+        }
+      end_packed_struct deauth;
+      begin_packed_struct struct
         {
           uint16_t capab_info;
           uint16_t listen_interval;
@@ -1251,8 +1276,9 @@ struct ieee80211_mgmt
           /* Followed by SSID and supported rates. */
 
           uint8_t variable[0];
-        } assoc_req;
-      struct
+        }
+      end_packed_struct assoc_req;
+      begin_packed_struct struct
         {
           uint16_t capab_info;
           uint16_t status_code;
@@ -1261,8 +1287,9 @@ struct ieee80211_mgmt
           /* Followed by supported rates. */
 
           uint8_t variable[0];
-        } assoc_resp;
-      struct
+        }
+      end_packed_struct assoc_resp;
+      begin_packed_struct struct
         {
           uint16_t capab_info;
           uint16_t status_code;
@@ -1271,20 +1298,23 @@ struct ieee80211_mgmt
           /* Followed by supported rates. */
 
           uint8_t variable[0];
-        } reassoc_resp;
-      struct
+        }
+      end_packed_struct reassoc_resp;
+      begin_packed_struct struct
         {
           uint16_t capab_info;
           uint16_t status_code;
           uint8_t variable[0];
-        } s1g_assoc_resp;
-      struct
+        }
+      end_packed_struct s1g_assoc_resp;
+      begin_packed_struct struct
         {
           uint16_t capab_info;
           uint16_t status_code;
           uint8_t variable[0];
-        } s1g_reassoc_resp;
-      struct
+        }
+      end_packed_struct s1g_reassoc_resp;
+      begin_packed_struct struct
         {
           uint16_t capab_info;
           uint16_t listen_interval;
@@ -1293,12 +1323,14 @@ struct ieee80211_mgmt
           /* Followed by SSID and supported rates. */
 
           uint8_t variable[0];
-        } reassoc_req;
-      struct
+        }
+      end_packed_struct reassoc_req;
+      begin_packed_struct struct
         {
           uint16_t reason_code;
-        } disassoc;
-      struct
+        }
+      end_packed_struct disassoc;
+      begin_packed_struct struct
         {
           uint64_t timestamp;
           uint16_t beacon_int;
@@ -1309,14 +1341,16 @@ struct ieee80211_mgmt
            */
 
           uint8_t variable[0];
-        } beacon;
-      struct
+        }
+      end_packed_struct beacon;
+      begin_packed_struct struct
         {
           /* Only variable items: SSID and supported rates. */
 
           uint8_t variable[0];
-        } probe_req;
-      struct
+        }
+      end_packed_struct probe_req;
+      begin_packed_struct struct
         {
           uint64_t timestamp;
           uint16_t beacon_int;
@@ -1327,40 +1361,45 @@ struct ieee80211_mgmt
            */
 
           uint8_t variable[0];
-        } probe_resp;
+        }
+      end_packed_struct probe_resp;
 
-      struct
+      begin_packed_struct struct
         {
           uint8_t category;
           union
             {
-              struct
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t dialog_token;
                   uint8_t status_code;
                   uint8_t variable[0];
-                } wme_action;
-              struct
+                }
+              end_packed_struct wme_action;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t variable[0];
-                } chan_switch;
-              struct
+                }
+              end_packed_struct chan_switch;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   struct ieee80211_ext_chansw_ie data;
                   uint8_t variable[0];
-                } ext_chan_switch;
-              struct
+                }
+              end_packed_struct ext_chan_switch;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t dialog_token;
                   uint8_t element_id;
                   uint8_t length;
                   struct ieee80211_msrment_ie msr_elem;
-                } measurement;
-              struct
+                }
+              end_packed_struct measurement;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t dialog_token;
@@ -1371,73 +1410,85 @@ struct ieee80211_mgmt
                   /* Followed by BA extension. */
 
                   uint8_t variable[0];
-                } addba_req;
-              struct
+                }
+              end_packed_struct addba_req;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t dialog_token;
                   uint16_t status;
                   uint16_t capab;
                   uint16_t timeout;
-                } addba_resp;
-              struct
+                }
+              end_packed_struct addba_resp;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint16_t params;
                   uint16_t reason_code;
-                } delba;
-              struct
+                }
+              end_packed_struct delba;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t variable[0];
-                } self_prot;
-              struct
+                }
+              end_packed_struct self_prot;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t variable[0];
-                } mesh_action;
-              struct
+                }
+              end_packed_struct mesh_action;
+              begin_packed_struct struct
                 {
                   uint8_t action;
                   uint8_t trans_id[WLAN_SA_QUERY_TR_ID_LEN];
-                } sa_query;
-              struct
+                }
+              end_packed_struct sa_query;
+              begin_packed_struct struct
                 {
                   uint8_t action;
                   uint8_t smps_control;
-                } ht_smps;
-              struct
+                }
+              end_packed_struct ht_smps;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t chanwidth;
-                } ht_notify_cw;
-              struct
+                }
+              end_packed_struct ht_notify_cw;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t dialog_token;
                   uint16_t capability;
                   uint8_t variable[0];
-                } tdls_discover_resp;
-              struct
+                }
+              end_packed_struct tdls_discover_resp;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t operating_mode;
-                } vht_opmode_notif;
-              struct
+                }
+              end_packed_struct vht_opmode_notif;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t membership[WLAN_MEMBERSHIP_LEN];
                   uint8_t position[WLAN_USER_POSITION_LEN];
-                } vht_group_notif;
-              struct
+                }
+              end_packed_struct vht_group_notif;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t dialog_token;
                   uint8_t tpc_elem_id;
                   uint8_t tpc_elem_length;
                   struct ieee80211_tpc_report_ie tpc;
-                } tpc_report;
-              struct
+                }
+              end_packed_struct tpc_report;
+              begin_packed_struct struct
                 {
                   uint8_t action_code;
                   uint8_t dialog_token;
@@ -1447,11 +1498,14 @@ struct ieee80211_mgmt
                   uint16_t tod_error;
                   uint16_t toa_error;
                   uint8_t variable[0];
-                } ftm;
+                }
+              end_packed_struct ftm;
             } u;
-        } action;
+        }
+      end_packed_struct action;
     } u;
-};
+}
+end_packed_struct aligned_data(2);
 
 /* Supported rates membership selectors */
 
@@ -1468,42 +1522,46 @@ struct ieee80211_mgmt
 
 /* Management MIC information element (IEEE 802.11w) */
 
-struct ieee80211_mmie
+begin_packed_struct struct ieee80211_mmie
 {
   uint8_t element_id;
   uint8_t length;
   uint16_t key_id;
   uint8_t sequence_number[6];
   uint8_t mic[8];
-};
+}
+end_packed_struct;
 
 /* Management MIC information element (IEEE 802.11w) for GMAC and CMAC-256 */
 
-struct ieee80211_mmie_16
+begin_packed_struct struct ieee80211_mmie_16
 {
   uint8_t element_id;
   uint8_t length;
   uint16_t key_id;
   uint8_t sequence_number[6];
   uint8_t mic[16];
-};
+}
+end_packed_struct;
 
-struct ieee80211_vendor_ie
+begin_packed_struct struct ieee80211_vendor_ie
 {
   uint8_t element_id;
   uint8_t len;
   uint8_t oui[3];
   uint8_t oui_type;
-};
+}
+end_packed_struct;
 
-struct ieee80211_wmm_ac_param
+begin_packed_struct struct ieee80211_wmm_ac_param
 {
   uint8_t aci_aifsn;  /* AIFSN, ACM, ACI */
   uint8_t cw;         /* ECWmin, ECWmax (CW = 2^ECW - 1) */
   uint16_t txop_limit;
-};
+}
+end_packed_struct;
 
-struct ieee80211_wmm_param_ie
+begin_packed_struct struct ieee80211_wmm_param_ie
 {
   uint8_t element_id;   /* Element ID: 221 (0xdd); */
   uint8_t len;          /* Length: 24 */
@@ -1520,55 +1578,61 @@ struct ieee80211_wmm_param_ie
   /* AC_BE, AC_BK, AC_VI, AC_VO */
 
   struct ieee80211_wmm_ac_param ac[4];
-};
+}
+end_packed_struct;
 
 /* Control frames */
 
-struct ieee80211_rts
+begin_packed_struct struct ieee80211_rts
 {
   uint16_t frame_control;
   uint16_t duration;
   uint8_t ra[ETH_ALEN];
   uint8_t ta[ETH_ALEN];
-};
+}
+end_packed_struct aligned_data(2);
 
-struct ieee80211_cts
+begin_packed_struct struct ieee80211_cts
 {
   uint16_t frame_control;
   uint16_t duration;
   uint8_t ra[ETH_ALEN];
-};
+}
+end_packed_struct aligned_data(2);
 
-struct ieee80211_pspoll
+begin_packed_struct struct ieee80211_pspoll
 {
   uint16_t frame_control;
   uint16_t aid;
   uint8_t bssid[ETH_ALEN];
   uint8_t ta[ETH_ALEN];
-};
+}
+end_packed_struct aligned_data(2);
 
 /* TDLS */
 
 /* Channel switch timing */
 
-struct ieee80211_ch_switch_timing
+begin_packed_struct struct ieee80211_ch_switch_timing
 {
   uint16_t switch_time;
   uint16_t switch_timeout;
-};
+}
+end_packed_struct;
 
 /* Link-id information element */
 
-struct ieee80211_tdls_lnkie
+begin_packed_struct struct ieee80211_tdls_lnkie
 {
   uint8_t ie_type; /* Link Identifier IE */
   uint8_t ie_len;
   uint8_t bssid[ETH_ALEN];
   uint8_t init_sta[ETH_ALEN];
   uint8_t resp_sta[ETH_ALEN];
-};
+}
+end_packed_struct;
 
-struct ieee80211_tdls_data
+begin_packed_struct struct ieee80211_tdls_data
 {
   uint8_t da[ETH_ALEN];
   uint8_t sa[ETH_ALEN];
@@ -1578,48 +1642,56 @@ struct ieee80211_tdls_data
   uint8_t action_code;
   union
     {
-      struct
+      begin_packed_struct struct
         {
           uint8_t dialog_token;
           uint16_t capability;
           uint8_t variable[0];
-        } setup_req;
-      struct
+        }
+      end_packed_struct setup_req;
+      begin_packed_struct struct
         {
           uint16_t status_code;
           uint8_t dialog_token;
           uint16_t capability;
           uint8_t variable[0];
-        } setup_resp;
-      struct
+        }
+      end_packed_struct setup_resp;
+      begin_packed_struct struct
         {
           uint16_t status_code;
           uint8_t dialog_token;
           uint8_t variable[0];
-        } setup_cfm;
-      struct
+        }
+      end_packed_struct setup_cfm;
+      begin_packed_struct struct
         {
           uint16_t reason_code;
           uint8_t variable[0];
-        } teardown;
-      struct
+        }
+      end_packed_struct teardown;
+      begin_packed_struct struct
         {
           uint8_t dialog_token;
           uint8_t variable[0];
-        } discover_req;
-      struct
+        }
+      end_packed_struct discover_req;
+      begin_packed_struct struct
         {
           uint8_t target_channel;
           uint8_t oper_class;
           uint8_t variable[0];
-        } chan_switch_req;
-      struct
+        }
+      end_packed_struct chan_switch_req;
+      begin_packed_struct struct
         {
           uint16_t status_code;
           uint8_t variable[0];
-        } chan_switch_resp;
+        }
+      end_packed_struct chan_switch_resp;
     } u;
-};
+}
+end_packed_struct;
 
 /* Peer-to-Peer IE attribute related definitions.
  */
@@ -1663,20 +1735,22 @@ enum ieee80211_p2p_attr_id
 
 #define IEEE80211_P2P_NOA_DESC_MAX 4
 
-struct ieee80211_p2p_noa_desc
+begin_packed_struct struct ieee80211_p2p_noa_desc
 {
   uint8_t count;
   uint32_t duration;
   uint32_t interval;
   uint32_t start_time;
-};
+}
+end_packed_struct;
 
-struct ieee80211_p2p_noa_attr
+begin_packed_struct struct ieee80211_p2p_noa_attr
 {
   uint8_t index;
   uint8_t oppps_ctwindow;
   struct ieee80211_p2p_noa_desc desc[IEEE80211_P2P_NOA_DESC_MAX];
-};
+}
+end_packed_struct;
 
 #define IEEE80211_P2P_OPPPS_ENABLE_BIT  BIT(7)
 #define IEEE80211_P2P_OPPPS_CTWINDOW_MASK 0x7F
@@ -1687,7 +1761,7 @@ struct ieee80211_p2p_noa_attr
  * draft section 7.2.1.7.1.
  */
 
-struct ieee80211_bar
+begin_packed_struct struct ieee80211_bar
 {
   uint16_t frame_control;
   uint16_t duration;
@@ -1695,7 +1769,8 @@ struct ieee80211_bar
   uint8_t ta[ETH_ALEN];
   uint16_t control;
   uint16_t start_seq_num;
-};
+}
+end_packed_struct;
 
 /* 802.11 BAR control masks */
 
@@ -1715,13 +1790,14 @@ struct ieee80211_bar
  * tx_params: TX parameters.
  */
 
-struct ieee80211_mcs_info
+begin_packed_struct struct ieee80211_mcs_info
 {
   uint8_t rx_mask[IEEE80211_HT_MCS_MASK_LEN];
   uint16_t rx_highest;
   uint8_t tx_params;
   uint8_t reserved[3];
-};
+}
+end_packed_struct;
 
 /* 802.11n HT capability MSC set */
 
@@ -1753,7 +1829,7 @@ struct ieee80211_mcs_info
  * described in 802.11n D5.0 7.3.2.57
  */
 
-struct ieee80211_ht_cap
+begin_packed_struct struct ieee80211_ht_cap
 {
   uint16_t cap_info;
   uint8_t ampdu_params_info;
@@ -1765,7 +1841,8 @@ struct ieee80211_ht_cap
   uint16_t extended_ht_cap_info;
   uint32_t tx_bf_cap_info;
   uint8_t antenna_selection_info;
-};
+}
+end_packed_struct;
 
 /* 802.11n HT capabilities masks (for cap_info) */
 
@@ -1852,14 +1929,15 @@ enum ieee80211_min_mpdu_spacing
  * described in 802.11n-2009 7.3.2.57
  */
 
-struct ieee80211_ht_operation
+begin_packed_struct struct ieee80211_ht_operation
 {
   uint8_t primary_chan;
   uint8_t ht_param;
   uint16_t operation_mode;
   uint16_t stbc_param;
   uint8_t basic_set[16];
-};
+}
+end_packed_struct;
 
 /* For ht_param. */
 
@@ -1937,13 +2015,14 @@ struct ieee80211_ht_operation
  *             the top indicates VHT Extended NSS BW capability.
  */
 
-struct ieee80211_vht_mcs_info
+begin_packed_struct struct ieee80211_vht_mcs_info
 {
   uint16_t rx_mcs_map;
   uint16_t rx_highest;
   uint16_t tx_mcs_map;
   uint16_t tx_highest;
-};
+}
+end_packed_struct;
 
 /* For rx_highest. */
 
@@ -1984,11 +2063,12 @@ enum ieee80211_vht_mcs_support
  * supp_mcs: VHT MCS supported rates.
  */
 
-struct ieee80211_vht_cap
+begin_packed_struct struct ieee80211_vht_cap
 {
   uint32_t vht_cap_info;
   struct ieee80211_vht_mcs_info supp_mcs;
-};
+}
+end_packed_struct;
 
 /* enum ieee80211_vht_chanwidth - VHT channel width.
  * IEEE80211_VHT_CHANWIDTH_USE_HT: Use the HT operation IE to determine
@@ -2016,13 +2096,14 @@ enum ieee80211_vht_chanwidth
  * basic_mcs_set: VHT Basic MCS rate set.
  */
 
-struct ieee80211_vht_operation
+begin_packed_struct struct ieee80211_vht_operation
 {
   uint8_t chan_width;
   uint8_t center_freq_seg0_idx;
   uint8_t center_freq_seg1_idx;
   uint16_t basic_mcs_set;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_he_cap_elem - HE capabilities element.
  *
@@ -2030,11 +2111,12 @@ struct ieee80211_vht_operation
  * described in P802.11ax_D4.0 section 9.4.2.242.2 and 9.4.2.242.3
  */
 
-struct ieee80211_he_cap_elem
+begin_packed_struct struct ieee80211_he_cap_elem
 {
   uint8_t mac_cap_info[6];
   uint8_t phy_cap_info[11];
-};
+}
+end_packed_struct;
 
 #define IEEE80211_TX_RX_MCS_NSS_DESC_MAX_LEN 5
 
@@ -2079,7 +2161,7 @@ enum ieee80211_he_mcs_support
  *               for a channel width of 80+80 MHz.
  */
 
-struct ieee80211_he_mcs_nss_supp
+begin_packed_struct struct ieee80211_he_mcs_nss_supp
 {
   uint16_t rx_mcs_80;
   uint16_t tx_mcs_80;
@@ -2087,7 +2169,8 @@ struct ieee80211_he_mcs_nss_supp
   uint16_t tx_mcs_160;
   uint16_t rx_mcs_80p80;
   uint16_t tx_mcs_80p80;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_he_operation - HE capabilities element.
  *
@@ -2095,7 +2178,7 @@ struct ieee80211_he_mcs_nss_supp
  * described in P802.11ax_D4.0 section 9.4.2.243
  */
 
-struct ieee80211_he_operation
+begin_packed_struct struct ieee80211_he_operation
 {
   uint32_t he_oper_params;
   uint16_t he_mcs_nss_set;
@@ -2103,7 +2186,8 @@ struct ieee80211_he_operation
   /* Optional 0, 1, 3, 4, 5, 7, or 8 bytes: Depends on he_oper_params. */
 
   uint8_t optional[];
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_he_spr - HE spatial reuse element.
  *
@@ -2111,14 +2195,15 @@ struct ieee80211_he_operation
  * described in P802.11ax_D4.0 section 9.4.2.241
  */
 
-struct ieee80211_he_spr
+begin_packed_struct struct ieee80211_he_spr
 {
   uint8_t he_sr_control;
 
   /* Optional 0 to 19 bytes: Depends on he_sr_control. */
 
   uint8_t optional[];
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_he_mu_edca_param_ac_rec - MU AC Parameter Record field.
  *
@@ -2126,12 +2211,13 @@ struct ieee80211_he_spr
  * described in P802.11ax_D4.0 section 9.4.2.245
  */
 
-struct ieee80211_he_mu_edca_param_ac_rec
+begin_packed_struct struct ieee80211_he_mu_edca_param_ac_rec
 {
   uint8_t aifsn;
   uint8_t ecw_min_max;
   uint8_t mu_edca_timer;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_mu_edca_param_set - MU EDCA Parameter Set element.
  *
@@ -2139,14 +2225,15 @@ struct ieee80211_he_mu_edca_param_ac_rec
  * described in P802.11ax_D4.0 section 9.4.2.245
  */
 
-struct ieee80211_mu_edca_param_set
+begin_packed_struct struct ieee80211_mu_edca_param_set
 {
   uint8_t mu_qos_info;
   struct ieee80211_he_mu_edca_param_ac_rec ac_be;
   struct ieee80211_he_mu_edca_param_ac_rec ac_bk;
   struct ieee80211_he_mu_edca_param_ac_rec ac_vi;
   struct ieee80211_he_mu_edca_param_ac_rec ac_vo;
-};
+}
+end_packed_struct;
 
 #define IEEE80211_EHT_MCS_NSS_RX 0x0f
 #define IEEE80211_EHT_MCS_NSS_TX 0xf0
@@ -2172,13 +2259,14 @@ struct ieee80211_mu_edca_param_set
  *     supported for transmission for MCS 12 - 13.
  */
 
-struct ieee80211_eht_mcs_nss_supp_20mhz_only
+begin_packed_struct struct ieee80211_eht_mcs_nss_supp_20mhz_only
 {
   uint8_t rx_tx_mcs7_max_nss;
   uint8_t rx_tx_mcs9_max_nss;
   uint8_t rx_tx_mcs11_max_nss;
   uint8_t rx_tx_mcs13_max_nss;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_eht_mcs_nss_supp_bw - EHT max supported NSS per MCS
  * (except 20MHz only stations).
@@ -2198,12 +2286,13 @@ struct ieee80211_eht_mcs_nss_supp_20mhz_only
  *     supported for transmission for MCS 12 - 13.
  */
 
-struct ieee80211_eht_mcs_nss_supp_bw
+begin_packed_struct struct ieee80211_eht_mcs_nss_supp_bw
 {
   uint8_t rx_tx_mcs9_max_nss;
   uint8_t rx_tx_mcs11_max_nss;
   uint8_t rx_tx_mcs13_max_nss;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_eht_cap_elem_fixed - EHT capabilities fixed data
  *
@@ -2214,18 +2303,19 @@ struct ieee80211_eht_mcs_nss_supp_bw
  * @phy_cap_info: PHY capabilities, see IEEE80211_EHT_PHY_CAP*
  */
 
-struct ieee80211_eht_cap_elem_fixed
+begin_packed_struct struct ieee80211_eht_cap_elem_fixed
 {
   uint8_t mac_cap_info[2];
   uint8_t phy_cap_info[9];
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_eht_cap_elem - EHT capabilities element
  * @fixed: fixed parts, see &ieee80211_eht_cap_elem_fixed
  * @optional: optional parts
  */
 
-struct ieee80211_eht_cap_elem
+begin_packed_struct struct ieee80211_eht_cap_elem
 {
   struct ieee80211_eht_cap_elem_fixed fixed;
 
@@ -2235,7 +2325,8 @@ struct ieee80211_eht_cap_elem
    */
 
   uint8_t optional[];
-};
+}
+end_packed_struct;
 
 #define IEEE80211_EHT_OPER_INFO_PRESENT                         0x01
 #define IEEE80211_EHT_OPER_DISABLED_SUBCHANNEL_BITMAP_PRESENT   0x02
@@ -2255,12 +2346,13 @@ struct ieee80211_eht_cap_elem
  * @optional: optional parts
  */
 
-struct ieee80211_eht_operation
+begin_packed_struct struct ieee80211_eht_operation
 {
   uint8_t params;
   uint32_t basic_mcs_nss;
   uint8_t optional[];
-};
+}
+end_packed_struct;
 
 /**
  * struct ieee80211_eht_operation_info - eht operation information
@@ -2272,13 +2364,14 @@ struct ieee80211_eht_operation
  * @optional: optional parts
  */
 
-struct ieee80211_eht_operation_info
+begin_packed_struct struct ieee80211_eht_operation_info
 {
   uint8_t control;
   uint8_t ccfs0;
   uint8_t ccfs1;
   uint8_t optional[];
-};
+}
+end_packed_struct;
 
 /* 802.11ac VHT Capabilities */
 
@@ -2703,7 +2796,7 @@ ieee80211_he_ppe_size(uint8_t ppe_thres_hdr, FAR const uint8_t *phy_cap_info)
  * minrate: Minimum rate (in 1 Mbps units).
  */
 
-struct ieee80211_he_6ghz_oper
+begin_packed_struct struct ieee80211_he_6ghz_oper
 {
   uint8_t primary;
 #define IEEE80211_HE_6GHZ_OPER_CTRL_CHANWIDTH         0x3
@@ -2716,7 +2809,8 @@ struct ieee80211_he_6ghz_oper
   uint8_t ccfs0;
   uint8_t ccfs1;
   uint8_t minrate;
-};
+}
+end_packed_struct;
 
 /* ieee80211_he_oper_size - Calculate the size of the 802.11ax HE Operations
  *                           IE.
@@ -3838,24 +3932,27 @@ enum ieee80211_root_mode_identifier
  *  Note that max_power is signed.
  */
 
-struct ieee80211_country_ie_triplet
+begin_packed_struct struct ieee80211_country_ie_triplet
 {
   union
   {
-    struct
+    begin_packed_struct struct
     {
       uint8_t first_channel;
       uint8_t num_channels;
       int8_t max_power;
-    } chans;
-    struct
+    }
+  end_packed_struct chans;
+    begin_packed_struct struct
     {
       uint8_t reg_extension_id;
       uint8_t reg_class;
       uint8_t coverage_class;
-    } ext;
+    }
+  end_packed_struct ext;
   };
-};
+}
+end_packed_struct;
 
 enum ieee80211_timeout_interval_type
 {
@@ -3869,11 +3966,12 @@ enum ieee80211_timeout_interval_type
  * value: Timeout interval value.
  */
 
-struct ieee80211_timeout_interval_ie
+begin_packed_struct struct ieee80211_timeout_interval_ie
 {
   uint8_t type;
   uint32_t value;
-};
+}
+end_packed_struct;
 
 /* struct ieee80211_bss_max_idle_period_ie
  *
@@ -3886,11 +3984,12 @@ struct ieee80211_timeout_interval_ie
  * capability as specified in &enum ieee80211_idle_options.
  */
 
-struct ieee80211_bss_max_idle_period_ie
+begin_packed_struct struct ieee80211_bss_max_idle_period_ie
 {
   uint16_t max_idle_period;
   uint8_t idle_options;
-};
+}
+end_packed_struct;
 
 /* BACK action code */
 
@@ -4023,7 +4122,7 @@ enum ieee80211_tspec_status_code
   IEEE80211_TSPEC_STATUS_ADDTS_INVAL_PARAMS = 0x1,
 };
 
-struct ieee80211_tspec_ie
+begin_packed_struct struct ieee80211_tspec_ie
 {
   uint8_t element_id;
   uint8_t len;
@@ -4048,14 +4147,16 @@ struct ieee80211_tspec_ie
   uint32_t min_phy_rate;
   uint16_t sba;
   uint16_t medium_time;
-};
+}
+end_packed_struct;
 
-struct ieee80211_he_6ghz_capa
+begin_packed_struct struct ieee80211_he_6ghz_capa
 {
   /* Uses IEEE80211_HE_6GHZ_CAP_* below. */
 
   uint16_t capa;
-};
+}
+end_packed_struct;
 
 /* HE 6 GHz band capabilities */
 
@@ -4245,13 +4346,14 @@ _ieee80211_is_robust_mgmt_frame(FAR struct ieee80211_hdr *hdr)
 #define IEEE80211_RNR_TBTT_PARAMS_PROBE_ACTIVE      0x20
 #define IEEE80211_RNR_TBTT_PARAMS_COLOC_AP          0x40
 
-struct ieee80211_neighbor_ap_info
+begin_packed_struct struct ieee80211_neighbor_ap_info
 {
   uint8_t tbtt_info_hdr;
   uint8_t tbtt_info_len;
   uint8_t op_class;
   uint8_t channel;
-};
+}
+end_packed_struct;
 
 enum ieee80211_range_params_max_total_ltf
 {
