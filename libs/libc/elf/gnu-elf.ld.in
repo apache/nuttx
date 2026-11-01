@@ -121,6 +121,7 @@ SECTIONS
       *(.rodata)
       *(.rodata1)
       *(.rodata.*)
+      *(.srodata .srodata.*)
       *(.gnu.linkonce.r*)
       . = ALIGN(SECTIONS_ALIGN);
       _erodata = . ;
@@ -166,6 +167,7 @@ SECTIONS
       *(.data)
       *(.data1)
       *(.data.*)
+      *(.sdata .sdata.*)
       *(.gnu.linkonce.d*)
       . = ALIGN(SECTIONS_ALIGN);
       _edata = . ;
@@ -173,6 +175,7 @@ SECTIONS
 
   .init_array :
     {
+      . = ALIGN(SECTIONS_ALIGN);
       _sinit = .;
       _sctors = .;
       KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
@@ -184,6 +187,7 @@ SECTIONS
 
   .fini_array :
     {
+      . = ALIGN(SECTIONS_ALIGN);
       _sfini = .;
       _sdtors = .;
       KEEP (*(.dtors))
