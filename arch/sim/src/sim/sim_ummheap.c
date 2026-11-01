@@ -180,7 +180,10 @@ static void update_stats(struct mm_heap_s *heap, void *mem, size_t size,
       do
         {
           uordblks = atomic_read(&heap->uordblks);
-          if (uordblks <= usmblks) break;
+          if (uordblks <= usmblks)
+            {
+              break;
+            }
         }
       while (!atomic_try_cmpxchg(&heap->usmblks, &usmblks, uordblks));
     }
@@ -657,6 +660,7 @@ void umm_extend(void *mem, size_t size, int region)
 struct mallinfo mallinfo_callback(struct mm_heap_s *heap)
 {
   struct mallinfo info;
+
   memset(&info, 0, sizeof(struct mallinfo));
 
   info.aordblks = atomic_read(&heap->aordblks);
