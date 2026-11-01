@@ -803,7 +803,10 @@ static void rpmsg_port_uart_rx_worker(FAR struct rpmsg_port_uart_s *rpuart,
                 rpmsgerrdump("Recv dbg:", rpuart->rx_dbg_buf,
                               sizeof(rpuart->rx_dbg_buf));
                 rpmsgerrdump("Recv error:", buf, ret);
-                rpmsgerrdump("Recv hdr:", hdr, hdr->len);
+
+                /* hdr->len came off the line and may be bogus here */
+
+                rpmsgerrdump("Recv hdr:", hdr, next);
                 state = RPMSG_PORT_UART_RX_WAIT_START;
                 next = 0;
               }
@@ -819,7 +822,10 @@ static void rpmsg_port_uart_rx_worker(FAR struct rpmsg_port_uart_s *rpuart,
                     rpmsgerrdump("Recv dbg:", rpuart->rx_dbg_buf,
                                  sizeof(rpuart->rx_dbg_buf));
                     rpmsgerrdump("Recv error:", buf, ret);
-                    rpmsgerrdump("Recv hdr:", hdr, hdr->len);
+
+                    /* hdr->len came off the line and may be bogus here */
+
+                    rpmsgerrdump("Recv hdr:", hdr, next);
                     rpmsg_port_queue_return_buffer(rxq, hdr);
                   }
                 else
