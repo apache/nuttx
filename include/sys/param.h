@@ -38,6 +38,20 @@
 #define MAXNAMLEN      NAME_MAX
 #define MAXPATHLEN     PATH_MAX
 
+/* The byte order of the host, as in <sys/endian.h>.  BSD systems and glibc
+ * give these names in <sys/param.h> too, and programs test them there
+ * (autoconf's AC_C_BIGENDIAN).
+ */
+
+#define LITTLE_ENDIAN  1234
+#define BIG_ENDIAN     4321
+
+#ifdef CONFIG_ENDIAN_BIG
+#  define BYTE_ORDER   BIG_ENDIAN
+#else
+#  define BYTE_ORDER   LITTLE_ENDIAN
+#endif
+
 /* Macros for min/max. */
 
 #ifndef MIN
