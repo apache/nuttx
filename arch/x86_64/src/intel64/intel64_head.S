@@ -645,8 +645,12 @@ no_kstack_switch:
 	/* Update stored kernel stack */
 	movq    %rsp, %gs:X86_64_CPUPRIV_KTOPSTK_OFFSET
 
-	/* Store original kernel stack on stack which is now in RDI */
+	/* Store original kernel stack on stack which is now in RDI.  The
+	 * SysV ABI wants RSP 16 byte aligned at the call: the push took 8
+	 * bytes of the aligned register area address, so take 8 more.
+	 */
 	pushq   %rdi
+	subq    $8, %rsp
 #endif
 
 	/* Return value from syscall stored in rax */
@@ -665,6 +669,7 @@ no_kstack_switch:
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
 	/* Restore original kernel stack */
+	addq    $8, %rsp
 	popq    %gs:X86_64_CPUPRIV_KTOPSTK_OFFSET
 #endif
 
