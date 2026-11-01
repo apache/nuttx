@@ -24,15 +24,29 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdint.h>
+#include <errno.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <windows.h>
+
+#include "sim_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define POW10_9 (1000000000ull)
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Ratio of simulated time to real time in percent.  100 means real-time
+ * (default).  Values > 100 speed up simulated time; values < 100 slow it
+ * down.  Overridable at runtime via --sim-rt-ratio=<percent>.
+ */
+
+static int g_time_ratio = CONFIG_SIM_WALLTIME_RATIO;
 
 /* Number of 100ns-seconds between the beginning of the Windows epoch
  * (Jan. 1, 1601) and the Unix epoch (Jan. 1, 1970)
@@ -89,7 +103,9 @@ uint64_t host_gettime(bool rtc)
       start = current;
     }
 
-  return current - start;
+  /* Apply time ratio: simulated_time = real_elapsed * ratio / 100 */
+
+  return ((current - start) * g_time_ratio) / 100;
 }
 
 /****************************************************************************
@@ -125,9 +141,33 @@ void host_sleepuntil(uint64_t nsec)
   uint64_t now;
 
   now = host_gettime(false);
-  if (nsec > now)
+  if (nsec > now + 1000)
     {
-      host_sleep(nsec - now);
+      /* nsec is in simulated time; convert back to real duration to sleep */
+
+      host_sleep((((nsec - now) * 100) / g_time_ratio));
+    }
+}
+
+/****************************************************************************
+ * Name: host_set_timeratio
+ *
+ * Description:
+ *   Set the ratio of simulated time to real time in percent.  100 (default)
+ *   means simulated time advances at the same rate as real time.  Values
+ *   greater than 100 speed up simulated time; values less than 100 slow it
+ *   down.
+ *
+ * Input Parameters:
+ *   ratio - The new time ratio in percent (must be > 0)
+ *
+ ****************************************************************************/
+
+void host_set_timeratio(int ratio)
+{
+  if (ratio > 0)
+    {
+      g_time_ratio = ratio;
     }
 }
 
@@ -148,22 +188,6 @@ void host_sleepuntil(uint64_t nsec)
 int host_settimer(uint64_t nsec)
 {
   return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: host_set_timeratio
- *
- * Description:
- *   Set the ratio of simulated time to real time in percent.
- *   Not implemented on Windows.
- *
- * Input Parameters:
- *   ratio - The new time ratio in percent
- *
- ****************************************************************************/
-
-void host_set_timeratio(int ratio)
-{
 }
 
 /****************************************************************************
