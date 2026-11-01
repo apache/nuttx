@@ -641,7 +641,7 @@
 #endif
 
 #ifndef CONFIG_NET_ARP_MAXAGE
-/* The maximum age of ARP table entries measured in 10ths of seconds.
+/* The maximum age of ARP table entries in units of 10 seconds.
  *
  * An CONFIG_NET_ARP_MAXAGE of 120 corresponds to 20 minutes (BSD
  * default).
