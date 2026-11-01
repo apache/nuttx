@@ -41,6 +41,7 @@
 #include <nuttx/bits.h>
 #include <nuttx/clock.h>
 
+#include <stddef.h>
 #include <sys/endian.h>
 #include <netinet/if_ether.h>
 
@@ -72,6 +73,8 @@
 #define IEEE80211_FCTL_VERS                 0x0003
 #define IEEE80211_FCTL_FTYPE                0x000c
 #define IEEE80211_FCTL_STYPE                0x00f0
+#define IEEE80211_FCTL_TYPE \
+  (IEEE80211_FCTL_FTYPE | IEEE80211_FCTL_STYPE)
 #define IEEE80211_FCTL_TODS                 0x0100
 #define IEEE80211_FCTL_FROMDS               0x0200
 #define IEEE80211_FCTL_MOREFRAGS            0x0400
@@ -107,6 +110,7 @@
 
 /* Control */
 
+#define IEEE80211_STYPE_TRIGGER             0x0020
 #define IEEE80211_STYPE_CTL_EXT             0x0060
 #define IEEE80211_STYPE_BACK_REQ            0x0080
 #define IEEE80211_STYPE_BACK                0x0090
@@ -210,7 +214,7 @@
 #define IEEE80211_PV1_FCTL_VERS             0x0003
 #define IEEE80211_PV1_FCTL_FTYPE            0x001c
 #define IEEE80211_PV1_FCTL_STYPE            0x00e0
-#define IEEE80211_PV1_FCTL_TODS             0x0100
+#define IEEE80211_PV1_FCTL_FROMDS           0x0100
 #define IEEE80211_PV1_FCTL_MOREFRAGS        0x0200
 #define IEEE80211_PV1_FCTL_PM               0x0400
 #define IEEE80211_PV1_FCTL_MOREDATA         0x0800
@@ -223,6 +227,11 @@
 static inline bool ieee80211_sn_less(uint16_t sn1, uint16_t sn2)
 {
   return ((sn1 - sn2) & IEEE80211_SN_MASK) > (IEEE80211_SN_MODULO >> 1);
+}
+
+static inline bool ieee80211_sn_less_eq(uint16_t sn1, uint16_t sn2)
+{
+  return ((sn2 - sn1) & IEEE80211_SN_MASK) <= (IEEE80211_SN_MODULO >> 1);
 }
 
 static inline uint16_t ieee80211_sn_add(uint16_t sn1, uint16_t sn2)
@@ -239,6 +248,22 @@ static inline uint16_t ieee80211_sn_sub(uint16_t sn1, uint16_t sn2)
 {
   return (sn1 - sn2) & IEEE80211_SN_MASK;
 }
+
+#define IEEE80211_TRIGGER_TYPE_MASK         0xf
+#define IEEE80211_TRIGGER_TYPE_BASIC        0x0
+#define IEEE80211_TRIGGER_TYPE_BFRP         0x1
+#define IEEE80211_TRIGGER_TYPE_MU_BAR       0x2
+#define IEEE80211_TRIGGER_TYPE_MU_RTS       0x3
+#define IEEE80211_TRIGGER_TYPE_BSRP         0x4
+#define IEEE80211_TRIGGER_TYPE_GCR_MU_BAR   0x5
+#define IEEE80211_TRIGGER_TYPE_BQRP         0x6
+#define IEEE80211_TRIGGER_TYPE_NFRP         0x7
+
+#define IEEE80211_TRIGGER_ULBW_MASK         0xc0000
+#define IEEE80211_TRIGGER_ULBW_20MHZ        0x0
+#define IEEE80211_TRIGGER_ULBW_40MHZ        0x1
+#define IEEE80211_TRIGGER_ULBW_80MHZ        0x2
+#define IEEE80211_TRIGGER_ULBW_160_80P80MHZ 0x3
 
 #define IEEE80211_SEQ_TO_SN(seq) (((seq) & IEEE80211_SCTL_SEQ) >> 4)
 #define IEEE80211_SN_TO_SEQ(ssn) (((ssn) << 4) & IEEE80211_SCTL_SEQ)
@@ -394,6 +419,30 @@ begin_packed_struct struct ieee80211_qos_hdr
   uint8_t addr3[ETH_ALEN];
   uint16_t seq_ctrl;
   uint16_t qos_ctrl;
+}
+end_packed_struct aligned_data(2);
+
+begin_packed_struct struct ieee80211_qos_hdr_4addr
+{
+  uint16_t frame_control;
+  uint16_t duration_id;
+  uint8_t addr1[ETH_ALEN];
+  uint8_t addr2[ETH_ALEN];
+  uint8_t addr3[ETH_ALEN];
+  uint16_t seq_ctrl;
+  uint8_t addr4[ETH_ALEN];
+  uint16_t qos_ctrl;
+}
+end_packed_struct aligned_data(2);
+
+begin_packed_struct struct ieee80211_trigger
+{
+  uint16_t frame_control;
+  uint16_t duration;
+  uint8_t ra[ETH_ALEN];
+  uint8_t ta[ETH_ALEN];
+  uint64_t common_info;
+  uint8_t variable[0];
 }
 end_packed_struct aligned_data(2);
 
@@ -770,6 +819,16 @@ static inline bool ieee80211_is_cts(uint16_t fc)
     htole16(IEEE80211_FTYPE_CTL | IEEE80211_STYPE_CTS);
 }
 
+/* ieee80211_is_trigger - Check if the frame is a trigger frame.
+ * fc: Frame control bytes in little-endian byte order.
+ */
+
+static inline bool ieee80211_is_trigger(uint16_t fc)
+{
+  return (fc & htole16(IEEE80211_FCTL_FTYPE | IEEE80211_FCTL_STYPE)) ==
+    htole16(IEEE80211_FTYPE_CTL | IEEE80211_STYPE_TRIGGER);
+}
+
 /* ieee80211_is_ack - Check if IEEE80211_FTYPE_CTL and IEEE80211_STYPE_ACK.
  * fc: Frame control bytes in little-endian byte order.
  */
@@ -868,6 +927,15 @@ static inline bool ieee80211_is_frag(FAR struct ieee80211_hdr *hdr)
     hdr->seq_ctrl & htole16(IEEE80211_SCTL_FRAG);
 }
 
+/* ieee80211_get_sn - Get the sequence number from a frame header.
+ * hdr: 802.11 header of the frame.
+ */
+
+static inline uint16_t ieee80211_get_sn(FAR struct ieee80211_hdr *hdr)
+{
+  return (le16toh(hdr->seq_ctrl) & IEEE80211_SCTL_SEQ) >> 4;
+}
+
 begin_packed_struct struct ieee80211s_hdr
 {
   uint8_t flags;
@@ -933,6 +1001,20 @@ begin_packed_struct struct ieee80211_msrment_ie
   uint8_t mode;
   uint8_t type;
   uint8_t request[];
+}
+end_packed_struct;
+
+#define IEEE80211_ADDBA_EXT_FRAG_LEVEL_MASK   GENMASK(2, 1)
+#define IEEE80211_ADDBA_EXT_FRAG_LEVEL_SHIFT  1
+#define IEEE80211_ADDBA_EXT_NO_FRAG           BIT(0)
+#define IEEE80211_ADDBA_EXT_BUF_SIZE_MASK     GENMASK(7, 5)
+#define IEEE80211_ADDBA_EXT_BUF_SIZE_SHIFT    10
+
+begin_packed_struct struct ieee80211_bss_load_elem
+{
+  uint16_t sta_count;
+  uint8_t channel_util;
+  uint16_t avail_admission_capa;
 }
 end_packed_struct;
 
@@ -1016,7 +1098,11 @@ begin_packed_struct struct ieee80211_tim_ie
 
   /* Variable size: 1-251 bytes. */
 
-  uint8_t virtual_map[1];
+  union
+    {
+      uint8_t required_octet;
+      uint8_t virtual_map[0];
+    };
 }
 end_packed_struct;
 
@@ -1156,10 +1242,6 @@ begin_packed_struct struct ieee80211_tpc_report_ie
   uint8_t link_margin;
 }
 end_packed_struct;
-
-#define IEEE80211_ADDBA_EXT_FRAG_LEVEL_MASK   GENMASK(2, 1)
-#define IEEE80211_ADDBA_EXT_FRAG_LEVEL_SHIFT  1
-#define IEEE80211_ADDBA_EXT_NO_FRAG           BIT(0)
 
 begin_packed_struct struct ieee80211_addba_ext_ie
 {
@@ -1367,11 +1449,11 @@ begin_packed_struct struct ieee80211_mgmt
       begin_packed_struct struct
         {
           uint8_t category;
+          uint8_t action_code;
           union
             {
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
                   uint8_t dialog_token;
                   uint8_t status_code;
                   uint8_t variable[0];
@@ -1379,20 +1461,18 @@ begin_packed_struct struct ieee80211_mgmt
               end_packed_struct wme_action;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
+                  uint8_t no_fixed_fields[0];
                   uint8_t variable[0];
                 }
               end_packed_struct chan_switch;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
                   struct ieee80211_ext_chansw_ie data;
                   uint8_t variable[0];
                 }
               end_packed_struct ext_chan_switch;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
                   uint8_t dialog_token;
                   uint8_t element_id;
                   uint8_t length;
@@ -1401,7 +1481,6 @@ begin_packed_struct struct ieee80211_mgmt
               end_packed_struct measurement;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
                   uint8_t dialog_token;
                   uint16_t capab;
                   uint16_t timeout;
@@ -1414,53 +1493,48 @@ begin_packed_struct struct ieee80211_mgmt
               end_packed_struct addba_req;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
                   uint8_t dialog_token;
                   uint16_t status;
                   uint16_t capab;
                   uint16_t timeout;
+                  uint8_t variable[0];
                 }
               end_packed_struct addba_resp;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
                   uint16_t params;
                   uint16_t reason_code;
                 }
               end_packed_struct delba;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
+                  uint8_t no_fixed_fields[0];
                   uint8_t variable[0];
                 }
               end_packed_struct self_prot;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
+                  uint8_t no_fixed_fields[0];
                   uint8_t variable[0];
                 }
               end_packed_struct mesh_action;
               begin_packed_struct struct
                 {
-                  uint8_t action;
                   uint8_t trans_id[WLAN_SA_QUERY_TR_ID_LEN];
                 }
               end_packed_struct sa_query;
               begin_packed_struct struct
                 {
-                  uint8_t action;
                   uint8_t smps_control;
                 }
               end_packed_struct ht_smps;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
                   uint8_t chanwidth;
                 }
               end_packed_struct ht_notify_cw;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
                   uint8_t dialog_token;
                   uint16_t capability;
                   uint8_t variable[0];
@@ -1468,20 +1542,17 @@ begin_packed_struct struct ieee80211_mgmt
               end_packed_struct tdls_discover_resp;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
                   uint8_t operating_mode;
                 }
               end_packed_struct vht_opmode_notif;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
                   uint8_t membership[WLAN_MEMBERSHIP_LEN];
                   uint8_t position[WLAN_USER_POSITION_LEN];
                 }
               end_packed_struct vht_group_notif;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
                   uint8_t dialog_token;
                   uint8_t tpc_elem_id;
                   uint8_t tpc_elem_length;
@@ -1490,7 +1561,6 @@ begin_packed_struct struct ieee80211_mgmt
               end_packed_struct tpc_report;
               begin_packed_struct struct
                 {
-                  uint8_t action_code;
                   uint8_t dialog_token;
                   uint8_t follow_up;
                   uint8_t tod[6];
@@ -1500,9 +1570,70 @@ begin_packed_struct struct ieee80211_mgmt
                   uint8_t variable[0];
                 }
               end_packed_struct ftm;
-            } u;
+              begin_packed_struct struct
+                {
+                  uint8_t no_fixed_fields[0];
+                  uint8_t variable[0];
+                }
+              end_packed_struct s1g;
+              begin_packed_struct struct
+                {
+                  uint8_t dialog_token;
+                  uint8_t follow_up;
+                  uint32_t tod;
+                  uint32_t toa;
+                  uint8_t max_tod_error;
+                  uint8_t max_toa_error;
+                }
+              end_packed_struct wnm_timing_msr;
+              begin_packed_struct struct
+                {
+                  uint8_t dialog_token;
+                  uint8_t variable[0];
+                }
+              end_packed_struct ttlm_req;
+              begin_packed_struct struct
+                {
+                  uint8_t dialog_token;
+                  uint16_t status_code;
+                  uint8_t variable[0];
+                }
+              end_packed_struct ttlm_res;
+              begin_packed_struct struct
+                {
+                  uint8_t no_fixed_fields[0];
+                }
+              end_packed_struct ttlm_tear_down;
+              begin_packed_struct struct
+                {
+                  uint8_t dialog_token;
+                  uint8_t variable[0];
+                }
+              end_packed_struct ml_reconf_req;
+              begin_packed_struct struct
+                {
+                  uint8_t dialog_token;
+                  uint8_t count;
+                  uint8_t variable[0];
+                }
+              end_packed_struct ml_reconf_resp;
+              begin_packed_struct struct
+                {
+                  uint8_t no_fixed_fields[0];
+                  uint8_t variable[0];
+                }
+              end_packed_struct epcs;
+              begin_packed_struct struct
+                {
+                  uint8_t dialog_token;
+                  uint8_t control;
+                  uint8_t variable[0];
+                }
+              end_packed_struct eml_omn;
+            };
         }
       end_packed_struct action;
+      uint8_t body[0];
     } u;
 }
 end_packed_struct aligned_data(2);
@@ -1511,8 +1642,22 @@ end_packed_struct aligned_data(2);
 
 #define BSS_MEMBERSHIP_SELECTOR_HT_PHY  127
 #define BSS_MEMBERSHIP_SELECTOR_VHT_PHY 126
+#define BSS_MEMBERSHIP_SELECTOR_GLK     125
+#define BSS_MEMBERSHIP_SELECTOR_EPD     124
 #define BSS_MEMBERSHIP_SELECTOR_HE_PHY  122
+#define BSS_MEMBERSHIP_SELECTOR_EHT_PHY 121
+#define BSS_MEMBERSHIP_SELECTOR_UHR_PHY 120
 #define BSS_MEMBERSHIP_SELECTOR_SAE_H2E 123
+#define BSS_MEMBERSHIP_SELECTOR_MIN     BSS_MEMBERSHIP_SELECTOR_UHR_PHY
+
+begin_packed_struct struct ieee80211_ml_reconf_status
+{
+  uint8_t info;
+  uint16_t status;
+}
+end_packed_struct;
+
+#define IEEE80211_ML_RECONF_LINK_ID_MASK 0x0f
 
 /* Management header plus 1-byte category code. */
 
@@ -1529,6 +1674,16 @@ begin_packed_struct struct ieee80211_mmie
   uint16_t key_id;
   uint8_t sequence_number[6];
   uint8_t mic[8];
+}
+end_packed_struct;
+
+begin_packed_struct struct ieee80211_mmie_var
+{
+  uint8_t element_id;
+  uint8_t length;
+  uint16_t key_id;
+  uint8_t sequence_number[6];
+  uint8_t mic[0];
 }
 end_packed_struct;
 
@@ -3048,6 +3203,8 @@ ieee80211_he_spr_size(FAR const uint8_t *he_spr_ie)
 #define WLAN_AUTH_FILS_SK     4
 #define WLAN_AUTH_FILS_SK_PFS 5
 #define WLAN_AUTH_FILS_PK     6
+#define WLAN_AUTH_IEEE8021X   8
+#define WLAN_AUTH_EPPKE       9
 #define WLAN_AUTH_LEAP        128
 
 #define WLAN_AUTH_CHALLENGE_LEN 128
@@ -3219,10 +3376,14 @@ enum ieee80211_statuscode
 
   /* 802.11ai */
 
-  WLAN_STATUS_FILS_AUTHENTICATION_FAILURE   = 108,
-  WLAN_STATUS_UNKNOWN_AUTHENTICATION_SERVER = 109,
+  WLAN_STATUS_REJECTED_NDP_BLOCK_ACK_SUGGESTED       = 109,
+  WLAN_STATUS_FILS_AUTHENTICATION_FAILURE            = 112,
+  WLAN_STATUS_UNKNOWN_AUTHENTICATION_SERVER          = 113,
   WLAN_STATUS_SAE_HASH_TO_ELEMENT                    = 126,
   WLAN_STATUS_SAE_PK                                 = 127,
+  WLAN_STATUS_DENIED_TID_TO_LINK_MAPPING             = 133,
+  WLAN_STATUS_PREF_TID_TO_LINK_MAPPING_SUGGESTED     = 134,
+  WLAN_STATUS_8021X_AUTH_SUCCESS                     = 153,
 };
 
 /* Reason codes */
@@ -3495,7 +3656,7 @@ enum ieee80211_eid
   WLAN_EID_VHT_OPERATION                = 192,
   WLAN_EID_EXTENDED_BSS_LOAD            = 193,
   WLAN_EID_WIDE_BW_CHANNEL_SWITCH       = 194,
-  WLAN_EID_VHT_TX_POWER_ENVELOPE  = 195,
+  WLAN_EID_TX_POWER_ENVELOPE            = 195,
   WLAN_EID_CHANNEL_SWITCH_WRAPPER       = 196,
   WLAN_EID_AID                          = 197,
   WLAN_EID_QUIET_CHANNEL                = 198,
@@ -3507,6 +3668,7 @@ enum ieee80211_eid
   WLAN_EID_AID_RESPONSE                 = 211,
   WLAN_EID_S1G_BCN_COMPAT               = 213,
   WLAN_EID_S1G_SHORT_BCN_INTERVAL       = 214,
+  WLAN_EID_S1G_TWT                      = 216,
   WLAN_EID_S1G_CAPABILITIES             = 217,
   WLAN_EID_VENDOR_SPECIFIC              = 221,
   WLAN_EID_QOS_PARAMETER                = 222,
@@ -3535,6 +3697,7 @@ enum ieee80211_eid_ext
   WLAN_EID_EXT_FILS_PUBLIC_KEY              = 12,
   WLAN_EID_EXT_FILS_NONCE                   = 13,
   WLAN_EID_EXT_FUTURE_CHAN_GUIDANCE         = 14,
+  WLAN_EID_EXT_DH_PARAMETER                 = 32,
   WLAN_EID_EXT_HE_CAPABILITY                = 35,
   WLAN_EID_EXT_HE_OPERATION                 = 36,
   WLAN_EID_EXT_UORA                         = 37,
@@ -3553,6 +3716,22 @@ enum ieee80211_eid_ext
   WLAN_EID_EXT_SHORT_SSID_LIST              = 58,
   WLAN_EID_EXT_HE_6GHZ_CAPA                 = 59,
   WLAN_EID_EXT_UL_MU_POWER_CAPA             = 60,
+  WLAN_EID_EXT_EHT_OPERATION                = 106,
+  WLAN_EID_EXT_EHT_MULTI_LINK               = 107,
+  WLAN_EID_EXT_EHT_CAPABILITY               = 108,
+  WLAN_EID_EXT_TID_TO_LINK_MAPPING          = 109,
+  WLAN_EID_EXT_BANDWIDTH_INDICATION         = 135,
+  WLAN_EID_EXT_KNOWN_STA_IDENTIFCATION      = 136,
+  WLAN_EID_EXT_NON_AP_STA_REG_CON           = 137,
+  WLAN_EID_EXT_UHR_OPER                     = 151,
+  WLAN_EID_EXT_UHR_CAPA                     = 152,
+  WLAN_EID_EXT_MACP                         = 153,
+  WLAN_EID_EXT_SMD                          = 154,
+  WLAN_EID_EXT_BSS_SMD_TRANS_PARAMS         = 155,
+  WLAN_EID_EXT_CHAN_USAGE                   = 156,
+  WLAN_EID_EXT_UHR_MODE_CHG                 = 157,
+  WLAN_EID_EXT_UHR_PARAM_UPD                = 158,
+  WLAN_EID_EXT_TXPI                         = 159,
 };
 
 /* Action category code */
@@ -3565,6 +3744,7 @@ enum ieee80211_category
   WLAN_CATEGORY_BACK                      = 3,
   WLAN_CATEGORY_PUBLIC                    = 4,
   WLAN_CATEGORY_RADIO_MEASUREMENT         = 5,
+  WLAN_CATEGORY_FAST_BBS_TRANSITION       = 6,
   WLAN_CATEGORY_HT                        = 7,
   WLAN_CATEGORY_SA_QUERY                  = 8,
   WLAN_CATEGORY_PROTECTED_DUAL_OF_ACTION  = 9,
@@ -3579,6 +3759,8 @@ enum ieee80211_category
   WLAN_CATEGORY_FST                       = 18,
   WLAN_CATEGORY_UNPROT_DMG                = 20,
   WLAN_CATEGORY_VHT                       = 21,
+  WLAN_CATEGORY_S1G                       = 22,
+  WLAN_CATEGORY_PROTECTED_EHT             = 37,
   WLAN_CATEGORY_VENDOR_SPECIFIC_PROTECTED = 126,
   WLAN_CATEGORY_VENDOR_SPECIFIC           = 127,
 };
@@ -3629,6 +3811,12 @@ enum ieee80211_self_protected_actioncode
   WLAN_SP_MGK_ACK              = 5,
 };
 
+enum ieee80211_unprotected_wnm_actioncode
+{
+  WLAN_UNPROTECTED_WNM_ACTION_TIM                         = 0,
+  WLAN_UNPROTECTED_WNM_ACTION_TIMING_MEASUREMENT_RESPONSE = 1,
+};
+
 /* Mesh action codes */
 
 enum ieee80211_mesh_actioncode
@@ -3664,6 +3852,16 @@ enum ieee80211_key_len
   WLAN_KEY_LEN_BIP_GMAC_256 = 32,
 };
 
+enum ieee80211_radio_measurement_actioncode
+{
+  WLAN_RM_ACTION_RADIO_MEASUREMENT_REQUEST = 0,
+  WLAN_RM_ACTION_RADIO_MEASUREMENT_REPORT  = 1,
+  WLAN_RM_ACTION_LINK_MEASUREMENT_REQUEST  = 2,
+  WLAN_RM_ACTION_LINK_MEASUREMENT_REPORT   = 3,
+  WLAN_RM_ACTION_NEIGHBOR_REPORT_REQUEST   = 4,
+  WLAN_RM_ACTION_NEIGHBOR_REPORT_RESPONSE  = 5,
+};
+
 #define IEEE80211_WEP_IV_LEN        4
 #define IEEE80211_WEP_ICV_LEN       4
 #define IEEE80211_CCMP_HDR_LEN      8
@@ -3679,6 +3877,10 @@ enum ieee80211_key_len
 #define IEEE80211_GCMP_HDR_LEN      8
 #define IEEE80211_GCMP_MIC_LEN      16
 #define IEEE80211_GCMP_PN_LEN       6
+#define IEEE80211_CMAC_128_MIC_LEN  8
+#define IEEE80211_CMAC_256_MIC_LEN  16
+#define IEEE80211_GMAC_MIC_LEN      16
+#define MICHAEL_MIC_LEN             8
 
 #define FILS_NONCE_LEN              16
 #define FILS_MAX_KEK_LEN            64
@@ -3728,6 +3930,7 @@ enum ieee80211_pub_actioncode
   WLAN_PUB_ACTION_WHITE_SPACE_MAP_ANN     = 31,
   WLAN_PUB_ACTION_FTM_REQUEST             = 32,
   WLAN_PUB_ACTION_FTM                     = 33,
+  WLAN_PUB_ACTION_FTM_RESPONSE            = 33,
   WLAN_PUB_ACTION_FILS_DISCOVERY          = 34,
 };
 
@@ -3759,6 +3962,7 @@ enum ieee80211_tdls_actioncode
  */
 
 #define WLAN_EXT_CAPA3_MULTI_BSSID_SUPPORT  BIT(6)
+#define WLAN_EXT_CAPA3_TIMING_MEASUREMENT_SUPPORT BIT(7)
 
 /* TDLS capabilities in the 4th byte of WLAN_EID_EXT_CAPABILITY */
 
@@ -3809,6 +4013,7 @@ enum ieee80211_tdls_actioncode
 /* Defines support for enhanced multi-bssid advertisement */
 
 #define WLAN_EXT_CAPA11_EMA_SUPPORT           BIT(3)
+#define WLAN_EXT_CAPA11_BCN_PROTECT           BIT(4)
 
 /* TDLS specific payload type in the LLC/SNAP header */
 
@@ -3973,6 +4178,11 @@ begin_packed_struct struct ieee80211_timeout_interval_ie
 }
 end_packed_struct;
 
+enum ieee80211_idle_options
+{
+  WLAN_IDLE_OPTIONS_PROTECTED_KEEP_ALIVE = BIT(0),
+};
+
 /* struct ieee80211_bss_max_idle_period_ie
  *
  * This structure refers to "BSS Max idle period element"
@@ -4104,6 +4314,7 @@ struct ieee80211_multiple_bssid_configuration
 
 #define WLAN_OUI_WFA                0x506f9a
 #define WLAN_OUI_TYPE_WFA_P2P       9
+#define WLAN_OUI_TYPE_WFA_NAN       0x13
 #define WLAN_OUI_TYPE_WFA_DPP       0x1A
 #define WLAN_OUI_MICROSOFT          0x0050f2
 #define WLAN_OUI_TYPE_MICROSOFT_WPA 1
@@ -4295,13 +4506,124 @@ _ieee80211_is_robust_mgmt_frame(FAR struct ieee80211_hdr *hdr)
         *category != WLAN_CATEGORY_SELF_PROTECTED &&
         *category != WLAN_CATEGORY_UNPROT_DMG &&
         *category != WLAN_CATEGORY_VHT &&
+        *category != WLAN_CATEGORY_S1G &&
         *category != WLAN_CATEGORY_VENDOR_SPECIFIC;
     }
 
   return false;
 }
 
+/* ieee80211_is_robust_mgmt_frame - Check if a frame is a robust management
+ *                                  frame.
+ * hdr: The frame header.
+ * len: Length of the frame.
+ */
+
+static inline bool
+ieee80211_is_robust_mgmt_frame(FAR struct ieee80211_hdr *hdr, size_t len)
+{
+  if (!hdr || len < IEEE80211_MIN_ACTION_SIZE(category))
+    {
+      return false;
+    }
+
+  return _ieee80211_is_robust_mgmt_frame(hdr);
+}
+
+/* ieee80211_is_public_action - Check if a frame is a public action frame.
+ * hdr: The frame header.
+ * len: Length of the frame.
+ */
+
+static inline bool
+ieee80211_is_public_action(FAR struct ieee80211_hdr *hdr, size_t len)
+{
+  FAR struct ieee80211_mgmt *mgmt = (FAR void *)hdr;
+
+  if (!hdr || len < IEEE80211_MIN_ACTION_SIZE(category) ||
+      !ieee80211_is_action(hdr->frame_control))
+    {
+      return false;
+    }
+
+  return mgmt->u.action.category == WLAN_CATEGORY_PUBLIC;
+}
+
+/* ieee80211_is_protected_dual_of_public_action - Check if a frame is a
+ *                                                protected dual of a public
+ *                                                action frame.
+ * hdr: The frame header.
+ * len: Length of the frame.
+ */
+
+static inline bool
+ieee80211_is_protected_dual_of_public_action(FAR struct ieee80211_hdr *hdr,
+                                             size_t len)
+{
+  FAR struct ieee80211_mgmt *mgmt = (FAR void *)hdr;
+  uint8_t action;
+
+  if (!ieee80211_is_public_action(hdr, len) ||
+      len < IEEE80211_MIN_ACTION_SIZE(action_code))
+    {
+      return false;
+    }
+
+  action = mgmt->u.action.action_code;
+  return action != WLAN_PUB_ACTION_20_40_BSS_COEX &&
+    action != WLAN_PUB_ACTION_DSE_REG_LOC_ANN &&
+    action != WLAN_PUB_ACTION_MSMT_PILOT &&
+    action != WLAN_PUB_ACTION_TDLS_DISCOVER_RES &&
+    action != WLAN_PUB_ACTION_LOC_TRACK_NOTI &&
+    action != WLAN_PUB_ACTION_FTM_REQUEST &&
+    action != WLAN_PUB_ACTION_FTM_RESPONSE &&
+    action != WLAN_PUB_ACTION_FILS_DISCOVERY &&
+    action != WLAN_PUB_ACTION_VENDOR_SPECIFIC;
+}
+
+/* _ieee80211_is_group_privacy_action - Check if a frame is a group-addressed
+ *                                      privacy action frame.
+ * hdr: The frame header.
+ */
+
+static inline bool
+_ieee80211_is_group_privacy_action(FAR struct ieee80211_hdr *hdr)
+{
+  FAR struct ieee80211_mgmt *mgmt = (FAR void *)hdr;
+
+  if (!ieee80211_is_action(hdr->frame_control) ||
+      !(hdr->addr1[0] & 1))
+    {
+      return false;
+    }
+
+  return mgmt->u.action.category == WLAN_CATEGORY_MESH_ACTION ||
+    mgmt->u.action.category == WLAN_CATEGORY_MULTIHOP_ACTION;
+}
+
+/* ieee80211_is_group_privacy_action - Check if a frame is a group-addressed
+ *                                     privacy action frame.
+ * hdr: The frame header.
+ * len: Length of the frame.
+ */
+
+static inline bool
+ieee80211_is_group_privacy_action(FAR struct ieee80211_hdr *hdr, size_t len)
+{
+  if (!hdr || len < IEEE80211_MIN_ACTION_SIZE(category))
+    {
+      return false;
+    }
+
+  return _ieee80211_is_group_privacy_action(hdr);
+}
+
 /* Convert time units. */
+
+static inline unsigned long ieee80211_tu_to_usec(unsigned long tu)
+{
+  return 1024 * tu;
+}
 
 #define TU_TO_TICKS(x)    USEC2TICK((x) * 1024)
 #define TU_TO_EXP_TIME(x) (clock_systime_ticks() + TU_TO_TICKS(x))
@@ -4320,12 +4642,201 @@ _ieee80211_is_robust_mgmt_frame(FAR struct ieee80211_hdr *hdr)
 #define DBM_TO_MBM(gain) ((gain) * 100)
 #define MBM_TO_DBM(gain) ((gain) / 100)
 
+/* __ieee80211_check_tim - Check whether an AID bit is set in a TIM.
+ * tim: The TIM information element.
+ * tim_len: Length of the TIM information element.
+ * aid: The AID to check.
+ */
+
+static inline bool
+__ieee80211_check_tim(FAR const struct ieee80211_tim_ie *tim,
+                      uint8_t tim_len, uint16_t aid)
+{
+  uint8_t index;
+  uint8_t indexn1;
+  uint16_t indexn2;
+  uint8_t mask;
+
+  if (!tim || tim_len < sizeof(*tim))
+    {
+      return false;
+    }
+
+  if (tim_len < 4)
+    {
+      return false;
+    }
+
+  aid &= 0x3fff;
+  index = aid / 8;
+  mask = 1 << (aid & 7);
+  indexn1 = tim->bitmap_ctrl & 0xfe;
+  indexn2 = tim_len + indexn1 - 4;
+
+  if (index < indexn1 || index > indexn2)
+    {
+      return false;
+    }
+
+  index -= indexn1;
+  return (tim->virtual_map[index] & mask) != 0;
+}
+
+/* ieee80211_get_tdls_action - Get the TDLS action code from a TDLS frame.
+ * tdls: The TDLS frame.
+ * len: Length of the frame.
+ *
+ * Return the TDLS action code, or -1 if the frame is not a TDLS action
+ * frame.
+ */
+
+static inline int
+ieee80211_get_tdls_action(FAR const struct ieee80211_tdls_data *tdls,
+                          size_t len)
+{
+  if (!tdls ||
+      len < offsetof(struct ieee80211_tdls_data, action_code) +
+            sizeof(tdls->action_code) ||
+      be16toh(tdls->ether_type) != 0x890d ||
+      tdls->payload_type != WLAN_TDLS_SNAP_RFTYPE ||
+      tdls->category != WLAN_CATEGORY_TDLS)
+    {
+      return -1;
+    }
+
+  return tdls->action_code;
+}
+
+/* ieee80211_action_contains_tpc - Check if an action frame contains a TPC
+ *                                  IE.
+ * hdr: The frame header.
+ * len: Length of the frame.
+ */
+
+static inline bool
+ieee80211_action_contains_tpc(FAR struct ieee80211_hdr *hdr, size_t len)
+{
+  FAR struct ieee80211_mgmt *mgmt = (FAR void *)hdr;
+
+  if (!hdr || !ieee80211_is_action(hdr->frame_control) ||
+      len < IEEE80211_MIN_ACTION_SIZE(tpc_report))
+    {
+      return false;
+    }
+
+  if (mgmt->u.action.category != WLAN_CATEGORY_SPECTRUM_MGMT &&
+      mgmt->u.action.category != WLAN_CATEGORY_RADIO_MEASUREMENT)
+    {
+      return false;
+    }
+
+  return mgmt->u.action.action_code == WLAN_ACTION_SPCT_TPC_RPRT &&
+    mgmt->u.action.tpc_report.tpc_elem_id == WLAN_EID_TPC_REPORT &&
+    mgmt->u.action.tpc_report.tpc_elem_length ==
+      sizeof(struct ieee80211_tpc_report_ie);
+}
+
+/* ieee80211_is_timing_measurement - Check for a timing measurement response.
+ * hdr: The frame header.
+ * len: Length of the frame.
+ */
+
+static inline bool
+ieee80211_is_timing_measurement(FAR struct ieee80211_hdr *hdr, size_t len)
+{
+  FAR struct ieee80211_mgmt *mgmt = (FAR void *)hdr;
+
+  if (!hdr || len < IEEE80211_MIN_ACTION_SIZE(wnm_timing_msr) ||
+      !ieee80211_is_action(hdr->frame_control))
+    {
+      return false;
+    }
+
+  return mgmt->u.action.category == WLAN_CATEGORY_WNM_UNPROTECTED &&
+    mgmt->u.action.action_code ==
+      WLAN_UNPROTECTED_WNM_ACTION_TIMING_MEASUREMENT_RESPONSE;
+}
+
+/* ieee80211_is_ftm - Check for a public FTM response action frame.
+ * hdr: The frame header.
+ * len: Length of the frame.
+ */
+
+static inline bool
+ieee80211_is_ftm(FAR struct ieee80211_hdr *hdr, size_t len)
+{
+  FAR struct ieee80211_mgmt *mgmt = (FAR void *)hdr;
+
+  if (!ieee80211_is_public_action(hdr, len) ||
+      len < IEEE80211_MIN_ACTION_SIZE(ftm))
+    {
+      return false;
+    }
+
+  return mgmt->u.action.action_code == WLAN_PUB_ACTION_FTM_RESPONSE;
+}
+
+begin_packed_struct struct element
+{
+  uint8_t id;
+  uint8_t datalen;
+  uint8_t data[0];
+}
+end_packed_struct;
+
+#define for_each_element(_elem, _data, _datalen) \
+  for (_elem = (const struct element *)(_data); \
+       (const uint8_t *)(_data) + (_datalen) - (const uint8_t *)_elem >= \
+         (int)sizeof(*_elem) && \
+       (const uint8_t *)(_data) + (_datalen) - (const uint8_t *)_elem >= \
+         (int)sizeof(*_elem) + _elem->datalen; \
+       _elem = (const struct element *)(_elem->data + _elem->datalen))
+
+#define for_each_element_id(element, _id, data, datalen) \
+  for_each_element(element, data, datalen) \
+    if (element->id == (_id))
+
+#define for_each_element_extid(element, extid, _data, _datalen) \
+  for_each_element(element, _data, _datalen) \
+    if (element->id == WLAN_EID_EXTENSION && \
+        element->datalen > 0 && element->data[0] == (extid))
+
+#define for_each_subelement(sub, element) \
+  for_each_element(sub, (element)->data, (element)->datalen)
+
+#define for_each_subelement_id(sub, id, element) \
+  for_each_element_id(sub, id, (element)->data, (element)->datalen)
+
+#define for_each_subelement_extid(sub, extid, element) \
+  for_each_element_extid(sub, extid, (element)->data, (element)->datalen)
+
+static inline bool for_each_element_completed(const struct element *element,
+                                              const void *data,
+                                              size_t datalen)
+{
+  return (const uint8_t *)element == (const uint8_t *)data + datalen;
+}
+
 /* RSNX Capabilities:
  * bits 0-3: Field length (n-1)
  */
 
 #define WLAN_RSNX_CAPA_PROTECTED_TWT BIT(4)
 #define WLAN_RSNX_CAPA_SAE_H2E       BIT(5)
+
+/* EBPCC = Enhanced BSS Parameter Change Count */
+
+#define IEEE80211_ENH_CRIT_UPD_EBPCC        0x0F
+#define IEEE80211_ENH_CRIT_UPD_TYPE         0x70
+#define IEEE80211_ENH_CRIT_UPD_TYPE_NO_UHR  0
+#define IEEE80211_ENH_CRIT_UPD_TYPE_UHR     1
+#define IEEE80211_ENH_CRIT_UPD_ALL          0x80
+
+begin_packed_struct struct ieee80211_enh_crit_upd
+{
+  uint8_t v;
+}
+end_packed_struct;
 
 /* Reduced neighbor report, based on Draft P802.11ax_D6.1,
  * section 9.4.2.170 and accepted contributions.
@@ -4338,6 +4849,9 @@ _ieee80211_is_robust_mgmt_frame(FAR struct ieee80211_hdr *hdr)
 #define IEEE80211_TBTT_INFO_OFFSET_BSSID_BSS_PARAM  9
 #define IEEE80211_TBTT_INFO_OFFSET_BSSID_SSSID_BSS_PARAM 13
 
+#define IEEE80211_TBTT_INFO_TYPE_TBTT               0
+#define IEEE80211_TBTT_INFO_TYPE_MLD                1
+
 #define IEEE80211_RNR_TBTT_PARAMS_OCT_RECOMMENDED   0x01
 #define IEEE80211_RNR_TBTT_PARAMS_SAME_SSID         0x02
 #define IEEE80211_RNR_TBTT_PARAMS_MULTI_BSSID       0x04
@@ -4345,6 +4859,9 @@ _ieee80211_is_robust_mgmt_frame(FAR struct ieee80211_hdr *hdr)
 #define IEEE80211_RNR_TBTT_PARAMS_COLOC_ESS         0x10
 #define IEEE80211_RNR_TBTT_PARAMS_PROBE_ACTIVE      0x20
 #define IEEE80211_RNR_TBTT_PARAMS_COLOC_AP          0x40
+#define IEEE80211_RNR_TBTT_PARAMS_SAME_SMD          0x80
+#define IEEE80211_RNR_TBTT_PARAMS_PSD_NO_LIMIT      127
+#define IEEE80211_RNR_TBTT_PARAMS_PSD_RESERVED      (-128)
 
 begin_packed_struct struct ieee80211_neighbor_ap_info
 {
@@ -4366,5 +4883,177 @@ enum ieee80211_range_params_max_total_ltf
 /* Multi-link device */
 
 #define IEEE80211_MLD_MAX_NUM_LINKS        15
+
+begin_packed_struct struct ieee80211_rnr_mld_params
+{
+  uint8_t mld_id;
+  uint16_t params;
+}
+end_packed_struct;
+
+#define IEEE80211_RNR_MLD_PARAMS_LINK_ID            0x000F
+#define IEEE80211_RNR_MLD_PARAMS_BSS_CHANGE_COUNT   0x0FF0
+#define IEEE80211_RNR_MLD_PARAMS_UPDATES_INCLUDED   0x1000
+#define IEEE80211_RNR_MLD_PARAMS_DISABLED_LINK      0x2000
+
+begin_packed_struct struct ieee80211_tbtt_info_7_8_9
+{
+  uint8_t tbtt_offset;
+  uint8_t bssid[ETH_ALEN];
+  uint8_t bss_params;
+  int8_t psd_20;
+}
+end_packed_struct;
+
+begin_packed_struct struct ieee80211_tbtt_info_ge_11
+{
+  uint8_t tbtt_offset;
+  uint8_t bssid[ETH_ALEN];
+  uint32_t short_ssid;
+  uint8_t bss_params;
+  int8_t psd_20;
+  struct ieee80211_rnr_mld_params mld_params;
+  struct ieee80211_enh_crit_upd enh_crit_upd;
+}
+end_packed_struct;
+
+/* ieee80211_s1g_check_tim - Check whether an AID bit is set in an S1G TIM.
+ * tim: The S1G TIM information element.
+ * tim_len: Length of the TIM information element.
+ * aid: The AID to check.
+ */
+
+static inline bool
+ieee80211_s1g_check_tim(FAR const struct ieee80211_tim_ie *tim,
+                        uint8_t tim_len, uint16_t aid)
+{
+  FAR const uint8_t *ptr;
+  FAR const uint8_t *end;
+  uint8_t target_block;
+  uint8_t target_subblock;
+  uint8_t target_bit;
+
+  if (!tim || tim_len < 3)
+    {
+      return false;
+    }
+
+  target_block = (aid >> 6) & 0x1f;
+  target_subblock = (aid >> 3) & 0x7;
+  target_bit = aid & 0x7;
+  ptr = tim->virtual_map;
+  end = (FAR const uint8_t *)tim + tim_len;
+
+  while (ptr < end)
+    {
+      uint8_t control = *ptr++;
+      uint8_t mode = control & 0x03;
+      bool inverse = (control & BIT(2)) != 0;
+      uint8_t block_offset = control >> 3;
+      uint8_t block_map;
+      size_t block_len;
+      size_t span;
+      bool contains;
+
+      switch (mode)
+        {
+          case 0:
+            if (ptr >= end)
+              {
+                return false;
+              }
+
+            block_map = *ptr;
+            block_len = 1 + hweight8(block_map);
+            contains = block_offset == target_block;
+            break;
+
+          case 1:
+            block_len = 1;
+            contains = block_offset == target_block;
+            break;
+
+          case 2:
+            if (ptr >= end)
+              {
+                return false;
+              }
+
+            block_len = 1 + ptr[0];
+            span = (block_len - 1 + 7) / 8;
+            contains = target_block >= block_offset &&
+              target_block < block_offset + span;
+            break;
+
+          default:
+            return false;
+        }
+
+      if ((size_t)(end - ptr) < block_len)
+        {
+          return false;
+        }
+
+      if (contains)
+        {
+          if (mode == 0)
+            {
+              uint8_t subblock;
+              uint8_t offset;
+
+              block_map = *ptr++;
+              if (!(block_map & BIT(target_subblock)))
+                {
+                  return inverse;
+                }
+
+              offset = target_subblock == 0 ? 0 :
+                hweight8(block_map & ((1 << target_subblock) - 1));
+              for (subblock = 0; subblock < offset; subblock++)
+                {
+                  ptr++;
+                }
+
+              return ((*ptr & BIT(target_bit)) != 0) ^ inverse;
+            }
+          else if (mode == 1)
+            {
+              return ((*ptr & 0x3f) == (aid & 0x3f)) ^ inverse;
+            }
+          else
+            {
+              uint8_t span_offset = target_block - block_offset;
+              uint8_t subblock = span_offset * 8 + target_subblock;
+              uint8_t count = *ptr++;
+
+              if (subblock >= count)
+                {
+                  return inverse;
+                }
+
+              return ((ptr[subblock] & BIT(target_bit)) != 0) ^ inverse;
+            }
+        }
+
+      ptr += block_len;
+    }
+
+  return false;
+}
+
+/* ieee80211_check_tim - Check whether an AID bit is set in a TIM.
+ * tim: The TIM information element.
+ * tim_len: Length of the TIM information element.
+ * aid: The AID to check.
+ * s1g: True if the TIM is from an S1G PPDU.
+ */
+
+static inline bool
+ieee80211_check_tim(FAR const struct ieee80211_tim_ie *tim,
+                    uint8_t tim_len, uint16_t aid, bool s1g)
+{
+  return s1g ? ieee80211_s1g_check_tim(tim, tim_len, aid) :
+    __ieee80211_check_tim(tim, tim_len, aid);
+}
 
 #endif /* __INCLUDE_NUTTX_WIRELESS_IEEE80211_IEEE80211_H */
