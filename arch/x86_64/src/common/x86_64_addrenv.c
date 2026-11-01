@@ -237,8 +237,6 @@ static int x86_64_create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
   uint32_t  ptlevel;
   int       npages;
   int       nmapped;
-  int       i;
-  int       j;
 
   /* Only one entry in PML4 supported now */
 
@@ -261,9 +259,11 @@ static int x86_64_create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
 
   map_spgtables(addrenv, vaddr);
 
-  /* Begin allocating memory for the page tables */
+  /* Begin allocating memory for the page tables.  Each PT is filled from
+   * the index of vaddr in it.
+   */
 
-  for (i = 0; i < npages; i += X86_MMU_ENTRIES_PER_PGT)
+  while (nmapped < size)
     {
       /* Get the current final level entry (PT) corresponding to this vaddr */
 
@@ -289,11 +289,11 @@ static int x86_64_create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
 
       ptlast = x86_64_pgvaddr(paddr);
 
-      /* Then allocate memory for the region data */
+      /* Then allocate memory for the region data, up to the end of this
+       * PT
+       */
 
-      for (j = X86_MMU_VADDR_INDEX(vaddr, ptlevel);
-           j < X86_MMU_ENTRIES_PER_PGT && nmapped < size;
-           j++)
+      do
         {
           paddr = mm_pgalloc(1);
           if (!paddr)
@@ -311,6 +311,7 @@ static int x86_64_create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
           nmapped += MM_PGSIZE;
           vaddr   += MM_PGSIZE;
         }
+      while (nmapped < size && X86_MMU_VADDR_INDEX(vaddr, ptlevel + 1) != 0);
     }
 
   /* Flush the data cache, so the changes are committed to memory */
