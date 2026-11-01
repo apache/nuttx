@@ -417,6 +417,24 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
   heapbase = database + MM_PGALIGNUP(datasize);
 #endif
 
+#if (CONFIG_ARCH_TEXT_VBASE != 0x0) && (CONFIG_ARCH_HEAP_VBASE != 0x0) && \
+    (CONFIG_ARCH_TEXT_VBASE < CONFIG_ARCH_DATA_VBASE) && \
+    (CONFIG_ARCH_DATA_VBASE < CONFIG_ARCH_HEAP_VBASE)
+  /* The regions have fixed windows: the text up to the data, the data up to
+   * the heap.  A region past its window would be mapped over the next one,
+   * so a program that does not fit cannot run.
+   */
+
+  if (textbase + MM_PGALIGNUP(textsize) > CONFIG_ARCH_DATA_VBASE ||
+      database + MM_PGALIGNUP(datasize) > CONFIG_ARCH_HEAP_VBASE)
+    {
+      berr("ERROR: text %zu or data %zu bytes do not fit\n",
+           textsize, datasize);
+      ret = -ENOMEM;
+      goto errout;
+    }
+#endif
+
   /* Map the reserved area */
 
   ret = x86_64_create_region(addrenv, resvbase, resvsize, MMU_UDATA_FLAGS);
