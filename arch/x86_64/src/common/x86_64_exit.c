@@ -71,10 +71,25 @@ void up_exit(int status)
    * task is closed down gracefully (data caches dump, MMU flushed) and
    * set up the address environment for the new thread at the head of
    * the ready-to-run list.
+   *
+   * No context switch here: this runs on the stack of the task that has
+   * exited.  Publish the worker that addrenv_switch() can wake as
+   * nxtask_exit() does, then switch to the new head of the list.
    */
 
-  addrenv_switch(tcb);
-  tcb = this_task();
+  do
+    {
+      tcb = this_task();
+      tcb->lockcount++;
+      addrenv_switch(tcb);
+      tcb->lockcount--;
+#  ifdef CONFIG_SMP
+      nxsched_deliver_task(this_cpu(), tcb->cpu, SWITCH_HIGHER);
+#  else
+      nxsched_merge_pending();
+#  endif
+    }
+  while (tcb != this_task());
 #endif
 
   /* Adjusts time slice for SCHED_RR & SCHED_SPORADIC cases
