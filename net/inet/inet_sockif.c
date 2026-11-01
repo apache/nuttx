@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/net/net.h>
@@ -1856,6 +1857,14 @@ static ssize_t inet_sendmsg(FAR struct socket *psock,
   end = &msg->msg_iov[msg->msg_iovlen];
   for (len = 0, iov = msg->msg_iov; iov != end; iov++)
     {
+      /* The sum of the iov_len values must fit in an ssize_t */
+
+      if (iov->iov_len > SSIZE_MAX - len)
+        {
+          nwarn("WARNING: The sum of the iov_len values is too large\n");
+          return -EINVAL;
+        }
+
       len += iov->iov_len;
     }
 
