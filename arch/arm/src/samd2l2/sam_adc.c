@@ -212,6 +212,7 @@ static int sam_adc_bind(struct adc_dev_s *dev,
                         const struct adc_callback_s *callback)
 {
   struct sam_adc_priv *priv = (struct sam_adc_priv *)dev->ad_priv;
+
   priv->adc_callback = callback;
   return 0;
 }
@@ -465,6 +466,12 @@ struct adc_dev_s *sam_adcinitialize(int genclk)
 
   struct sam_adc_priv *priv = (struct sam_adc_priv *)
                               kmm_malloc(sizeof(struct sam_adc_priv));
+
+  if (priv == NULL)
+    {
+      return NULL;
+    }
+
   priv->genclk = genclk;
 
   g_sam_adc_dev.ad_priv = priv;
@@ -472,6 +479,12 @@ struct adc_dev_s *sam_adcinitialize(int genclk)
 
   priv->num_channels = BOARD_ADC_NUM_CHANNELS;
   priv->channels = kmm_malloc(priv->num_channels * sizeof(int));
+
+  if (priv->channels == NULL)
+    {
+      kmm_free(priv);
+      return NULL;
+    }
 
 #if BOARD_ADC_REF == ADC_REFCTRL_REFSEL_VREFA
   sam_configport(PORT_ADC_VREFA);
