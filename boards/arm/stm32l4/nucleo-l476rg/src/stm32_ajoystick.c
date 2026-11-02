@@ -238,6 +238,7 @@ static int ajoy_sample(const struct ajoy_lowerhalf_s *lower,
       if ((have & 1) == 0 && ptr->am_channel == 0)
         {
           int32_t tmp = ptr->am_data;
+
           sample->as_x = (int16_t)tmp;
           have |= 1;
 
@@ -248,6 +249,7 @@ static int ajoy_sample(const struct ajoy_lowerhalf_s *lower,
       if ((have & 2) == 0 && ptr->am_channel == 1)
         {
           int32_t tmp = ptr->am_data;
+
           sample->as_y = (int16_t)tmp;
           have |= 2;
 
