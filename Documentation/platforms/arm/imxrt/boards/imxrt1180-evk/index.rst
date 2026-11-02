@@ -43,9 +43,9 @@ Features
 
 The current NuttX configurations provide the serial console, USB device
 support, image generation, and multicore boot flow. The Cortex-M7 ``nsh``
-configuration also enables the onboard MicroSD socket through USDHC1. Other
-on-board interfaces listed above are not enabled by the supplied
-configurations.
+configuration also enables the onboard MicroSD socket through USDHC1 and
+NETC Ethernet on ETH1. Other on-board interfaces listed above are not
+enabled by the supplied configurations.
 
 Buttons and LEDs
 ================
@@ -101,6 +101,84 @@ GPIO_AD_27   GPIO4_IO27    Green user LED D6
 Consult the MIMXRT1180-EVK user manual (UM12021) and schematic, available from
 the NXP product page linked above, for the complete expansion-header pinout and
 any signal-sharing restrictions.
+
+Ethernet
+========
+
+The Cortex-M7 board integration supports direct-PHY ENETC0 and the ENETC1
+switch through the NETC driver. The ``nsh`` configuration enables only
+``CONFIG_IMXRT_NETC_ENETC1_PORT1`` (ETH1), with
+``CONFIG_ETH0_PHY_RTL8211F=y`` selecting the RTL8211F PHY driver.
+Board bring-up configures the enabled ports' pins and resets before PHY
+discovery and registers the network interfaces. Hardware acceptance,
+including link negotiation and bidirectional traffic, is still required.
+
+================= ========== ============ ============ ============
+Attachment        Board port PHY          MDIO address Reset GPIO
+================= ========== ============ ============ ============
+ENETC1 port 0     ETH0/J28   RTL8201FI    2            GPIO_AD_25
+ENETC1 port 1     ETH1       RTL8211FDI   5            GPIO_B1_13
+ENETC1 port 2     ETH2       RTL8211FDI   4            GPIO_AD_28
+ENETC1 port 3     ETH3       RTL8211FDI   7            GPIO_B2_01
+ENETC0            ETH4/J32   RTL8201FI    3            GPIO_AD_13
+================= ========== ============ ============ ============
+
+Select additional switch ports with ``CONFIG_IMXRT_NETC_ENETC1_PORT0``
+through ``CONFIG_IMXRT_NETC_ENETC1_PORT3``, or the direct attachment with
+``CONFIG_IMXRT_NETC_ENETC0``. The appropriate PHY drivers must also be
+compiled. The ``CONFIG_ETHx_PHY_RTL8201F`` and
+``CONFIG_ETHx_PHY_RTL8211F`` model selections enable
+``CONFIG_NET_PHY_RTL8201F`` and ``CONFIG_NET_PHY_RTL8211F``, respectively.
+For this board, Kconfig also selects these driver symbols automatically:
+RTL8201F for ENETC0 or ENETC1 port 0, and RTL8211F for ENETC1 ports 1--3.
+No additional manual PHY selection is required when adding these ports.
+The per-port PHY descriptors in board code are still required; enabling a
+PHY driver does not populate them. The board also selects the
+``CONFIG_IMXRT_NETC_PHYINIT`` hardware-reset hook automatically. Ports 1--3
+use RGMII with clock delays selected by the PHY hardware straps. ETH0 and
+ETH4 use RMII with a 50 MHz reference supplied by the MAC and SION enabled
+on the clock pad. GPIO_AD_16 for ETH0 (ENETC1/PORT0) and GPIO_AD_17 for
+ETH4 (ENETC0) must remain inputs without internal pulls when their
+respective ports are enabled, preserving the PHY-address straps.
+
+ENETC0's PHY reset shares GPIO_AD_13 with LPUART3 TX; do not enable both.
+For ETH2/3, set J65/J72 and J63/J73 to 2-3 and do not enable SDRAM or
+EtherCAT on their shared GPIO_EMC_B1 pads.
+
+The NETC root uses PLL3 PFD3 at 480 MHz divided by two for 240 MHz.
+MAC1/2/3 use PLL1 DIV2 at 500 MHz divided by four for 125 MHz;
+MAC0/4 divide it by ten for 50 MHz. The boot environment must supply the
+PLL3 PFD3 source with fraction 18 and leave NETCMIX powered, released from
+reset and deisolated, with TRDC access for the Cortex-M7 and NETC DMA.
+The board's Cortex-M33 bootloader configures TRDC permissions for
+Cortex-M7 access to NETC registers and NETC DMA access to memory.
+A replacement bootloader must provide equivalent permissions.
+
+Both controllers use 16 TX and 16 RX descriptors by default. The ``nsh``
+configuration provides ``CONFIG_MM_IOB=y`` and 160 IOBs, the minimum pool
+for the 16-descriptor TX selection.
+
+ENETC1 exposes one interface for all enabled switch ports. ENETC0 exposes a
+separate interface and is not bridged to ENETC1. MAC addresses are locally
+administered unicast addresses derived from the chip UID; ENETC0 differs
+from ENETC1 in the low bit of the last byte. With only ENETC1 enabled, its
+interface is ``eth0``. Enabling ENETC0 normally makes ENETC0 ``eth0`` and
+ENETC1 ``eth1``; confirm the mapping with ``ifconfig``.
+
+Use separate subnets for two-interface tests and do not introduce loops
+between switch ports. ``CONFIG_DEBUG_NET_ERROR`` enables PHY discovery
+and NETC initialization error messages; ``CONFIG_NETDEV_PHY_IOCTL`` enables
+PHY register diagnostics.
+
+NETC and the Realtek PHY drivers select ``CONFIG_MDIO_BUS`` automatically.
+Each used NETC MDIO endpoint has one registered bus shared by its PHYs;
+discovery, PHY initialization, link polling and register ioctls all use
+``mdio_read()`` and ``mdio_write()``. Only Clause 22 is supported.
+Paged PHY operations require caller exclusion across the entire sequence,
+which NETC provides with the network lock. Bus handles survive interface
+down/up, and MDIO timing is restored on each transaction after a function
+reset. Initialization failure releases only the failing attachment's bus
+references.
 
 Power Supply
 ============
@@ -248,8 +326,9 @@ nsh
 Runs NSH on the Cortex-M7. The output ``nuttx.bin`` is a raw XIP payload that
 must be programmed at offset ``0x80000`` and started by the ``bl``
 configuration. NSH is available on LPUART1 at the MCU-Link virtual COM port.
-This configuration also enables USB CDC/ACM, the ``ostest`` application, and
-the onboard MicroSD socket via USDHC1.
+This configuration also enables USB CDC/ACM, the ``ostest`` application, the
+onboard MicroSD socket via USDHC1, and NETC Ethernet on ETH1 with static IPv4
+addressing and ``ping``.
 
 License Exceptions
 ==================
