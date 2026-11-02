@@ -170,6 +170,28 @@ static int vsprintf_repeat(FAR struct lib_outstream_s *stream, int ch,
   return total_len;
 }
 
+static int vsprintf_putnum(FAR struct lib_outstream_s *stream,
+                           FAR char *buf, int len)
+{
+  int i;
+  int j;
+
+  for (i = 0, j = len - 1; i < j; i++, j--)
+    {
+      char tmp = buf[i];
+
+      buf[i] = buf[j];
+      buf[j] = tmp;
+    }
+
+  if (len > 0)
+    {
+      lib_stream_puts(stream, buf, len);
+    }
+
+  return len;
+}
+
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                              FAR struct arg_s *arglist, int numargs,
                              FAR const IPTR char *fmt, va_list ap)
@@ -918,18 +940,14 @@ flt_oper:
                 }
 
               stream_putc(ndigs, stream);
-              c = __ultoa_invert(exp, buf, 10) - buf;
+              len = __ultoa_invert(exp, buf, 10) - buf;
 
               if (exp >= 0 && exp <= 9)
                 {
                   stream_putc('0', stream);
                 }
 
-              while (c > 0)
-                {
-                  stream_putc(buf[c - 1], stream);
-                  c--;
-                }
+              total_len += vsprintf_putnum(stream, buf, len);
             }
 
           goto tail;
@@ -1428,10 +1446,7 @@ str_lpad:
           prec = c;
         }
 
-      while (c)
-        {
-          stream_putc(buf[--c], stream);
-        }
+      total_len += vsprintf_putnum(stream, buf, c);
 
 tail:
 
