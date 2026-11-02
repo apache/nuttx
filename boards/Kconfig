@@ -3664,6 +3664,8 @@ config ARCH_BOARD_STM32N6570_DK
 	bool "STM32N6570-DK"
 	depends on ARCH_CHIP_STM32N657X0
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		STMicro STM32N6570-DK Discovery kit based on the STM32N657X0
 		MCU (Cortex-M55).

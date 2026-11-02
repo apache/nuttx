@@ -237,6 +237,52 @@ static bool rcc_waitflag(uint32_t addr, uint32_t mask, bool set)
 }
 
 /****************************************************************************
+ * Name: rcc_enableahb1
+ *
+ * Description:
+ *   Enable selected AHB1 peripherals.
+ *
+ ****************************************************************************/
+
+static inline void rcc_enableahb1(void)
+{
+  uint32_t regval = 0;
+
+#ifdef CONFIG_STM32_DMA1
+  regval |= RCC_AHB1ENR_GPDMA1EN;
+#endif
+
+  if (regval != 0)
+    {
+      putreg32(regval, STM32_RCC_AHB1ENSR);
+      putreg32(regval, STM32_RCC_AHB1LPENSR);
+    }
+}
+
+/****************************************************************************
+ * Name: rcc_enableahb5
+ *
+ * Description:
+ *   Enable selected AHB5 peripherals.
+ *
+ ****************************************************************************/
+
+static inline void rcc_enableahb5(void)
+{
+  uint32_t regval = 0;
+
+#ifdef CONFIG_STM32_DMA2
+  regval |= RCC_AHB5ENR_HPDMA1EN;
+#endif
+
+  if (regval != 0)
+    {
+      putreg32(regval, STM32_RCC_AHB5ENSR);
+      putreg32(regval, STM32_RCC_AHB5LPENSR);
+    }
+}
+
+/****************************************************************************
  * Name: rcc_enableahb4
  *
  * Description:
@@ -674,7 +720,9 @@ void stm32_rcc_enableperipherals(void)
       modifyreg32(STM32_RAMCFG_AXISRAM_CR(n), RAMCFG_CR_SRAMSD, 0);
     }
 
+  rcc_enableahb1();
   rcc_enableahb4();
+  rcc_enableahb5();
   rcc_enableapb1();
   rcc_enableapb2();
   rcc_enableccip();

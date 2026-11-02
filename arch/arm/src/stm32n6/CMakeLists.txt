@@ -29,7 +29,6 @@ set(SRCS)
 list(
   APPEND
   SRCS
-  stm32_gpio.c
   stm32_irq.c
   stm32_lowputc.c
   stm32_rcc.c

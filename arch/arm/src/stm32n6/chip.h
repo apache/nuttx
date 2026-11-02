@@ -35,7 +35,8 @@
 
 #include <arch/irq.h>
 #include <arch/stm32n6/chip.h>
-#include "hardware/stm32n6xxx_memorymap.h"
+#include "hardware/stm32_pinmap.h"
+#include "hardware/stm32_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,5 +54,14 @@
 
 #define ARMV8M_ICACHE_LINESIZE 32
 #define ARMV8M_DCACHE_LINESIZE 32
+
+/* DMA instances for the common GPDMA driver: DMA1 is GPDMA1, DMA2 is
+ * HPDMA1.  Both have 16 channels with one interrupt per channel.
+ */
+
+#define STM32_DMA1_NCHAN       16
+#define STM32_DMA1_IRQ_FIRST   STM32_IRQ_GPDMA1_CH0
+#define STM32_DMA2_NCHAN       16
+#define STM32_DMA2_IRQ_FIRST   STM32_IRQ_HPDMA1_CH0
 
 #endif /* __ARCH_ARM_SRC_STM32N6_CHIP_H */

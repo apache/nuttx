@@ -192,6 +192,17 @@
 #  define GPIO_PORTG                  (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
 #  define GPIO_PORTH                  (7 << GPIO_PORT_SHIFT)     /*   GPIOH */
 #  define GPIO_PORTI                  (8 << GPIO_PORT_SHIFT)     /*   GPIOI */
+#  define GPIO_PORTJ                  (9 << GPIO_PORT_SHIFT)     /*   GPIOJ */
+#  define GPIO_PORTK                  (10 << GPIO_PORT_SHIFT)    /*   GPIOK */
+
+/* STM32N6 names the ports above H as N, O, P and Q */
+
+#ifdef STM32_GPION_BASE
+#  define GPIO_PORTN                  (8 << GPIO_PORT_SHIFT)     /*   GPION */
+#  define GPIO_PORTO                  (9 << GPIO_PORT_SHIFT)     /*   GPIOO */
+#  define GPIO_PORTP                  (10 << GPIO_PORT_SHIFT)    /*   GPIOP */
+#  define GPIO_PORTQ                  (11 << GPIO_PORT_SHIFT)    /*   GPIOQ */
+#endif
 
 /* This identifies the bit in the port:
  *

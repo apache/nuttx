@@ -87,7 +87,38 @@ const uint32_t g_gpiobase[STM32_NPORTS] =
   STM32_GPIOH_BASE,
 #endif
 #if STM32_NPORTS > 8
+#  if defined(STM32_GPIOI_BASE)
   STM32_GPIOI_BASE,
+#  elif defined(STM32_GPION_BASE)
+  STM32_GPION_BASE,
+#  else
+  0,
+#  endif
+#endif
+#if STM32_NPORTS > 9
+#  if defined(STM32_GPIOJ_BASE)
+  STM32_GPIOJ_BASE,
+#  elif defined(STM32_GPIOO_BASE)
+  STM32_GPIOO_BASE,
+#  else
+  0,
+#  endif
+#endif
+#if STM32_NPORTS > 10
+#  if defined(STM32_GPIOK_BASE)
+  STM32_GPIOK_BASE,
+#  elif defined(STM32_GPIOP_BASE)
+  STM32_GPIOP_BASE,
+#  else
+  0,
+#  endif
+#endif
+#if STM32_NPORTS > 11
+#  if defined(STM32_GPIOQ_BASE)
+  STM32_GPIOQ_BASE,
+#  else
+  0,
+#  endif
 #endif
 };
 
