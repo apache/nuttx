@@ -246,9 +246,8 @@ mount point. For example:
         mount v9fs none /mnt trans=virtio,tag=host
         mount -t hostfs -o fs=. /data
 
-``mount`` without arguments runs the NSH command. With
-``CONFIG_DISABLE_MOUNTPOINT``, NXInit has no ``mount`` and ``umount``
-commands.
+A ``mount`` line in neither form fails. With ``CONFIG_DISABLE_MOUNTPOINT``,
+NXInit has no ``mount`` and ``umount`` commands.
 
 Compound Commands
 ------------------
