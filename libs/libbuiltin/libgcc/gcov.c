@@ -22,15 +22,16 @@
  * Included Files
  ****************************************************************************/
 
-#include <errno.h>
 #include <gcov.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <string.h>
 #include <syslog.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include <nuttx/lib/lib.h>
+#include <nuttx/reboot_notifier.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -246,7 +247,7 @@ static int gcov_process_path(FAR char *prefix, int strip,
       strcat(new_path, tokens[i]);
       if (access(new_path, F_OK) != 0)
         {
-          ret = mkdir(new_path, 0644);
+          ret = mkdir(new_path, 0777);
           if (ret != 0)
             {
               return -errno;
@@ -297,12 +298,50 @@ static int gcov_write_file(FAR const char *filename,
   return ret;
 }
 
+#ifdef CONFIG_COVERAGE_GCOV_DUMP_REBOOT
+static int gcov_reboot_notify(FAR struct notifier_block *nb,
+                              unsigned long action, FAR void *data)
+{
+  __gcov_dump();
+  return 0;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 void __gcov_init(FAR struct gcov_info *info)
 {
+#ifdef CONFIG_COVERAGE_GCOV_DUMP_REBOOT
+  static struct notifier_block nb;
+#endif
+  char path[PATH_MAX] = CONFIG_COVERAGE_DEFAULT_PREFIX;
+  static int inited = 0;
+  struct tm *tm_info;
+  time_t cur;
+
+  if (!inited)
+    {
+      cur = time(NULL);
+      tm_info = localtime(&cur);
+
+      strftime(path + strlen(path),
+               PATH_MAX,
+               "/gcov_%Y%m%d_%H%M%S",
+               tm_info);
+
+      setenv("GCOV_PREFIX_STRIP", CONFIG_COVERAGE_DEFAULT_PREFIX_STRIP, 1);
+      setenv("GCOV_PREFIX", path, 1);
+
+#ifdef CONFIG_COVERAGE_GCOV_DUMP_REBOOT
+      nb.notifier_call = gcov_reboot_notify;
+      register_reboot_notifier(&nb);
+#endif
+
+      inited++;
+    }
+
   info->next = __gcov_info_start;
   __gcov_info_start = info;
 }
