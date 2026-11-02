@@ -76,13 +76,9 @@
  *           exit(0);
  *       }
  *
- *    This implementation begins essentially 'pretending' that we forked
- *    and that the fork was successful and that we are the child of the
- *    fork.
- *
- *    REVISIT:  Ideally we should remove the parent information from the
- *    the new daemon's group data structure.  That would have a similar
- *    effect to the above fork() operation.
+ *    With CONFIG_ARCH_HAVE_FORK, daemon() forks as above and the child
+ *    calls setsid().  Without fork(), this implementation 'pretends' that
+ *    we forked and that we are the child of the fork.
  *
  * Input Parameters:
  *   nochdir - If nochdir is zero, daemon() changes the process's current
@@ -100,6 +96,24 @@
 
 int daemon(int nochdir, int noclose)
 {
+#ifdef CONFIG_ARCH_HAVE_FORK
+  pid_t pid = fork();
+
+  if (pid < 0)
+    {
+      return -1;  /* fork() will set the errno variable */
+    }
+
+  if (pid > 0)
+    {
+      _exit(0);
+    }
+
+  /* The child: a new session, without a controlling terminal */
+
+  setsid();
+#endif
+
 #ifndef CONFIG_DISABLE_ENVIRON
   if (nochdir == 0)
     {
