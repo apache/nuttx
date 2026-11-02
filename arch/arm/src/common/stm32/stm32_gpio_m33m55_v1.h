@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_gpio_m33_v1.h
+ * arch/arm/src/common/stm32/stm32_gpio_m33m55_v1.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33_V1_H
-#define __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33_V1_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33M55_V1_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33M55_V1_H
 
 /****************************************************************************
  * Included Files
@@ -38,7 +38,7 @@
 #include <arch/chip/chip.h>
 
 #include "chip.h"
-#include "hardware/stm32_gpio_m33_v1.h"
+#include "hardware/stm32_gpio_m33m55_v1.h"
 
 /****************************************************************************
  * Pre-Processor Declarations
@@ -353,4 +353,4 @@ void stm32_gpioinit(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33_V1_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33M55_V1_H */
