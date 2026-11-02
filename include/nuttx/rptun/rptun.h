@@ -64,9 +64,11 @@
   ((FAR struct rptun_cmd_s *)&((FAR struct resource_table *)(r))->reserved[0])
 
 #ifdef CONFIG_OPENAMP_CACHE
-#  define RPTUN_INVALIDATE(x) metal_cache_invalidate(&x, sizeof(x))
+#  define RPTUN_INVALIDATE(p, s) metal_cache_invalidate(p, s)
+#  define RPTUN_FLUSH(p, s)      metal_cache_flush(p, s)
 #else
-#  define RPTUN_INVALIDATE(x)
+#  define RPTUN_INVALIDATE(p, s)
+#  define RPTUN_FLUSH(p, s)
 #endif
 
 /* Access macros ************************************************************/
