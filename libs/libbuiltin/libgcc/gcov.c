@@ -291,6 +291,20 @@ static int gcov_binfile_dump(FAR struct dump_args *args,
   return OK;
 }
 
+/* Append src to dst (PATH_MAX-sized buffer) using strlcat, returning
+ * -ERANGE if the resulting path would be truncated.
+ */
+
+static int gcov_path_append(FAR char *dst, FAR const char *src)
+{
+  if (strlcat(dst, src, PATH_MAX) >= PATH_MAX)
+    {
+      return -ERANGE;
+    }
+
+  return OK;
+}
+
 static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
 {
   FAR struct gcov_info *info;
@@ -299,6 +313,7 @@ static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
   int token_count;
   int size;
   int i;
+  bool overflow;
 
   for (info = __gcov_info_start;
        info && info != &g_gcov_list_end;
@@ -339,32 +354,58 @@ static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
           continue;
         }
 
-      /* Build prefix part (tokens[0 .. token_cnt-1]) */
+      /* Build prefix part (tokens[0 .. token_cnt-1]).  Use strlcat
+       * bounded by PATH_MAX so that long source/build paths (e.g.
+       * CMake object dirs embedding absolute source paths) cannot
+       * overrun args->path_buffer and corrupt adjacent memory, which
+       * previously showed up as a data abort inside gcov_convert on
+       * the next iteration (info->functions[] returning garbage).
+       */
 
-      for (i = 0; i < args->token_cnt; i++)
+      overflow = false;
+
+      for (i = 0; i < args->token_cnt && !overflow; i++)
         {
-          strcat(args->path_buffer, "/");
-          strcat(args->path_buffer, args->tokens[i]);
+          if (gcov_path_append(args->path_buffer, "/") < 0 ||
+              gcov_path_append(args->path_buffer, args->tokens[i]) < 0)
+            {
+              overflow = true;
+            }
         }
 
       /* Build source path part, skipping first 'strip' tokens */
 
       for (i = args->token_cnt + args->strip;
-           i < token_count - 1; i++)
+           i < token_count - 1 && !overflow; i++)
         {
-          strcat(args->path_buffer, "/");
-          strcat(args->path_buffer, args->tokens[i]);
+          if (gcov_path_append(args->path_buffer, "/") < 0 ||
+              gcov_path_append(args->path_buffer, args->tokens[i]) < 0)
+            {
+              overflow = true;
+              break;
+            }
+
           if (args->mkdir)
             {
               args->mkdir(args->path_buffer);
             }
         }
 
-      strcat(args->path_buffer, "/");
-      strcat(args->path_buffer,
-             args->tokens[token_count - 1]);
+      if (!overflow &&
+          (gcov_path_append(args->path_buffer, "/") < 0 ||
+           gcov_path_append(args->path_buffer,
+                            args->tokens[token_count - 1]) < 0))
+        {
+          overflow = true;
+        }
 
-      if (handler(args, args->path_buffer, data, size) < 0)
+      if (overflow)
+        {
+          syslog(LOG_ERR,
+                 "gcov path exceeds PATH_MAX, skip %s\n",
+                 info->filename);
+        }
+      else if (handler(args, args->path_buffer, data, size) < 0)
         {
           syslog(LOG_ERR, "gcov dump %s failed!\n", args->path_buffer);
         }
