@@ -598,12 +598,34 @@ static int local_getsockopt(FAR struct socket *psock, int level, int option,
 #ifdef CONFIG_NET_LOCAL_SCM
           case SO_PEERCRED:
             {
+              FAR struct ucred *cred = value;
+
               if (*value_len != sizeof(struct ucred))
                 {
                   return -EINVAL;
                 }
 
-              memcpy(value, &conn->lc_peer->lc_cred, sizeof(struct ucred));
+              /* As on Linux: a connected stream socket gives its peer, an
+               * end of a socketpair() and a listening socket give their own
+               * credentials, any other socket gives pid 0, uid and gid -1.
+               */
+
+              if (conn->lc_peer != NULL)
+                {
+                  memcpy(cred, &conn->lc_peer->lc_cred, sizeof(*cred));
+                }
+              else if (conn->lc_pair ||
+                       conn->lc_state == LOCAL_STATE_LISTENING)
+                {
+                  memcpy(cred, &conn->lc_cred, sizeof(*cred));
+                }
+              else
+                {
+                  cred->pid = 0;
+                  cred->uid = -1;
+                  cred->gid = -1;
+                }
+
               return OK;
             }
 #endif
@@ -1162,6 +1184,7 @@ static int local_socketpair(FAR struct socket *psocks[2])
       conns[i]->lc_proto = psocks[i]->s_type;
       conns[i]->lc_type  = LOCAL_TYPE_PATHNAME;
       conns[i]->lc_state = LOCAL_STATE_BOUND;
+      conns[i]->lc_pair  = true;
     }
 
   conns[0]->lc_instance_id = conns[1]->lc_instance_id
