@@ -880,7 +880,32 @@ flt_oper:
                       break;
                     }
 
-                  stream_putc(out, stream);
+                  if (out == '0')
+                    {
+                      int zeroes = 1;
+
+                      while (n != -1)
+                        {
+                          int next = n - 1;
+                          int offset = exp - n;
+
+                          if (next < -prec ||
+                              (0 <= offset && offset < ndigs &&
+                               _dtoa.digits[offset] != '0'))
+                            {
+                              break;
+                            }
+
+                          zeroes++;
+                          n = next;
+                        }
+
+                      stream_repeat('0', zeroes, stream);
+                    }
+                  else
+                    {
+                      stream_putc(out, stream);
+                    }
                 }
               while (1);
 
