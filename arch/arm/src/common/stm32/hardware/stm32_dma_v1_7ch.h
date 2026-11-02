@@ -317,6 +317,8 @@
 #  define DMACHAN_SETTING_CHANNEL_SHIFT  (0)
 #  define DMACHAN_SETTING_FUNCTION_MASK  0xff00
 #  define DMACHAN_SETTING_FUNCTION_SHIFT (8)
+#else
+#  define DMACHAN_SETTING(chan, sel)     (chan)
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_STM32F0)
