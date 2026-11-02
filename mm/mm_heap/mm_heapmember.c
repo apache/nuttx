@@ -67,8 +67,8 @@ bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
 
   for (i = 0; i < heap->mm_nregions; i++)
     {
-      if (mem > (FAR void *)heap->mm_heapstart[i] &&
-          mem < (FAR void *)heap->mm_heapend[i])
+      if (mem > kasan_clear_tag((FAR void *)heap->mm_heapstart[i]) &&
+          mem < kasan_clear_tag((FAR void *)heap->mm_heapend[i]))
         {
           return true;
         }
@@ -83,8 +83,8 @@ bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
    * two guard nodes.
    */
 
-  if (mem > (FAR void *)heap->mm_heapstart[0] &&
-      mem < (FAR void *)heap->mm_heapend[0])
+  if (mem > kasan_clear_tag((FAR void *)heap->mm_heapstart[0]) &&
+      mem < kasan_clear_tag((FAR void *)heap->mm_heapend[0]))
     {
       return true;
     }
