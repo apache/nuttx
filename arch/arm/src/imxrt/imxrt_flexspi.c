@@ -408,7 +408,7 @@ static uint32_t imxrt_flexspi_configure_dll(struct flexspi_type_s *base,
       default:
           ASSERT(false);
           break;
-  }
+    }
 
   if (is_unified_config)
     {
@@ -478,7 +478,7 @@ static int imxrt_flexspi_check_and_clear_error(struct flexspi_type_s *base,
 
       base->IPTXFCR |= FLEXSPI_IPTXFCR_CLRIPTXF_MASK;
       base->IPRXFCR |= FLEXSPI_IPRXFCR_CLRIPRXF_MASK;
-  }
+    }
 
   return result;
 }
