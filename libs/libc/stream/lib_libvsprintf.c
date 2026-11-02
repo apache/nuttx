@@ -1087,6 +1087,84 @@ static int vsprintf_put_float_exp(FAR struct lib_outstream_s *stream,
 
   return total_len;
 }
+
+static size_t vsprintf_put_float(FAR struct lib_outstream_s *stream,
+                                 uint16_t flags, unsigned char c,
+                                 FAR int *width, int prec,
+                                 FAR struct dtoa_s *dtoa, FAR char *buf,
+                                 double value)
+{
+  int exp;              /* Exponent of master decimal digit */
+  unsigned int flen;    /* Length of the conversion */
+  int sign;             /* Sign character (or 0) */
+  unsigned int ndigs;   /* Number of digits to convert */
+  int ndecimal;         /* Digits after decimal (for 'f' format), 0 if no
+                         * limit */
+  size_t total_len = 0;
+
+  if ((c >= 'E' && c <= 'G') || c == 'A')
+    {
+      flags |= FL_FLTUPP;
+      c += 'e' - 'E';
+    }
+  else
+    {
+      flags &= ~FL_FLTUPP;
+    }
+
+  if ((flags & FL_PREC) == 0)
+    {
+      prec = 6;
+    }
+
+  /* %a has no output yet */
+
+  if (c == 'a')
+    {
+      return vsprintf_put_field(stream, "?", 1, width, flags);
+    }
+
+  vsprintf_float_format(c, prec, &flags, &ndigs, &ndecimal);
+
+  ndigs = __dtoa_engine(value, dtoa, ndigs, ndecimal);
+  exp = dtoa->exp;
+
+  sign = vsprintf_float_sign(flags, dtoa);
+
+  if ((dtoa->flags & (DTOA_NAN | DTOA_INF)) != 0)
+    {
+      return vsprintf_put_naninf(stream, flags, dtoa->flags, sign, width);
+    }
+
+  vsprintf_adjust_float_general(&flags, &prec, &ndigs, exp, dtoa);
+
+  /* Conversion result length, width := free space length */
+
+  flen = vsprintf_float_length(flags, sign, exp, prec);
+  if (flen > INT_MAX)
+    {
+      return INT_MAX + 1u;
+    }
+
+  total_len += vsprintf_put_float_prefix(stream, flags, sign, width, flen);
+
+  if ((flags & FL_FLTFIX) != 0)
+    {
+      /* 'f' format */
+
+      total_len += vsprintf_put_float_fixed(stream, flags, dtoa, exp,
+                                            ndigs, prec);
+    }
+  else
+    {
+      /* 'e(E)' format */
+
+      total_len += vsprintf_put_float_exp(stream, flags, dtoa, exp,
+                                          ndigs, prec, buf);
+    }
+
+  return total_len;
+}
 #endif
 
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
@@ -1413,31 +1491,9 @@ set_star:
 #endif
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT
-      if ((c >= 'E' && c <= 'G') || c == 'A')
-        {
-          flags |= FL_FLTUPP;
-          c += 'e' - 'E';
-          goto flt_oper;
-        }
-      else if ((c >= 'e' && c <= 'g') || c == 'a')
+      if (fmt_isfloat(c))
         {
           double value;
-          int exp;              /* Exponent of master decimal digit */
-          unsigned int flen;    /* Length of the conversion */
-          uint8_t sign;         /* Sign character (or 0) */
-          unsigned int ndigs;   /* Number of digits to convert */
-          int ndecimal;         /* Digits after decimal (for 'f' format), 0 if
-                                 * no limit */
-
-          flags &= ~FL_FLTUPP;
-
-flt_oper:
-          if ((flags & FL_PREC) == 0)
-            {
-              prec = 6;
-            }
-
-          vsprintf_float_format(c, prec, &flags, &ndigs, &ndecimal);
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
@@ -1459,62 +1515,8 @@ flt_oper:
               value = va_arg(ap, double);
             }
 
-          /* %a has no output yet */
-
-          if (c == 'a')
-            {
-              pnt  = "?";
-              size = 1;
-              total_len += vsprintf_put_field(stream, pnt, size, &width,
-                                              flags);
-              goto tail;
-            }
-
-          ndigs = __dtoa_engine(value, &_dtoa, ndigs,
-                                ndecimal);
-          exp = _dtoa.exp;
-
-          sign = vsprintf_float_sign(flags, &_dtoa);
-
-          if (_dtoa.flags & (DTOA_NAN | DTOA_INF))
-            {
-              total_len += vsprintf_put_naninf(stream, flags, _dtoa.flags,
-                                               sign, &width);
-
-              goto tail;
-            }
-
-          vsprintf_adjust_float_general(&flags, &prec, &ndigs, exp, &_dtoa);
-
-          /* Conversion result length, width := free space length */
-
-          flen = vsprintf_float_length(flags, sign, exp, prec);
-
-          if (flen > INT_MAX)
-            {
-              total_len = INT_MAX + 1u;
-              goto ret;
-            }
-
-          total_len += vsprintf_put_float_prefix(stream, flags, sign,
-                                                 &width, flen);
-
-          if ((flags & FL_FLTFIX) != 0)
-            {
-              /* 'f' format */
-
-              total_len += vsprintf_put_float_fixed(stream, flags, &_dtoa,
-                                                    exp, ndigs, prec);
-            }
-          else
-            {
-              /* 'e(E)' format
-               */
-
-              total_len += vsprintf_put_float_exp(stream, flags, &_dtoa,
-                                                  exp, ndigs, prec, buf);
-            }
-
+          total_len += vsprintf_put_float(stream, flags, c, &width, prec,
+                                          &_dtoa, buf, value);
           goto tail;
         }
 
