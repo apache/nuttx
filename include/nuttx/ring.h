@@ -41,7 +41,7 @@
  *
  *   Init takes the blob and its total size, and derives the geometry.  The
  *   multi-core calls also take a rewind count, replaying that many
- *   already-consumed elements across a warm restart, 0 to disable:
+ *   already-consumed bytes across a warm restart, 0 to disable:
  *     ring_mpmc_init(&g_ring, g_blob, sizeof(g_blob), 0);  // SMP/BMP, CAS
  *     ring_mpsc_init(&g_ring, g_blob, sizeof(g_blob), 0);  // alias of mpmc
  *     ring_spmc_init(&g_ring, g_blob, sizeof(g_blob), 0);  // alias of mpmc
@@ -56,9 +56,12 @@
  *
  * 2. Mode Selection:
  *
+ *   The ring is a byte queue: every count, return value and length below is
+ *   in bytes, whatever type items points to.
+ *
  *   SPSC - Single Producer, Single Consumer (volatile + barrier):
- *     ring_spsc_enqueue(&g_ring, &val, 1);
- *     ring_spsc_dequeue(&g_ring, &out, 1);
+ *     ring_spsc_enqueue(&g_ring, buf, len);
+ *     ring_spsc_dequeue(&g_ring, buf, sizeof(buf));
  *
  *   Enqueue takes as much as fits and reports how much that was.  When the
  *   payload is indivisible - a framed record whose reader splits on a length
@@ -84,16 +87,16 @@
  *   where a rival may claim more right after the reservation lands.
  *
  *   MPSC - Multiple Producers, Single Consumer:
- *     ring_mpsc_enqueue(&g_ring, &val, 1);
- *     ring_mpsc_dequeue(&g_ring, &out, 1);
+ *     ring_mpsc_enqueue(&g_ring, buf, len);
+ *     ring_mpsc_dequeue(&g_ring, buf, sizeof(buf));
  *
  *   SPMC - Single Producer, Multiple Consumers:
- *     ring_spmc_enqueue(&g_ring, &val, 1);
- *     ring_spmc_dequeue(&g_ring, &out, 1);
+ *     ring_spmc_enqueue(&g_ring, buf, len);
+ *     ring_spmc_dequeue(&g_ring, buf, sizeof(buf));
  *
  *   MPMC - Multiple Producers, Multiple Consumers:
- *     ring_mpmc_enqueue(&g_ring, &val, 1);
- *     ring_mpmc_dequeue(&g_ring, &out, 1);
+ *     ring_mpmc_enqueue(&g_ring, buf, len);
+ *     ring_mpmc_dequeue(&g_ring, buf, sizeof(buf));
  *
  * 3. Skip (advance consumer index without reading data):
  *
@@ -111,8 +114,8 @@
  *
  * 4. Overwrite Mode (SPMC/MPMC only, discards oldest on full):
  *
- *     ring_spmc_overwrite(&g_ring, &val, 1);
- *     ring_mpmc_overwrite(&g_ring, &val, 1);
+ *     ring_spmc_overwrite(&g_ring, buf, len);
+ *     ring_mpmc_overwrite(&g_ring, buf, len);
  *     // Consumer MUST use MC dequeue (ring_spmc/mpmc_dequeue)
  *
  * 5. Zero-copy enqueue/dequeue (start/finish pattern):
@@ -120,42 +123,39 @@
  *     struct ring_buf_s buf;
  *
  *     // Enqueue (all modes: spsc/mpsc/spmc/mpmc):
- *     ring_spsc_enqueue_start(&g_ring, count, elem_size, &buf);
- *     memcpy(buf.ptr1, src, buf.len1 * elem_size);
+ *     ring_spsc_enqueue_start(&g_ring, count, &buf);
+ *     memcpy(buf.ptr1, src, buf.len1);
  *     if (buf.ptr2)
- *       memcpy(buf.ptr2, src + buf.len1 * elem_size,
- *              buf.len2 * elem_size);
+ *       memcpy(buf.ptr2, src + buf.len1, buf.len2);
  *     ring_spsc_enqueue_finish(&g_ring, &buf);
  *
- *     ring_spsc_enqueue_start_bulk(&g_ring, count, elem_size, NULL, &buf);
+ *     ring_spsc_enqueue_start_bulk(&g_ring, count, NULL, &buf);
  *     if (buf.cnt != 0)
  *       { ... fill and finish as above ... }
  *
  *     // Dequeue (all modes):
- *     ring_spsc_dequeue_start(&g_ring, count, elem_size, &buf);
+ *     ring_spsc_dequeue_start(&g_ring, count, &buf);
  *     // Read from buf.ptr1 (len1) and buf.ptr2 (len2)
  *     ring_spsc_dequeue_finish(&g_ring, &buf);
  *
- *     ring_spsc_dequeue_start_bulk(&g_ring, count, elem_size, NULL, &buf);
+ *     ring_spsc_dequeue_start_bulk(&g_ring, count, NULL, &buf);
  *     if (buf.cnt != 0)
  *       { ... read and finish as above ... }
  *
  * 6. Zero-copy overwrite (start/finish pattern):
  *
  *     struct ring_buf_s buf;
- *     ring_spmc_overwrite_start(&g_ring, count,
- *                               elem_size, &buf);
- *     memcpy(buf.ptr1, src, buf.len1 * elem_size);
+ *     ring_spmc_overwrite_start(&g_ring, count, &buf);
+ *     memcpy(buf.ptr1, src, buf.len1);
  *     if (buf.ptr2)
- *       memcpy(buf.ptr2, src + buf.len1 * elem_size,
- *              buf.len2 * elem_size);
+ *       memcpy(buf.ptr2, src + buf.len1, buf.len2);
  *     ring_spmc_overwrite_finish(&g_ring, &buf);
  *
  * 7. Query:
  *
- *     ring_count(&g_ring);     // Elements currently in ring
- *     ring_capacity(&g_ring);  // Max elements
- *     ring_space(&g_ring);     // Free slots
+ *     ring_count(&g_ring);     // Bytes currently in ring
+ *     ring_capacity(&g_ring);  // Max bytes
+ *     ring_space(&g_ring);     // Free bytes
  *     ring_is_ready(&g_ring);  // true if initialized
  */
 
@@ -258,58 +258,58 @@
 
 #define ring_spsc_enqueue(r, items, count) \
   (ring_is_ready(r) ? \
-   ring_sp_enqueue(r, items, count, sizeof(*(items))) : 0)
+   ring_sp_enqueue(r, items, count) : 0)
 
 #define ring_spsc_enqueue_bulk(r, items, count, space) \
   (ring_is_ready(r) ? \
-   ring_sp_enqueue_bulk(r, items, count, sizeof(*(items)), space) : 0)
+   ring_sp_enqueue_bulk(r, items, count, space) : 0)
 
 #define ring_spsc_dequeue(r, items, count) \
   (ring_is_ready(r) ? \
-   ring_sc_dequeue(r, items, count, sizeof(*(items))) : 0)
+   ring_sc_dequeue(r, items, count) : 0)
 
 #define ring_spsc_dequeue_bulk(r, items, count, avail) \
   (ring_is_ready(r) ? \
-   ring_sc_dequeue_bulk(r, items, count, sizeof(*(items)), avail) : 0)
+   ring_sc_dequeue_bulk(r, items, count, avail) : 0)
 
 #define ring_spsc_skip(r, count) \
   (ring_is_ready(r) ? ring_sc_skip(r, count) : 0)
 
 #define ring_mpmc_enqueue(r, items, count) \
-  ring_mp_enqueue(r, items, count, sizeof(*(items)))
+  ring_mp_enqueue(r, items, count)
 
 #define ring_mpmc_enqueue_bulk(r, items, count, space) \
-  ring_mp_enqueue_bulk(r, items, count, sizeof(*(items)), space)
+  ring_mp_enqueue_bulk(r, items, count, space)
 
 #define ring_mpmc_dequeue(r, items, count) \
-  ring_mc_dequeue(r, items, count, sizeof(*(items)))
+  ring_mc_dequeue(r, items, count)
 
 #define ring_mpmc_dequeue_bulk(r, items, count, avail) \
-  ring_mc_dequeue_bulk(r, items, count, sizeof(*(items)), avail)
+  ring_mc_dequeue_bulk(r, items, count, avail)
 
 #define ring_spmc_enqueue(r, items, count) \
-  ring_sp_enqueue(r, items, count, sizeof(*(items)))
+  ring_sp_enqueue(r, items, count)
 
 #define ring_spmc_enqueue_bulk(r, items, count, space) \
-  ring_sp_enqueue_bulk(r, items, count, sizeof(*(items)), space)
+  ring_sp_enqueue_bulk(r, items, count, space)
 
 #define ring_spmc_dequeue(r, items, count) \
-  ring_mc_dequeue(r, items, count, sizeof(*(items)))
+  ring_mc_dequeue(r, items, count)
 
 #define ring_spmc_dequeue_bulk(r, items, count, avail) \
-  ring_mc_dequeue_bulk(r, items, count, sizeof(*(items)), avail)
+  ring_mc_dequeue_bulk(r, items, count, avail)
 
 #define ring_mpsc_enqueue(r, items, count) \
-  ring_mp_enqueue(r, items, count, sizeof(*(items)))
+  ring_mp_enqueue(r, items, count)
 
 #define ring_mpsc_enqueue_bulk(r, items, count, space) \
-  ring_mp_enqueue_bulk(r, items, count, sizeof(*(items)), space)
+  ring_mp_enqueue_bulk(r, items, count, space)
 
 #define ring_mpsc_dequeue(r, items, count) \
-  ring_sc_dequeue(r, items, count, sizeof(*(items)))
+  ring_sc_dequeue(r, items, count)
 
 #define ring_mpsc_dequeue_bulk(r, items, count, avail) \
-  ring_sc_dequeue_bulk(r, items, count, sizeof(*(items)), avail)
+  ring_sc_dequeue_bulk(r, items, count, avail)
 
 #define ring_mpmc_skip(r, count) ring_mc_skip(r, count)
 #define ring_spmc_skip(r, count) ring_mc_skip(r, count)
@@ -331,96 +331,96 @@
  */
 
 #define ring_spmc_overwrite(r, items, count) \
-  ring_sp_overwrite(r, items, count, sizeof(*(items)))
+  ring_sp_overwrite(r, items, count)
 
 #define ring_mpmc_overwrite(r, items, count) \
-  ring_mp_overwrite(r, items, count, sizeof(*(items)))
+  ring_mp_overwrite(r, items, count)
 
-#define ring_spmc_overwrite_start(r, count, elem_size, b) \
-  ring_sp_overwrite_start(r, count, elem_size, b)
+#define ring_spmc_overwrite_start(r, count, b) \
+  ring_sp_overwrite_start(r, count, b)
 
 #define ring_spmc_overwrite_finish(r, b) ring_sp_finish(r, b)
 
-#define ring_mpmc_overwrite_start(r, count, elem_size, b) \
-  ring_mp_overwrite_start(r, count, elem_size, b)
+#define ring_mpmc_overwrite_start(r, count, b) \
+  ring_mp_overwrite_start(r, count, b)
 
 #define ring_mpmc_overwrite_finish(r, b) ring_mp_finish(r, b)
 
-#define ring_spsc_enqueue_start(r, count, elem_size, b) \
-  ring_sp_start(r, count, elem_size, false, NULL, b)
+#define ring_spsc_enqueue_start(r, count, b) \
+  ring_sp_start(r, count, false, NULL, b)
 
-#define ring_spsc_enqueue_start_bulk(r, count, elem_size, space, b) \
-  ring_sp_start(r, count, elem_size, true, space, b)
+#define ring_spsc_enqueue_start_bulk(r, count, space, b) \
+  ring_sp_start(r, count, true, space, b)
 
 #define ring_spsc_enqueue_finish(r, b) ring_sp_finish(r, b)
 
-#define ring_spsc_dequeue_start(r, count, elem_size, b) \
-  ring_sc_start(r, count, elem_size, false, NULL, b)
+#define ring_spsc_dequeue_start(r, count, b) \
+  ring_sc_start(r, count, false, NULL, b)
 
-#define ring_spsc_dequeue_start_bulk(r, count, elem_size, avail, b) \
-  ring_sc_start(r, count, elem_size, true, avail, b)
+#define ring_spsc_dequeue_start_bulk(r, count, avail, b) \
+  ring_sc_start(r, count, true, avail, b)
 
 #define ring_spsc_dequeue_finish(r, b) ring_sc_finish(r, b)
 
-#define ring_mpmc_enqueue_start(r, count, elem_size, b) \
-  ring_mp_start(r, count, elem_size, false, NULL, b)
+#define ring_mpmc_enqueue_start(r, count, b) \
+  ring_mp_start(r, count, false, NULL, b)
 
-#define ring_mpmc_enqueue_start_bulk(r, count, elem_size, space, b) \
-  ring_mp_start(r, count, elem_size, true, space, b)
+#define ring_mpmc_enqueue_start_bulk(r, count, space, b) \
+  ring_mp_start(r, count, true, space, b)
 
 #define ring_mpmc_enqueue_finish(r, b) ring_mp_finish(r, b)
 
-#define ring_mpmc_dequeue_start(r, count, elem_size, b) \
-  ring_mc_start(r, count, elem_size, false, NULL, b)
+#define ring_mpmc_dequeue_start(r, count, b) \
+  ring_mc_start(r, count, false, NULL, b)
 
-#define ring_mpmc_dequeue_start_bulk(r, count, elem_size, avail, b) \
-  ring_mc_start(r, count, elem_size, true, avail, b)
+#define ring_mpmc_dequeue_start_bulk(r, count, avail, b) \
+  ring_mc_start(r, count, true, avail, b)
 
 #define ring_mpmc_dequeue_finish(r, b) ring_mc_finish(r, b)
 
-#define ring_spmc_enqueue_start(r, count, elem_size, b) \
-  ring_sp_start(r, count, elem_size, false, NULL, b)
+#define ring_spmc_enqueue_start(r, count, b) \
+  ring_sp_start(r, count, false, NULL, b)
 
-#define ring_spmc_enqueue_start_bulk(r, count, elem_size, space, b) \
-  ring_sp_start(r, count, elem_size, true, space, b)
+#define ring_spmc_enqueue_start_bulk(r, count, space, b) \
+  ring_sp_start(r, count, true, space, b)
 
 #define ring_spmc_enqueue_finish(r, b) ring_sp_finish(r, b)
 
-#define ring_spmc_dequeue_start(r, count, elem_size, b) \
-  ring_mc_start(r, count, elem_size, false, NULL, b)
+#define ring_spmc_dequeue_start(r, count, b) \
+  ring_mc_start(r, count, false, NULL, b)
 
-#define ring_spmc_dequeue_start_bulk(r, count, elem_size, avail, b) \
-  ring_mc_start(r, count, elem_size, true, avail, b)
+#define ring_spmc_dequeue_start_bulk(r, count, avail, b) \
+  ring_mc_start(r, count, true, avail, b)
 
 #define ring_spmc_dequeue_finish(r, b) ring_mc_finish(r, b)
 
-#define ring_mpsc_enqueue_start(r, count, elem_size, b) \
-  ring_mp_start(r, count, elem_size, false, NULL, b)
+#define ring_mpsc_enqueue_start(r, count, b) \
+  ring_mp_start(r, count, false, NULL, b)
 
-#define ring_mpsc_enqueue_start_bulk(r, count, elem_size, space, b) \
-  ring_mp_start(r, count, elem_size, true, space, b)
+#define ring_mpsc_enqueue_start_bulk(r, count, space, b) \
+  ring_mp_start(r, count, true, space, b)
 
 #define ring_mpsc_enqueue_finish(r, b) ring_mp_finish(r, b)
 
-#define ring_mpsc_dequeue_start(r, count, elem_size, b) \
-  ring_sc_start(r, count, elem_size, false, NULL, b)
+#define ring_mpsc_dequeue_start(r, count, b) \
+  ring_sc_start(r, count, false, NULL, b)
 
-#define ring_mpsc_dequeue_start_bulk(r, count, elem_size, avail, b) \
-  ring_sc_start(r, count, elem_size, true, avail, b)
+#define ring_mpsc_dequeue_start_bulk(r, count, avail, b) \
+  ring_sc_start(r, count, true, avail, b)
 
 #define ring_mpsc_dequeue_finish(r, b) ring_sc_finish(r, b)
 
 #define ring_mpsc_peek(r, items, count, index) \
-  ring_sc_peek(r, items, count, sizeof(*(items)), index)
+  ring_sc_peek(r, items, count, index)
 
 #define ring_spsc_peek(r, items, count, index) \
-  ring_sc_peek(r, items, count, sizeof(*(items)), index)
+  ring_sc_peek(r, items, count, index)
 
 #define ring_mpmc_peek(r, items, count, index) \
-  ring_mc_peek(r, items, count, sizeof(*(items)), index)
+  ring_mc_peek(r, items, count, index)
 
 #define ring_spmc_peek(r, items, count, index) \
-  ring_mc_peek(r, items, count, sizeof(*(items)), index)
+  ring_mc_peek(r, items, count, index)
 
 /* Peek at a fixed offset from the oldest element (cons_tail), without
  * advancing.  Unlike the external-index peek above, the read position is
@@ -429,16 +429,16 @@
  */
 
 #define ring_mpsc_peek_at(r, items, count, offset) \
-  ring_sc_peek_at(r, items, count, sizeof(*(items)), offset)
+  ring_sc_peek_at(r, items, count, offset)
 
 #define ring_spsc_peek_at(r, items, count, offset) \
-  ring_sc_peek_at(r, items, count, sizeof(*(items)), offset)
+  ring_sc_peek_at(r, items, count, offset)
 
 #define ring_mpmc_peek_at(r, items, count, offset) \
-  ring_mc_peek_at(r, items, count, sizeof(*(items)), offset)
+  ring_mc_peek_at(r, items, count, offset)
 
 #define ring_spmc_peek_at(r, items, count, offset) \
-  ring_mc_peek_at(r, items, count, sizeof(*(items)), offset)
+  ring_mc_peek_at(r, items, count, offset)
 
 /****************************************************************************
  * Public Types
@@ -513,11 +513,11 @@ struct ring_s
 struct ring_buf_s
 {
   FAR void    *ptr1;              /* First contiguous segment */
-  uint32_t     len1;              /* Element count in first segment */
+  uint32_t     len1;              /* Byte count in first segment */
   FAR void    *ptr2;              /* Second segment (wrap), NULL if none */
-  uint32_t     len2;              /* Element count in second segment */
+  uint32_t     len2;              /* Byte count in second segment */
   uint32_t     idx;               /* Internal: start index */
-  uint32_t     cnt;               /* Internal: total slots reserved */
+  uint32_t     cnt;               /* Total bytes reserved */
 };
 
 /****************************************************************************
@@ -673,7 +673,7 @@ static inline_function uint32_t ring_reset(FAR struct ring_s *r)
  *
  *   buf    - the blob to operate on
  *   buflen - total blob size in bytes (header + data)
- *   rewind - elements to replay on a warm restart, 0 for none
+ *   rewind - bytes to replay on a warm restart, 0 for none
  *
  * Returned Value:
  *   true if this caller ran the init body (the first one this boot), false
@@ -761,19 +761,19 @@ ring_spsc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen,
  *   would make every later CAS wait for a producer/consumer that no longer
  *   exists.
  *
- *   rewind additionally replays elements the previous run had already
- *   consumed, by pulling cons_tail back that many elements.  It is a count
- *   of elements, not bytes, and it is clamped to the free space
- *   (capacity - count): the live data occupies count slots and the whole
- *   remaining area is exactly the window of already-consumed-but-still-
- *   present data.  It only makes sense for a blob that survives reboot (a
- *   located .noinit section or shared SRAM); pass 0 otherwise.  A cold
- *   start has nothing to replay, and a blob with corrupted indices
- *   (count > capacity) is reset - neither path applies rewind.
+ *   rewind additionally replays bytes the previous run had already
+ *   consumed, by pulling cons_tail back that many bytes.  It is clamped to
+ *   the free space (capacity - count): the live data occupies count bytes
+ *   and the whole remaining area is exactly the window of
+ *   already-consumed-but-still-present data.  It only makes sense for a
+ *   blob that survives reboot (a located .noinit section or shared SRAM);
+ *   pass 0 otherwise.  A cold start has nothing to replay, and a blob with
+ *   corrupted indices (count > capacity) is reset - neither path applies
+ *   rewind.
  *
  *   buf    - the blob to operate on
  *   buflen - total blob size in bytes (header + data)
- *   rewind - elements of already-consumed data to replay on a warm restart,
+ *   rewind - bytes of already-consumed data to replay on a warm restart,
  *            0 to disable
  *
  * Returned Value:
@@ -941,7 +941,7 @@ static inline_function void ring_free(FAR struct ring_s *r)
 
 static inline_function void
 ring_buf_init(FAR struct ring_buf_s *buf, FAR struct ring_s *r,
-              uint32_t idx, uint32_t count, size_t elem_size)
+              uint32_t idx, uint32_t count)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t first;
@@ -965,14 +965,14 @@ ring_buf_init(FAR struct ring_buf_s *buf, FAR struct ring_s *r,
 
   if (first >= count)
     {
-      buf->ptr1 = blob->data + idx * elem_size;
+      buf->ptr1 = blob->data + idx;
       buf->len1 = count;
       buf->ptr2 = NULL;
       buf->len2 = 0;
     }
   else
     {
-      buf->ptr1 = blob->data + idx * elem_size;
+      buf->ptr1 = blob->data + idx;
       buf->len1 = first;
       buf->ptr2 = blob->data;
       buf->len2 = count - first;
@@ -988,39 +988,14 @@ ring_buf_init(FAR struct ring_buf_s *buf, FAR struct ring_s *r,
  ****************************************************************************/
 
 static inline_function void
-ring_copy_from(FAR struct ring_buf_s *buf, FAR const void *items,
-               size_t elem_size)
+ring_copy_from(FAR struct ring_buf_s *buf, FAR const void *items)
 {
-  if (buf->cnt == 1)
+  if (buf->cnt != 0)
     {
-      if (elem_size == sizeof(uint8_t))
-        {
-          *(FAR uint8_t *)buf->ptr1 = *(FAR const uint8_t *)items;
-        }
-      else if (elem_size == sizeof(uint16_t))
-        {
-          *(FAR uint16_t *)buf->ptr1 = *(FAR const uint16_t *)items;
-        }
-      else if (elem_size == sizeof(uint32_t))
-        {
-          *(FAR uint32_t *)buf->ptr1 = *(FAR const uint32_t *)items;
-        }
-      else if (elem_size == sizeof(uint64_t))
-        {
-          *(FAR uint64_t *)buf->ptr1 = *(FAR const uint64_t *)items;
-        }
-      else
-        {
-          memcpy(buf->ptr1, items, elem_size);
-        }
-    }
-  else if (buf->cnt != 0)
-    {
-      memcpy(buf->ptr1, items, buf->len1 * elem_size);
+      memcpy(buf->ptr1, items, buf->len1);
       if (buf->len2 != 0)
         {
-          memcpy(buf->ptr2, (FAR const char *)items + buf->len1 * elem_size,
-                 buf->len2 * elem_size);
+          memcpy(buf->ptr2, (FAR const char *)items + buf->len1, buf->len2);
         }
     }
 }
@@ -1034,38 +1009,14 @@ ring_copy_from(FAR struct ring_buf_s *buf, FAR const void *items,
  ****************************************************************************/
 
 static inline_function void
-ring_copy_to(FAR struct ring_buf_s *buf, FAR void *items, size_t elem_size)
+ring_copy_to(FAR struct ring_buf_s *buf, FAR void *items)
 {
-  if (buf->cnt == 1)
+  if (buf->cnt != 0)
     {
-      if (elem_size == sizeof(uint8_t))
-        {
-          *(FAR uint8_t *)items = *(FAR const uint8_t *)buf->ptr1;
-        }
-      else if (elem_size == sizeof(uint16_t))
-        {
-          *(FAR uint16_t *)items = *(FAR const uint16_t *)buf->ptr1;
-        }
-      else if (elem_size == sizeof(uint32_t))
-        {
-          *(FAR uint32_t *)items = *(FAR const uint32_t *)buf->ptr1;
-        }
-      else if (elem_size == sizeof(uint64_t))
-        {
-          *(FAR uint64_t *)items = *(FAR const uint64_t *)buf->ptr1;
-        }
-      else
-        {
-          memcpy(items, buf->ptr1, elem_size);
-        }
-    }
-  else if (buf->cnt != 0)
-    {
-      memcpy(items, buf->ptr1, buf->len1 * elem_size);
+      memcpy(items, buf->ptr1, buf->len1);
       if (buf->len2 != 0)
         {
-          memcpy((FAR char *)items + buf->len1 * elem_size,
-                 buf->ptr2, buf->len2 * elem_size);
+          memcpy((FAR char *)items + buf->len1, buf->ptr2, buf->len2);
         }
     }
 }
@@ -1079,8 +1030,8 @@ ring_copy_to(FAR struct ring_buf_s *buf, FAR void *items, size_t elem_size)
  ****************************************************************************/
 
 static inline_function void
-ring_sp_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
-              bool bulk, FAR uint32_t *space, FAR struct ring_buf_s *buf)
+ring_sp_start(FAR struct ring_s *r, uint32_t count, bool bulk,
+              FAR uint32_t *space, FAR struct ring_buf_s *buf)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t prod_index = RTS_IDX(blob->prod_tail);
@@ -1104,7 +1055,7 @@ ring_sp_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
       *space = free_space - n;
     }
 
-  ring_buf_init(buf, r, prod_index, n, elem_size);
+  ring_buf_init(buf, r, prod_index, n);
 }
 
 /****************************************************************************
@@ -1117,8 +1068,8 @@ ring_sp_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
  ****************************************************************************/
 
 static inline_function void
-ring_mp_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
-              bool bulk, FAR uint32_t *space, FAR struct ring_buf_s *buf)
+ring_mp_start(FAR struct ring_s *r, uint32_t count, bool bulk,
+              FAR uint32_t *space, FAR struct ring_buf_s *buf)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t old_head;
@@ -1157,7 +1108,7 @@ ring_mp_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
       *space = free_space - n;
     }
 
-  ring_buf_init(buf, r, RTS_IDX(old_head), n, elem_size);
+  ring_buf_init(buf, r, RTS_IDX(old_head), n);
 }
 
 /****************************************************************************
@@ -1170,8 +1121,8 @@ ring_mp_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
  ****************************************************************************/
 
 static inline_function void
-ring_sc_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
-              bool bulk, FAR uint32_t *avail, FAR struct ring_buf_s *buf)
+ring_sc_start(FAR struct ring_s *r, uint32_t count, bool bulk,
+              FAR uint32_t *avail, FAR struct ring_buf_s *buf)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t cons_index = RTS_IDX(blob->cons_tail);
@@ -1204,7 +1155,7 @@ ring_sc_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
       *avail = available - n;
     }
 
-  ring_buf_init(buf, r, cons_index, n, elem_size);
+  ring_buf_init(buf, r, cons_index, n);
 }
 
 /****************************************************************************
@@ -1217,8 +1168,8 @@ ring_sc_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
  ****************************************************************************/
 
 static inline_function void
-ring_mc_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
-              bool bulk, FAR uint32_t *avail, FAR struct ring_buf_s *buf)
+ring_mc_start(FAR struct ring_s *r, uint32_t count, bool bulk,
+              FAR uint32_t *avail, FAR struct ring_buf_s *buf)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t old_head;
@@ -1263,7 +1214,7 @@ ring_mc_start(FAR struct ring_s *r, uint32_t count, size_t elem_size,
       *avail = available - n;
     }
 
-  ring_buf_init(buf, r, RTS_IDX(old_head), n, elem_size);
+  ring_buf_init(buf, r, RTS_IDX(old_head), n);
 }
 
 /****************************************************************************
@@ -1365,7 +1316,7 @@ ring_sc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 
 static inline_function uint32_t
 ring_sc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
-             size_t elem_size, FAR uint32_t *index)
+             FAR uint32_t *index)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t cons_index;
@@ -1388,8 +1339,8 @@ ring_sc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
     {
       struct ring_buf_s buf;
 
-      ring_buf_init(&buf, r, cons_index, n, elem_size);
-      ring_copy_to(&buf, items, elem_size);
+      ring_buf_init(&buf, r, cons_index, n);
+      ring_copy_to(&buf, items);
       cons_index = ring_advance(r, cons_index, n);
     }
 
@@ -1416,7 +1367,7 @@ ring_sc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
 
 static inline_function uint32_t
 ring_mc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
-             size_t elem_size, FAR uint32_t *index)
+             FAR uint32_t *index)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t cons_index;
@@ -1443,8 +1394,8 @@ ring_mc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
           break;
         }
 
-      ring_buf_init(&buf, r, cons_index, n, elem_size);
-      ring_copy_to(&buf, items, elem_size);
+      ring_buf_init(&buf, r, cons_index, n);
+      ring_copy_to(&buf, items);
 
       /* Verify data wasn't overwritten during copy:
        * If cons_tail advanced past our read position, retry.
@@ -1481,7 +1432,7 @@ ring_mc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
 
 static inline_function uint32_t
 ring_sc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
-                size_t elem_size, uint32_t offset)
+                uint32_t offset)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t index;
@@ -1492,7 +1443,7 @@ ring_sc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
     }
 
   index = ring_advance(r, offset, RTS_IDX(blob->cons_tail));
-  return ring_sc_peek(r, items, count, elem_size, &index);
+  return ring_sc_peek(r, items, count, &index);
 }
 
 /****************************************************************************
@@ -1509,7 +1460,7 @@ ring_sc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
 
 static inline_function uint32_t
 ring_mc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
-                size_t elem_size, uint32_t offset)
+                uint32_t offset)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t index;
@@ -1521,7 +1472,7 @@ ring_mc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
 
   index = ring_advance(r, offset,
                        RTS_IDX(atomic_read_acquire(&blob->cons_tail)));
-  return ring_mc_peek(r, items, count, elem_size, &index);
+  return ring_mc_peek(r, items, count, &index);
 }
 
 /****************************************************************************
@@ -1574,12 +1525,12 @@ ring_mc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 
 static inline_function uint32_t
 ring_sp_enqueue(FAR struct ring_s *r, FAR const void *items,
-                uint32_t count, size_t elem_size)
+                uint32_t count)
 {
   struct ring_buf_s buf;
 
-  ring_sp_start(r, count, elem_size, false, NULL, &buf);
-  ring_copy_from(&buf, items, elem_size);
+  ring_sp_start(r, count, false, NULL, &buf);
+  ring_copy_from(&buf, items);
   ring_sp_finish(r, &buf);
 
   return buf.cnt;
@@ -1599,13 +1550,12 @@ ring_sp_enqueue(FAR struct ring_s *r, FAR const void *items,
 
 static inline_function uint32_t
 ring_sp_enqueue_bulk(FAR struct ring_s *r, FAR const void *items,
-                     uint32_t count, size_t elem_size,
-                     FAR uint32_t *space)
+                     uint32_t count, FAR uint32_t *space)
 {
   struct ring_buf_s buf;
 
-  ring_sp_start(r, count, elem_size, true, space, &buf);
-  ring_copy_from(&buf, items, elem_size);
+  ring_sp_start(r, count, true, space, &buf);
+  ring_copy_from(&buf, items);
   ring_sp_finish(r, &buf);
 
   return buf.cnt;
@@ -1627,12 +1577,12 @@ ring_sp_enqueue_bulk(FAR struct ring_s *r, FAR const void *items,
 
 static inline_function uint32_t
 ring_mp_enqueue(FAR struct ring_s *r, FAR const void *items,
-                uint32_t count, size_t elem_size)
+                uint32_t count)
 {
   struct ring_buf_s buf;
 
-  ring_mp_start(r, count, elem_size, false, NULL, &buf);
-  ring_copy_from(&buf, items, elem_size);
+  ring_mp_start(r, count, false, NULL, &buf);
+  ring_copy_from(&buf, items);
   ring_mp_finish(r, &buf);
 
   return buf.cnt;
@@ -1652,13 +1602,12 @@ ring_mp_enqueue(FAR struct ring_s *r, FAR const void *items,
 
 static inline_function uint32_t
 ring_mp_enqueue_bulk(FAR struct ring_s *r, FAR const void *items,
-                     uint32_t count, size_t elem_size,
-                     FAR uint32_t *space)
+                     uint32_t count, FAR uint32_t *space)
 {
   struct ring_buf_s buf;
 
-  ring_mp_start(r, count, elem_size, true, space, &buf);
-  ring_copy_from(&buf, items, elem_size);
+  ring_mp_start(r, count, true, space, &buf);
+  ring_copy_from(&buf, items);
   ring_mp_finish(r, &buf);
 
   return buf.cnt;
@@ -1674,12 +1623,12 @@ ring_mp_enqueue_bulk(FAR struct ring_s *r, FAR const void *items,
 
 static inline_function uint32_t
 ring_sc_dequeue(FAR struct ring_s *r, FAR void *items,
-                uint32_t count, size_t elem_size)
+                uint32_t count)
 {
   struct ring_buf_s buf;
 
-  ring_sc_start(r, count, elem_size, false, NULL, &buf);
-  ring_copy_to(&buf, items, elem_size);
+  ring_sc_start(r, count, false, NULL, &buf);
+  ring_copy_to(&buf, items);
   ring_sc_finish(r, &buf);
 
   return buf.cnt;
@@ -1700,13 +1649,12 @@ ring_sc_dequeue(FAR struct ring_s *r, FAR void *items,
 
 static inline_function uint32_t
 ring_sc_dequeue_bulk(FAR struct ring_s *r, FAR void *items,
-                     uint32_t count, size_t elem_size,
-                     FAR uint32_t *avail)
+                     uint32_t count, FAR uint32_t *avail)
 {
   struct ring_buf_s buf;
 
-  ring_sc_start(r, count, elem_size, true, avail, &buf);
-  ring_copy_to(&buf, items, elem_size);
+  ring_sc_start(r, count, true, avail, &buf);
+  ring_copy_to(&buf, items);
   ring_sc_finish(r, &buf);
 
   return buf.cnt;
@@ -1725,12 +1673,12 @@ ring_sc_dequeue_bulk(FAR struct ring_s *r, FAR void *items,
 
 static inline_function uint32_t
 ring_mc_dequeue(FAR struct ring_s *r, FAR void *items,
-                uint32_t count, size_t elem_size)
+                uint32_t count)
 {
   struct ring_buf_s buf;
 
-  ring_mc_start(r, count, elem_size, false, NULL, &buf);
-  ring_copy_to(&buf, items, elem_size);
+  ring_mc_start(r, count, false, NULL, &buf);
+  ring_copy_to(&buf, items);
   ring_mc_finish(r, &buf);
 
   return buf.cnt;
@@ -1752,13 +1700,12 @@ ring_mc_dequeue(FAR struct ring_s *r, FAR void *items,
 
 static inline_function uint32_t
 ring_mc_dequeue_bulk(FAR struct ring_s *r, FAR void *items,
-                     uint32_t count, size_t elem_size,
-                     FAR uint32_t *avail)
+                     uint32_t count, FAR uint32_t *avail)
 {
   struct ring_buf_s buf;
 
-  ring_mc_start(r, count, elem_size, true, avail, &buf);
-  ring_copy_to(&buf, items, elem_size);
+  ring_mc_start(r, count, true, avail, &buf);
+  ring_copy_to(&buf, items);
   ring_mc_finish(r, &buf);
 
   return buf.cnt;
@@ -1778,7 +1725,7 @@ ring_sc_skip(FAR struct ring_s *r, uint32_t count)
 {
   struct ring_buf_s buf;
 
-  ring_sc_start(r, count, 0, false, NULL, &buf);
+  ring_sc_start(r, count, false, NULL, &buf);
   ring_sc_finish(r, &buf);
 
   return buf.cnt;
@@ -1829,7 +1776,7 @@ ring_mc_skip(FAR struct ring_s *r, uint32_t count)
 {
   struct ring_buf_s buf;
 
-  ring_mc_start(r, count, 0, false, NULL, &buf);
+  ring_mc_start(r, count, false, NULL, &buf);
   ring_mc_finish(r, &buf);
 
   return buf.cnt;
@@ -1882,7 +1829,7 @@ ring_mc_skipto(FAR struct ring_s *r, uint32_t target)
 
 static inline_function uint32_t
 ring_sp_overwrite_start(FAR struct ring_s *r, uint32_t count,
-                        size_t elem_size, FAR struct ring_buf_s *buf)
+                        FAR struct ring_buf_s *buf)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t prod_idx;
@@ -1917,14 +1864,14 @@ ring_sp_overwrite_start(FAR struct ring_s *r, uint32_t count,
                           ring_advance(r, cons_idx, discard));
       if (atomic_cmpxchg_relaxed(&blob->cons_head, &old_cons, new_cons))
         {
-          ring_buf_init(buf, r, cons_idx, discard, elem_size);
+          ring_buf_init(buf, r, cons_idx, discard);
           ring_mc_finish(r, buf);
           all_discard += discard;
           break;
         }
     }
 
-  ring_buf_init(buf, r, prod_idx, count, elem_size);
+  ring_buf_init(buf, r, prod_idx, count);
   return all_discard;
 }
 
@@ -1940,15 +1887,13 @@ ring_sp_overwrite_start(FAR struct ring_s *r, uint32_t count,
 
 static inline_function uint32_t
 ring_sp_overwrite(FAR struct ring_s *r, FAR const void *items,
-                  uint32_t count, size_t elem_size)
+                  uint32_t count)
 {
   struct ring_buf_s buf;
   uint32_t discard;
 
-  discard = ring_sp_overwrite_start(r, count, elem_size, &buf);
-  ring_copy_from(&buf,
-                 (FAR const char *)items + (count - buf.cnt) * elem_size,
-                 elem_size);
+  discard = ring_sp_overwrite_start(r, count, &buf);
+  ring_copy_from(&buf, (FAR const char *)items + (count - buf.cnt));
   ring_sp_finish(r, &buf);
 
   return discard;
@@ -1970,7 +1915,7 @@ ring_sp_overwrite(FAR struct ring_s *r, FAR const void *items,
 
 static inline_function uint32_t
 ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
-                        size_t elem_size, FAR struct ring_buf_s *buf)
+                        FAR struct ring_buf_s *buf)
 {
   FAR struct ring_blob_s *blob = r->blob;
   uint32_t old_prod;
@@ -1997,7 +1942,7 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
        * deadlocks the RTS tail sync.  Return an empty buf instead.
        */
 
-      ring_buf_init(buf, r, 0, 0, elem_size);
+      ring_buf_init(buf, r, 0, 0);
       return all_discard;
     }
 
@@ -2037,7 +1982,7 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
                * early, so no prod_head reservation is left unmatched.
                */
 
-              ring_buf_init(buf, r, 0, 0, elem_size);
+              ring_buf_init(buf, r, 0, 0);
               return all_discard + count;
             }
 
@@ -2049,7 +1994,7 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
               continue;
             }
 
-          ring_buf_init(buf, r, cons_idx, discard, elem_size);
+          ring_buf_init(buf, r, cons_idx, discard);
           ring_mc_finish(r, buf);
           all_discard += discard;
         }
@@ -2062,7 +2007,7 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
         }
     }
 
-  ring_buf_init(buf, r, prod_idx, count, elem_size);
+  ring_buf_init(buf, r, prod_idx, count);
   return all_discard;
 }
 
@@ -2078,15 +2023,13 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
 
 static inline_function uint32_t
 ring_mp_overwrite(FAR struct ring_s *r, FAR const void *items,
-                  uint32_t count, size_t elem_size)
+                  uint32_t count)
 {
   struct ring_buf_s buf;
   uint32_t discard;
 
-  discard = ring_mp_overwrite_start(r, count, elem_size, &buf);
-  ring_copy_from(&buf,
-                 (FAR const char *)items + (count - buf.cnt) * elem_size,
-                 elem_size);
+  discard = ring_mp_overwrite_start(r, count, &buf);
+  ring_copy_from(&buf, (FAR const char *)items + (count - buf.cnt));
   ring_mp_finish(r, &buf);
 
   return discard;
