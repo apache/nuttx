@@ -158,7 +158,8 @@ ifeq ($(CONFIG_HOST_MACOS),y)
 FLAGS += -D__APPLE__
 endif
 
-CSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.c)
+CSRCS += $(filter-out %/InstrProfilingPlatformOther.c, \
+          $(wildcard compiler-rt/compiler-rt/lib/profile/*.c))
 CPPSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.cpp)
 CSRCS += InstrProfilingPlatform.c
 

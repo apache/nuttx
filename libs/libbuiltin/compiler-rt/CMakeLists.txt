@@ -194,6 +194,7 @@ if(CONFIG_COVERAGE_COMPILER_RT)
   set(RT_PROFILE_SRCS InstrProfilingPlatform.c)
 
   file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/profile/*.c)
+  list(FILTER SRCSTMP EXCLUDE REGEX "InstrProfilingPlatformOther\\.c$")
   list(APPEND RT_PROFILE_SRCS ${SRCSTMP})
 
   file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/profile/*.cpp)
