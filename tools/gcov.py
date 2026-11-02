@@ -947,13 +947,21 @@ def clang_resolve_cov_binary(
     a relocatable .o from all source objects carrying covmap sections.
 
     Resolution order:
+      0. No -s (build_dir is None): use the ELF directly. llvm-cov reads its
+         __llvm_covmap/__llvm_covfun even at VMA 0; it then only reports the
+         functions actually linked into the image. Linker-GC'd dead code is
+         correctly excluded, so the coverage denominator reflects real code.
       1. A pre-built ``coverage_all.o`` reachable via ``-s`` (file or dir).
-         Used as-is -- no build tree required. This is how persisted
-         coverage data is reported after the ``out/`` build dir is deleted.
+         Used as-is -- no build tree required. This includes dead code GC'd
+         from the final image, inflating the denominator; use only when you
+         specifically want every compiled (even unlinked) function counted.
       2. Scan ``build_dir`` for ``.o`` files with covmap sections and link
          them on the fly (result cached via a ``.fingerprint`` sidecar).
-      3. Fall back to the ELF binary directly (usually fails on lld VMA=0).
     """
+    if build_dir is None:
+        log("using the ELF directly for the report (no -s given)")
+        return elf_path
+
     prebuilt = _find_prebuilt_reloc(build_dir)
     if prebuilt is not None:
         log(f"using pre-built relocatable object for report: {prebuilt}")
@@ -1161,13 +1169,17 @@ llvm-cov/llvm-readelf/ld.lld for Clang); make sure the toolchain is on PATH.
     parser.add_argument(
         "-s",
         dest="gcno_dir",
-        required=True,
+        required=False,
+        default=None,
         help="Directory with .gcno files (gcc) or build output containing "
         ".o files for the covmap relocatable workaround (clang). For "
         "clang it may also point directly at a pre-built LLVM coverage object "
         "(nuttx_llvm_covmap.o or coverage_all.o, as produced by the build), "
         "or a directory containing one, to report from persisted coverage "
-        "data without the build tree.",
+        "data without the build tree. Required for gcc. Optional for clang: "
+        "when omitted, coverage is read straight from the ELF (-e), which "
+        "only reports functions actually linked into the image -- linker "
+        "GC'd dead code is correctly excluded.",
     )
     parser.add_argument(
         "-a",
@@ -1222,8 +1234,22 @@ def main() -> None:
     log(f"  toolchain: {elf.toolchain}")
     log(f"  arch:      {elf.arch_name} (e_machine={elf.e_machine})")
 
-    # Resolve gcno_dir / build_dir (always provided via required -s).
-    gcno_dir = os.path.abspath(args.gcno_dir)
+    # Resolve gcno_dir / build_dir. -s is required for gcc (the .gcno tree
+    # cannot be inferred from the ELF). For clang it is optional: when omitted,
+    # coverage is read straight from the ELF. llvm-cov then only sees functions
+    # actually linked into the image; sections garbage-collected by the linker
+    # (dead code never present in the firmware) are correctly excluded, so the
+    # coverage denominator reflects real, executable code.
+    if args.gcno_dir:
+        gcno_dir = os.path.abspath(args.gcno_dir)
+    elif elf.toolchain == "clang":
+        log("  no -s given: reading coverage mapping straight from the ELF")
+        gcno_dir = None
+    else:
+        die(
+            "-s is required for gcc targets (the .gcno tree cannot be "
+            "inferred from the ELF)."
+        )
 
     path_map = PathMap.parse(args.path_map)
 
