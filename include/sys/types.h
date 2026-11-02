@@ -168,10 +168,11 @@ typedef uint16_t     nlink_t;
 typedef int          pid_t;
 
 /* id_t is a general identifier that can be used to contain at least a pid_t,
- * uid_t, or gid_t.
+ * uid_t, or gid_t.  It has the type of uid_t and gid_t, as in glibc and
+ * musl.
  */
 
-typedef int          id_t;
+typedef unsigned int id_t;
 
 /* Unix requires a key of type key_t defined in file sys/types.h for
  * requesting resources such as shared memory segments, message queues and
