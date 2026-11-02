@@ -959,7 +959,7 @@ int fdlist_count(FAR struct fdlist *list);
 
 int fdlist_copy(FAR struct fdlist *plist, FAR struct fdlist *clist,
                 FAR const posix_spawn_file_actions_t *actions,
-                bool cloexec);
+                bool exec);
 
 /****************************************************************************
  * Name: fdlist_get2
