@@ -35,6 +35,8 @@ if(CONFIG_ALLSYMS)
   set(ALLSYMS_INCDIR ${NUTTX_DIR}/include ${NUTTX_BINARY_DIR}/include)
   set_source_files_properties(${ALLSYMS_SOURCE} PROPERTIES INCLUDE_DIRECTORIES
                                                            "${ALLSYMS_INCDIR}")
+  set_source_files_properties(
+    ${ALLSYMS_SOURCE} PROPERTIES COMPILE_OPTIONS -fno-sanitize=kernel-address)
 endif()
 
 if(CONFIG_MM_KASAN_GLOBAL)
@@ -53,6 +55,9 @@ if(CONFIG_MM_KASAN_GLOBAL)
   set_source_files_properties(
     ${KASAN_GLOBAL_SOURCE} PROPERTIES INCLUDE_DIRECTORIES
                                       "${KASAN_GLOBAL_INCDIR}")
+  set_source_files_properties(
+    ${KASAN_GLOBAL_SOURCE} PROPERTIES COMPILE_OPTIONS
+                                      -fno-sanitize=kernel-address)
 endif()
 
 # ~~~
