@@ -1222,7 +1222,7 @@ def run_clang_pipeline(
     cov_binary = clang_resolve_cov_binary(tools, elf_path, gcno_dir, result_dir)
 
     # Export first: the SF: records drive path remap and build-root inference.
-    cov_info = os.path.join(result_dir, "coverage.info")
+    cov_info = os.path.join(result_dir, "gcov.info")
     try:
         clang_run_export_lcov(tools, profdata, cov_binary, cov_info)
     except subprocess.CalledProcessError as e:
