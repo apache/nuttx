@@ -137,7 +137,7 @@ extern void __gcov_info_to_gcda(FAR const struct gcov_info *info,
                                 FAR void (*filename)(FAR const char *,
                                                      FAR void *),
                                 FAR void (*dump)(FAR const void *,
-                                                 unsigned int, FAR void *),
+                                                 size_t, FAR void *),
                                 FAR void *(*allocate)(unsigned int,
                                                       FAR void *),
                                 FAR void *arg);
