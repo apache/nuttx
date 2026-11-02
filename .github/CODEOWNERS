@@ -1830,7 +1830,7 @@ arch/arm/src/common/stm32/stm32_qencoder.c raiden00@railab.me 59230071+hartmanna
 arch/arm/src/common/stm32/stm32_qencoder.h raiden00@railab.me alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
 arch/arm/src/common/stm32/stm32_rcc.h raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com simon@leitwert.ch titus@elbe-informatik.de xiaoxiang@xiaomi.com
 arch/arm/src/common/stm32/stm32_rng_m0_v1.c alin.jerpelea@sony.com juha.niskanen@haltian.com anjiahao@xiaomi.com raiden00pl@gmail.com xiaoxiang@xiaomi.com
-arch/arm/src/common/stm32/stm32_rng_m3m4_v1.c alin.jerpelea@sony.com juha.niskanen@haltian.com anjiahao@xiaomi.com raiden00pl@gmail.com xiaoxiang@xiaomi.com
+arch/arm/src/common/stm32/stm32_rng_v1.c alin.jerpelea@sony.com juha.niskanen@haltian.com anjiahao@xiaomi.com raiden00pl@gmail.com xiaoxiang@xiaomi.com
 arch/arm/src/common/stm32/stm32_rtc.h NeilH20@biomonitors.com alin.jerpelea@sony.com jakob@weite-welt.com 59230071+hartmannathan@users.noreply.github.com raiden00@railab.me
 arch/arm/src/common/stm32/stm32_rtc_m3m4_v1_lowerhalf.c juha.niskanen@haltian.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com anjiahao@xiaomi.com jussi.kivilinna@haltian.com
 arch/arm/src/common/stm32/stm32_rtcc_m3m4_f4.c NeilH20@biomonitors.com juha.niskanen@haltian.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com peter.barada@gmail.com

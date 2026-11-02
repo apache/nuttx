@@ -86,10 +86,6 @@ if(CONFIG_STM32_FMC)
   list(APPEND SRCS stm32_fmc.c)
 endif()
 
-if(CONFIG_STM32_RNG)
-  list(APPEND SRCS stm32_rng.c)
-endif()
-
 if(CONFIG_STM32_RTC_LSECLOCK)
   list(APPEND SRCS stm32_lse.c)
 endif()

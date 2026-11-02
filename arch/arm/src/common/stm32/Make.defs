@@ -87,6 +87,10 @@ ifeq ($(CONFIG_STM32_HAVE_IP_EXTI_M33M55_V1),y)
 CHIP_CSRCS += stm32_exti_gpio_m33m55_v1.c
 endif
 
+ifeq ($(CONFIG_STM32_RNG)$(CONFIG_STM32_HAVE_IP_RNG_V1),yy)
+CHIP_CSRCS += stm32_rng_v1.c
+endif
+
 ifeq ($(CONFIG_STM32_COMMON_M33),y)
 CHIP_CSRCS += stm32_allocateheap_m33_v1.c
 CHIP_CSRCS += stm32_irq_m33_v1.c
@@ -352,10 +356,6 @@ endif
 
 ifeq ($(CONFIG_STM32_HCIUART),y)
 CHIP_CSRCS += stm32_hciuart_m3m4_v1.c
-endif
-
-ifeq ($(CONFIG_STM32_RNG)$(CONFIG_STM32_HAVE_IP_RNG_M3M4_V1),yy)
-CHIP_CSRCS += stm32_rng_m3m4_v1.c
 endif
 
 ifeq ($(CONFIG_STM32_LTDC),y)
