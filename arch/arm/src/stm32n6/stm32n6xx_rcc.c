@@ -79,10 +79,11 @@
 
 /* Allow up to 100 milliseconds for a clock to become ready.  That is a
  * very long delay, but if the clock does not become ready we are hosed
- * anyway.
+ * anyway.  The LSE crystal may need up to a few seconds to start.
  */
 
 #define CLKRDY_TIMEOUT  (100 * CONFIG_BOARD_LOOPSPERMSEC)
+#define LSERDY_TIMEOUT  (3000 * CONFIG_BOARD_LOOPSPERMSEC)
 
 /* Defaults for optional board.h settings */
 
@@ -732,6 +733,59 @@ static void rcc_enableccip(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_rcc_enablelse
+ *
+ * Description:
+ *   Enable the 32.768 kHz LSE oscillator.  The LSE lives in the backup
+ *   domain, so write access is enabled for the duration of the call.
+ *
+ ****************************************************************************/
+
+void stm32_rcc_enablelse(void)
+{
+  volatile int32_t timeout;
+  bool writable;
+
+  if ((getreg32(STM32_RCC_SR) & RCC_SR_LSERDY) != 0)
+    {
+      return;
+    }
+
+  writable = stm32_pwr_enablebkp(true);
+
+#ifdef CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY
+  modifyreg32(STM32_RCC_LSECFGR, RCC_LSECFGR_LSEDRV_MASK,
+              CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY <<
+              RCC_LSECFGR_LSEDRV_SHIFT);
+#endif
+
+  putreg32(RCC_CR_LSEON, STM32_RCC_CSR);
+  for (timeout = LSERDY_TIMEOUT; timeout > 0; timeout--)
+    {
+      if ((getreg32(STM32_RCC_SR) & RCC_SR_LSERDY) != 0)
+        {
+          break;
+        }
+    }
+
+  stm32_pwr_enablebkp(writable);
+}
+
+/****************************************************************************
+ * Name: stm32_rcc_enablelsi
+ *
+ * Description:
+ *   Enable the 32 kHz LSI oscillator.
+ *
+ ****************************************************************************/
+
+void stm32_rcc_enablelsi(void)
+{
+  putreg32(RCC_CR_LSION, STM32_RCC_CSR);
+  rcc_waitflag(STM32_RCC_SR, RCC_SR_LSIRDY, true);
+}
 
 /****************************************************************************
  * Name: stm32_rcc_enableperipherals

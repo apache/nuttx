@@ -32,6 +32,8 @@ PWR         Yes      Supply configuration, VOS, I/O supply validity.
 RCC         Yes      HSI/HSE, PLL1-4, IC1-20, bus prescalers and kernel
                      clock selection from board.h.
 RNG         Yes      Through the common driver.
+RTC         Yes      Calendar, sub-seconds, Alarm A/B and wakeup timer
+                     through the common RTC driver.
 USART       Yes      USART1 only.
 
 ADC         No
@@ -45,7 +47,6 @@ LPTIM       No
 LTDC        No
 MPU         No
 NPU         No
-RTC         No
 SAI         No
 SDMMC       No
 SPI         No

@@ -42,7 +42,8 @@
  */
 
 #if defined(CONFIG_STM32_HAVE_IP_RTCC_M3M4_F4) || \
-    defined(CONFIG_STM32_HAVE_IP_RTCC_M3M4_L1)
+    defined(CONFIG_STM32_HAVE_IP_RTCC_M3M4_L1) || \
+    defined(CONFIG_STM32_HAVE_IP_RTCC_M33M55_V1)
 #  define STM32_RTC_HAVE_ALARMB 1
 #endif
 

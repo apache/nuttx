@@ -29,7 +29,8 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_STM32_HAVE_IP_RTC_M3M4_V1
+#if defined(CONFIG_STM32_HAVE_IP_RTC_M3M4_V1) || \
+    defined(CONFIG_STM32_HAVE_IP_RTCC_M33M55_V1)
 
 #include "chip.h"
 
@@ -50,6 +51,12 @@
       defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F4XXX) || \
       defined(CONFIG_STM32_STM32G4XXX)
 #  include "hardware/stm32_rtcc.h"
+
+/* The M33/M55 RTC keeps its backup registers in the TAMP peripheral */
+
+#elif defined(CONFIG_STM32_HAVE_IP_RTCC_M33M55_V1)
+#  include "hardware/stm32_rtcc.h"
+#  include "hardware/stm32_tamp.h"
 #endif
 
 #include "stm32_alarm.h"
@@ -91,7 +98,11 @@
 #  define CONFIG_STM32_RTC_MAGIC_REG      (0)
 #endif
 
-#define RTC_MAGIC_REG                     STM32_RTC_BKR(CONFIG_STM32_RTC_MAGIC_REG)
+#ifdef CONFIG_STM32_HAVE_IP_RTCC_M33M55_V1
+#  define RTC_MAGIC_REG                   STM32_TAMP_BKPR(CONFIG_STM32_RTC_MAGIC_REG)
+#else
+#  define RTC_MAGIC_REG                   STM32_RTC_BKR(CONFIG_STM32_RTC_MAGIC_REG)
+#endif
 
 #endif /* CONFIG_STM32_STM32F10XX */
 
@@ -213,5 +224,5 @@ struct rtc_lowerhalf_s *stm32_rtc_lowerhalf(void);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* CONFIG_STM32_HAVE_IP_RTC_M3M4_V1 */
+#endif /* CONFIG_STM32_HAVE_IP_RTC_M3M4_V1 || CONFIG_STM32_HAVE_IP_RTCC_M33M55_V1 */
 #endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_RTC_H */

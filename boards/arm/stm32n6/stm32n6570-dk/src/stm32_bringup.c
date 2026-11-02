@@ -34,7 +34,9 @@
 #include <nuttx/board.h>
 #include <nuttx/leds/userled.h>
 #include <nuttx/input/buttons.h>
+#include <nuttx/timers/rtc.h>
 
+#include "stm32_rtc.h"
 #include "stm32n6570-dk.h"
 
 #include <arch/board/board.h>
@@ -60,6 +62,7 @@
 int stm32_bringup(void)
 {
 #if defined(CONFIG_FS_PROCFS) || defined(CONFIG_INPUT_BUTTONS_LOWER) || \
+    (defined(CONFIG_RTC_DRIVER) && defined(CONFIG_STM32_RTC)) || \
     (!defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER))
   int ret;
 #endif
@@ -91,6 +94,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_RTC_DRIVER) && defined(CONFIG_STM32_RTC)
+  /* Register the RTC driver as /dev/rtc0 */
+
+  ret = rtc_initialize(0, stm32_rtc_lowerhalf());
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rtc_initialize() failed: %d\n", ret);
     }
 #endif
 

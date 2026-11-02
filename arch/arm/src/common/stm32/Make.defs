@@ -91,6 +91,13 @@ ifeq ($(CONFIG_STM32_RNG)$(CONFIG_STM32_HAVE_IP_RNG_V1),yy)
 CHIP_CSRCS += stm32_rng_v1.c
 endif
 
+ifeq ($(CONFIG_STM32_RTC)$(CONFIG_STM32_HAVE_IP_RTCC_M33M55_V1),yy)
+CHIP_CSRCS += stm32_rtcc_m33m55_v1.c
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += stm32_rtc_m3m4_v1_lowerhalf.c
+endif
+endif
+
 ifeq ($(CONFIG_STM32_COMMON_M33),y)
 CHIP_CSRCS += stm32_allocateheap_m33_v1.c
 CHIP_CSRCS += stm32_irq_m33_v1.c
