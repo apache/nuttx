@@ -773,6 +773,13 @@ static const char *g_white_content_list[] =
   "unzGoToFirstFile",
 
   /* Ref:
+   * arch/tricore/src/common
+   */
+
+  "__jumpBackToLink",
+  "__getA11",
+
+  /* Ref:
    * apps/netutils/telnetc/telnetc.c
    */
 

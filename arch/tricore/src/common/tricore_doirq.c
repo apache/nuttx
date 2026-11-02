@@ -41,23 +41,99 @@
 
 #include "tricore_internal.h"
 
+#include "IfxCpu.h"
+#include "IfxInt_reg.h"
+
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
+#define TRICORE_INT_LASR0_ADDR    ((uintptr_t)&INT_LASR0)
+#define TRICORE_INT_LASR_SPACING  ((uintptr_t)&INT_LASR1 - \
+                                   (uintptr_t)&INT_LASR0)
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tricore_irq_from_lasr
+ *
+ * Description:
+ *   Get irq number from ICU's last acknowledged SRN register
+ *
+ ****************************************************************************/
+
+static inline_function int tricore_irq_from_lasr(void)
+{
+  uintptr_t addr = TRICORE_INT_LASR0_ADDR +
+                   up_cpu_index() * TRICORE_INT_LASR_SPACING;
+
+  return (getreg32(addr) >> 16) & 0x7ff;
+}
+
+#ifdef CONFIG_ARCH_IRQPRIO
+
+/****************************************************************************
+ * Name: tricore_irq_direct
+ *
+ * Description:
+ *   Fast interrupt path (analogous to ARM-M exception_direct).
+ *   Only dispatches the IRQ handler, no context switch.
+ *   If a context switch is needed, triggers the scheduling GPSR which
+ *   will execute after all higher-priority interrupts have returned.
+ *
+ ****************************************************************************/
+
+static void tricore_irq_direct(uintptr_t *regs)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
-  struct tcb_s *tcb = this_task();
+  int irq = tricore_irq_from_lasr();
 
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC();
-#else
-  Ifx_CPU_ICR icr;
-  uintptr_t *regs;
+  up_irq_enable();
 
-  icr.U = tricore_mfcr(CPU_ICR);
-  regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
+  tricore_ack_irq(irq);
+  irq_dispatch(irq, regs);
+
+  if (*running_task != this_task())
+    {
+      cpu_set_t cpuset;
+
+      CPU_ZERO(&cpuset);
+      CPU_SET(up_cpu_index(), &cpuset);
+      up_trigger_irq(TRICORE_SCHEDIRQ, cpuset);
+    }
+}
+
+#endif /* CONFIG_ARCH_IRQPRIO */
+
+/****************************************************************************
+ * Name: tricore_irq_sched
+ *
+ * Description:
+ *   Context-switch interrupt path. Two dispatch schemes share this path
+ *   with different roles, selected by CONFIG_ARCH_IRQPRIO.
+ *
+ *   CONFIG_ARCH_IRQPRIO=y:
+ *     SRPN 1 -> tricore_irq_sched (lowest priority, task switch only),
+ *     SRPN 2~MAX -> tricore_irq_direct (fast dispatch, nestable).
+ *   CONFIG_ARCH_IRQPRIO=n:
+ *     tricore_irq_sched does dispatch and task switch for all IRQs.
+ *     No nesting support and no scheduling GPSR.
+ *
+ ****************************************************************************/
+
+static void tricore_irq_sched(uintptr_t *regs)
+{
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  struct tcb_s *tcb;
+#ifndef CONFIG_ARCH_IRQPRIO
+  int irq = tricore_irq_from_lasr();
+#endif
+
+#ifdef CONFIG_ARCH_IRQPRIO
+  up_irq_enable();
+#endif
 
   if (*running_task != NULL)
     {
@@ -66,19 +142,12 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
   board_autoled_on(LED_INIRQ);
 
-  /* Nested interrupts are not supported */
+#ifndef CONFIG_ARCH_IRQPRIO
+  tricore_ack_irq(irq);
+  irq_dispatch(irq, regs);
+#endif
 
-  DEBUGASSERT(!up_interrupt_context());
-
-  /* Set irq flag */
-
-  up_set_interrupt_context(true);
-
-  /* Deliver the IRQ */
-
-  tricore_ack_irq(NDX_TO_IRQ(icr.B.CCPN));
-
-  irq_dispatch(NDX_TO_IRQ(icr.B.CCPN), regs);
+  tcb = this_task();
 
   /* Check for a context switch. */
 
@@ -110,15 +179,32 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
       UP_ISB();
     }
 
-  /* Set irq flag */
-
-  up_set_interrupt_context(false);
-
   /* running_task->xcp.regs is about to become invalid
    * and will be marked as NULL to avoid misusage.
    */
 
   (*running_task)->xcp.regs = NULL;
   board_autoled_off(LED_INIRQ);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
+{
+  uintptr_t *regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
+
+#ifdef CONFIG_ARCH_IRQPRIO
+  Ifx_CPU_ICR icr;
+
+  icr.U = tricore_mfcr(CPU_ICR);
+  if (icr.B.CCPN != TRICORE_IRQ_MIN_PRIORITY)
+    {
+      tricore_irq_direct(regs);
+      return;
+    }
 #endif
+
+  tricore_irq_sched(regs);
 }
