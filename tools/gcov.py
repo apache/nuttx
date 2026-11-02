@@ -198,14 +198,33 @@ def run_lcov(data_dir, gcov_tool):
     return output
 
 
+def get_lcov_major_version():
+    """Get the major version number of the installed lcov/genhtml."""
+    try:
+        result = subprocess.run(
+            ["lcov", "--version"], capture_output=True, text=True, timeout=5
+        )
+        match = re.search(r"LCOV version (\d+)", result.stdout)
+        if match:
+            return int(match.group(1))
+    except (subprocess.TimeoutExpired, OSError, FileNotFoundError):
+        pass
+    return 1
+
+
 def run_genhtml(info, report):
+    # 'category' is only supported by lcov >= 2
+    ignore_errors = "source"
+    if get_lcov_major_version() >= 2:
+        ignore_errors = "source,category"
+
     cmd = [
         "genhtml",
         "--branch-coverage",
         "-o",
         report,
         "--ignore-errors",
-        "source,category",
+        ignore_errors,
         info,
     ]
     print(cmd)
