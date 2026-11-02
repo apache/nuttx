@@ -530,6 +530,74 @@ static int vsprintf_put_wstring(FAR struct lib_outstream_s *stream,
 }
 #endif
 
+#ifdef CONFIG_LIBC_NUMBERED_ARGS
+static int vsprintf_check_arg(FAR struct lib_outstream_s *stream,
+                              FAR struct arg_s *arglist, int numargs,
+                              int argnumber, uint16_t flags,
+                              unsigned char c, FAR size_t *total_len)
+{
+  if ((flags & FL_ARGNUMBER) != 0)
+    {
+      if (argnumber <= 0 || argnumber > numargs)
+        {
+          return -1;
+        }
+
+      if (stream == NULL)
+        {
+          unsigned char type;
+
+          if (fmt_isfloat(c))
+            {
+              type = FL_IS_LDOUBLE(flags) ? TYPE_LONG_DOUBLE : TYPE_DOUBLE;
+            }
+          else if (c == 'i' || c == 'd' || c == 'u' || c == 'p' ||
+                   c == 'o' || c == 'x' || c == 'X')
+            {
+              if ((flags & FL_LONG) == 0)
+                {
+                  type = TYPE_INT;
+                }
+              else if ((flags & FL_REPD_TYPE) == 0)
+                {
+                  type = TYPE_LONG;
+                }
+              else
+                {
+                  type = TYPE_LONG_LONG;
+                }
+            }
+          else if (c == 'c')
+            {
+              type = TYPE_INT;
+            }
+          else if (c == 's' || c == 'S' || c == 'n')
+            {
+              type = TYPE_CHAR_POINTER;
+            }
+          else
+            {
+              return -1;
+            }
+
+          arglist->type[argnumber - 1] = type;
+          if (argnumber > *total_len)
+            {
+              *total_len = argnumber;
+            }
+
+          return 1; /* We do only parsing */
+        }
+    }
+  else if (stream == NULL)
+    {
+      return 1; /* We do only parsing */
+    }
+
+  return 0;
+}
+#endif
+
 static size_t vsprintf_put_integer(FAR struct lib_outstream_s *stream,
                                    uint16_t flags, FAR char *buf,
                                    int digits, FAR int *width, int prec)
@@ -1199,57 +1267,15 @@ set_star:
         }
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
-      if ((flags & FL_ARGNUMBER) != 0 && argnumber > numargs)
+      result = vsprintf_check_arg(stream, arglist, numargs, argnumber,
+                                  flags, c, &total_len);
+      if (result < 0)
         {
           goto ret;
         }
 
-      if (stream == NULL)
+      if (result > 0)
         {
-          unsigned char type; /* We do only parsing */
-
-          if (fmt_isfloat(c))
-            {
-              type = FL_IS_LDOUBLE(flags) ? TYPE_LONG_DOUBLE : TYPE_DOUBLE;
-            }
-          else if (c == 'i' || c == 'd' || c == 'u' || c == 'p' ||
-                   c == 'o' || c == 'x' || c == 'X')
-            {
-              if ((flags & FL_LONG) == 0)
-                {
-                  type = TYPE_INT;
-                }
-              else if ((flags & FL_REPD_TYPE) == 0)
-                {
-                  type = TYPE_LONG;
-                }
-              else
-                {
-                  type = TYPE_LONG_LONG;
-                }
-            }
-          else if (c == 'c')
-            {
-              type = TYPE_INT;
-            }
-          else if (c == 's' || c == 'S' || c == 'n')
-            {
-              type = TYPE_CHAR_POINTER;
-            }
-          else
-            {
-              goto ret; /* The second pass reads no argument after this */
-            }
-
-          if ((flags & FL_ARGNUMBER) != 0)
-            {
-              arglist->type[argnumber - 1] = type;
-              if (argnumber > total_len)
-                {
-                  total_len = argnumber;
-                }
-            }
-
           continue;
         }
 #endif
