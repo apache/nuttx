@@ -598,6 +598,22 @@ static int vsprintf_check_arg(FAR struct lib_outstream_s *stream,
 }
 #endif
 
+static void vsprintf_pointer_flags(FAR uint16_t *flags)
+{
+  /* Determine size of pointer and set flags accordingly */
+
+  *flags &= ~(FL_LONG | FL_REPD_TYPE);
+
+  if (sizeof(FAR void *) == sizeof(unsigned long long))
+    {
+      *flags |= FL_LONG | FL_REPD_TYPE;
+    }
+  else if (sizeof(FAR void *) == sizeof(unsigned long))
+    {
+      *flags |= FL_LONG;
+    }
+}
+
 static size_t vsprintf_put_integer(FAR struct lib_outstream_s *stream,
                                    uint16_t flags, FAR char *buf,
                                    int digits, FAR int *width, int prec)
@@ -754,6 +770,27 @@ static int vsprintf_put_naninf(FAR struct lib_outstream_s *stream,
   *width = w;
 
   return total_len;
+}
+
+static int vsprintf_float_sign(uint16_t flags,
+                               FAR const struct dtoa_s *dtoa)
+{
+  if ((dtoa->flags & DTOA_MINUS) != 0)
+    {
+      return '-';
+    }
+
+  if ((flags & FL_PLUS) != 0)
+    {
+      return '+';
+    }
+
+  if ((flags & FL_SPACE) != 0)
+    {
+      return ' ';
+    }
+
+  return 0;
 }
 
 static void vsprintf_float_format(unsigned char c, int prec,
@@ -1358,19 +1395,7 @@ set_star:
 
       if (c == 'p')
         {
-          /* Determine size of pointer and set flags accordingly */
-
-          flags &= ~(FL_LONG | FL_REPD_TYPE);
-
-          if (sizeof(FAR void *) == sizeof(unsigned long long))
-            {
-              flags |= (FL_LONG | FL_REPD_TYPE);
-            }
-          else
-          if (sizeof(FAR void *) == sizeof(unsigned long))
-            {
-              flags |= FL_LONG;
-            }
+          vsprintf_pointer_flags(&flags);
         }
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
@@ -1449,19 +1474,7 @@ flt_oper:
                                 ndecimal);
           exp = _dtoa.exp;
 
-          sign = 0;
-          if (_dtoa.flags & DTOA_MINUS)
-            {
-              sign = '-';
-            }
-          else if ((flags & FL_PLUS) != 0)
-            {
-              sign = '+';
-            }
-          else if ((flags & FL_SPACE) != 0)
-            {
-              sign = ' ';
-            }
+          sign = vsprintf_float_sign(flags, &_dtoa);
 
           if (_dtoa.flags & (DTOA_NAN | DTOA_INF))
             {
