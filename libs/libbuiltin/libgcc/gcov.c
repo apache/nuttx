@@ -319,6 +319,10 @@ void __gcov_execve(void)
 {
 }
 
+void __gcov_execl(void)
+{
+}
+
 void __gcov_execv(void)
 {
 }
