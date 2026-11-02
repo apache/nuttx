@@ -38,19 +38,6 @@ Upper half configuration resides in :menuselection:`Device Drivers --> LED suppo
 Some of the configuration options are described here - mostly for the purpose of helping
 with implementation of lower half drivers and board code.
 
-WS2812 driver variant
----------------------
-
-Allows user to choose between old-style SPI driver and driver split into upper and
-lower-half. The old style SPI driver could only drive the LEDs using a SPI interface,
-the new style can use any hardware supported by the lower half (including SPI,
-despite the naming.)
-
-When implementing lower half driver for new architecture, make the appropriate
-Kconfig option depend on :menuselection:`WS2812_NON_SPI_DRIVER`
-
-The old-style driver and its associated options are not described in this document.
-
 Number of ws2812s connected
 ---------------------------
 
