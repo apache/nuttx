@@ -55,11 +55,21 @@ typedef CODE int (*dump_fn_t)(FAR struct dump_args *,
                               FAR char *, FAR uint8_t *, size_t);
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Sentinel node: the last real node's next points here.
+ * This distinguishes "already in list" (next != NULL) from
+ * "never inserted" (next == NULL, zero-initialized in BSS).
+ */
+
+static struct gcov_info g_gcov_list_end;
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
 FAR struct gcov_info *__gcov_info_start;
-FAR struct gcov_info *__gcov_info_end;
 
 /****************************************************************************
  * Private Functions
@@ -237,6 +247,33 @@ static int gcov_onefile_dump(FAR struct dump_args *args,
   return OK;
 }
 
+static int gcov_binfile_dump(FAR struct dump_args *args,
+                             FAR char *path,
+                             FAR uint8_t *data, size_t size)
+{
+  /* Binary pack: [path_len(4B LE)][path+NUL][size(4B LE)][data]
+   * Use gcov_split.py on host to unpack.
+   * Write header and data separately to avoid double malloc.
+   */
+
+  uint32_t path_len = strlen(path) + 1;
+  uint32_t data_size = size;
+  uint8_t hdr[PATH_MAX + 8];
+  FAR struct lib_rawoutstream_s *rstream =
+      (FAR struct lib_rawoutstream_s *)args->stream;
+
+  memcpy(hdr, &path_len, sizeof(path_len));
+  memcpy(hdr + sizeof(path_len), path, path_len);
+  memcpy(hdr + sizeof(path_len) + path_len,
+         &data_size, sizeof(data_size));
+
+  _NX_WRITE(rstream->fd, hdr,
+            sizeof(path_len) + path_len + sizeof(data_size));
+  _NX_WRITE(rstream->fd, data, size);
+
+  return OK;
+}
+
 static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
 {
   FAR struct gcov_info *info;
@@ -246,7 +283,9 @@ static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
   int size;
   int i;
 
-  for (info = __gcov_info_start; info; info = info->next)
+  for (info = __gcov_info_start;
+       info && info != &g_gcov_list_end;
+       info = info->next)
     {
       memset(args->path_buffer, 0x00, PATH_MAX);
 
@@ -254,8 +293,9 @@ static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
       data = lib_malloc(size);
       if (data == NULL)
         {
-          syslog(LOG_ERR, "gcov alloc failed!");
-          return -ERROR;
+          syslog(LOG_ERR, "gcov alloc failed! skip %s",
+                          info->filename);
+          continue;
         }
 
       gcov_convert(data, info);
@@ -263,9 +303,10 @@ static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
       filename = strdup(info->filename);
       if (filename == NULL)
         {
-          syslog(LOG_ERR, "gcov alloc failed! skip %s", info->filename);
+          syslog(LOG_ERR, "gcov alloc failed! skip %s",
+                          info->filename);
           lib_free(data);
-          return -ERROR;
+          continue;
         }
 
       token_count = args->token_cnt +
@@ -276,10 +317,23 @@ static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
         {
           syslog(LOG_ERR, "gcov get path tokens failed! skip %s",
                           info->filename);
-          goto exit;
+          lib_free(filename);
+          lib_free(data);
+          continue;
         }
 
-      for (i = 0; i < token_count - 1; i++)
+      /* Build prefix part (tokens[0 .. token_cnt-1]) */
+
+      for (i = 0; i < args->token_cnt; i++)
+        {
+          strcat(args->path_buffer, "/");
+          strcat(args->path_buffer, args->tokens[i]);
+        }
+
+      /* Build source path part, skipping first 'strip' tokens */
+
+      for (i = args->token_cnt + args->strip;
+           i < token_count - 1; i++)
         {
           strcat(args->path_buffer, "/");
           strcat(args->path_buffer, args->tokens[i]);
@@ -290,12 +344,12 @@ static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
         }
 
       strcat(args->path_buffer, "/");
-      strcat(args->path_buffer, args->tokens[token_count - 1]);
+      strcat(args->path_buffer,
+             args->tokens[token_count - 1]);
 
       if (handler(args, args->path_buffer, data, size) < 0)
         {
           syslog(LOG_ERR, "gcov dump %s failed!\n", args->path_buffer);
-          goto exit;
         }
 
       lib_free(filename);
@@ -303,12 +357,6 @@ static int gcov_dump_foreach(dump_fn_t handler, FAR struct dump_args *args)
     }
 
   return OK;
-
-exit:
-  lib_free(filename);
-  lib_free(data);
-
-  return -ERROR;
 }
 
 /****************************************************************************
@@ -346,7 +394,18 @@ void __gcov_init(FAR struct gcov_info *info)
       inited++;
     }
 
-  info->next = __gcov_info_start;
+  /* Guard against duplicate insertion which would create a cycle.
+   * GCC zero-initializes the static gcov_info structs, so next == NULL
+   * means "never inserted".  Once inserted, next points to either
+   * the previous head or the sentinel g_gcov_list_end (for the tail).
+   */
+
+  if (info->next != NULL || info == __gcov_info_start)
+    {
+      return;
+    }
+
+  info->next = __gcov_info_start ? __gcov_info_start : &g_gcov_list_end;
   __gcov_info_start = info;
 }
 
@@ -405,8 +464,12 @@ void __gcov_dump(void)
   if (stat(prefix, &state) ||
       S_ISREG(state.st_mode) || S_ISCHR(state.st_mode))
     {
+      FAR char *strip_env = getenv("GCOV_PREFIX_STRIP");
       struct lib_rawoutstream_s stream;
-      int fd = _NX_OPEN(prefix, O_WRONLY | O_CREAT | O_APPEND, 0666);
+      dump_fn_t handler;
+      int fd;
+
+      fd = _NX_OPEN(prefix, O_WRONLY | O_CREAT | O_APPEND, 0666);
       if (fd < 0)
         {
           syslog(LOG_ERR, "open %s failed! ret: %d\n", prefix, ret);
@@ -416,7 +479,17 @@ void __gcov_dump(void)
       lib_rawoutstream(&stream, fd);
       args.stream = &stream.common;
 
-      ret = gcov_dump_foreach(gcov_onefile_dump, &args);
+      if (strip_env && atoi(strip_env) > 0)
+        {
+          args.strip = atoi(strip_env);
+          handler = gcov_binfile_dump;
+        }
+      else
+        {
+          handler = gcov_onefile_dump;
+        }
+
+      ret = gcov_dump_foreach(handler, &args);
 
       _NX_CLOSE(fd);
     }
@@ -456,7 +529,9 @@ void __gcov_reset(void)
   uint32_t functions;
   uint32_t counts;
 
-  for (info = __gcov_info_start; info; info = info->next)
+  for (info = __gcov_info_start;
+       info && info != &g_gcov_list_end;
+       info = info->next)
     {
       for (functions = 0; functions < info->n_functions; functions++)
         {
