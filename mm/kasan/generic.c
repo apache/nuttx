@@ -84,7 +84,8 @@ kasan_mem_to_shadow(FAR const void *ptr, size_t size,
 
   for (i = 0; i < count; i++)
     {
-      if (addr >= g_region[i]->begin && addr < g_region[i]->end)
+      if (g_region[i] &&
+          addr >= g_region[i]->begin && addr < g_region[i]->end)
         {
           DEBUGASSERT(addr + size <= g_region[i]->end);
           addr -= g_region[i]->begin;
