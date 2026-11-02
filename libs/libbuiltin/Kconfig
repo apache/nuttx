@@ -57,6 +57,7 @@ config COVERAGE_MINI
 config COVERAGE_TOOLCHAIN
 	bool "Link toolchain gcov library to the OS"
 	depends on ARCH_TOOLCHAIN_GCC
+	depends on HAVE_CXXINITIALIZE
 	---help---
 		Link the toolchain coverage library to the OS.
 
