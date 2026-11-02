@@ -339,6 +339,53 @@ static int vsprintf_put_field(FAR struct lib_outstream_s *stream,
   return total_len;
 }
 
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+static int vsprintf_put_naninf(FAR struct lib_outstream_s *stream,
+                               uint16_t flags, int dtoa_flags, int sign,
+                               FAR int *width)
+{
+  FAR const char *p;
+  int total_len = 0;
+  int w = *width;
+  int len = sign ? 4 : 3;
+
+  if (w > len)
+    {
+      w -= len;
+      if ((flags & FL_LPAD) == 0)
+        {
+          total_len += vsprintf_repeat(stream, ' ', w);
+          w = 0;
+        }
+    }
+  else
+    {
+      w = 0;
+    }
+
+  if (sign)
+    {
+      total_len++;
+      lib_stream_putc(stream, sign);
+    }
+
+  if (dtoa_flags & DTOA_NAN)
+    {
+      p = (flags & FL_FLTUPP) != 0 ? g_nan_upper : g_nan_lower;
+    }
+  else
+    {
+      p = (flags & FL_FLTUPP) != 0 ? g_inf_upper : g_inf_lower;
+    }
+
+  total_len += 3;
+  lib_stream_puts(stream, p, 3);
+  *width = w;
+
+  return total_len;
+}
+#endif
+
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                              FAR struct arg_s *arglist, int numargs,
                              FAR const IPTR char *fmt, va_list ap)
@@ -893,38 +940,8 @@ flt_oper:
 
           if (_dtoa.flags & (DTOA_NAN | DTOA_INF))
             {
-              FAR const char *p;
-
-              ndigs = sign ? 4 : 3;
-              if (width > ndigs)
-                {
-                  width -= ndigs;
-                  if ((flags & FL_LPAD) == 0)
-                    {
-                      stream_repeat(' ', width, stream);
-                      width = 0;
-                    }
-                }
-              else
-                {
-                  width = 0;
-                }
-
-              if (sign)
-                {
-                  stream_putc(sign, stream);
-                }
-
-              if (_dtoa.flags & DTOA_NAN)
-                {
-                  p = (flags & FL_FLTUPP) != 0 ? g_nan_upper : g_nan_lower;
-                }
-              else
-                {
-                  p = (flags & FL_FLTUPP) != 0 ? g_inf_upper : g_inf_lower;
-                }
-
-              stream_puts(p, 3, stream);
+              total_len += vsprintf_put_naninf(stream, flags, _dtoa.flags,
+                                               sign, &width);
 
               goto tail;
             }
