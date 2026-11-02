@@ -879,7 +879,9 @@ static void adc_startifstopped(struct stm32_dev_s *priv,
                                uint8_t stopped_bits)
 {
   uint32_t regval = adc_getreg(priv, STM32_ADC_CR_OFFSET);
+
   regval |= stopped_bits;
+
   adc_putreg(priv, STM32_ADC_CR_OFFSET, regval);
 }
 
@@ -1638,18 +1640,18 @@ static bool adc_internal(struct stm32_dev_s * priv, uint32_t *adc_ccr)
     {
       for (i = 0; i < priv->rnchannels; i++)
         {
-            switch (priv->chanlist[i])
-              {
-                case 16:
-                  *adc_ccr |= ADC_CCR_TSEN;
-                  internal = true;
-                  break;
+          switch (priv->chanlist[i])
+            {
+              case 16:
+                *adc_ccr |= ADC_CCR_TSEN;
+                internal = true;
+                break;
 
-                case 17:
-                  *adc_ccr |= ADC_CCR_VREFEN;
-                  internal = true;
-                  break;
-              }
+              case 17:
+                *adc_ccr |= ADC_CCR_VREFEN;
+                internal = true;
+                break;
+            }
         }
     }
   else if (priv->intf == 2)
@@ -1861,17 +1863,15 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
         break;
 
 #ifdef ADC_HAVE_WDG1
-  uint32_t regval;
-  uint32_t startbits;
-  uint32_t tmp;
-     case ANIOC_WDOG_UPPER: /* Set watchdog upper threshold */
+      case ANIOC_WDOG_UPPER: /* Set watchdog upper threshold */
         {
-          startbits = adc_stopifstarted(priv);
-          regval = adc_getreg(priv, STM32_ADC_TR1_OFFSET);
+          uint32_t startbits = adc_stopifstarted(priv);
+          uint32_t regval = adc_getreg(priv, STM32_ADC_TR1_OFFSET);
 
           /* Verify new upper threshold greater than lower threshold */
 
-          tmp = (regval & ADC_TR1_LT1_MASK) >> ADC_TR1_LT1_SHIFT;
+          uint32_t tmp = (regval & ADC_TR1_LT1_MASK) >> ADC_TR1_LT1_SHIFT;
+
           if (arg < tmp)
             {
               ret = -EINVAL;
@@ -1901,12 +1901,13 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
       case ANIOC_WDOG_LOWER: /* Set watchdog lower threshold */
         {
-          startbits = adc_stopifstarted(priv);
-          regval = adc_getreg(priv, STM32_ADC_TR1_OFFSET);
+          uint32_t startbits = adc_stopifstarted(priv);
+          uint32_t regval = adc_getreg(priv, STM32_ADC_TR1_OFFSET);
 
           /* Verify new lower threshold less than upper threshold */
 
-          tmp = (regval & ADC_TR1_HT1_MASK) >> ADC_TR1_HT1_SHIFT;
+          uint32_t tmp = (regval & ADC_TR1_HT1_MASK) >> ADC_TR1_HT1_SHIFT;
+
           if (arg > tmp)
             {
               ret = -EINVAL;
@@ -1972,6 +1973,7 @@ static int adc_interrupt(struct adc_dev_s *dev, uint32_t adcisr)
 #ifdef ADC_HAVE_WDG
   uint32_t awd_mask = adcisr & (ADC_INT_AWD1 | ADC_INT_AWD2 | ADC_INT_AWD3);
   uint32_t regval;
+
   if (awd_mask != 0)
     {
       regval = adc_getreg(priv, STM32_ADC_IER_OFFSET);
@@ -2213,6 +2215,7 @@ static void tim_modifyreg32(struct stm32_dev_s *priv, int offset,
                             uint32_t clrbits, uint32_t setbits)
 {
   uint32_t addr = priv->tbase + offset;
+
   putreg32((getreg32(addr) & ~clrbits) | setbits, addr);
 }
 
