@@ -100,7 +100,6 @@ SECTIONS
       _snoinit = ABSOLUTE(.);
       *(.noinit*)
       _enoinit = ABSOLUTE(.);
-      . =  + 60;
   } > ksram
 
  . = ALIGN(4096);
