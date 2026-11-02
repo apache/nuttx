@@ -61,6 +61,63 @@ extern void __gcov_reset(void);
 
 extern void __gcov_dump(void);
 
+/****************************************************************************
+ * Name: __gcov_info_to_gcda
+ *
+ * Description:
+ *   Convert the gcov information referenced by INFO to a gcda data stream.
+ *
+ * Parameters:
+ *   info - Pointer to the gcov information.
+ *   filename - Callback function to get the filename.
+ *   dump - Callback function to write the gcda data.
+ *   allocate - Callback function to allocate memory.
+ *   arg - User-provided argument.
+ *
+ ****************************************************************************/
+
+extern void __gcov_info_to_gcda(FAR const struct gcov_info *info,
+                                FAR void (*filename)(FAR const char *,
+                                                     FAR void *),
+                                FAR void (*dump)(FAR const void *,
+                                                 unsigned int, FAR void *),
+                                FAR void *(*allocate)(unsigned int,
+                                                      FAR void *),
+                                FAR void *arg);
+
+/****************************************************************************
+ * Name: __gcov_filename_to_gcfn
+ *
+ * Description:
+ *   Convert the filename to a gcfn data stream.
+ *
+ * Parameters:
+ *   filename - Pointer to the filename.
+ *   dump - Callback function to write the gcfn data.
+ *   arg - User-provided argument.
+ *
+ ****************************************************************************/
+
+extern void __gcov_filename_to_gcfn(FAR const char *filename,
+                                    FAR void (*dump)(FAR const void *,
+                                                     unsigned int,
+                                                     FAR void *),
+                                     FAR void *arg);
+
+/****************************************************************************
+ * Name: __gcov_dump_to_memory
+ *
+ * Description:
+ *   Dump gcov data directly to memory
+ *
+ * Parameters:
+ *   ptr - Memory Address
+ *   size - Memory block size
+ *
+ ****************************************************************************/
+
+size_t __gcov_dump_to_memory(FAR void *ptr, size_t size);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
