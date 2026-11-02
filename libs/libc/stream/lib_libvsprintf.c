@@ -314,6 +314,31 @@ static int vsprintf_putnum(FAR struct lib_outstream_s *stream,
   return len;
 }
 
+static int vsprintf_put_field(FAR struct lib_outstream_s *stream,
+                              FAR const char *pnt, size_t size,
+                              FAR int *width, uint16_t flags)
+{
+  int total_len = 0;
+  int w = *width;
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      if (w > 0 && size < w)
+        {
+          int pad = w - size;
+
+          total_len += vsprintf_repeat(stream, ' ', pad);
+          w -= pad;
+        }
+    }
+
+  total_len += size;
+  lib_stream_puts(stream, pnt, size);
+  *width = w >= size ? w - size : 0;
+
+  return total_len;
+}
+
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                              FAR struct arg_s *arglist, int numargs,
                              FAR const IPTR char *fmt, va_list ap)
@@ -1293,19 +1318,8 @@ flt_oper:
               }
 
 str_lpad:
-            if ((flags & FL_LPAD) == 0)
-              {
-                if (width > 0 && size < width)
-                  {
-                    int pad = width - size;
-
-                    stream_repeat(' ', pad, stream);
-                    width -= pad;
-                  }
-              }
-
-            stream_puts(pnt, size, stream);
-            width = width >= size ? width - size : 0;
+            total_len += vsprintf_put_field(stream, pnt, size, &width,
+                                            flags);
             size = 0;
 
             goto tail;
