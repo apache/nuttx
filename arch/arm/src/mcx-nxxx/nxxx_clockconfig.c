@@ -42,6 +42,11 @@
 #include "hardware/nxxx_scg.h"
 #include "hardware/nxxx_spc.h"
 
+#ifdef CONFIG_ARCH_CHIP_N236
+#  include "hardware/nxxx_itrc.h"
+#  include "hardware/nxxx_gdet.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -94,6 +99,42 @@ int nxxx_sysinit(void)
   /* Enable the flash cache LPCAC */
 
   modifyreg32(SYSCON_LPCAC_CTRL, SYSCON_LPCAC_CTRL_DIS_LPCAC_MASK, 0);
+
+#ifdef CONFIG_ARCH_CHIP_N236
+  /* Disable aGDET routing to CHIP_RESET in ITRC */
+
+  modifyreg32(NXXX_ITRC_OUT4_SEL0,
+              ITRC_OUT_SEL_IN9_SELN_MASK,
+              ITRC_OUT_SEL_IN9_SELN_NONE);
+  modifyreg32(NXXX_ITRC_OUT4_SEL1,
+              ITRC_OUT_SEL_IN9_SELN_MASK,
+              ITRC_OUT_SEL_IN9_SELN_NONE);
+
+  /* Disable aGDET interrupt and reset in SPC */
+
+  modifyreg32(NXXX_SPC_ACTIVE_CFG, 0,
+              SPC_ACTIVE_CFG_GLITCH_DETECT_DISABLE_MASK);
+  modifyreg32(NXXX_SPC_GLITCH_DETECT_SC,
+              SPC_GLITCH_DETECT_SC_LOCK_MASK, 0);
+  putreg32(SPC_GLITCH_DETECT_SC_TIMEOUT_MASK,
+           NXXX_SPC_GLITCH_DETECT_SC);
+  modifyreg32(NXXX_SPC_GLITCH_DETECT_SC, 0,
+              SPC_GLITCH_DETECT_SC_LOCK_MASK);
+
+  /* Disable dGDET routing to CHIP_RESET in ITRC */
+
+  modifyreg32(NXXX_ITRC_OUT4_SEL0,
+              ITRC_OUT_SEL_IN0_SELN_MASK,
+              ITRC_OUT_SEL_IN0_SELN_NONE);
+  modifyreg32(NXXX_ITRC_OUT4_SEL1,
+              ITRC_OUT_SEL_IN0_SELN_MASK,
+              ITRC_OUT_SEL_IN0_SELN_NONE);
+
+  /* Disable dGDET reference clocks */
+
+  putreg32(0, NXXX_GDET0_ENABLE1);
+  putreg32(0, NXXX_GDET1_ENABLE1);
+#endif /* CONFIG_ARCH_CHIP_N236 */
 
   return OK;
 }
