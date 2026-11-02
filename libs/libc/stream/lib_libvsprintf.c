@@ -137,6 +137,12 @@ struct arg_s
  ****************************************************************************/
 
 static const char g_nullstring[] = "(null)";
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+static const char g_inf_lower[] = "inf";
+static const char g_nan_lower[] = "nan";
+static const char g_inf_upper[] = "INF";
+static const char g_nan_upper[] = "NAN";
+#endif
 static const char g_spaces[REPEAT_BUFLEN] = "                ";
 static const char g_zeroes[REPEAT_BUFLEN] = "0000000000000000";
 
@@ -742,25 +748,16 @@ flt_oper:
                   stream_putc(sign, stream);
                 }
 
-              p = "inf";
               if (_dtoa.flags & DTOA_NAN)
                 {
-                  p = "nan";
+                  p = (flags & FL_FLTUPP) != 0 ? g_nan_upper : g_nan_lower;
                 }
-
-#  if ('I'-'i' != 'N'-'n') || ('I'-'i' != 'F'-'f') || ('I'-'i' != 'A'-'a')
-#    error
-#  endif
-              while ((ndigs = *p) != 0)
+              else
                 {
-                  if ((flags & FL_FLTUPP) != 0)
-                    {
-                      ndigs += 'I' - 'i';
-                    }
-
-                  stream_putc(ndigs, stream);
-                  p++;
+                  p = (flags & FL_FLTUPP) != 0 ? g_inf_upper : g_inf_lower;
                 }
+
+              stream_puts(p, 3, stream);
 
               goto tail;
             }
