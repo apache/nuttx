@@ -25,6 +25,11 @@ inferred from the ELF binary's `.comment` section, and the cross-compile
 prefix (if any) is inferred from the ELF machine type, so users no longer
 have to specify `-t`/`--toolchain`.
 
+Both toolchains converge on the lcov tracefile format: gcc captures it
+with `lcov -c`, clang exports it with `llvm-cov export -format=lcov`, and
+`genhtml` renders both, so reports look the same regardless of the
+toolchain and tracefiles can be merged with `lcov --add-tracefile`.
+
 Usage example:
 
     gcov.py -e build/nuttx -s build -a coverage_data.bin -o report_dir
@@ -37,6 +42,11 @@ Use `-b OLD=NEW` (repeatable) to rewrite source paths recorded by the
 compiler at build time to local paths, mirroring `-fdebug-prefix-map`:
 
     gcov.py -b /old/build/path=/new/local/path ...
+
+When only the local root is known, pass just NEW and the build-time root
+is inferred from the paths recorded in the coverage data:
+
+    gcov.py -b /new/local/path ...
 """
 
 import argparse
@@ -589,33 +599,142 @@ def resolve_llvm_tools() -> LlvmTools:
 @dataclass
 class PathMap:
     pairs: List[Tuple[str, str]] = field(default_factory=list)
+    # NEW-only entries; OLD is inferred from the coverage data later.
+    pending: List[str] = field(default_factory=list)
 
     @classmethod
     def parse(cls, raw_args: Optional[List[str]]) -> "PathMap":
         pairs: List[Tuple[str, str]] = []
+        pending: List[str] = []
         for raw in raw_args or []:
-            if "=" not in raw:
-                die(f"-b expects OLD=NEW form, got: {raw!r}")
-            old, new = raw.split("=", 1)
-            if not old:
-                die(f"-b OLD part must be non-empty: {raw!r}")
-            pairs.append((old, new))
-        return cls(pairs=pairs)
+            if "=" in raw:
+                old, new = raw.split("=", 1)
+                if not old:
+                    die(f"-b OLD part must be non-empty: {raw!r}")
+                pairs.append((old, new))
+            else:
+                pending.append(raw)
+        return cls(pairs=pairs, pending=pending)
 
-    def lcov_substitute_args(self) -> List[str]:
-        """Render --substitute args for lcov."""
-        out: List[str] = []
+    def resolve_pending(self, recorded_paths: List[str]) -> None:
+        """Fill in OLD for NEW-only entries via build-root inference."""
+        for new in self.pending:
+            old = infer_build_root(recorded_paths, new)
+            if old is None:
+                die(
+                    f"-b {new}: could not infer the build-time source root "
+                    "from the coverage data. Pass the explicit form: "
+                    f"-b <build-time-root>={new}"
+                )
+            log(f"-b {new}: inferred build-time root {old}")
+            self.pairs.append((old, new))
+        self.pending = []
+
+    def _check_resolved(self) -> None:
+        if self.pending:
+            die(
+                f"-b path inference was not performed for {self.pending}; "
+                "pass the explicit OLD=NEW form"
+            )
+
+    def apply(self, path: str) -> str:
+        """Rewrite a single recorded path through the first matching pair."""
         for old, new in self.pairs:
-            # Use '#' as the sed delimiter to avoid clashing with '/' in paths
-            out.extend(["--substitute", f"s#{old}#{new}#g"])
-        return out
+            if path.startswith(old):
+                return new + path[len(old) :]
+        return path
 
     def llvm_path_equivalence_args(self) -> List[str]:
         """Render -path-equivalence args for llvm-cov subcommands."""
+        self._check_resolved()
         out: List[str] = []
         for old, new in self.pairs:
             out.append(f"-path-equivalence={old},{new}")
         return out
+
+
+def lcov_info_source_paths(info_file: str) -> List[str]:
+    """Read the SF: (source file) paths out of an lcov tracefile."""
+    paths: List[str] = []
+    try:
+        with open(info_file, "r", encoding="utf-8", errors="replace") as fp:
+            for line in fp:
+                if line.startswith("SF:"):
+                    paths.append(line[3:].strip())
+    except OSError as e:
+        warn(f"cannot read {info_file}: {e}")
+    return paths
+
+
+def lcov_info_remap_sources(info_file: str, path_map: PathMap) -> int:
+    """Rewrite SF: paths in an lcov tracefile in place.
+
+    Replaces lcov's ``--substitute`` (lcov 2.x only), so ``-b`` works on
+    lcov 1.x and both toolchains. Returns the number of records changed.
+    """
+    if not path_map.pairs:
+        return 0
+
+    try:
+        with open(info_file, "r", encoding="utf-8", errors="replace") as fp:
+            lines = fp.readlines()
+    except OSError as e:
+        warn(f"cannot read {info_file}: {e}")
+        return 0
+
+    changed = 0
+    for i, line in enumerate(lines):
+        if not line.startswith("SF:"):
+            continue
+        old_path = line[3:].strip()
+        new_path = path_map.apply(old_path)
+        if new_path != old_path:
+            lines[i] = f"SF:{new_path}\n"
+            changed += 1
+
+    if changed:
+        try:
+            with open(info_file, "w", encoding="utf-8") as fp:
+                fp.writelines(lines)
+        except OSError as e:
+            warn(f"cannot rewrite {info_file}: {e}")
+            return 0
+        log(f"remapped {changed} SF: path(s) in {os.path.basename(info_file)}")
+    return changed
+
+
+def infer_build_root(
+    recorded_paths: List[str],
+    new_root: str,
+    min_ratio: float = 0.5,
+    max_samples: int = 64,
+) -> Optional[str]:
+    """Infer the build-time source root from recorded (absolute) paths.
+
+    Walk up from the longest common directory of the recorded paths and
+    return the first candidate OLD under which a majority of samples map
+    to existing local paths (local = new_root + relpath(recorded, OLD)).
+    A sample also counts as mapped when only its directory exists locally,
+    because gcc dumps record *.gcda paths whose files do not exist locally.
+    """
+    abs_paths = [p for p in recorded_paths if p.startswith("/")]
+    if not abs_paths:
+        return None
+
+    new_root = os.path.abspath(new_root)
+    samples = abs_paths[:max_samples]
+    candidate = os.path.commonpath(abs_paths)
+
+    while candidate and candidate != os.sep:
+        hits = 0
+        for f in samples:
+            mapped = os.path.join(new_root, os.path.relpath(f, candidate))
+            if os.path.exists(mapped) or os.path.isdir(os.path.dirname(mapped)):
+                hits += 1
+        if hits >= min_ratio * len(samples):
+            return candidate
+        candidate = os.path.dirname(candidate)
+    return None
 
 
 # =============================================================================
@@ -759,19 +878,21 @@ def gcc_run_lcov(tools: GccTools, data_dir: str, path_map: PathMap) -> str:
         "--directory",
         data_dir,
     ]
-    cmd.extend(path_map.lcov_substitute_args())
     run_cmd(cmd)
     return info_file
 
 
-def gcc_run_genhtml(tools: GccTools, info_file: str, report_dir: str) -> None:
+def run_genhtml(
+    genhtml: str, info_file: str, report_dir: str, lcov: Optional[str] = None
+) -> None:
+    """Render an lcov tracefile to HTML (shared by both toolchains)."""
     ignore_errors = "source"
-    if get_lcov_major_version(tools.lcov) >= 2:
+    if lcov is not None and get_lcov_major_version(lcov) >= 2:
         ignore_errors = "source,category"
 
     run_cmd(
         [
-            tools.genhtml,
+            genhtml,
             "--branch-coverage",
             "-o",
             report_dir,
@@ -780,6 +901,10 @@ def gcc_run_genhtml(tools: GccTools, info_file: str, report_dir: str) -> None:
             info_file,
         ]
     )
+
+
+def gcc_run_genhtml(tools: GccTools, info_file: str, report_dir: str) -> None:
+    run_genhtml(tools.genhtml, info_file, report_dir, tools.lcov)
 
 
 def run_gcc_pipeline(
@@ -807,6 +932,11 @@ def run_gcc_pipeline(
             "warnings above). Skipping HTML report generation."
         )
         return
+
+    # Remap SF: paths (and resolve NEW-only -b entries) on the tracefile.
+    if path_map.pending:
+        path_map.resolve_pending(lcov_info_source_paths(info_file))
+    lcov_info_remap_sources(info_file, path_map)
 
     try:
         gcc_run_genhtml(tools, info_file, report_dir)
@@ -1045,8 +1175,9 @@ def clang_run_show_html(
 
 
 def clang_run_export_lcov(
-    tools: LlvmTools, profdata: str, binary: str, out_info: str, path_map: PathMap
+    tools: LlvmTools, profdata: str, binary: str, out_info: str
 ) -> str:
+    """Export an lcov tracefile with the recorded (build-time) paths."""
     cmd = [
         tools.cov,
         "export",
@@ -1054,7 +1185,6 @@ def clang_run_export_lcov(
         f"-instr-profile={profdata}",
         "-format=lcov",
     ]
-    cmd.extend(path_map.llvm_path_equivalence_args())
     log(" ".join(cmd))
     with open(out_info, "w") as fp:
         subprocess.run(cmd, check=True, stdout=fp, stderr=sys.stdout)
@@ -1067,6 +1197,7 @@ def run_clang_pipeline(
     result_dir: str,
     elf_path: str,
     path_map: PathMap,
+    llvm_html: bool = False,
 ) -> None:
     tools = resolve_llvm_tools()
 
@@ -1091,45 +1222,42 @@ def run_clang_pipeline(
 
     cov_binary = clang_resolve_cov_binary(tools, elf_path, gcno_dir, result_dir)
 
+    # Export first: the SF: records drive path remap and build-root inference.
+    cov_info = os.path.join(result_dir, "coverage.info")
+    try:
+        clang_run_export_lcov(tools, profdata, cov_binary, cov_info)
+    except subprocess.CalledProcessError as e:
+        die(f"llvm-cov export (lcov format) failed: {e}")
+
+    if path_map.pending:
+        path_map.resolve_pending(lcov_info_source_paths(cov_info))
+    lcov_info_remap_sources(cov_info, path_map)
+
     log("\n=== Coverage Summary ===")
     clang_run_report(tools, profdata, cov_binary, path_map)
 
-    # Always export lcov .info so downstream tools (e.g. cross-toolchain merge
-    # with gcc coverage via lcov --add-tracefile) can consume it regardless of
-    # whether the HTML report succeeded.
-    cov_info = os.path.join(result_dir, "coverage.info")
-    try:
-        clang_run_export_lcov(tools, profdata, cov_binary, cov_info, path_map)
-    except subprocess.CalledProcessError as e:
-        warn(f"llvm-cov export (lcov format) failed: {e}")
-
-    # HTML: prefer llvm-cov show; fall back to genhtml(lcov-format export).
-    try:
-        clang_run_show_html(tools, profdata, cov_binary, report_dir, path_map)
-        ok = True
-    except subprocess.CalledProcessError as e:
-        warn(f"llvm-cov show HTML failed: {e}; trying genhtml fallback.")
-        ok = False
+    ok = False
+    if llvm_html:
+        # Renders from the coverage map, not the remapped tracefile, so it
+        # still needs -path-equivalence.
+        try:
+            clang_run_show_html(tools, profdata, cov_binary, report_dir, path_map)
+            ok = True
+        except subprocess.CalledProcessError as e:
+            warn(f"llvm-cov show HTML failed: {e}; falling back to genhtml.")
 
     if not ok:
         genhtml = shutil.which("genhtml")
         if genhtml is None:
-            die("HTML generation failed and genhtml is not available.")
-        try:
-            run_cmd(
-                [
-                    genhtml,
-                    "--branch-coverage",
-                    "-o",
-                    report_dir,
-                    "--ignore-errors",
-                    "source",
-                    cov_info,
-                ]
+            die(
+                "genhtml not found on PATH; install lcov, or pass "
+                "--llvm-html to render with llvm-cov instead."
             )
+        try:
+            run_genhtml(genhtml, cov_info, report_dir, shutil.which("lcov"))
             ok = True
         except subprocess.CalledProcessError as e:
-            die(f"genhtml fallback also failed: {e}")
+            die(f"genhtml failed: {e}")
 
     # Only advertise the report if it actually produced an index page.
     if ok and os.path.isfile(os.path.join(report_dir, "index.html")):
@@ -1160,6 +1288,10 @@ Examples:
 
   # With path remap (works for both backends)
   gcov.py -b /old/build/path=/new/local/path \\
+          -e build/nuttx -s build -a default.profraw -o report
+
+  # Path remap with inferred build-time root
+  gcov.py -b /new/local/path \\
           -e build/nuttx -s build -a default.profraw -o report
 
 Tools are resolved from PATH (gcov/lcov/genhtml for GCC; llvm-profdata/
@@ -1211,7 +1343,18 @@ llvm-cov/llvm-readelf/ld.lld for Clang); make sure the toolchain is on PATH.
         metavar="OLD=NEW",
         help="Rewrite paths recorded in coverage data: replace OLD with NEW. "
         "Maps to lcov --substitute / llvm-cov -path-equivalence. "
+        "OLD=NEW may be shortened to just NEW: the build-time root is then "
+        "inferred from the coverage data itself. "
         "Repeatable.",
+    )
+    parser.add_argument(
+        "--llvm-html",
+        action="store_true",
+        help="Clang only: render the HTML report with 'llvm-cov show' "
+        "instead of genhtml. Keeps region-level (sub-line) highlighting "
+        "that the lcov line-based format cannot express, at the cost of a "
+        "report that differs from the gcc one. Falls back to genhtml if "
+        "llvm-cov show fails.",
     )
     parser.add_argument(
         "--debug",
@@ -1266,7 +1409,14 @@ def main() -> None:
     data_inputs = resolve_data_inputs(args.data_inputs, args.delete)
 
     if elf.toolchain == "clang":
-        run_clang_pipeline(data_inputs, gcno_dir, result_dir, elf_path, path_map)
+        run_clang_pipeline(
+            data_inputs,
+            gcno_dir,
+            result_dir,
+            elf_path,
+            path_map,
+            args.llvm_html,
+        )
     else:
         run_gcc_pipeline(data_inputs, gcno_dir, result_dir, elf, path_map)
 
