@@ -251,6 +251,14 @@ int local_alloc_accept(FAR struct local_conn_s *server,
   strlcpy(conn->lc_path, server->lc_path, sizeof(conn->lc_path));
   conn->lc_instance_id = client->lc_instance_id;
 
+#ifdef CONFIG_NET_LOCAL_SCM
+  /* connect() makes this end with the client's credentials.  Take the
+   * listener's, so that SO_PEERCRED of the client names the server.
+   */
+
+  conn->lc_cred = server->lc_cred;
+#endif
+
   /* Create the FIFOs needed for the connection */
 
   ret = local_create_fifos(conn, server->lc_rcvsize, client->lc_rcvsize);
