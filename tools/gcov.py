@@ -401,7 +401,6 @@ def parse_gcda_hex_dump(path: str) -> str:
                     os.makedirs(os.path.dirname(out_path), exist_ok=True)
                     with open(out_path, "wb") as out_fp:
                         out_fp.write(blob)
-                        log(f"write {out_path} success")
                 payload = ""
             else:
                 payload += line.strip()
