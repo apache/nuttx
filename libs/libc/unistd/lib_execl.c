@@ -57,7 +57,9 @@
  * Private Functions
  ****************************************************************************/
 
-static int lib_execl(FAR const char *path, FAR const char *arg0,
+static int lib_execl(CODE int (*execfn)(FAR const char *,
+                                        FAR char * const []),
+                     FAR const char *path, FAR const char *arg0,
                      va_list ap)
 {
   FAR char **argv = NULL;
@@ -110,9 +112,9 @@ static int lib_execl(FAR const char *path, FAR const char *arg0,
       argv[argc] = va_arg(ap, FAR char *);
     }
 
-  /* Then let execv() do the real work */
+  /* Then let execv() or execvp() do the real work */
 
-  ret = execv(path, argv);
+  ret = execfn(path, argv);
 
   /* Free the allocated argv[] list */
 
@@ -188,7 +190,7 @@ int execl(FAR const char *path, FAR const char *arg0, ...)
   int ret;
 
   va_start(ap, arg0);
-  ret = lib_execl(path, arg0, ap);
+  ret = lib_execl(execv, path, arg0, ap);
   va_end(ap);
   return ret;
 }
@@ -197,8 +199,10 @@ int execl(FAR const char *path, FAR const char *arg0, ...)
  * Name: execlp
  *
  * Description:
- *   The same as execl().  NuttX has only one behavior: with
- *   CONFIG_LIBC_ENVPATH, execl() also searches the PATH for file.
+ *   The same as execl(), except that a file that execl() refuses with
+ *   ENOEXEC is run with the shell (see execvp()).  NuttX has only one PATH
+ *   behavior: with CONFIG_LIBC_ENVPATH, execl() also searches the PATH for
+ *   file.
  *
  ****************************************************************************/
 
@@ -208,7 +212,7 @@ int execlp(FAR const char *file, FAR const char *arg0, ...)
   int ret;
 
   va_start(ap, arg0);
-  ret = lib_execl(file, arg0, ap);
+  ret = lib_execl(execvp, file, arg0, ap);
   va_end(ap);
   return ret;
 }
