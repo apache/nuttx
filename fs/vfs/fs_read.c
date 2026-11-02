@@ -204,7 +204,7 @@ ssize_t file_readv(FAR struct file *filep,
     {
       /* No.. File is not read-able */
 
-      ret = -EACCES;
+      ret = -EBADF;
     }
 
   /* Is a driver or mountpoint registered? If so, does it support the read
@@ -303,7 +303,7 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
     {
       /* No.. File is not read-able */
 
-      return -EACCES;
+      return -EBADF;
     }
 
   if (nbytes == 0)

@@ -156,7 +156,7 @@ ssize_t file_writev(FAR struct file *filep,
 
   if ((filep->f_oflags & O_ACCMODE) == O_RDONLY)
     {
-      return -EACCES;
+      return -EBADF;
     }
 
   /* Check buffer count and pointer for iovec */
@@ -278,7 +278,7 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf,
     {
       /* No.. File is not writable */
 
-      return -EACCES;
+      return -EBADF;
     }
 
   if (nbytes == 0)
