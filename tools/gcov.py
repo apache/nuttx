@@ -1094,6 +1094,15 @@ def run_clang_pipeline(
     log("\n=== Coverage Summary ===")
     clang_run_report(tools, profdata, cov_binary, path_map)
 
+    # Always export lcov .info so downstream tools (e.g. cross-toolchain merge
+    # with gcc coverage via lcov --add-tracefile) can consume it regardless of
+    # whether the HTML report succeeded.
+    cov_info = os.path.join(result_dir, "coverage.info")
+    try:
+        clang_run_export_lcov(tools, profdata, cov_binary, cov_info, path_map)
+    except subprocess.CalledProcessError as e:
+        warn(f"llvm-cov export (lcov format) failed: {e}")
+
     # HTML: prefer llvm-cov show; fall back to genhtml(lcov-format export).
     try:
         clang_run_show_html(tools, profdata, cov_binary, report_dir, path_map)
@@ -1107,8 +1116,6 @@ def run_clang_pipeline(
         if genhtml is None:
             die("HTML generation failed and genhtml is not available.")
         try:
-            cov_info = os.path.join(data_dir, "coverage.info")
-            clang_run_export_lcov(tools, profdata, cov_binary, cov_info, path_map)
             run_cmd(
                 [
                     genhtml,
