@@ -26,9 +26,17 @@ import struct
 import subprocess
 import sys
 
-# LLVM raw profile magic bytes (first 8 bytes of .profraw)
-# 64-bit: \xff lprofr \x81
-# 32-bit: \xff lprofR \x81
+# LLVM raw profile magic bytes (first 8 bytes of .profraw).
+#
+# The magic is a uint64_t written by the runtime in native byte order
+# (high byte 0xff, low byte 0x81; "lprofr"/"lprofR" in the middle), so
+# big-endian platforms produce \xff..\x81 and little-endian platforms
+# (ARM aarch64, x86_64, etc.) produce \x81..\xff. Both forms must be
+# accepted, mirroring LLVM's RawInstrProfReader::hasFormat which compares
+# the on-disk magic against both the native and byte-swapped values.
+#
+# 64-bit BE: \xff lprofr \x81   /   64-bit LE: \x81 rforpl \xff
+# 32-bit BE: \xff lprofR \x81   /   32-bit LE: \x81 Rforpl \xff
 
 PROFRAW_MAGIC_64 = b"\xff\x6c\x70\x72\x6f\x66\x72\x81"
 PROFRAW_MAGIC_32 = b"\xff\x6c\x70\x72\x6f\x66\x52\x81"
@@ -42,11 +50,20 @@ GCOV_BINPACK_PATH_LEN_MAX = 4096
 
 
 def is_profraw_file(path):
-    """Check if a file is an LLVM profraw file by magic number."""
+    """Check if a file is an LLVM profraw file by magic number.
+
+    Accepts both native and byte-swapped magic so that profraw files
+    produced on either little- or big-endian targets are recognised.
+    """
     try:
         with open(path, "rb") as f:
             magic = f.read(8)
-            return magic == PROFRAW_MAGIC_64 or magic == PROFRAW_MAGIC_32
+            return magic in (
+                PROFRAW_MAGIC_64,
+                PROFRAW_MAGIC_64[::-1],
+                PROFRAW_MAGIC_32,
+                PROFRAW_MAGIC_32[::-1],
+            )
     except (IOError, OSError):
         return False
 
