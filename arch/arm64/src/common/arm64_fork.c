@@ -255,6 +255,11 @@ static pid_t arm64_fork_direct(bool vfork, struct tcb_s *parent,
   child->xcp.regs[REG_SPSR]  |= (DAIF_IRQ_BIT | DAIF_FIQ_BIT);
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 
+  child->xcp.regs[REG_SCTLR_EL1] = read_sysreg(sctlr_el1);
+#ifdef CONFIG_ARM64_MTE
+  child->xcp.regs[REG_SCTLR_EL1] |= SCTLR_TCF1_BIT;
+#endif
+
   child->xcp.regs[REG_ELR]    = (uint64_t)context->lr;
 
 #ifdef CONFIG_ARM64_MTE
