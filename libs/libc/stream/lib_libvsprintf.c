@@ -937,13 +937,19 @@ flt_oper:
               stream_putc(_dtoa.digits[0], stream);
               if (prec > 0)
                 {
-                  uint8_t pos;
+                  int nbytes;
 
                   stream_putc('.', stream);
-                  for (pos = 1; pos < 1 + prec; pos++)
+
+                  nbytes = MIN(prec, ndigs > 1 ? ndigs - 1 : 0);
+                  if (nbytes > 0)
                     {
-                      stream_putc(pos < ndigs ? _dtoa.digits[pos] : '0',
-                                  stream);
+                      stream_puts(&_dtoa.digits[1], nbytes, stream);
+                    }
+
+                  if (prec > nbytes)
+                    {
+                      stream_repeat('0', prec - nbytes, stream);
                     }
                 }
               else if ((flags & FL_ALT) != 0)
