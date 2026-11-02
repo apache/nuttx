@@ -51,4 +51,9 @@
 #define BOARD_NGPIOIN     1 /* Amount of GPIO Input without Interruption */
 #define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
 
+/* IMU definitions **********************************************************/
+
+#define QMI8658_I2C_PORT  (0)
+#define QMI8658_I2C_ADDR  (0x6A)
+
 #endif /* __BOARDS_XTENSA_ESP32S3_LCKFB_SZPI_ESP32S3_INCLUDE_BOARD_H */

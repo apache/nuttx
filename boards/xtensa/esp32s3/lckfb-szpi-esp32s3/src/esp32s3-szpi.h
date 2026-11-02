@@ -46,9 +46,6 @@
 #define FT5X06_I2C_ADDRESS  (0x38)
 #define FT5X06_FREQUENCY    (400000)
 
-#define QMI8658_I2C_PORT    (0)
-#define QMI8658_I2C_ADDR    (0x6A)
-
 #define ES7210_I2C_ADDR     (0x41)
 #define ES7210_I2C_FREQ     (100000)
 #define ES7210_DEVPATH      "/dev/audio/pcm_in0"
