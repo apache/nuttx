@@ -1063,7 +1063,14 @@ flt_oper:
               }
 #endif
 
-            size = strnlen(pnt, (flags & FL_PREC) ? prec : ~0);
+            if ((flags & FL_PREC) != 0)
+              {
+                size = strnlen(pnt, prec);
+              }
+            else
+              {
+                size = strlen(pnt);
+              }
 
 str_lpad:
             if ((flags & FL_LPAD) == 0)
