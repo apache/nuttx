@@ -109,6 +109,7 @@ void pm_idle_unlock(void)
 bool pm_idle_lock(int cpu)
 {
   bool first;
+
   spin_lock(&g_pm_idle.lock);
   first = (g_pm_idle.running == 0);
   CPU_SET(cpu, &g_pm_idle.running);
