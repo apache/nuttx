@@ -279,11 +279,11 @@
 
 #define PTHREAD_DESTRUCTOR_ITERATIONS _POSIX_THREAD_DESTRUCTOR_ITERATIONS
 
-/* Required for readv() and writev() */
+/* Required for readv() and writev().  NuttX has no upper limit, but programs
+ * declare arrays of IOV_MAX vectors: use the value of Linux and the BSDs.
+ */
 
-/* There really is no upper limit on the number of vectors */
-
-#define IOV_MAX        INT_MAX
+#define IOV_MAX        1024
 
 #define HOST_NAME_MAX  CONFIG_HOST_NAME_MAX
 
