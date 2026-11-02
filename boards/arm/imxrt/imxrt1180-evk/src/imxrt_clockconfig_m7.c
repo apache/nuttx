@@ -161,12 +161,66 @@ const struct clock_configuration_s g_initial_clkconfig =
     .ecat_clk_root          = CCM_CLOCK_ROOT_DISABLE,
     .enet_clk_root          = CCM_CLOCK_ROOT_DISABLE,
     .tmr_1588_clk_root      = CCM_CLOCK_ROOT_DISABLE,
+#ifdef CONFIG_IMXRT_NETC
+    .netc_clk_root =
+    {
+      .action = CCM_CLOCK_ROOT_CONFIGURE,
+      .div    = 2,
+      .mux    = SYS_PLL3_PFD3,
+    },
+#else
     .netc_clk_root          = CCM_CLOCK_ROOT_IGNORE,
+#endif
+#ifdef CONFIG_IMXRT_NETC_ENETC1_PORT0
+    .mac0_clk_root =
+    {
+      .action = CCM_CLOCK_ROOT_CONFIGURE,
+      .div    = 10,
+      .mux    = SYS_PLL1_DIV2,
+    },
+#else
     .mac0_clk_root          = CCM_CLOCK_ROOT_DISABLE,
+#endif
+#ifdef CONFIG_IMXRT_NETC_ENETC1_PORT1
+    .mac1_clk_root =
+    {
+      .action = CCM_CLOCK_ROOT_CONFIGURE,
+      .div    = 4,
+      .mux    = SYS_PLL1_DIV2,
+    },
+#else
     .mac1_clk_root          = CCM_CLOCK_ROOT_DISABLE,
+#endif
+#ifdef CONFIG_IMXRT_NETC_ENETC1_PORT2
+    .mac2_clk_root =
+    {
+      .action = CCM_CLOCK_ROOT_CONFIGURE,
+      .div    = 4,
+      .mux    = SYS_PLL1_DIV2,
+    },
+#else
     .mac2_clk_root          = CCM_CLOCK_ROOT_DISABLE,
+#endif
+#ifdef CONFIG_IMXRT_NETC_ENETC1_PORT3
+    .mac3_clk_root =
+    {
+      .action = CCM_CLOCK_ROOT_CONFIGURE,
+      .div    = 4,
+      .mux    = SYS_PLL1_DIV2,
+    },
+#else
     .mac3_clk_root          = CCM_CLOCK_ROOT_DISABLE,
+#endif
+#ifdef CONFIG_IMXRT_NETC_ENETC0
+    .mac4_clk_root =
+    {
+      .action = CCM_CLOCK_ROOT_CONFIGURE,
+      .div    = 10,
+      .mux    = SYS_PLL1_DIV2,
+    },
+#else
     .mac4_clk_root          = CCM_CLOCK_ROOT_DISABLE,
+#endif
     .serdes0_clk_root       = CCM_CLOCK_ROOT_DISABLE,
     .serdes1_clk_root       = CCM_CLOCK_ROOT_DISABLE,
     .serdes2_clk_root       = CCM_CLOCK_ROOT_DISABLE,
