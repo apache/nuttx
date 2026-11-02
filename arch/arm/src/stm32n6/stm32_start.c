@@ -106,8 +106,10 @@ void __start_c(void) noinstrument_function;
  *
  * Description:
  *   Reset entry point.  The STM32N6 boot ROM (DEV mode) leaves MSPLIM and
- *   PSPLIM set such that the first stack push from C code can fault.
- *   This function is naked so the limits can be cleared before any
+ *   PSPLIM set such that the first stack push from C code can fault, and
+ *   it jumps here with MSP still pointing into its own stack in AXISRAM1.
+ *   This function is naked so the limits can be cleared and MSP loaded
+ *   from the vector table, as a hardware reset would, before any
  *   compiler-generated prologue runs.  It then tail-calls __start_c.
  *
  ****************************************************************************/
@@ -117,6 +119,10 @@ void __attribute__((naked)) noinstrument_function __start(void)
   __asm__ volatile ("mov r0, #0\n\t"
                     "msr msplim, r0\n\t"
                     "msr psplim, r0\n\t"
+                    "ldr r0, =_vectors\n\t"
+                    "ldr r0, [r0]\n\t"
+                    "msr msp, r0\n\t"
+                    "isb\n\t"
                     "b __start_c\n\t");
 }
 
@@ -258,14 +264,6 @@ void __start_c(void)
   /* Read-back to ensure prior SYSCFG writes complete */
 
   (void)getreg32(STM32_SYSCFG_VDDCCCR);
-
-#ifdef CONFIG_STM32_USART1
-  /* Route USART1's kernel clock to HSI so the BRR computation is
-   * independent of any later SYSCLK changes.
-   */
-
-  putreg32(RCC_CCIPR13_USART1SEL_HSI, STM32_RCC_CCIPR13);
-#endif
 
   stm32_lowsetup();
 

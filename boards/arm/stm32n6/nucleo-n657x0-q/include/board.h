@@ -38,38 +38,57 @@
 
 /* Clocking *****************************************************************/
 
-/* Clock tree (single PLL1 fed from the internal HSI):
- *
- *   HSI 64 MHz / M=4 * N=50 = 800 MHz VCO
- *     IC1  /4 = 200 MHz  -> CPU clock (CPUSW)
- *     IC2  /8 = 100 MHz  \
- *     IC6 /12 = 66.7 MHz  > SYSCLK components (SYSSW IC2_IC6_IC11)
- *     IC11 /8 = 100 MHz  /
- *   HPRE /2  = 50 MHz   -> HCLK
- *   PPRE1 /1 = 50 MHz   -> PCLK1
- *   PPRE2 /1 = 50 MHz   -> PCLK2
- *
- * Works with the default VOS SCALE1, no SMPS overdrive required.  Higher
- * CPU frequencies (600/800 MHz) are deferred to a follow-up.
+/* Single PLL1 fed from the internal HSI.  See
+ * arch/arm/src/stm32n6/stm32n6xx_rcc.c for the board.h clock macros.
  */
 
 #define STM32_HSI_FREQUENCY     64000000ul
 #define STM32_LSI_FREQUENCY     32000
+#define STM32_LSE_FREQUENCY     32768
 
+/* HSI 64 MHz
+ *   PLL1 = HSI / 4 * 50 = 800 MHz
+ *     IC1  /4  = 200 MHz  -> CPU clock (CPUSW)
+ *     IC2  /8  = 100 MHz  \
+ *     IC6  /12 = 66.7 MHz  > SYSCLK components (SYSSW IC2_IC6_IC11)
+ *     IC11 /8  = 100 MHz  /
+ *   HPRE /2   = 50 MHz   -> HCLK
+ *   PPREx /1  = 50 MHz   -> PCLK1/2/4/5
+ *   TIMPRE /1 = 100 MHz  -> timer kernel clock
+ *
+ * Works with VOS low, no VDDCORE overdrive required.
+ */
+
+#define STM32_PLL1_SRC          RCC_PLL1CFGR1_SEL_HSI
 #define STM32_PLL1_M            4
 #define STM32_PLL1_N            50
-#define STM32_PLL1_IC1_DIV      4
+#define STM32_PLL1_FREQUENCY    800000000ul
 
-#define STM32_CPUCLK_FREQUENCY  200000000ul
-#define STM32_SYSCLK_FREQUENCY  (STM32_CPUCLK_FREQUENCY / 2)
-#define STM32_HCLK_FREQUENCY    (STM32_CPUCLK_FREQUENCY / 4)
+#define STM32_IC1_SRC           RCC_ICCFGR_SEL_PLL1
+#define STM32_IC1_DIV           4
+#define STM32_IC2_SRC           RCC_ICCFGR_SEL_PLL1
+#define STM32_IC2_DIV           8
+#define STM32_IC6_SRC           RCC_ICCFGR_SEL_PLL1
+#define STM32_IC6_DIV           12
+#define STM32_IC11_SRC          RCC_ICCFGR_SEL_PLL1
+#define STM32_IC11_DIV          8
+
+#define STM32_CPUCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC1_DIV)
+#define STM32_SYSCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC2_DIV)
+#define STM32_RCC_CFGR2_HPRE    RCC_CFGR2_HPRE_SYSCLKd2
+#define STM32_RCC_CFGR2_TIMPRE  RCC_CFGR2_TIMPRE_SYSCLK
+#define STM32_HCLK_FREQUENCY    (STM32_SYSCLK_FREQUENCY / 2)
+#define STM32_TIMCLK_FREQUENCY  STM32_SYSCLK_FREQUENCY
+
 #define STM32_PCLK1_FREQUENCY   STM32_HCLK_FREQUENCY
 #define STM32_PCLK2_FREQUENCY   STM32_HCLK_FREQUENCY
+#define STM32_PCLK4_FREQUENCY   STM32_HCLK_FREQUENCY
+#define STM32_PCLK5_FREQUENCY   STM32_HCLK_FREQUENCY
 
-/* Timer input clock = SYSCLK (TIMPRE=0 default) */
+/* Timer kernel clock (TIMG = SYSCLK / TIMPRE) */
 
-#define STM32_APB1_TIM_FREQUENCY STM32_SYSCLK_FREQUENCY
-#define STM32_APB2_TIM_FREQUENCY STM32_SYSCLK_FREQUENCY
+#define STM32_APB1_TIM_FREQUENCY STM32_TIMCLK_FREQUENCY
+#define STM32_APB2_TIM_FREQUENCY STM32_TIMCLK_FREQUENCY
 
 #define STM32_TIM1_CLKIN         STM32_APB2_TIM_FREQUENCY
 #define STM32_TIM8_CLKIN         STM32_APB2_TIM_FREQUENCY
@@ -98,6 +117,11 @@
 #define STM32_LPTIM3_CLKIN       STM32_HCLK_FREQUENCY
 #define STM32_LPTIM4_CLKIN       STM32_HCLK_FREQUENCY
 #define STM32_LPTIM5_CLKIN       STM32_HCLK_FREQUENCY
+
+/* USART1 kernel clock: HSI, independent of the system clock tree */
+
+#define STM32_RCC_CCIPR13_USART1SEL RCC_CCIPR13_USART1SEL_HSI
+#define STM32_USART1_FREQUENCY      STM32_HSI_FREQUENCY
 
 /* I/O voltage domains ******************************************************/
 
