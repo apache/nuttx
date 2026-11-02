@@ -29,6 +29,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -39,7 +41,9 @@
 
 #ifdef CONFIG_RPMSG_PROCFS
 void rpmsg_procfs_initialize(void);
+bool rpmsg_procfs_trace_allow(FAR const char *ept_name);
 #else
 #  define rpmsg_procfs_initialize()
+#  define rpmsg_procfs_trace_allow(ept_name) true
 #endif /* CONFIG_RPMSG_PROCFS */
 #endif /* __DRIVERS_RPMSG_RPMSG_PROCFS_H */
