@@ -314,9 +314,18 @@ static int vsprintf_putnum(FAR struct lib_outstream_s *stream,
   return len;
 }
 
-static int vsprintf_scan_literal(FAR struct lib_outstream_s *stream,
-                                 FAR const IPTR char **fmtp,
-                                 FAR unsigned char *conv)
+/****************************************************************************
+ * Name: vsprintf_scan_literal
+ *
+ * Description:
+ *   Scan and emit ordinary literal text until the next conversion specifier.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_scan_literal(FAR struct lib_outstream_s *stream,
+                      FAR const IPTR char **fmtp,
+                      FAR unsigned char *conv)
 {
   FAR const IPTR char *fmt = *fmtp;
   unsigned char c;
@@ -412,9 +421,18 @@ static int vsprintf_scan_literal(FAR struct lib_outstream_s *stream,
   return total_len;
 }
 
-static int vsprintf_put_field(FAR struct lib_outstream_s *stream,
-                              FAR const char *pnt, size_t size,
-                              FAR int *width, uint16_t flags)
+/****************************************************************************
+ * Name: vsprintf_put_field
+ *
+ * Description:
+ *   Emit a field with leading padding and update the remaining width.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_field(FAR struct lib_outstream_s *stream,
+                   FAR const char *pnt, size_t size,
+                   FAR int *width, uint16_t flags)
 {
   int total_len = 0;
   int w = *width;
@@ -437,9 +455,18 @@ static int vsprintf_put_field(FAR struct lib_outstream_s *stream,
   return total_len;
 }
 
-static int vsprintf_put_char(FAR struct lib_outstream_s *stream,
-                             uint16_t flags, int ch, FAR int *width,
-                             FAR char *buf)
+/****************************************************************************
+ * Name: vsprintf_put_char
+ *
+ * Description:
+ *   Emit a character conversion, including wide-character handling.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_char(FAR struct lib_outstream_s *stream,
+                  uint16_t flags, int ch, FAR int *width,
+                  FAR char *buf)
 {
   FAR const char *pnt;
   size_t size;
@@ -466,13 +493,25 @@ static int vsprintf_put_char(FAR struct lib_outstream_s *stream,
     }
 
   pnt = buf;
+
+  /* Share normal field padding/output with string conversions. */
+
   return vsprintf_put_field(stream, pnt, size, width, flags);
 }
 
 #ifdef CONFIG_LIBC_LOCALE
-static int vsprintf_put_wstring(FAR struct lib_outstream_s *stream,
-                                FAR const wchar_t *ws, uint16_t flags,
-                                FAR int *width, int prec)
+/****************************************************************************
+ * Name: vsprintf_put_wstring
+ *
+ * Description:
+ *   Emit a wide string conversion as multibyte characters.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_wstring(FAR struct lib_outstream_s *stream,
+                     FAR const wchar_t *ws, uint16_t flags,
+                     FAR int *width, int prec)
 {
   char mb[MB_LEN_MAX];
   mbstate_t ps;
@@ -531,10 +570,19 @@ static int vsprintf_put_wstring(FAR struct lib_outstream_s *stream,
 #endif
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
-static int vsprintf_check_arg(FAR struct lib_outstream_s *stream,
-                              FAR struct arg_s *arglist, int numargs,
-                              int argnumber, uint16_t flags,
-                              unsigned char c, FAR size_t *total_len)
+/****************************************************************************
+ * Name: vsprintf_check_arg
+ *
+ * Description:
+ *   Validate numbered arguments and record their type during the parse pass.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_check_arg(FAR struct lib_outstream_s *stream,
+                   FAR struct arg_s *arglist, int numargs,
+                   int argnumber, uint16_t flags,
+                   unsigned char c, FAR size_t *total_len)
 {
   if ((flags & FL_ARGNUMBER) != 0)
     {
@@ -598,7 +646,16 @@ static int vsprintf_check_arg(FAR struct lib_outstream_s *stream,
 }
 #endif
 
-static void vsprintf_pointer_flags(FAR uint16_t *flags)
+/****************************************************************************
+ * Name: vsprintf_pointer_flags
+ *
+ * Description:
+ *   Select integer-size flags that match the platform pointer size.
+ *
+ ****************************************************************************/
+
+static inline_function void
+vsprintf_pointer_flags(FAR uint16_t *flags)
 {
   /* Determine size of pointer and set flags accordingly */
 
@@ -615,10 +672,18 @@ static void vsprintf_pointer_flags(FAR uint16_t *flags)
 }
 
 #ifdef CONFIG_LIBC_PRINT_EXTENSION
-static int vsprintf_pointer_extension(FAR struct lib_outstream_s *stream,
-                                      FAR const IPTR char **fmt,
-                                      unsigned long long x,
-                                      FAR size_t *total_len)
+/****************************************************************************
+ * Name: vsprintf_pointer_extension
+ *
+ * Description:
+ *   Handle CONFIG_LIBC_PRINT_EXTENSION pointer conversion extensions.
+ *
+ ****************************************************************************/
+
+static int
+vsprintf_pointer_extension(FAR struct lib_outstream_s *stream,
+                           FAR const IPTR char **fmt,
+                           unsigned long long x, FAR size_t *total_len)
 {
   unsigned char c = fmt_char(*fmt);
 
@@ -689,9 +754,18 @@ static int vsprintf_pointer_extension(FAR struct lib_outstream_s *stream,
 }
 #endif
 
-static size_t vsprintf_put_integer(FAR struct lib_outstream_s *stream,
-                                   uint16_t flags, FAR char *buf,
-                                   int digits, FAR int *width, int prec)
+/****************************************************************************
+ * Name: vsprintf_put_integer
+ *
+ * Description:
+ *   Emit integer prefixes, signs, precision padding, and converted digits.
+ *
+ ****************************************************************************/
+
+static inline_function size_t
+vsprintf_put_integer(FAR struct lib_outstream_s *stream,
+                     uint16_t flags, FAR char *buf, int digits,
+                     FAR int *width, int prec)
 {
   unsigned int len = digits;
   size_t total_len = 0;
@@ -802,9 +876,18 @@ static size_t vsprintf_put_integer(FAR struct lib_outstream_s *stream,
 }
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT
-static int vsprintf_put_naninf(FAR struct lib_outstream_s *stream,
-                               uint16_t flags, int dtoa_flags, int sign,
-                               FAR int *width)
+/****************************************************************************
+ * Name: vsprintf_put_naninf
+ *
+ * Description:
+ *   Emit NaN or Inf floating-point output with padding and sign handling.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_naninf(FAR struct lib_outstream_s *stream,
+                    uint16_t flags, int dtoa_flags, int sign,
+                    FAR int *width)
 {
   FAR const char *p;
   int total_len = 0;
@@ -847,8 +930,16 @@ static int vsprintf_put_naninf(FAR struct lib_outstream_s *stream,
   return total_len;
 }
 
-static int vsprintf_float_sign(uint16_t flags,
-                               FAR const struct dtoa_s *dtoa)
+/****************************************************************************
+ * Name: vsprintf_float_sign
+ *
+ * Description:
+ *   Select the sign character for a floating-point conversion.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_float_sign(uint16_t flags, FAR const struct dtoa_s *dtoa)
 {
   if ((dtoa->flags & DTOA_MINUS) != 0)
     {
@@ -868,10 +959,19 @@ static int vsprintf_float_sign(uint16_t flags,
   return 0;
 }
 
-static void vsprintf_float_format(unsigned char c, int prec,
-                                  FAR uint16_t *flags,
-                                  FAR unsigned int *ndigs,
-                                  FAR int *ndecimal)
+/****************************************************************************
+ * Name: vsprintf_float_format
+ *
+ * Description:
+ *   Initialize dtoa digit limits and float-mode flags for a conversion.
+ *
+ ****************************************************************************/
+
+static inline_function void
+vsprintf_float_format(unsigned char c, int prec,
+                      FAR uint16_t *flags,
+                      FAR unsigned int *ndigs,
+                      FAR int *ndecimal)
 {
   *ndigs = MIN(prec, DTOA_MAX_DIG);
   *ndecimal = 0;
@@ -898,10 +998,19 @@ static void vsprintf_float_format(unsigned char c, int prec,
     }
 }
 
-static void vsprintf_adjust_float_general(FAR uint16_t *flags,
-                                          FAR int *prec,
-                                          FAR unsigned int *ndigs, int exp,
-                                          FAR const struct dtoa_s *dtoa)
+/****************************************************************************
+ * Name: vsprintf_adjust_float_general
+ *
+ * Description:
+ *   Adjust %%g/%%G precision and choose fixed or exponent notation.
+ *
+ ****************************************************************************/
+
+static inline_function void
+vsprintf_adjust_float_general(FAR uint16_t *flags,
+                              FAR int *prec,
+                              FAR unsigned int *ndigs, int exp,
+                              FAR const struct dtoa_s *dtoa)
 {
   if ((*flags & (FL_FLTEXP | FL_FLTFIX)) != 0)
     {
@@ -940,8 +1049,16 @@ static void vsprintf_adjust_float_general(FAR uint16_t *flags,
     }
 }
 
-static unsigned int vsprintf_float_length(uint16_t flags, int sign, int exp,
-                                          int prec)
+/****************************************************************************
+ * Name: vsprintf_float_length
+ *
+ * Description:
+ *   Calculate the formatted floating-point output length.
+ *
+ ****************************************************************************/
+
+static inline_function unsigned int
+vsprintf_float_length(uint16_t flags, int sign, int exp, int prec)
 {
   unsigned int len;
 
@@ -975,9 +1092,18 @@ static unsigned int vsprintf_float_length(uint16_t flags, int sign, int exp,
   return len;
 }
 
-static int vsprintf_put_float_prefix(FAR struct lib_outstream_s *stream,
-                                     uint16_t flags, int sign,
-                                     FAR int *width, int len)
+/****************************************************************************
+ * Name: vsprintf_put_float_prefix
+ *
+ * Description:
+ *   Emit floating-point padding, sign, and zero-fill prefix bytes.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_float_prefix(FAR struct lib_outstream_s *stream,
+                          uint16_t flags, int sign,
+                          FAR int *width, int len)
 {
   int total_len = 0;
   int w = *width;
@@ -1007,10 +1133,18 @@ static int vsprintf_put_float_prefix(FAR struct lib_outstream_s *stream,
   return total_len;
 }
 
-static int vsprintf_put_float_fixed(FAR struct lib_outstream_s *stream,
-                                    uint16_t flags,
-                                    FAR const struct dtoa_s *dtoa, int exp,
-                                    unsigned int ndigs, int prec)
+/****************************************************************************
+ * Name: vsprintf_put_float_fixed
+ *
+ * Description:
+ *   Emit the fixed-format floating-point digit sequence.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_float_fixed(FAR struct lib_outstream_s *stream, uint16_t flags,
+                         FAR const struct dtoa_s *dtoa, int exp,
+                         unsigned int ndigs, int prec)
 {
   char out;
   int n;
@@ -1097,10 +1231,18 @@ static int vsprintf_put_float_fixed(FAR struct lib_outstream_s *stream,
   return total_len;
 }
 
-static int vsprintf_put_float_exp(FAR struct lib_outstream_s *stream,
-                                  uint16_t flags, FAR struct dtoa_s *dtoa,
-                                  int exp, unsigned int ndigs, int prec,
-                                  FAR char *buf)
+/****************************************************************************
+ * Name: vsprintf_put_float_exp
+ *
+ * Description:
+ *   Emit the exponent-format floating-point digit sequence.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_float_exp(FAR struct lib_outstream_s *stream,
+                       uint16_t flags, FAR struct dtoa_s *dtoa,
+                       int exp, unsigned int ndigs, int prec, FAR char *buf)
 {
   int nbytes;
   int sign;
@@ -1163,11 +1305,20 @@ static int vsprintf_put_float_exp(FAR struct lib_outstream_s *stream,
   return total_len;
 }
 
-static size_t vsprintf_put_float(FAR struct lib_outstream_s *stream,
-                                 uint16_t flags, unsigned char c,
-                                 FAR int *width, int prec,
-                                 FAR struct dtoa_s *dtoa, FAR char *buf,
-                                 double value)
+/****************************************************************************
+ * Name: vsprintf_put_float
+ *
+ * Description:
+ *   Handle a complete floating-point conversion.
+ *
+ ****************************************************************************/
+
+static inline_function size_t
+vsprintf_put_float(FAR struct lib_outstream_s *stream,
+                   uint16_t flags, unsigned char c,
+                   FAR int *width, int prec,
+                   FAR struct dtoa_s *dtoa, FAR char *buf,
+                   double value)
 {
   int exp;              /* Exponent of master decimal digit */
   unsigned int flen;    /* Length of the conversion */
@@ -1199,17 +1350,25 @@ static size_t vsprintf_put_float(FAR struct lib_outstream_s *stream,
       return vsprintf_put_field(stream, "?", 1, width, flags);
     }
 
+  /* Initialize dtoa precision and select the requested float mode. */
+
   vsprintf_float_format(c, prec, &flags, &ndigs, &ndecimal);
 
   ndigs = __dtoa_engine(value, dtoa, ndigs, ndecimal);
   exp = dtoa->exp;
 
+  /* Select the optional sign prefix before handling special values. */
+
   sign = vsprintf_float_sign(flags, dtoa);
 
   if ((dtoa->flags & (DTOA_NAN | DTOA_INF)) != 0)
     {
+      /* Emit NaN/Inf and return because they have no mantissa body. */
+
       return vsprintf_put_naninf(stream, flags, dtoa->flags, sign, width);
     }
+
+  /* Apply the %g/%G fixed-versus-exponent selection rules. */
 
   vsprintf_adjust_float_general(&flags, &prec, &ndigs, exp, dtoa);
 
@@ -1221,11 +1380,15 @@ static size_t vsprintf_put_float(FAR struct lib_outstream_s *stream,
       return INT_MAX + 1u;
     }
 
+  /* Emit any leading padding, sign, or zero-fill prefix. */
+
   total_len += vsprintf_put_float_prefix(stream, flags, sign, width, flen);
 
   if ((flags & FL_FLTFIX) != 0)
     {
       /* 'f' format */
+
+      /* Emit fixed-format digits after the common prefix. */
 
       total_len += vsprintf_put_float_fixed(stream, flags, dtoa, exp,
                                             ndigs, prec);
@@ -1233,6 +1396,8 @@ static size_t vsprintf_put_float(FAR struct lib_outstream_s *stream,
   else
     {
       /* 'e(E)' format */
+
+      /* Emit exponent-format digits after the common prefix. */
 
       total_len += vsprintf_put_float_exp(stream, flags, dtoa, exp,
                                           ndigs, prec, buf);
@@ -1276,6 +1441,8 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
   while (total_len <= INT_MAX)
     {
+      /* Emit literal text before handling the next conversion. */
+
       total_len += vsprintf_scan_literal(stream, &fmt, &c);
       if (c == '\0')
         {
@@ -1548,10 +1715,14 @@ set_star:
 
       if (c == 'p')
         {
+          /* Select the integer width needed to print a pointer value. */
+
           vsprintf_pointer_flags(&flags);
         }
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
+      /* Validate numbered arguments or record their type in parse mode. */
+
       result = vsprintf_check_arg(stream, arglist, numargs, argnumber,
                                   flags, c, &total_len);
       if (result < 0)
@@ -1569,6 +1740,8 @@ set_star:
       if (fmt_isfloat(c))
         {
           double value;
+
+          /* Handle the full floating-point conversion outside this loop. */
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
@@ -1616,6 +1789,9 @@ set_star:
 
           pnt  = "?";
           size = 1;
+
+          /* Emit the placeholder string when floating point is disabled. */
+
           total_len += vsprintf_put_field(stream, pnt, size, &width,
                                           flags);
           goto tail;
@@ -1628,6 +1804,8 @@ set_star:
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
             if ((flags & FL_ARGNUMBER) != 0)
               {
+                /* Emit a numbered character argument. */
+
                 result = vsprintf_put_char(stream, flags,
                                            arglist->value[argnumber - 1].u,
                                            &width, buf);
@@ -1635,6 +1813,8 @@ set_star:
             else
 #endif
               {
+                /* Emit a sequential character argument. */
+
                 result = vsprintf_put_char(stream, flags, va_arg(ap, int),
                                            &width, buf);
               }
@@ -1679,6 +1859,8 @@ set_star:
 #ifdef CONFIG_LIBC_LOCALE
             else if (c == 's' && (flags & FL_LONG) != 0)
               {
+                /* Emit a wide string argument as multibyte output. */
+
                 result = vsprintf_put_wstring(stream,
                                               (FAR const wchar_t *)pnt,
                                               flags, &width, prec);
@@ -1700,6 +1882,8 @@ set_star:
               {
                 size = strlen(pnt);
               }
+
+            /* Emit a normal string field with any required padding. */
 
             total_len += vsprintf_put_field(stream, pnt, size, &width,
                                             flags);
@@ -1725,8 +1909,7 @@ set_star:
                   x = va_arg(ap, long long);
                 }
             }
-          else
-          if ((flags & FL_LONG) != 0)
+          else if ((flags & FL_LONG) != 0)
             {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
@@ -1815,8 +1998,7 @@ set_star:
                   x = va_arg(ap, unsigned long long);
                 }
             }
-          else
-          if ((flags & FL_LONG) != 0)
+          else if ((flags & FL_LONG) != 0)
             {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
@@ -1870,6 +2052,8 @@ set_star:
 
               case 'p':
 #ifdef CONFIG_LIBC_PRINT_EXTENSION
+                /* Try CONFIG_LIBC_PRINT_EXTENSION before normal %p output. */
+
                 result = vsprintf_pointer_extension(stream, &fmt, x,
                                                      &total_len);
                 if (result > 0)
@@ -1912,6 +2096,8 @@ set_star:
 
           flags &= ~FL_NEGATIVE;
         }
+
+      /* Emit the converted integer digits and field decoration. */
 
       total_len += vsprintf_put_integer(stream, flags, buf, c, &width,
                                         prec);
