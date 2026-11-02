@@ -131,6 +131,10 @@
 
 #define LAN9250_SQI_TIMEOUT         20
 
+/* RX data FIFO fast-forward timeout in second */
+
+#define LAN9250_RXFFWD_TIMEOUT      1
+
 /* Packet Memory ************************************************************/
 
 /* Misc. Helper Macros ******************************************************/
@@ -270,6 +274,7 @@ static void lan9250_set_phyreg(FAR struct lan9250_driver_s *priv,
 
 static void lan9250_recv_buffer(FAR struct lan9250_driver_s *priv,
                                 FAR uint8_t *buffer, size_t buflen);
+static void lan9250_discard_frame(FAR struct lan9250_driver_s *priv);
 static inline void lan9250_send_buffer(FAR struct lan9250_driver_s *priv,
                                        FAR const uint8_t *buffer,
                                        size_t buflen);
@@ -881,6 +886,8 @@ static void lan9250_recv_buffer(FAR struct lan9250_driver_s *priv,
   struct qspi_meminfo_s meminfo;
   int ret;
 
+  DEBUGASSERT(buflen <= sizeof(priv->pktbuf));
+
   meminfo.cmd     = LAN9250_SPI_READ;
   meminfo.addr    = LAN9250_RXDFR;
   meminfo.addrlen = sizeof(uint16_t);
@@ -898,6 +905,29 @@ static void lan9250_recv_buffer(FAR struct lan9250_driver_s *priv,
 #endif /* CONFIG_LAN9250_SPI */
 
   lan9250_buffer_dump(LAN9250_RXDFR, buffer, buflen);
+}
+
+/****************************************************************************
+ * Name: lan9250_discard_frame
+ *
+ * Description:
+ *   Discard the data of the frame at the head of the RX data FIFO by
+ *   fast-forwarding past it.  The RX status of the frame must have been
+ *   read already, and the frame must be at least 4 DWORDs long.
+ *
+ * Input Parameters:
+ *   priv    - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lan9250_discard_frame(FAR struct lan9250_driver_s *priv)
+{
+  lan9250_set_reg(priv, LAN9250_RDCR, RDCR_RXFFWD);
+  lan9250_wait_ready(priv, LAN9250_RDCR, RDCR_RXFFWD, 0,
+                     LAN9250_RXFFWD_TIMEOUT);
 }
 
 /****************************************************************************
@@ -1424,7 +1454,7 @@ static int lan9250_transmit(FAR struct lan9250_driver_s *priv)
 
   for (int i = 0; i < status_size; i++)
     {
-       lan9250_get_reg(priv, LAN9250_TXSFR);
+      lan9250_get_reg(priv, LAN9250_TXSFR);
     }
 
   if (free_size > priv->dev.d_len)
@@ -1749,6 +1779,19 @@ static void lan9250_rxdone_isr(FAR struct lan9250_driver_s *priv)
 
       ninfo("pktlen:%d\n", pktlen);
 
+      /* The length reported by the hardware includes the 4 byte CRC and
+       * can be up to 16383 bytes.  Frames that do not fit in d_buf must
+       * not be copied into it; skip their data in the RX data FIFO.
+       */
+
+      if (pktlen > MAX_NETDEV_PKTSIZE + 4)
+        {
+          nwarn("WARNING: Oversized frame dropped (%u)\n", pktlen);
+          NETDEV_RXERRORS(&priv->dev);
+          lan9250_discard_frame(priv);
+          continue;
+        }
+
       if (pktlen)
         {
           /* Copy the data from the receive buffer to priv->dev.d_buf.
@@ -1757,6 +1800,17 @@ static void lan9250_rxdone_isr(FAR struct lan9250_driver_s *priv)
            */
 
           lan9250_recv_buffer(priv, priv->dev.d_buf, pktlen);
+
+          /* Runt frames are read out of the FIFO above, but not passed on,
+           * so that d_len cannot underflow.
+           */
+
+          if (pktlen < ETH_HDRLEN + 4)
+            {
+              nwarn("WARNING: Runt frame dropped (%u)\n", pktlen);
+              NETDEV_RXERRORS(&priv->dev);
+              continue;
+            }
 
           /* Save the packet length (without the 4 byte CRC)
            * in priv->dev.d_len.
@@ -2373,6 +2427,7 @@ static int lan9250_ioctl(FAR struct net_driver_s *dev, int cmd,
         {
           struct mii_ioctl_data_s *req =
                     (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           req->phy_id = 0;
         }
         break;
@@ -2381,6 +2436,7 @@ static int lan9250_ioctl(FAR struct net_driver_s *dev, int cmd,
         {
           struct mii_ioctl_data_s *req =
                     (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           req->val_out = lan9250_get_phyreg(priv, req->reg_num);
         }
         break;
@@ -2389,14 +2445,15 @@ static int lan9250_ioctl(FAR struct net_driver_s *dev, int cmd,
         {
           struct mii_ioctl_data_s *req =
                     (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           lan9250_set_phyreg(priv, req->reg_num, req->val_in);
         }
         break;
 #endif /* CONFIG_NETDEV_PHY_IOCTL */
 
-    default:
-      nerr("ERROR: Unrecognized IOCTL command: %d\n", cmd);
-      ret = -ENOTTY; /* Special return value for this case */
+      default:
+        nerr("ERROR: Unrecognized IOCTL command: %d\n", cmd);
+        ret = -ENOTTY; /* Special return value for this case */
     }
 
   /* Un-lock the SPI bus */
@@ -2511,8 +2568,9 @@ int lan9250_uninitialize(FAR const struct lan9250_lower_s *lower)
 {
   FAR struct lan9250_driver_s *priv = &g_lan9250;
   FAR struct net_driver_s *dev = &priv->dev;
+  int ret;
 
-  int ret = netdev_unregister(dev); /* No such interface yet */
+  ret = netdev_unregister(dev); /* No such interface yet */
   if (ret < 0)
     {
       nerr("ERROR: netdev_unregister failed: %d\n", ret);

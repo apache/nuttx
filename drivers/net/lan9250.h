@@ -234,6 +234,10 @@
 
 /* System Control and Status Registers Fields *******************************/
 
+/* RX Datapath Control Register */
+
+#define RDCR_RXFFWD                 0x80000000
+
 /* RX FIFO Status Register */
 
 #define RXFIR_RXSFUS_M              0x00ff0000
