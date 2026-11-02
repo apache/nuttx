@@ -268,6 +268,7 @@ irqstate_t enter_critical_section_notrace(void)
   if (!up_interrupt_context())
     {
       FAR struct tcb_s *rtcb = this_task();
+
       DEBUGASSERT(rtcb != NULL);
 
       /* Have we just entered the critical section?  Or is this a nested
@@ -367,6 +368,7 @@ void leave_critical_section_notrace(irqstate_t flags)
                       g_cpu_nestcount[cpu] == 1);
 
           FAR struct tcb_s *rtcb = current_task(cpu);
+
           DEBUGASSERT(rtcb != NULL);
           DEBUGASSERT((g_cpu_irqset & (1 << cpu)) != 0);
 
@@ -441,6 +443,7 @@ void leave_critical_section_notrace(irqstate_t flags)
   if (!up_interrupt_context())
     {
       FAR struct tcb_s *rtcb = this_task();
+
       DEBUGASSERT(rtcb != NULL);
 
       /* Have we left entered the critical section?  Or are we still
