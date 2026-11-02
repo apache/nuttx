@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_sdmmc.c
+ * arch/arm/src/common/stm32/stm32_sdmmc_v2.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -50,11 +50,9 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "stm32_dtcm.h"
-#include "stm32_dma.h"
-#include "stm32_gpio.h"
-#include "stm32_rcc.h"
+#include "stm32.h"
 #include "stm32_sdmmc.h"
+#include "stm32_sdmmc_chip.h"
 
 #if defined(CONFIG_STM32_SDMMC1) || defined(CONFIG_STM32_SDMMC2)
 
@@ -86,11 +84,11 @@
  *
  * HW Issues when using IDMA
  *
- *    The DMA buffer must be located in a zone accessible via IDMA.
- * For SDMMC1, IDMA cannot access SRAM123 or SRAM4. Refer to ST AN5200.
+ *    The DMA buffer must be located in a zone accessible via IDMA.  The
+ * family stm32_sdmmc_chip.h gives these zones.
  * Buffer validity is checked when CONFIG_ARCH_HAVE_SDIO_PREFLIGHT is set.
  *
- * MDMA is only available on for SDMMC1 and Not supported at this time.
+ * The STM32H7 MDMA path for SDMMC1 is not supported at this time.
  *
  * Required system configuration options:
  *
@@ -138,20 +136,8 @@
 
 #if !defined(CONFIG_STM32_SDMMC_IDMA)
 #  warning "Large Non-DMA transfer may result in RX overrun failures"
-#else
-#  define AXISRAM_START  STM32_AXISRAM_BASE
-#  define AXISRAM_END    (AXISRAM_START + STM32_SRAM_SIZE)
-#  if defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
-      !defined(CONFIG_STM32_STM32H72XXX_OR_STM32H73XXX) && \
-      (defined(CONFIG_STM32_STM32H7X0XX) || \
-       defined(CONFIG_STM32_STM32H7X3XX) || \
-       defined(CONFIG_STM32_STM32H7X5XX))
-#    define HAVE_SDMMC2_D2D3_IDMA 1
-#    define SRAM123_START STM32_SRAM123_BASE
-#    define SRAM123_END   (SRAM123_START + STM32_SRAM123_SIZE)
-#    define SRAM4_START   STM32_SRAM4_BASE
-#    define SRAM4_END     (SRAM4_START + STM32_SRAM4_SIZE)
-#  endif
+#elif !defined(STM32_SDMMC_IDMA_RAM_START) || !defined(STM32_SDMMC_IDMA_RAM_END)
+#  error "stm32_sdmmc_chip.h must define the IDMA accessible memory"
 #endif
 
 #if !defined(CONFIG_SCHED_WORKQUEUE) || !defined(CONFIG_SCHED_HPWORK)
@@ -183,20 +169,54 @@
 
 #define FIFO_SIZE_IN_BYTES        64
 
-/* Friendly Clock source & CLKCR bit re-definitions *************************/
+/* Data cache maintenance for ARMv7-M and ARMv8-M cores */
 
-/* If not set in board use default pll1_q_ck clock is selected as
- * kernel peripheral clock (default after reset)
- */
-
-#if !defined(STM32_RCC_D1CCIPR_SDMMCSEL)
-#  define STM32_RCC_D1CCIPR_SDMMCSEL  RCC_D1CCIPR_SDMMC_PLL1
+#if defined(CONFIG_ARMV7M_DCACHE)
+#  define SDMMC_HAVE_DCACHE 1
+#  if defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
+#    define SDMMC_DCACHE_WRITETHROUGH 1
+#  endif
+#elif defined(CONFIG_ARMV8M_DCACHE)
+#  define SDMMC_HAVE_DCACHE 1
+#  if defined(CONFIG_ARMV8M_DCACHE_WRITETHROUGH)
+#    define SDMMC_DCACHE_WRITETHROUGH 1
+#  endif
 #endif
 
-#if STM32_RCC_D1CCIPR_SDMMCSEL  == RCC_D1CCIPR_SDMMC_PLL1
-#  define STM32_SDMMC_CLK  STM32_PLL1Q_FREQUENCY
+#if defined(ARMV7M_DCACHE_LINESIZE)
+#  define SDMMC_DCACHE_LINESIZE ARMV7M_DCACHE_LINESIZE
+#elif defined(ARMV8M_DCACHE_LINESIZE)
+#  define SDMMC_DCACHE_LINESIZE ARMV8M_DCACHE_LINESIZE
 #else
-#  define STM32_SDMMC_CLK  STM32_PLL2R_FREQUENCY
+#  define SDMMC_DCACHE_LINESIZE 32
+#endif
+
+/* Peripheral reset bits */
+
+#if defined(RCC_AHB3RSTR_SDMMC1RST)
+#  define STM32_RCC_SDMMC1_RST_REG  STM32_RCC_AHB3RSTR
+#  define STM32_RCC_SDMMC1_RST      RCC_AHB3RSTR_SDMMC1RST
+#elif defined(RCC_AHB5RSTR_SDMMC1RST)
+#  define STM32_RCC_SDMMC1_RST_REG  STM32_RCC_AHB5RSTR
+#  define STM32_RCC_SDMMC1_RST      RCC_AHB5RSTR_SDMMC1RST
+#endif
+
+#if defined(RCC_AHB2RSTR_SDMMC2RST)
+#  define STM32_RCC_SDMMC2_RST_REG  STM32_RCC_AHB2RSTR
+#  define STM32_RCC_SDMMC2_RST      RCC_AHB2RSTR_SDMMC2RST
+#elif defined(RCC_AHB5RSTR_SDMMC2RST)
+#  define STM32_RCC_SDMMC2_RST_REG  STM32_RCC_AHB5RSTR
+#  define STM32_RCC_SDMMC2_RST      RCC_AHB5RSTR_SDMMC2RST
+#endif
+
+/* Friendly Clock source & CLKCR bit re-definitions *************************/
+
+/* The SDMMC kernel clock frequency comes from board.h or the family
+ * stm32_sdmmc_chip.h.
+ */
+
+#if !defined(STM32_SDMMC_CLK)
+#  error "board.h must provide STM32_SDMMC_CLK"
 #endif
 
 #define STM32_CLKCR_RISINGEDGE    (0)
@@ -371,6 +391,8 @@ struct stm32_dev_s
 
   uint32_t          base;
   int               nirq;
+  uint32_t          rstreg;           /* RCC reset register */
+  uint32_t          rstbit;           /* RCC reset bit */
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   uint32_t          d0_gpio;
 #endif
@@ -420,7 +442,7 @@ struct stm32_dev_s
   struct work_s      cbfifo;          /* Monitor for Lame FIFO */
 #endif
   uint8_t            rxfifo[FIFO_SIZE_IN_BYTES] /* To offload with IDMA and support un-alinged buffers */
-                     aligned_data(ARMV7M_DCACHE_LINESIZE);
+                     aligned_data(SDMMC_DCACHE_LINESIZE);
   bool               unaligned_rx; /* read buffer is not cache-line or 32 bit aligned */
 #if defined(CONFIG_STM32_SDMMC_IDMA_BOUNCE_BUFFER)
   bool               bounce_rx;    /* Receive uses the IDMA bounce buffer */
@@ -595,7 +617,7 @@ static void stm32_default(struct stm32_dev_s *priv);
  ****************************************************************************/
 #if defined(CONFIG_STM32_SDMMC_IDMA) && defined(CONFIG_STM32_SDMMC1)
 static uint8_t g_sdmmc1_idmabuffer[SDMMC_IDMA_BUFFER_SIZE]
-               aligned_data(ARMV7M_DCACHE_LINESIZE);
+               aligned_data(SDMMC_DCACHE_LINESIZE);
 #endif
 
 #if defined(CONFIG_STM32_SDMMC1)
@@ -647,6 +669,8 @@ struct stm32_dev_s g_sdmmcdev1 =
   },
   .base               = STM32_SDMMC1_BASE,
   .nirq               = STM32_IRQ_SDMMC1,
+  .rstreg             = STM32_RCC_SDMMC1_RST_REG,
+  .rstbit             = STM32_RCC_SDMMC1_RST,
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   .d0_gpio            = SDMMC1_SDIO_PULL(GPIO_SDMMC1_D0),
 #endif
@@ -662,7 +686,7 @@ struct stm32_dev_s g_sdmmcdev1 =
 
 #if defined(CONFIG_STM32_SDMMC_IDMA) && defined(CONFIG_STM32_SDMMC2)
 static uint8_t g_sdmmc2_idmabuffer[SDMMC_IDMA_BUFFER_SIZE]
-               aligned_data(ARMV7M_DCACHE_LINESIZE);
+               aligned_data(SDMMC_DCACHE_LINESIZE);
 #endif
 
 #if defined(CONFIG_STM32_SDMMC2)
@@ -714,6 +738,8 @@ struct stm32_dev_s g_sdmmcdev2 =
   },
   .base               = STM32_SDMMC2_BASE,
   .nirq               = STM32_IRQ_SDMMC2,
+  .rstreg             = STM32_RCC_SDMMC2_RST_REG,
+  .rstbit             = STM32_RCC_SDMMC2_RST,
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   .d0_gpio            = SDMMC2_SDIO_PULL(GPIO_SDMMC2_D0),
 #endif
@@ -1280,29 +1306,10 @@ static void stm32_datastop(struct stm32_dev_s *priv)
       uint32_t mask = sdmmc_getreg32(priv, STM32_SDMMC_MASK_OFFSET);
       uint32_t dctrl = sdmmc_getreg32(priv, STM32_SDMMC_DCTRL_OFFSET) &
                        STM32_SDMMC_DCTRL_SDIOEN;
-      uint32_t regaddress = 0;
-      uint32_t rstbit = 0;
 
-#if defined(CONFIG_STM32_SDMMC1)
-      if (priv->base == STM32_SDMMC1_BASE)
-        {
-          regaddress = STM32_RCC_AHB3RSTR;
-          rstbit = RCC_AHB3RSTR_SDMMC1RST;
-        }
-
-#endif
-#if defined(CONFIG_STM32_SDMMC2)
-      if (priv->base == STM32_SDMMC2_BASE)
-        {
-          regaddress = STM32_RCC_AHB2RSTR;
-          rstbit = RCC_AHB2RSTR_SDMMC2RST;
-        }
-#endif
-
-      DEBUGASSERT(rstbit != 0);
-      modifyreg32(regaddress, 0, rstbit);
+      modifyreg32(priv->rstreg, 0, priv->rstbit);
       up_udelay(2);
-      modifyreg32(regaddress, rstbit, 0);
+      modifyreg32(priv->rstreg, priv->rstbit, 0);
 
       sdmmc_putreg32(priv, power, STM32_SDMMC_POWER_OFFSET);
       sdmmc_putreg32(priv, clkcr, STM32_SDMMC_CLKCR_OFFSET);
@@ -2075,33 +2082,15 @@ static void stm32_reset(struct sdio_dev_s *dev)
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
   irqstate_t flags;
   uint32_t regval;
-  uint32_t regaddress = 0;
-  uint32_t restval = 0;
 
   /* Disable clocking */
 
   flags = enter_critical_section();
 
-#if defined(CONFIG_STM32_SDMMC1)
-  if (priv->base == STM32_SDMMC1_BASE)
-    {
-      regaddress = STM32_RCC_AHB3RSTR;
-      restval    = RCC_AHB3RSTR_SDMMC1RST;
-    }
-#endif
-
-#if defined CONFIG_STM32_SDMMC2
-  if (priv->base == STM32_SDMMC2_BASE)
-    {
-      regaddress = STM32_RCC_AHB2RSTR;
-      restval    = RCC_AHB2RSTR_SDMMC2RST;
-    }
-#endif
-
-  regval = getreg32(regaddress);
-  putreg32(regval | restval, regaddress);
+  regval = getreg32(priv->rstreg);
+  putreg32(regval | priv->rstbit, priv->rstreg);
   nxsched_usleep(2);
-  putreg32(regval, regaddress);
+  putreg32(regval, priv->rstreg);
 
   stm32_setpwrctrl(priv, STM32_SDMMC_POWER_PWRCTRL_CYCLE);
   nxsched_usleep(1000);
@@ -3248,7 +3237,7 @@ errout_with_waitints:
         {
           DEBUGASSERT(priv->receivecnt <= SDMMC_IDMA_BUFFER_SIZE);
 
-#  if defined(CONFIG_ARMV7M_DCACHE)
+#  if defined(SDMMC_HAVE_DCACHE)
           up_invalidate_dcache((uintptr_t)priv->sdmmc_idmabuffer,
                                (uintptr_t)priv->sdmmc_idmabuffer +
                                priv->receivecnt);
@@ -3358,24 +3347,24 @@ static bool stm32_idma_accessible(struct stm32_dev_s *priv,
       return false;
     }
 
-  /* All STM32H7 SDMMC instances can reach D1 AXI SRAM. */
+  /* All SDMMC instances can reach AXI SRAM. */
 
-  if (start >= AXISRAM_START && end <= AXISRAM_END)
+  if (start >= STM32_SDMMC_IDMA_RAM_START &&
+      end <= STM32_SDMMC_IDMA_RAM_END)
     {
       return true;
     }
 
-  /* On the STM32H74x/H75x family, SDMMC2 can also reach the D2 SRAM1/2/3
-   * and D3 SRAM4 regions.  Other families remain conservatively limited to
-   * AXI SRAM until their bus matrix has an explicit allow-list.  Cortex-M4
-   * uses a private 0x100... alias for SRAM123, which must not be exposed to
-   * an IDMA bus master.
+  /* SDMMC2 may also reach the SRAM123 and SRAM4 regions given by
+   * stm32_sdmmc_chip.h.  Other memory must bounce or be rejected.
    */
 
-#if defined(CONFIG_STM32_SDMMC2) && defined(HAVE_SDMMC2_D2D3_IDMA)
+#if defined(CONFIG_STM32_SDMMC2) && defined(STM32_SDMMC2_IDMA_SRAM123_START)
   if (priv->base == STM32_SDMMC2_BASE &&
-      ((start >= SRAM123_START && end <= SRAM123_END) ||
-       (start >= SRAM4_START && end <= SRAM4_END)))
+      ((start >= STM32_SDMMC2_IDMA_SRAM123_START &&
+        end <= STM32_SDMMC2_IDMA_SRAM123_END) ||
+       (start >= STM32_SDMMC2_IDMA_SRAM4_START &&
+        end <= STM32_SDMMC2_IDMA_SRAM4_END)))
     {
       return true;
     }
@@ -3403,9 +3392,9 @@ static bool stm32_idma_bounce_required(struct stm32_dev_s *priv,
       return true;
     }
 
-#if defined(CONFIG_ARMV7M_DCACHE)
-  return (start & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
-         (buflen & (ARMV7M_DCACHE_LINESIZE - 1)) != 0;
+#if defined(SDMMC_HAVE_DCACHE)
+  return (start & (SDMMC_DCACHE_LINESIZE - 1)) != 0 ||
+         (buflen & (SDMMC_DCACHE_LINESIZE - 1)) != 0;
 #else
   return (start & 3) != 0;
 #endif
@@ -3464,17 +3453,17 @@ static int stm32_dmapreflight(struct sdio_dev_s *dev,
       return -EFAULT;
     }
 
-#if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
+#if defined(SDMMC_HAVE_DCACHE) && !defined(SDMMC_DCACHE_WRITETHROUGH)
   /* buffer alignment is required for DMA transfers with dcache in buffered
    * mode (not write-through) because a) arch_invalidate_dcache could lose
    * buffered writes and b) arch_flush_dcache could corrupt adjacent memory
    * if the maddr and the mend+1, the next next address are not on
-   * ARMV7M_DCACHE_LINESIZE boundaries.
+   * SDMMC_DCACHE_LINESIZE boundaries.
    */
 
   if (buffer != priv->rxfifo &&
-      (((uintptr_t)buffer & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
-      ((uintptr_t)(buffer + buflen) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0))
+      (((uintptr_t)buffer & (SDMMC_DCACHE_LINESIZE - 1)) != 0 ||
+      ((uintptr_t)(buffer + buflen) & (SDMMC_DCACHE_LINESIZE - 1)) != 0))
     {
       mcerr("dcache unaligned "
             "buffer:%p end:%p\n",
@@ -3527,7 +3516,7 @@ static int stm32_dmarecvsetup(struct sdio_dev_s *dev,
   priv->bounce_rx = stm32_idma_bounce_required(priv, buffer, buflen);
   priv->unaligned_rx = false;
 
-#  if defined(CONFIG_ARMV7M_DCACHE)
+#  if defined(SDMMC_HAVE_DCACHE)
   if (priv->bounce_rx)
     {
       up_invalidate_dcache((uintptr_t)priv->sdmmc_idmabuffer,
@@ -3539,9 +3528,9 @@ static int stm32_dmarecvsetup(struct sdio_dev_s *dev,
     }
 #  endif
 #else
-#  if defined(CONFIG_ARMV7M_DCACHE)
-  if (((uintptr_t)buffer & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
-      (buflen & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
+#  if defined(SDMMC_HAVE_DCACHE)
+  if (((uintptr_t)buffer & (SDMMC_DCACHE_LINESIZE - 1)) != 0 ||
+      (buflen & (SDMMC_DCACHE_LINESIZE - 1)) != 0)
     {
       /* Preserve the legacy single-block bounce path when the new
        * multi-block bounce buffer is disabled.
@@ -3669,10 +3658,12 @@ static int stm32_dmasendsetup(struct sdio_dev_s *dev,
 
   /* Flush cache to physical memory when not in DTCM memory */
 
-#if defined(CONFIG_ARMV7M_DCACHE) && \
-      !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
+#if defined(SDMMC_HAVE_DCACHE) && \
+      !defined(SDMMC_DCACHE_WRITETHROUGH)
+#  if defined(DTCM_START)
   if ((uintptr_t)dma_buffer < DTCM_START ||
       (uintptr_t)dma_buffer + buflen > DTCM_END)
+#  endif
     {
       up_clean_dcache((uintptr_t)dma_buffer,
                       (uintptr_t)dma_buffer + buflen);

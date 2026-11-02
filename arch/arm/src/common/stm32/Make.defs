@@ -122,6 +122,10 @@ CHIP_CSRCS += stm32_mdio_v2.c
 endif
 endif
 
+ifeq ($(CONFIG_STM32_SDMMC)$(CONFIG_STM32_HAVE_IP_SDMMC_V2),yy)
+CHIP_CSRCS += stm32_sdmmc_v2.c
+endif
+
 ifeq ($(CONFIG_STM32_COMMON_M33),y)
 CHIP_CSRCS += stm32_allocateheap_m33_v1.c
 CHIP_CSRCS += stm32_irq_m33_v1.c

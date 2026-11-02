@@ -56,7 +56,7 @@ config STM32_SDIO_WIDTH_D1_ONLY
 
 config STM32_SDMMC_IDMA
 	bool "Support IDMA data transfers"
-	depends on (ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5) && STM32_SDMMC
+	depends on (STM32_HAVE_IP_SDMMC_V2 || ARCH_CHIP_STM32H5) && STM32_SDMMC
 	default y
 	select SDIO_DMA
 	---help---
@@ -67,8 +67,8 @@ config STM32_SDMMC_IDMA_BOUNCE_BUFFER
 	depends on STM32_SDMMC_IDMA
 	---help---
 		Use an internal, cache-line aligned buffer when a client buffer
-		cannot be accessed directly by the STM32H7 SDMMC IDMA or does not
-		meet its alignment requirements.  The internal buffer must be
+		cannot be accessed directly by the SDMMC IDMA or does not meet its
+		alignment requirements.  The internal buffer must be
 		linked into IDMA-accessible memory, normally AXI SRAM.
 
 config STM32_SDMMC_IDMA_BOUNCE_BLOCKS

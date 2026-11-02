@@ -130,10 +130,6 @@ ifeq ($(CONFIG_SPI_SLAVE),y)
 CHIP_CSRCS += stm32_spi_slave.c
 endif
 
-ifeq ($(CONFIG_STM32_SDMMC),y)
-CHIP_CSRCS += stm32_sdmmc.c
-endif
-
 ifeq ($(CONFIG_STM32_TIMX_CAP),y)
 CHIP_CSRCS += stm32_capture.c
 endif

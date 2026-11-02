@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_sdmmc.h
+ * arch/arm/src/common/stm32/stm32_sdmmc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32_SDMMC_H
-#define __ARCH_ARM_SRC_STM32H7_STM32_SDMMC_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_SDMMC_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_SDMMC_H
 
 /****************************************************************************
  * Included Files
@@ -32,7 +32,10 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "hardware/stm32_sdmmc.h"
+
+#ifdef CONFIG_STM32_HAVE_IP_SDMMC_V2
+#  include "hardware/stm32_sdmmc.h"
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -128,4 +131,4 @@ void sdio_set_sdio_card_isr(struct sdio_dev_s *dev,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32H7_STM32_SDMMC_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_SDMMC_H */
