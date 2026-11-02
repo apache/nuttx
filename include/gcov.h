@@ -30,15 +30,40 @@
 #include <sys/types.h>
 
 /****************************************************************************
+ * Preprocessor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_LIB_SYSCALL
+#  define GCOV_OP_RESET   1
+#  define GCOV_OP_DUMP    2
+#  define GCOV_OP_MIN     GCOV_OP_RESET
+#  define GCOV_OP_MAX     GCOV_OP_DUMP
+#endif
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
+#endif
+
+#ifdef CONFIG_LIB_SYSCALL
+/****************************************************************************
+ * Name: gcov
+ *
+ * Description:
+ *   Request kernel space gcov data operations.
+ *
+ * Parameters:
+ *   op - operation code between GCOV_OP_MIN and GCOV_OP_MAX
+ *
+ * Return:
+ *   status code.
+ ****************************************************************************/
+
+extern int gcov(int op);
 #endif
 
 /****************************************************************************
@@ -118,7 +143,6 @@ extern void __gcov_filename_to_gcfn(FAR const char *filename,
 
 size_t __gcov_dump_to_memory(FAR void *ptr, size_t size);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

@@ -406,7 +406,7 @@ void __gcov_dump(void)
       S_ISREG(state.st_mode) || S_ISCHR(state.st_mode))
     {
       struct lib_rawoutstream_s stream;
-      int fd = _NX_OPEN(prefix, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+      int fd = _NX_OPEN(prefix, O_WRONLY | O_CREAT | O_APPEND, 0666);
       if (fd < 0)
         {
           syslog(LOG_ERR, "open %s failed! ret: %d\n", prefix, ret);
@@ -475,3 +475,25 @@ void __gcov_reset(void)
         }
     }
 }
+
+#if defined(CONFIG_LIB_SYSCALL) && defined(__KERNEL__)
+int gcov(int op)
+{
+  if (op < GCOV_OP_MIN || op > GCOV_OP_MAX)
+    {
+      return -EINVAL;
+    }
+
+  switch (op)
+    {
+      case GCOV_OP_RESET:
+        __gcov_reset();
+        break;
+      case GCOV_OP_DUMP:
+        __gcov_dump();
+        break;
+    }
+
+  return 0;
+}
+#endif
