@@ -28,6 +28,14 @@ config RPMSG_TRACE_BACKTRACE
 		Number of frames recorded with a trace that asks for a
 		backtrace. 0 disables backtraces.
 
+config RPMSG_PROCFS
+	bool "Include rpmsg info in procfs"
+	depends on FS_PROCFS_REGISTER
+	default !DEFAULT_SMALL
+	---help---
+		Add /proc/rpmsg, which lists the local and the remote CPU of every
+		registered rpmsg device.
+
 config RPMSG_LOCAL_CPUNAME
 	string "Rpmsg Local Cpuname"
 	default LIBC_HOSTNAME

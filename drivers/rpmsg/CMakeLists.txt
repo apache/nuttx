@@ -29,6 +29,10 @@ if(CONFIG_RPMSG)
     list(APPEND SRCS rpmsg_trace.c)
   endif()
 
+  if(CONFIG_RPMSG_PROCFS)
+    list(APPEND SRCS rpmsg_procfs.c)
+  endif()
+
   if(CONFIG_RPMSG_PING)
     list(APPEND SRCS rpmsg_ping.c)
   endif()
