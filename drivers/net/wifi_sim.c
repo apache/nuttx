@@ -517,41 +517,44 @@ uint32_t wifi_chan_to_freq_mhz(int chan, enum WLAN_80211_BAND_E band)
   switch (band)
     {
       case WLAN_80211_BAND_2GHZ:
-          if (chan == 14)
-            {
-              return (2484);
-            }
-          else if (chan < 14)
-            {
-              return (2407 + chan * 5);
-            }
-          break;
+        if (chan == 14)
+          {
+            return (2484);
+          }
+        else if (chan < 14)
+          {
+            return (2407 + chan * 5);
+          }
+        break;
+
       case WLAN_80211_BAND_5GHZ:
-          if (chan >= 182 && chan <= 196)
-            {
-              return (4000 + chan * 5);
-            }
-          else
-            {
-              return (5000 + chan * 5);
-            }
-          break;
+        if (chan >= 182 && chan <= 196)
+          {
+            return (4000 + chan * 5);
+          }
+        else
+          {
+            return (5000 + chan * 5);
+          }
+        break;
+
       case WLAN_80211_BAND_6GHZ:
 
-          /* see 802.11ax D6.1 27.3.23.2 */
+        /* see 802.11ax D6.1 27.3.23.2 */
 
-          if (chan == 2)
-            {
-              return (5935);
-            }
+        if (chan == 2)
+          {
+            return (5935);
+          }
 
-          if (chan <= 233)
-            {
-              return (5950 + chan * 5);
-            }
-          break;
+        if (chan <= 233)
+          {
+            return (5950 + chan * 5);
+          }
+        break;
+
       default:
-          break;
+        break;
     }
 
   return 0; /* not supported */
@@ -1416,7 +1419,7 @@ static int wifidriver_get_bssinfo(FAR struct wifi_sim_bss_s *bss_info,
             break;
 
           default:
-              break;
+            break;
         }
     }
 
@@ -1756,15 +1759,15 @@ static int wifidriver_get_psk(FAR struct wifi_sim_s *wifidev,
       case IW_MODE_INFRA:
         size = strnlen(wifidev->password, 64);
         if (len < size)
-        {
-          return -EINVAL;
-        }
+          {
+            return -EINVAL;
+          }
         else
-        {
-          ext->key_len = size;
-          memcpy(ext->key, wifidev->password, ext->key_len);
-          ext->alg = wifidev->auth_alg;
-        }
+          {
+            ext->key_len = size;
+            memcpy(ext->key, wifidev->password, ext->key_len);
+            ext->alg = wifidev->auth_alg;
+          }
         break;
 
       case IW_MODE_MASTER:
