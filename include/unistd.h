@@ -537,6 +537,8 @@ int     fchownat(int dirfd, FAR const char *path, uid_t owner,
 /* NOTE: NuttX provides only one behavior:  If CONFIG_LIBC_ENVPATH is
  * defined, then execv(), execl() and execve() also search the PATH as
  * execvp(), execlp() and execvpe() do; otherwise none of them searches it.
+ * Only execvp(), execlp() and execvpe() run a file that is not a program
+ * (ENOEXEC, for example a script without "#!") with the shell (POSIX).
  */
 
 #ifdef CONFIG_LIBC_EXECFUNCS
