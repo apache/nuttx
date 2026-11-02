@@ -27,6 +27,14 @@ is a preprocessor directive.
 
 File path configured by ``CONFIG_SYSTEM_NXINIT_RC_FILE_PATH``.
 
+At start, NXInit sets the file mode creation mask (see ``umask()``) to the
+octal value of ``CONFIG_SYSTEM_NXINIT_UMASK``. All commands and services
+inherit it. The default is empty: NXInit keeps the mask that it got, and NuttX
+starts the first task with the mask 0. A system with file permissions
+(``CONFIG_FS_PERMISSION``) can set ``022``, as sysvinit and systemd do. Then
+the files and directories that programs create with the mode 0666 or 0777 are
+not writable by all users.
+
 1. Actions and Commands
 -----------------------
 .. code-block::
