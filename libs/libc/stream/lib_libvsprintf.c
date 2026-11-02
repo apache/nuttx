@@ -314,6 +314,104 @@ static int vsprintf_putnum(FAR struct lib_outstream_s *stream,
   return len;
 }
 
+static int vsprintf_scan_literal(FAR struct lib_outstream_s *stream,
+                                 FAR const IPTR char **fmtp,
+                                 FAR unsigned char *conv)
+{
+  FAR const IPTR char *fmt = *fmtp;
+  unsigned char c;
+  int total_len = 0;
+
+#ifndef CONFIG_ARCH_ROMGETC
+  FAR const char *start = fmt;
+
+  for (; ; )
+    {
+      c = fmt_char(fmt);
+      if (c == '\0')
+        {
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+          if (stream != NULL)
+#  endif
+            {
+              size_t litlen = (fmt - start) - 1;
+
+              if (litlen > 0)
+                {
+                  total_len += litlen;
+                  lib_stream_puts(stream, start, litlen);
+                }
+            }
+
+          break;
+        }
+
+      if (c == '%')
+        {
+          size_t litlen = (fmt - start) - 1;
+
+          c = fmt_char(fmt);
+          if (c != '%')
+            {
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+              if (stream != NULL)
+#  endif
+                {
+                  if (litlen > 0)
+                    {
+                      total_len += litlen;
+                      lib_stream_puts(stream, start, litlen);
+                    }
+                }
+
+              break;
+            }
+
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+          if (stream != NULL)
+#  endif
+            {
+              total_len += litlen + 1;
+              lib_stream_puts(stream, start, litlen + 1);
+            }
+
+          start = fmt;
+        }
+    }
+#else
+  for (; ; )
+    {
+      c = fmt_char(fmt);
+      if (c == '\0')
+        {
+          break;
+        }
+
+      if (c == '%')
+        {
+          c = fmt_char(fmt);
+          if (c != '%')
+            {
+              break;
+            }
+        }
+
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+      if (stream != NULL)
+#  endif
+        {
+          total_len++;
+          lib_stream_putc(stream, c);
+        }
+    }
+#endif
+
+  *fmtp = fmt;
+  *conv = c;
+
+  return total_len;
+}
+
 static int vsprintf_put_field(FAR struct lib_outstream_s *stream,
                               FAR const char *pnt, size_t size,
                               FAR int *width, uint16_t flags)
@@ -813,87 +911,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
   while (total_len <= INT_MAX)
     {
-#ifndef CONFIG_ARCH_ROMGETC
-      FAR const char *start = fmt;
-
-      for (; ; )
+      total_len += vsprintf_scan_literal(stream, &fmt, &c);
+      if (c == '\0')
         {
-          c = fmt_char(fmt);
-          if (c == '\0')
-            {
-#ifdef CONFIG_LIBC_NUMBERED_ARGS
-              if (stream != NULL)
-#endif
-                {
-                  size_t litlen = (fmt - start) - 1;
-
-                  if (litlen > 0)
-                    {
-                      stream_puts(start, litlen, stream);
-                    }
-                }
-
-              goto ret;
-            }
-
-          if (c == '%')
-            {
-              size_t litlen = (fmt - start) - 1;
-
-              c = fmt_char(fmt);
-              if (c != '%')
-                {
-#ifdef CONFIG_LIBC_NUMBERED_ARGS
-                  if (stream != NULL)
-#endif
-                    {
-                      if (litlen > 0)
-                        {
-                          stream_puts(start, litlen, stream);
-                        }
-                    }
-
-                  break;
-                }
-
-#ifdef CONFIG_LIBC_NUMBERED_ARGS
-              if (stream != NULL)
-#endif
-                {
-                  stream_puts(start, litlen + 1, stream);
-                }
-
-              start = fmt;
-            }
+          goto ret;
         }
-#else
-      for (; ; )
-        {
-          c = fmt_char(fmt);
-          if (c == '\0')
-            {
-              goto ret;
-            }
-
-          if (c == '%')
-            {
-              c = fmt_char(fmt);
-              if (c != '%')
-                {
-                  break;
-                }
-            }
-
-#ifdef CONFIG_LIBC_NUMBERED_ARGS
-          if (stream != NULL)
-            {
-              stream_putc(c, stream);
-            }
-#else
-          stream_putc(c, stream);
-#endif
-        }
-#endif
 
       flags = 0;
       width = 0;
