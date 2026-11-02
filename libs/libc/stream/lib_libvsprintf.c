@@ -756,6 +756,113 @@ static int vsprintf_put_naninf(FAR struct lib_outstream_s *stream,
   return total_len;
 }
 
+static void vsprintf_float_format(unsigned char c, int prec,
+                                  FAR uint16_t *flags,
+                                  FAR unsigned int *ndigs,
+                                  FAR int *ndecimal)
+{
+  *ndigs = MIN(prec, DTOA_MAX_DIG);
+  *ndecimal = 0;
+  *flags &= ~(FL_FLTEXP | FL_FLTFIX);
+
+  if (c == 'e')
+    {
+      if (*ndigs < DTOA_MAX_DIG)
+        {
+          (*ndigs)++;
+        }
+
+      *flags |= FL_FLTEXP;
+    }
+  else if (c == 'f')
+    {
+      *ndecimal = *ndigs;
+      *ndigs    = DTOA_MAX_DIG;
+      *flags |= FL_FLTFIX;
+    }
+  else if (*ndigs == 0)
+    {
+      *ndigs = 1;
+    }
+}
+
+static void vsprintf_adjust_float_general(FAR uint16_t *flags,
+                                          FAR int *prec,
+                                          FAR unsigned int *ndigs, int exp,
+                                          FAR const struct dtoa_s *dtoa)
+{
+  if ((*flags & (FL_FLTEXP | FL_FLTFIX)) != 0)
+    {
+      return;
+    }
+
+  /* 'g(G)' format */
+
+  *prec = *ndigs;
+
+  /* Remove trailing zeros */
+
+  while (*ndigs > 0 && dtoa->digits[*ndigs - 1] == '0')
+    {
+      (*ndigs)--;
+    }
+
+  if (-4 <= exp && exp < *prec)
+    {
+      *flags |= FL_FLTFIX;
+
+      if (exp < 0 || *ndigs > exp)
+        {
+          *prec = *ndigs - (exp + 1);
+        }
+      else
+        {
+          *prec = 0;
+        }
+    }
+  else
+    {
+      /* Limit displayed precision to available precision */
+
+      *prec = *ndigs - 1;
+    }
+}
+
+static unsigned int vsprintf_float_length(uint16_t flags, int sign, int exp,
+                                          int prec)
+{
+  unsigned int len;
+
+  if ((flags & FL_FLTFIX) != 0)
+    {
+      len = exp > 0 ? exp + 1 : 1;
+    }
+  else
+    {
+      len = 5;              /* 1e+00 */
+      if (exp >= 100 || exp <= -100)
+        {
+          len++;
+        }
+    }
+
+  if (sign != 0)
+    {
+      len += 1;
+    }
+
+  if (prec != 0)
+    {
+      len += prec + 1u;
+    }
+  else if ((flags & FL_ALT) != 0)
+    {
+      len += 1;
+    }
+
+  return len;
+}
+
 static int vsprintf_put_float_prefix(FAR struct lib_outstream_s *stream,
                                      uint16_t flags, int sign,
                                      FAR int *width, int len)
@@ -791,7 +898,7 @@ static int vsprintf_put_float_prefix(FAR struct lib_outstream_s *stream,
 static int vsprintf_put_float_fixed(FAR struct lib_outstream_s *stream,
                                     uint16_t flags,
                                     FAR const struct dtoa_s *dtoa, int exp,
-                                    uint8_t ndigs, int prec)
+                                    unsigned int ndigs, int prec)
 {
   char out;
   int n;
@@ -880,7 +987,7 @@ static int vsprintf_put_float_fixed(FAR struct lib_outstream_s *stream,
 
 static int vsprintf_put_float_exp(FAR struct lib_outstream_s *stream,
                                   uint16_t flags, FAR struct dtoa_s *dtoa,
-                                  int exp, uint8_t ndigs, int prec,
+                                  int exp, unsigned int ndigs, int prec,
                                   FAR char *buf)
 {
   int nbytes;
@@ -1305,30 +1412,7 @@ flt_oper:
               prec = 6;
             }
 
-          flags &= ~(FL_FLTEXP | FL_FLTFIX);
-
-          ndigs = MIN(prec, DTOA_MAX_DIG);
-          ndecimal = 0;
-
-          if (c == 'e')
-            {
-              if (ndigs < DTOA_MAX_DIG)
-                {
-                  ndigs++;
-                }
-
-              flags |= FL_FLTEXP;
-            }
-          else if (c == 'f')
-            {
-              ndecimal = ndigs;
-              ndigs = DTOA_MAX_DIG;
-              flags |= FL_FLTFIX;
-            }
-          else if (ndigs == 0)
-            {
-              ndigs = 1;
-            }
+          vsprintf_float_format(c, prec, &flags, &ndigs, &ndecimal);
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
@@ -1387,68 +1471,11 @@ flt_oper:
               goto tail;
             }
 
-          if ((flags & (FL_FLTEXP | FL_FLTFIX)) == 0)
-            {
-              /* 'g(G)' format */
-
-              prec = ndigs;
-
-              /* Remove trailing zeros */
-
-              while (ndigs > 0 && _dtoa.digits[ndigs - 1] == '0')
-                {
-                  ndigs--;
-                }
-
-              if (-4 <= exp && exp < prec)
-                {
-                  flags |= FL_FLTFIX;
-
-                  if (exp < 0 || ndigs > exp)
-                    {
-                      prec = ndigs - (exp + 1);
-                    }
-                  else
-                    {
-                      prec = 0;
-                    }
-                }
-              else
-                {
-                  /* Limit displayed precision to available precision */
-
-                  prec = ndigs - 1;
-                }
-            }
+          vsprintf_adjust_float_general(&flags, &prec, &ndigs, exp, &_dtoa);
 
           /* Conversion result length, width := free space length */
 
-          if ((flags & FL_FLTFIX) != 0)
-            {
-              flen = (exp > 0 ? exp + 1 : 1);
-            }
-          else
-            {
-              flen = 5;           /* 1e+00 */
-              if (exp >= 100 || exp <= -100)
-                {
-                  flen++;
-                }
-            }
-
-          if (sign != 0)
-            {
-              flen += 1;
-            }
-
-          if (prec != 0)
-            {
-              flen += prec + 1u;
-            }
-          else if ((flags & FL_ALT) != 0)
-            {
-              flen += 1;
-            }
+          flen = vsprintf_float_length(flags, sign, exp, prec);
 
           if (flen > INT_MAX)
             {
