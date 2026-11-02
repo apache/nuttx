@@ -52,6 +52,8 @@
 #  define STM32_EXTI_NLINES  59
 #elif defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_EXTI_NLINES  58
+#elif defined(CONFIG_STM32_STM32N6XXXX)
+#  define STM32_EXTI_NLINES  78
 #else
 #  error "Unsupported STM32 M33 EXTI line inventory"
 #endif

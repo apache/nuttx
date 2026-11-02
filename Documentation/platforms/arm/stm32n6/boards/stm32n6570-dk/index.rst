@@ -99,6 +99,21 @@ and includes debug symbols.  These debugging steps require an installed
 image that enables debug access.  Stop GDB and OpenOCD before running either
 flash target.
 
+LEDs and buttons
+================
+
+===== ===== ======================================
+Name  Pin   Notes
+===== ===== ======================================
+LD1   PO1   Green, active high
+LD2   PG10  Red, active low
+USER1 PC13  Button B2, EXTI13, high when pressed
+TAMP  PE0   Button B4, EXTI0, high when pressed
+===== ===== ======================================
+
+The LEDs are available through ``/dev/userleds`` and the button through
+``/dev/buttons`` in the nsh configuration.
+
 Clocking
 ========
 
@@ -119,4 +134,4 @@ Configurations
 nsh
 ---
 
-Minimal NuttShell configuration.
+NuttShell with the user LEDs, the USER1 button and GPDMA1 enabled.

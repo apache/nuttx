@@ -766,28 +766,28 @@ WWDG          v2            arch/arm/src/common/stm32/stm32_wwdg.c
 STM32N6
 -------
 
-============  ============  ===================================
-Peripheral    Core version  Driver                             
-============  ============  ===================================
-ADC           to be done    not supported                      
-CAN/FDCAN     to be done    not supported                      
-DAC           to be done    not supported                      
-ETH           to be done    not supported                      
-EXTI          to be done    not supported                      
-GPIO          to be done    arch/arm/src/stm32n6/stm32_gpio.c  
-GPDMA         to be done    not supported                      
-I2C           to be done    not supported                      
+============  ============  ==================================================
+Peripheral    Core version  Driver
+============  ============  ==================================================
+ADC           to be done    not supported
+CAN/FDCAN     to be done    not supported
+DAC           to be done    not supported
+ETH           to be done    not supported
+EXTI          M33M55 v1     arch/arm/src/common/stm32/stm32_exti_gpio_m33m55_v1.c
+GPIO          M33M55 v1     arch/arm/src/common/stm32/stm32_gpio_m33m55_v1.c
+GPDMA         v1            arch/arm/src/common/stm32/stm32_dma_gpdma.c
+I2C           to be done    not supported
 IWDG          v3            arch/arm/src/common/stm32/stm32_iwdg.c
 LPTIM         v2            arch/arm/src/common/stm32/stm32_lptim.c
-PWR           to be done    arch/arm/src/stm32n6/stm32_pwr.c   
-RCC           to be done    arch/arm/src/stm32n6/stm32_rcc.c   
-SPI/I2S       to be done    not supported                      
+PWR           n6            arch/arm/src/stm32n6/stm32_pwr.c
+RCC           n6            arch/arm/src/stm32n6/stm32n6xx_rcc.c
+SPI/I2S       to be done    not supported
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  v4            arch/arm/src/stm32n6/stm32_serial.c
 USB           device        not supported
 WWDG          v3            arch/arm/src/common/stm32/stm32_wwdg.c
 XSPI          to be done    not supported
-============  ============  ===================================
+============  ============  ==================================================
 
 STM32U0
 -------

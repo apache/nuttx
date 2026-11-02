@@ -225,6 +225,18 @@
 #define LED_ASSERTION      2 /* An assertion failed   N/C    N/C   */
 #define LED_PANIC          3 /* The system crashed    OFF    Blink */
 
+/* Button definitions *******************************************************/
+
+/* The STM32N6570-DK has two user buttons: USER1 (B2) on PC13 and TAMP (B4)
+ * on PE0.  Both read high when pressed.  The RESET button (B3) drives NRST.
+ */
+
+#define BUTTON_USER        0
+#define BUTTON_TAMP        1
+#define NUM_BUTTONS        2
+#define BUTTON_USER_BIT    (1 << BUTTON_USER)
+#define BUTTON_TAMP_BIT    (1 << BUTTON_TAMP)
+
 /* Alternate function pin selections ****************************************/
 
 /* USART1 GPIOs *************************************************************/
