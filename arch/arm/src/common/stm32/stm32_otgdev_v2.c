@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_otgdev.c
+ * arch/arm/src/common/stm32/stm32_otgdev_v2.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -46,11 +46,10 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "hardware/stm32_pwr.h"
 #include "chip.h"
-#include "stm32_rcc.h"
-#include "stm32_gpio.h"
+#include "stm32.h"
 #include "stm32_otg.h"
+#include "stm32_otg_phyif.h"
 #include "arm_internal.h"
 
 #if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32_OTGFS) || \
@@ -1215,6 +1214,7 @@ static void stm32_epin_transfer(struct stm32_ep_s *privep,
        */
 
       uint32_t status = stm32_getreg(STM32_OTG_DSTS);
+
       if ((status & OTG_DSTS_SOFFN0) == OTG_DSTS_SOFFN_EVEN)
         {
           regval |= OTG_DIEPCTL_SEVNFRM;
@@ -1410,6 +1410,7 @@ static void stm32_epin_request(struct stm32_usbdev_s *priv,
            */
 
           uint32_t empmsk = stm32_getreg(STM32_OTG_DIEPEMPMSK);
+
           empmsk |= OTG_DIEPEMPMSK(privep->epphy);
           stm32_putreg(empmsk, STM32_OTG_DIEPEMPMSK);
 
@@ -1545,6 +1546,7 @@ static void stm32_rxfifo_discard(struct stm32_ep_s *privep, int len)
       for (i = 0; i < len; i += 4)
         {
           volatile uint32_t data = stm32_getreg(regaddr);
+
           UNUSED(data);
         }
     }
@@ -1632,6 +1634,7 @@ static inline void stm32_ep0out_receive(struct stm32_ep_s *privep,
       /* Read the data into our special buffer for SETUP data */
 
       int readlen = MIN(CONFIG_USBDEV_SETUP_MAXDATASIZE, bcnt);
+
       stm32_rxfifo_read(privep, priv->ep0data, readlen);
 
       /* Do we have to discard any excess bytes? */
@@ -1935,6 +1938,7 @@ static void stm32_req_complete(struct stm32_ep_s *privep, int16_t result)
    */
 
   bool stalled = privep->stalled;
+
   if (privep->epphy == EP0)
     {
       privep->stalled = privep->dev->stalled;
@@ -2331,6 +2335,7 @@ void stm32_ep0out_stdrequest(struct stm32_usbdev_s *priv,
           if (priv->addressed != 0 && ctrlreq->len == 0)
             {
               uint8_t recipient = ctrlreq->type & USB_REQ_RECIPIENT_MASK;
+
               if (recipient == USB_REQ_RECIPIENT_ENDPOINT &&
                   ctrlreq->value == USB_FEATURE_ENDPOINTHALT &&
                   (privep = stm32_ep_findbyaddr(priv,
@@ -2372,6 +2377,7 @@ void stm32_ep0out_stdrequest(struct stm32_usbdev_s *priv,
           if (priv->addressed != 0 && ctrlreq->len == 0)
             {
               uint8_t recipient = ctrlreq->type & USB_REQ_RECIPIENT_MASK;
+
               if (recipient == USB_REQ_RECIPIENT_ENDPOINT &&
                   ctrlreq->value == USB_FEATURE_ENDPOINTHALT &&
                   (privep = stm32_ep_findbyaddr(priv,
@@ -2528,6 +2534,7 @@ void stm32_ep0out_stdrequest(struct stm32_usbdev_s *priv,
               if (ret == OK)
                 {
                   uint8_t cfg = (uint8_t)ctrlreq->value;
+
                   if (cfg != 0)
                     {
                       priv->devstate   = DEVSTATE_CONFIGURED;
@@ -2870,6 +2877,7 @@ static inline void stm32_epout_interrupt(struct stm32_usbdev_s *priv)
 static inline void stm32_epin_runtestmode(struct stm32_usbdev_s *priv)
 {
   uint32_t regval = stm32_getreg(STM32_OTG_DCTL);
+
   regval &= OTG_DCTL_TCTL_MASK;
   regval |= (uint32_t)priv->testmode << OTG_DCTL_TCTL_SHIFT;
   stm32_putreg(regval , STM32_OTG_DCTL);
@@ -4907,6 +4915,7 @@ static struct usbdev_ep_s *stm32_ep_alloc(struct usbdev_s *dev,
       for (epno = 1; epno < STM32_NENDPOINTS; epno++)
         {
           uint8_t bit = 1 << epno;
+
           if ((epavail & bit) != 0)
             {
               /* Mark the endpoint no longer available */
@@ -5064,6 +5073,7 @@ static int stm32_pullup(struct usbdev_s *dev, bool enable)
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
   irqstate_t flags = enter_critical_section();
+
   regval = stm32_getreg(STM32_OTG_DCTL);
   if (enable)
     {
@@ -5632,30 +5642,17 @@ void arm_usbinitialize(void)
    */
 
   struct stm32_usbdev_s *priv = &g_otghsdev;
-  uint32_t regval;
   int ret;
 
   usbtrace(TRACE_DEVINIT, 0);
 
-  /* Configure USB voltage regulator */
+  /* Power up the USB transceiver supply */
 
-  regval = stm32_getreg(STM32_PWR_CR3);
-
-  /* Enable USB regulator if configured */
-
-#ifdef CONFIG_STM32_OTG_USBREGEN
-  regval |= STM32_PWR_CR3_USBREGEN;
-#else
-  regval &= ~STM32_PWR_CR3_USBREGEN;
-#endif
-
-  /* Enable VDD33USB supply level detector */
-
-  regval |= STM32_PWR_CR3_USB33DEN;
-  stm32_putreg(regval, STM32_PWR_CR3);
-
-  while ((stm32_getreg(STM32_PWR_CR3) & STM32_PWR_CR3_USB33RDY) == 0)
+  ret = stm32_otg_phyinit();
+  if (ret < 0)
     {
+      uerr("ERROR: OTG PHY initialization failed: %d\n", ret);
+      return;
     }
 
   /* Here we assume that:

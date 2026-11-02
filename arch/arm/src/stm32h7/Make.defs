@@ -142,21 +142,6 @@ ifeq ($(CONFIG_STM32_LTDC),y)
 CHIP_CSRCS += stm32_ltdc.c
 endif
 
-ifeq ($(CONFIG_USBDEV),y)
-CHIP_CSRCS += stm32_otgdev.c
-endif
-
-ifeq ($(CONFIG_USBHOST),y)
-CHIP_CSRCS += stm32_otghost.c
-ifeq ($(CONFIG_USBHOST_TRACE),y)
-CHIP_CSRCS += stm32_usbhost.c
-else
-ifeq ($(CONFIG_DEBUG_USB),y)
-CHIP_CSRCS += stm32_usbhost.c
-endif
-endif
-endif
-
 ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
