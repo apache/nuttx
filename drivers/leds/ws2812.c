@@ -142,9 +142,9 @@ static void ws2812_pack(FAR uint8_t *buf, uint32_t rgb);
 
 #ifdef CONFIG_WS2812_NON_SPI_DRIVER
 
-static ssize_t ws2812_open(FAR struct file *filep);
+static int ws2812_open(FAR struct file *filep);
 
-static ssize_t ws2812_close(FAR struct file *filep);
+static int ws2812_close(FAR struct file *filep);
 
 #endif /* CONFIG_WS2812_NON_SPI_DRIVER */
 
@@ -292,11 +292,11 @@ static void ws2812_byte_order_transform_rgb(FAR const char *src,
  *   filep    - Pointer system file data
  *
  * Returned Value:
- *   A pointer to an internal structure used by rp2040_ws2812
+ *   OK if successful, or an error code on failure.
  *
  ****************************************************************************/
 
-ssize_t ws2812_open(FAR struct file *filep)
+static int ws2812_open(FAR struct file *filep)
 {
   FAR struct inode        *inode = filep->f_inode;
   FAR struct ws2812_dev_s *priv  = inode->i_private;
