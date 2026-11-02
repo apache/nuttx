@@ -238,10 +238,26 @@ static int gcov_onefile_dump(FAR struct dump_args *args,
                              FAR char *path,
                              FAR uint8_t *data, size_t size)
 {
-  FAR struct lib_outstream_s *stream = args->stream;
+  /* Wrap the raw output stream with a buffered stream so that the many
+   * single-byte putc() calls produced by lib_sprintf() (which formats
+   * the "gcov start/end ..." headers character by character) are
+   * coalesced into chunked write()s.  Without this buffering, every
+   * formatted character triggers a separate write() syscall on the
+   * backing fd; when GCOV_PREFIX points to a slow remote filesystem
+   * (e.g. 9pfs over /share/gcda) each write incurs an RPC round-trip
+   * to the host, and dumping coverage for hundreds of source files
+   * exceeds the test heartbeat watchdog and is reported as a busyloop.
+   */
+
+  FAR struct lib_outstream_s *backend = args->stream;
+  struct lib_bufferedoutstream_s buffered;
+  FAR struct lib_outstream_s *stream;
   struct lib_hexdumpstream_s hexstream;
   uint16_t checksum = 0;
   int i;
+
+  lib_bufferedoutstream(&buffered, backend);
+  stream = &buffered.common;
 
   lib_hexdumpstream(&hexstream, stream);
   for (i = 0; i < size; i++)
