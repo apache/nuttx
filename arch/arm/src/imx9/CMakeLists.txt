@@ -73,6 +73,10 @@ if(CONFIG_IMX9_FLEXIO)
   list(APPEND SRCS imx9_flexio.c)
 endif()
 
+if(CONFIG_IMX9_FLEXSPI)
+  list(APPEND SRCS imx9_flexspi.c)
+endif()
+
 if(CONFIG_IMX9_TPM_PWM)
   list(APPEND SRCS imx9_tpm_pwm.c)
 endif()
