@@ -339,6 +339,118 @@ static int vsprintf_put_field(FAR struct lib_outstream_s *stream,
   return total_len;
 }
 
+static size_t vsprintf_put_integer(FAR struct lib_outstream_s *stream,
+                                   uint16_t flags, FAR char *buf,
+                                   int digits, FAR int *width, int prec)
+{
+  unsigned int len = digits;
+  size_t total_len = 0;
+  int w = *width;
+
+  if ((flags & FL_PREC) != 0)
+    {
+      flags &= ~FL_ZFILL;
+      if (len < prec)
+        {
+          len = prec;
+          if ((flags & FL_ALT) != 0 && (flags & FL_ALTHEX) == 0)
+            {
+              flags &= ~FL_ALT;
+            }
+        }
+    }
+
+  if ((flags & FL_ALT) != 0)
+    {
+      /* digits is 0 for a value of 0 with a precision of 0: then %#o has
+       * a "0" from the flag, and a hexadecimal value has no prefix.
+       */
+
+      if (digits == 0 ? (flags & FL_ALTHEX) != 0 : buf[digits - 1] == '0')
+        {
+          flags &= ~(FL_ALT | FL_ALTHEX | FL_ALTUPP);
+        }
+      else
+        {
+          len += 1;
+          if ((flags & FL_ALTHEX) != 0)
+            {
+              len += 1;
+            }
+        }
+    }
+  else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
+    {
+      len += 1;
+    }
+
+  if (len > INT_MAX)
+    {
+      *width = 0;
+      return INT_MAX + 1u;
+    }
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      if ((flags & FL_ZFILL) != 0)
+        {
+          prec = digits;
+          if (len < w)
+            {
+              prec += w - len;
+              len = w;
+            }
+        }
+
+      if (len < w)
+        {
+          total_len += vsprintf_repeat(stream, ' ', w - len);
+          len = w;
+        }
+    }
+
+  w = len < w ? w - len : 0;
+
+  if ((flags & FL_ALT) != 0)
+    {
+      total_len++;
+      lib_stream_putc(stream, '0');
+      if ((flags & FL_ALTHEX) != 0)
+        {
+          total_len++;
+          lib_stream_putc(stream, flags & FL_ALTUPP ? 'X' : 'x');
+        }
+    }
+  else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
+    {
+      unsigned char z = ' ';
+
+      if ((flags & FL_PLUS) != 0)
+        {
+          z = '+';
+        }
+
+      if ((flags & FL_NEGATIVE) != 0)
+        {
+          z = '-';
+        }
+
+      total_len++;
+      lib_stream_putc(stream, z);
+    }
+
+  if (prec > digits)
+    {
+      total_len += vsprintf_repeat(stream, '0', prec - digits);
+      prec = digits;
+    }
+
+  total_len += vsprintf_putnum(stream, buf, digits);
+  *width = w;
+
+  return total_len;
+}
+
 #ifdef CONFIG_LIBC_FLOATINGPOINT
 static int vsprintf_put_naninf(FAR struct lib_outstream_s *stream,
                                uint16_t flags, int dtoa_flags, int sign,
@@ -1602,104 +1714,8 @@ str_lpad:
           flags &= ~FL_NEGATIVE;
         }
 
-      len = c;
-
-      if ((flags & FL_PREC) != 0)
-        {
-          flags &= ~FL_ZFILL;
-          if (len < prec)
-            {
-              len = prec;
-              if ((flags & FL_ALT) != 0 && (flags & FL_ALTHEX) == 0)
-                {
-                  flags &= ~FL_ALT;
-                }
-            }
-        }
-
-      if ((flags & FL_ALT) != 0)
-        {
-          /* c is 0 for a value of 0 with a precision of 0: then %#o has a
-           * "0" from the flag, and a hexadecimal value has no prefix.
-           */
-
-          if (c == 0 ? (flags & FL_ALTHEX) != 0 : buf[c - 1] == '0')
-            {
-              flags &= ~(FL_ALT | FL_ALTHEX | FL_ALTUPP);
-            }
-          else
-            {
-              len += 1;
-              if ((flags & FL_ALTHEX) != 0)
-                {
-                  len += 1;
-                }
-            }
-        }
-      else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
-        {
-          len += 1;
-        }
-
-      if (len > INT_MAX)
-        {
-          total_len = INT_MAX + 1u;
-          goto ret;
-        }
-
-      if ((flags & FL_LPAD) == 0)
-        {
-          if ((flags & FL_ZFILL) != 0)
-            {
-              prec = c;
-              if (len < width)
-                {
-                  prec += width - len;
-                  len = width;
-                }
-            }
-
-          if (len < width)
-            {
-              stream_repeat(' ', width - len, stream);
-              len = width;
-            }
-        }
-
-      width = (len < width) ? width - len : 0;
-
-      if ((flags & FL_ALT) != 0)
-        {
-          stream_putc('0', stream);
-          if ((flags & FL_ALTHEX) != 0)
-            {
-              stream_putc(flags & FL_ALTUPP ? 'X' : 'x', stream);
-            }
-        }
-      else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
-        {
-          unsigned char z = ' ';
-
-          if ((flags & FL_PLUS) != 0)
-            {
-              z = '+';
-            }
-
-          if ((flags & FL_NEGATIVE) != 0)
-            {
-              z = '-';
-            }
-
-          stream_putc(z, stream);
-        }
-
-      if (prec > c)
-        {
-          stream_repeat('0', prec - c, stream);
-          prec = c;
-        }
-
-      total_len += vsprintf_putnum(stream, buf, c);
+      total_len += vsprintf_put_integer(stream, flags, buf, c, &width,
+                                        prec);
 
 tail:
 
