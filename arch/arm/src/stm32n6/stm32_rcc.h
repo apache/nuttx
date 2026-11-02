@@ -108,6 +108,26 @@ void stm32_clockenable(void);
 
 void stm32_rcc_enableperipherals(void);
 
+/****************************************************************************
+ * Name: stm32_rcc_enablelse
+ *
+ * Description:
+ *   Enable the External Low-Speed (LSE) oscillator.
+ *
+ ****************************************************************************/
+
+void stm32_rcc_enablelse(void);
+
+/****************************************************************************
+ * Name: stm32_rcc_enablelsi
+ *
+ * Description:
+ *   Enable the Internal Low-Speed (LSI) oscillator.
+ *
+ ****************************************************************************/
+
+void stm32_rcc_enablelsi(void);
+
 #if defined(__cplusplus)
 }
 #endif

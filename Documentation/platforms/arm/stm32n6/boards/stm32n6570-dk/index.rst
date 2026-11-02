@@ -114,6 +114,15 @@ TAMP  PE0   Button B4, EXTI0, high when pressed
 The LEDs are available through ``/dev/userleds`` and the buttons through
 ``/dev/buttons`` in the nsh configuration.
 
+RTC
+===
+
+The RTC runs from the 32.768 kHz LSE crystal and is registered as
+``/dev/rtc0`` with two alarms.  Set the time with ``date -s`` and test the
+alarms with the ``alarm`` example, e.g. ``alarm 5`` or ``alarm -a 1 5``.
+The time survives a reset; without a backup battery it is lost on power
+off.
+
 Clocking
 ========
 
@@ -134,4 +143,5 @@ Configurations
 nsh
 ---
 
-NuttShell with the user LEDs, the USER1 button and GPDMA1 enabled.
+NuttShell with the user LEDs, the USER1 button, GPDMA1 and the RTC
+enabled.
