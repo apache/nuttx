@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <gcov.h>
+#include <assert.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
@@ -123,6 +124,7 @@ static size_t gcov_convert(FAR uint8_t *buffer,
   for (functions = 0; functions < info->n_functions; functions++)
     {
       unsigned int length = 0;
+
       gfi = info->functions[functions];
 
       if (gfi && gfi->key == info)
@@ -252,14 +254,12 @@ static int gcov_onefile_dump(FAR struct dump_args *args,
   FAR struct lib_outstream_s *backend = args->stream;
   struct lib_bufferedoutstream_s buffered;
   FAR struct lib_outstream_s *stream;
-  struct lib_hexdumpstream_s hexstream;
   uint16_t checksum = 0;
-  int i;
+  size_t i;
 
   lib_bufferedoutstream(&buffered, backend);
   stream = &buffered.common;
 
-  lib_hexdumpstream(&hexstream, stream);
   for (i = 0; i < size; i++)
     {
       checksum += ((FAR const uint8_t *)data)[i];
@@ -269,8 +269,66 @@ static int gcov_onefile_dump(FAR struct dump_args *args,
               "gcov start filename:%s size: %zuByte\n",
               path, size);
 
-  lib_stream_puts(&hexstream, data, size);
-  lib_stream_flush(&hexstream);
+  /* Streaming the body via lib_hexdumpstream emits one fixed-size line
+   * per CONFIG_STREAM_HEXDUMP_BUFFER_SIZE/2 binary bytes (typically
+   * 128 hex chars + '\n' = 129 bytes per line).  Each emitted line is
+   * forwarded to lib_bufferedoutstream as a single put; whenever the
+   * line is larger than the buffer's free space, lib_bufferedoutstream
+   * falls back to its "flush + direct write" path and bypasses
+   * coalescing entirely (see lib_bufferedoutstream.c
+   * bufferedoutstream_puts).  Because the default
+   * CONFIG_STREAM_OUT_BUFFER_SIZE (64-128) is not greater than the
+   * hexdump line, every body line becomes its own write() syscall.  On
+   * a slow remote filesystem (e.g. 9pfs at /share/gcda used by the
+   * Vela_System_Tools_Gcov_Integration test), each write incurs a
+   * virtio-9p RPC round-trip to the host, so a dump of hundreds of
+   * source files issues thousands of RPCs and trips the test heartbeat
+   * watchdog.
+   *
+   * Pre-encode the entire body into a single heap-allocated buffer and
+   * write it in one lib_stream_puts() call.  The on-disk format is
+   * byte-for-byte identical to the lib_hexdumpstream output.  If heap
+   * allocation fails (e.g. very large data on a constrained system),
+   * fall back to the streaming path so the dump is still complete.
+   */
+
+  if (size > 0)
+    {
+      static const char hex_chars[] = "0123456789ABCDEF";
+      const size_t line_bytes = CONFIG_STREAM_HEXDUMP_BUFFER_SIZE / 2;
+      const size_t num_lines = (size + line_bytes - 1) / line_bytes;
+      const size_t buf_size = size * 2 + num_lines;
+      FAR char *hex_buf = lib_malloc(buf_size);
+
+      if (hex_buf != NULL)
+        {
+          size_t pos = 0;
+
+          for (i = 0; i < size; i++)
+            {
+              uint8_t byte = ((FAR const uint8_t *)data)[i];
+
+              hex_buf[pos++] = hex_chars[byte >> 4];
+              hex_buf[pos++] = hex_chars[byte & 0xf];
+              if ((i + 1) % line_bytes == 0 || i + 1 == size)
+                {
+                  hex_buf[pos++] = '\n';
+                }
+            }
+
+          DEBUGASSERT(pos == buf_size);
+          lib_stream_puts(stream, hex_buf, pos);
+          lib_free(hex_buf);
+        }
+      else
+        {
+          struct lib_hexdumpstream_s hexstream;
+
+          lib_hexdumpstream(&hexstream, stream);
+          lib_stream_puts(&hexstream, data, size);
+          lib_stream_flush(&hexstream);
+        }
+    }
 
   lib_sprintf(stream,
               "gcov end filename:%s checksum: %#0x\n",
