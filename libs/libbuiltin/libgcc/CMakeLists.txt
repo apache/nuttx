@@ -24,19 +24,18 @@ if(CONFIG_PROFILE_MINI)
 endif()
 
 if(CONFIG_COVERAGE_MINI AND CONFIG_ARCH_TOOLCHAIN_GCC)
-  nuttx_add_kernel_library(libcoverage SPLIT)
+  nuttx_add_kernel_library(coverage SPLIT)
   target_compile_options(
-    libcoverage
-    PRIVATE -fno-profile-arcs -fno-test-coverage -fno-stack-protector
-            -fno-profile-generate -fno-profile-use)
+    coverage PRIVATE -fno-profile-arcs -fno-test-coverage -fno-stack-protector
+                     -fno-profile-generate -fno-profile-use)
 
   list(REMOVE_ITEM NUTTX_EXTRA_FLAGS "-fprofile-arcs" "-ftest-coverage"
        "-fno-inline")
   set_property(GLOBAL PROPERTY NUTTX_EXTRA_FLAGS ${NUTTX_EXTRA_FLAGS})
 
-  target_sources(libcoverage PRIVATE gcov.c gcov_write.c)
+  target_sources(coverage PRIVATE gcov.c gcov_write.c)
 
   if(CONFIG_COVERAGE_PGO)
-    target_sources(libcoverage PRIVATE profile_value.c profile_write.c)
+    target_sources(coverage PRIVATE profile_value.c profile_write.c)
   endif()
 endif()
