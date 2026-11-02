@@ -327,8 +327,9 @@ void __gcov_execv(void)
 {
 }
 
-void __gcov_fork(void)
+pid_t __gcov_fork(void)
 {
+  return fork();
 }
 
 void __gcov_dump(void)
