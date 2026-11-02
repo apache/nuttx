@@ -22,6 +22,7 @@ import argparse
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
 
@@ -31,6 +32,13 @@ import sys
 
 PROFRAW_MAGIC_64 = b"\xff\x6c\x70\x72\x6f\x66\x72\x81"
 PROFRAW_MAGIC_32 = b"\xff\x6c\x70\x72\x6f\x66\x52\x81"
+
+# gcov binary pack magic heuristic:
+# First 4 bytes are path_len (LE uint32), typically 30~200 for gcda paths.
+# Followed by a path string starting with a printable char (not \x00 or \xff).
+
+GCOV_BINPACK_PATH_LEN_MIN = 10
+GCOV_BINPACK_PATH_LEN_MAX = 4096
 
 
 def is_profraw_file(path):
@@ -122,6 +130,93 @@ def parse_gcda_data(path):
             print(f"gcov start filename:{filename} size:{size}")
             print(output[:200])
 
+    return gcda_path
+
+
+def is_gcov_binpack_file(path):
+    """Check if a file is a gcov binary pack file.
+
+    Binary format: [path_len(4B LE)][path+NUL][data_size(4B LE)][data]...
+    Heuristic: first 4 bytes are a small uint32, followed by a printable path.
+    """
+
+    try:
+        with open(path, "rb") as f:
+            header = f.read(8)
+            if len(header) < 8:
+                return False
+            path_len = struct.unpack_from("<I", header, 0)[0]
+            if path_len < GCOV_BINPACK_PATH_LEN_MIN:
+                return False
+            if path_len > GCOV_BINPACK_PATH_LEN_MAX:
+                return False
+            first_char = header[4]
+            return first_char >= 0x20 and first_char < 0x7F
+    except (IOError, OSError):
+        return False
+
+
+def parse_gcov_binpack(path):
+    """Parse gcov binary pack file into individual gcda files.
+
+    Binary format: [path_len(4B LE)][path+NUL][data_size(4B LE)][data]...
+    """
+
+    with open(path, "rb") as f:
+        data = f.read()
+
+    gcda_path = path + "_covert"
+    os.makedirs(gcda_path, exist_ok=True)
+
+    offset = 0
+    count = 0
+    errors = 0
+
+    while offset < len(data):
+        if offset + 4 > len(data):
+            break
+
+        path_len = struct.unpack_from("<I", data, offset)[0]
+        offset += 4
+
+        if (
+            path_len == 0
+            or path_len > GCOV_BINPACK_PATH_LEN_MAX
+            or offset + path_len > len(data)
+        ):
+            print(f"Invalid path_len {path_len} at offset {offset - 4}")
+            errors += 1
+            break
+
+        filepath = data[offset : offset + path_len].rstrip(b"\x00").decode("utf-8")
+        offset += path_len
+
+        if offset + 4 > len(data):
+            print(f"Truncated at data_size for {filepath}")
+            errors += 1
+            break
+
+        data_size = struct.unpack_from("<I", data, offset)[0]
+        offset += 4
+
+        if offset + data_size > len(data):
+            print(f"Truncated data for {filepath}")
+            gcda_data = data[offset:]
+            offset = len(data)
+            errors += 1
+        else:
+            gcda_data = data[offset : offset + data_size]
+            offset += data_size
+
+        out_path = os.path.join(gcda_path, filepath.lstrip("/"))
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+
+        with open(out_path, "wb") as out:
+            out.write(gcda_data)
+
+        count += 1
+
+    print(f"Parsed binary pack: {count} files ({errors} errors)")
     return gcda_path
 
 
@@ -634,19 +729,22 @@ def main():
         debug_file = os.path.join(result_dir, "debug.log")
         sys.stdout = open(debug_file, "w+")
 
-    # Parse hex dump files (works for both gcc and clang)
+    # Parse dump files (hex dump, binary pack, or profraw)
     gcda_dirs = []
     for i in args.gcda_dir:
         if os.path.isfile(i):
-            # Check if it's a binary profraw or a text hex dump log
-            if is_profraw_file(
-                os.path.join(root_dir, i) if not os.path.isabs(i) else i
-            ):
-                # Binary profraw file, use directly
+            abs_path = os.path.join(root_dir, i) if not os.path.isabs(i) else i
+            if is_profraw_file(abs_path):
+                # Binary profraw file (clang), use directly
                 gcda_dirs.append(os.path.abspath(i))
+            elif is_gcov_binpack_file(abs_path):
+                # Binary pack file from COVERAGE_MINI gcov_binfile_dump
+                gcda_dirs.append(parse_gcov_binpack(abs_path))
+                if args.delete:
+                    os.remove(i)
             else:
                 # Text file: try to parse as hex dump log
-                gcda_dirs.append(parse_gcda_data(os.path.join(root_dir, i)))
+                gcda_dirs.append(parse_gcda_data(abs_path))
                 if args.delete:
                     os.remove(i)
         else:
