@@ -103,9 +103,17 @@ const void * const _vectors[] locate_data(".vectors")
 
   start,
 
-  /* Vectors 2 - n point directly at the generic handler */
+  /* Vectors 2 - n point directly at the generic handler.
+   * Reserved slots (7 in Non-Secure, 8-10, and 13) are left unassigned,
+   * which C guarantees to be zero-initialized (NULL).
+   */
 
-  [2 ... NVIC_IRQ_PENDSV] = &exception_common,
-  [(NVIC_IRQ_PENDSV + 1) ... (15 + ARMV8M_PERIPHERAL_INTERRUPTS)]
-                          = &exception_direct
+  [NVIC_IRQ_NMI ... NVIC_IRQ_USAGEFAULT]    = &exception_common,
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+  [NVIC_IRQ_SECUREFAULT]                    = &exception_common,
+#endif
+  [NVIC_IRQ_SVCALL ... NVIC_IRQ_DBGMONITOR] = &exception_common,
+  [NVIC_IRQ_PENDSV]                         = &exception_common,
+  [NVIC_IRQ_SYSTICK ... (15 + ARMV8M_PERIPHERAL_INTERRUPTS)]
+                                            = &exception_direct
 };
