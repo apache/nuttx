@@ -10,6 +10,24 @@ config RPMSG
 
 if RPMSG
 
+config RPMSG_TRACE
+	bool "rpmsg trace"
+	default n
+	depends on SCHED_INSTRUMENTATION_DUMP
+	---help---
+		Record the messages passed through the rpmsg transports in the
+		note stream under NOTE_TAG_RPMSG, so they can be read back with
+		the note drivers (e.g. /dev/note/ram).
+
+config RPMSG_TRACE_BACKTRACE
+	int "rpmsg trace backtrace depth"
+	default 0
+	range 0 16
+	depends on RPMSG_TRACE
+	---help---
+		Number of frames recorded with a trace that asks for a
+		backtrace. 0 disables backtraces.
+
 config RPMSG_LOCAL_CPUNAME
 	string "Rpmsg Local Cpuname"
 	default LIBC_HOSTNAME

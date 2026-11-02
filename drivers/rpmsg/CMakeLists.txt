@@ -25,6 +25,10 @@ if(CONFIG_RPMSG)
 
   list(APPEND SRCS rpmsg.c)
 
+  if(CONFIG_RPMSG_TRACE)
+    list(APPEND SRCS rpmsg_trace.c)
+  endif()
+
   if(CONFIG_RPMSG_PING)
     list(APPEND SRCS rpmsg_ping.c)
   endif()
