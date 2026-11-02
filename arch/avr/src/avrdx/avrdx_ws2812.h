@@ -90,45 +90,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: <Inline function name>
- *
- * Description:
- *   Description of the operation of the inline function.
- *
- * Input Parameters:
- *   A list of input parameters, one-per-line, appears here along with a
- *   description of each input parameter.
- *
- * Returned Value:
- *   Description of the value returned by this function (if any),
- *   including an enumeration of all possible error values.
- *
- * Assumptions/Limitations:
- *   Anything else that one might need to know to use this function.
- *
- ****************************************************************************/
-
-/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: <Global function name>
- *
- * Description:
- *   Description of the operation of the function.
- *
- * Input Parameters:
- *   A list of input parameters, one-per-line, appears here along with a
- *   description of each input parameter.
- *
- * Returned Value:
- *   Description of the value returned by this function (if any),
- *   including an enumeration of all possible error values.
- *
- * Assumptions/Limitations:
- *   Anything else that one might need to know to use this function.
- *
  ****************************************************************************/
 
 /****************************************************************************
