@@ -60,6 +60,7 @@
 "inotify_rm_watch","sys/inotify.h","defined(CONFIG_FS_NOTIFY)","int","int","int"
 "insmod","nuttx/module.h","defined(CONFIG_MODULE)","FAR void *","FAR const char *","FAR const char *"
 "ioctl","sys/ioctl.h","","int","int","int","...","unsigned long"
+"issetugid","unistd.h","defined(CONFIG_SCHED_USER_IDENTITY)","int"
 "kill","signal.h","","int","pid_t","int"
 "lchmod","sys/stat.h","","int","FAR const char *","mode_t"
 "lchown","unistd.h","","int","FAR const char *","uid_t","gid_t"
