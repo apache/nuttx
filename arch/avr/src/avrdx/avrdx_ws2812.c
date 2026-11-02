@@ -924,7 +924,7 @@ static ssize_t avrdx_ws2812_read(struct file *filep,
  * Returned Value:
  *   OK or negated errno.
  *   ENOMEM - if the LED count exceeds limit (in addition to memory
- *            allocation failure.)
+ *            allocation failure and no free software interrupt vector.)
  *   ENOTSUP - if support for white LED is requested and not disabled
  *             (see #warning at the beginning of the file or description
  *             of AVR_AVRDX_WS2812_NO_WHITE_LED configuration option)
@@ -1259,7 +1259,8 @@ int avrdx_ws2812_register(const char *path, uint8_t count,
     avrdx_swint_allocate(transmission_completed, (void *)lane);
   if (g_avrdx_ws2812_swint_vector[lane] == 0)
     {
-      goto errout; /* No vector available */
+      ret = -ENOMEM; /* No vector available */
+      goto errout;
     }
 
   /* xmit_bytes are initialized to zero but we can't just put zero bytes
@@ -1325,17 +1326,20 @@ errout:
   if (g_avrdx_ws2812_uart9_bytes[lane])
     {
       kmm_free(g_avrdx_ws2812_uart9_bytes[lane]);
+      g_avrdx_ws2812_uart9_bytes[lane] = NULL;
     }
 #endif
 
   if (g_avrdx_ws2812_xmit_ts[lane])
     {
       kmm_free(g_avrdx_ws2812_xmit_ts[lane]);
+      g_avrdx_ws2812_xmit_ts[lane] = NULL;
     }
 
   if (g_avrdx_ws2812_xmit_bytes[lane])
     {
       kmm_free(g_avrdx_ws2812_xmit_bytes[lane]);
+      g_avrdx_ws2812_xmit_bytes[lane] = NULL;
     }
 
   return ret;
