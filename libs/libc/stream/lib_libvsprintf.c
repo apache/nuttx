@@ -1293,10 +1293,7 @@ str_lpad:
                         if (symbol != NULL)
                           {
                             pnt = symbol->sym_name;
-                            while (*pnt != '\0')
-                              {
-                                stream_putc(*pnt++, stream);
-                              }
+                            stream_puts(pnt, strlen(pnt), stream);
 
                             if (c == 'S')
                               {
