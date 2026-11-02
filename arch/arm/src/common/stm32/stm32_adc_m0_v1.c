@@ -60,10 +60,6 @@
 
 #if defined(CONFIG_STM32_ADC1)
 
-#if defined(CONFIG_STM32_STM32F0)
-#  error Not tested
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
