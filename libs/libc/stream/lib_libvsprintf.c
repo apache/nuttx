@@ -614,6 +614,81 @@ static void vsprintf_pointer_flags(FAR uint16_t *flags)
     }
 }
 
+#ifdef CONFIG_LIBC_PRINT_EXTENSION
+static int vsprintf_pointer_extension(FAR struct lib_outstream_s *stream,
+                                      FAR const IPTR char **fmt,
+                                      unsigned long long x,
+                                      FAR size_t *total_len)
+{
+  unsigned char c = fmt_char(*fmt);
+
+  switch (c)
+    {
+      case 'B':
+        {
+          FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
+
+          *total_len += lib_bsprintf(stream, vaf->fmt, vaf->va);
+          return 1;
+        }
+
+      case 'V':
+        {
+          FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
+#  ifdef va_copy
+          va_list copy;
+
+          va_copy(copy, *vaf->va);
+          *total_len += lib_vsprintf(stream, vaf->fmt, copy);
+          va_end(copy);
+#  else
+          *total_len += lib_vsprintf(stream, vaf->fmt, *vaf->va);
+#  endif
+          return 1;
+        }
+
+      case 'S':
+      case 's':
+        {
+#  ifdef CONFIG_ALLSYMS
+          FAR const struct symtab_s *symbol;
+          FAR void *addr = (FAR void *)(uintptr_t)x;
+          size_t symbolsize;
+          FAR const char *name;
+          size_t namelen;
+
+          symbol = allsyms_findbyvalue(addr, &symbolsize);
+          if (symbol != NULL)
+            {
+              name = symbol->sym_name;
+              namelen = strlen(name);
+
+              *total_len += namelen;
+              lib_stream_puts(stream, name, namelen);
+
+              if (c == 'S')
+                {
+                  *total_len +=
+                    lib_sprintf_internal(stream, "+%#tx/%#zx",
+                                         addr - symbol->sym_value,
+                                         symbolsize);
+                }
+
+              return 1;
+            }
+#  endif
+          break;
+        }
+
+      default:
+        fmt_ungetc(*fmt);
+        break;
+    }
+
+  return 0;
+}
+#endif
+
 static size_t vsprintf_put_integer(FAR struct lib_outstream_s *stream,
                                    uint16_t flags, FAR char *buf,
                                    int digits, FAR int *width, int prec)
@@ -1795,66 +1870,11 @@ set_star:
 
               case 'p':
 #ifdef CONFIG_LIBC_PRINT_EXTENSION
-                c = fmt_char(fmt);
-                switch (c)
+                result = vsprintf_pointer_extension(stream, &fmt, x,
+                                                     &total_len);
+                if (result > 0)
                   {
-                    case 'B':
-                      {
-                        FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
-
-                        total_len += lib_bsprintf(stream, vaf->fmt,
-                                                  vaf->va);
-                        continue;
-                      }
-
-                    case 'V':
-                      {
-                        FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
-#  ifdef va_copy
-                        va_list copy;
-
-                        va_copy(copy, *vaf->va);
-                        total_len += lib_vsprintf(stream, vaf->fmt, copy);
-                        va_end(copy);
-#  else
-                        total_len += lib_vsprintf(stream, vaf->fmt,
-                                                  *vaf->va);
-#  endif
-                        continue;
-                      }
-
-                    case 'S':
-                    case 's':
-                      {
-#  ifdef CONFIG_ALLSYMS
-                        FAR const struct symtab_s *symbol;
-                        FAR void *addr = (FAR void *)(uintptr_t)x;
-                        size_t symbolsize;
-
-                        symbol = allsyms_findbyvalue(addr, &symbolsize);
-                        if (symbol != NULL)
-                          {
-                            pnt = symbol->sym_name;
-                            stream_puts(pnt, strlen(pnt), stream);
-
-                            if (c == 'S')
-                              {
-                                total_len +=
-                                lib_sprintf_internal(stream,
-                                      "+%#tx/%#zx",
-                                      addr - symbol->sym_value,
-                                      symbolsize);
-                              }
-
-                            continue;
-                          }
-#  endif
-                        break;
-                      }
-
-                    default:
-                      fmt_ungetc(fmt);
-                      break;
+                    continue;
                   }
 #endif
 
