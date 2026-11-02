@@ -241,11 +241,10 @@ Mounting File Systems
     umount <dir>
 
 ``<flag>`` is ``defaults``, ``rw``, ``ro``, ``nosuid``, ``nodev``, ``noexec``,
-``sync``, ``remount``, ``dirsync`` or ``noatime``. In the first form, a last
-argument that is not a flag is the option string of the file system. For a
-file system without a device, ``<device>`` is any name that is not a device,
-for example ``none``. The second form is the one of the NSH command:
-``<options>`` is a comma-separated list of flags and file system options.
+``sync``, ``remount``, ``dirsync`` or ``noatime``. In both forms, ``<options>``
+is a comma-separated list of flags and file system options. For a file system
+without a device, ``<device>`` is any name that is not a device, for example
+``none``. The second form is the one of the NSH command.
 In the pseudo file system, ``<dir>`` does not need to exist: NuttX makes the
 mount point. For example:
 
