@@ -24,7 +24,7 @@ if(CONFIG_PROFILE_MINI)
 endif()
 
 if(CONFIG_COVERAGE_MINI AND CONFIG_ARCH_TOOLCHAIN_GCC)
-  nuttx_add_system_library(libcoverage)
+  nuttx_add_kernel_library(libcoverage SPLIT)
   target_compile_options(
     libcoverage
     PRIVATE -fno-profile-arcs -fno-test-coverage -fno-stack-protector
