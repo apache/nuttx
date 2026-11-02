@@ -25,6 +25,15 @@ config RPMSG_TEST
 	bool "rpmsg test support"
 	default n
 
+config RPMSG_WAKELOCK
+	bool "rpmsg wakelock support"
+	default n
+	depends on PM
+	---help---
+		Let a CPU hold a PM wakelock on the remote CPU through the
+		RPMSGIOC_ACQUIRE_WAKELOCK and RPMSGIOC_RELEASE_WAKELOCK ioctls.
+		Both sides of the link must enable it.
+
 endif # RPMSG
 
 config RPMSG_ROUTER

@@ -50,6 +50,9 @@ struct rpmsg_s
 #ifdef CONFIG_RPMSG_TEST
   struct rpmsg_endpoint        test;
 #endif
+#ifdef CONFIG_RPMSG_WAKELOCK
+  struct rpmsg_endpoint        wakelock;
+#endif
   atomic_t                     signals;
 };
 

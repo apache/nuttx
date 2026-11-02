@@ -37,6 +37,7 @@
 #include "rpmsg.h"
 #include "rpmsg_router.h"
 #include "rpmsg_test.h"
+#include "rpmsg_wakelock.h"
 
 /****************************************************************************
  * Private Types
@@ -144,6 +145,12 @@ static int rpmsg_dev_ioctl_(FAR struct rpmsg_s *rpmsg, int cmd,
         *(FAR bool *)arg = rpmsg_is_running(rpmsg_get_rdev_by_rpmsg(rpmsg));
         ret = OK;
         break;
+#ifdef CONFIG_RPMSG_WAKELOCK
+      case RPMSGIOC_ACQUIRE_WAKELOCK:
+      case RPMSGIOC_RELEASE_WAKELOCK:
+        ret = rpmsg_wakelock(&rpmsg->wakelock, cmd, arg);
+        break;
+#endif
       default:
         if (rpmsg->ops->ioctl)
           {
@@ -456,6 +463,9 @@ void rpmsg_device_created(FAR struct rpmsg_s *rpmsg)
 #ifdef CONFIG_RPMSG_TEST
   rpmsg_test_init(rdev, &rpmsg->test);
 #endif
+#ifdef CONFIG_RPMSG_WAKELOCK
+  rpmsg_wakelock_init(rdev, &rpmsg->wakelock);
+#endif
 }
 
 void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg)
@@ -471,6 +481,10 @@ void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg)
 
 #ifdef CONFIG_RPMSG_TEST
   rpmsg_test_deinit(&rpmsg->test);
+#endif
+
+#ifdef CONFIG_RPMSG_WAKELOCK
+  rpmsg_wakelock_deinit(&rpmsg->wakelock);
 #endif
 
   nxrmutex_lock(&rpmsg->lock);
