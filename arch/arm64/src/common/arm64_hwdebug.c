@@ -342,6 +342,10 @@ int arm64_enable_dbgmonitor(void)
   mdscr |= ARM64_MDSCR_EL1_MDE | ARM64_MDSCR_EL1_KDE;
   write_sysreg(mdscr, mdscr_el1);
 
+  write_sysreg(0, osdlr_el1);
+  write_sysreg(0, oslar_el1);
+  UP_ISB();
+
   arm64_register_debug_hook(DBG_ESR_EVT_HWBP, arm64_breakpoint_match);
   arm64_register_debug_hook(DBG_ESR_EVT_HWWP, arm64_watchpoint_match);
   return OK;
