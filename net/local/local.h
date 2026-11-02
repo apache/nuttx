@@ -124,6 +124,7 @@ struct local_conn_s
   uint8_t lc_proto;              /* SOCK_STREAM or SOCK_DGRAM */
   uint8_t lc_type;               /* See enum local_type_e */
   uint8_t lc_state;              /* See enum local_state_e */
+  bool lc_pair;                  /* One end of a socketpair() */
   struct file lc_infile;         /* File for read-only FIFO (peers) */
   struct file lc_outfile;        /* File descriptor of write-only FIFO (peers) */
   char lc_path[UNIX_PATH_MAX];   /* Path assigned by bind() */
