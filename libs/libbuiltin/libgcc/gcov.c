@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/streams.h>
 #include <nuttx/reboot_notifier.h>
 
@@ -190,6 +191,22 @@ static int gcov_mkdir(FAR const char *path)
 static int gcov_reboot_notify(FAR struct notifier_block *nb,
                               unsigned long action, FAR void *data)
 {
+  /* __gcov_dump() performs filesystem operations (stat/open/write/mkdir)
+   * that are unsafe in IRQ/panic context where IRQs are disabled and the
+   * kernel state may be corrupted.  The assert path invokes this notifier
+   * with action == SYS_HALT; running heavy filesystem code from there can
+   * easily fault and trigger a recursive assert, masking the original
+   * crash cause.  Only dump coverage data on clean shutdowns (restart or
+   * power-off) from task context, matching the guard used by the VFS
+   * sync reboot handler.
+   */
+
+  if (up_interrupt_context() ||
+      (action != SYS_RESTART && action != SYS_POWER_OFF))
+    {
+      return OK;
+    }
+
   __gcov_dump();
   return OK;
 }
