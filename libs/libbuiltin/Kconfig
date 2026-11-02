@@ -122,6 +122,16 @@ config COVERAGE_ALL
 		The data can then be printed nsh run "gcov dump -d /xxx/xxx"
 
 
+config GCOV_COUNTER_POOL_SIZE
+	int "GCOV counter pool size"
+	default 8192
+	depends on ARCH_TOOLCHAIN_GCC && COVERAGE_PGO
+	---help---
+		PGO profile collection may occur before the memory subsystem is
+		initialized, so we need to define a memory block for counter
+		allocation. This can also replace dynamic memory allocation to
+		improve performance.
+
 config PROFILE_ALL
 	bool "Enable gprof call graph for all modules"
 	depends on FRAME_POINTER && !PROFILE_NONE

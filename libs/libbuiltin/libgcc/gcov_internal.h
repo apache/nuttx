@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdatomic.h>
 #include <unistd.h>
 
 /****************************************************************************
@@ -38,38 +39,55 @@
 #endif
 
 #ifdef GCOV_12_FORMAT
-#  define GCOV_UNIT_SIZE      4
+#  define GCOV_UNIT_SIZE                  4
 #else
-#  define GCOV_UNIT_SIZE      1
+#  define GCOV_UNIT_SIZE                  1
 #endif
 
 #ifdef GCOV_12_FORMAT
-#  define GCOV_TAG_FUNCTION_LENGTH 12
+#  define GCOV_TAG_FUNCTION_LENGTH        12
 #else
-#  define GCOV_TAG_FUNCTION_LENGTH 3
+#  define GCOV_TAG_FUNCTION_LENGTH        3
 #endif
 
 #if __GNUC__ >= 14
-#  define GCOV_COUNTERS 9u
+#  define GCOV_COUNTERS                   9u
 #elif __GNUC__ >= 10
-#  define GCOV_COUNTERS 8u
+#  define GCOV_COUNTERS                   8u
 #elif __GNUC__ >= 8
-#  define GCOV_COUNTERS 9u
+#  define GCOV_COUNTERS                   9u
 #else
-#  define GCOV_COUNTERS 10u
+#  define GCOV_COUNTERS                   10u
 #endif
 
-#define GCOV_DATA_MAGIC       (0x67636461)
-#define GCOV_NOTE_MAGIC       (0x67636e6f)
-#define GCOV_FILENAME_MAGIC   (0x6763666e)
+/* The most common value of expression. */
 
-#define GCOV_TAG_FUNCTION     (0x01000000)
-#define GCOV_TAG_COUNTER_BASE (0x01a10000)
+#define GCOV_COUNTER_V_TOPN               3
+
+/* The most common indirect address. */
+
+#define GCOV_COUNTER_V_INDIR              4
+
+#define GCOV_DATA_MAGIC                   (0x67636461)
+#define GCOV_NOTE_MAGIC                   (0x67636e6f)
+#define GCOV_FILENAME_MAGIC               (0x6763666e)
+
+#define GCOV_TAG_FUNCTION                 (0x01000000)
+#define GCOV_TAG_COUNTER_BASE             (0x01a10000)
+#define GCOV_TAG_COUNTER_LENGTH(n)        ((n) * 2 * GCOV_UNIT_SIZE)
+
+/* Number of top N counters when being in memory. */
+
+#define GCOV_TOPN_MEM_COUNTERS            3
+
+#define GCOV_PATH_MAX_TOKENS              64
+
+#define GCOV_CXX_VTABLE_USES_DESCRIPTORS  0
+
+/* Convert a counter index to a tag. */
 
 #define GCOV_TAG_FOR_COUNTER(count) \
   (GCOV_TAG_COUNTER_BASE + ((uint32_t)(count) << 17))
-
-#define GCOV_PATH_MAX_TOKENS 64
 
 /****************************************************************************
  * Public Types
@@ -125,9 +143,43 @@ struct gcov_fn_info
   struct gcov_ctr_info ctrs[1];    /* Instrumented counters */
 };
 
+struct indirect_call_tuple
+{
+  /* Callee function. */
+
+  FAR void *callee;
+
+  /* Pointer to counters. */
+
+  FAR atomic_ulong *counters;
+};
+
+/* GCOV key-value pair linked list type. */
+
+struct gcov_kvp
+{
+  gcov_type value;
+  atomic_ulong count;
+  FAR struct gcov_kvp *next;
+};
+
+struct gcov_kvp_list
+{
+  struct gcov_kvp value;
+  FAR struct gcov_kvp_list *next;
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 void dump_counter(FAR void *buffer, FAR size_t *off, uint64_t v);
 void dump_unsigned(FAR void *buffer, FAR size_t *off, uint32_t v);
+
+#ifdef CONFIG_COVERAGE_PGO
+void write_topn_counters(FAR void *buffer, FAR size_t *off,
+                         FAR const struct gcov_ctr_info *ci_ptr,
+                         unsigned t_ix, gcov_unsigned_t n_counts);
+#else
+#define write_topn_counters(a, b, c, d, e)
+#endif

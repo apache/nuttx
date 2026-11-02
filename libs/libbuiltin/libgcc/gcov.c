@@ -111,12 +111,24 @@ static size_t gcov_convert(FAR uint8_t *buffer,
 
   for (functions = 0; functions < info->n_functions; functions++)
     {
+      unsigned int length = 0;
       gfi = info->functions[functions];
+
+      if (gfi && gfi->key == info)
+        {
+          length = GCOV_TAG_FUNCTION_LENGTH;
+        }
 
       /* Function record. */
 
       dump_unsigned(buffer, &pos, GCOV_TAG_FUNCTION);
-      dump_unsigned(buffer, &pos, GCOV_TAG_FUNCTION_LENGTH);
+      dump_unsigned(buffer, &pos, length);
+
+      if (length == 0)
+        {
+          continue;
+        }
+
       dump_unsigned(buffer, &pos, gfi->ident);
       dump_unsigned(buffer, &pos, gfi->lineno_checksum);
       dump_unsigned(buffer, &pos, gfi->cfg_checksum);
@@ -131,12 +143,20 @@ static size_t gcov_convert(FAR uint8_t *buffer,
 
           /* Counter record. */
 
-          dump_unsigned(buffer, &pos, GCOV_TAG_FOR_COUNTER(counts));
-          dump_unsigned(buffer, &pos, gci->num * 2 * GCOV_UNIT_SIZE);
-
-          for (value = 0; value < gci->num; value++)
+          if (counts == GCOV_COUNTER_V_TOPN ||
+              counts == GCOV_COUNTER_V_INDIR)
             {
-              dump_counter(buffer, &pos, gci->values[value]);
+              write_topn_counters(buffer, &pos, gci, counts, gci->num);
+            }
+          else
+            {
+              dump_unsigned(buffer, &pos, GCOV_TAG_FOR_COUNTER(counts));
+              dump_unsigned(buffer, &pos, GCOV_TAG_COUNTER_LENGTH(gci->num));
+
+              for (value = 0; value < gci->num; value++)
+                {
+                  dump_counter(buffer, &pos, gci->values[value]);
+                }
             }
 
           gci++;
