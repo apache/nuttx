@@ -3846,6 +3846,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
  *
  ****************************************************************************/
 
+#ifdef HAVE_UART
 uart_dev_t *stm32_serial_get_uart(int uart_num)
 {
   int uart_idx = uart_num - 1;
@@ -3862,6 +3863,7 @@ uart_dev_t *stm32_serial_get_uart(int uart_num)
 
   return &g_uart_devs[uart_idx]->dev;
 }
+#endif /* HAVE_UART */
 
 /****************************************************************************
  * Name: arm_earlyserialinit
