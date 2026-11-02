@@ -31,6 +31,7 @@ DMA         Yes      GPDMA1 and HPDMA1 through the common GPDMA driver.
 PWR         Yes      Supply configuration, VOS, I/O supply validity.
 RCC         Yes      HSI/HSE, PLL1-4, IC1-20, bus prescalers and kernel
                      clock selection from board.h.
+RNG         Yes      Through the common driver.
 USART       Yes      USART1 only.
 
 ADC         No
@@ -44,7 +45,6 @@ LPTIM       No
 LTDC        No
 MPU         No
 NPU         No
-RNG         No
 RTC         No
 SAI         No
 SDMMC       No

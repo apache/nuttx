@@ -260,6 +260,28 @@ static inline void rcc_enableahb1(void)
 }
 
 /****************************************************************************
+ * Name: rcc_enableahb3
+ *
+ * Description:
+ *   Enable selected AHB3 peripherals.
+ *
+ ****************************************************************************/
+
+static inline void rcc_enableahb3(void)
+{
+  uint32_t regval = 0;
+
+#ifdef CONFIG_STM32_RNG
+  regval |= RCC_AHB3ENR_RNGEN;
+#endif
+
+  if (regval != 0)
+    {
+      putreg32(regval, STM32_RCC_AHB3ENSR);
+    }
+}
+
+/****************************************************************************
  * Name: rcc_enableahb5
  *
  * Description:
@@ -721,6 +743,7 @@ void stm32_rcc_enableperipherals(void)
     }
 
   rcc_enableahb1();
+  rcc_enableahb3();
   rcc_enableahb4();
   rcc_enableahb5();
   rcc_enableapb1();
