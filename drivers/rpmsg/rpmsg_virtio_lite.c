@@ -28,6 +28,7 @@
 
 #include <nuttx/debug.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/param.h>
 
 #include <metal/cache.h>
@@ -682,6 +683,7 @@ static int rpmsg_virtio_lite_start(FAR struct rpmsg_virtio_lite_priv_s *priv)
   rpmsg_virtio_init_shm_pool(&priv->pool[0], shbuf0, shbufsz0);
   rpmsg_virtio_init_shm_pool(&priv->pool[1], shbuf1, shbufsz1);
 
+  memset(&config, 0, sizeof(config));
   config.h2r_buf_size = rsc->config.h2r_buf_size;
   config.r2h_buf_size = rsc->config.r2h_buf_size;
   config.split_shpool = true;

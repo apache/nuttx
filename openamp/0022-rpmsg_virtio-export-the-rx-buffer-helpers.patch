@@ -1,0 +1,312 @@
+From 2ade8c2d4e47e2e8bd7686d997e0fe663ecd5ea3 Mon Sep 17 00:00:00 2001
+From: Yongrong Wang <wangyongrong@xiaomi.com>
+Date: Mon, 2 Nov 2026 21:32:10 +0800
+Subject: [PATCH 0022/23] rpmsg_virtio: export the rx buffer helpers
+
+Make rpmsg_virtio_get_rx_buffer(), rpmsg_virtio_release_rx_buffer_nolock()
+and rpmsg_virtio_buf_held_dec_test() public and move the buffer held
+counter macros to rpmsg_internal.h, so a transport can walk the rx
+virtqueue and dispatch the buffers itself.
+
+Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/rpmsg.h        |   1 +
+ lib/include/openamp/rpmsg_virtio.h |  33 ++++++
+ lib/rpmsg/rpmsg_internal.h         |  19 ++++
+ lib/rpmsg/rpmsg_virtio.c           | 158 +++++++++++------------------
+ 4 files changed, 112 insertions(+), 99 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index e6409de..5737066 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -58,6 +58,7 @@ extern "C" {
+ #define RPMSG_PRIO_MAX			255
+ #define RPMSG_PRIO_RT			RPMSG_PRIO_MAX
+ 
++struct rpmsg_hdr;
+ struct rpmsg_endpoint;
+ struct rpmsg_device;
+ 
+diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
+index 5eef8b7..89275db 100644
+--- a/lib/include/openamp/rpmsg_virtio.h
++++ open-amp/lib/include/openamp/rpmsg_virtio.h
+@@ -297,6 +297,39 @@ static inline int rpmsg_virtio_get_buffer_size(struct rpmsg_device *rdev)
+ 	return rpmsg_virtio_get_tx_buffer_size(rdev);
+ }
+ 
++/**
++ * @brief Release rpmsg virtio Rx buffer
++ *
++ * @param rvdev		Pointer to the rpmsg virtio device
++ * @param rp_hdr	Pointer to rpmsg buffer header
++ *
++ * @return true indicates this buffer is released.
++ */
++bool rpmsg_virtio_release_rx_buffer_nolock(struct rpmsg_virtio_device *rvdev,
++					   struct rpmsg_hdr *rp_hdr);
++
++/**
++ * @brief Check whether rpmsg buffer needs to be released or not
++ *
++ * @param rp_hdr	Pointer to rpmsg buffer header
++ *
++ * @return true indicates this buffer needs to be released
++ */
++bool rpmsg_virtio_buf_held_dec_test(struct rpmsg_hdr *rp_hdr);
++
++/**
++ * @brief Retrieves the received buffer from the virtqueue.
++ *
++ * @param rvdev	Pointer to rpmsg device
++ * @param len	Size of received buffer
++ * @param idx	Index of buffer
++ * @param last	Indicates whether this is the last buffer
++ *
++ * @return Pointer to received buffer
++ */
++void *rpmsg_virtio_get_rx_buffer(struct rpmsg_virtio_device *rvdev,
++				 uint32_t *len, uint16_t *idx, bool *last);
++
+ /**
+  * @brief Initialize rpmsg virtio device
+  *
+diff --git a/lib/rpmsg/rpmsg_internal.h open-amp/lib/rpmsg/rpmsg_internal.h
+index 3e9ff02..52eeaf0 100644
+--- a/lib/rpmsg/rpmsg_internal.h
++++ open-amp/lib/rpmsg/rpmsg_internal.h
+@@ -32,6 +32,25 @@ extern "C" {
+ #define RPMSG_BUF_HELD_SHIFT 16
+ #define RPMSG_BUF_HELD_MASK  (0xFFFFU << RPMSG_BUF_HELD_SHIFT)
+ 
++/*
++ * Get the buffer held counter value.
++ * If 0 the buffer can be released
++ */
++#define RPMSG_BUF_HELD_COUNTER(rp_hdr)          \
++	(((rp_hdr)->reserved & RPMSG_BUF_HELD_MASK) >> RPMSG_BUF_HELD_SHIFT)
++
++/* Increase buffer held counter */
++#define RPMSG_BUF_HELD_INC(rp_hdr)              \
++	((rp_hdr)->reserved += 1 << RPMSG_BUF_HELD_SHIFT)
++
++/* Decrease buffer held counter */
++#define RPMSG_BUF_HELD_DEC(rp_hdr)              \
++	((rp_hdr)->reserved -= 1 << RPMSG_BUF_HELD_SHIFT)
++
++/* Get the buffer index */
++#define RPMSG_BUF_INDEX(rphdr)                  \
++	((uint16_t)((rp_hdr)->reserved & ~RPMSG_BUF_HELD_MASK))
++
+ #define RPMSG_LOCATE_HDR(p) \
+ 	((struct rpmsg_hdr *)((unsigned char *)(p) - sizeof(struct rpmsg_hdr)))
+ #define RPMSG_LOCATE_DATA(p) ((unsigned char *)(p) + sizeof(struct rpmsg_hdr))
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 46ce306..1d6259e 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -20,25 +20,6 @@
+ 
+ #define RPMSG_NUM_VRINGS                        2
+ 
+-/*
+- * Get the buffer held counter value.
+- * If 0 the buffer can be released
+- */
+-#define RPMSG_BUF_HELD_COUNTER(rp_hdr)          \
+-	(((rp_hdr)->reserved & RPMSG_BUF_HELD_MASK) >> RPMSG_BUF_HELD_SHIFT)
+-
+-/* Increase buffer held counter */
+-#define RPMSG_BUF_HELD_INC(rp_hdr)              \
+-	((rp_hdr)->reserved += 1 << RPMSG_BUF_HELD_SHIFT)
+-
+-/* Decrease buffer held counter */
+-#define RPMSG_BUF_HELD_DEC(rp_hdr)              \
+-	((rp_hdr)->reserved -= 1 << RPMSG_BUF_HELD_SHIFT)
+-
+-/* Get the buffer index */
+-#define RPMSG_BUF_INDEX(rphdr)                  \
+-	((uint16_t)((rp_hdr)->reserved & ~RPMSG_BUF_HELD_MASK))
+-
+ /**
+  * struct vbuff_reclaimer_t - vring buffer recycler
+  *
+@@ -210,44 +191,6 @@ static void *rpmsg_virtio_get_tx_buffer(struct rpmsg_virtio_device *rvdev,
+ 	return data;
+ }
+ 
+-/**
+- * @internal
+- *
+- * @brief Retrieves the received buffer from the virtqueue.
+- *
+- * @param rvdev	Pointer to rpmsg device
+- * @param len	Size of received buffer
+- * @param idx	Index of buffer
+- * @param last	Indicates whether this is the last buffer
+- *
+- * @return Pointer to received buffer
+- */
+-static void *rpmsg_virtio_get_rx_buffer(struct rpmsg_virtio_device *rvdev,
+-					uint32_t *len, uint16_t *idx, bool *last)
+-{
+-	void *data = NULL;
+-
+-	if (VIRTIO_ROLE_IS_DRIVER(rvdev->vdev)) {
+-		data = virtqueue_get_buffer(rvdev->rvq, len, idx);
+-		/* used->len was written by the remote; never exceed our buffer */
+-		if (data && *len > rvdev->config.r2h_buf_size)
+-			*len = rvdev->config.r2h_buf_size;
+-		*last = virtqueue_nused(rvdev->rvq) == 0;
+-	}
+-
+-	if (VIRTIO_ROLE_IS_DEVICE(rvdev->vdev)) {
+-		data =
+-		    virtqueue_get_first_avail_buffer(rvdev->rvq, idx, len);
+-		*last = virtqueue_navail(rvdev->rvq) == 0;
+-	}
+-
+-	/* Invalidate the buffer before returning it */
+-	if (data)
+-		BUFFER_INVALIDATE(data, *len);
+-
+-	return data;
+-}
+-
+ /**
+  * @internal
+  *
+@@ -279,33 +222,6 @@ static int rpmsg_virtio_wait_remote_ready(struct rpmsg_virtio_device *rvdev)
+ 	}
+ }
+ 
+-/**
+- * @internal
+- *
+- * @brief Check whether rpmsg buffer needs to be released or not
+- *
+- * @param rp_hdr	Pointer to rpmsg buffer header
+- *
+- * @return true indicates this buffer needs to be released
+- */
+-static bool rpmsg_virtio_buf_held_dec_test(struct rpmsg_hdr *rp_hdr)
+-{
+-	/* Check the held counter first */
+-	if (RPMSG_BUF_HELD_COUNTER(rp_hdr) <= 0) {
+-		metal_err("unexpected buffer held counter\r\n");
+-		return false;
+-	}
+-
+-	/* Decrease the held counter */
+-	RPMSG_BUF_HELD_DEC(rp_hdr);
+-
+-	/* Check whether to release the buffer */
+-	if (RPMSG_BUF_HELD_COUNTER(rp_hdr) > 0)
+-		return false;
+-
+-	return true;
+-}
+-
+ static void rpmsg_virtio_hold_rx_buffer(struct rpmsg_device *rdev, void *rxbuf)
+ {
+ 	metal_mutex_acquire(&rdev->lock);
+@@ -313,21 +229,6 @@ static void rpmsg_virtio_hold_rx_buffer(struct rpmsg_device *rdev, void *rxbuf)
+ 	metal_mutex_release(&rdev->lock);
+ }
+ 
+-static bool rpmsg_virtio_release_rx_buffer_nolock(struct rpmsg_virtio_device *rvdev,
+-						  struct rpmsg_hdr *rp_hdr)
+-{
+-	uint16_t idx;
+-	uint32_t len;
+-
+-	/* The reserved field contains buffer index */
+-	idx = RPMSG_BUF_INDEX(rp_hdr);
+-	/* Return buffer on virtqueue. */
+-	len = virtqueue_get_buffer_length(rvdev->rvq, idx);
+-	rpmsg_virtio_return_buffer(rvdev, rp_hdr, len, idx);
+-
+-	return true;
+-}
+-
+ static void rpmsg_virtio_release_rx_buffer(struct rpmsg_device *rdev,
+ 					   void *rxbuf)
+ {
+@@ -774,6 +675,32 @@ int rpmsg_virtio_get_tx_buffer_size(struct rpmsg_device *rdev)
+ 	return size;
+ }
+ 
++void *rpmsg_virtio_get_rx_buffer(struct rpmsg_virtio_device *rvdev,
++				 uint32_t *len, uint16_t *idx, bool *last)
++{
++	void *data = NULL;
++
++	if (VIRTIO_ROLE_IS_DRIVER(rvdev->vdev)) {
++		data = virtqueue_get_buffer(rvdev->rvq, len, idx);
++		/* used->len was written by the remote; never exceed our buffer */
++		if (data && *len > rvdev->config.r2h_buf_size)
++			*len = rvdev->config.r2h_buf_size;
++		*last = virtqueue_nused(rvdev->rvq) == 0;
++	}
++
++	if (VIRTIO_ROLE_IS_DEVICE(rvdev->vdev)) {
++		data =
++		    virtqueue_get_first_avail_buffer(rvdev->rvq, idx, len);
++		*last = virtqueue_navail(rvdev->rvq) == 0;
++	}
++
++	/* Invalidate the buffer before returning it */
++	if (data)
++		BUFFER_INVALIDATE(data, *len);
++
++	return data;
++}
++
+ int rpmsg_virtio_get_rx_buffer_size(struct rpmsg_device *rdev)
+ {
+ 	struct rpmsg_virtio_device *rvdev;
+@@ -810,6 +737,39 @@ int rpmsg_virtio_get_rx_buffer_size(struct rpmsg_device *rdev)
+ 	return size;
+ }
+ 
++bool rpmsg_virtio_release_rx_buffer_nolock(struct rpmsg_virtio_device *rvdev,
++					   struct rpmsg_hdr *rp_hdr)
++{
++	uint16_t idx;
++	uint32_t len;
++
++	/* The reserved field contains buffer index */
++	idx = RPMSG_BUF_INDEX(rp_hdr);
++	/* Return buffer on virtqueue. */
++	len = virtqueue_get_buffer_length(rvdev->rvq, idx);
++	rpmsg_virtio_return_buffer(rvdev, rp_hdr, len, idx);
++
++	return true;
++}
++
++bool rpmsg_virtio_buf_held_dec_test(struct rpmsg_hdr *rp_hdr)
++{
++	/* Check the held counter first */
++	if (RPMSG_BUF_HELD_COUNTER(rp_hdr) <= 0) {
++		metal_err("unexpected buffer held counter\r\n");
++		return false;
++	}
++
++	/* Decrease the held counter */
++	RPMSG_BUF_HELD_DEC(rp_hdr);
++
++	/* Check whether to release the buffer */
++	if (RPMSG_BUF_HELD_COUNTER(rp_hdr) > 0)
++		return false;
++
++	return true;
++}
++
+ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ 		    struct virtio_device *vdev,
+ 		    rpmsg_ns_bind_cb ns_bind_cb,
+-- 
+2.34.1
+
