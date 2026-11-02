@@ -26,8 +26,9 @@ The following list indicates peripherals supported in NuttX:
 Peripheral  Support  Notes
 ==========  =======  ===============================================
 GPIO        Yes
-PWR         Yes      Partial.
-RCC         Yes      PLL1 clock tree.
+PWR         Yes      Supply configuration, VOS, I/O supply validity.
+RCC         Yes      HSI/HSE, PLL1-4, IC1-20, bus prescalers and kernel
+                     clock selection from board.h.
 USART       Yes      USART1 only.
 
 ADC         No

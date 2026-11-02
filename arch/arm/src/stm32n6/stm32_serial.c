@@ -244,7 +244,7 @@ static struct stm32_serial_s g_usart1priv =
   .bits          = CONFIG_USART1_BITS,
   .stopbits2     = CONFIG_USART1_2STOP,
   .baud          = CONFIG_USART1_BAUD,
-  .apbclock      = STM32_HSI_FREQUENCY,  /* USART1SEL=HSI via CCIPR13 */
+  .apbclock      = STM32_USART1_FREQUENCY,
   .usartbase     = STM32_USART1_BASE,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
@@ -1262,6 +1262,7 @@ static void stm32serial_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct stm32_serial_s *priv =
     (struct stm32_serial_s *)dev->priv;
+
   irqstate_t flags;
   uint16_t ie;
 
@@ -1438,6 +1439,7 @@ static void stm32serial_txint(struct uart_dev_s *dev, bool enable)
 {
   struct stm32_serial_s *priv =
     (struct stm32_serial_s *)dev->priv;
+
   irqstate_t flags;
 
   /* USART transmit interrupts:
