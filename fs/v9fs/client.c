@@ -1233,15 +1233,20 @@ ssize_t v9fs_client_convertdir(FAR const uint8_t *buffer, size_t bufsize,
       return -EIO;
     }
 
-  /* Copy the file name to entry->d_name and null-terminate it */
+  /* Copy the file name to entry->d_name and null-terminate it.
+   * If the name exceeds NAME_MAX, skip this entry silently.
+   */
 
   if (name_len > NAME_MAX)
     {
-      return -ENAMETOOLONG;
+      entry->d_name[0] = '\0';
+    }
+  else
+    {
+      memcpy(entry->d_name, buffer + next, name_len);
+      entry->d_name[name_len] = '\0';
     }
 
-  memcpy(entry->d_name, buffer + next, name_len);
-  entry->d_name[name_len] = '\0';
   next += name_len;
   *offset = off;
 

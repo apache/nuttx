@@ -695,7 +695,8 @@ static int v9fs_vfs_readdir(FAR struct inode *mountpt,
 
       fsdir->head += ret;
       if (strcmp(entry->d_name, ".") != 0 &&
-          strcmp(entry->d_name, "..") != 0)
+          strcmp(entry->d_name, "..") != 0 &&
+          entry->d_name[0] != '\0')
         {
           break;
         }
