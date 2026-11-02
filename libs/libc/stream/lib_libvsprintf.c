@@ -496,6 +496,194 @@ static int vsprintf_put_naninf(FAR struct lib_outstream_s *stream,
 
   return total_len;
 }
+
+static int vsprintf_put_float_prefix(FAR struct lib_outstream_s *stream,
+                                     uint16_t flags, int sign,
+                                     FAR int *width, int len)
+{
+  int total_len = 0;
+  int w = *width;
+
+  w = w > len ? w - len : 0;
+
+  if ((flags & (FL_LPAD | FL_ZFILL)) == 0)
+    {
+      total_len += vsprintf_repeat(stream, ' ', w);
+      w = 0;
+    }
+
+  if (sign != 0)
+    {
+      total_len++;
+      lib_stream_putc(stream, sign);
+    }
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      total_len += vsprintf_repeat(stream, '0', w);
+      w = 0;
+    }
+
+  *width = w;
+
+  return total_len;
+}
+
+static int vsprintf_put_float_fixed(FAR struct lib_outstream_s *stream,
+                                    uint16_t flags,
+                                    FAR const struct dtoa_s *dtoa, int exp,
+                                    uint8_t ndigs, int prec)
+{
+  char out;
+  int n;
+  int total_len = 0;
+
+  /* At this point, we should have exp exponent of leftmost digit in
+   * dtoa->digits ndigs number of buffer digits to print prec number
+   * of digits after decimal In the loop, 'n' walks over the exponent
+   * value.
+   */
+
+  n = exp > 0 ? exp : 0;
+  do
+    {
+      /* Insert decimal point at correct place */
+
+      if (n == -1)
+        {
+          total_len++;
+          lib_stream_putc(stream, '.');
+        }
+
+      /* Pull digits from buffer when in-range, otherwise use 0 */
+
+      if (0 <= exp - n && exp - n < ndigs)
+        {
+          out = dtoa->digits[exp - n];
+        }
+      else
+        {
+          out = '0';
+        }
+
+      if (--n < -prec)
+        {
+          break;
+        }
+
+      if (out == '0')
+        {
+          int zeroes = 1;
+
+          while (n != -1)
+            {
+              int next = n - 1;
+              int offset = exp - n;
+
+              if (next < -prec ||
+                  (0 <= offset && offset < ndigs &&
+                   dtoa->digits[offset] != '0'))
+                {
+                  break;
+                }
+
+              zeroes++;
+              n = next;
+            }
+
+          total_len += vsprintf_repeat(stream, '0', zeroes);
+        }
+      else
+        {
+          total_len++;
+          lib_stream_putc(stream, out);
+        }
+    }
+  while (1);
+
+  if (n == exp && (dtoa->digits[0] > '5' ||
+      (dtoa->digits[0] == '5' && !(dtoa->flags & DTOA_CARRY))))
+    {
+      out = '1';
+    }
+
+  total_len++;
+  lib_stream_putc(stream, out);
+
+  if ((flags & FL_ALT) != 0 && n == -1)
+    {
+      total_len++;
+      lib_stream_putc(stream, '.');
+    }
+
+  return total_len;
+}
+
+static int vsprintf_put_float_exp(FAR struct lib_outstream_s *stream,
+                                  uint16_t flags, FAR struct dtoa_s *dtoa,
+                                  int exp, uint8_t ndigs, int prec,
+                                  FAR char *buf)
+{
+  int nbytes;
+  int sign;
+  int len;
+  int total_len = 0;
+
+  if (dtoa->digits[0] != '1')
+    {
+      dtoa->flags &= ~DTOA_CARRY;
+    }
+
+  total_len++;
+  lib_stream_putc(stream, dtoa->digits[0]);
+  if (prec > 0)
+    {
+      total_len++;
+      lib_stream_putc(stream, '.');
+
+      nbytes = MIN(prec, ndigs > 1 ? ndigs - 1 : 0);
+      if (nbytes > 0)
+        {
+          total_len += nbytes;
+          lib_stream_puts(stream, &dtoa->digits[1], nbytes);
+        }
+
+      if (prec > nbytes)
+        {
+          total_len += vsprintf_repeat(stream, '0', prec - nbytes);
+        }
+    }
+  else if ((flags & FL_ALT) != 0)
+    {
+      total_len++;
+      lib_stream_putc(stream, '.');
+    }
+
+  /* Exponent */
+
+  total_len++;
+  lib_stream_putc(stream, flags & FL_FLTUPP ? 'E' : 'e');
+  sign = '+';
+  if (exp < 0 || (exp == 0 && (dtoa->flags & DTOA_CARRY) != 0))
+    {
+      exp = -exp;
+      sign = '-';
+    }
+
+  total_len++;
+  lib_stream_putc(stream, sign);
+  len = __ultoa_invert(exp, buf, 10) - buf;
+
+  if (exp >= 0 && exp <= 9)
+    {
+      total_len++;
+      lib_stream_putc(stream, '0');
+    }
+
+  total_len += vsprintf_putnum(stream, buf, len);
+
+  return total_len;
+}
 #endif
 
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
@@ -521,7 +709,6 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   size_t size;
   int ch;
   int star;
-  unsigned int len;
   size_t total_len = 0;
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
@@ -963,7 +1150,6 @@ set_star:
         {
           double value;
           int exp;              /* Exponent of master decimal digit */
-          int n;
           unsigned int flen;    /* Length of the conversion */
           uint8_t sign;         /* Sign character (or 0) */
           unsigned int ndigs;   /* Number of digits to convert */
@@ -1127,162 +1313,23 @@ flt_oper:
               goto ret;
             }
 
-          width = width > flen ? width - flen : 0;
-
-          /* Output before first digit */
-
-          if ((flags & (FL_LPAD | FL_ZFILL)) == 0)
-            {
-              stream_repeat(' ', width, stream);
-              width = 0;
-            }
-
-          if (sign != 0)
-            {
-              stream_putc(sign, stream);
-            }
-
-          if ((flags & FL_LPAD) == 0)
-            {
-              stream_repeat('0', width, stream);
-              width = 0;
-            }
+          total_len += vsprintf_put_float_prefix(stream, flags, sign,
+                                                 &width, flen);
 
           if ((flags & FL_FLTFIX) != 0)
             {
               /* 'f' format */
 
-              unsigned int uexp = exp;
-              char out;
-
-              /* At this point, we should have exp exponent of leftmost digit
-               * in _dtoa.digits ndigs number of buffer digits to print prec
-               * number of digits after decimal In the loop, 'n' walks over
-               * the exponent value
-               */
-
-              n = exp > 0 ? exp : 0;    /* Exponent of left digit */
-              do
-                {
-                  /* Insert decimal point at correct place */
-
-                  if (n == -1)
-                    {
-                      stream_putc('.', stream);
-                    }
-
-                  /* Pull digits from buffer when in-range, otherwise use 0 */
-
-                  if (uexp - n < ndigs)
-                    {
-                      out = _dtoa.digits[exp - n];
-                    }
-                  else
-                    {
-                      out = '0';
-                    }
-
-                  if (--n < -prec)
-                    {
-                      break;
-                    }
-
-                  if (out == '0')
-                    {
-                      int zeroes = 1;
-
-                      while (n != -1)
-                        {
-                          int next = n - 1;
-                          unsigned int offset = uexp - n;
-
-                          if (next < -prec ||
-                              (offset < ndigs &&
-                               _dtoa.digits[offset] != '0'))
-                            {
-                              break;
-                            }
-
-                          zeroes++;
-                          n = next;
-                        }
-
-                      stream_repeat('0', zeroes, stream);
-                    }
-                  else
-                    {
-                      stream_putc(out, stream);
-                    }
-                }
-              while (1);
-
-              if (n == exp && (_dtoa.digits[0] > '5' ||
-                  (_dtoa.digits[0] == '5' && !(_dtoa.flags & DTOA_CARRY))))
-                {
-                  out = '1';
-                }
-
-              stream_putc(out, stream);
-
-              if ((flags & FL_ALT) != 0 && n == -1)
-                {
-                  stream_putc('.', stream);
-                }
+              total_len += vsprintf_put_float_fixed(stream, flags, &_dtoa,
+                                                    exp, ndigs, prec);
             }
           else
             {
               /* 'e(E)' format
-               *
-               * Mantissa
                */
 
-              if (_dtoa.digits[0] != '1')
-                {
-                  _dtoa.flags &= ~DTOA_CARRY;
-                }
-
-              stream_putc(_dtoa.digits[0], stream);
-              if (prec > 0)
-                {
-                  int nbytes;
-
-                  stream_putc('.', stream);
-
-                  nbytes = MIN(prec, ndigs > 1 ? ndigs - 1 : 0);
-                  if (nbytes > 0)
-                    {
-                      stream_puts(&_dtoa.digits[1], nbytes, stream);
-                    }
-
-                  if (prec > nbytes)
-                    {
-                      stream_repeat('0', prec - nbytes, stream);
-                    }
-                }
-              else if ((flags & FL_ALT) != 0)
-                {
-                  stream_putc('.', stream);
-                }
-
-              /* Exponent */
-
-              stream_putc(flags & FL_FLTUPP ? 'E' : 'e', stream);
-              ndigs = '+';
-              if (exp < 0 || (exp == 0 && (_dtoa.flags & DTOA_CARRY) != 0))
-                {
-                  exp = -exp;
-                  ndigs = '-';
-                }
-
-              stream_putc(ndigs, stream);
-              len = __ultoa_invert(exp, buf, 10) - buf;
-
-              if (exp >= 0 && exp <= 9)
-                {
-                  stream_putc('0', stream);
-                }
-
-              total_len += vsprintf_putnum(stream, buf, len);
+              total_len += vsprintf_put_float_exp(stream, flags, &_dtoa,
+                                                  exp, ndigs, prec, buf);
             }
 
           goto tail;
