@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
+
 #include <metal/sys.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
@@ -559,6 +561,26 @@ void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg)
   unregister_driver(path);
 
   metal_finish();
+}
+
+/****************************************************************************
+ * Name: rpmsg_dump_epts
+ ****************************************************************************/
+
+void rpmsg_dump_epts(FAR struct rpmsg_device *rdev)
+{
+  FAR struct rpmsg_endpoint *ept;
+  FAR struct metal_list *node;
+
+  metal_log(METAL_LOG_EMERGENCY, "  rpmsg ept list:\n");
+  metal_list_for_each(&rdev->endpoints, node)
+    {
+      ept = metal_container_of(node, struct rpmsg_endpoint, node);
+      metal_log(METAL_LOG_EMERGENCY, "    ept %s %p: addr=%" PRIu32 " "
+                "dest=%" PRIu32 " refcnt=%" PRIu32 " priority=%" PRIu8
+                " priv=%p\n", ept->name, ept, ept->addr, ept->dest_addr,
+                ept->refcnt, ept->priority, ept->priv);
+    }
 }
 
 static int rpmsg_ioctl_foreach_cb(FAR struct rpmsg_s *rpmsg, FAR void *arg)
