@@ -279,6 +279,42 @@ static void ws2812_byte_order_transform_rgb(FAR const char *src,
     }
 }
 
+/****************************************************************************
+ * Name: ws2812_byte_order_len
+ *
+ * Description:
+ *   Limit a transfer through byte_order_buffer to the LEDs from the file
+ *   position to the end of the chain, so that it fits in the buffer.
+ *
+ * Input Parameters:
+ *   filep - Pointer system file data
+ *   priv  - The device
+ *   len   - Requested length in bytes
+ *
+ * Returned Value:
+ *   The length in bytes to transfer.
+ *
+ ****************************************************************************/
+
+static size_t ws2812_byte_order_len(FAR struct file *filep,
+                                    FAR struct ws2812_dev_s *priv,
+                                    size_t len)
+{
+  off_t size = (off_t)priv->nleds * WS2812_RW_PIXEL_SIZE;
+
+  if (filep->f_pos >= size)
+    {
+      return 0;
+    }
+
+  if (len > (size_t)(size - filep->f_pos))
+    {
+      len = size - filep->f_pos;
+    }
+
+  return len;
+}
+
 #  endif
 
 /****************************************************************************
@@ -402,6 +438,7 @@ ssize_t ws2812_write(FAR struct file *filep,
 #    ifdef CONFIG_WS2812_COMPONENT_TRANSFORM_RGB
           case WS2812_COMPONENT_TRANSFORM_RGB:
             {
+              len = ws2812_byte_order_len(filep, priv, len);
               ws2812_byte_order_transform_rgb(
                   data,
                   priv->byte_order_buffer,
@@ -497,12 +534,16 @@ ssize_t ws2812_read(FAR struct file *filep,
 #    ifdef CONFIG_WS2812_COMPONENT_TRANSFORM_RGB
           case WS2812_COMPONENT_TRANSFORM_RGB:
             {
+              len = ws2812_byte_order_len(filep, priv, len);
               res = priv->read(filep, priv->byte_order_buffer, len);
-              ws2812_byte_order_transform_rgb(
-                  priv->byte_order_buffer,
-                  data,
-                  len >> 2
-              );
+              if (res > 0)
+                {
+                  ws2812_byte_order_transform_rgb(
+                      priv->byte_order_buffer,
+                      data,
+                      res >> 2
+                  );
+                }
             }
             break;
 #    endif /* CONFIG_WS2812_COMPONENT_TRANSFORM_RGB */
