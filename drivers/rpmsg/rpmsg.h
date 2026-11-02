@@ -105,6 +105,7 @@ int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
 void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg);
 
 int rpmsg_foreach(rpmsg_foreach_t handler, FAR void *args);
+void rpmsg_dump_epts(FAR struct rpmsg_device *rdev);
 
 #endif /* CONFIG_RPMSG */
 #endif /* __DRIVERS_RPMSG_RPMSG_H */

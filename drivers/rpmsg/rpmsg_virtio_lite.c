@@ -479,8 +479,6 @@ static void rpmsg_virtio_lite_dump(FAR struct rpmsg_s *rpmsg)
       (FAR struct rpmsg_virtio_lite_priv_s *)rpmsg;
   FAR struct rpmsg_device *rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
-  FAR struct rpmsg_endpoint *ept;
-  FAR struct metal_list *node;
   bool needlock = true;
 
   metal_log(METAL_LOG_EMERGENCY, "Remote: %s headrx %d\n",
@@ -511,13 +509,7 @@ static void rpmsg_virtio_lite_dump(FAR struct rpmsg_s *rpmsg)
   metal_log(METAL_LOG_EMERGENCY, "rpmsg vq TX:\n");
   virtqueue_dump(rvdev->svq);
 
-  metal_log(METAL_LOG_EMERGENCY, "  rpmsg ept list:\n");
-
-  metal_list_for_each(&rdev->endpoints, node)
-    {
-      ept = metal_container_of(node, struct rpmsg_endpoint, node);
-      metal_log(METAL_LOG_EMERGENCY, "    ept %s\n", ept->name);
-    }
+  rpmsg_dump_epts(rdev);
 
   metal_log(METAL_LOG_EMERGENCY, "  rpmsg buffer list:\n");
 
