@@ -16,6 +16,17 @@ config DRIVERS_NOTE_MAX
 	---help---
 		sched_note supports the maximum number of drivers
 
+config DRIVERS_NOTE_CPUID
+	int "Note CPU ID"
+	depends on UP
+	default 0
+	---help---
+		The value used to mark CPU ID in the note data.
+		When SMP or BMP is disabled, CPU ID is always 0. In order to
+		distinguish between valid CPU ID and invalid CPU ID
+		in the note data, this option can be used to set a
+		specific value as the CPU ID.
+
 config DRIVERS_NOTE_TASKNAME_BUFSIZE
 	int "Note task name buffer size"
 	default 256 if TASK_NAME_SIZE > 0
