@@ -23,7 +23,7 @@ CSRCS += profile.c
 endif
 
 ifeq ($(CONFIG_COVERAGE_MINI)$(CONFIG_ARCH_TOOLCHAIN_GCC),yy)
-CSRCS += gcov.c
+CSRCS += gcov.c gcov_write.c
 
 GCOV_CFLAGS += -fno-profile-arcs -fno-test-coverage
 GCOV_CFLAGS += -fno-stack-protector

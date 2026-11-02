@@ -33,5 +33,5 @@ if(CONFIG_COVERAGE_MINI AND CONFIG_ARCH_TOOLCHAIN_GCC)
        "-fno-inline")
   set_property(GLOBAL PROPERTY NUTTX_EXTRA_FLAGS ${NUTTX_EXTRA_FLAGS})
 
-  target_sources(libcoverage PRIVATE gcov.c)
+  target_sources(libcoverage PRIVATE gcov.c gcov_write.c)
 endif()
