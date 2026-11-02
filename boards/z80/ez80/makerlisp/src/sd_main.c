@@ -99,6 +99,7 @@ int sd_main(int argc, char *argv[])
   if (ret < 0)
     {
       int errcode = errno;
+
       syslog(LOG_ERR, "ERROR: Failed to mount filesystem at %s: %d\n",
              MMCSD_MOUNTPT, errcode);
       goto halt;
@@ -110,6 +111,7 @@ int sd_main(int argc, char *argv[])
   if (fd < 0)
     {
       int errcode = errno;
+
       syslog(LOG_ERR, "ERROR: Failed to mount filesystem at %s: %d\n",
              MMCSD_MOUNTPT, errcode);
       goto halt_with_mount;
