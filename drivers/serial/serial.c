@@ -2600,18 +2600,94 @@ void uart_reset_sem(FAR uart_dev_t *dev)
 int uart_check_special(FAR uart_dev_t *dev, FAR char *buf,
                        FAR size_t *size)
 {
+  FAR char *src = buf;
+  FAR char *end = buf + *size;
   size_t kept = 0;
   int signo = 0;
-  size_t i;
 
   if ((dev->tc_lflag & ISIG) == 0)
     {
       return 0;
     }
 
-  for (i = 0; i < *size; i++)
+  /* Walk the buffer, jumping to the next special character with memchr
+   * instead of testing every byte.  The ordinary bytes before it are kept
+   * in one move, then the special character is acted on and dropped.
+   */
+
+  while (src < end)
     {
-      char ch = buf[i];
+      FAR char *special = NULL;
+      FAR char *tmp;
+      size_t n;
+      char ch;
+
+#ifdef CONFIG_TTY_FORCE_PANIC
+      tmp = memchr(src, CONFIG_TTY_FORCE_PANIC_CHAR, end - src);
+      if (tmp != NULL && (special == NULL || tmp < special))
+        {
+          special = tmp;
+        }
+#endif
+
+#ifdef CONFIG_TTY_LAUNCH
+      tmp = memchr(src, CONFIG_TTY_LAUNCH_CHAR, end - src);
+      if (tmp != NULL && (special == NULL || tmp < special))
+        {
+          special = tmp;
+        }
+#endif
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+      if (dev->pid > 0)
+        {
+#ifdef CONFIG_TTY_SIGINT
+          if (dev->tc_vintr != _POSIX_VDISABLE)
+            {
+              tmp = memchr(src, dev->tc_vintr, end - src);
+              if (tmp != NULL && (special == NULL || tmp < special))
+                {
+                  special = tmp;
+                }
+            }
+#endif
+
+#ifdef CONFIG_TTY_SIGTSTP
+          if (dev->tc_vsusp != _POSIX_VDISABLE)
+            {
+              tmp = memchr(src, dev->tc_vsusp, end - src);
+              if (tmp != NULL && (special == NULL || tmp < special))
+                {
+                  special = tmp;
+                }
+            }
+#endif
+        }
+#endif
+
+      n = (special != NULL ? special : end) - src;
+      if (n > 0)
+        {
+          if (&buf[kept] != src)
+            {
+              memmove(&buf[kept], src, n);
+            }
+
+          kept += n;
+#ifdef CONFIG_TTY_FORCE_PANIC
+          dev->panic_count = 0;
+#endif
+        }
+
+      if (special == NULL)
+        {
+          break;
+        }
+
+      ch  = *special;
+      src = special + 1;
+
+      /* One action per special character, in this order, then drop it */
 
 #ifdef CONFIG_TTY_FORCE_PANIC
       if (ch == CONFIG_TTY_FORCE_PANIC_CHAR)
@@ -2660,8 +2736,6 @@ int uart_check_special(FAR uart_dev_t *dev, FAR char *buf,
           continue;
         }
 #endif
-
-      buf[kept++] = ch;
     }
 
   *size = kept;
