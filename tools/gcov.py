@@ -307,6 +307,26 @@ def get_lcov_major_version():
     return 1
 
 
+def lcov_info_has_records(info_file):
+    """Return True if an lcov .info tracefile contains at least one 'SF:' record.
+
+    When the local gcov tool cannot decode any .gcda file (e.g. because the
+    build toolchain produced a newer gcov version than the host tool supports),
+    lcov still exits 0 (due to --ignore-errors gcov) but writes an info file
+    with zero source records. Running genhtml on such a file always fails with
+    'no valid records found in tracefile', which is a pipeline-level symptom
+    of an environment issue, not a real coverage regression.
+    """
+    try:
+        with open(info_file, "r", encoding="utf-8", errors="replace") as f:
+            for line in f:
+                if line.startswith("SF:"):
+                    return True
+    except (IOError, OSError):
+        return False
+    return False
+
+
 def run_genhtml(info, report):
     # 'category' is only supported by lcov >= 2
     ignore_errors = "source"
@@ -571,6 +591,23 @@ def main_gcc(args, gcda_dirs, gcno_dir, result_dir):
 
     if args.only_copy:
         sys.exit(0)
+
+    # If lcov produced an .info tracefile with no source records, the local
+    # gcov tool could not decode the collected .gcda files - usually a
+    # toolchain version mismatch (look for 'version Bxx*, prefer Byy*'
+    # warnings from lcov above). Running genhtml on an empty tracefile always
+    # fails with 'no valid records found in tracefile' and aborts the whole
+    # pipeline even though there is nothing actionable in the coverage data.
+    # Print a clear diagnostic and skip the HTML step instead of failing.
+    if not lcov_info_has_records(coverage_file):
+        print(
+            "Warning: lcov produced no coverage records in "
+            f"{coverage_file}. This usually means the local gcov tool "
+            "cannot decode the collected .gcda files (toolchain version "
+            "mismatch - see 'version ... prefer ...' warnings above). "
+            "Skipping HTML report generation."
+        )
+        return
 
     try:
         run_genhtml(coverage_file, report_dir)
