@@ -86,16 +86,6 @@ Examples of applicable platforms
      find ./ -name "*.gcda"
      ```
 
-  5. Examples:
-     ```
-     $ ./tools/configure.sh sim:nsh
-     nsh: poweroff
-     $ ./nuttx/tools/gcov.py -t gcov
-     Then open ./gcov/result/index.html with your browser
-     ```
-
-2. Applicable to device
-
 2. Applicable to device
 
   Due to differences in implementation methods, the device side is divided into GCC and CLANG
@@ -139,14 +129,14 @@ Examples of applicable platforms
         # The -t parameter specifies the gcov version, which needs to match the gcc version
 
         # sim
-        ./tools/gcov.py -t gcov
+        ./tools/gcov.py -t gcov-13
 
         # arm platform
         ./tools/gcov.py -t arm-none-eabi-gcov
 
     5. Impact and precautions
        ```
-       1. Before using the .tools/gcov.sh tool, you need to ensure that *.gcno and *.gcda files exist
+       1. Before using the tools/gcov.py tool, you need to ensure that *.gcno and *.gcda files exist
        2. If *.gcno does not exist, recompile the code after distclean.
        3. If *.gcda does not exist, please check and use poweroff to exit Vela normally
        ```
