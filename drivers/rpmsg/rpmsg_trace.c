@@ -38,6 +38,8 @@
 #include <nuttx/streams.h>
 #include <nuttx/rpmsg/rpmsg.h>
 
+#include "rpmsg_procfs.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -85,7 +87,10 @@ void rpmsg_vtrace(FAR const char *name, bool bt, FAR const void *buf,
 {
   irqstate_t flags;
 
-  UNUSED(name);
+  if (!rpmsg_procfs_trace_allow(name))
+    {
+      return;
+    }
 
 #if CONFIG_RPMSG_TRACE_BACKTRACE > 0
   if (bt)
