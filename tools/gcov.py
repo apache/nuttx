@@ -824,6 +824,16 @@ def _resolve_gcov_tool(gcov_path: str) -> Optional[str]:
     return shutil.which("gcov-tool")
 
 
+def _list_files_with_suffix(root: str, suffix: str) -> List[str]:
+    """Paths (relative to root) of all files under root ending with suffix."""
+    found: List[str] = []
+    for cur, _, files in os.walk(root):
+        for f in files:
+            if f.endswith(suffix):
+                found.append(os.path.relpath(os.path.join(cur, f), root))
+    return found
+
+
 def gcc_merge_gcda(tools: GccTools, gcda_dirs: List[str], out_dir: str) -> None:
     """Merge multiple gcda directories into out_dir using `<gcov>-tool merge`.
 
@@ -847,6 +857,17 @@ def gcc_merge_gcda(tools: GccTools, gcda_dirs: List[str], out_dir: str) -> None:
 
     shutil.copytree(gcda_dirs[0], out_dir)
     for extra in gcda_dirs[1:]:
+        # `gcov-tool merge` only handles files present in BOTH inputs; a .gcda
+        # that exists only in `extra` (e.g. a second image of a multi-image
+        # board dumped from the same core, whose objects live under another
+        # build directory) is skipped and would be silently lost. Remember
+        # those and copy them over after the merge. Doing it after, not
+        # before, keeps them from being merged with themselves (doubled).
+        only_in_extra = [
+            rel
+            for rel in _list_files_with_suffix(extra, ".gcda")
+            if not os.path.exists(os.path.join(out_dir, rel))
+        ]
         try:
             run_cmd([merge_tool, "merge", out_dir, extra, "-o", out_dir])
         except subprocess.CalledProcessError:
@@ -858,6 +879,12 @@ def gcc_merge_gcda(tools: GccTools, gcda_dirs: List[str], out_dir: str) -> None:
                 "(2) the input was already merged in. "
                 f"merge_tool={merge_tool}"
             )
+        for rel in only_in_extra:
+            dst = os.path.join(out_dir, rel)
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.copy2(os.path.join(extra, rel), dst)
+        if only_in_extra:
+            log(f"{len(only_in_extra)} .gcda only in {extra}: copied (not merged)")
 
 
 def gcc_run_lcov(tools: GccTools, data_dir: str, path_map: PathMap) -> str:
