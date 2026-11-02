@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/hardware/stm32_otg.h
+ * arch/arm/src/common/stm32/hardware/stm32_otg_v2.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_OTG_H
-#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_OTG_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_OTG_V2_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_OTG_V2_H
 
 /****************************************************************************
  * Included Files
@@ -933,4 +933,4 @@
 #define OTG_PCGCCTL_SUSP              (1 << 7)  /* Bit 7: PHY Suspended */
                                                 /* Bits 7-31: Reserved */
 
-#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_OTG_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_OTG_V2_H */

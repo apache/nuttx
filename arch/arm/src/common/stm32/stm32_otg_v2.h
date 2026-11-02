@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_otg.h
+ * arch/arm/src/common/stm32/stm32_otg_v2.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32_OTG_H
-#define __ARCH_ARM_SRC_STM32H7_STM32_OTG_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_OTG_V2_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_OTG_V2_H
 
 /****************************************************************************
  * Included Files
@@ -34,7 +34,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "stm32_rcc.h"
+#include "stm32.h"
 #include "hardware/stm32_otg.h"
 
 #if defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)
@@ -141,4 +141,4 @@ void stm32_usbulpireset(struct usbdev_s *dev);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_STM32_OTGFS */
-#endif /* __ARCH_ARM_SRC_STM32H7_STM32_OTG_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_OTG_V2_H */

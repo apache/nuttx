@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_otghost.c
+ * arch/arm/src/common/stm32/stm32_otghost_v2.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -55,9 +55,9 @@
 #include <arch/board/board.h> /* May redefine GPIO settings */
 
 #include "arm_internal.h"
-#include "hardware/stm32_pwr.h"
-#include "stm32_gpio.h"
+#include "stm32.h"
 #include "stm32_otg.h"
+#include "stm32_otg_phyif.h"
 #include "stm32_usbhost.h"
 
 #if defined(CONFIG_USBHOST) && defined(CONFIG_STM32_OTGFS)
@@ -762,95 +762,95 @@ static void stm32_chan_configure(struct stm32_usbhost_s *priv, int chidx)
 
   switch (chan->eptype)
     {
-    case OTG_EPTYPE_CTRL:
-    case OTG_EPTYPE_BULK:
-      {
+      case OTG_EPTYPE_CTRL:
+      case OTG_EPTYPE_BULK:
+        {
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
-        uint16_t intrace;
-        uint16_t outtrace;
+          uint16_t intrace;
+          uint16_t outtrace;
 
-        /* Determine the definitive trace ID to use below */
+          /* Determine the definitive trace ID to use below */
 
-        if (chan->eptype == OTG_EPTYPE_CTRL)
-          {
-            intrace  = OTG_VTRACE2_CHANCONF_CTRL_IN;
-            outtrace = OTG_VTRACE2_CHANCONF_CTRL_OUT;
-          }
-        else
-          {
-            intrace  = OTG_VTRACE2_CHANCONF_BULK_IN;
-            outtrace = OTG_VTRACE2_CHANCONF_BULK_OUT;
-          }
+          if (chan->eptype == OTG_EPTYPE_CTRL)
+            {
+              intrace  = OTG_VTRACE2_CHANCONF_CTRL_IN;
+              outtrace = OTG_VTRACE2_CHANCONF_CTRL_OUT;
+            }
+          else
+            {
+              intrace  = OTG_VTRACE2_CHANCONF_BULK_IN;
+              outtrace = OTG_VTRACE2_CHANCONF_BULK_OUT;
+            }
 #endif
 
-        /* Interrupts required for CTRL and BULK endpoints */
+          /* Interrupts required for CTRL and BULK endpoints */
 
-        regval |= (OTG_HCINT_XFRC  | OTG_HCINT_STALL | OTG_HCINT_NAK |
-                   OTG_HCINT_TXERR | OTG_HCINT_DTERR);
+          regval |= (OTG_HCINT_XFRC  | OTG_HCINT_STALL | OTG_HCINT_NAK |
+                     OTG_HCINT_TXERR | OTG_HCINT_DTERR);
 
-        /* Additional setting for IN/OUT endpoints */
+          /* Additional setting for IN/OUT endpoints */
 
-        if (chan->in)
-          {
-            usbhost_vtrace2(intrace, chidx, chan->epno);
-            regval |= OTG_HCINT_BBERR;
-          }
-        else
-          {
-            usbhost_vtrace2(outtrace, chidx, chan->epno);
-            regval |= OTG_HCINT_NYET;
-          }
-      }
-      break;
+          if (chan->in)
+            {
+              usbhost_vtrace2(intrace, chidx, chan->epno);
+              regval |= OTG_HCINT_BBERR;
+            }
+          else
+            {
+              usbhost_vtrace2(outtrace, chidx, chan->epno);
+              regval |= OTG_HCINT_NYET;
+            }
+        }
+        break;
 
-    case OTG_EPTYPE_INTR:
-      {
-        /* Interrupts required for INTR endpoints */
+      case OTG_EPTYPE_INTR:
+        {
+          /* Interrupts required for INTR endpoints */
 
-        regval |= (OTG_HCINT_XFRC | OTG_HCINT_STALL | OTG_HCINT_NAK |
-                   OTG_HCINT_TXERR | OTG_HCINT_FRMOR | OTG_HCINT_DTERR);
+          regval |= (OTG_HCINT_XFRC | OTG_HCINT_STALL | OTG_HCINT_NAK |
+                     OTG_HCINT_TXERR | OTG_HCINT_FRMOR | OTG_HCINT_DTERR);
 
-        /* Additional setting for IN endpoints */
+          /* Additional setting for IN endpoints */
 
-        if (chan->in)
-          {
-            usbhost_vtrace2(OTG_VTRACE2_CHANCONF_INTR_IN, chidx,
-                            chan->epno);
-            regval |= OTG_HCINT_BBERR;
-          }
+          if (chan->in)
+            {
+              usbhost_vtrace2(OTG_VTRACE2_CHANCONF_INTR_IN, chidx,
+                              chan->epno);
+              regval |= OTG_HCINT_BBERR;
+            }
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
-        else
-          {
-            usbhost_vtrace2(OTG_VTRACE2_CHANCONF_INTR_OUT, chidx,
-                            chan->epno);
-          }
+          else
+            {
+              usbhost_vtrace2(OTG_VTRACE2_CHANCONF_INTR_OUT, chidx,
+                              chan->epno);
+            }
 #endif
-      }
-      break;
+        }
+        break;
 
-    case OTG_EPTYPE_ISOC:
-      {
-        /* Interrupts required for ISOC endpoints */
+      case OTG_EPTYPE_ISOC:
+        {
+          /* Interrupts required for ISOC endpoints */
 
-        regval |= (OTG_HCINT_XFRC | OTG_HCINT_ACK | OTG_HCINT_FRMOR);
+          regval |= (OTG_HCINT_XFRC | OTG_HCINT_ACK | OTG_HCINT_FRMOR);
 
-        /* Additional setting for IN endpoints */
+          /* Additional setting for IN endpoints */
 
-        if (chan->in)
-          {
-            usbhost_vtrace2(OTG_VTRACE2_CHANCONF_ISOC_IN, chidx,
-                            chan->epno);
-            regval |= (OTG_HCINT_TXERR | OTG_HCINT_BBERR);
-          }
+          if (chan->in)
+            {
+              usbhost_vtrace2(OTG_VTRACE2_CHANCONF_ISOC_IN, chidx,
+                              chan->epno);
+              regval |= (OTG_HCINT_TXERR | OTG_HCINT_BBERR);
+            }
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
-        else
-          {
-            usbhost_vtrace2(OTG_VTRACE2_CHANCONF_ISOC_OUT, chidx,
-                            chan->epno);
-          }
+          else
+            {
+              usbhost_vtrace2(OTG_VTRACE2_CHANCONF_ISOC_OUT, chidx,
+                              chan->epno);
+            }
 #endif
-      }
-      break;
+        }
+        break;
     }
 
   stm32_putreg(STM32_OTG_HCINTMSK(chidx), regval);
@@ -1504,33 +1504,33 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv, int chidx)
 
       switch (chan->eptype)
         {
-        case OTG_EPTYPE_CTRL: /* Non periodic transfer */
-        case OTG_EPTYPE_BULK:
-          {
-            /* Read the Non-periodic Tx FIFO status register */
+          case OTG_EPTYPE_CTRL: /* Non periodic transfer */
+          case OTG_EPTYPE_BULK:
+            {
+              /* Read the Non-periodic Tx FIFO status register */
 
-            regval = stm32_getreg(STM32_OTG_HNPTXSTS);
-            avail  = ((regval & OTG_HNPTXSTS_NPTXFSAV_MASK) >>
-                      OTG_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
-          }
-          break;
+              regval = stm32_getreg(STM32_OTG_HNPTXSTS);
+              avail  = ((regval & OTG_HNPTXSTS_NPTXFSAV_MASK) >>
+                        OTG_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
+            }
+            break;
 
-        /* Periodic transfer */
+          /* Periodic transfer */
 
-        case OTG_EPTYPE_INTR:
-        case OTG_EPTYPE_ISOC:
-          {
-            /* Read the Non-periodic Tx FIFO status register */
+          case OTG_EPTYPE_INTR:
+          case OTG_EPTYPE_ISOC:
+            {
+              /* Read the Non-periodic Tx FIFO status register */
 
-            regval = stm32_getreg(STM32_OTG_HPTXSTS);
-            avail  = ((regval & OTG_HPTXSTS_PTXFSAVL_MASK) >>
-                      OTG_HPTXSTS_PTXFSAVL_SHIFT) << 2;
-          }
-          break;
+              regval = stm32_getreg(STM32_OTG_HPTXSTS);
+              avail  = ((regval & OTG_HPTXSTS_PTXFSAVL_MASK) >>
+                        OTG_HPTXSTS_PTXFSAVL_SHIFT) << 2;
+            }
+            break;
 
-        default:
-          DEBUGPANIC();
-          return;
+          default:
+            DEBUGPANIC();
+            return;
         }
 
       /* Is there space in the TxFIFO to hold the minimum size packet? */
@@ -1549,6 +1549,7 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv, int chidx)
                */
 
               unsigned int wrpackets = avail / chan->maxpacket;
+
               wrsize = wrpackets * chan->maxpacket;
             }
 
@@ -1566,7 +1567,7 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv, int chidx)
            * FIFO becomes empty.
            */
 
-           stm32_txfe_enable(priv, chidx);
+          stm32_txfe_enable(priv, chidx);
         }
     }
 }
@@ -1775,42 +1776,42 @@ static int stm32_in_setup(struct stm32_usbhost_s *priv, int chidx)
   chan = &priv->chan[chidx];
   switch (chan->eptype)
     {
-    default:
-    case OTG_EPTYPE_CTRL: /* Control */
-      {
-        /* This kind of transfer on control endpoints other than EP0 are not
-         * currently supported
-         */
+      default:
+      case OTG_EPTYPE_CTRL: /* Control */
+        {
+          /* This kind of transfer on control endpoints other than EP0 are
+           * not currently supported
+           */
 
-        return -ENOSYS;
-      }
+          return -ENOSYS;
+        }
 
-    case OTG_EPTYPE_ISOC: /* Isochronous */
-      {
-        /* Set up the IN data PID */
+      case OTG_EPTYPE_ISOC: /* Isochronous */
+        {
+          /* Set up the IN data PID */
 
-        usbhost_vtrace2(OTG_VTRACE2_ISOCIN, chidx, chan->buflen);
-        chan->pid = OTG_PID_DATA0;
-      }
-      break;
+          usbhost_vtrace2(OTG_VTRACE2_ISOCIN, chidx, chan->buflen);
+          chan->pid = OTG_PID_DATA0;
+        }
+        break;
 
-    case OTG_EPTYPE_BULK: /* Bulk */
-      {
-        /* Setup the IN data PID */
+      case OTG_EPTYPE_BULK: /* Bulk */
+        {
+          /* Setup the IN data PID */
 
-        usbhost_vtrace2(OTG_VTRACE2_BULKIN, chidx, chan->buflen);
-        chan->pid = chan->indata1 ? OTG_PID_DATA1 : OTG_PID_DATA0;
-      }
-      break;
+          usbhost_vtrace2(OTG_VTRACE2_BULKIN, chidx, chan->buflen);
+          chan->pid = chan->indata1 ? OTG_PID_DATA1 : OTG_PID_DATA0;
+        }
+        break;
 
-    case OTG_EPTYPE_INTR: /* Interrupt */
-      {
-        /* Setup the IN data PID */
+      case OTG_EPTYPE_INTR: /* Interrupt */
+        {
+          /* Setup the IN data PID */
 
-        usbhost_vtrace2(OTG_VTRACE2_INTRIN, chidx, chan->buflen);
-        chan->pid = chan->indata1 ? OTG_PID_DATA1 : OTG_PID_DATA0;
-      }
-      break;
+          usbhost_vtrace2(OTG_VTRACE2_INTRIN, chidx, chan->buflen);
+          chan->pid = chan->indata1 ? OTG_PID_DATA1 : OTG_PID_DATA0;
+        }
+        break;
     }
 
   /* Start the transfer */
@@ -1904,6 +1905,7 @@ static ssize_t stm32_in_transfer(struct stm32_usbhost_s *priv, int chidx,
                    */
 
                   clock_t elapsed = clock_systime_ticks() - start;
+
                   if (elapsed >= STM32_DATANAK_DELAY)
                     {
                       /* Timeout out... break out returning the NAK as
@@ -2132,46 +2134,46 @@ static int stm32_out_setup(struct stm32_usbhost_s *priv, int chidx)
   chan = &priv->chan[chidx];
   switch (chan->eptype)
     {
-    default:
-    case OTG_EPTYPE_CTRL: /* Control */
-      {
-        /* This kind of transfer on control endpoints other than EP0 are not
-         * currently supported
-         */
+      default:
+      case OTG_EPTYPE_CTRL: /* Control */
+        {
+          /* This kind of transfer on control endpoints other than EP0 are
+           * not currently supported
+           */
 
-        return -ENOSYS;
-      }
+          return -ENOSYS;
+        }
 
-    case OTG_EPTYPE_ISOC: /* Isochronous */
-      {
-        /* Set up the OUT data PID */
+      case OTG_EPTYPE_ISOC: /* Isochronous */
+        {
+          /* Set up the OUT data PID */
 
-        usbhost_vtrace2(OTG_VTRACE2_ISOCOUT, chidx, chan->buflen);
-        chan->pid = OTG_PID_DATA0;
-      }
-      break;
+          usbhost_vtrace2(OTG_VTRACE2_ISOCOUT, chidx, chan->buflen);
+          chan->pid = OTG_PID_DATA0;
+        }
+        break;
 
-    case OTG_EPTYPE_BULK: /* Bulk */
-      {
-        /* Setup the OUT data PID */
+      case OTG_EPTYPE_BULK: /* Bulk */
+        {
+          /* Setup the OUT data PID */
 
-        usbhost_vtrace2(OTG_VTRACE2_BULKOUT, chidx, chan->buflen);
-        chan->pid = chan->outdata1 ? OTG_PID_DATA1 : OTG_PID_DATA0;
-      }
-      break;
+          usbhost_vtrace2(OTG_VTRACE2_BULKOUT, chidx, chan->buflen);
+          chan->pid = chan->outdata1 ? OTG_PID_DATA1 : OTG_PID_DATA0;
+        }
+        break;
 
-    case OTG_EPTYPE_INTR: /* Interrupt */
-      {
-        /* Setup the OUT data PID */
+      case OTG_EPTYPE_INTR: /* Interrupt */
+        {
+          /* Setup the OUT data PID */
 
-        usbhost_vtrace2(OTG_VTRACE2_INTROUT, chidx, chan->buflen);
-        chan->pid = chan->outdata1 ? OTG_PID_DATA1 : OTG_PID_DATA0;
+          usbhost_vtrace2(OTG_VTRACE2_INTROUT, chidx, chan->buflen);
+          chan->pid = chan->outdata1 ? OTG_PID_DATA1 : OTG_PID_DATA0;
 
-        /* Toggle the OUT data PID for the next transfer */
+          /* Toggle the OUT data PID for the next transfer */
 
-        chan->outdata1 ^= true;
-      }
-      break;
+          chan->outdata1 ^= true;
+        }
+        break;
     }
 
   /* Start the transfer */
@@ -2437,6 +2439,7 @@ static void stm32_gint_wrpacket(struct stm32_usbhost_s *priv,
   for (; buflen32 > 0; buflen32--)
     {
       uint32_t data = *src++;
+
       stm32_putreg(fifo, data);
     }
 
@@ -3070,55 +3073,55 @@ static inline void stm32_gint_rxflvlisr(struct stm32_usbhost_s *priv)
 
   switch (grxsts & OTG_GRXSTSH_PKTSTS_MASK)
     {
-    case OTG_GRXSTSH_PKTSTS_INRECVD: /* IN data packet received */
-      {
-        /* Read the data into the host buffer. */
+      case OTG_GRXSTSH_PKTSTS_INRECVD: /* IN data packet received */
+        {
+          /* Read the data into the host buffer. */
 
-        bcnt = (grxsts & OTG_GRXSTSH_BCNT_MASK) >> OTG_GRXSTSH_BCNT_SHIFT;
-        if (bcnt > 0 && priv->chan[chidx].buffer != NULL)
-          {
-            /* Transfer the packet from the Rx FIFO into the user buffer */
+          bcnt = (grxsts & OTG_GRXSTSH_BCNT_MASK) >> OTG_GRXSTSH_BCNT_SHIFT;
+          if (bcnt > 0 && priv->chan[chidx].buffer != NULL)
+            {
+              /* Transfer the packet from the Rx FIFO into the user buffer */
 
-            dest   = (uint32_t *)priv->chan[chidx].buffer;
-            fifo   = STM32_OTG_DFIFO_HCH(0);
-            bcnt32 = (bcnt + 3) >> 2;
+              dest   = (uint32_t *)priv->chan[chidx].buffer;
+              fifo   = STM32_OTG_DFIFO_HCH(0);
+              bcnt32 = (bcnt + 3) >> 2;
 
-            for (i = 0; i < bcnt32; i++)
-              {
-                *dest++ = stm32_getreg(fifo);
-              }
+              for (i = 0; i < bcnt32; i++)
+                {
+                  *dest++ = stm32_getreg(fifo);
+                }
 
-            stm32_pktdump("Received", priv->chan[chidx].buffer, bcnt);
+              stm32_pktdump("Received", priv->chan[chidx].buffer, bcnt);
 
-            /* Toggle the IN data pid (Used by Bulk and INTR only) */
+              /* Toggle the IN data pid (Used by Bulk and INTR only) */
 
-            priv->chan[chidx].indata1 ^= true;
+              priv->chan[chidx].indata1 ^= true;
 
-            /* Manage multiple packet transfers */
+              /* Manage multiple packet transfers */
 
-            priv->chan[chidx].buffer += bcnt;
-            priv->chan[chidx].xfrd   += bcnt;
+              priv->chan[chidx].buffer += bcnt;
+              priv->chan[chidx].xfrd   += bcnt;
 
-            /* Check if more packets are expected */
+              /* Check if more packets are expected */
 
-            hctsiz = stm32_getreg(STM32_OTG_HCTSIZ(chidx));
-            if ((hctsiz & OTG_HCTSIZ_PKTCNT_MASK) != 0)
-              {
-                /* Re-activate the channel when more packets are expected */
+              hctsiz = stm32_getreg(STM32_OTG_HCTSIZ(chidx));
+              if ((hctsiz & OTG_HCTSIZ_PKTCNT_MASK) != 0)
+                {
+                  /* Re-activate the channel when more packets are expected */
 
-                hcchar |= OTG_HCCHAR_CHENA;
-                hcchar &= ~OTG_HCCHAR_CHDIS;
-                stm32_putreg(STM32_OTG_HCCHAR(chidx), hcchar);
-              }
-          }
-      }
-      break;
+                  hcchar |= OTG_HCCHAR_CHENA;
+                  hcchar &= ~OTG_HCCHAR_CHDIS;
+                  stm32_putreg(STM32_OTG_HCCHAR(chidx), hcchar);
+                }
+            }
+        }
+        break;
 
-    case OTG_GRXSTSH_PKTSTS_INDONE:  /* IN transfer completed */
-    case OTG_GRXSTSH_PKTSTS_DTOGERR: /* Data toggle error */
-    case OTG_GRXSTSH_PKTSTS_HALTED:  /* Channel halted */
-    default:
-      break;
+      case OTG_GRXSTSH_PKTSTS_INDONE:  /* IN transfer completed */
+      case OTG_GRXSTSH_PKTSTS_DTOGERR: /* Data toggle error */
+      case OTG_GRXSTSH_PKTSTS_HALTED:  /* Channel halted */
+      default:
+        break;
     }
 
   /* Re-enable the RxFIFO non-empty interrupt */
@@ -3196,6 +3199,7 @@ static inline void stm32_gint_nptxfeisr(struct stm32_usbhost_s *priv)
        */
 
       unsigned int wrpackets = avail / chan->maxpacket;
+
       wrsize = wrpackets * chan->maxpacket;
     }
 
@@ -3286,6 +3290,7 @@ static inline void stm32_gint_ptxfeisr(struct stm32_usbhost_s *priv)
        */
 
       unsigned int wrpackets = avail / chan->maxpacket;
+
       wrsize = wrpackets * chan->maxpacket;
     }
 
@@ -3796,16 +3801,16 @@ static void stm32_txfe_enable(struct stm32_usbhost_s *priv, int chidx)
   regval = stm32_getreg(STM32_OTG_GINTMSK);
   switch (chan->eptype)
     {
-    default:
-    case OTG_EPTYPE_CTRL: /* Non periodic transfer */
-    case OTG_EPTYPE_BULK:
-      regval |= OTG_GINT_NPTXFE;
-      break;
+      default:
+      case OTG_EPTYPE_CTRL: /* Non periodic transfer */
+      case OTG_EPTYPE_BULK:
+        regval |= OTG_GINT_NPTXFE;
+        break;
 
-    case OTG_EPTYPE_INTR: /* Periodic transfer */
-    case OTG_EPTYPE_ISOC:
-      regval |= OTG_GINT_PTXFE;
-      break;
+      case OTG_EPTYPE_INTR: /* Periodic transfer */
+      case OTG_EPTYPE_ISOC:
+        regval |= OTG_GINT_PTXFE;
+        break;
     }
 
   /* Enable interrupts */
@@ -5394,7 +5399,6 @@ struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
    */
 
   struct stm32_usbhost_s *priv = &g_usbhost;
-  uint32_t regval;
 
   /* Sanity checks */
 
@@ -5408,25 +5412,12 @@ struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
 
   stm32_sw_initialize(priv);
 
-  /* Configure USB voltage regulator */
+  /* Power up the USB transceiver supply */
 
-  regval = stm32_getreg(STM32_PWR_CR3);
-
-  /* Enable USB regulator if configured */
-
-#ifdef CONFIG_STM32_OTG_USBREGEN
-  regval |= STM32_PWR_CR3_USBREGEN;
-#else
-  regval &= ~STM32_PWR_CR3_USBREGEN;
-#endif
-
-  /* Enable VDD33USB supply level detector */
-
-  regval |= STM32_PWR_CR3_USB33DEN;
-  stm32_putreg(STM32_PWR_CR3, regval);
-
-  while ((stm32_getreg(STM32_PWR_CR3) & STM32_PWR_CR3_USB33RDY) == 0)
+  if (stm32_otg_phyinit() < 0)
     {
+      uerr("ERROR: OTG PHY initialization failed\n");
+      return NULL;
     }
 
   /* Alternate function pin configuration.  Here we assume that:
