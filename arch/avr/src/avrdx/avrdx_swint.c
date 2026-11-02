@@ -214,6 +214,7 @@ avrdx_swint_size_t avrdx_swint_allocate(xcpt_t handler, void *arg)
 
   if (i == CONFIG_AVRDX_SWINT_MAX_VECTORS)
     {
+      leave_critical_section(irqflags);
       return 0;
     }
 
