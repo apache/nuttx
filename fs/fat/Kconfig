@@ -225,4 +225,15 @@ config FAT_DIRECT_RETRY
 			*  CONFIG_DIRECT_RETRY cannot be selected with CONFIG_FORCE_INDIRECT
 			** CONFIG_DIRECT_RETRY is automatically selected with CONFIG_DMA_MEMORY
 
+config FS_FAT_READONLY
+	bool "FAT read-only filesystem"
+	default n
+	depends on FS_FAT
+	---help---
+		Compile the FAT filesystem in read-only mode.  Write, truncate,
+		unlink, mkdir, rmdir and rename operations are disabled at build
+		time and the corresponding implementation code is eliminated by
+		linker garbage collection.  Read, seek, stat and directory
+		enumeration remain fully functional.
+
 endif # FAT
