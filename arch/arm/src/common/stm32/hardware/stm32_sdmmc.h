@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/hardware/stm32_sdmmc.h
+ * arch/arm/src/common/stm32/hardware/stm32_sdmmc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,28 +20,19 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_SDMMC_H
-#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_SDMMC_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SDMMC_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SDMMC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip.h"
 
-#if defined(CONFIG_STM32_STM32H7X0XX)
-#  include "stm32h7x3xx_sdmmc.h"
-#elif defined(CONFIG_STM32_STM32H7X3XX)
-#  include "stm32h7x3xx_sdmmc.h"
-#elif defined(CONFIG_STM32_STM32H7B3XX)
-#  include "stm32h7x3xx_sdmmc.h"
-#elif defined(CONFIG_STM32_STM32H7X5XX)
-#  include "stm32h7x3xx_sdmmc.h"
-#elif defined(CONFIG_STM32_STM32H7X7XX)
-#  include "stm32h7x3xx_sdmmc.h"
+#if defined(CONFIG_STM32_HAVE_IP_SDMMC_V2)
+#  include "hardware/stm32_sdmmc_v2.h"
 #else
-#  error "Unsupported STM32 H7 part"
+#  error "Unsupported STM32 SDMMC"
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_SDMMC_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SDMMC_H */

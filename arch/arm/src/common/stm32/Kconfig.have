@@ -808,6 +808,11 @@ config STM32_HAVE_SDMMC2
 config STM32_HAVE_IP_SDIO_M3M4_V1
 	bool
 
+config STM32_HAVE_IP_SDMMC_V2
+	bool
+	---help---
+		SDMMC with an internal DMA (IDMA) (STM32H7).
+
 # SECURITY capabilities
 
 config STM32_HAVE_FIREWALL
