@@ -1035,22 +1035,22 @@ void rpmsg_virtio_remove(FAR struct virtio_device *vdev)
   pm_wakelock_uninit(&priv->wakelock);
 #endif
 
-  /* Unregister the rpmsg */
-
-  snprintf(name, sizeof(name), "/dev/rpmsg/%s", priv->rpmsg.cpuname);
-  rpmsg_unregister(name, &priv->rpmsg);
-
   /* Disable tx buffer return callback */
 
   virtqueue_disable_cb(priv->rvdev.svq);
+
+  /* Destroy all the rpmsg services */
+
+  rpmsg_device_destroy(&priv->rpmsg);
 
   /* Deinit the rpmsg wqueues */
 
   rpmsg_deinit_wqueues(&priv->rpmsg);
 
-  /* Destroy all the rpmsg services */
+  /* Unregister the rpmsg */
 
-  rpmsg_device_destroy(&priv->rpmsg);
+  snprintf(name, sizeof(name), "/dev/rpmsg/%s", priv->rpmsg.cpuname);
+  rpmsg_unregister(name, &priv->rpmsg);
 
   /* Reset the rpmsg virtio device for driver */
 
