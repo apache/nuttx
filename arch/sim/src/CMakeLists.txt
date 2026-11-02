@@ -31,6 +31,4 @@ if(NOT CONFIG_BUILD_FLAT)
                                                           common)
 endif()
 
-if(CONFIG_FS_LARGEFILE)
-  target_compile_options(nuttx PRIVATE -D_FILE_OFFSET_BITS=64)
-endif()
+target_compile_options(nuttx PRIVATE -D_FILE_OFFSET_BITS=64 -D_TIME_BITS=64)
