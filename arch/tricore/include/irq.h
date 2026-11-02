@@ -45,7 +45,6 @@
 
 #include <arch/chip/irq.h>
 #include <arch/arch.h>
-#include <IfxCpu_Intrinsics.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
@@ -133,10 +132,41 @@
 #define FCX_FREE        (FCX_FCXS_MASK | FCX_FCXO_MASK) /* Free CSA manipulation */
 
 #define TRICORE_SRCNUM_PER_GPSR  8
-#define TRICORE_SRC2IRQ(src_addr) \
-  (((uintptr_t)(src_addr) - (uintptr_t)&MODULE_SRC) / 4)
+#define TRICORE_SRC_SPACING      4
+#define TRICORE_SRC2IRQ(src) \
+  (((uintptr_t)(src) - TRICORE_SRC_BASEADDR) / TRICORE_SRC_SPACING)
+#define TRICORE_IRQ2SRC(irq) \
+  (TRICORE_SRC_BASEADDR + (irq) * TRICORE_SRC_SPACING)
 #define TRICORE_GPSR_IRQNUM(src_cpu, dest_cpu)  \
-  TRICORE_SRC2IRQ(&SRC_GPSR00 + src_cpu * 8 + dest_cpu)
+  TRICORE_SRC2IRQ(TRICORE_SRC_GPSR0_SR0 + \
+                  ((src_cpu) * TRICORE_SRCNUM_PER_GPSR + (dest_cpu)) * \
+                  TRICORE_SRC_SPACING)
+
+#ifdef CONFIG_ARCH_IRQPRIO
+#  define TRICORE_SCHEDIRQ \
+     TRICORE_GPSR_IRQNUM(up_cpu_index(), up_cpu_index())
+#endif
+
+/* TriCore interrupt priority range, higher value means higher priority. */
+
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  #define TRICORE_IRQ_DISABLE_PRIORITY CONFIG_ARCH_IRQ_DISABLE_PRIORITY
+#endif
+
+#define TRICORE_IRQ_MIN_PRIORITY 1
+#define TRICORE_IRQ_MAX_PRIORITY CONFIG_ARCH_IRQ_MAX_PRIORITY
+
+/* ICR (Interrupt Control Register) bit definitions.
+ *   [7:0]   CCPN  - Current CPU Priority Number
+ *   [15]    IE    - Interrupt Enable (global)
+ *   [23:16] PIPN  - Previous Interrupt Priority Number
+ */
+
+#define ICR_CCPN_SHIFT  0
+#define ICR_CCPN_MASK   (0xffu << ICR_CCPN_SHIFT)
+#define ICR_IE          (1u << 15)
+#define ICR_PIPN_SHIFT  16
+#define ICR_PIPN_MASK   (0xffu << ICR_PIPN_SHIFT)
 
 /* For use with EABI and floating point, the stack must be aligned to 8-byte
  * addresses.
@@ -186,14 +216,6 @@ struct xcptcontext
 };
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* g_interrupt_context store irq status */
-
-extern volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -236,50 +258,74 @@ noinstrument_function static inline_function uintptr_t up_getsp(void)
  * Name: up_irq_save
  *
  * Description:
- *   Disable interrupts and return the previous value of the mstatus register
+ *   Disable interrupts and return the previous interrupt state.
+ *
+ *   When CONFIG_ARCH_HIPRI_INTERRUPT is enabled, this raises ICR.CCPN
+ *   to TRICORE_IRQ_DISABLE_PRIORITY so that high-priority interrupts
+ *   (SRPN > TRICORE_IRQ_DISABLE_PRIORITY) remain unmasked. up_irq_save
+ *   only raises CCPN, up_irq_restore only lowers it. This prevents the
+ *   masking level from being accidentally lowered.
+ *
+ *   Otherwise, uses the hardware disable instruction (ICR.IE = 0)
+ *   for minimal overhead.
  *
  ****************************************************************************/
 
 noinstrument_function static inline_function irqstate_t up_irq_save(void)
 {
-  return __disable_and_save();
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  uint32_t icr = tricore_mfcr(CPU_ICR);
+  irqstate_t ccpn = (icr & ICR_CCPN_MASK) >> ICR_CCPN_SHIFT;
+
+  if (TRICORE_IRQ_DISABLE_PRIORITY > ccpn)
+    {
+      icr &= ~ICR_CCPN_MASK;
+      icr |= TRICORE_IRQ_DISABLE_PRIORITY << ICR_CCPN_SHIFT;
+      tricore_mtcr(CPU_ICR, icr);
+      UP_ISB();
+    }
+
+  return ccpn;
+#else
+  irqstate_t flags;
+
+  __asm__ volatile ("disable %0" : "=d"(flags) :: "memory");
+  return flags;
+#endif
 }
 
 /****************************************************************************
  * Name: up_irq_restore
  *
  * Description:
- *   Restore the value of the mstatus register
+ *   Restore the previous interrupt state saved by up_irq_save().
+ *
+ *   When CONFIG_ARCH_HIPRI_INTERRUPT is enabled, restores ICR.CCPN.
+ *   Otherwise, restores ICR.IE via the hardware restore instruction.
  *
  ****************************************************************************/
 
 noinstrument_function static inline_function
 void up_irq_restore(irqstate_t flags)
 {
-  __restore(flags);
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  uint32_t icr = tricore_mfcr(CPU_ICR);
+
+  if (flags < ((icr & ICR_CCPN_MASK) >> ICR_CCPN_SHIFT))
+    {
+      icr &= ~ICR_CCPN_MASK;
+      icr |= flags << ICR_CCPN_SHIFT;
+      tricore_mtcr(CPU_ICR, icr);
+      UP_ISB();
+    }
+#else
+  __asm__ volatile ("restore %0" :: "d"(flags) : "memory");
+#endif
 }
 
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_set_interrupt_context
- *
- * Description:
- *   Set the interrupt handler context.
- *
- ****************************************************************************/
-
-noinstrument_function
-static inline_function void up_set_interrupt_context(bool flag)
-{
-#ifdef CONFIG_SMP
-  g_interrupt_context[up_this_cpu()] = flag;
-#else
-  g_interrupt_context[0] = flag;
-#endif
-}
 
 /****************************************************************************
  * Name: up_interrupt_context
@@ -293,16 +339,7 @@ static inline_function void up_set_interrupt_context(bool flag)
 noinstrument_function
 static inline_function bool up_interrupt_context(void)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags = up_irq_save();
-  bool ret = g_interrupt_context[up_this_cpu()];
-
-  up_irq_restore(flags);
-
-  return ret;
-#else
-  return g_interrupt_context[0];
-#endif
+  return (tricore_mfcr(CPU_PSW) & PSW_IS) != 0;
 }
 
 /****************************************************************************
@@ -312,6 +349,11 @@ static inline_function bool up_interrupt_context(void)
 static inline_function uintptr_t up_getusrsp(void *regs)
 {
   uintptr_t *csaregs = (uintptr_t *)regs;
+
+  if (csaregs == NULL)
+    {
+      return 0;
+    }
 
   if (csaregs[REG_LPCXI] & PCXI_UL)
     {

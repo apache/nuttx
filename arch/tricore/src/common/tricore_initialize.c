@@ -30,14 +30,7 @@
 #include <arch/board/board.h>
 
 #include "tricore_internal.h"
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* g_interrupt_context store irq status */
-
-volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
+#include "tricore_vectors.h"
 
 /****************************************************************************
  * Public Functions
