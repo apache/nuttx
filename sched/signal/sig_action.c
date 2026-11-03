@@ -261,7 +261,7 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
   if (oact != NULL)
     {
 #ifdef CONFIG_SIG_DEFAULT
-      if (nxsig_isdefault(rtcb, signo))
+      if (sigact != NULL && nxsig_isdefault(rtcb, signo))
         {
           /* Return SIG_DFL if the default signal is attached */
 
@@ -282,9 +282,16 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
         }
       else
         {
-          /* There isn't an old value */
+          /* No action attached: the signal is ignored, or it is at a
+           * default action that ignores it.
+           */
 
+#ifdef CONFIG_SIG_DEFAULT
+          oact->sa_handler = nxsig_isdefault(rtcb, signo) ?
+                             SIG_DFL : SIG_IGN;
+#else
           oact->sa_handler = NULL;
+#endif
           oact->sa_flags   = 0;
           sigemptyset(&oact->sa_mask);
         }
