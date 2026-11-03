@@ -109,8 +109,10 @@ control sequences transparently:
 - **Subnegotiation (SB / SE)**: Handles option subnegotiation sequences bracketed by ``IAC SB``
   and ``IAC SE``.
 - **Window Size Negotiation (NAWS)**: When ``CONFIG_TELNET_SUPPORT_NAWS`` is enabled, the
-  driver negotiates window dimensions (:rfc:`1073`) and provides window size queries
-  via terminal ``ioctl()`` calls (such as ``TIOCGWINSZ``).
+  driver negotiates window dimensions (:rfc:`1073`). ``TIOCGWINSZ`` returns the window
+  size and ``TIOCSWINSZ`` sets it. A new size from the client or from ``TIOCSWINSZ``
+  sends ``SIGWINCH`` to the foreground process (the PID given with ``TIOCSCTTY``) when
+  ``CONFIG_TTY_SIGINT`` or ``CONFIG_TTY_SIGTSTP`` is enabled.
 - **Line Ending Handling**: Adheres to :rfc:`854` end-of-line conventions. On the transmit
   path, outgoing newline characters (``\n``) are automatically formatted as standard network
   ``CR LF`` pairs. If an application outputs a carriage return alone, the driver defers
