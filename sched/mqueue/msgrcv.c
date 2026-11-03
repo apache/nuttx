@@ -85,7 +85,10 @@ static int msgrcv_wait(FAR struct msgq_s *msgq, FAR struct msgbuf_s **rcvmsg,
 
           if (msgtyp < 0)
             {
-              if (newmsg == NULL || newmsg->mtype > tmp->mtype)
+              /* mtype <= |msgtyp|, without the overflow of -LONG_MIN */
+
+              if (-tmp->mtype >= msgtyp &&
+                  (newmsg == NULL || newmsg->mtype > tmp->mtype))
                 {
                   newmsg = tmp;
                 }
