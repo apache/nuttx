@@ -187,6 +187,10 @@ void __start(void)
   up_enable_icache();
   up_enable_dcache();
 
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  up_perf_init((void *)MPS_SYSTICK_CLOCK);
+#endif
+
   /* Then start NuttX */
 
   nx_start();
