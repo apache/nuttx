@@ -478,6 +478,21 @@ void arm_netinitialize(void);
 void arm_timer_secondary_init(unsigned int freq);
 #endif
 
+/****************************************************************************
+ * Name: arm_perf_secondary_init
+ *
+ * Description:
+ *   Start the PMU cycle counter of a secondary CPU.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_PERF_EVENTS)
+void arm_perf_secondary_init(void);
+#endif
+
 /* USB **********************************************************************/
 
 #ifdef CONFIG_USBDEV

@@ -85,6 +85,10 @@ void arm_cpu_boot(int cpu)
 
   arm_timer_secondary_init(0);
 
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  arm_perf_secondary_init();
+#endif
+
   /* Then transfer control to the IDLE task */
 
   nx_idle_trampoline();
