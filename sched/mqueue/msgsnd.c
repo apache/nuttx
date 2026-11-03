@@ -39,7 +39,7 @@
  * Name: msgsnd_wait
  ****************************************************************************/
 
-static int msgsnd_wait(FAR struct msgq_s *msgq, int msgflg)
+static int msgsnd_wait(FAR struct msgq_s *msgq, size_t msgsz, int msgflg)
 {
   FAR struct tcb_s *rtcb;
   int msqid = msgq->id;
@@ -59,12 +59,9 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, int msgflg)
     }
 #endif
 
-  /* Verify that the queue is indeed full as the caller thinks
-   * Loop until there are fewer than max allowable messages in the
-   * receiving message queue
-   */
+  /* Loop until the queue has room for msgsz more bytes */
 
-  while (msgq->nmsgs >= msgq->maxmsgs)
+  while (msgq->cbytes + msgsz > msgq->qbytes)
     {
       /* Should we block until there is sufficient space in the
        * message queue?
@@ -196,7 +193,7 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
 
   /* Is the message queue FULL? */
 
-  if (msgq->nmsgs >= msgq->maxmsgs)
+  if (msgq->cbytes + msgsz > msgq->qbytes)
     {
       if (!up_interrupt_context()) /* In an interrupt handler? */
         {
@@ -204,7 +201,7 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
            * available in the message queue.
            */
 
-          ret = msgsnd_wait(msgq, msgflg);
+          ret = msgsnd_wait(msgq, msgsz, msgflg);
         }
       else if ((msgflg & IPC_NOWAIT) != 0)
         {
@@ -233,7 +230,6 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
 
       list_add_tail(&msgq->msglist, &msg->node);
 
-      msgq->nmsgs++;
       msgq->cbytes += msgsz;
       msgq->lspid   = nxsched_getpid();
       msgq->stime   = time(NULL);

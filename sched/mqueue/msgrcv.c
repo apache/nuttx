@@ -174,7 +174,6 @@ static int msgrcv_wait(FAR struct msgq_s *msgq, FAR struct msgbuf_s **rcvmsg,
     }
 
 found:
-  msgq->nmsgs--;
   msgq->cbytes -= newmsg->msize;
   msgq->lrpid   = nxsched_getpid();
   msgq->rtime   = time(NULL);
@@ -224,7 +223,6 @@ ssize_t msgrcv(int msqid, FAR void *msgp, size_t msgsz, long msgtyp,
   FAR struct msgbuf_s *msg = NULL;
   FAR struct mymsg *buf = msgp;
   FAR struct msgq_s *msgq;
-  FAR struct tcb_s *btcb;
   irqstate_t flags;
   int ret;
 
@@ -255,44 +253,9 @@ ssize_t msgrcv(int msqid, FAR void *msgp, size_t msgsz, long msgtyp,
 
   list_add_tail(&g_msgfreelist, &msg->node);
 
-  /* Check if any tasks are waiting for the MQ not full event. */
+  /* The room in the queue can be enough for more than one sender */
 
-  if (msgq->cmn.nwaitnotfull > 0)
-    {
-      FAR struct tcb_s *rtcb = this_task();
-
-      /* Find the highest priority task that is waiting for
-       * this queue to be not-full, in the waitfornotfull list of the queue.
-       * This must be performed in a critical section because
-       * messages can be sent from interrupt handlers.
-       */
-
-      btcb = (FAR struct tcb_s *)dq_remfirst(MQ_WNFLIST(msgq->cmn));
-
-      /* If one was found, unblock it.  NOTE:  There is a race
-       * condition here:  the queue might be full again by the
-       * time the task is unblocked
-       */
-
-      DEBUGASSERT(btcb != NULL);
-
-      wd_cancel(&btcb->waitdog);
-
-      msgq->cmn.nwaitnotfull--;
-
-      /* Indicate that the wait is over. */
-
-      btcb->waitobj = NULL;
-
-      /* Add the task to ready-to-run task list and
-       * perform the context switch if one is needed
-       */
-
-      if (nxsched_add_readytorun(btcb))
-        {
-          up_switch_context(this_task(), rtcb);
-        }
-    }
+  nxmsg_wakeup_senders(msgq);
 
 errout_with_critical:
   leave_critical_section(flags);

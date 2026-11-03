@@ -88,9 +88,19 @@ int msgctl(int msqid, int cmd, FAR struct msqid_ds *buf)
               break;
             }
 
-          msgq->maxmsgs   = buf->msg_qbytes / CONFIG_MQ_MAXMSGSIZE;
+          if (buf->msg_qbytes == 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          msgq->qbytes    = buf->msg_qbytes;
           msgq->perm.mode = buf->msg_perm.mode & IPC_MODE;
           msgq->ctime     = time(NULL);
+
+          /* A larger msg_qbytes can make room for the waiting senders */
+
+          nxmsg_wakeup_senders(msgq);
           break;
         }
 
@@ -108,7 +118,7 @@ int msgctl(int msqid, int cmd, FAR struct msqid_ds *buf)
           buf->msg_ctime  = msgq->ctime;
           buf->msg_cbytes = msgq->cbytes;
           buf->msg_qnum   = list_length(&msgq->msglist);
-          buf->msg_qbytes = msgq->maxmsgs * CONFIG_MQ_MAXMSGSIZE;
+          buf->msg_qbytes = msgq->qbytes;
           buf->msg_lspid  = msgq->lspid;
           buf->msg_lrpid  = msgq->lrpid;
           break;

@@ -24,6 +24,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <assert.h>
+
 #include <nuttx/kmalloc.h>
 #include "mqueue/msg.h"
 #include "sched/sched.h"
@@ -155,7 +157,7 @@ int nxmsg_alloc(FAR struct msgq_s **pmsgq)
 
   list_initialize(&msgq->msglist);
 
-  msgq->maxmsgs    = MSG_MAX_MSGS;
+  msgq->qbytes     = MSG_DEF_QBYTES;
   msgq->maxmsgsize = MSG_MAX_BYTES;
 
   *pmsgq = msgq;
@@ -194,6 +196,39 @@ void nxmsg_free(FAR struct msgq_s *msgq)
     }
 
   kmm_free(msgq);
+}
+
+/****************************************************************************
+ * Name: nxmsg_wakeup_senders
+ ****************************************************************************/
+
+void nxmsg_wakeup_senders(FAR struct msgq_s *msgq)
+{
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *btcb;
+  bool need_switch = false;
+
+  /* Each sender checks again if its message fits */
+
+  while (msgq->cmn.nwaitnotfull > 0)
+    {
+      btcb = (FAR struct tcb_s *)dq_remfirst(MQ_WNFLIST(msgq->cmn));
+      DEBUGASSERT(btcb != NULL);
+
+      wd_cancel(&btcb->waitdog);
+      msgq->cmn.nwaitnotfull--;
+      btcb->waitobj = NULL;
+
+      if (nxsched_add_readytorun(btcb))
+        {
+          need_switch = true;
+        }
+    }
+
+  if (need_switch)
+    {
+      up_switch_context(this_task(), rtcb);
+    }
 }
 
 /****************************************************************************

@@ -43,7 +43,7 @@
  ****************************************************************************/
 
 #define MSG_MAX_BYTES   CONFIG_MQ_MAXMSGSIZE
-#define MSG_MAX_MSGS    16
+#define MSG_DEF_QBYTES  (16 * MSG_MAX_BYTES) /* Default msg_qbytes */
 
 /****************************************************************************
  * Public Type Definitions
@@ -61,9 +61,8 @@ struct msgq_s
   pid_t                lspid;         /* PID of the last msgsnd() */
   pid_t                lrpid;         /* PID of the last msgrcv() */
   msglen_t             cbytes;        /* Number of bytes in the queue */
+  msglen_t             qbytes;        /* Maximum bytes in the queue */
   int16_t              id;            /* The message queue identifier */
-  int16_t              maxmsgs;       /* Maximum number of messages in the queue */
-  int16_t              nmsgs;         /* Number of message in the queue */
   uint16_t             maxmsgsize;    /* Max size of message in message queue */
 };
 
@@ -109,6 +108,16 @@ int nxmsg_alloc(FAR struct msgq_s **pmsgq);
  ****************************************************************************/
 
 void nxmsg_free(FAR struct msgq_s *msgq);
+
+/****************************************************************************
+ * Name: nxmsg_wakeup_senders
+ *
+ * Description:
+ *   Wake up all tasks that wait in msgsnd() for room in the queue
+ *
+ ****************************************************************************/
+
+void nxmsg_wakeup_senders(FAR struct msgq_s *msgq);
 
 /****************************************************************************
  * Name: nxmsg_lookup
