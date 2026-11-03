@@ -39,6 +39,41 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: timer_cpuremaining
+ *
+ * Description:
+ *   Return the CPU time until a CPU-time timer expires, or zero if the
+ *   timer is disarmed.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_CPUTIME_TIMER
+void timer_cpuremaining(FAR struct posix_timer_s *timer,
+                        FAR struct timespec *ts)
+{
+  struct timespec now;
+  struct timespec expected;
+
+  ts->tv_sec  = 0;
+  ts->tv_nsec = 0;
+
+  if (WDOG_ISACTIVE(&timer->pt_wdog) &&
+      nxclock_gettime(timer->pt_clock, &now) >= 0)
+    {
+      clock_ticks2time(&expected, timer->pt_expected);
+      clock_timespec_subtract(&expected, &now, ts);
+
+      /* An armed timer never reports zero */
+
+      if (ts->tv_sec == 0 && ts->tv_nsec == 0)
+        {
+          ts->tv_nsec = 1;
+        }
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: timer_gettime
  *
  * Description:
@@ -83,13 +118,20 @@ int timer_gettime(timer_t timerid, FAR struct itimerspec *value)
     }
   else
     {
-      /* Get the number of ticks before the underlying watchdog expires */
+#ifdef HAVE_CPUTIME_TIMER
+      if (timer_iscputime(timer))
+        {
+          timer_cpuremaining(timer, &value->it_value);
+        }
+      else
+#endif
+        {
+          /* Get the number of ticks before the watchdog expires */
 
-      ticks = wd_gettime(&timer->pt_wdog);
+          ticks = wd_gettime(&timer->pt_wdog);
+          clock_ticks2time(&value->it_value, ticks);
+        }
 
-      /* Convert that to a struct timespec and return it */
-
-      clock_ticks2time(&value->it_value, ticks);
       clock_ticks2time(&value->it_interval, timer->pt_delay);
     }
 
