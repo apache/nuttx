@@ -74,6 +74,15 @@ SIGTTOU     Suspend Task           CONFIG_SIG_SIGSTOP_ACTION
 SIGCONT     Resume Task            CONFIG_SIG_SIGSTOP_ACTION
 ==========  ====================   =========================
 
+With ``CONFIG_SCHED_HAVE_PARENT``, the parent of a process that stops gets
+``SIGCHLD`` with ``si_code`` ``CLD_STOPPED`` (``si_status`` is the signal),
+and ``waitpid()`` with ``WUNTRACED`` (``waitid()`` with ``WSTOPPED``)
+reports the stop once.  When the process continues on ``SIGCONT``, the
+parent gets ``CLD_CONTINUED``, and ``WCONTINUED`` reports it.  If the
+``SIGCHLD`` action of the parent has ``SA_NOCLDSTOP``, the parent gets no
+``SIGCHLD`` for the two events, but ``waitpid()`` and ``waitid()`` still
+report them.  ``SIGKILL`` also ends a stopped process.
+
 Ignored By Default
 ------------------
 
@@ -287,6 +296,9 @@ provided by NuttX:
        supported but only for ``SIGCHLD``.  ``SIGCHLD`` set to ``SIG_IGN``
        has the same effect if ``CONFIG_SIG_DEFAULT`` is defined.  Any
        other action for ``SIGCHLD`` keeps the child status again.
+       ``SA_NOCLDSTOP`` for ``SIGCHLD`` is also supported if
+       ``CONFIG_SCHED_HAVE_PARENT`` and ``CONFIG_SIG_SIGSTOP_ACTION`` are
+       defined.
 
 .. c:function:: int sigignore(int signo);
 
