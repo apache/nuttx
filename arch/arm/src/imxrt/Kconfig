@@ -237,6 +237,7 @@ config ARCH_FAMILY_IMXRT118x
 	select IMXRT_HAVE_LPUART11
 	select IMXRT_HAVE_LPUART12
 	select IMXRT_CLOCKCONFIG_VER3
+	select IMXRT_ADC_VER3
 	select IMXRT_IOMUX_VER3
 	select IMXRT_RGPIO
 	select IMXRT_EDMA_VER2
@@ -408,6 +409,10 @@ config IMXRT_SEMC_INIT_DONE
 	default n
 
 config IMXRT_ADC_VER2
+	bool
+	default n
+
+config IMXRT_ADC_VER3
 	bool
 	default n
 
