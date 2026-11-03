@@ -805,6 +805,12 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
   remaining = buflen;
   totalsize = 0;
 
+  UNUSED(maxtime);
+  UNUSED(runtime);
+  UNUSED(remaining);
+  UNUSED(linesize);
+  UNUSED(copysize);
+
   /* Convert the for maximum time pre-emption disabled */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
