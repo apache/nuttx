@@ -182,12 +182,17 @@ Functions
      ``CONFIG_SCHED_HAVE_PARENT``, ``waitpid()`` simply supports waiting
      for any task to complete execution. With
      ``CONFIG_SCHED_HAVE_PARENT``, ``waitpid()`` will use ``SIGCHLD`` and
-     can, therefore, wait for any child of the parent to complete. The
-     implementation is incomplete in either case, however: it does not
-     support process groups. Nor does NuttX retain the
-     status of exited tasks so if ``waitpid()`` is called after a task has
-     exited, then no status will be available. The options argument is
-     currently ignored.
+     can, therefore, wait for any child of the parent to complete, and it
+     is ``waitid()`` with a status in place of the ``siginfo_t``.
+     ``WUNTRACED`` and ``WCONTINUED`` report a child that stopped on
+     ``SIGSTOP``, ``SIGTSTP``, ``SIGTTIN`` or ``SIGTTOU`` and a child that
+     continued on ``SIGCONT`` (``CONFIG_SIG_SIGSTOP_ACTION``), as the job
+     control of a shell needs.  A ``pid`` of 0 or less than -1 selects a
+     process group: with ``CONFIG_SCHED_PROCESS_GROUPS`` the process groups
+     of ``setpgid()``; without it a process group contains only one
+     process.  NuttX keeps the status of an exited child only with
+     ``CONFIG_SCHED_CHILD_STATUS``: without it, if ``waitpid()`` is called
+     after a task has exited, then no status will be available.
 
   The ``waitpid()`` functions will obtain status information pertaining to
   one of the caller's child processes. The ``waitpid()`` function will
@@ -206,7 +211,7 @@ Functions
 
   :param pid: The task ID of the thread to wait for
   :param stat_loc: The location to return the exit status
-  :param options: ignored
+  :param options: ``WNOHANG``, ``WUNTRACED``, ``WCONTINUED`` (see below)
 
   The ``pid`` argument specifies a set of child processes for which status
   is requested. The ``waitpid()`` function will only return the status of
@@ -317,17 +322,16 @@ Functions
   .. note::
 
      The following discussion is a general description of the ``waitid()``
-     interface. However, as of this writing, the implementation of
-     ``waitid()`` is incomplete (but usable). If
-     ``CONFIG_SCHED_HAVE_PARENT`` is defined, ``waitid()`` will be a
-     little more compliant to specifications. ``waitpid()`` simply
-     supports waiting a specific child task (``P_PID`` or for any child
-     task ``P_ALL`` to complete execution. ``SIGCHLD`` is used. The
-     implementation is incomplete in either case, however: it does not
-     support process groups. Nor does NuttX retain the
-     status of exited tasks so if ``waitpid()`` is called after a task has
-     exited, then no status will be available. The options argument is
-     currently ignored.
+     interface. ``waitid()`` needs ``CONFIG_SCHED_HAVE_PARENT``.  It
+     waits for a specific child (``P_PID``), for a child in a process
+     group (``P_PGID``; an ``id`` of 0 is the process group of the
+     caller) or for any child (``P_ALL``), and ``SIGCHLD`` is used.
+     ``WSTOPPED`` and ``WCONTINUED`` need ``CONFIG_SIG_SIGSTOP_ACTION``.
+     NuttX keeps the status of an exited child only with
+     ``CONFIG_SCHED_CHILD_STATUS``: without it, if ``waitid()`` is called
+     after a task has exited, then no status will be available.  Options
+     other than those below, or no ``WEXITED``, ``WSTOPPED`` or
+     ``WCONTINUED``, give ``EINVAL``.
 
   The ``waitid()`` function suspends the calling thread until one child of
   the process containing the calling thread changes state. It records the
@@ -355,7 +359,7 @@ Functions
   -  ``WEXITED``: Wait for processes that have exited.
   -  ``WSTOPPED``: Status will be returned for any child that has stopped
      upon receipt of a signal.
-  -  ``WCONTINUES``: Status will be returned for any child that was
+  -  ``WCONTINUED``: Status will be returned for any child that was
      stopped and has been continued.
   -  ``WNOHANG``: Return immediately if there are no children to wait for.
   -  ``WNOWAIT``: Keep the process whose status is returned in ``info`` in
