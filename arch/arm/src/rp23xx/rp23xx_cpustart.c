@@ -35,6 +35,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched_note.h>
+#include <arch/board/board.h>
 
 #include "nvic.h"
 #include "sched/sched.h"
@@ -157,6 +158,12 @@ static void core1_boot(void)
   /* Setup NVIC */
 
   up_irqinitialize();
+
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  /* The cycle counter (DWT) is a register of each core */
+
+  up_perf_init((void *)BOARD_SYS_FREQ);
+#endif
 
   /* Enable inter-processor FIFO interrupt */
 

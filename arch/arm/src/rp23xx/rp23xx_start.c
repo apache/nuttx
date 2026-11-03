@@ -294,6 +294,10 @@ void __start(void)
   rp23xx_mpu_share_sram();
 #endif
 
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  up_perf_init((void *)BOARD_SYS_FREQ);
+#endif
+
   /* Then start NuttX */
 
   showprogress('\r');
