@@ -491,6 +491,9 @@ struct task_group_s
 
 #ifdef HAVE_GROUP_MEMBERS
   sq_queue_t tg_members;            /* List of members for task             */
+#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+  clock_t tg_run_time;              /* Run time of the members that left    */
+#  endif
 #endif
 
 #ifdef CONFIG_BINFMT_LOADABLE
