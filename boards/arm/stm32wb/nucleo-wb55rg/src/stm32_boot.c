@@ -39,8 +39,6 @@
 
 #include <arch/board/board.h>
 
-#include "stm32_tim.h"
-
 #ifdef CONFIG_RTC_DRIVER
 #  include <nuttx/timers/rtc.h>
 #  include "stm32wb_rtc.h"
@@ -143,18 +141,6 @@ void board_late_initialize(void)
           serr("ERROR: Failed to bind/register the RTC driver: %d\n", ret);
           return;
         }
-    }
-#endif
-
-#ifdef CONFIG_TIMER
-  /* Initialize and register the timer driver */
-
-  ret = stm32_timer_initialize("/dev/timer0", 1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to register the timer driver: %d\n",
-             ret);
-      return;
     }
 #endif
 
