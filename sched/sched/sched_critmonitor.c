@@ -371,7 +371,14 @@ void nxsched_critmon_busywait(bool state, FAR void *caller)
 void nxsched_switch_critmon(FAR struct tcb_s *from, FAR struct tcb_s *to)
 {
   clock_t current = perf_gettime();
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
   clock_t elapsed = current - from->run_start;
+#else
+  clock_t elapsed = 0;
+
+  UNUSED(current);
+  UNUSED(elapsed);
+#endif
 
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
   clock_t tick = elapsed * CLK_TCK / perf_getfreq();
@@ -457,6 +464,7 @@ void nxsched_switch_critmon(FAR struct tcb_s *from, FAR struct tcb_s *to)
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION */
 }
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
 void nxsched_update_critmon(FAR struct tcb_s *tcb)
 {
   clock_t current = perf_gettime();
@@ -479,3 +487,4 @@ void nxsched_update_critmon(FAR struct tcb_s *tcb)
         }
     }
 }
+#endif

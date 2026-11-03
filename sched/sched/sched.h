@@ -446,6 +446,9 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to);
 
 #ifdef CONFIG_SCHED_CRITMONITOR
 void nxsched_switch_critmon(FAR struct tcb_s *from, FAR struct tcb_s *to);
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
 void nxsched_update_critmon(FAR struct tcb_s *tcb);
 #endif
 
