@@ -127,9 +127,11 @@ struct telnet_dev_s
   uint16_t          td_offset;    /* Offset to the valid, pending bytes in the rxbuffer */
   uint16_t          td_pending;   /* Number of valid, pending bytes in the rxbuffer */
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
+  bool              td_winch;     /* Window size changed, send SIGWINCH */
   uint16_t          td_rows;      /* Number of NAWS rows */
   uint16_t          td_cols;      /* Number of NAWS cols */
   int               td_sb_count;  /* Count of TELNET_SB bytes received */
+  struct winsize    td_winsize;   /* Window size (TIOCGWINSZ, TIOCSWINSZ) */
 #endif
 #ifdef HAVE_SIGNALS
   pid_t             td_pid;
@@ -167,6 +169,11 @@ static bool    telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
                  int *nwritten);
 static void    telnet_sendopt(FAR struct telnet_dev_s *priv, uint8_t option,
                  uint8_t value);
+#if defined(CONFIG_TELNET_SUPPORT_NAWS) && defined(HAVE_SIGNALS)
+static void    telnet_winch(FAR struct telnet_dev_s *priv);
+#else
+#  define telnet_winch(priv)
+#endif
 
 /* Telnet character driver methods */
 
@@ -569,6 +576,16 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
                 case 3:
                   priv->td_rows = (priv->td_rows & 0xff00) | ch;
                   ninfo("NAWS: %d,%d", priv->td_cols, priv->td_rows);
+
+                  if (priv->td_winsize.ws_row != priv->td_rows ||
+                      priv->td_winsize.ws_col != priv->td_cols)
+                    {
+                      priv->td_winsize.ws_row    = priv->td_rows;
+                      priv->td_winsize.ws_col    = priv->td_cols;
+                      priv->td_winsize.ws_xpixel = 0;
+                      priv->td_winsize.ws_ypixel = 0;
+                      priv->td_winch             = true;
+                    }
                   break;
               }
 
@@ -682,6 +699,24 @@ static void telnet_sendopt(FAR struct telnet_dev_s *priv, uint8_t option,
       nerr("ERROR: Failed to send TELNET_IAC: %d\n", ret);
     }
 }
+
+/****************************************************************************
+ * Name: telnet_winch
+ *
+ * Description:
+ *   Send SIGWINCH to the foreground process after a window size change.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_TELNET_SUPPORT_NAWS) && defined(HAVE_SIGNALS)
+static void telnet_winch(FAR struct telnet_dev_s *priv)
+{
+  if (priv->td_pid > 0)
+    {
+      nxsig_kill(priv->td_pid, SIGWINCH);
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: telnet_open
@@ -862,6 +897,18 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
 
       src = &priv->td_rxbuffer[priv->td_offset];
       nread = telnet_receive(priv, src, priv->td_pending, buffer, len);
+
+#ifdef CONFIG_TELNET_SUPPORT_NAWS
+      /* Send SIGWINCH after telnet_receive(), before the next wait.  In a
+       * flat build the handler runs at once and can use this session.
+       */
+
+      if (priv->td_winch)
+        {
+          priv->td_winch = false;
+          telnet_winch(priv);
+        }
+#endif
     }
   while (nread == 0);
 
@@ -1059,6 +1106,8 @@ static int telnet_session(FAR struct telnet_session_s *session)
   priv->td_rows      = 25;
   priv->td_cols      = 80;
   priv->td_sb_count  = 0;
+  priv->td_winsize.ws_row = 25;
+  priv->td_winsize.ws_col = 80;
 #endif
 
   /* Clone the internal socket structure.  We do this so that it will be
@@ -1216,12 +1265,34 @@ static int telnet_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
       case TIOCGWINSZ:
         {
-          FAR struct winsize *pw = (FAR struct winsize *)((uintptr_t)arg);
+          FAR struct winsize *ws = (FAR struct winsize *)((uintptr_t)arg);
 
-          /* Get row/col from the private data */
+          if (ws == NULL)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-          pw->ws_row = priv->td_rows;
-          pw->ws_col = priv->td_cols;
+          *ws = priv->td_winsize;
+        }
+        break;
+
+      case TIOCSWINSZ:
+        {
+          FAR const struct winsize *ws =
+            (FAR const struct winsize *)((uintptr_t)arg);
+
+          if (ws == NULL)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          if (memcmp(&priv->td_winsize, ws, sizeof(*ws)) != 0)
+            {
+              priv->td_winsize = *ws;
+              telnet_winch(priv);
+            }
         }
         break;
 #endif
