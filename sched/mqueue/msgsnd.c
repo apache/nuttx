@@ -166,7 +166,6 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
   FAR const struct mymsg *buf = msgp;
   FAR struct msgbuf_s *msg;
   FAR struct msgq_s *msgq;
-  FAR struct tcb_s *btcb;
   irqstate_t flags;
   int ret = OK;
 
@@ -236,40 +235,11 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
       msgq->lspid   = nxsched_getpid();
       msgq->stime   = time(NULL);
 
-      if (msgq->cmn.nwaitnotempty > 0)
-        {
-          FAR struct tcb_s *rtcb = this_task();
+      /* A receiver waits for one type: the first one may not want this
+       * message, and another one may.
+       */
 
-          /* Find the highest priority task that is waiting for
-           * this queue to be non-empty, in the waitfornotempty list of
-           * the queue. enter_critical_section() should give us sufficient
-           * protection since interrupts should never cause a change
-           * in this list
-           */
-
-          btcb = (FAR struct tcb_s *)dq_remfirst(MQ_WNELIST(msgq->cmn));
-
-          /* If one was found, unblock it */
-
-          DEBUGASSERT(btcb);
-
-          wd_cancel(&btcb->waitdog);
-
-          msgq->cmn.nwaitnotempty--;
-
-          /* Indicate that the wait is over. */
-
-          btcb->waitobj = NULL;
-
-          /* Add the task to ready-to-run task list and
-           * perform the context switch if one is needed
-           */
-
-          if (nxsched_add_readytorun(btcb))
-            {
-              up_switch_context(this_task(), rtcb);
-            }
-        }
+      nxmsg_wakeup_receivers(msgq);
     }
 
 errout_with_critical:

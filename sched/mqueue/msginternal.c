@@ -136,6 +136,42 @@ static void nxmsg_wakeup(FAR struct msgq_s *msgq)
 }
 
 /****************************************************************************
+ * Name: nxmsg_wakeup_list
+ *
+ * Description:
+ *   Wake up all tasks in a wait list of a queue.  Each task checks again
+ *   if it can go on.
+ *
+ ****************************************************************************/
+
+static void nxmsg_wakeup_list(FAR dq_queue_t *list, FAR int16_t *nwait)
+{
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *btcb;
+  bool need_switch = false;
+
+  while (*nwait > 0)
+    {
+      btcb = (FAR struct tcb_s *)dq_remfirst(list);
+      DEBUGASSERT(btcb != NULL);
+
+      wd_cancel(&btcb->waitdog);
+      (*nwait)--;
+      btcb->waitobj = NULL;
+
+      if (nxsched_add_readytorun(btcb))
+        {
+          need_switch = true;
+        }
+    }
+
+  if (need_switch)
+    {
+      up_switch_context(this_task(), rtcb);
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -204,31 +240,16 @@ void nxmsg_free(FAR struct msgq_s *msgq)
 
 void nxmsg_wakeup_senders(FAR struct msgq_s *msgq)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct tcb_s *btcb;
-  bool need_switch = false;
+  nxmsg_wakeup_list(MQ_WNFLIST(msgq->cmn), &msgq->cmn.nwaitnotfull);
+}
 
-  /* Each sender checks again if its message fits */
+/****************************************************************************
+ * Name: nxmsg_wakeup_receivers
+ ****************************************************************************/
 
-  while (msgq->cmn.nwaitnotfull > 0)
-    {
-      btcb = (FAR struct tcb_s *)dq_remfirst(MQ_WNFLIST(msgq->cmn));
-      DEBUGASSERT(btcb != NULL);
-
-      wd_cancel(&btcb->waitdog);
-      msgq->cmn.nwaitnotfull--;
-      btcb->waitobj = NULL;
-
-      if (nxsched_add_readytorun(btcb))
-        {
-          need_switch = true;
-        }
-    }
-
-  if (need_switch)
-    {
-      up_switch_context(this_task(), rtcb);
-    }
+void nxmsg_wakeup_receivers(FAR struct msgq_s *msgq)
+{
+  nxmsg_wakeup_list(MQ_WNELIST(msgq->cmn), &msgq->cmn.nwaitnotempty);
 }
 
 /****************************************************************************
