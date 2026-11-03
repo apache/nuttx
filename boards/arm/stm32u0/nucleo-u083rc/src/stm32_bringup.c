@@ -38,10 +38,6 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef CONFIG_TIMER
-#  include <stm32_tim.h>
-#endif
-
 #ifdef CONFIG_SENSORS_QENCODER
 #  include "board_qencoder.h"
 #endif
@@ -86,16 +82,6 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
              ret);
     }
-
-#if defined(CONFIG_TIMER) && defined(CONFIG_STM32_TIM6)
-  /* Initialize and register the timer driver - TIM6 */
-
-  ret = stm32_timer_initialize("/dev/timer0", 6);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_timer_initialize failed: %d\n", ret);
-    }
-#endif
 
 #if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
   /* Register the LED driver */

@@ -49,7 +49,7 @@ Enabled features:
 
 - Quadrature encoder on TIM3 (PA6/PA7, D12/D11)
 
-- Timer driver on TIM6 (/dev/timer0)
+- Timer driver on TIM6 (/dev/timer6)
 
 - IWDG and WWDG watchdogs
 
