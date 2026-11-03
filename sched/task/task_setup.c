@@ -304,11 +304,15 @@ static inline void nxtask_save_parent(FAR struct tcb_s *tcb, uint8_t ttype)
             {
               /* Yes.. Initialize the structure */
 
-              child->ch_flags  = ttype;
-              child->ch_pid    = tcb->pid;
-              child->ch_status = 0;
+              child->ch_flags   = ttype;
+              child->ch_stopsig = 0;
+              child->ch_pid     = tcb->pid;
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+              child->ch_pgid    = 0;
+#endif
+              child->ch_status  = 0;
 #ifdef CONFIG_SCHED_USER_IDENTITY
-              child->ch_uid    = 0;
+              child->ch_uid     = 0;
 #endif
 
               /* Add the entry into the group's list of children */

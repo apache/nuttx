@@ -40,16 +40,22 @@
  * Encoded is as follows as 2 bytes of _info(MS) then two bytes of code (LS).
  * Code:
  *   0 - Child has exited, info is the exit code.
+ *   0x7f - Child has stopped, info is the signal that stopped it.
+ *   0xffff (all of the 2 bytes) - Child has continued.
  *   Other values - Not implemented
  */
 
 #define WEXITSTATUS(s)  (((s) >> 8) & 0xff) /* Return exit status */
 #define WIFEXITED(s)    (((s) & 0xff) == 0) /* True: Child exited normally */
 
-#define WIFCONTINUED(s) (0)                 /* True: Child has been continued */
+#define WIFCONTINUED(s) ((s) == 0xffff)     /* True: Child has been continued */
 #define WIFSIGNALED(s)  (0)                 /* True: Child exited due to uncaught signal */
-#define WIFSTOPPED(s)   (0)                 /* True: Child is currently stopped */
-#define WSTOPSIG(s)     (0)                 /* Return signal number that caused process to stop */
+
+/* True: Child is currently stopped */
+
+#define WIFSTOPPED(s)   (((s) & 0xff) == 0x7f)
+
+#define WSTOPSIG(s)     (((s) >> 8) & 0xff) /* Return signal number that caused process to stop */
 #define WTERMSIG(s)     (((s) >> 8) & 0x7f) /* Return signal number that caused process to terminate */
 #define WCOREDUMP(s)    (((s) >> 8) & 0x80) /* True: Child has produced a core dump */
 
