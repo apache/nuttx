@@ -48,6 +48,7 @@
 #include "imx9_gpio.h"
 #include "imx9_lowputc.h"
 #include "imx9_system_ctl.h"
+#include "hardware/imx9_ccm.h"
 #ifdef CONFIG_IMX9_DDR_TRAINING
 #include "ddr/imx9_ddr_training.h"
 #endif
@@ -95,6 +96,37 @@ const struct arm_mmu_config g_mmu_config =
   .num_regions = nitems(g_mmu_regions),
   .mmu_regions = g_mmu_regions,
 };
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: imx9_a55_frequency
+ *
+ * Description:
+ *   Return the clock of the A55 cores: the ARM PLL or the A55 clock root.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_PERF_EVENTS) && !defined(CONFIG_IMX9_CLK_OVER_SCMI)
+static uint32_t imx9_a55_frequency(void)
+{
+  uint32_t freq = 0;
+
+  if ((getreg32(IMX9_CCM_GPR_SH(CCM_SHARED_A55_CLK)) &
+       CCM_GPR_A55_CLK_SEL_MASK) == CCM_GPR_A55_CLK_SEL_PLL)
+    {
+      imx9_get_clock(ARM_PLL, &freq);
+    }
+  else
+    {
+      imx9_get_rootclock(CCM_ARM_A55_CLK_ROOT, &freq);
+    }
+
+  return freq;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -229,4 +261,8 @@ void arm64_chip_boot(void)
    */
 
   imx9_board_initialize();
+
+#if defined(CONFIG_ARCH_PERF_EVENTS) && !defined(CONFIG_IMX9_CLK_OVER_SCMI)
+  up_perf_init((void *)(uintptr_t)imx9_a55_frequency());
+#endif
 }
