@@ -70,7 +70,7 @@
 #  define CHECK_CSECTION(pid, elapsed)
 #endif
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT > 0
 #  define CHECK_BUSYWAIT(pid, elapsed) \
      do \
        { \
