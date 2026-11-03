@@ -97,4 +97,8 @@ void arm_boot(void)
 
   arm_earlyserialinit();
 #endif
+
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  up_perf_init((void *)CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC);
+#endif
 }
