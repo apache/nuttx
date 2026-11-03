@@ -32,13 +32,24 @@
 #include <nuttx/sched.h>
 #include <nuttx/wdog.h>
 
-#ifndef CONFIG_ARCH_PERF_EVENTS_USER_ACCESS
-
 /****************************************************************************
  * Preprocessors
  ****************************************************************************/
 
-#  if defined(CONFIG_PERF_OVERFLOW_CORRECTION) && ULONG_MAX != UINT64_MAX
+/* Use up_perf_*() only when they count: the arch counter runs only with
+ * ARCH_PERF_EVENTS, and arch_alarm.c or arch_timer.c give up_perf_*() only
+ * without ARCH_HAVE_PERF_EVENTS.  Else use the system ticks.
+ */
+
+#if defined(CONFIG_ARCH_PERF_EVENTS) || \
+    (!defined(CONFIG_ARCH_HAVE_PERF_EVENTS) && \
+     (defined(CONFIG_ALARM_ARCH) || defined(CONFIG_TIMER_ARCH)))
+#  define USE_UP_PERF
+#endif
+
+#ifndef CONFIG_ARCH_PERF_EVENTS_USER_ACCESS
+#  if defined(USE_UP_PERF) && defined(CONFIG_PERF_OVERFLOW_CORRECTION) && \
+      ULONG_MAX != UINT64_MAX
 
 /****************************************************************************
  * Private Types
@@ -138,8 +149,7 @@ clock_t perf_gettime(void)
   return result;
 }
 
-#  elif defined(CONFIG_ALARM_ARCH) || defined (CONFIG_TIMER_ARCH) || \
-        defined(CONFIG_ARCH_PERF_EVENTS)
+#  elif defined(USE_UP_PERF)
 
 /****************************************************************************
  * perf_gettime
@@ -164,8 +174,7 @@ clock_t perf_gettime(void)
 #  endif
 #endif /* !CONFIG_ARCH_PERF_EVENTS_USER_ACCESS */
 
-#if defined(CONFIG_ALARM_ARCH) || defined (CONFIG_TIMER_ARCH) || \
-    defined(CONFIG_ARCH_PERF_EVENTS)
+#ifdef USE_UP_PERF
 
 /****************************************************************************
  * perf_convert
