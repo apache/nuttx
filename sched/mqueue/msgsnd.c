@@ -197,14 +197,16 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
     {
       if (!up_interrupt_context()) /* In an interrupt handler? */
         {
-          /* Yes.. the message queue is full.  Wait for space to become
+          /* No.. the message queue is full.  Wait for space to become
            * available in the message queue.
            */
 
           ret = msgsnd_wait(msgq, msgsz, msgflg);
         }
-      else if ((msgflg & IPC_NOWAIT) != 0)
+      else
         {
+          /* Yes.. an interrupt handler cannot wait */
+
           ret = -EAGAIN;
         }
     }
