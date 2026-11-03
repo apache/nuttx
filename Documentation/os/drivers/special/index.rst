@@ -47,6 +47,7 @@ following section.
   sdio.rst
   usbdev.rst
   uvc.rst
+  uvc_host.rst
   usbhost.rst
   usbmisc.rst
   usbmonitor.rst
