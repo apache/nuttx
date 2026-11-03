@@ -163,7 +163,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
 
       /* Copy from the user buffer to the I/O buffer.  */
 
-      memcpy(dest, src, ncopy);
+      memmove(dest, src, ncopy);
       iobinfo("iob=%p Copy %u bytes new len=%u\n",
               iob, ncopy, iob->io_len);
 
