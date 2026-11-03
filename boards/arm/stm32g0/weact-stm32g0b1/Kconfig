@@ -1,0 +1,8 @@
+#
+# For a description of the syntax of this configuration file,
+# see the kconfig-language reference.
+#
+
+if ARCH_BOARD_WEACT_STM32G0B1
+
+endif # ARCH_BOARD_WEACT_STM32G0B1
