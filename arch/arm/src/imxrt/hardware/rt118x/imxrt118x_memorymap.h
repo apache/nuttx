@@ -93,6 +93,7 @@
 #define IMXRT_OTFAD1_BASE               (0x425e0000ul)  /* On-The-Fly AES Decrypt 1 */
 
 #define IMXRT_ADC1_BASE                 (0x42600000ul)  /* LPADC 1 */
+#define IMXRT_ADC2_BASE                 (0x42e00000ul)  /* LPADC 2 */
 #define IMXRT_FLEXPWM1_BASE             (0x42650000ul)  /* FlexPWM 1 */
 #define IMXRT_FLEXPWM2_BASE             (0x42660000ul)  /* FlexPWM 2 */
 #define IMXRT_FLEXPWM3_BASE             (0x42670000ul)  /* FlexPWM 3 */

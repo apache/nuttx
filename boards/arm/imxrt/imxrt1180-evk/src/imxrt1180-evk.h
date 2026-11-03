@@ -42,4 +42,16 @@ int imxrt_bringup(void);
 int imxrt_dma_alloc_init(void);
 #endif
 
+/****************************************************************************
+ * Name: imxrt_adc_initialize
+ *
+ * Description:
+ *   Initialize ADC drivers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_ADC
+int imxrt_adc_initialize(void);
+#endif
+
 #endif /* __BOARDS_ARM_IMXRT_IMXRT1180_EVK_SRC_IMXRT1180_EVK_H */

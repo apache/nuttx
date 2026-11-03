@@ -28,7 +28,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_IMXRT_ADC_VER2
+#ifdef CONFIG_IMXRT_ADC_VER3
+#include "imxrt_adc_ver3.h"
+#elif defined(CONFIG_IMXRT_ADC_VER2)
 #include "imxrt_adc_ver2.h"
 #else
 #include "imxrt_adc_ver1.h"

@@ -34,6 +34,11 @@
 
 #include "hardware/rt118x/imxrt118x_ccm.h"
 
+#define imxrt_clockall_adc1() imxrt_ccm_gate_on(CCM_LPCG_ADC1, true)
+#define imxrt_clockall_adc2() imxrt_ccm_gate_on(CCM_LPCG_ADC2, true)
+#define imxrt_clockoff_adc1() imxrt_ccm_gate_on(CCM_LPCG_ADC1, false)
+#define imxrt_clockoff_adc2() imxrt_ccm_gate_on(CCM_LPCG_ADC2, false)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
