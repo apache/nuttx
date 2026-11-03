@@ -83,10 +83,6 @@ if(CONFIG_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_timer.c)
-endif()
-
 if(CONFIG_BOARDCTL_IOCTL)
   list(APPEND SRCS stm32_ioctl.c)
 endif()
