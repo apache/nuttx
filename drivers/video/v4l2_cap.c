@@ -507,6 +507,10 @@ static const capture_parameter_name_t g_capture_parameter_name[] =
     },
 
     {
+      IMGSENSOR_ID_GAIN,                 "Gain"
+    },
+
+    {
       IMGSENSOR_ID_EXPOSURE_AUTO,        "Auto Exposure"
     },
 

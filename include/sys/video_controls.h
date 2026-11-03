@@ -105,6 +105,7 @@ enum v4l2_colorfx
 
 #define V4L2_CID_AUTOBRIGHTNESS       USER_CID(17)   /* Auto brightness */
 #define V4L2_CID_ROTATE               USER_CID(18)   /* Rotation */
+#define V4L2_CID_GAIN                 USER_CID(19)   /* Gain */
 
 #define V4L2_CID_LENS_SHADING_CORRECTION USER_CID(19) /* Lens shading correction */
 
