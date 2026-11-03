@@ -55,6 +55,14 @@
 #include <nuttx/syslog/syslog_rpmsg.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* QEMU counts the PMU cycle counter (PMCCNTR) at 1 GHz */
+
+#define QEMU_PMU_CYCLES_PER_SEC  1000000000
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -79,7 +87,7 @@ void arm_boot(void)
 #ifdef CONFIG_ARCH_PERF_EVENTS
   /* Perf init */
 
-  up_perf_init(0);
+  up_perf_init((void *)QEMU_PMU_CYCLES_PER_SEC);
 #endif
 
 #ifdef CONFIG_ARCH_ARMV7A
