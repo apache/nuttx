@@ -305,8 +305,8 @@ the following paragraphs.
   -  ``EOPNOTSUPP``. Some bit in the flags argument is inappropriate for
      the socket type.
   -  ``EPIPE``. The local end has been shut down on a connection oriented
-     socket. In this case the process will also receive a SIGPIPE unless
-     MSG_NOSIGNAL is set.
+     socket, or the peer closed the connection. In this case the process
+     will also receive a SIGPIPE unless MSG_NOSIGNAL is set.
 
 .. c:function:: ssize_t recv(int sockfd, void *buf, size_t len, int flags);
 
