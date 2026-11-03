@@ -41,6 +41,7 @@
 
 static int msgsnd_wait(FAR struct msgq_s *msgq, size_t msgsz, int msgflg)
 {
+  FAR struct mqueue_cmn_s *cmn;
   FAR struct tcb_s *rtcb;
   int msqid = msgq->id;
 
@@ -59,13 +60,27 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, size_t msgsz, int msgflg)
     }
 #endif
 
-  /* Loop until the queue has room for msgsz more bytes */
+  /* Loop until the queue has room for msgsz more bytes and the pool has
+   * a free message.  Wait in the list of the queue or in the list of the
+   * pool.
+   */
 
-  while (msgq->cbytes + msgsz > msgq->qbytes)
+  for (; ; )
     {
-      /* Should we block until there is sufficient space in the
-       * message queue?
-       */
+      if (msgq->cbytes + msgsz > msgq->qbytes)
+        {
+          cmn = &msgq->cmn;
+        }
+      else if (list_is_empty(&g_msgfreelist))
+        {
+          cmn = &g_msgpoolwait;
+        }
+      else
+        {
+          return OK;
+        }
+
+      /* Should we block until there is sufficient space? */
 
       if ((msgflg & IPC_NOWAIT) != 0)
         {
@@ -77,8 +92,8 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, size_t msgsz, int msgflg)
        */
 
       rtcb          = this_task();
-      rtcb->waitobj = msgq;
-      msgq->cmn.nwaitnotfull++;
+      rtcb->waitobj = cmn;
+      cmn->nwaitnotfull++;
 
       /* Initialize the errcode used to communication wake-up error
        * conditions.
@@ -99,7 +114,7 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, size_t msgsz, int msgflg)
       /* Add the task to the specified blocked task list */
 
       rtcb->task_state = TSTATE_WAIT_MQNOTFULL;
-      nxsched_add_prioritized(rtcb, MQ_WNFLIST(msgq->cmn));
+      nxsched_add_prioritized(rtcb, MQ_WNFLIST(*cmn));
 
       /* Now, perform the context switch */
 
@@ -123,8 +138,6 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, size_t msgsz, int msgflg)
           return -EIDRM;
         }
     }
-
-  return OK;
 }
 
 /****************************************************************************
@@ -152,7 +165,8 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, size_t msgsz, int msgflg)
  *   On success, msgsnd() returns 0 (OK); on error, -1 (ERROR)
  *   is returned, with errno set to indicate the error:
  *
- *   EAGAIN   The queue is full and IPC_NOWAIT is set.
+ *   EAGAIN   The queue is full or no free message is left, and
+ *            IPC_NOWAIT is set or the caller is an interrupt handler.
  *   EINVAL   msqid is not a valid message queue identifier, mtype is
  *            less than 1, or msgsz is greater than the maximum message
  *            size of the queue.
@@ -190,9 +204,9 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
       goto errout_with_critical;
     }
 
-  /* Is the message queue FULL? */
+  /* Is the message queue FULL, or the pool of free messages empty? */
 
-  if (msgq->cbytes + msgsz > msgq->qbytes)
+  if (msgq->cbytes + msgsz > msgq->qbytes || list_is_empty(&g_msgfreelist))
     {
       if (!up_interrupt_context()) /* In an interrupt handler? */
         {
@@ -215,11 +229,7 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
       /* Now allocate the message. */
 
       msg = (FAR struct msgbuf_s *)list_remove_head(&g_msgfreelist);
-      if (msg == NULL)
-        {
-          ret = -ENOMEM;
-          goto errout_with_critical;
-        }
+      DEBUGASSERT(msg != NULL);
 
       /* Check if the message was successfully allocated */
 

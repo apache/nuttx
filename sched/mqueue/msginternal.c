@@ -49,6 +49,7 @@ static FAR struct msgq_s **g_msgqs; /* The queues; the index is the id - 1 */
  ****************************************************************************/
 
 struct list_node g_msgfreelist;
+struct mqueue_cmn_s g_msgpoolwait;
 
 /****************************************************************************
  * Private Functions
@@ -243,6 +244,11 @@ void nxmsg_free(FAR struct msgq_s *msgq)
       list_add_tail(&g_msgfreelist, &entry->node);
     }
 
+  /* Also the senders of this queue that wait for a free message: they
+   * get EIDRM.
+   */
+
+  nxmsg_wakeup_pool();
   kmm_free(msgq);
 }
 
@@ -262,6 +268,15 @@ void nxmsg_wakeup_senders(FAR struct msgq_s *msgq)
 void nxmsg_wakeup_receivers(FAR struct msgq_s *msgq)
 {
   nxmsg_wakeup_list(MQ_WNELIST(msgq->cmn), &msgq->cmn.nwaitnotempty);
+}
+
+/****************************************************************************
+ * Name: nxmsg_wakeup_pool
+ ****************************************************************************/
+
+void nxmsg_wakeup_pool(void)
+{
+  nxmsg_wakeup_list(MQ_WNFLIST(g_msgpoolwait), &g_msgpoolwait.nwaitnotfull);
 }
 
 /****************************************************************************

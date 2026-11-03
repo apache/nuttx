@@ -256,6 +256,7 @@ ssize_t msgrcv(int msqid, FAR void *msgp, size_t msgsz, long msgtyp,
   /* The room in the queue can be enough for more than one sender */
 
   nxmsg_wakeup_senders(msgq);
+  nxmsg_wakeup_pool();
 
 errout_with_critical:
   leave_critical_section(flags);

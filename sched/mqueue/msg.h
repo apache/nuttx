@@ -85,6 +85,10 @@ extern "C"
 
 extern struct list_node g_msgfreelist;
 
+/* The senders that wait for a free message in g_msgfreelist */
+
+extern struct mqueue_cmn_s g_msgpoolwait;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -128,6 +132,16 @@ void nxmsg_wakeup_senders(FAR struct msgq_s *msgq);
  ****************************************************************************/
 
 void nxmsg_wakeup_receivers(FAR struct msgq_s *msgq);
+
+/****************************************************************************
+ * Name: nxmsg_wakeup_pool
+ *
+ * Description:
+ *   Wake up all tasks that wait in msgsnd() for a free message
+ *
+ ****************************************************************************/
+
+void nxmsg_wakeup_pool(void);
 
 /****************************************************************************
  * Name: nxmsg_lookup
