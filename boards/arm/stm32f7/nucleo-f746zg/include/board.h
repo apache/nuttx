@@ -193,6 +193,10 @@
 #define STM32_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
+/* LPTIM1 kernel clock is PCLK1 (STM32_RCC_DCKCFGR2_LPTIM1SRC) */
+
+#define STM32_LPTIM1_CLKIN STM32_PCLK1_FREQUENCY
+
 /* SDMMC dividers.  Note that slower clocking is required when DMA
  * is disabledin order to avoid RX overrun/TX underrun errors due
  * to delayed responses to service FIFOs in interrupt driven mode.
