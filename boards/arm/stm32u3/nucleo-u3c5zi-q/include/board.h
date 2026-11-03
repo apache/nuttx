@@ -93,6 +93,16 @@
 #define STM32_TIM16_CLKIN            STM32_PCLK2_FREQUENCY
 #define STM32_TIM17_CLKIN            STM32_PCLK2_FREQUENCY
 
+/* LPTIM kernel clocks (RCC_CCIPR1 LPTIM2SEL and RCC_CCIPR3 LPTIM1SEL /
+ * LPTIM34SEL reset values): LPTIM2 on PCLK1, LPTIM1/3/4 on MSIK
+ * (MSIRC1 24 MHz / 2, RCC_ICSCR1 MSIKSEL / MSIKDIV reset values)
+ */
+
+#define STM32_LPTIM1_CLKIN           12000000ul
+#define STM32_LPTIM2_CLKIN           STM32_PCLK1_FREQUENCY
+#define STM32_LPTIM3_CLKIN           12000000ul
+#define STM32_LPTIM4_CLKIN           12000000ul
+
 /* USART1 is connected to the ST-LINK virtual COM port. */
 
 #define GPIO_USART1_RX               GPIO_USART1_RX_1
