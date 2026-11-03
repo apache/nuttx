@@ -277,6 +277,7 @@ ssize_t file_sendfile(FAR struct file *outfile, FAR struct file *infile,
 
       if (ret >= 0 || ret != -ENOSYS)
         {
+          psock_sigpipe(psock, ret, 0);
           return ret;
         }
 
