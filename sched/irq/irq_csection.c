@@ -461,7 +461,6 @@ void leave_critical_section_notrace(irqstate_t flags)
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-    CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
     defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 void leave_critical_section(irqstate_t flags)
 {
