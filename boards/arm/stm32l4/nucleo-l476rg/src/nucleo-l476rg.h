@@ -364,18 +364,6 @@ int stm32_mmcsd_initialize(int minor);
 #endif
 
 /****************************************************************************
- * Name: board_timer_driver_initialize
- *
- * Description:
- *   Initialize and register a timer
- *
- ****************************************************************************/
-
-#ifdef CONFIG_TIMER
-int board_timer_driver_initialize(const char *devpath, int timer);
-#endif
-
-/****************************************************************************
  * Name: stm32_qencoder_initialize
  *
  * Description:
