@@ -133,6 +133,8 @@
 
 #define STM32_LPTIM1_CLKIN      4000000  /* MSIK */
 #define STM32_LPTIM2_CLKIN      STM32_HCLK_FREQUENCY
+#define STM32_LPTIM3_CLKIN      4000000  /* MSIK */
+#define STM32_LPTIM4_CLKIN      4000000  /* MSIK */
 
 /* DMA Channel/Stream Selections ********************************************/
 
