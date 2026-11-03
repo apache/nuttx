@@ -27,6 +27,7 @@
 
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/compiler.h>
+#include <nuttx/rwsem.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -108,6 +109,7 @@ struct cfi_dev_s
   uint8_t cfi_offset;         /* cfi offset address, 0x55 or 0x555 */
   uint32_t unlock_addr1;      /* unlock addr1 for amd */
   uint32_t unlock_addr2;      /* unlock addr2 for amd */
+  rw_semaphore_t lock;        /* read-write lock */
   struct cfi_info_s info;     /* struct of cfi information */
 };
 
