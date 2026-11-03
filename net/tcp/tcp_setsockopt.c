@@ -161,10 +161,10 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
             }
 
           if (dsecs > UINT16_MAX)
-             {
-               nwarn("WARNING: value out of range: %u\n", dsecs);
-               return -EDOM;
-             }
+            {
+              nwarn("WARNING: value out of range: %u\n", dsecs);
+              return -EDOM;
+            }
 
           if (option == TCP_KEEPIDLE)
             {
@@ -175,7 +175,7 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
               conn->keepintvl = dsecs;
             }
 
-           /* Reset timer */
+          /* Reset timer */
 
           if (conn->keepalive)
             {
