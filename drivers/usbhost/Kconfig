@@ -813,6 +813,66 @@ config USBHOST_BTHCI
 	---help---
 		Select this option to build in support for USB Bluetooth HCI devices.
 
+config USBHOST_UVC
+	bool "USB Video Driver"
+	default n
+	depends on VIDEO_STREAM && USBHOST_HAVE_ASYNCH && SCHED_HPWORK
+	depends on !USBHOST_ISOC_DISABLE
+	depends on SIM_USB_HOST
+	select USBHOST_ASYNCH
+	---help---
+		Select this option to build in support of USB Video Camera devices.
+
+		The driver streams over isochronous endpoints and needs the length
+		of every isochronous packet on completion, which is what
+		DRVR_ISOCASYNCH() reports.  Only the simulated host implements that
+		method so far; a hardware host controller driver has to provide it
+		before this class can be used there.
+
+if USBHOST_UVC
+
+config USBHOST_UVC_ISO_PIPELINE_DEPTH
+	int "UVC ISO Pipeline Depth"
+	default 2
+	range 2 16
+	---help---
+		Number of concurrent ISO transfer slots in the UVC capture
+		pipeline. More slots reduce the chance of USB microframe data
+		loss but consume more memory. Each slot allocates a transfer
+		buffer whose size depends on the negotiated max packet size.
+		Default value of 2 is sufficient for most USB cameras.
+
+config USBHOST_UVC_PACKETS_PER_SLOT
+	int "UVC ISO packets per slot"
+	default 32
+	range 8 256
+	---help---
+		How many ISO packets one transfer slot carries. A slot is not a
+		frame: frame boundaries come from the UVC payload header, so a
+		frame spans as many slots as it needs.
+
+		Each slot costs packets_per_slot * wMaxPacketSize of heap, times
+		USBHOST_UVC_ISO_PIPELINE_DEPTH. Must be at least the number of
+		packets the host controller driver delivers per callback, or
+		packets are dropped whenever the pending queue runs shallow.
+
+config USBHOST_UVC_THREAD_PRIORITY
+	int "UVC capture thread priority"
+	default 100
+	---help---
+		Priority of the UVC capture thread that handles ISO data
+		transfer. Higher priority ensures timely frame delivery.
+		Default is 100 (same as SCHED_PRIORITY_DEFAULT).
+
+config USBHOST_UVC_THREAD_STACKSIZE
+	int "UVC capture thread stack size"
+	default 4096
+	---help---
+		Stack size in bytes for the UVC capture thread.
+		Default is 4096.
+
+endif # USBHOST_UVC
+
 config USBHOST_XHCI
 	bool
 	default n

@@ -115,4 +115,14 @@ void usbhost_drivers_initialize(void)
       uerr("ERROR: Failed to register the FT232R class\n");
     }
 #endif
+
+#ifdef CONFIG_USBHOST_UVC
+  /* Initialize the UVC class */
+
+  ret = usbhost_uvc_initialize();
+  if (ret != OK)
+    {
+      uerr("ERROR: Failed to register the UVC class\n");
+    }
+#endif
 }

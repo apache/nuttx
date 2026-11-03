@@ -1261,6 +1261,27 @@ int usbhost_cdcacm_initialize(void);
 int usbhost_cdcecm_initialize(void);
 #endif
 
+#ifdef CONFIG_USBHOST_UVC
+/****************************************************************************
+ * Name: usbhost_uvc_initialize
+ *
+ * Description:
+ *   Initialize the USB Video Class host driver.  This function should be
+ *   called by platform-specific code in order to initialize and register
+ *   support for USB video cameras.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success this function will return zero (OK);  A negated errno value
+ *   will be returned on failure.
+ *
+ ****************************************************************************/
+
+int usbhost_uvc_initialize(void);
+#endif
+
 #ifdef CONFIG_USBHOST_FT232R
 /****************************************************************************
  * Name: usbhost_ft232r_initialize
