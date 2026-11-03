@@ -387,6 +387,12 @@ void nxsched_switch_critmon(FAR struct tcb_s *from, FAR struct tcb_s *to)
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+  /* A zero run_start tells nxsched_critmon_runtime() that the thread does
+   * not run.  Clear it before run_time changes.
+   */
+
+  from->run_start = 0;
+  SMP_WMB();
   from->run_time += elapsed;
   to->run_start = current;
   if (elapsed > from->run_max)
@@ -470,7 +476,7 @@ void nxsched_update_critmon(FAR struct tcb_s *tcb)
   clock_t current = perf_gettime();
   clock_t elapsed = current - tcb->run_start;
 
-  if (tcb->task_state == TSTATE_TASK_RUNNING)
+  if (tcb->task_state == TSTATE_TASK_RUNNING && tcb->run_start != 0)
     {
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
       clock_t tick = elapsed * CLK_TCK / perf_getfreq();
@@ -486,5 +492,37 @@ void nxsched_update_critmon(FAR struct tcb_s *tcb)
           CHECK_THREAD(tcb->pid, elapsed);
         }
     }
+}
+#endif
+
+/****************************************************************************
+ * Name: nxsched_critmon_runtime
+ *
+ * Description:
+ *   Return the run time of a thread.  If the thread runs now, add the time
+ *   since it started to run.
+ *
+ ****************************************************************************/
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+clock_t nxsched_critmon_runtime(FAR struct tcb_s *tcb)
+{
+  irqstate_t flags = up_irq_save();
+  clock_t runtime = tcb->run_time;
+  clock_t start;
+
+  /* Read run_time before run_start: nxsched_switch_critmon() clears
+   * run_start before it adds the time slice to run_time.
+   */
+
+  SMP_RMB();
+  start = tcb->run_start;
+  if (start != 0 && tcb->task_state == TSTATE_TASK_RUNNING)
+    {
+      runtime += perf_gettime() - start;
+    }
+
+  up_irq_restore(flags);
+  return runtime;
 }
 #endif
