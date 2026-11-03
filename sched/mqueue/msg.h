@@ -120,6 +120,16 @@ void nxmsg_free(FAR struct msgq_s *msgq);
 void nxmsg_wakeup_senders(FAR struct msgq_s *msgq);
 
 /****************************************************************************
+ * Name: nxmsg_wakeup_receivers
+ *
+ * Description:
+ *   Wake up all tasks that wait in msgrcv() for a message in the queue
+ *
+ ****************************************************************************/
+
+void nxmsg_wakeup_receivers(FAR struct msgq_s *msgq);
+
+/****************************************************************************
  * Name: nxmsg_lookup
  *
  * Description:
