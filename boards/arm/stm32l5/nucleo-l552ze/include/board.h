@@ -154,6 +154,7 @@
 
 #define STM32_LPTIM1_CLKIN      STM32_HCLK_FREQUENCY
 #define STM32_LPTIM2_CLKIN      STM32_HCLK_FREQUENCY
+#define STM32_LPTIM3_CLKIN      STM32_PCLK1_FREQUENCY
 
 /* DMA Channel/Stream Selections ********************************************/
 
