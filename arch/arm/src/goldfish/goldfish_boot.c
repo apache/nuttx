@@ -47,6 +47,14 @@
 #include <nuttx/syslog/syslog_rpmsg.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The emulator (QEMU) counts the PMU cycle counter at 1 GHz */
+
+#define GOLDFISH_PMU_CYCLES_PER_SEC  1000000000
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -71,7 +79,7 @@ void arm_boot(void)
 #ifdef CONFIG_ARCH_PERF_EVENTS
   /* Perf init */
 
-  up_perf_init(0);
+  up_perf_init((void *)GOLDFISH_PMU_CYCLES_PER_SEC);
 #endif
 
   /* Set the page table for section */
