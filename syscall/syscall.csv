@@ -50,7 +50,7 @@
 "getppid","unistd.h","defined(CONFIG_SCHED_HAVE_PARENT)","pid_t"
 "getrlimit","sys/resource.h","","int","int","FAR struct rlimit *"
 "getsockname","sys/socket.h","defined(CONFIG_NET)","int","int","FAR struct sockaddr *","FAR socklen_t *"
-"getsockopt","sys/socket.h","defined(CONFIG_NET)","int","int","int","int","FAR void *","FAR socklen_t *"
+"getsockopt","sys/socket.h","defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS)","int","int","int","int","FAR void *","FAR socklen_t *"
 "gettimeofday","sys/time.h","","int","FAR struct timeval *","FAR struct timezone *"
 "getuid","unistd.h","defined(CONFIG_SCHED_USER_IDENTITY)","uid_t"
 "getumask","sys/stat.h","","mode_t"

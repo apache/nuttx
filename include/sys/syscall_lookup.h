@@ -392,7 +392,9 @@ SYSCALL_LOOKUP(munlockall,                 0)
   SYSCALL_LOOKUP(connect,                  3)
   SYSCALL_LOOKUP(getpeername,              3)
   SYSCALL_LOOKUP(getsockname,              3)
+#  ifdef CONFIG_NET_SOCKOPTS
   SYSCALL_LOOKUP(getsockopt,               5)
+#  endif
   SYSCALL_LOOKUP(listen,                   2)
   SYSCALL_LOOKUP(recv,                     4)
   SYSCALL_LOOKUP(recvfrom,                 6)
@@ -400,7 +402,9 @@ SYSCALL_LOOKUP(munlockall,                 0)
   SYSCALL_LOOKUP(send,                     4)
   SYSCALL_LOOKUP(sendto,                   6)
   SYSCALL_LOOKUP(sendmsg,                  3)
+#  ifdef CONFIG_NET_SOCKOPTS
   SYSCALL_LOOKUP(setsockopt,               5)
+#  endif
   SYSCALL_LOOKUP(shutdown,                 2)
   SYSCALL_LOOKUP(socket,                   3)
   SYSCALL_LOOKUP(socketpair,               4)
