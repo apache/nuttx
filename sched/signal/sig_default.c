@@ -222,9 +222,11 @@ static void nxsig_abnormal_termination(int signo)
 #ifdef HAVE_GROUP_MEMBERS
   /* Kill all of the children of the task.  This will not kill the currently
    * running task/pthread (this_task).  It will kill the main thread of the
-   * task group if this_task is a pthread.
+   * task group if this_task is a pthread.  Cancel them at once, as for a
+   * fatal exception: a thread can block or catch SIGTERM.
    */
 
+  rtcb->flags |= TCB_FLAG_FORCED_CANCEL;
   group_kill_children(rtcb);
 #endif
 

@@ -2100,6 +2100,8 @@ config GROUP_KILL_CHILDREN_TIMEOUT_MS
 		< 0 means wait until all the child thread exit
 		> 0 means wait timeout
 		= 0 means don't do kill signal
+		The default action of a signal (abnormal termination) does not
+		send the signal: it cancels the other threads at once.
 
 config PID_INITIAL_COUNT
 	int "Initial length of pid table"
