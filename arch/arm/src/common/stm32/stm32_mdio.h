@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_mdio.h
+ * arch/arm/src/common/stm32/stm32_mdio.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32_MDIO_H
-#define __ARCH_ARM_SRC_STM32H7_STM32_MDIO_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_MDIO_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_MDIO_H
 
 /****************************************************************************
  * Included Files
@@ -55,4 +55,4 @@
 
 struct mdio_bus_s *stm32_mdio_bus_initialize(void);
 
-#endif /* __ARCH_ARM_SRC_STM32H7_STM32_MDIO_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_MDIO_H */

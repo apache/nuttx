@@ -71,4 +71,4 @@ When a bus instance is no longer required, it should be deallocated by calling t
 
 This function takes the handle returned by ``mdio_register()`` and releases the associated bus instance.
 
-A (mostly) complete reference implementation for a lower-half driver is available in ``arch/arm/src/stm32h7/stm32_mdio.c``.
+A (mostly) complete reference implementation for a lower-half driver is available in ``arch/arm/src/common/stm32/stm32_mdio_v2.c``.

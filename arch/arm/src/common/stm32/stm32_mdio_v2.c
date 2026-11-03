@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_mdio.c
+ * arch/arm/src/common/stm32/stm32_mdio_v2.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -34,21 +34,14 @@
 
 #include "arm_internal.h"
 #include "stm32_mdio.h"
-#include "hardware/stm32_ethernet.h"
+#include "hardware/stm32_eth_v2.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_ETHMAC_REGDEBUG
-static uint32_t stm32_getreg(uint32_t addr);
-static void stm32_putreg(uint32_t val, uint32_t addr);
-static void stm32_checksetup(void);
-#else
-#  define stm32_getreg(addr)     getreg32(addr)
-#  define stm32_putreg(val,addr) putreg32(val,addr)
-#  define stm32_checksetup()
-#endif
+#define stm32_getreg(addr)     getreg32(addr)
+#define stm32_putreg(val,addr) putreg32(val,addr)
 
 /****************************************************************************
  * Private Types

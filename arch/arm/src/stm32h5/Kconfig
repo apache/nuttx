@@ -179,6 +179,7 @@ config STM32_STM32H57XXX
 	bool
 	default n
 	select STM32_HAVE_ETHERNET
+	select STM32_HAVE_IP_ETHMAC_V2
 
 config STM32_H56_H57_PERIPHERALS
 	bool
@@ -237,6 +238,7 @@ config STM32_STM32H563XX
 	bool
 	default n
 	select STM32_HAVE_ETHERNET
+	select STM32_HAVE_IP_ETHMAC_V2
 
 # Pin/package configurations
 

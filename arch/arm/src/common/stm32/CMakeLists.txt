@@ -95,6 +95,18 @@ if(CONFIG_STM32_SPI AND CONFIG_STM32_HAVE_IP_SPI_V5)
   list(APPEND SRCS stm32_spi_v5.c)
 endif()
 
+if(CONFIG_STM32_ETHMAC AND CONFIG_STM32_HAVE_IP_ETHMAC_V2)
+  list(APPEND SRCS stm32_eth_v2.c)
+endif()
+
+if(CONFIG_MDIO_BUS AND CONFIG_STM32_HAVE_IP_ETHMAC_V2)
+  if(CONFIG_STM32_ETH_MDIO_GPIO)
+    list(APPEND SRCS stm32_mdio_gpio.c)
+  else()
+    list(APPEND SRCS stm32_mdio_v2.c)
+  endif()
+endif()
+
 if(CONFIG_STM32_COMMON_M33)
   list(APPEND SRCS stm32_allocateheap_m33_v1.c stm32_irq_m33_v1.c
        stm32_start_m33_v1.c)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_ethernet.c
+ * arch/arm/src/common/stm32/stm32_eth_v2.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -62,31 +62,9 @@
 #include "arm_internal.h"
 
 #include "hardware/stm32_pinmap.h"
-#include "stm32_gpio.h"
-
-#ifdef CONFIG_STM32_HAVE_SBS
-#  include "hardware/stm32h7rsxx_sbs.h"
-#else
-#  include "hardware/stm32_syscfg.h"
-#endif
-
-/* The PHY interface selection lives in SBS on the H7R/S and in SYSCFG
- * everywhere else.  Only the names differ.
- */
-
-#ifdef CONFIG_STM32_HAVE_SBS
-#  define ETH_PHYSEL_REG   STM32_SBS_PMCR
-#  define ETH_PHYSEL_MASK  SBS_PMCR_ETH_PHYSEL_MASK
-#  define ETH_PHYSEL_MII   SBS_PMCR_ETH_PHYSEL_GMII_MII
-#  define ETH_PHYSEL_RMII  SBS_PMCR_ETH_PHYSEL_RMII
-#else
-#  define ETH_PHYSEL_REG   STM32_SYSCFG_PMC
-#  define ETH_PHYSEL_MASK  SYSCFG_PMC_EPIS_MASK
-#  define ETH_PHYSEL_MII   SYSCFG_PMC_EPIS_MII
-#  define ETH_PHYSEL_RMII  SYSCFG_PMC_EPIS_RMII
-#endif
-#include "stm32_rcc.h"
-#include "stm32_ethernet.h"
+#include "stm32.h"
+#include "stm32_eth.h"
+#include "stm32_eth_phyif.h"
 #include "stm32_uid.h"
 
 #ifdef CONFIG_STM32_ETH_MDIO_GPIO
@@ -99,7 +77,7 @@
 
 /* STM32_NETHERNET determines the number of physical interfaces that can
  * be supported by the hardware.  CONFIG_STM32_ETHMAC will defined if
- * any STM32H7 Ethernet support is enabled in the configuration.
+ * any STM32 Ethernet support is enabled in the configuration.
  */
 
 #if STM32_NETHERNET > 0 && defined(CONFIG_STM32_ETHMAC)
@@ -187,8 +165,27 @@
 #elif defined(CONFIG_ETH0_PHY_YT8512)
 #  define STM32_PHYID1       MII_PHYID1_YT8512
 #  define STM32_PHYID2       MII_PHYID2_YT8512
+#endif
+
+/* The IRQ of the MAC is ETH1 on parts that number their MACs */
+
+#if !defined(STM32_IRQ_ETH) && defined(STM32_IRQ_ETH1)
+#  define STM32_IRQ_ETH      STM32_IRQ_ETH1
+#endif
+
+/* The reset of the MAC on the RCC */
+
+#if defined(RCC_AHB1RSTR_ETH1MACRST)
+#  define STM32_RCC_ETH_RSTR STM32_RCC_AHB1RSTR
+#  define STM32_RCC_ETH_RST  RCC_AHB1RSTR_ETH1MACRST
+#elif defined(RCC_AHB1RSTR_ETHRST)
+#  define STM32_RCC_ETH_RSTR STM32_RCC_AHB1RSTR
+#  define STM32_RCC_ETH_RST  RCC_AHB1RSTR_ETHRST
+#elif defined(RCC_AHB5RSTR_ETH1RST)
+#  define STM32_RCC_ETH_RSTR STM32_RCC_AHB5RSTR
+#  define STM32_RCC_ETH_RST  RCC_AHB5RSTR_ETH1RST
 #else
-#  warning "No PHY specified!"
+#  error "Unknown RCC reset of the Ethernet MAC"
 #endif
 
 #ifndef CONFIG_STM32_PHYADDR
@@ -311,8 +308,6 @@
 #  endif
 #endif
 
-#undef CONFIG_STM32_ETH_HWCHECKSUM
-
 /* Add 4 to the configured buffer size to account for the 2 byte checksum
  * memory needed at the end of the maximum size packet.  Buffer sizes must
  * be an even multiple of 4, 8, or 16 bytes (depending on buswidth).  We
@@ -361,7 +356,13 @@
  * The TX and RX descriptors are 16 bytes in size
  */
 
-#define DMA_BUFFER_MASK    (ARMV7M_DCACHE_LINESIZE - 1)
+#ifdef ARMV8M_DCACHE_LINESIZE
+#  define ETH_DCACHE_LINESIZE ARMV8M_DCACHE_LINESIZE
+#else
+#  define ETH_DCACHE_LINESIZE ARMV7M_DCACHE_LINESIZE
+#endif
+
+#define DMA_BUFFER_MASK    (ETH_DCACHE_LINESIZE - 1)
 #define DMA_ALIGN_UP(n)    (((n) + DMA_BUFFER_MASK) & ~DMA_BUFFER_MASK)
 #define DMA_ALIGN_DOWN(n)  ((n) & ~DMA_BUFFER_MASK)
 
@@ -605,13 +606,15 @@
  * ETH_MTLTXQOMR_TSF      Bit 1: Transmit Store and Forward
  * ETH_MTLTXQOMR_TXQEN    Bits 2-3: Transmit Queue Enable
  * ETH_MTLTXQOMR_TTC      Bits 4-6: Transmit Threshold Control
- * ETH_MTLTXQOMR_TQS      Bits 16-24: Transmit Queue Size
+ *
+ * The queue size is left at its reset value: it is read-only on the MACs
+ * with one queue and the reset value splits the FIFO between the queues
+ * on the MACs with more.
  */
 
 #define MTLTXQOMR_CLEAR_MASK                            \
   (ETH_MTLTXQOMR_FTQ | ETH_MTLTXQOMR_TSF |              \
-   ETH_MTLTXQOMR_TXQEN_MASK | ETH_MTLTXQOMR_TTC_MASK |  \
-   ETH_MTLTXQOMR_TQS_MASK)
+   ETH_MTLTXQOMR_TXQEN_MASK | ETH_MTLTXQOMR_TTC_MASK)
 
 /* Clear the MTLRXQOMR bits that will be setup during MAC initialization
  * (or that are cleared unconditionally).  Per the reference manual, all
@@ -627,30 +630,25 @@
  * ETH_MTLRXQOMR_RFA_MASK    Bits 8-10: Threshold for Activating Flow Control
  * ETH_MTLRXQOMR_RFD_MASK    Bits 14-16: Threshold for Deactivating Flow
  *                                       Control
- * ETH_MTLRXQOMR_RQS_MASK    Bits 20-22: Receive Queue Size
+ *
+ * The queue size is left at its reset value, as for the TX queue.
  */
 
 #define MTLRXQOMR_CLEAR_MASK                            \
   (ETH_MTLRXQOMR_RTC_MASK | ETH_MTLRXQOMR_FUP |         \
    ETH_MTLRXQOMR_FEP | ETH_MTLRXQOMR_RSF |              \
    ETH_MTLRXQOMR_DIS_TCP_EF | ETH_MTLRXQOMR_EHFC |      \
-   ETH_MTLRXQOMR_RFA_MASK | ETH_MTLRXQOMR_RFD_MASK |    \
-   ETH_MTLRXQOMR_RQS_MASK)
+   ETH_MTLRXQOMR_RFA_MASK | ETH_MTLRXQOMR_RFD_MASK)
+
+/* Store and forward is needed by the checksum offload engine */
 
 #define MTLTXQOMR_SET_MASK                                      \
-  ((0xd << ETH_MTLTXQOMR_TQS_SHIFT) | ETH_MTLTXQOMR_TTC_64 |    \
+  (ETH_MTLTXQOMR_TTC_64 | ETH_MTLTXQOMR_TSF |                   \
    ETH_MTLTXQOMR_TXQEN_ENABLED | ETH_MTLTXQOMR_FTQ)
 
 /* TODO: Check whether use flow control (bits RFD, RFA EHFC) */
 
-#define MTLRXQOMR_SET_MASK                                      \
-  ((0x7 << ETH_MTLRXQOMR_RQS_SHIFT) | ETH_MTLRXQOMR_RTC_64)
-
-#ifdef CONFIG_STM32_ETH_HWCHECKSUM
-/* TODO */
-
-#  error CONFIG_STM32_ETH_HWCHECKSUM not supported
-#endif
+#define MTLRXQOMR_SET_MASK  (ETH_MTLRXQOMR_RTC_64)
 
 /* Clear the DMAMR bits that will be setup during MAC initialization (or that
  * are cleared unconditionally).  Per the reference manual, all reserved bits
@@ -816,16 +814,16 @@ struct stm32_ethmac_s
 /* Descriptor allocations */
 
 static union stm32_desc_u g_rxtable[RXTABLE_SIZE]
-aligned_data(ARMV7M_DCACHE_LINESIZE);
+aligned_data(ETH_DCACHE_LINESIZE);
 static union stm32_desc_u g_txtable[TXTABLE_SIZE]
-aligned_data(ARMV7M_DCACHE_LINESIZE);
+aligned_data(ETH_DCACHE_LINESIZE);
 
 /* Buffer allocations */
 
 static uint8_t g_rxbuffer[RXBUFFER_ALLOC]
-aligned_data(ARMV7M_DCACHE_LINESIZE);
+aligned_data(ETH_DCACHE_LINESIZE);
 static uint8_t g_txbuffer[TXBUFFER_ALLOC]
-aligned_data(ARMV7M_DCACHE_LINESIZE);
+aligned_data(ETH_DCACHE_LINESIZE);
 
 /* These are the pre-allocated Ethernet device structures */
 
@@ -1014,7 +1012,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  ninfo("%08x->%08x\n", addr, val);
+  ninfo("%08" PRIx32 "->%08" PRIx32 "\n", addr, val);
   return val;
 }
 #endif
@@ -1041,7 +1039,7 @@ static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  ninfo("%08x<-%08x\n", addr, val);
+  ninfo("%08" PRIx32 "<-%08" PRIx32 "\n", addr, val);
 
   /* Write the value */
 
@@ -1315,9 +1313,16 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
       ninfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
-      /* Set the first segment bit in the first TX descriptor */
+      /* Set the first segment bit in the first TX descriptor.
+       * If hardware checksum is enabled, IP header + payload +
+       * pseudo-header checksum will be computed.
+       */
 
+#ifdef CONFIG_STM32_ETH_HWCHECKSUM
+      txdesc->des3 = ETH_TDES3_RD_FD | ETH_TDES3_RD_CIC_ALL;
+#else
       txdesc->des3 = ETH_TDES3_RD_FD;
+#endif
 
       /* Set up all but the last TX descriptor */
 
@@ -1428,10 +1433,16 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
       /* The single descriptor is both the first and last segment. */
 
       /* Set OWN bit of the TX descriptor des3.  This gives the buffer to
-       * Ethernet DMA
+       * Ethernet DMA. If hardware checksum is enabled, IP header + payload +
+       * pseudo-header checksum will be computed.
        */
 
+#ifdef CONFIG_STM32_ETH_HWCHECKSUM
+      txdesc->des3 = (ETH_TDES3_RD_OWN | ETH_TDES3_RD_LD | ETH_TDES3_RD_FD |
+                      ETH_TDES3_RD_CIC_ALL);
+#else
       txdesc->des3 = (ETH_TDES3_RD_OWN | ETH_TDES3_RD_LD | ETH_TDES3_RD_FD);
+#endif
 
       /* Flush the contents of the modified TX descriptor into physical
        * memory.
@@ -2047,6 +2058,8 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 
           else
             {
+              bool err = ((rxdesc->des3 & ETH_RDES3_WB_ES) != 0);
+
               priv->segments++;
 
               /* Check if there is only one segment in the frame */
@@ -2063,9 +2076,29 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
               ninfo("rxhead: %p rxcurr: %p segments: %d\n",
                     priv->rxhead, priv->rxcurr, priv->segments);
 
+#ifdef CONFIG_STM32_ETH_HWCHECKSUM
+              /* Check if any errors are reported in the frame.
+               * If hardware checksum is enabled, check if:
+               * - RDES1 is valid
+               * - IP checksum was not bypassed
+               * - IP hdr checksum error or IP payload checksum error is set
+               *
+               * By the previous checks the Last Descriptor is set.
+               * RS1V is valid.
+               */
+
+              if (!err && (rxdesc->des3 & ETH_RDES3_WB_RS1V) != 0 &&
+                  (rxdesc->des1 & ETH_RDES1_WB_IPCB) == 0 &&
+                  (rxdesc->des1 & (ETH_RDES1_WB_IPHE |
+                                   ETH_RDES1_WB_IPCE)) != 0)
+                {
+                  err = true;
+                }
+#endif
+
               /* Check if any errors are reported in the frame */
 
-              if ((rxdesc->des3 & ETH_RDES3_WB_ES) == 0)
+              if (!err)
                 {
                   struct net_driver_s *dev = &priv->dev;
 
@@ -3445,9 +3478,7 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
 static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
 #ifndef CONFIG_STM32_NO_PHY
-#ifdef CONFIG_ARCH_PHY_INTERRUPT
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;
-#endif
   int ret;
 
   switch (cmd)
@@ -3720,6 +3751,9 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       ninfo("Phy reset in %d ms\n", PHY_RESET_DELAY - to);
     }
 
+#ifdef STM32_PHYID1
+  /* Check the identifier of the PHY, if the configuration names one */
+
   ret = mdio_read(priv->mdio,
     CONFIG_STM32_PHYADDR, MII_PHYID1, &phyval);
 
@@ -3755,6 +3789,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
     }
 
   ninfo("MII_PHYID2: phyval: %u ret: %d\n", phyval, ret);
+#endif
 
 #ifdef CONFIG_STM32_ETHMAC_REGDEBUG
   stm32_phyregdump(priv);
@@ -3985,10 +4020,10 @@ static inline void stm32_selectmii(void)
 {
   uint32_t regval;
 
-  regval  = getreg32(ETH_PHYSEL_REG);
-  regval &= ~ETH_PHYSEL_MASK;
-  regval |= ETH_PHYSEL_MII;
-  putreg32(regval, ETH_PHYSEL_REG);
+  regval  = getreg32(STM32_ETH_PHYIF_REG);
+  regval &= ~STM32_ETH_PHYIF_MASK;
+  regval |= STM32_ETH_PHYIF_MII;
+  putreg32(regval, STM32_ETH_PHYIF_REG);
 }
 #endif
 
@@ -4011,10 +4046,10 @@ static inline void stm32_selectrmii(void)
 {
   uint32_t regval;
 
-  regval  = getreg32(ETH_PHYSEL_REG);
-  regval &= ~ETH_PHYSEL_MASK;
-  regval |= ETH_PHYSEL_RMII;
-  putreg32(regval, ETH_PHYSEL_REG);
+  regval  = getreg32(STM32_ETH_PHYIF_REG);
+  regval &= ~STM32_ETH_PHYIF_MASK;
+  regval |= STM32_ETH_PHYIF_RMII;
+  putreg32(regval, STM32_ETH_PHYIF_REG);
 }
 #endif
 
@@ -4661,14 +4696,14 @@ static void stm32_ethreset(struct stm32_ethmac_s *priv)
   uint32_t regval;
   volatile uint32_t timeout;
 
-  /* Reset the Ethernet on the AHB1 bus */
+  /* Reset the Ethernet on the AHB bus */
 
-  regval  = stm32_getreg(STM32_RCC_AHB1RSTR);
-  regval |= RCC_AHB1RSTR_ETH1MACRST;
-  stm32_putreg(regval, STM32_RCC_AHB1RSTR);
+  regval  = stm32_getreg(STM32_RCC_ETH_RSTR);
+  regval |= STM32_RCC_ETH_RST;
+  stm32_putreg(regval, STM32_RCC_ETH_RSTR);
 
-  regval &= ~RCC_AHB1RSTR_ETH1MACRST;
-  stm32_putreg(regval, STM32_RCC_AHB1RSTR);
+  regval &= ~STM32_RCC_ETH_RST;
+  stm32_putreg(regval, STM32_RCC_ETH_RSTR);
 
   /* Perform a software reset by setting the SR bit in the DMAMR register.
    * This Resets all MAC subsystem internal registers and logic.  After this
@@ -4767,6 +4802,19 @@ static int stm32_macconfig(struct stm32_ethmac_s *priv)
   regval &= ~MTLRXQOMR_CLEAR_MASK;
   regval |= MTLRXQOMR_SET_MASK;
   stm32_putreg(regval, STM32_ETH_MTLRXQOMR);
+
+  /* A MAC with more than one RX queue starts with all of them disabled.
+   * Enable queue 0, that the MTL maps to DMA channel 0, for generic
+   * traffic.
+   */
+
+  if ((stm32_getreg(STM32_ETH_MACHWF2R) & ETH_MACHWF2R_RXQCNT_MASK) != 0)
+    {
+      regval  = stm32_getreg(STM32_ETH_MACRXQC0R);
+      regval &= ~ETH_MACRXQC0R_RXQ0EN_MASK;
+      regval |= ETH_MACRXQC0R_RXQ0EN_GT;
+      stm32_putreg(regval, STM32_ETH_MACRXQC0R);
+    }
 
   /* MAC Configuration */
 

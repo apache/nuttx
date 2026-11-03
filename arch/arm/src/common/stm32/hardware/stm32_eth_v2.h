@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/hardware/stm32_ethernet.h
+ * arch/arm/src/common/stm32/hardware/stm32_eth_v2.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_ETHERNET_H
-#define __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_ETHERNET_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_ETH_V2_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_ETH_V2_H
 
 /****************************************************************************
  * Included Files
@@ -29,11 +29,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include "chip.h"
 
-/* Ethernet support only on STM32H563/573 chips. */
+/* Synopsys Ethernet QoS MAC of STM32H5, STM32H7 and STM32N6 */
 
-#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
+#if STM32_NETHERNET > 0
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -52,14 +52,32 @@
 #define STM32_ETH_MACVTR_OFFSET      0x0050 /* Ethernet MAC VLAN tag register */
 #define STM32_ETH_MACQTXFCR_OFFSET   0x0070 /* Ethernet MAC Tx Queue flow control register */
 #define STM32_ETH_MACRXFCR_OFFSET    0x0090 /* Ethernet MAC Tx Queue flow control register */
+#define STM32_ETH_MACRXQC0R_OFFSET   0x00A0 /* Ethernet MAC Rx queue control 0 register */
 
 #define STM32_ETH_MACISR_OFFSET      0x00B0 /* Ethernet MAC interrupt status register */
 #define STM32_ETH_MACIER_OFFSET      0x00B4 /* Ethernet MAC interrupt enable register */
+#define STM32_ETH_MACHWF2R_OFFSET    0x0124 /* Ethernet MAC HW feature 2 register */
 
 #define STM32_ETH_MACMDIOAR_OFFSET   0x0200 /* Ethernet MAC MDIO address register */
 #define STM32_ETH_MACMDIODR_OFFSET   0x0204 /* Ethernet MAC MDIO data register */
 #define STM32_ETH_MACA0HR_OFFSET     0x0300 /* Address 0 high register */
 #define STM32_ETH_MACA0LR_OFFSET     0x0304 /* Address 0 low register */
+
+/* MAC Timestamp Registers */
+
+#define STM32_ETH_MACTSCR_OFFSET    0x0B00 /* Ethernet MAC timestamp control register */
+#define STM32_ETH_MACSSIR_OFFSET    0x0B04 /* Ethernet MAC sub-second increment register */
+#define STM32_ETH_MACSTSR_OFFSET    0x0B08 /* Ethernet MAC system time seconds register */
+#define STM32_ETH_MACSTNR_OFFSET    0x0B0C /* Ethernet MAC system time nanoseconds register */
+#define STM32_ETH_MACSTSUR_OFFSET   0x0B10 /* Ethernet MAC system time seconds update register */
+#define STM32_ETH_MACSTNUR_OFFSET   0x0B14 /* Ethernet MAC system time nanoseconds update register */
+#define STM32_ETH_MACTSAR_OFFSET    0x0B18 /* Ethernet MAC timestamp addend register */
+#define STM32_ETH_MACTSSR_OFFSET    0x0B20 /* Ethernet MAC timestamp status register */
+#define STM32_ETH_MACPPSCR_OFFSET   0x0B70 /* Ethernet MAC PPS control register */
+#define STM32_ETH_MACPPSTTSR_OFFSET 0x0B80 /* Ethernet MAC PPS target time seconds register */
+#define STM32_ETH_MACPPSTTNR_OFFSET 0x0B84 /* Ethernet MAC PPS target time nanoseconds register */
+#define STM32_ETH_MACPPSIR_OFFSET   0x0B88 /* Ethernet MAC PPS interval register */
+#define STM32_ETH_MACPPSWR_OFFSET   0x0B8C /* Ethernet MAC PPS width register */
 
 /* MTL Registers */
 
@@ -108,13 +126,31 @@
 #define STM32_ETH_MACVTR             (STM32_EMAC_BASE+STM32_ETH_MACVTR_OFFSET)
 #define STM32_ETH_MACQTXFCR          (STM32_EMAC_BASE+STM32_ETH_MACQTXFCR_OFFSET)
 #define STM32_ETH_MACRXFCR           (STM32_EMAC_BASE+STM32_ETH_MACRXFCR_OFFSET)
+#define STM32_ETH_MACRXQC0R          (STM32_EMAC_BASE+STM32_ETH_MACRXQC0R_OFFSET)
 #define STM32_ETH_MACISR             (STM32_EMAC_BASE+STM32_ETH_MACISR_OFFSET)
 #define STM32_ETH_MACIER             (STM32_EMAC_BASE+STM32_ETH_MACIER_OFFSET)
+#define STM32_ETH_MACHWF2R           (STM32_EMAC_BASE+STM32_ETH_MACHWF2R_OFFSET)
 
 #define STM32_ETH_MACMDIOAR          (STM32_EMAC_BASE+STM32_ETH_MACMDIOAR_OFFSET)
 #define STM32_ETH_MACMDIODR          (STM32_EMAC_BASE+STM32_ETH_MACMDIODR_OFFSET)
 #define STM32_ETH_MACA0LR            (STM32_EMAC_BASE+STM32_ETH_MACA0LR_OFFSET)
 #define STM32_ETH_MACA0HR            (STM32_EMAC_BASE+STM32_ETH_MACA0HR_OFFSET)
+
+/* MAC Timestamp Registers */
+
+#define STM32_ETH_MACTSCR           (STM32_EMAC_BASE+STM32_ETH_MACTSCR_OFFSET)
+#define STM32_ETH_MACSSIR           (STM32_EMAC_BASE+STM32_ETH_MACSSIR_OFFSET)
+#define STM32_ETH_MACSTSR           (STM32_EMAC_BASE+STM32_ETH_MACSTSR_OFFSET)
+#define STM32_ETH_MACSTNR           (STM32_EMAC_BASE+STM32_ETH_MACSTNR_OFFSET)
+#define STM32_ETH_MACSTSUR          (STM32_EMAC_BASE+STM32_ETH_MACSTSUR_OFFSET)
+#define STM32_ETH_MACSTNUR          (STM32_EMAC_BASE+STM32_ETH_MACSTNUR_OFFSET)
+#define STM32_ETH_MACTSAR           (STM32_EMAC_BASE+STM32_ETH_MACTSAR_OFFSET)
+#define STM32_ETH_MACTSSR           (STM32_EMAC_BASE+STM32_ETH_MACTSSR_OFFSET)
+#define STM32_ETH_MACPPSCR          (STM32_EMAC_BASE+STM32_ETH_MACPPSCR_OFFSET)
+#define STM32_ETH_MACPPSTTSR        (STM32_EMAC_BASE+STM32_ETH_MACPPSTTSR_OFFSET)
+#define STM32_ETH_MACPPSTTNR        (STM32_EMAC_BASE+STM32_ETH_MACPPSTTNR_OFFSET)
+#define STM32_ETH_MACPPSIR          (STM32_EMAC_BASE+STM32_ETH_MACPPSIR_OFFSET)
+#define STM32_ETH_MACPPSWR          (STM32_EMAC_BASE+STM32_ETH_MACPPSWR_OFFSET)
 
 /* MTL Registers */
 
@@ -180,6 +216,7 @@
 #define ETH_MACCR_LM                 (1 << 12) /* Bit 12: Loopback mode */
 #define ETH_MACCR_DM                 (1 << 13) /* Bit 13: Duplex mode */
 #define ETH_MACCR_FES                (1 << 14) /* Bit 14: Fast Ethernet speed */
+#define ETH_MACCR_PS                 (1 << 15) /* Bit 15: Port select (10/100 vs 1000) */
 #define ETH_MACCR_JE                 (1 << 16) /* Bit 16: Jumbo packet enable */
 #define ETH_MACCR_JD                 (1 << 17) /* Bit 17: Jabber disable */
 #define ETH_MACCR_WD                 (1 << 19) /* Bit 19: Watchdog disable */
@@ -195,6 +232,17 @@
 #define ETH_MACCR_SARC_SHIFT         (28)      /* Bits 28-30: Source Address Insertion or Replacement Control */
 #define ETH_MACCR_SARC_MASK          (7 << ETH_MACCR_SARC_SHIFT)
 #define ETH_MACCR_ARPEN              (1 << 31) /* Bit 31: ARP Offload Enable */
+
+/* Ethernet MAC Rx queue control 0 register */
+
+#define ETH_MACRXQC0R_RXQ0EN_SHIFT   (0)       /* Bits 0-1: Receive queue 0 enable */
+#define ETH_MACRXQC0R_RXQ0EN_MASK    (3 << ETH_MACRXQC0R_RXQ0EN_SHIFT)
+#  define ETH_MACRXQC0R_RXQ0EN_GT    (2 << ETH_MACRXQC0R_RXQ0EN_SHIFT) /* Generic traffic */
+
+/* Ethernet MAC HW feature 2 register */
+
+#define ETH_MACHWF2R_RXQCNT_SHIFT    (0)       /* Bits 0-3: Number of Rx queues - 1 */
+#define ETH_MACHWF2R_RXQCNT_MASK     (0xf << ETH_MACHWF2R_RXQCNT_SHIFT)
 
 /* Ethernet MAC frame filter register */
 
@@ -309,9 +357,76 @@
 #define STM32_ETH_MACAxHR_SA          (1 << 30) /* Bit 30: Source Address */
 #define STM32_ETH_MACAxHR_AE          (1 << 31) /* Bit 31: Address Enable */
 
+/* Ethernet MAC timestamp control register */
+
+#define ETH_MACTSCR_TSENA           (1 << 0)  /* Bit 0: Enable timestamp */
+#define ETH_MACTSCR_TSCFUPDT        (1 << 1)  /* Bit 1: Fine or coarse timestamp update */
+#define ETH_MACTSCR_TSINIT          (1 << 2)  /* Bit 2: Initialize timestamp */
+#define ETH_MACTSCR_TSUPDT          (1 << 3)  /* Bit 3: Update timestamp */
+#define ETH_MACTSCR_TSADDREG        (1 << 5)  /* Bit 5: Update addend register */
+#define ETH_MACTSCR_TSENALL         (1 << 8)  /* Bit 8: Enable timestamp for all packets */
+#define ETH_MACTSCR_TSCTRLSSR       (1 << 9)  /* Bit 9: Timestamp digital or binary rollover control */
+#define ETH_MACTSCR_TSVER2ENA       (1 << 10) /* Bit 10: Enable PTP packet processing for version 2 format */
+#define ETH_MACTSCR_TSIPENA         (1 << 11) /* Bit 11: Enable processing of PTP over Ethernet packets */
+#define ETH_MACTSCR_TSIPV6ENA       (1 << 12) /* Bit 12: Enable processing of PTP packets sent over IPv6-UDP */
+#define ETH_MACTSCR_TSIPV4ENA       (1 << 13) /* Bit 13: Enable processing of PTP packets sent over IPv4-UDP */
+#define ETH_MACTSCR_TSEVNTENA       (1 << 14) /* Bit 14: Enable timestamp snapshot for event messages */
+#define ETH_MACTSCR_TSMSTRENA       (1 << 15) /* Bit 15: Enable snapshot for messages relevant to master */
+#define ETH_MACTSCR_SNAPTYPSEL_SHIFT (16)     /* Bits 16-17: Select PTP packets for taking snapshots */
+#define ETH_MACTSCR_SNAPTYPSEL_MASK (0x3 << ETH_MACTSCR_SNAPTYPSEL_SHIFT)
+#  define ETH_MACTSCR_SNAPTYPSEL_1 (1 << ETH_MACTSCR_SNAPTYPSEL_SHIFT)
+#define ETH_MACTSCR_TSENMACADDR     (1 << 18) /* Bit 18: Enable MAC address for PTP packet filtering */
+#define ETH_MACTSCR_CSC             (1 << 19) /* Bit 19: Checksum correction for PTP over UDP/IPv4 (one-step) */
+#define ETH_MACTSCR_TXTSSTSM        (1 << 24) /* Bit 24: Transmit timestamp status mode */
+
+/* Ethernet MAC sub-second increment register */
+
+#define ETH_MACSSIR_SNSINC_SHIFT    (8)       /* Bits 8-15: Sub-nanosecond increment value */
+#define ETH_MACSSIR_SNSINC_MASK     (0xFF << ETH_MACSSIR_SNSINC_SHIFT)
+#define ETH_MACSSIR_SSINC_SHIFT     (16)      /* Bits 16-23: Sub-second increment value */
+#define ETH_MACSSIR_SSINC_MASK      (0xFF << ETH_MACSSIR_SSINC_SHIFT)
+
+/* Ethernet MAC system time nanoseconds register */
+
+#define ETH_MACSTNR_TSSS_SHIFT      (0)       /* Bits 0-30: Timestamp sub-seconds */
+#define ETH_MACSTNR_TSSS_MASK       (0x7FFFFFFF << ETH_MACSTNR_TSSS_SHIFT)
+
+/* Ethernet MAC system time nanoseconds update register */
+
+#define ETH_MACSTNUR_TSSS_SHIFT     (0)       /* Bits 0-30: Timestamp sub-seconds */
+#define ETH_MACSTNUR_TSSS_MASK      (0x7FFFFFFF << ETH_MACSTNUR_TSSS_SHIFT)
+#define ETH_MACSTNUR_ADDSUB         (1 << 31) /* Bit 31: Add or subtract time */
+
+/* Ethernet MAC timestamp status register */
+
+#define ETH_MACTSSR_TSSOVF          (1 << 0)  /* Bit 0: Timestamp seconds overflow */
+#define ETH_MACTSSR_TSTARGT0        (1 << 1)  /* Bit 1: Timestamp target time reached */
+#define ETH_MACTSSR_AUXTSTRIG       (1 << 2)  /* Bit 2: Auxiliary timestamp trigger snapshot */
+#define ETH_MACTSSR_TSTRGTERR0      (1 << 3)  /* Bit 3: Timestamp target time error */
+#define ETH_MACTSSR_TXTSSIS         (1 << 15) /* Bit 15: Tx timestamp status interrupt status */
+#define ETH_MACTSSR_ATSSTN_SHIFT    (16)      /* Bits 16-19: Auxiliary timestamp snapshot trigger identifier */
+#define ETH_MACTSSR_ATSSTN_MASK     (0xF << ETH_MACTSSR_ATSSTN_SHIFT)
+#define ETH_MACTSSR_ATSSTM          (1 << 24) /* Bit 24: Auxiliary timestamp snapshot trigger missed */
+#define ETH_MACTSSR_ATSNS_SHIFT     (25)      /* Bits 25-29: Number of auxiliary timestamp snapshots */
+#define ETH_MACTSSR_ATSNS_MASK      (0x1F << ETH_MACTSSR_ATSNS_SHIFT)
+
+/* Ethernet MAC PPS control register */
+
+#define ETH_MACPPSCR_PPSCTRL_SHIFT  (0)       /* Bits 0-3: PPS output frequency control or command */
+#define ETH_MACPPSCR_PPSCTRL_MASK   (0xF << ETH_MACPPSCR_PPSCTRL_SHIFT)
+#  define ETH_MACPPSCR_PPSCMD_START_TRAIN (2 << ETH_MACPPSCR_PPSCTRL_SHIFT)
+#  define ETH_MACPPSCR_PPSCMD_STOP_NOW    (5 << ETH_MACPPSCR_PPSCTRL_SHIFT)
+#define ETH_MACPPSCR_PPSEN0         (1 << 4)  /* Bit 4: Flexible PPS output mode enable */
+
+/* Ethernet MAC PPS target time nanoseconds register */
+
+#define ETH_MACPPSTTNR_TTSL0_SHIFT  (0)       /* Bits 0-30: Target time low */
+#define ETH_MACPPSTTNR_TTSL0_MASK   (0x7FFFFFFF << ETH_MACPPSTTNR_TTSL0_SHIFT)
+#define ETH_MACPPSTTNR_TRGTBUSY0    (1 << 31) /* Bit 31: PPS target time register busy */
+
 /* Ethernet MTL registers */
 
-#define ETH_MTLOMR_DTXSTS             (1 << 0)   /* Bit 0: Drop Transmit Status */
+#define ETH_MTLOMR_DTXSTS             (1 << 1)   /* Bit 1: Drop Transmit Status */
 #define ETH_MTLOMR_CNTPRST            (1 << 8)   /* Bit 8: Counters Preset */
 #define ETH_MTLOMR_CNTCLR             (1 << 9)   /* Bit 9: Counters Reset */
 
@@ -321,8 +436,8 @@
 #define ETH_MTLTXQOMR_TSF             (1 << 1)   /* Bit 1: Transmit Store and Forward */
 #define ETH_MTLTXQOMR_TXQEN_SHIFT     (2)        /* Bits 2-3: Transmit Queue Enable */
 #define ETH_MTLTXQOMR_TXQEN_MASK      (0x3 << ETH_MTLTXQOMR_TXQEN_SHIFT)
-#define ETH_MTLTXQOMR_TXQEN_DISABLED  (0)
-#define ETH_MTLTXQOMR_TXQEN_ENABLED   (2)
+#define ETH_MTLTXQOMR_TXQEN_DISABLED  (0 << ETH_MTLTXQOMR_TXQEN_SHIFT)
+#define ETH_MTLTXQOMR_TXQEN_ENABLED   (2 << ETH_MTLTXQOMR_TXQEN_SHIFT)
 
 #define ETH_MTLTXQOMR_TTC_SHIFT       (4)        /* Bits 4-6: Transmit Threshold Control */
 #define ETH_MTLTXQOMR_TTC_MASK        (0x7 << ETH_MTLTXQOMR_TTC_SHIFT)
@@ -411,10 +526,13 @@
 #define ETH_DMAMR_INTM_SHIFT   (16)    /* Bits 16-17: Interrupt Mode */
 #define ETH_DMAMR_INTM_MASK    (0x3 << ETH_DMAMR_INTM_SHIFT)
 
-#define STM32_ETH_DMASBMR_FB   (1 << 0)  /* Bit 0: Fixed Burst Length */
-#define STM32_ETH_DMASBMR_AAL  (1 << 12) /* Bit 12: Address-Aligned Beats */
-#define STM32_ETH_DMASBMR_MB   (1 << 14) /* Bit 14: Mixed Burst */
-#define STM32_ETH_DMASBMR_RB   (1 << 15) /* Bit 15: Rebuild INCRx Burst */
+#define STM32_ETH_DMASBMR_FB     (1 << 0)  /* Bit 0: Fixed Burst Length */
+#define STM32_ETH_DMASBMR_BLEN4  (1 << 1)  /* Bit 1: AXI burst length 4 */
+#define STM32_ETH_DMASBMR_BLEN8  (1 << 2)  /* Bit 2: AXI burst length 8 */
+#define STM32_ETH_DMASBMR_BLEN16 (1 << 3)  /* Bit 3: AXI burst length 16 */
+#define STM32_ETH_DMASBMR_AAL    (1 << 12) /* Bit 12: Address-Aligned Beats */
+#define STM32_ETH_DMASBMR_MB     (1 << 14) /* Bit 14: Mixed Burst */
+#define STM32_ETH_DMASBMR_RB     (1 << 15) /* Bit 15: Rebuild INCRx Burst */
 
 #define ETH_DMACIER_TIE              (1 << 0)  /* Bit 0:  Transmit interrupt enable */
 #define ETH_DMACIER_TXSE             (1 << 1)  /* Bit 1:  Transmit process stopped interrupt enable */
@@ -502,11 +620,10 @@
 
 #define ETH_TDES3_RD_CIC_TPL_SHIFT   (16) /* Checksum Insertion Control or TCP Payload Length */
 #define ETH_TDES3_RD_CIC_TPL_MASK    (0x3 << ETH_TDES3_RD_CIC_TPL_SHIFT)
-#  define ETH_TDES3_RD_CIC_DISABLED  (0x0 << ETH_TDES3_RD_CIC_TPL_SHIFT) /* Checksum insertion disabled */
-#  define ETH_TDES3_RD_CIC_IPHDR     (0x1 << ETH_TDES3_RD_CIC_TPL_SHIFT) /* Only IP header checksum calculation and insertion are enabled */
-#  define ETH_TDES3_RD_CIC_IPHDR_PL  (0x2 << ETH_TDES3_RD_CIC_TPL_SHIFT) /* IP header + payload checksum and insertion, pseudo-header checksum is not calculated in hardware. */
-#  define ETH_TDES3_RD_CIC_ALL       (0x3 << ETH_TDES3_RD_CIC_TPL_SHIFT) /* IP header + payload + pseudo-header computed by hardware */
-
+#  define ETH_TDES3_RD_CIC_DISABLED (0x0 << ETH_TDES3_RD_CIC_TPL_SHIFT)
+#  define ETH_TDES3_RD_CIC_IPHDR    (0x1 << ETH_TDES3_RD_CIC_TPL_SHIFT)
+#  define ETH_TDES3_RD_CIC_IPHDR_PL (0x2 << ETH_TDES3_RD_CIC_TPL_SHIFT)
+#  define ETH_TDES3_RD_CIC_ALL      (0x3 << ETH_TDES3_RD_CIC_TPL_SHIFT)
 #define ETH_TDES3_RD_TSE             (1 << 18) /* Bit 18: TCP Segmentation Enable */
 
 #define ETH_TDES3_RD_THL_SHIFT       (19) /* TCP Header Length */
@@ -681,5 +798,5 @@ struct eth_desc_s
  ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32_STM32H56XXX || CONFIG_STM32_STM32H57XXX */
-#endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_ETHERNET_H */
+#endif /* STM32_NETHERNET > 0 */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_ETH_V2_H */
