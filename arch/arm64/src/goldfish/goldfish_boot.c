@@ -175,7 +175,7 @@ void arm64_chip_boot(void)
 #endif
 
 #ifdef CONFIG_ARCH_PERF_EVENTS
-  up_perf_init((void *)CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC);
+  up_perf_init((void *)GOLDFISH_PMU_CYCLES_PER_SEC);
 #endif
 }
 
