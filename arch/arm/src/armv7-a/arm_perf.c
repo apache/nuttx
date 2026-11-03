@@ -40,6 +40,17 @@
 static unsigned long g_cpu_freq = ULONG_MAX;
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void arm_perf_start(void)
+{
+  cp15_pmu_uer(PMUER_UME);
+  cp15_pmu_pmcr(PMCR_E);
+  cp15_pmu_cesr(PMCESR_CCES);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -74,10 +85,24 @@ void up_perf_init(void *arg)
     }
 #endif
 
-  cp15_pmu_uer(PMUER_UME);
-  cp15_pmu_pmcr(PMCR_E);
-  cp15_pmu_cesr(PMCESR_CCES);
+  arm_perf_start();
 }
+
+/****************************************************************************
+ * Name: arm_perf_secondary_init
+ *
+ * Description:
+ *   Start the cycle counter of a secondary CPU.  up_perf_init() runs on
+ *   the boot CPU only, and the cycle counter is a register of each CPU.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_PERF_EVENTS)
+void arm_perf_secondary_init(void)
+{
+  arm_perf_start();
+}
+#endif
 
 unsigned long up_perf_getfreq(void)
 {
