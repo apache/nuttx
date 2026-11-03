@@ -38,7 +38,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC  62500000
+/* QEMU counts the PMU cycle counter (PMCCNTR_EL0) at 1 GHz */
+
+#define CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC  1000000000
 
 /****************************************************************************
  * Public Function Prototypes
