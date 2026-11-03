@@ -222,6 +222,11 @@
 #define STM32_TIM16_CLKIN    (STM32_PCLK2_FREQUENCY)
 #define STM32_TIM17_CLKIN    (STM32_PCLK2_FREQUENCY)
 
+/* LPTIM kernel clocks (RCC_CCIPR LPTIMxSEL reset values): PCLK1 */
+
+#define STM32_LPTIM1_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_LPTIM2_CLKIN   (STM32_PCLK1_FREQUENCY)
+
 /* Higher SYSCLK requires more flash wait states. */
 
 #define BOARD_FLASH_WAITSTATES      3
