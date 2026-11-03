@@ -48,10 +48,6 @@ if(CONFIG_LCD_SSD1351)
   list(APPEND SRCS stm32_ssd1351.c)
 endif()
 
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_timer.c)
-endif()
-
 if(CONFIG_BOARDCTL_UNIQUEID)
   list(APPEND SRCS stm32_uid.c)
 endif()
