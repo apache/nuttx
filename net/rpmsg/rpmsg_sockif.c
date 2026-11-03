@@ -144,6 +144,8 @@ struct rpmsg_socket_conn_s
 
   uint32_t                       recvpos;
   uint32_t                       lastpos;
+
+  uint8_t                        priority;
 };
 
 /****************************************************************************
@@ -276,6 +278,7 @@ static FAR struct rpmsg_socket_conn_s *rpmsg_socket_alloc(void)
 
   conn->recvsize = CONFIG_NET_RPMSG_RXBUF_SIZE;
   conn->crefs = 1;
+  conn->priority = RPMSG_PRIO_DEFAULT;
   return conn;
 }
 
@@ -539,6 +542,7 @@ static void rpmsg_socket_device_created(FAR struct rpmsg_device *rdev,
       rpmsg_create_ept(&conn->ept, rdev, namebuf,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        rpmsg_socket_ept_cb, rpmsg_socket_ns_unbind);
+      rpmsg_set_priority(&conn->ept, conn->priority);
     }
 }
 
@@ -594,6 +598,19 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
   ret = rpmsg_create_ept(&new->ept, rdev, name,
                          RPMSG_ADDR_ANY, dest,
                          rpmsg_socket_ept_cb, rpmsg_socket_ns_unbind);
+  if (ret < 0)
+    {
+      rpmsg_socket_free(new);
+      return;
+    }
+
+  /* The accepted connection inherits the listener's priority, so that
+   * getsockopt(SO_PRIORITY) on it reports the priority actually in use.
+   */
+
+  new->priority = server->priority;
+
+  ret = rpmsg_set_priority(&new->ept, new->priority);
   if (ret < 0)
     {
       rpmsg_socket_free(new);
@@ -1547,6 +1564,31 @@ static int rpmsg_socket_getsockopt(FAR struct socket *psock, int level,
               *(FAR int *)value = conn->sendsize;
               return OK;
             }
+
+          case SO_PRIORITY:
+            {
+              if (value == NULL || *value_len == 0)
+                {
+                  return -EINVAL;
+                }
+
+              /* Write back only as many bytes as the caller provided, so
+               * that both an int and a char argument work.
+               */
+
+              if (*value_len >= sizeof(int))
+                {
+                  *(FAR int *)value = conn->priority;
+                  *value_len = sizeof(int);
+                }
+              else
+                {
+                  *(FAR unsigned char *)value = conn->priority;
+                  *value_len = sizeof(unsigned char);
+                }
+
+              return OK;
+            }
         }
     }
 
@@ -1559,20 +1601,58 @@ static int rpmsg_socket_setsockopt(FAR struct socket *psock, int level,
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
 
-  if (level == SOL_SOCKET && option == SO_RCVBUF)
+  if (level == SOL_SOCKET)
     {
-      if (value_len < sizeof(int))
+      switch (option)
         {
-          return -EINVAL;
-        }
+          case SO_RCVBUF:
+            {
+              if (value_len < sizeof(int))
+                {
+                  return -EINVAL;
+                }
 
-      if (_SS_ISCONNECTED(conn->sconn.s_flags))
-        {
-          return -EISCONN;
-        }
+              if (_SS_ISCONNECTED(conn->sconn.s_flags))
+                {
+                  return -EISCONN;
+                }
 
-      conn->recvsize = *(FAR const int *)value;
-      return OK;
+              conn->recvsize = *(FAR const int *)value;
+              return OK;
+            }
+
+          case SO_PRIORITY:
+            {
+              int priority;
+
+              if (value == NULL || value_len == 0)
+                {
+                  return -EINVAL;
+                }
+
+              if (_SS_ISCONNECTED(conn->sconn.s_flags))
+                {
+                  return -EISCONN;
+                }
+
+              /* SO_PRIORITY is an int in socket(7), but accept a smaller
+               * value as well so that a char or uint8_t argument also
+               * works.  Read only as many bytes as the caller supplied.
+               */
+
+              priority = (value_len >= sizeof(int)) ?
+                *(FAR const int *)value :
+                (int)*(FAR const unsigned char *)value;
+
+              if (priority < RPMSG_PRIO_MIN || priority > RPMSG_PRIO_MAX)
+                {
+                  return -EINVAL;
+                }
+
+              conn->priority = (uint8_t)priority;
+              return OK;
+            }
+        }
     }
 
   return -ENOPROTOOPT;
