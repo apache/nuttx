@@ -60,18 +60,27 @@ int msgget(key_t key, int msgflg)
 
   flags = enter_critical_section();
 
-  msgq = nxmsg_lookup(key);
-  if (msgq)
+  /* IPC_PRIVATE always makes a new queue */
+
+  msgq = key != IPC_PRIVATE ? nxmsg_findkey(key) : NULL;
+  if (msgq != NULL)
     {
       if ((msgflg & IPC_CREAT) && (msgflg & IPC_EXCL))
         {
           ret = -EEXIST;
         }
     }
+  else if (key != IPC_PRIVATE && (msgflg & IPC_CREAT) == 0)
+    {
+      ret = -ENOENT;
+    }
   else
     {
-      ret = (key != IPC_PRIVATE && !(msgflg & IPC_CREAT)) ?
-            -ENOENT : nxmsg_alloc(&msgq);
+      ret = nxmsg_alloc(&msgq);
+      if (ret >= 0)
+        {
+          msgq->key = key;
+        }
     }
 
   leave_critical_section(flags);
@@ -82,5 +91,5 @@ int msgget(key_t key, int msgflg)
       return ERROR;
     }
 
-  return msgq->key;
+  return msgq->id;
 }

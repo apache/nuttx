@@ -53,7 +53,8 @@ struct msgq_s
 {
   struct mqueue_cmn_s  cmn;
   struct list_node     msglist;       /* Prioritized message list */
-  key_t                key;
+  key_t                key;           /* The msgget() key, or IPC_PRIVATE */
+  int16_t              id;            /* The message queue identifier */
   int16_t              maxmsgs;       /* Maximum number of messages in the queue */
   int16_t              nmsgs;         /* Number of message in the queue */
   uint16_t             maxmsgsize;    /* Max size of message in message queue */
@@ -106,11 +107,21 @@ void nxmsg_free(FAR struct msgq_s *msgq);
  * Name: nxmsg_lookup
  *
  * Description:
- *   Find the message queue in look-up table
+ *   Find the message queue with the identifier msqid
  *
  ****************************************************************************/
 
-FAR struct msgq_s *nxmsg_lookup(key_t key);
+FAR struct msgq_s *nxmsg_lookup(int msqid);
+
+/****************************************************************************
+ * Name: nxmsg_findkey
+ *
+ * Description:
+ *   Find the message queue of a key (not IPC_PRIVATE)
+ *
+ ****************************************************************************/
+
+FAR struct msgq_s *nxmsg_findkey(key_t key);
 
 #ifdef __cplusplus
 }

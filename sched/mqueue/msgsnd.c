@@ -42,7 +42,7 @@
 static int msgsnd_wait(FAR struct msgq_s *msgq, int msgflg)
 {
   FAR struct tcb_s *rtcb;
-  key_t key = msgq->key;
+  int msqid = msgq->id;
 
 #ifdef CONFIG_CANCELLATION_POINTS
   /* msgsnd_wait() is not a cancellation point, but may be called via
@@ -121,7 +121,7 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, int msgflg)
 
       /* msgctl(IPC_RMID) may have freed the queue before this task ran */
 
-      if (nxmsg_lookup(key) != msgq)
+      if (nxmsg_lookup(msqid) != msgq)
         {
           return -EIDRM;
         }
