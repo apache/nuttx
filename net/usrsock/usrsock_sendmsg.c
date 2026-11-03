@@ -27,14 +27,16 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_USRSOCK)
 
-#include <stdint.h>
-#include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
+#include <stdint.h>
+#include <string.h>
 #include <nuttx/debug.h>
 
 #include <arch/irq.h>
 
+#include <sys/param.h>
 #include <sys/socket.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/usrsock.h>
@@ -160,12 +162,16 @@ static int do_sendto_request(FAR struct usrsock_conn_s *conn,
 
   for (i = 0; i < msg->msg_iovlen; i++)
     {
-      req.buflen += msg->msg_iov[i].iov_len;
-    }
+      /* The sum of the iov_len values must fit in ssize_t and uint32_t */
 
-  if (req.buflen > UINT32_MAX)
-    {
-      req.buflen = UINT32_MAX;
+      if (msg->msg_iov[i].iov_len >
+          MIN(SSIZE_MAX, UINT32_MAX) - req.buflen)
+        {
+          nwarn("WARNING: The sum of the iov_len values is too large\n");
+          return -EINVAL;
+        }
+
+      req.buflen += msg->msg_iov[i].iov_len;
     }
 
   bufs[0].iov_base = (FAR void *)&req;
@@ -364,7 +370,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
 
       /* MSG_DONTWAIT is only use in usrsock. */
 
-       flags &= ~MSG_DONTWAIT;
+      flags &= ~MSG_DONTWAIT;
 
       /* Request user-space daemon to close socket. */
 
