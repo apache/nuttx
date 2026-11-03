@@ -55,7 +55,24 @@
 #endif /* CONFIG_ARCH_ADDRENV */
 
 #define UP_WFE() __asm__ __volatile__ ("wfe" : : : "memory")
-#define UP_SEV() __asm__ __volatile__ ("sev" : : : "memory")
+
+/* SEV is not a memory access and is not subject to memory ordering,
+ * so a waiter may observe the event before the lock release store
+ * becomes visible, re-read the stale lock and sleep again with the
+ * event already consumed (missed wakeup).  DSB makes the store visible
+ * before SEV.  A waiter sleeping with an exclusive monitor armed is an
+ * exception: it wakes on the monitor clear from the store itself, so it
+ * needs neither SEV nor DSB.  From ARM Reference Manual DDI 0406C,
+ * "Use of WFE and SEV with Locks".
+ */
+
+#define UP_SEV()                          \
+  do                                      \
+    {                                     \
+      UP_DSB();                           \
+      __asm__ __volatile__ ("sev" : : : "memory"); \
+    }                                     \
+  while (0)
 
 /* The kernel keeps the address of the running thread's TLS info in
  * TPIDR_EL0, so user code finds it whatever stack it runs on.
