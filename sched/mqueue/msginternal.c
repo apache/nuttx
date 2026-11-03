@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <assert.h>
+#include <stdint.h>
 
 #include <nuttx/kmalloc.h>
 #include "mqueue/msg.h"
@@ -40,8 +41,8 @@
  * Private Data
  ****************************************************************************/
 
-static uint8_t             g_nmsgq; /* The number of groups of msgs array */
-static FAR struct msgq_s **g_msgqs; /* The pointer of two layer file descriptors array */
+static int                 g_nmsgq; /* The number of entries in g_msgqs */
+static FAR struct msgq_s **g_msgqs; /* The queues; the index is the id - 1 */
 
 /****************************************************************************
  * Public Data
@@ -57,7 +58,7 @@ struct list_node g_msgfreelist;
  * Name: nxmsg_alloc_internal
  ****************************************************************************/
 
-static FAR struct msgq_s *nxmsg_alloc_internal(void)
+static int nxmsg_alloc_internal(FAR struct msgq_s **pmsgq)
 {
   FAR struct msgq_s *msgq;
   FAR struct msgq_s **tmp;
@@ -66,7 +67,7 @@ static FAR struct msgq_s *nxmsg_alloc_internal(void)
   msgq = kmm_zalloc(sizeof(struct msgq_s));
   if (msgq == NULL)
     {
-      return NULL;
+      return -ENOMEM;
     }
 
   for (i = 0; i < g_nmsgq; i++)
@@ -75,8 +76,17 @@ static FAR struct msgq_s *nxmsg_alloc_internal(void)
         {
           g_msgqs[i] = msgq;
           msgq->id = i + 1;
-          return msgq;
+          *pmsgq = msgq;
+          return OK;
         }
+    }
+
+  /* The identifier must fit in the int16_t id of the queue */
+
+  if (g_nmsgq > INT16_MAX - MQ_PERBLOCK)
+    {
+      kmm_free(msgq);
+      return -ENOSPC;
     }
 
   tmp = kmm_realloc(g_msgqs, sizeof(FAR void *) *
@@ -84,7 +94,7 @@ static FAR struct msgq_s *nxmsg_alloc_internal(void)
   if (tmp == NULL)
     {
       kmm_free(msgq);
-      return NULL;
+      return -ENOMEM;
     }
 
   g_msgqs = tmp;
@@ -97,7 +107,8 @@ static FAR struct msgq_s *nxmsg_alloc_internal(void)
 
   g_nmsgq += MQ_PERBLOCK;
 
-  return msgq;
+  *pmsgq = msgq;
+  return OK;
 }
 
 /****************************************************************************
@@ -182,11 +193,12 @@ static void nxmsg_wakeup_list(FAR dq_queue_t *list, FAR int16_t *nwait)
 int nxmsg_alloc(FAR struct msgq_s **pmsgq)
 {
   FAR struct msgq_s *msgq;
+  int ret;
 
-  msgq = nxmsg_alloc_internal();
-  if (msgq == NULL)
+  ret = nxmsg_alloc_internal(&msgq);
+  if (ret < 0)
     {
-      return -ENOMEM;
+      return ret;
     }
 
   /* Initialize the new named message queue */
