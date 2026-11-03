@@ -234,6 +234,9 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
       list_add_tail(&msgq->msglist, &msg->node);
 
       msgq->nmsgs++;
+      msgq->cbytes += msgsz;
+      msgq->lspid   = nxsched_getpid();
+      msgq->stime   = time(NULL);
 
       if (msgq->cmn.nwaitnotempty > 0)
         {

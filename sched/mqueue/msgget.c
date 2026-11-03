@@ -79,7 +79,9 @@ int msgget(key_t key, int msgflg)
       ret = nxmsg_alloc(&msgq);
       if (ret >= 0)
         {
-          msgq->key = key;
+          msgq->key       = key;
+          msgq->perm.mode = msgflg & IPC_MODE;
+          msgq->ctime     = time(NULL);
         }
     }
 
