@@ -1330,7 +1330,8 @@ static unsigned int tcp_send_gettimeout(clock_t start, unsigned int timeout)
  *   ENOTSOCK
  *     The argument s is not a socket.
  *   EPIPE
- *     The local end has been shut down on a connection oriented socket.
+ *     The local end has been shut down on a connection oriented socket, or
+ *     the connection was closed.
  *     In this case the process will also receive a SIGPIPE unless
  *     MSG_NOSIGNAL is set.
  *
@@ -1361,7 +1362,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: Not connected\n");
-      ret = -ENOTCONN;
+      ret = TCP_NOTCONN_ERROR(conn);
       goto errout;
     }
 
@@ -1429,7 +1430,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       if (!_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           nerr("ERROR: No longer connected\n");
-          ret = -ENOTCONN;
+          ret = TCP_NOTCONN_ERROR(conn);
           goto errout_with_lock;
         }
 
