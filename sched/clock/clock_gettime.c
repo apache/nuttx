@@ -55,12 +55,15 @@ static clock_t clock_process_runtime(FAR struct tcb_s *tcb)
 # ifdef HAVE_GROUP_MEMBERS
   FAR struct task_group_s *group;
   FAR sq_entry_t *curr;
-  clock_t runtime = 0;
+  clock_t runtime;
   irqstate_t flags;
 
   group = tcb->group;
 
+  /* The threads that left the group count too */
+
   flags = spin_lock_irqsave(&group->tg_lock);
+  runtime = group->tg_run_time;
   sq_for_every(&group->tg_members, curr)
     {
       tcb = container_of(curr, struct tcb_s, member);

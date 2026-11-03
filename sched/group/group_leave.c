@@ -43,6 +43,7 @@
 #  include <nuttx/binfmt/binfmt.h>
 #endif
 
+#include "sched/sched.h"
 #include "signal/signal.h"
 #include "pthread/pthread.h"
 #include "mqueue/mqueue.h"
@@ -227,6 +228,9 @@ void group_leave(FAR struct tcb_s *tcb)
 #ifdef HAVE_GROUP_MEMBERS
       flags = spin_lock_irqsave(&group->tg_lock);
       sq_rem(&tcb->member, &group->tg_members);
+#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+      group->tg_run_time += nxsched_critmon_runtime(tcb);
+#  endif
       release = release && sq_empty(&group->tg_members);
       spin_unlock_irqrestore(&group->tg_lock, flags);
 
