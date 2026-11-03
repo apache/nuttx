@@ -63,6 +63,8 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           REPORT_PATH: depends-on-report/result.json
         run: |
+          . .github/scripts/gh_api_retry.sh
+
           OS_REF=""
           APPS_REF=""
 
@@ -70,7 +72,7 @@ jobs:
           # created; re-read it so a manual re-run picks up an edited
           # Depends-On line. Keep the payload copy if the API call fails.
           if [ -n "${PR_NUMBER:-}" ]; then
-            if LIVE_BODY="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.body // ""')"; then
+            if LIVE_BODY="$(gh_api_retry "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.body // ""')"; then
               PR_BODY="$LIVE_BODY"
             else
               echo "::warning::Could not re-read the PR description; using the copy from the event payload."
@@ -153,6 +155,8 @@ jobs:
         run: |
           set -uo pipefail
 
+          . .github/scripts/gh_api_retry.sh
+
           git config --global user.email "actions@github.com"
           git config --global user.name "github-actions"
 
@@ -217,7 +221,7 @@ jobs:
             # Skip a dependency whose merge commit is already in the checkout.
             # Its commits are in the target branch and cannot be applied again.
             # A dependency that is closed without merge is an error.
-            if ! DEP_INFO=$(gh api "repos/${DEP_REPO}/pulls/${DEP_PR_NUM}" \
+            if ! DEP_INFO=$(gh_api_retry "repos/${DEP_REPO}/pulls/${DEP_PR_NUM}" \
                 --jq 'if .merged then "merged \(.merge_commit_sha)" else .state end'); then
               echo "::warning::Could not read the state of ${DEP}; applying it."
               DEP_INFO=""
