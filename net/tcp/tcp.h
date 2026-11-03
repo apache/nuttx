@@ -100,6 +100,14 @@
 #define TCP_SEQ_ADD(a, b)   ((uint32_t)((a) + (b)))
 #define TCP_SEQ_SUB(a, b)   ((uint32_t)((a) - (b)))
 
+/* The error of a send on a TCP socket that is not connected: -EPIPE if the
+ * connection was closed (POSIX: the socket is no longer connected), else
+ * -ENOTCONN.
+ */
+
+#define TCP_NOTCONN_ERROR(conn) \
+  (_SS_ISCLOSED((conn)->sconn.s_flags) ? -EPIPE : -ENOTCONN)
+
 /* The TCP options flags */
 
 #define TCP_WSCALE            0x01U /* Window Scale option enabled */

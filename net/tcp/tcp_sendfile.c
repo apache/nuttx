@@ -310,7 +310,7 @@ static uint32_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 
       /* Report not connected */
 
-      pstate->snd_sent = -ENOTCONN;
+      pstate->snd_sent = TCP_NOTCONN_ERROR(conn);
       goto end_wait;
     }
 
@@ -425,12 +425,14 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
   conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
-  /* If this is an un-connected socket, then return ENOTCONN */
+  /* If this is an un-connected socket, then return ENOTCONN (EPIPE after
+   * the connection was closed).
+   */
 
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: Not connected\n");
-      return -ENOTCONN;
+      return TCP_NOTCONN_ERROR(conn);
     }
 
   /* Make sure that we have the IP address mapping */
