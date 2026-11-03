@@ -83,6 +83,7 @@ static int cfi_mtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 {
   FAR struct cfi_dev_s *priv = (FAR struct cfi_dev_s *)dev;
   size_t endblock;
+  int ret;
 
   /* The interface definition assumes that all erase blocks are the
    * same size. If that is not true for this particular device, then
@@ -96,7 +97,10 @@ static int cfi_mtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 
   /* Erase the specified blocks and return status (OK or a negated errno) */
 
-  return cfi_erase(priv, startblock, endblock - startblock);
+  down_write(&priv->lock);
+  ret = cfi_erase(priv, startblock, endblock - startblock);
+  up_write(&priv->lock);
+  return ret;
 }
 
 /****************************************************************************
@@ -114,7 +118,9 @@ static ssize_t cfi_mtd_bread(FAR struct mtd_dev_s *dev, off_t startpage,
   off_t offset = startpage * priv->page_size;
   int ret;
 
+  down_read(&priv->lock);
   ret = cfi_read(priv, offset, npages * priv->page_size, buf);
+  up_read(&priv->lock);
   return ret < 0 ? ret : npages;
 }
 
@@ -133,7 +139,9 @@ static ssize_t cfi_mtd_bwrite(FAR struct mtd_dev_s *dev, off_t startpage,
   off_t offset = startpage * priv->page_size;
   int ret;
 
+  down_write(&priv->lock);
   ret = cfi_write(priv, offset, npages * priv->page_size, buf);
+  up_write(&priv->lock);
   return ret < 0 ? ret : npages;
 }
 
@@ -151,7 +159,9 @@ static ssize_t cfi_mtd_read(FAR struct mtd_dev_s *dev, off_t offset,
   FAR struct cfi_dev_s *priv = (FAR struct cfi_dev_s *)dev;
   int ret;
 
+  down_read(&priv->lock);
   ret = cfi_read(priv, offset, nbytes, buffer);
+  up_read(&priv->lock);
   return ret < 0 ? ret : nbytes;
 }
 
@@ -172,7 +182,9 @@ static ssize_t cfi_mtd_write(FAR struct mtd_dev_s *dev, off_t offset,
   FAR struct cfi_dev_s *priv = (FAR struct cfi_dev_s *)dev;
   int ret;
 
+  down_write(&priv->lock);
   ret = cfi_write(priv, offset, nbytes, buffer);
+  up_write(&priv->lock);
   return ret < 0 ? ret : nbytes;
 }
 #endif
@@ -268,6 +280,7 @@ static FAR struct mtd_dev_s *
 cfi_initialize(uintptr_t addr_base, uintptr_t addr_end, uint32_t bankwidth)
 {
   FAR struct cfi_dev_s *cfi;
+  int ret;
 
   /* Create an instance of the CFI MTD device state structure  */
 
@@ -292,6 +305,14 @@ cfi_initialize(uintptr_t addr_base, uintptr_t addr_end, uint32_t bankwidth)
   cfi->end_addr = addr_end;
   cfi->bankwidth = bankwidth;
 
+  ret = init_rwsem(&cfi->lock);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to initialize the CFI lock: %d\n", ret);
+      kmm_free(cfi);
+      return NULL;
+    }
+
   /* Check the CFI, and set other parameters */
 
   if (cfi_check(cfi) == OK)
@@ -300,6 +321,7 @@ cfi_initialize(uintptr_t addr_base, uintptr_t addr_end, uint32_t bankwidth)
     }
 
   ferr("ERROR: Not a CFI device!\n");
+  destroy_rwsem(&cfi->lock);
   kmm_free(cfi);
   return NULL;
 }
@@ -331,6 +353,7 @@ int register_cfi_driver(uintptr_t addr_base, uintptr_t addr_end,
       ret = register_mtddriver(devname, mtd, 0777, NULL);
       if (ret < 0)
         {
+          destroy_rwsem(&((FAR struct cfi_dev_s *)mtd)->lock);
           kmm_free(mtd);
         }
     }
