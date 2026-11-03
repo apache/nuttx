@@ -27,12 +27,46 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
+#include <signal.h>
+#include <string.h>
 #include <time.h>
+#include <sys/param.h>
 #include <sys/time.h>
 
 #include "sched/sched.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: setitimer_create
+ *
+ * Description:
+ *   Create the timer of an interval timer.  ITIMER_VIRTUAL and ITIMER_PROF
+ *   both count the CPU time of the process.
+ *
+ ****************************************************************************/
+
+static int setitimer_create(int which, FAR timer_t *itimer)
+{
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+  struct sigevent event;
+
+  if (which != ITIMER_REAL)
+    {
+      memset(&event, 0, sizeof(event));
+      event.sigev_notify = SIGEV_SIGNAL;
+      event.sigev_signo  = which == ITIMER_VIRTUAL ? SIGVTALRM : SIGPROF;
+
+      return timer_create(CLOCK_PROCESS_CPUTIME_ID, &event, itimer);
+    }
+#endif
+
+  return timer_create(CLOCK_REALTIME, NULL, itimer);
+}
 
 /****************************************************************************
  * Public Functions
@@ -89,25 +123,26 @@
 int setitimer(int which, FAR const struct itimerval *value,
               FAR struct itimerval *ovalue)
 {
-  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *rtcb = this_task();
+  FAR timer_t *itimer;
   struct itimerspec spec;
   struct itimerspec ospec;
   int ret = OK;
 
-  if (which != ITIMER_REAL || !value)
+  if ((unsigned int)which >= nitems(rtcb->group->itimer) || !value)
     {
       set_errno(EINVAL);
       ret = ERROR;
     }
   else
     {
-      rtcb = this_task();
+      itimer = &rtcb->group->itimer[which];
 
       nxrmutex_lock(&rtcb->group->tg_mutex);
 
-      if (!rtcb->group->itimer)
+      if (*itimer == NULL)
         {
-          ret = timer_create(CLOCK_REALTIME, NULL, &rtcb->group->itimer);
+          ret = setitimer_create(which, itimer);
         }
 
       nxrmutex_unlock(&rtcb->group->tg_mutex);
@@ -117,8 +152,7 @@ int setitimer(int which, FAR const struct itimerval *value,
           TIMEVAL_TO_TIMESPEC(&value->it_value, &spec.it_value);
           TIMEVAL_TO_TIMESPEC(&value->it_interval, &spec.it_interval);
 
-          ret = timer_settime(rtcb->group->itimer, 0, &spec,
-                              ovalue ? &ospec : NULL);
+          ret = timer_settime(*itimer, 0, &spec, ovalue ? &ospec : NULL);
           if (ret == OK && ovalue)
             {
               TIMESPEC_TO_TIMEVAL(&ovalue->it_value, &ospec.it_value);

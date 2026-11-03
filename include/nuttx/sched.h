@@ -552,9 +552,13 @@ struct task_group_s
 #endif
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
-  /* Interval timer *********************************************************/
+  /* Interval timers, indexed by ITIMER_* ***********************************/
 
-  timer_t itimer;
+#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+  timer_t itimer[3];                /* ITIMER_REAL, _VIRTUAL and _PROF          */
+#  else
+  timer_t itimer[1];                /* ITIMER_REAL                              */
+#  endif
 #endif
 
   /* PIC data space and address environments ********************************/
