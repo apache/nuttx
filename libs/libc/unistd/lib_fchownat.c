@@ -52,12 +52,16 @@
  *
  *   If pathname is absolute, then dirfd is ignored.
  *
+ *   If pathname is an empty string and flags contains AT_EMPTY_PATH, then
+ *   the call operates on the file referred to by dirfd (like fchown()).  If
+ *   dirfd is AT_FDCWD, the call operates on the current working directory.
+ *
  * Input Parameters:
  *   dirfd - The file descriptor of directory.
  *   path  - A pointer to the path.
  *   owner - The owner to set.
  *   group - The group to set.
- *   flags - Ignored.
+ *   flags - AT_SYMLINK_NOFOLLOW and AT_EMPTY_PATH are supported.
  *
  * Returned Value:
  *   Return zero on success, or -1 if an error occurred (in which case,
@@ -70,6 +74,16 @@ int fchownat(int dirfd, FAR const char *path, uid_t owner,
 {
   FAR char *fullpath;
   int ret;
+
+  if (path != NULL && path[0] == '\0' && (flags & AT_EMPTY_PATH) != 0)
+    {
+      if (dirfd != AT_FDCWD)
+        {
+          return fchown(dirfd, owner, group);
+        }
+
+      path = ".";
+    }
 
   fullpath = lib_get_pathbuffer();
   if (fullpath == NULL)
