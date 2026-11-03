@@ -76,10 +76,6 @@ ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
   CSRCS += stm32_zerocross.c
 endif
 
-ifeq ($(CONFIG_TIMER),y)
-CSRCS += stm32_timer.c
-endif
-
 ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
 CSRCS += stm32_ioctl.c
 endif

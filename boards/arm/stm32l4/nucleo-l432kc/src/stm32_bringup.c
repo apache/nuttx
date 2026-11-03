@@ -238,18 +238,6 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_TIMER
-  /* Initialize and register the timer driver */
-
-  ret = board_timer_driver_initialize("/dev/timer0", 2);
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to register the timer driver: %d\n",
-             ret);
-      return ret;
-    }
-#endif
-
 #ifdef CONFIG_SENSORS_QENCODER
   /* Initialize and register the qencoder driver */
 
