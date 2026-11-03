@@ -47,6 +47,7 @@
 #include "arm64_mmu.h"
 #include "zynq_boot.h"
 #include "zynq_serial.h"
+#include "hardware/zynq_pll.h"
 
 /****************************************************************************
  * Private Data
@@ -200,6 +201,6 @@ void arm64_chip_boot(void)
 #endif
 
 #ifdef CONFIG_ARCH_PERF_EVENTS
-  up_perf_init((void *)CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC);
+  up_perf_init((void *)mpsoc_clk_rate_get(acpu));
 #endif
 }
