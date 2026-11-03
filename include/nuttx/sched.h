@@ -126,6 +126,7 @@
 #define GROUP_FLAG_DUMPABLE        (1 << 6)                      /* Bit 6: Process may be traced / coredumped */
 #define GROUP_FLAG_VFORK           (1 << 7)                      /* Bit 7: In the address environment of the vfork() parent */
 #define GROUP_FLAG_EXECED          (1 << 8)                      /* Bit 8: The process image came from exec() */
+#define GROUP_FLAG_STOPPED         (1 << 9)                      /* Bit 9: Stopped, the parent knows it */
 
 /* Values for struct child_status_s ch_flags */
 
@@ -135,7 +136,9 @@
 #  define CHILD_FLAG_TTYPE_PTHREAD (1 << CHILD_FLAG_TTYPE_SHIFT) /* User pthread */
 #  define CHILD_FLAG_TTYPE_KERNEL  (2 << CHILD_FLAG_TTYPE_SHIFT) /* Kernel thread */
 #define CHILD_FLAG_EXITED          (1 << 2)                      /* Bit 2: The child thread has exit'ed */
-                                                                 /* Bits 3-7: Available */
+#define CHILD_FLAG_STOPPED         (1 << 3)                      /* Bit 3: Stopped, not reported yet */
+#define CHILD_FLAG_CONTINUED       (1 << 4)                      /* Bit 4: Continued, not reported yet */
+                                                                 /* Bits 5-7: Available */
 
 /* Sporadic scheduler flags */
 
@@ -368,7 +371,11 @@ struct child_status_s
   FAR struct child_status_s *flink;
 
   uint8_t ch_flags;                 /* Child status:  See CHILD_FLAG_* defines */
+  uint8_t ch_stopsig;               /* Signal that stopped the child           */
   pid_t   ch_pid;                   /* Child task ID                           */
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+  pid_t   ch_pgid;                  /* Child process group ID at exit          */
+#endif
   int     ch_status;                /* Child exit status                       */
 #ifdef CONFIG_SCHED_USER_IDENTITY
   uid_t   ch_uid;                   /* Child real user ID at exit              */

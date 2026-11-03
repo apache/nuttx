@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <stdbool.h>
 #include <sched.h>
 
@@ -90,8 +91,11 @@ FAR struct task_group_s *task_getgroup(pid_t pid);
 /* Process groups and sessions */
 
 #ifdef CONFIG_SCHED_PROCESS_GROUPS
+#  define group_getpgid(group) ((group)->tg_pgid)
 bool group_in_pgrp(FAR struct tcb_s *tcb, pid_t pgid);
 int  group_setpgid(pid_t pid, pid_t pgid);
+#else
+#  define group_getpgid(group) ((group)->tg_pid)
 #endif
 
 /* Signaling group members */
@@ -109,13 +113,17 @@ FAR struct child_status_s *group_alloc_child(void);
 void group_free_child(FAR struct child_status_s *status);
 void group_add_child(FAR struct task_group_s *group,
                      FAR struct child_status_s *child);
-FAR struct child_status_s *group_exit_child(FAR struct task_group_s *group);
 FAR struct child_status_s *group_find_child(FAR struct task_group_s *group,
                                             pid_t pid);
 FAR struct child_status_s *group_remove_child(FAR struct task_group_s *group,
                                               pid_t pid);
 void group_remove_children(FAR struct task_group_s *group);
-bool group_has_child(FAR struct task_group_s *group, pid_t pid);
+#ifdef CONFIG_SCHED_WAITPID
+uint8_t group_child_event(FAR struct child_status_s *child, int options);
+FAR struct child_status_s *group_wait_child(FAR struct task_group_s *group,
+                                            idtype_t idtype, pid_t id,
+                                            int options, FAR bool *found);
+#endif
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 #endif /* CONFIG_SCHED_HAVE_PARENT */

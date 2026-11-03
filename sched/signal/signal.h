@@ -190,6 +190,9 @@ _sa_handler_t      nxsig_default(FAR struct tcb_s *tcb, int signo,
                                  bool defaction);
 int                nxsig_default_initialize(FAR struct tcb_s *tcb);
 #endif
+#if defined(CONFIG_SIG_SIGSTOP_ACTION) && defined(CONFIG_SCHED_HAVE_PARENT)
+void               nxsig_notify_parent(pid_t pid, int code, int signo);
+#endif
 
 /* sig_dispatch.c */
 
@@ -202,6 +205,10 @@ int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info,
                                   bool limit);
 bool               nxsig_source_queued(pid_t pid, FAR const void *source,
                                        int signo);
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+void               nxsig_wake_waiters(FAR struct task_group_s *group,
+                                      FAR siginfo_t *info);
+#endif
 
 /* sig_notification.c */
 

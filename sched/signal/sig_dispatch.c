@@ -565,6 +565,58 @@ static bool nxsig_queue_full(FAR struct tcb_s *stcb)
 }
 
 /****************************************************************************
+ * Name: nxsig_wake_waiter
+ *
+ * Description:
+ *   Wake up the thread pid if it waits for the signal of arg (a siginfo),
+ *   and give it the signal information.  A function of
+ *   nxsig_wake_waiters().
+ *
+ * Assumptions:
+ *   Called in a critical section with the scheduler locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+static int nxsig_wake_waiter(pid_t pid, FAR void *arg)
+{
+  FAR siginfo_t *info = arg;
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
+
+  if (tcb != NULL && tcb->task_state == TSTATE_WAIT_SIG &&
+      nxsig_ismember(&tcb->sigwaitmask, info->si_signo) == 1)
+    {
+      if (tcb->sigunbinfo != NULL)
+        {
+          memcpy(tcb->sigunbinfo, info, sizeof(siginfo_t));
+        }
+
+      sigemptyset(&tcb->sigwaitmask);
+      if (WDOG_ISACTIVE(&tcb->waitdog))
+        {
+          wd_cancel(&tcb->waitdog);
+        }
+
+      /* Remove the task from waiting list */
+
+      dq_rem((FAR dq_entry_t *)tcb, list_waitingforsignal());
+
+      /* Add the task to ready-to-run task list and
+       * perform the context switch if one is needed
+       */
+
+      if (nxsched_add_readytorun(tcb))
+        {
+          up_switch_context(this_task(), rtcb);
+        }
+    }
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -609,6 +661,9 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
   FAR sigactq_t *sigact;
   bool deliver = false;
+#endif
+#if defined(CONFIG_SIG_SIGSTOP_ACTION) && defined(CONFIG_SCHED_HAVE_PARENT)
+  pid_t contpid = INVALID_PROCESS_ID;
 #endif
   bool ignored = false;
 
@@ -899,11 +954,12 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
       /* If the task was stopped by SIGSTOP or SIGTSTP, then unblock the task
-       * if SIGCONT is received.
+       * if SIGCONT is received.  SIGKILL also unblocks it, so that it can
+       * end.
        */
 
       else if (stcb->task_state == TSTATE_TASK_STOPPED &&
-          info->si_signo == SIGCONT)
+               (info->si_signo == SIGCONT || info->si_signo == SIGKILL))
         {
 #ifdef HAVE_GROUP_MEMBERS
           group_continue(stcb);
@@ -921,6 +977,19 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
               up_switch_context(this_task(), rtcb);
             }
 #endif
+        }
+#endif
+
+#if defined(CONFIG_SIG_SIGSTOP_ACTION) && defined(CONFIG_SCHED_HAVE_PARENT)
+      /* SIGCONT continues a stopped process: tell the parent when the
+       * critical section is free (its SIGCHLD handler can run).
+       */
+
+      if (info->si_signo == SIGCONT &&
+          (stcb->group->tg_flags & GROUP_FLAG_STOPPED) != 0)
+        {
+          stcb->group->tg_flags &= ~GROUP_FLAG_STOPPED;
+          contpid = stcb->group->tg_pid;
         }
 #endif
     }
@@ -945,6 +1014,13 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
         }
 
       leave_critical_section(flags);
+    }
+#endif
+
+#if defined(CONFIG_SIG_SIGSTOP_ACTION) && defined(CONFIG_SCHED_HAVE_PARENT)
+  if (contpid != INVALID_PROCESS_ID)
+    {
+      nxsig_notify_parent(contpid, CLD_CONTINUED, SIGCONT);
     }
 #endif
 
@@ -1084,3 +1160,39 @@ bool nxsig_source_queued(pid_t pid, FAR const void *source, int signo)
   leave_critical_section(flags);
   return found;
 }
+
+/****************************************************************************
+ * Name: nxsig_wake_waiters
+ *
+ * Description:
+ *   Wake up each thread of a task group that waits for the signal of info
+ *   (sigwaitinfo(), sigtimedwait(), waitpid(), waitid()), and give it info.
+ *   The signal is not sent: it does not become pending, and no handler
+ *   runs.  The parent of a child that stopped or continued uses it when
+ *   the SIGCHLD action of the parent has SA_NOCLDSTOP: waitpid() must
+ *   still see the event.
+ *
+ * Input Parameters:
+ *   group - The task group
+ *   info  - The signal information
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called from a critical section.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+void nxsig_wake_waiters(FAR struct task_group_s *group, FAR siginfo_t *info)
+{
+  sched_lock();
+#ifdef HAVE_GROUP_MEMBERS
+  group_foreachchild(group, nxsig_wake_waiter, info);
+#else
+  nxsig_wake_waiter(group->tg_pid, info);
+#endif
+  sched_unlock();
+}
+#endif

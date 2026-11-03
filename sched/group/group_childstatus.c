@@ -61,15 +61,6 @@ struct child_pool_s
   FAR struct child_status_s *freelist;
 };
 
-/* The search state of group_has_child() */
-
-struct child_search_s
-{
-  FAR struct task_group_s *group;
-  pid_t pid;
-  bool found;
-};
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -117,26 +108,35 @@ static void group_dump_children(FAR struct task_group_s *group,
 #endif
 
 /****************************************************************************
- * Name: group_child_handler
+ * Name: group_child_pgid
  *
  * Description:
- *   The nxsched_foreach() handler of group_has_child().
+ *   Return the process group ID of a child.  A child that exited is in the
+ *   process group that it had when its main thread exited.
  *
  ****************************************************************************/
 
-static void group_child_handler(FAR struct tcb_s *tcb, FAR void *arg)
+#ifdef CONFIG_SCHED_WAITPID
+static pid_t group_child_pgid(FAR struct child_status_s *child)
 {
-  FAR struct child_search_s *search = arg;
-  FAR struct task_group_s *group = tcb->group;
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+  FAR struct task_group_s *chgrp;
 
-  if (group != NULL && group != search->group &&
-      group->tg_ppid == search->group->tg_pid &&
-      (search->pid == INVALID_PROCESS_ID || group->tg_pid == search->pid) &&
-      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) == 0)
+  if ((child->ch_flags & CHILD_FLAG_EXITED) == 0)
     {
-      search->found = true;
+      chgrp = task_getgroup(child->ch_pid);
+      if (chgrp != NULL)
+        {
+          return chgrp->tg_pgid;
+        }
     }
+
+  return child->ch_pgid;
+#else
+  return child->ch_pid;
+#endif
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -332,44 +332,107 @@ FAR struct child_status_s *group_find_child(FAR struct task_group_s *group,
 }
 
 /****************************************************************************
- * Name: group_exit_child
+ * Name: group_child_event
  *
  * Description:
- *   Search for any child that has exited.
+ *   Return the event of a child that waitpid() or waitid() can report with
+ *   these options: the child exited (WEXITED), stopped (WUNTRACED or
+ *   WSTOPPED) or continued (WCONTINUED), and the event was not reported
+ *   yet.  An exit comes before the other events.
  *
  * Input Parameters:
- *   tcb - The TCB of the parent task to containing the child status.
+ *   child   - The child status structure.
+ *   options - The options of waitpid() or waitid().
  *
  * Returned Value:
- *   On success, a non-NULL pointer to a child status structure for the
- *   exited child.  NULL is returned if not child has exited.
- *
- * Assumptions:
- *   Called during SIGCHLD processing in a safe context.  No special
- *   precautions are required here.
+ *   CHILD_FLAG_EXITED, CHILD_FLAG_STOPPED or CHILD_FLAG_CONTINUED, or 0 if
+ *   the child has no event to report.
  *
  ****************************************************************************/
 
-FAR struct child_status_s *group_exit_child(FAR struct task_group_s *group)
+#ifdef CONFIG_SCHED_WAITPID
+uint8_t group_child_event(FAR struct child_status_s *child, int options)
+{
+  if ((child->ch_flags & CHILD_FLAG_EXITED) != 0)
+    {
+      return (options & WEXITED) != 0 ? CHILD_FLAG_EXITED : 0;
+    }
+
+  if ((child->ch_flags & CHILD_FLAG_STOPPED) != 0 &&
+      (options & (WUNTRACED | WSTOPPED)) != 0)
+    {
+      return CHILD_FLAG_STOPPED;
+    }
+
+  if ((child->ch_flags & CHILD_FLAG_CONTINUED) != 0 &&
+      (options & WCONTINUED) != 0)
+    {
+      return CHILD_FLAG_CONTINUED;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: group_wait_child
+ *
+ * Description:
+ *   Find a child that idtype and id select and that has an event to report
+ *   (see group_child_event()).  P_ALL selects all children, P_PID the child
+ *   with the process ID id, and P_PGID the children in the process group
+ *   id.  A child that exited is in the process group that it had when its
+ *   main thread exited.  Without CONFIG_SCHED_PROCESS_GROUPS, a process
+ *   group contains only one process.
+ *
+ * Input Parameters:
+ *   group   - The parent task group.
+ *   idtype  - P_ALL, P_PID or P_PGID.
+ *   id      - The process ID or the process group ID.
+ *   options - The options of waitpid() or waitid().
+ *   found   - Return true if idtype and id select a child.
+ *
+ * Returned Value:
+ *   The child status structure, or NULL if no child that idtype and id
+ *   select has an event to report.
+ *
+ * Assumptions:
+ *   Called from a critical section.
+ *
+ ****************************************************************************/
+
+FAR struct child_status_s *group_wait_child(FAR struct task_group_s *group,
+                                            idtype_t idtype, pid_t id,
+                                            int options, FAR bool *found)
 {
   FAR struct child_status_s *child;
   irqstate_t flags;
 
-  /* Find the status structure of any child task that has exited. */
+  *found = false;
 
   flags = spin_lock_irqsave(&group->tg_lock);
   for (child = group->tg_children; child; child = child->flink)
     {
-      if ((child->ch_flags & CHILD_FLAG_EXITED) != 0)
+      if (idtype == P_PID && child->ch_pid != id)
         {
-          spin_unlock_irqrestore(&group->tg_lock, flags);
-          return child;
+          continue;
+        }
+
+      if (idtype == P_PGID && group_child_pgid(child) != id)
+        {
+          continue;
+        }
+
+      *found = true;
+      if (group_child_event(child, options) != 0)
+        {
+          break;
         }
     }
 
   spin_unlock_irqrestore(&group->tg_lock, flags);
-  return NULL;
+  return child;
 }
+#endif /* CONFIG_SCHED_WAITPID */
 
 /****************************************************************************
  * Name: group_remove_child
@@ -479,36 +542,6 @@ void group_remove_children(FAR struct task_group_s *group)
   spin_unlock_irqrestore(&group->tg_lock, flags);
 
   group_dump_children(group, "group_remove_children");
-}
-
-/****************************************************************************
- * Name: group_has_child
- *
- * Description:
- *   Check if a child of the task group is still running.  This also finds
- *   the children that have no child status structure.
- *
- * Input Parameters:
- *   group - The parent task group.
- *   pid   - The PID of the child, or INVALID_PROCESS_ID for any child.
- *
- * Returned Value:
- *   True if the child (or any child) has a thread that is not exiting.
- *
- * Assumptions:
- *   Called from a critical section.
- *
- ****************************************************************************/
-
-bool group_has_child(FAR struct task_group_s *group, pid_t pid)
-{
-  struct child_search_s search;
-
-  search.group = group;
-  search.pid   = pid;
-  search.found = false;
-  nxsched_foreach(group_child_handler, &search);
-  return search.found;
 }
 
 #endif /* CONFIG_SCHED_HAVE_PARENT && CONFIG_SCHED_CHILD_STATUS */

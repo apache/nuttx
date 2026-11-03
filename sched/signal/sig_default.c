@@ -288,7 +288,7 @@ static void nxsig_abnormal_termination(int signo)
 static void nxsig_stop_task(int signo)
 {
   FAR struct tcb_s *rtcb = this_task();
-#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+#if defined(CONFIG_SCHED_WAITPID) || defined(CONFIG_SCHED_HAVE_PARENT)
   FAR struct task_group_s *group;
 
   DEBUGASSERT(rtcb != NULL && rtcb->group != NULL);
@@ -314,6 +314,15 @@ static void nxsig_stop_task(int signo)
 
   sched_lock();
 
+#ifdef CONFIG_SCHED_HAVE_PARENT
+  /* Tell the parent that the process stopped: SIGCHLD with CLD_STOPPED,
+   * and waitpid() with WUNTRACED.  SIGCONT tells it that the process
+   * continued (nxsig_tcbdispatch()).
+   */
+
+  nxsig_notify_parent(group->tg_pid, CLD_STOPPED, signo);
+#endif
+
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
   /* Notify via waitpid if any parent is waiting for this task to EXIT
    * or STOP.  This action is only performed if WUNTRACED is set in the
@@ -324,11 +333,11 @@ static void nxsig_stop_task(int signo)
     {
       int semvalue;
 
-      /* Return zero for exit status (we are not exiting, however) */
+      /* Return the status of a stopped process (WIFSTOPPED()) */
 
       if (group->tg_statloc != NULL)
         {
-          *group->tg_statloc = 0;
+          *group->tg_statloc = WAIT_STOPPED(signo);
           group->tg_statloc = NULL;
         }
 
@@ -614,3 +623,120 @@ int nxsig_default_initialize(FAR struct tcb_s *tcb)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: nxsig_notify_parent
+ *
+ * Description:
+ *   Tell the parent of a process that the process stopped (CLD_STOPPED) or
+ *   continued (CLD_CONTINUED).  The child status of the parent keeps the
+ *   event for waitpid() and waitid(), and the parent gets SIGCHLD.  If the
+ *   SIGCHLD action of the parent has SA_NOCLDSTOP, the parent gets no
+ *   SIGCHLD, but its threads that wait in waitpid() or waitid() wake up.
+ *   CLD_STOPPED also sets GROUP_FLAG_STOPPED of the process.
+ *
+ * Input Parameters:
+ *   pid   - The process ID of the child
+ *   code  - CLD_STOPPED or CLD_CONTINUED
+ *   signo - The signal that stopped the child, or SIGCONT
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Not called from a critical section: the SIGCHLD handler of the calling
+ *   thread can run before the function returns.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SIG_SIGSTOP_ACTION) && defined(CONFIG_SCHED_HAVE_PARENT)
+void nxsig_notify_parent(pid_t pid, int code, int signo)
+{
+  FAR struct task_group_s *chgrp;
+  FAR struct task_group_s *pgrp = NULL;
+#ifdef CONFIG_SCHED_CHILD_STATUS
+  FAR struct child_status_s *child;
+#endif
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  FAR sigactq_t *sigact;
+#endif
+  bool nocldstop = false;
+  irqstate_t flags;
+  siginfo_t info;
+  pid_t ppid = INVALID_PROCESS_ID;
+
+  flags = enter_critical_section();
+
+  chgrp = task_getgroup(pid);
+  if (chgrp != NULL)
+    {
+      /* SIGCONT reports only the continue of a stopped process */
+
+      if (code == CLD_STOPPED)
+        {
+          chgrp->tg_flags |= GROUP_FLAG_STOPPED;
+        }
+
+      ppid = chgrp->tg_ppid;
+      pgrp = task_getgroup(ppid);
+    }
+
+  if (pgrp == NULL)
+    {
+      /* The process ended, or it has no parent */
+
+      leave_critical_section(flags);
+      return;
+    }
+
+#ifdef CONFIG_SCHED_CHILD_STATUS
+  /* Keep the event for waitpid() and waitid().  It replaces an event of
+   * the other type that was not reported.
+   */
+
+  child = group_find_child(pgrp, pid);
+  if (child != NULL)
+    {
+      child->ch_flags &= ~(CHILD_FLAG_STOPPED | CHILD_FLAG_CONTINUED);
+      if (code == CLD_STOPPED)
+        {
+          child->ch_flags  |= CHILD_FLAG_STOPPED;
+          child->ch_stopsig = signo;
+        }
+      else
+        {
+          child->ch_flags  |= CHILD_FLAG_CONTINUED;
+        }
+    }
+#endif
+
+  info.si_signo           = SIGCHLD;
+  info.si_code            = code;
+  info.si_errno           = OK;
+  info.si_value.sival_ptr = NULL;
+  info.si_pid             = pid;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  info.si_uid             = chgrp->tg_uid;
+#else
+  info.si_uid             = 0;
+#endif
+  info.si_status          = signo;
+
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  sigact    = nxsig_find_action(pgrp, SIGCHLD);
+  nocldstop = sigact != NULL && (sigact->act.sa_flags & SA_NOCLDSTOP) != 0;
+#endif
+
+  if (nocldstop)
+    {
+      nxsig_wake_waiters(pgrp, &info);
+    }
+
+  leave_critical_section(flags);
+
+  if (!nocldstop)
+    {
+      nxsig_dispatch(ppid, &info, false, NULL, false);
+    }
+}
+#endif
