@@ -32,6 +32,10 @@ ifeq ($(CONFIG_BOARDCTL_RESET),y)
   CSRCS += qemu_reset.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_POWEROFF),y)
+  CSRCS += qemu_power.c
+endif
+
 ifeq ($(CONFIG_ETC_ROMFS),y)
 ifeq ($(CONFIG_SYSTEM_NXINIT),y)
   RCSRCS += etc/init.d/init.rc
