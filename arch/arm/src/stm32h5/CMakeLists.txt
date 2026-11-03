@@ -72,14 +72,6 @@ if(CONFIG_STM32_USBFS_HOST)
   list(APPEND SRCS stm32_usbdrdhost.c)
 endif()
 
-if(CONFIG_STM32_ETHMAC)
-  list(APPEND SRCS stm32_ethernet.c)
-endif()
-
-if(CONFIG_MDIO_BUS)
-  list(APPEND SRCS stm32_mdio.c)
-endif()
-
 if(CONFIG_STM32_DTS)
   list(APPEND SRCS stm32_dts.c)
 endif()

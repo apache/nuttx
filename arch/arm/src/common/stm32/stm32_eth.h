@@ -31,6 +31,8 @@
 
 #if defined(CONFIG_STM32_HAVE_IP_ETHMAC_M3M4_V1)
 #  include "stm32_eth_m3m4_v1.h"
+#elif defined(CONFIG_STM32_HAVE_IP_ETHMAC_V2)
+#  include "stm32_eth_v2.h"
 #else
 #  error "Unsupported STM32 stm32_eth"
 #endif

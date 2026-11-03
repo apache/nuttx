@@ -162,18 +162,6 @@ if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
-if(CONFIG_STM32_ETHMAC)
-  list(APPEND SRCS stm32_ethernet.c)
-endif()
-
-if(CONFIG_MDIO_BUS)
-  if(CONFIG_STM32_ETH_MDIO_GPIO)
-    list(APPEND SRCS stm32_mdio_gpio.c)
-  else()
-    list(APPEND SRCS stm32_mdio.c)
-  endif()
-endif()
-
 if(CONFIG_PM)
   list(APPEND SRCS stm32_pmsleep.c stm32_pmstandby.c stm32_pmstop.c)
   if(NOT CONFIG_ARCH_CUSTOM_PMINIT)

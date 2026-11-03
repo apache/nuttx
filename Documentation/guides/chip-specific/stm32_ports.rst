@@ -611,7 +611,7 @@ AES/CRYP      to be done    not supported
 CAN/FDCAN     FDCAN         arch/arm/src/stm32h5/stm32_fdcan.c     
 DAC           to be done    not supported                          
 DTS           to be done    arch/arm/src/stm32h5/stm32_dts.c       
-ETH           to be done    arch/arm/src/stm32h5/stm32_ethernet.c  
+ETH           v2            arch/arm/src/common/stm32/stm32_eth_v2.c
 EXTI          to be done    arch/arm/src/stm32h5/stm32_exti_gpio.c 
 FLASH         to be done    arch/arm/src/stm32h5/stm32_flash.c     
 GPIO          to be done    arch/arm/src/stm32h5/stm32_gpio.c      
@@ -647,7 +647,7 @@ CAN/FDCAN     FDCAN         arch/arm/src/stm32h7/stm32_fdcan_sock.c
 DAC           to be done    not supported                          
 DMA           v2 style      arch/arm/src/stm32h7/stm32_dma.c       
 DMA2D         to be done    not supported                          
-ETH           to be done    arch/arm/src/stm32h7/stm32_ethernet.c  
+ETH           v2            arch/arm/src/common/stm32/stm32_eth_v2.c
 EXTI          to be done    arch/arm/src/stm32h7/stm32_exti_gpio.c 
 FLASH         to be done    arch/arm/src/stm32h7/stm32_flash.c     
 FMC/FSMC      to be done    arch/arm/src/stm32h7/stm32_fmc.c       

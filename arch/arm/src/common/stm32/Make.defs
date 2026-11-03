@@ -106,6 +106,18 @@ ifeq ($(CONFIG_STM32_SPI)$(CONFIG_STM32_HAVE_IP_SPI_V5),yy)
 CHIP_CSRCS += stm32_spi_v5.c
 endif
 
+ifeq ($(CONFIG_STM32_ETHMAC)$(CONFIG_STM32_HAVE_IP_ETHMAC_V2),yy)
+CHIP_CSRCS += stm32_eth_v2.c
+endif
+
+ifeq ($(CONFIG_MDIO_BUS)$(CONFIG_STM32_HAVE_IP_ETHMAC_V2),yy)
+ifeq ($(CONFIG_STM32_ETH_MDIO_GPIO),y)
+CHIP_CSRCS += stm32_mdio_gpio.c
+else
+CHIP_CSRCS += stm32_mdio_v2.c
+endif
+endif
+
 ifeq ($(CONFIG_STM32_COMMON_M33),y)
 CHIP_CSRCS += stm32_allocateheap_m33_v1.c
 CHIP_CSRCS += stm32_irq_m33_v1.c

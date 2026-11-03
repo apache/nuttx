@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_mdio_gpio.c
+ * arch/arm/src/common/stm32/stm32_mdio_gpio.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -40,8 +40,8 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "hardware/stm32_ethernet.h"
-#include "stm32_gpio.h"
+#include "hardware/stm32_eth_v2.h"
+#include "stm32.h"
 #include "stm32_mdio_gpio.h"
 
 /****************************************************************************

@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_ethernet.h
+ * arch/arm/src/common/stm32/stm32_eth_v2.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_ETHERNET_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_ETHERNET_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_ETH_V2_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_ETH_V2_H
 
 /****************************************************************************
  * Included Files
@@ -27,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#include "hardware/stm32_ethernet.h"
+#include "hardware/stm32_eth_v2.h"
 
 #if STM32_NETHERNET > 0
 #ifndef __ASSEMBLY__
@@ -96,4 +98,4 @@ int stm32_phy_boardinitialize(int intf);
 
 #endif /* __ASSEMBLY__ */
 #endif /* STM32_NETHERNET > 0 */
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_ETHERNET_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_ETH_V2_H */

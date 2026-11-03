@@ -33,7 +33,7 @@
 
 #if STM32_NETHERNET > 0
 
-#include "hardware/stm32_eth.h"
+#include "hardware/stm32_eth_v1.h"
 
 #ifndef __ASSEMBLY__
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_mdio.h
+ * arch/arm/src/common/stm32/stm32_mdio_gpio.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_MDIO_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_MDIO_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_MDIO_GPIO_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_MDIO_GPIO_H
 
 /****************************************************************************
  * Included Files
@@ -43,16 +43,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_mdio_bus_initialize
+ * Name: stm32_mdiogpio_bus_initialize
  *
  * Description:
- *   Initialize the MDIO bus
+ *   Initialize the MDIO bus to emilate STA via GPIO pins
+ *
+ * Input Parameters:
+ *   mdc_out  - MDC GPIO pin definition for output
+ *   mdio_out - MDIO GPIO pin definition for output
+ *   mdio_in  - MDIO GPIO pin definition for input
  *
  * Returned Value:
- *   Initialized MDIO bus structure or NULL on failure
+ *   Initialized MDIO GPIO bus structure or NULL on failure
  *
  ****************************************************************************/
 
-struct mdio_bus_s *stm32_mdio_bus_initialize(void);
+struct mdio_bus_s *stm32_mdiogpio_bus_initialize(uint32_t mdc_out,
+                                                 uint32_t mdio_out,
+                                                 uint32_t mdio_inp);
 
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_MDIO_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_MDIO_GPIO_H */
