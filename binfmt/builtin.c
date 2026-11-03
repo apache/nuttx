@@ -92,8 +92,8 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
   ret = builtin_isavail(filename);
   if (ret < 0)
     {
-      berr("ERROR: %s is not a builtin application\n", filename);
-      return ret;
+      binfo("%s is not a builtin application\n", filename);
+      return -ENOEXEC;
     }
 
   /* Return the load information.  NOTE: that there is no way to configure

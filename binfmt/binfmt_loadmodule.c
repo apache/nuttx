@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/stat.h>
 #include <sched.h>
 #include <nuttx/debug.h>
 #include <errno.h>
@@ -36,6 +37,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/binfmt/binfmt.h>
+#include <nuttx/fs/fs.h>
 
 #include "binfmt.h"
 
@@ -103,6 +105,8 @@ static int load_absmodule(FAR struct binary_s *bin, FAR const char *filename,
                           FAR const struct symtab_s *exports, int nexports)
 {
   FAR struct binfmt_s *binfmt;
+  struct stat buf;
+  int first = -ENOEXEC;
   int ret = -ENOENT;
 
   binfo("Loading %s\n", filename);
@@ -142,7 +146,18 @@ static int load_absmodule(FAR struct binary_s *bin, FAR const char *filename,
           binfmt_dumpmodule(bin);
           break;
         }
-      else if (ret == -EACCES)
+
+      /* -ENOEXEC is the "not my format" of a handler.  Keep the first other
+       * error (a missing file, or -ENOMEM from a handler that knew the
+       * format): the next handlers must not hide it.
+       */
+
+      if (first == -ENOEXEC && ret != -ENOEXEC)
+        {
+          first = ret;
+        }
+
+      if (ret == -EACCES)
         {
           /* Access explicitly denied -- stop here; do not let a fallback
            * loader bypass the execute-permission check that already ran.
@@ -152,7 +167,25 @@ static int load_absmodule(FAR struct binary_s *bin, FAR const char *filename,
         }
     }
 
-  return ret;
+  if (ret == OK)
+    {
+      return OK;
+    }
+
+  /* A handler that is not for this format need not look at the file, so
+   * only here do we know if a missing file is the reason.
+   */
+
+  if (first == -ENOEXEC)
+    {
+      ret = nx_stat(filename, &buf, 1);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  return first;
 }
 
 /****************************************************************************
