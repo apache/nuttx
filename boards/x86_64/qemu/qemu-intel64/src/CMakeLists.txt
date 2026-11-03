@@ -26,6 +26,10 @@ if(CONFIG_BOARDCTL_RESET)
   list(APPEND SRCS qemu_reset.c)
 endif()
 
+if(CONFIG_BOARDCTL_POWEROFF)
+  list(APPEND SRCS qemu_power.c)
+endif()
+
 if(CONFIG_BUILD_KERNEL)
   # Pack the standalone application binaries into the ROMFS image registered by
   # qemu_boardinit.c. The application targets are not known yet when this
