@@ -54,8 +54,6 @@
 #include "hardware/imx9_flexspi.h"
 #include "hardware/imx9_pinmux.h"
 
-#ifdef CONFIG_IMX9_FLEXSPI
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -1255,5 +1253,3 @@ struct flexspi_dev_s *imx9_flexspi_initialize(int intf)
 
   return &priv->flexspi;
 }
-
-#endif /* CONFIG_IMX9_FLEXSPI */
