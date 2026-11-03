@@ -118,6 +118,9 @@ multi-threaded task group:
 -  If a task group receives a signal and more than one thread is waiting
    on that signal, then one and only one indeterminate thread out of
    that waiting group will receive the signal.
+-  If the action of the signal is the default action *Abnormal
+   Termination*, all threads of the task group end at once, also the
+   threads that block the signal.
 
 You can mask out that signal using ''sigprocmask()'' (or
 ''pthread_sigmask()''). That signal will then be effectively disabled
