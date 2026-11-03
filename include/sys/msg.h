@@ -165,7 +165,8 @@ int msgget(key_t key, int msgflg);
  *   On success, msgsnd() returns 0 (OK); on error, -1 (ERROR)
  *   is returned, with errno set to indicate the error:
  *
- *   EAGAIN   The queue is full and IPC_NOWAIT is set.
+ *   EAGAIN   The queue is full or no free message is left, and
+ *            IPC_NOWAIT is set or the caller is an interrupt handler.
  *   EINVAL   msqid is not a valid message queue identifier, mtype is
  *            less than 1, or msgsz is greater than the maximum message
  *            size of the queue.
