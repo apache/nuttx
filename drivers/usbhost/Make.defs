@@ -84,6 +84,10 @@ ifeq ($(CONFIG_USBHOST_BTHCI),y)
 CSRCS += usbhost_bthci.c
 endif
 
+ifeq ($(CONFIG_USBHOST_UVC),y)
+CSRCS += usbhost_uvc.c
+endif
+
 ifeq ($(CONFIG_USBHOST_XHCI),y)
 CSRCS += usbhost_xhci.c usbhost_xhci_trace.c
 endif
