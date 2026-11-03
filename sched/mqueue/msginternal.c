@@ -72,7 +72,7 @@ static FAR struct msgq_s *nxmsg_alloc_internal(void)
       if (g_msgqs[i] == NULL)
         {
           g_msgqs[i] = msgq;
-          msgq->key = i + 1;
+          msgq->id = i + 1;
           return msgq;
         }
     }
@@ -91,7 +91,7 @@ static FAR struct msgq_s *nxmsg_alloc_internal(void)
 
   g_msgqs[g_nmsgq] = msgq;
 
-  msgq->key = g_nmsgq + 1;
+  msgq->id = g_nmsgq + 1;
 
   g_nmsgq += MQ_PERBLOCK;
 
@@ -172,12 +172,12 @@ void nxmsg_free(FAR struct msgq_s *msgq)
   FAR struct msgbuf_s *tmp;
   int index;
 
-  if (msgq == NULL || msgq->key <= 0 || msgq->key > g_nmsgq)
+  if (msgq == NULL || msgq->id <= 0 || msgq->id > g_nmsgq)
     {
       return;
     }
 
-  index = msgq->key - 1;
+  index = msgq->id - 1;
 
   /* Remove the queue from the table first, so that no task finds it after
    * the wake-up or while kmm_free() waits for the heap lock.
@@ -200,12 +200,31 @@ void nxmsg_free(FAR struct msgq_s *msgq)
  * Name: nxmsg_lookup
  ****************************************************************************/
 
-FAR struct msgq_s *nxmsg_lookup(key_t key)
+FAR struct msgq_s *nxmsg_lookup(int msqid)
 {
-  if (key <= 0 || key > g_nmsgq)
+  if (msqid <= 0 || msqid > g_nmsgq)
     {
       return NULL;
     }
 
-  return g_msgqs[key - 1];
+  return g_msgqs[msqid - 1];
+}
+
+/****************************************************************************
+ * Name: nxmsg_findkey
+ ****************************************************************************/
+
+FAR struct msgq_s *nxmsg_findkey(key_t key)
+{
+  int i;
+
+  for (i = 0; i < g_nmsgq; i++)
+    {
+      if (g_msgqs[i] != NULL && g_msgqs[i]->key == key)
+        {
+          return g_msgqs[i];
+        }
+    }
+
+  return NULL;
 }
