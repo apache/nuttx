@@ -338,7 +338,6 @@ spin_unlock_notrace(FAR volatile spinlock_t *lock)
 #else
   atomic_set_release((FAR atomic_t *)lock, SP_UNLOCKED);
 #endif
-  UP_DSB();
   UP_SEV();
 }
 #else
@@ -924,7 +923,6 @@ bool rspin_unlock(FAR rspinlock_t *lock)
   if (RSPINLOCK_COUNT(val) == 1u)
     {
       atomic_set_release(&lock->val, 0u);
-      UP_DSB();
       UP_SEV();
       ret = true;
     }
@@ -1139,7 +1137,6 @@ static inline_function void read_unlock(FAR volatile rwlock_t *lock)
   DEBUGASSERT(atomic_read(lock) >= RW_SP_READ_LOCKED);
 
   atomic_sub_release(lock, 1);
-  UP_DSB();
   UP_SEV();
 }
 
@@ -1249,7 +1246,6 @@ static inline_function void write_unlock(FAR volatile rwlock_t *lock)
   DEBUGASSERT(atomic_read(lock) == RW_SP_WRITE_LOCKED);
 
   atomic_set_release(lock, RW_SP_UNLOCKED);
-  UP_DSB();
   UP_SEV();
 }
 

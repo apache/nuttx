@@ -37,7 +37,6 @@
 #define arm_dmb(n) __asm__ __volatile__ ("dmb " #n : : : "memory")
 #define arm_isb()  __asm__ __volatile__ ("isb " : : : "memory")
 #define arm_nop()  __asm__ __volatile__ ("nop\n")
-#define arm_sev()  __asm__ __volatile__ ("sev\n")
 
 #define UP_DSB()  arm_dsb(15)
 
@@ -47,6 +46,5 @@
 
 #define UP_ISB()  arm_isb()
 #define UP_NOP()  arm_nop()
-#define UP_SEV()  arm_sev()
 
 #endif /* __ARCH_ARM_INCLUDE_ARMV7_A_BARRIERS_H */
