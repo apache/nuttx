@@ -153,6 +153,10 @@
 #define STM32_TIM6_CLKIN   (STM32_PCLK1_FREQUENCY)
 #define STM32_TIM7_CLKIN   (STM32_PCLK1_FREQUENCY)
 
+/* LPTIM1 kernel clock is PCLK1 (RCC_CCIPR LPTIM1SEL reset value) */
+
+#define STM32_LPTIM1_CLKIN (STM32_PCLK1_FREQUENCY)
+
 /* USB divider -- Divide PLL clock by 1.5 */
 
 #define STM32_CFGR_USBPRE       0
