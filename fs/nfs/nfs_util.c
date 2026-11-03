@@ -131,7 +131,7 @@ int nfs_request(FAR struct nfsmount *nmp, int procnum,
     {
       ferr("ERROR: rpcclnt_request failed: %d\n", error);
 
-      if (error != -ENOTCONN)
+      if (error != -ENOTCONN && error != -EPIPE)
         {
           return error;
         }
