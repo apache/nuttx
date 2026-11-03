@@ -41,6 +41,14 @@
 
 /* Clocking *****************************************************************/
 
+/* Refer to following figures in ST RM0477 to understand clock
+ * naming and routing:
+ *
+ * page 354: Figure 40. Top-level clock tree
+ * page 371: Figure 48. Pll block diagram
+ * page 378: Figure 51. Core and bus generation
+ */
+
 /* The NUCLEO-H7S3L8 board provides the following clock sources:
  *
  *   MCO: 24 MHz from the ST-LINK is available as the HSE input
@@ -57,72 +65,109 @@
 #define STM32_LSI_FREQUENCY      32000ul
 #define STM32_LSE_FREQUENCY      32768ul
 
-/* Main PLL configuration
+/* PLL clocking is derived from pll_ck in put source divided by
+ * PLL DIVM divisor then multiplied by DIVM divisor:
  *
- * The HSI and HSE configurations both produce a 600 MHz PLL1 VCO and use
- * PLL1P as the system clock:
- *
- *   HSI: PLL1_VCO = (64 MHz / 32) * 300 = 600 MHz
- *   HSE: PLL1_VCO = (24 MHz / 2)  * 50  = 600 MHz
- *
- *   PLL1P = 600 MHz
- *   PLL1Q = 300 MHz
- *   PLL1R = 300 MHz
+ * VCOx = (pll_ck / DIVNx) * DIVMx
  */
 
-#ifdef CONFIG_NUCLEO_H7S3L8_USE_HSE
+/* Define pll_ck clock source and frequency */
+
+#ifdef CONFIG_STM32H7S8_DK_USE_HSE
 #  define STM32_BOARD_USEHSE
 #  define STM32_HSEBYP_ENABLE
 #  define STM32_PLLCFG_PLLSRC    RCC_PLLCKSELR_PLLSRC_HSE
-#  define STM32_PLLCFG_PLL1M     RCC_PLLCKSELR_DIVM1(2)
-#  define STM32_PLLCFG_PLL1N     RCC_PLL1DIVR1_N(50)
-#  define STM32_PLLCFG_PLL1CFG   (RCC_PLLCFGR_PLL1RGE_8_16 | \
-                                  RCC_PLLCFGR_PLL1PEN | \
-                                  RCC_PLLCFGR_PLL1QEN | \
-                                  RCC_PLLCFGR_PLL1REN)
+#  define STM32_PLL_CK_FREQUENCY STM32_HSE_FREQUENCY
 #else
 #  define STM32_BOARD_USEHSI
 #  define STM32_PLLCFG_PLLSRC    RCC_PLLCKSELR_PLLSRC_HSI
-#  define STM32_PLLCFG_PLL1M     RCC_PLLCKSELR_DIVM1(32)
-#  define STM32_PLLCFG_PLL1N     RCC_PLL1DIVR1_N(300)
-#  define STM32_PLLCFG_PLL1CFG   (RCC_PLLCFGR_PLL1RGE_2_4 | \
-                                  RCC_PLLCFGR_PLL1PEN | \
-                                  RCC_PLLCFGR_PLL1QEN | \
-                                  RCC_PLLCFGR_PLL1REN)
+#  define STM32_PLL_CK_FREQUENCY STM32_HSI_FREQUENCY
 #endif
 
-#define STM32_PLLCFG_PLL1P       RCC_PLL1DIVR1_P(1)
-#define STM32_PLLCFG_PLL1Q       RCC_PLL1DIVR1_Q(2)
-#define STM32_PLLCFG_PLL1R       RCC_PLL1DIVR1_R(2)
-
-#define STM32_VCO1_FREQUENCY     600000000ul
-#define STM32_PLL1P_FREQUENCY    STM32_VCO1_FREQUENCY
-#define STM32_PLL1Q_FREQUENCY    (STM32_VCO1_FREQUENCY / 2)
-#define STM32_PLL1R_FREQUENCY    (STM32_VCO1_FREQUENCY / 2)
-
-/* SYSCLK = PLL1P = 600 MHz
- * CPUCLK = SYSCLK
+/* Main PLL configuration (PLL1)
+ *
+ * The HSI and HSE configurations can both generate a 600 MHz
+ * PLL1 VCO clock to use as the system clock:
+ *
+ *   HSE: PLL1_VCO = (24 MHz / 2)  * 50  = 600 MHz
+ *   HSI: PLL1_VCO = (64 MHz / 32) * 300 = 600 MHz
  */
 
-#define STM32_RCC_CDCFGR_CPRE    RCC_CDCFGR_CPRE_SYSCLK
-#define STM32_SYSCLK_FREQUENCY   STM32_PLL1P_FREQUENCY
+#ifdef CONFIG_STM32H7S8_DK_USE_HSE
+#define STM32_PLL1_DIVM_VAL          2
+#define STM32_PLL1_DIVN_VAL          50
+#else
+#define STM32_PLL1_DIVM_VAL          32
+#define STM32_PLL1_DIVN_VAL          300
+#endif
+
+#define STM32_REF1_CK_FREQUENCY  (STM32_PLL_CK_FREQUENCY / STM32_PLL1_DIVM_VAL)
+#define STM32_VCO1_CK_FREQUENCY  (STM32_REF1_CK_FREQUENCY * STM32_PLL1_DIVN_VAL)
+
+/* Define main PLL1 output dividers:
+ *
+ * pll1_p_ck = (vco1_ck / 1) => 600Mhz
+ * pll1_q_ck = (vco1_ck / 2) => 300Mhz
+ * pll1_s_ck = (vco1_ck / 2) => 300Mhz
+ */
+
+#define STM32_PLL1_DIVP_VAL      1
+#define STM32_PLL1P_FREQUENCY    (STM32_VCO1_CK_FREQUENCY/STM32_PLL1_DIVP_VAL)
+#define STM32_PLL1_DIVQ_VAL      2
+#define STM32_PLL1Q_FREQUENCY    (STM32_VCO1_CK_FREQUENCY/STM32_PLL1_DIVQ_VAL)
+#define STM32_PLL1_DIVS_VAL      2
+#define STM32_PLL1S_FREQUENCY    (STM32_VCO1_CK_FREQUENCY/STM32_PLL1_DIVS_VAL)
+
+/* SW field of SW selects which clock source to use as sys_ck;
+ * use 600 Mhz pll1_p_ck
+ */
+
+#define STM32_SYS_CK_SWCFG       RCC_CFGR_SW_PLL1
+#define STM32_SYS_CK_FREQUENCY   STM32_PLL1P_FREQUENCY
+
+/* CPRE is divisor of sys_ck to generate sys_cpu_ck:
+ *
+ * sys_cpu_ck = PLL1P / CPRE = PLL1P / 1 = 600 MHz
+ * SYSCLK = sys_cpu_ck
+ * CPUCLK = sys_cpu_ck
+ */
+
+#define STM32_CPRE_DIV_VAL       1
+#define STM32_SYSCLK_FREQUENCY   (STM32_SYS_CK_FREQUENCY / STM32_CPRE_DIV_VAL)
 #define STM32_CPUCLK_FREQUENCY   STM32_SYSCLK_FREQUENCY
 
-/* AHB clock (HCLK) is SYSCLK/2 (300 MHz). */
+/* BMPRE is divisor of sys_cpu_ck to generate sys_bus_clock (AHB clock):
+ *
+ * sys_bus_ck = SYSCLK / 2 = 600 / 2 = 300 Mhz
+ * HCLK = sys_bus_ck
+ */
 
-#define STM32_RCC_BMCFGR_BMPRE   RCC_BMCFGR_BMPRE_SYSCLKd2
-#define STM32_HCLK_FREQUENCY     (STM32_SYSCLK_FREQUENCY / 2)
+#define STM32_BMPRE_DIV_VAL      2
+#define STM32_HCLK_FREQUENCY     (STM32_SYSCLK_FREQUENCY / STM32_BMPRE_DIV_VAL)
 
-/* APB1, APB2, APB4 and APB5 clocks are HCLK/2 (150 MHz). */
+/* APB1, APB2, APB4 and APB5 peripheral clocks are HCLK/2 (150 MHz):
+ *
+ * rcc_pclk1 = sys_bus_ck / 2 = 300 / 2 = 150 Mhz
+ * PCLK1 = rcc_pclk1
+ * rcc_pclk2 = sys_bus_ck / 2 = 300 / 2 = 150 Mhz
+ * PCLK2 = rcc_pclk2
+ * rcc_pclk4 = sys_bus_ck / 2 = 300 / 2 = 150 Mhz
+ * PCLK4 = rcc_pclk4
+ * rcc_pclk5 = sys_bus_ck / 2 = 300 / 2 = 150 Mhz
+ * PCLK5 = rcc_pclk5
+ */
 
-#define STM32_RCC_APBCFGR_PPRE1  RCC_APBCFGR_PPRE1_HCLKd2
-#define STM32_RCC_APBCFGR_PPRE2  RCC_APBCFGR_PPRE2_HCLKd2
-#define STM32_RCC_APBCFGR_PPRE4  RCC_APBCFGR_PPRE4_HCLKd2
-#define STM32_RCC_APBCFGR_PPRE5  RCC_APBCFGR_PPRE5_HCLKd2
-#define STM32_PCLK1_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
-#define STM32_PCLK2_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
-#define STM32_PCLK4_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
-#define STM32_PCLK5_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
+#define STM32_PPRE1_DIV_VAL      2
+#define STM32_PCLK1_FREQUENCY    (STM32_HCLK_FREQUENCY / STM32_PPRE1_DIV_VAL)
+
+#define STM32_PPRE2_DIV_VAL      2
+#define STM32_PCLK2_FREQUENCY    (STM32_HCLK_FREQUENCY / STM32_PPRE1_DIV_VAL)
+
+#define STM32_PPRE4_DIV_VAL      2
+#define STM32_PCLK4_FREQUENCY    (STM32_HCLK_FREQUENCY / STM32_PPRE1_DIV_VAL)
+
+#define STM32_PPRE5_DIV_VAL      2
+#define STM32_PCLK5_FREQUENCY    (STM32_HCLK_FREQUENCY / STM32_PPRE1_DIV_VAL)
 
 /* Timers on APB1 and APB2 are clocked at twice the peripheral clock. */
 
@@ -137,7 +182,6 @@
 #define STM32_TIM14_CLKIN        (2 * STM32_PCLK1_FREQUENCY)
 
 #define STM32_TIM1_CLKIN         (2 * STM32_PCLK2_FREQUENCY)
-#define STM32_TIM8_CLKIN         (2 * STM32_PCLK2_FREQUENCY)
 #define STM32_TIM9_CLKIN         (2 * STM32_PCLK2_FREQUENCY)
 #define STM32_TIM15_CLKIN        (2 * STM32_PCLK2_FREQUENCY)
 #define STM32_TIM16_CLKIN        (2 * STM32_PCLK2_FREQUENCY)

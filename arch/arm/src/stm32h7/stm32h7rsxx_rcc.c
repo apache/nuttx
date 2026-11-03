@@ -61,6 +61,47 @@
 #  define STM32_PWR_CSR2_SELECTION PWR_CSR2_LDOEN
 #endif
 
+/* Validate CPRE and BMPRE divisors. They must
+ * be defined and a power of two between 1 and 512
+ */
+
+#if (!defined(STM32_CPRE_DIV_VAL) || (STM32_CPRE_DIV_VAL < 1)           \
+     || (STM32_CPRE_DIV_VAL > 512) || !IS_POWER_OF_2(STM32_CPRE_DIV_VAL))
+#error "STM32_CPRE_DIV_VAL is not defined or illegal"
+#endif
+#if (!defined(STM32_BMPRE_DIV_VAL) || (STM32_BMPRE_DIV_VAL < 1) \
+     || (STM32_CPRE_DIV_VAL > 512) || !IS_POWER_OF_2(STM32_BMPRE_DIV_VAL))
+#error "STM32_BMPRE_DIV_VAL is not defined or illegal"
+#endif
+
+/* Validate PPRE1, PPRE2, PPRE4, and PPRE5 divisors. If defined
+ * they must be a power of two between 1 and 16.
+ */
+
+#if defined(STM32_PPRE1_DIV_VAL)                              \
+  && ((STM32_PPRE1_DIV_VAL < 1) || (STM32_PPRE1_DIV_VAL > 16) \
+     || !IS_POWER_OF_2(STM32_PPRE1_DIV_VAL))
+#error "STM32_PPRE1_DIV_VAL is illegal"
+#endif
+
+#if defined(STM32_PPRE2_DIV_VAL)                              \
+  && ((STM32_PPRE2_DIV_VAL < 1) || (STM32_PPRE2_DIV_VAL > 16) \
+     || !IS_POWER_OF_2(STM32_PPRE2_DIV_VAL))
+#error "STM32_PPRE2_DIV_VAL is illegal"
+#endif
+
+#if defined(STM32_PPRE4_DIV_VAL)                              \
+  && ((STM32_PPRE4_DIV_VAL < 1) || (STM32_PPRE4_DIV_VAL > 16) \
+     || !IS_POWER_OF_2(STM32_PPRE4_DIV_VAL))
+#error "STM32_PPRE4_DIV_VAL is illegal"
+#endif
+
+#if defined(STM32_PPRE5_DIV_VAL)                              \
+  && ((STM32_PPRE5_DIV_VAL < 1) || (STM32_PPRE5_DIV_VAL > 16) \
+     || !IS_POWER_OF_2(STM32_PPRE5_DIV_VAL))
+#error "STM32_PPRE5_DIV_VAL is illegal"
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -445,6 +486,9 @@ static inline void rcc_enableperipherals(void)
 void stm32_stdclockconfig(void)
 {
   uint32_t regval;
+  uint32_t regval_pllcfgr;
+  uint32_t regval_pllxdivr1;
+  uint32_t regval_pllxdivr2;
   volatile int32_t timeout;
 
   /* Select the PMU supply the board uses.  As on the other H7 parts the low
@@ -554,14 +598,66 @@ void stm32_stdclockconfig(void)
     {
     }
 
+  regval_pllcfgr = getreg32(STM32_RCC_PLLCFGR);
+  regval_pllcfgr &= ~(RCC_PLLCFGR_PLL1SEN | RCC_PLLCFGR_PLL1QEN
+                   | RCC_PLLCFGR_PLL1PEN | RCC_PLLCFGR_PLL1RGE_MASK
+                   | RCC_PLLCFGR_PLL1SSCGEN | RCC_PLLCFGR_PLL1VCOSEL
+                   | RCC_PLLCFGR_PLL1FRACEN);
+
+  regval_pllxdivr1 = getreg32(STM32_RCC_PLL1DIVR1);
+  regval_pllxdivr1 &= ~(RCC_PLLDIVR_DIVQ_MASK | RCC_PLLDIVR_DIVP_MASK
+                        | RCC_PLLDIVR_DIVN_MASK);
+  regval_pllxdivr2 = getreg32(STM32_RCC_PLL1DIVR2);
+  regval_pllxdivr2 &= ~RCC_PLL1DIVR2_DIVS_MASK;
+
   /* Configure PLL1 source, dividers and outputs */
 
-  putreg32(STM32_PLLCFG_PLLSRC | STM32_PLLCFG_PLL1M,
-           STM32_RCC_PLLCKSELR);
-  putreg32(STM32_PLLCFG_PLL1CFG, STM32_RCC_PLLCFGR);
-  putreg32(STM32_PLLCFG_PLL1N | STM32_PLLCFG_PLL1P |
-           STM32_PLLCFG_PLL1Q | STM32_PLLCFG_PLL1R,
-           STM32_RCC_PLL1DIVR1);
+  /* Determine PLLCFGR:PLL1RGE from ref1_ck */
+#if (STM32_REF1_CK_FREQUENCY >= 1000000 && STM32_REF1_CK_FREQUENCY < 2000000)
+  regval_pllcfgr |= RCC_PLLCFGR_PLL1RGE_1_2;
+#elif (STM32_REF1_CK_FREQUENCY >= 2000000 && STM32_REF1_CK_FREQUENCY < 4000000)
+  regval_pllcfgr |= RCC_PLLCFGR_PLL1RGE_2_4;
+#elif (STM32_REF1_CK_FREQUENCY >= 4000000 && STM32_REF1_CK_FREQUENCY < 8000000)
+  regval_pllcfgr |= RCC_PLLCFGR_PLL1RGE_4_8;
+#elif (STM32_REF1_CK_FREQUENCY >= 8000000 && STM32_REF1_CK_FREQUENCY < 16000000)
+  regval_pllcfgr |= RCC_PLLCFGR_PLL1RGE_8_16;
+#else
+#error "ref1_ck is out of range(see 7.5.5 PLL description in TRM)"
+#endif
+
+  /* Set PLL muptiplier */
+
+  regval_pllxdivr1 |= RCC_PLLDIVR_DIVN(STM32_PLL1_DIVN_VAL);
+
+  /* PLL divisors are enabled IFF divisor value is defined */
+
+#ifdef STM32_PLL1_DIVP_VAL
+  regval_pllcfgr |= RCC_PLLCFGR_PLL1PEN;
+  regval_pllxdivr1 |= RCC_PLLDIVR_DIVP(STM32_PLL1_DIVP_VAL);
+#endif
+#ifdef STM32_PLL1_DIVQ_VAL
+  regval_pllcfgr |= RCC_PLLCFGR_PLL1QEN;
+  regval_pllxdivr1 |= RCC_PLLDIVR_DIVQ(STM32_PLL1_DIVQ_VAL);
+#endif
+#ifdef STM32_PLL1_DIVS_VAL
+  regval_pllcfgr |= RCC_PLLCFGR_PLL1SEN;
+  regval_pllxdivr2 |= RCC_PLLDIVR_DIVS(STM32_PLL1_DIVS_VAL);
+#endif
+
+  /* Set PLL source clock, as well as DIVM1 */
+
+  regval  = getreg32(STM32_RCC_PLLCKSELR);
+  regval &= ~(RCC_PLLCKSELR_DIVM1_MASK | RCC_PLLCKSELR_PLLSRC_MASK);
+  regval |= STM32_PLLCFG_PLLSRC | RCC_PLLCKSELR_DIVM1(STM32_PLL1_DIVM_VAL);
+  putreg32(regval, STM32_RCC_PLLCKSELR);
+
+  /* Set RCC_PLLCFGR, RCC_PLL1DIVR1, RCC_PLL1DIVR2 */
+
+  putreg32(regval_pllcfgr, STM32_RCC_PLLCFGR);
+  putreg32(regval_pllxdivr1, STM32_RCC_PLL1DIVR1);
+  putreg32(regval_pllxdivr2, STM32_RCC_PLL1DIVR2);
+
+  /* Enable PLL1 and wait for it to become ready */
 
   modifyreg32(STM32_RCC_CR, 0, RCC_CR_PLL1ON);
   while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL1RDY) == 0)
@@ -570,18 +666,49 @@ void stm32_stdclockconfig(void)
 
   /* Configure the CPU, bus matrix and APB prescalers */
 
-  putreg32(STM32_RCC_CDCFGR_CPRE, STM32_RCC_CDCFGR);
-  putreg32(STM32_RCC_BMCFGR_BMPRE, STM32_RCC_BMCFGR);
-  putreg32(STM32_RCC_APBCFGR_PPRE1 | STM32_RCC_APBCFGR_PPRE2 |
-           STM32_RCC_APBCFGR_PPRE4 | STM32_RCC_APBCFGR_PPRE5,
-           STM32_RCC_APBCFGR);
+  regval = getreg32(STM32_RCC_CDCFGR);
+  regval &= ~RCC_CDCFGR_CPRE_MASK;
+
+  /* Map from CRPE divisor to RCC_CDCFGR:CPRE field value */
+
+  regval |= RCC_CDCFGR_CPRE(STM32_CPRE_DIV_VAL);
+
+  putreg32(regval, STM32_RCC_CDCFGR);
+  regval = getreg32(STM32_RCC_BMCFGR);
+
+  /* Map from BMPRE divisor to RCC_BMCFGR:BMPRE field value */
+
+  regval |= RCC_BMCFGR_BMPRE(STM32_BMPRE_DIV_VAL);
+
+  putreg32(regval, STM32_RCC_BMCFGR);
+
+  regval = getreg32(STM32_RCC_APBCFGR);
+
+  /* Map from PPRE[1-5] divisor to RCC_APBCFGR:PPRE[1-5] field value */
+
+#if defined(STM32_PPRE1_DIV_VAL)
+  regval |= RCC_APBCFGR_PPRE1(STM32_PPRE1_DIV_VAL);
+#endif
+#if defined(STM32_PPRE2_DIV_VAL)
+  regval |= RCC_APBCFGR_PPRE1(STM32_PPRE2_DIV_VAL);
+#endif
+#if defined(STM32_PPRE4_DIV_VAL)
+  regval |= RCC_APBCFGR_PPRE1(STM32_PPRE4_DIV_VAL);
+#endif
+#if defined(STM32_PPRE5_DIV_VAL)
+  regval |= RCC_APBCFGR_PPRE1(STM32_PPRE5_DIV_VAL);
+#endif
+  putreg32(regval, STM32_RCC_APBCFGR);
 
   /* Select PLL1P as the system clock source */
 
   regval  = getreg32(STM32_RCC_CFGR);
   regval &= ~RCC_CFGR_SW_MASK;
-  regval |= RCC_CFGR_SW_PLL1;
+  regval |= STM32_SYS_CK_SWCFG;
   putreg32(regval, STM32_RCC_CFGR);
+
+  /* Wait for the system clock switch to take effect */
+
   while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
          RCC_CFGR_SWS_PLL1)
     {
