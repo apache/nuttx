@@ -175,6 +175,9 @@ static int msgrcv_wait(FAR struct msgq_s *msgq, FAR struct msgbuf_s **rcvmsg,
 
 found:
   msgq->nmsgs--;
+  msgq->cbytes -= newmsg->msize;
+  msgq->lrpid   = nxsched_getpid();
+  msgq->rtime   = time(NULL);
   *rcvmsg = newmsg;
   return OK;
 }

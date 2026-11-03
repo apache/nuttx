@@ -54,6 +54,13 @@ struct msgq_s
   struct mqueue_cmn_s  cmn;
   struct list_node     msglist;       /* Prioritized message list */
   key_t                key;           /* The msgget() key, or IPC_PRIVATE */
+  time_t               stime;         /* Time of the last msgsnd() */
+  time_t               rtime;         /* Time of the last msgrcv() */
+  time_t               ctime;         /* Time of the last change */
+  struct ipc_perm      perm;          /* Ownership and permissions */
+  pid_t                lspid;         /* PID of the last msgsnd() */
+  pid_t                lrpid;         /* PID of the last msgrcv() */
+  msglen_t             cbytes;        /* Number of bytes in the queue */
   int16_t              id;            /* The message queue identifier */
   int16_t              maxmsgs;       /* Maximum number of messages in the queue */
   int16_t              nmsgs;         /* Number of message in the queue */

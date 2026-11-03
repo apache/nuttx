@@ -88,8 +88,9 @@ int msgctl(int msqid, int cmd, FAR struct msqid_ds *buf)
               break;
             }
 
-          msgq->maxmsgs = buf->msg_qbytes / CONFIG_MQ_MAXMSGSIZE;
-
+          msgq->maxmsgs   = buf->msg_qbytes / CONFIG_MQ_MAXMSGSIZE;
+          msgq->perm.mode = buf->msg_perm.mode & IPC_MODE;
+          msgq->ctime     = time(NULL);
           break;
         }
 
@@ -101,9 +102,15 @@ int msgctl(int msqid, int cmd, FAR struct msqid_ds *buf)
               break;
             }
 
+          buf->msg_perm   = msgq->perm;
+          buf->msg_stime  = msgq->stime;
+          buf->msg_rtime  = msgq->rtime;
+          buf->msg_ctime  = msgq->ctime;
+          buf->msg_cbytes = msgq->cbytes;
           buf->msg_qnum   = list_length(&msgq->msglist);
-          buf->msg_cbytes = buf->msg_qnum * CONFIG_MQ_MAXMSGSIZE;
           buf->msg_qbytes = msgq->maxmsgs * CONFIG_MQ_MAXMSGSIZE;
+          buf->msg_lspid  = msgq->lspid;
+          buf->msg_lrpid  = msgq->lrpid;
           break;
         }
 
