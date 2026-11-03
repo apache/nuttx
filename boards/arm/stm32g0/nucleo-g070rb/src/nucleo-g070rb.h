@@ -127,27 +127,6 @@ int stm32_pwm_setup(void);
 #endif
 
 /****************************************************************************
- * Name: stm32_timer_driver_setup
- *
- * Description:
- *   Configure the timer driver.
- *
- * Input Parameters:
- *   devpath - The full path to the timer device.  This should be of the
- *             form /dev/timer0
- *   timer   - The timer's number.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_TIMER
-int stm32_timer_driver_setup(const char *devpath, int timer);
-#endif
-
-/****************************************************************************
  * Name: stm32_bringup
  *
  * Description:
