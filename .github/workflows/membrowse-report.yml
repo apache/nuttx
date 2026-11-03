@@ -45,6 +45,8 @@ jobs:
           HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           GH_TOKEN: ${{ github.token }}
         run: |
+          . .github/scripts/gh_api_retry.sh
+
           # On the very first push to a branch, github.event.before is all-zeros.
           if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
             echo "source=true" >> "$GITHUB_OUTPUT"
@@ -59,7 +61,7 @@ jobs:
           #
           # GitHub's compare API uses 3-dot semantics, so .merge_base_commit.sha
           # is the fork point. gh is pre-installed on the runner.
-          MERGE_BASE=$(gh api \
+          MERGE_BASE=$(gh_api_retry \
             "repos/$GITHUB_REPOSITORY/compare/$BASE_SHA...$HEAD_SHA" \
             --jq '.merge_base_commit.sha' 2>/dev/null || true)
           if [ -z "$MERGE_BASE" ]; then
@@ -204,11 +206,13 @@ jobs:
         run: |
           set -uo pipefail
 
+          . sources/nuttx/.github/scripts/gh_api_retry.sh
+
           # Re-read the current body so a re-run picks up an edited Depends-On
           # line. Do not fall back to the event payload: unlike build.yml, which
           # resolves this once for every target, each matrix leg resolves
           # independently and could otherwise use a different declaration.
-          if ! PR_BODY="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.body // ""')"; then
+          if ! PR_BODY="$(gh_api_retry "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.body // ""')"; then
             echo "::error::Could not read the PR description."
             exit 1
           fi
@@ -319,7 +323,7 @@ jobs:
 
             # Skip a merged dependency and reject a closed one, as build.yml
             # does.
-            if ! DEP_INFO=$(gh api "repos/${DEP_REPO}/pulls/${DEP_NUM}" \
+            if ! DEP_INFO=$(gh_api_retry "repos/${DEP_REPO}/pulls/${DEP_NUM}" \
                 --jq 'if .merged then "merged \(.merge_commit_sha)" else .state end'); then
               echo "::warning::Could not read the state of ${DEP}; applying it."
               DEP_INFO=""

@@ -91,8 +91,10 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         shell: bash
         run: |
+          . nuttx/.github/scripts/gh_api_retry.sh
+
           # Reuse the parser used by the main build workflow.
-          if body=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
+          if body=$(gh_api_retry "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
               --jq '.body // ""'); then
             export PR_BODY="$body"
           else
@@ -118,7 +120,7 @@ jobs:
               *) exit 1 ;;
             esac
             query='[.state, .merged, (.merge_commit_sha // "-")] | @tsv'
-            if info=$(gh api "repos/$repo/pulls/$number" --jq "$query"); then
+            if info=$(gh_api_retry "repos/$repo/pulls/$number" --jq "$query"); then
               read -r status merged merge_sha <<< "$info"
             else
               echo "::warning::Could not read the state of $dependency;" \
