@@ -231,7 +231,8 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
     {
       if (++info >= &conn->pollinfo[CONFIG_NET_TCP_NPOLLWAITERS])
         {
-          DEBUGPANIC();
+          nwarn("WARNING: more than %d poll waiters\n",
+                CONFIG_NET_TCP_NPOLLWAITERS);
           ret = -ENOMEM;
           goto errout_with_lock;
         }
