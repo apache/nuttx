@@ -483,69 +483,19 @@ static unsigned long eval(FAR const char *s, unsigned long n)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: dcngettext
+ * Name: motranslate
  *
  * Description:
- *   The dcngettext function searches the message catalogs identified by
- *   domainname and category for a string which is equal to msgid1.
- *
- *   The msgid1 parameter must contain the singular form of the string to
- *   be converted. It is also used as the key for the search in the catalog.
- *   The msgid2 parameter is the plural form. The parameter n is used to
- *   determine the plural form.
- *
- * Returned Value:
- *   If there is such a string available it is returned. Otherwise msgid1 is
- *   returned if n == 1, otherwise msgid2.
- *
- *   Please note that although the return value is char * the returned string
- *   must not be changed. This broken type results from the history of the
- *   function and does not reflect the way the function should be used.
+ *   The work of dcngettext().  It can change errno (the open() of a
+ *   message catalog that does not exist, for example).
  *
  ****************************************************************************/
 
-FAR char *gettext(FAR const char *msgid)
-{
-  return dgettext(NULL, msgid);
-}
-
-FAR char *dgettext(FAR const char *domainname,
-                   FAR const char *msgid)
-{
-  return dcgettext(domainname, msgid, LC_MESSAGES);
-}
-
-FAR char *dcgettext(FAR const char *domainname,
-                    FAR const char *msgid,
-                    int category)
-{
-  return dcngettext(domainname, msgid, NULL, 1, category);
-}
-
-FAR char *ngettext(FAR const char *msgid1,
-                   FAR const char *msgid2,
-                   unsigned long int n)
-{
-  return dngettext(NULL, msgid1, msgid2, n);
-}
-
-FAR char *dngettext(FAR const char *domainname,
-                    FAR const char *msgid1,
-                    FAR const char *msgid2,
-                    unsigned long int n)
-{
-  return dcngettext(domainname, msgid1, msgid2, n, LC_MESSAGES);
-}
-
-FAR char *dcngettext(FAR const char *domainname,
-                     FAR const char *msgid1,
-                     FAR const char *msgid2,
-                     unsigned long int n,
-                     int category)
+static FAR char *motranslate(FAR const char *domainname,
+                             FAR const char *msgid1,
+                             FAR const char *msgid2,
+                             unsigned long int n,
+                             int category)
 {
   FAR struct mofile_s *mofile;
   FAR const char *lang;
@@ -692,6 +642,86 @@ FAR char *dcngettext(FAR const char *domainname,
         }
     }
 
+  return trans;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: dcngettext
+ *
+ * Description:
+ *   The dcngettext function searches the message catalogs identified by
+ *   domainname and category for a string which is equal to msgid1.
+ *
+ *   The msgid1 parameter must contain the singular form of the string to
+ *   be converted. It is also used as the key for the search in the catalog.
+ *   The msgid2 parameter is the plural form. The parameter n is used to
+ *   determine the plural form.
+ *
+ * Returned Value:
+ *   If there is such a string available it is returned. Otherwise msgid1 is
+ *   returned if n == 1, otherwise msgid2.
+ *
+ *   Please note that although the return value is char * the returned string
+ *   must not be changed. This broken type results from the history of the
+ *   function and does not reflect the way the function should be used.
+ *
+ *   The functions do not change errno.
+ *
+ ****************************************************************************/
+
+FAR char *gettext(FAR const char *msgid)
+{
+  return dgettext(NULL, msgid);
+}
+
+FAR char *dgettext(FAR const char *domainname,
+                   FAR const char *msgid)
+{
+  return dcgettext(domainname, msgid, LC_MESSAGES);
+}
+
+FAR char *dcgettext(FAR const char *domainname,
+                    FAR const char *msgid,
+                    int category)
+{
+  return dcngettext(domainname, msgid, NULL, 1, category);
+}
+
+FAR char *ngettext(FAR const char *msgid1,
+                   FAR const char *msgid2,
+                   unsigned long int n)
+{
+  return dngettext(NULL, msgid1, msgid2, n);
+}
+
+FAR char *dngettext(FAR const char *domainname,
+                    FAR const char *msgid1,
+                    FAR const char *msgid2,
+                    unsigned long int n)
+{
+  return dcngettext(domainname, msgid1, msgid2, n, LC_MESSAGES);
+}
+
+FAR char *dcngettext(FAR const char *domainname,
+                     FAR const char *msgid1,
+                     FAR const char *msgid2,
+                     unsigned long int n,
+                     int category)
+{
+  int errcode = get_errno();
+  FAR char *trans;
+
+  /* A program calls gettext() for the message of an error, often between
+   * the failed call and the use of errno.  So keep errno, as the GNU C
+   * library does.
+   */
+
+  trans = motranslate(domainname, msgid1, msgid2, n, category);
+  set_errno(errcode);
   return trans;
 }
 
