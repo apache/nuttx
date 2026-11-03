@@ -248,6 +248,9 @@ provided by NuttX:
   in the location pointed to by the argument oact. If the argument act is
   NULL, signal handling is unchanged by this function call; thus, the call
   can be used to inquire about the current handling of a given signal.
+  With ``CONFIG_SIG_DEFAULT``, oact reports ``SIG_DFL`` for a signal at its
+  default action, also when the default action is to ignore the signal
+  (``SIGCHLD``, for example).
 
   When a signal is caught by a signal-catching function installed by the
   sigaction() function, a new signal mask is calculated and installed for
@@ -273,8 +276,8 @@ provided by NuttX:
   **POSIX Compatibility:** Comparable to the POSIX interface of the same
   name. Differences from the POSIX implementation include:
 
-    -  There are no default actions so the special value ``SIG_DFL`` is
-       treated like ``SIG_IGN``.
+    -  Without ``CONFIG_SIG_DEFAULT``, there are no default actions so the
+       special value ``SIG_DFL`` is treated like ``SIG_IGN``.
     -  All ``sa_flags`` in struct sigaction of act input are ignored (all
        treated like ``SA_SIGINFO``). The one exception is if
        ``CONFIG_SCHED_CHILD_STATUS`` is defined; then ``SA_NOCLDWAIT`` is
