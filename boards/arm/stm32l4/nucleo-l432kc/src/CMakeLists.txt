@@ -76,10 +76,6 @@ if(CONFIG_SENSORS_ZEROCROSS)
   list(APPEND SRCS stm32_zerocross.c)
 endif()
 
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_timer.c)
-endif()
-
 if(CONFIG_BOARDCTL_IOCTL)
   list(APPEND SRCS stm32_ioctl.c)
 endif()
