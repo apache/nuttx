@@ -680,10 +680,10 @@ static void rpmsg_socket_device_created(FAR struct rpmsg_device *rdev,
       conn->ept.release_cb = rpmsg_socket_ept_release;
       rpmsg_socket_format_name(conn, namebuf);
 
+      rpmsg_set_priority(&conn->ept, conn->priority);
       rpmsg_create_ept(&conn->ept, rdev, namebuf,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        rpmsg_socket_ept_cb, rpmsg_socket_ns_unbind);
-      rpmsg_set_priority(&conn->ept, conn->priority);
     }
 }
 
@@ -1805,7 +1805,11 @@ static int rpmsg_socket_setsockopt(FAR struct socket *psock, int level,
                 *(FAR const int *)value :
                 (int)*(FAR const unsigned char *)value;
 
-              if (priority < RPMSG_PRIO_MIN || priority > RPMSG_PRIO_MAX)
+              /* RPMSG_PRIO_RT is reserved for internal real-time traffic
+               * and must not be requested by applications.
+               */
+
+              if (priority < RPMSG_PRIO_MIN || priority >= RPMSG_PRIO_RT)
                 {
                   return -EINVAL;
                 }
