@@ -37,7 +37,6 @@
 #define arm_dmb(n) __asm__ __volatile__ ("dmb " #n : : : "memory")
 #define arm_isb()  __asm__ __volatile__ ("isb " : : : "memory")
 #define arm_nop()  __asm__ __volatile__ ("nop\n")
-#define arm_sev()  __asm__ __volatile__ ("sev\n")
 
 #define UP_DSB()  arm_dsb(15)
 
@@ -47,21 +46,5 @@
 
 #define UP_ISB()  arm_isb()
 #define UP_NOP()  arm_nop()
-
-/* SEV is not a memory access and is not subject to memory ordering,
- * so a waiter may observe the event before the lock release store
- * becomes visible.  The waiter then re-reads the stale lock and sleeps
- * again with the event already consumed (missed wakeup).  DSB makes
- * the store visible before SEV.  From ARM Reference Manual DDI 0406C,
- * "Use of WFE and SEV with Locks".
- */
-
-#define UP_SEV()  \
-  do              \
-    {             \
-      UP_DSB();   \
-      arm_sev();  \
-    }             \
-  while (0)
 
 #endif /* __ARCH_ARM_INCLUDE_ARMV7_A_BARRIERS_H */
