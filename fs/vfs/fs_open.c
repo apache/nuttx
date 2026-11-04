@@ -280,11 +280,19 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
   if (oflags & O_DIRECTORY)
     {
+      /* A file fails with ENOTDIR.  Without a stat method, the opendir
+       * method of the file system decides.
+       */
+
+      ret = file_checkdir(inode, desc.relpath);
       if ((oflags & O_ACCMODE) == O_RDONLY)
         {
-          ret = dir_allocate(filep, desc.relpath);
+          if (ret >= 0 || ret == -ENOSYS)
+            {
+              ret = dir_allocate(filep, desc.relpath);
+            }
         }
-      else
+      else if (ret >= 0)
         {
           /* A directory cannot be opened for writing.  O_TMPFILE (it
            * includes O_DIRECTORY) asks for an unnamed regular file in the
@@ -293,15 +301,11 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
            * and unlink().
            */
 
-          ret = file_checkdir(inode, desc.relpath);
-          if (ret >= 0)
-            {
 #ifdef __O_TMPFILE
-              ret = (oflags & __O_TMPFILE) != 0 ? -EOPNOTSUPP : -EISDIR;
+          ret = (oflags & __O_TMPFILE) != 0 ? -EOPNOTSUPP : -EISDIR;
 #else
-              ret = -EISDIR;
+          ret = -EISDIR;
 #endif
-            }
         }
     }
 #ifndef CONFIG_DISABLE_MOUNTPOINT
