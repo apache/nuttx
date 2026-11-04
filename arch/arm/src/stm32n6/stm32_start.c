@@ -31,6 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/init.h>
+#include <nuttx/macro.h>
 #include <arch/barriers.h>
 #include <arch/board/board.h>
 
@@ -42,6 +43,7 @@
 #include "stm32_pwr.h"
 #include "stm32_start.h"
 #include "hardware/stm32n6xxx_bsec.h"
+#include "hardware/stm32n6xxx_ramcfg.h"
 #include "hardware/stm32n6xxx_syscfg.h"
 
 /****************************************************************************
@@ -112,13 +114,47 @@ void __start_c(void) noinstrument_function;
  *   from the vector table, as a hardware reset would, before any
  *   compiler-generated prologue runs.  It then tail-calls __start_c.
  *
+ *   The boot ROM enables only AXISRAM1/2, but .data, .bss and the idle
+ *   stack may extend into AXISRAM3.  AXISRAM3-6 are clocked and taken out
+ *   of RAMCFG shutdown here, before anything uses memory.
+ *
  ****************************************************************************/
 
 void __attribute__((naked)) noinstrument_function __start(void)
 {
+  /* Clear the stack limits, clock all AXISRAM banks and the RAMCFG, clear
+   * SRAMSD of AXISRAM3-6, then load MSP from the vector table.
+   */
+
   __asm__ volatile ("mov r0, #0\n\t"
                     "msr msplim, r0\n\t"
                     "msr psplim, r0\n\t"
+                    "ldr r0, =" STRINGIFY(STM32_RCC_MEMENSR) "\n\t"
+                    "ldr r1, =" STRINGIFY(RCC_MEMENR_ALLAXISRAM |
+                                          RCC_MEMENR_CACHEAXIRAMEN) "\n\t"
+                    "str r1, [r0]\n\t"
+                    "ldr r0, =" STRINGIFY(STM32_RCC_AHB2ENSR) "\n\t"
+                    "ldr r1, =" STRINGIFY(RCC_AHB2ENR_RAMCFGEN) "\n\t"
+                    "str r1, [r0]\n\t"
+                    "dsb\n\t"
+                    "ldr r2, =" STRINGIFY(RAMCFG_CR_SRAMSD) "\n\t"
+                    "ldr r0, =" STRINGIFY(STM32_RAMCFG_AXISRAM3_CR) "\n\t"
+                    "ldr r1, [r0]\n\t"
+                    "bic r1, r1, r2\n\t"
+                    "str r1, [r0]\n\t"
+                    "ldr r0, =" STRINGIFY(STM32_RAMCFG_AXISRAM4_CR) "\n\t"
+                    "ldr r1, [r0]\n\t"
+                    "bic r1, r1, r2\n\t"
+                    "str r1, [r0]\n\t"
+                    "ldr r0, =" STRINGIFY(STM32_RAMCFG_AXISRAM5_CR) "\n\t"
+                    "ldr r1, [r0]\n\t"
+                    "bic r1, r1, r2\n\t"
+                    "str r1, [r0]\n\t"
+                    "ldr r0, =" STRINGIFY(STM32_RAMCFG_AXISRAM6_CR) "\n\t"
+                    "ldr r1, [r0]\n\t"
+                    "bic r1, r1, r2\n\t"
+                    "str r1, [r0]\n\t"
+                    "dsb\n\t"
                     "ldr r0, =_vectors\n\t"
                     "ldr r0, [r0]\n\t"
                     "msr msp, r0\n\t"
