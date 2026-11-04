@@ -26,17 +26,24 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <fcntl.h>
 #include <nuttx/debug.h>
 #include <errno.h>
 
 #include <nuttx/binfmt/binfmt.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/lib/builtin.h>
 
 #include "binfmt.h"
 
 #ifdef CONFIG_BUILTIN
+
+#if defined(CONFIG_BINFMT_BUILTIN_STRICT_PATH) && defined(CONFIG_FS_BINFS)
+extern const struct mountpt_operations g_binfs_operations;
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -63,6 +70,35 @@ static struct binfmt_s g_builtin_binfmt =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: builtin_inbinfs
+ *
+ * Description:
+ *   Return true if the path names a file in a mounted BINFS.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BINFMT_BUILTIN_STRICT_PATH
+static bool builtin_inbinfs(FAR const char *path)
+{
+  bool inbinfs = false;
+#ifdef CONFIG_FS_BINFS
+  struct file file;
+
+  if (file_open(&file, path, O_RDONLY | O_CLOEXEC) >= 0)
+    {
+      inbinfs = INODE_IS_MOUNTPT(file.f_inode) &&
+                file.f_inode->u.i_mops == &g_binfs_operations;
+      file_close(&file);
+    }
+#else
+  UNUSED(path);
+#endif
+
+  return inbinfs;
+}
+#endif
+
+/****************************************************************************
  * Name: builtin_loadbinary
  *
  * Description:
@@ -84,6 +120,13 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
   name = strrchr(filename, '/');
   if (name != NULL)
     {
+#ifdef CONFIG_BINFMT_BUILTIN_STRICT_PATH
+      if (!builtin_inbinfs(filename))
+        {
+          return -ENOEXEC;
+        }
+#endif
+
       filename = name + 1;
     }
 
