@@ -43,12 +43,10 @@
 
 /* The STM32H7S8-DK board provides the following clock sources:
  *
- *   MCO: 24 MHz from the ST-LINK is available as the HSE input
+ *   X3:  24 MHz oscillator on OSC_IN (PH0), HSE bypass mode
  *   X2:  32.768 kHz crystal for LSE
  *
- * HSI is selected by default so that the board can run when the ST-LINK is
- * not supplying its MCO clock.  CONFIG_STM32H7S8_DK_USE_HSE selects the
- * 24 MHz bypass clock instead.
+ * HSI is selected by default.  CONFIG_STM32H7S8_DK_USE_HSE selects HSE.
  */
 
 #define STM32_BOARD_XTAL         24000000ul
