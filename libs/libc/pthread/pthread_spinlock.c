@@ -216,7 +216,7 @@ int pthread_spin_lock(pthread_spinlock_t *lock)
  *   of the following errno values are returned:
  *
  *   EINVAL - 'lock' does not refer to a valid spinlock object
- *   EBUSY  - The spinlock is held by another thread
+ *   EBUSY  - The spinlock is held by a thread, also by the caller
  *
  ****************************************************************************/
 
@@ -233,7 +233,7 @@ int pthread_spin_trylock(pthread_spinlock_t *lock)
     }
   else if (lock->sp_holder == me)
     {
-      ret = OK;
+      ret = EBUSY;
     }
   else
     {
