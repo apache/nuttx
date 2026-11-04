@@ -28,3 +28,10 @@ Example::
   nsh> /bin/hello
   Hello, World!!
 
+By default, ``exec()`` and ``posix_spawn()`` look up only the last part of a
+path in the builtin applications: ``/nonexistent/hello`` also starts ``hello``.
+With ``CONFIG_BINFMT_BUILTIN_STRICT_PATH``, a name with a ``/`` starts a builtin
+application only if it names a file in a mounted binfs.  A bare name still
+starts it.  The option breaks code that uses a path with no file there, such as
+``/bin/sh`` with no binfs at ``/bin``: see its help text.
+
