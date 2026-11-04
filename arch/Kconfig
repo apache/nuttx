@@ -1076,12 +1076,12 @@ endif # ARCH_PGPOOL_MAPPING
 endif # ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
 
 config NCPUS
-	int "Number of CPUs we will use"
+	int "Number of CPUs we will use" if !SMP
 	default SMP_NCPUS if SMP
 	default 1
 	range 1 32
 	---help---
-		Number of CPUs we will use.
+		Number of CPUs we will use.  An SMP build always uses SMP_NCPUS.
 
 config PAGING
 	bool "On-demand paging"
