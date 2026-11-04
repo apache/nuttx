@@ -33,6 +33,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/wqueue.h>
 
+#include "arm_internal.h"
+#include "nrf52_ppi.h"
+#include "hardware/nrf52_tim.h"
 #include "nrf52_ieee802154_tim.h"
 #include "nrf52_ieee802154_trace.h"
 
@@ -50,13 +53,23 @@
 
 #define NRF52_IEEE802154_TIMER0 (0)
 
-/* Timer period set to 16us (symbol duration) */
+/* Timer period set to 1 us, 16 MHz / 16 = 1 MHz */
 
-#define NRF52_TIMER_FREQUENCY   (1000000 / 16)
+#define NRF52_TIMER_PRESCALER    NRF52_TIM_PRE_1000000
 
-/* 16MHz / (2 ** 8) =  62500 */
+/* The ACK of a received frame starts aTurnaroundTime after its last symbol
+ * (IEEE 802.15.4-2006 7.5.6.4.2).  While the timer is idle, RADIO PHYEND
+ * clears and starts it and it stops at the ACK compare.  For an ACK the
+ * compare enables TX through RADIO TXEN, TXREADY starts the TX.
+ */
 
-#define NRF52_TIMER_PRESCALER   (8)
+#define NRF52_TIMER_BASE         NRF52_TIMER0_BASE
+#define NRF52_TIMER_ACKTXEN_US   (IEEE802154_TURN_AROUND_TIME * \
+                                  IEEE802154_SYMBOL_US - \
+                                  NRF52_RADIOI8_RAMPUP_US - \
+                                  NRF52_RADIOI8_PHYEND_US)
+#define NRF52_TIMER_LINK_PHYEND  (14)
+#define NRF52_TIMER_LINK_ACKTXEN (15)
 
 /****************************************************************************
  * Private Function Prototypes
@@ -68,6 +81,8 @@ static int nrf52_radioi8_tim(struct nrf52_radioi8_dev_s *dev, uint8_t chan,
                              uint32_t val);
 static void nrf52_radioi8_tim_stop(struct nrf52_radioi8_dev_s *dev);
 static void nrf52_radioi8_tim_reset(struct nrf52_radioi8_dev_s *dev);
+static bool nrf52_radioi8_tim_ackarm(struct nrf52_radioi8_dev_s *dev);
+static void nrf52_radioi8_tim_ackdone(struct nrf52_radioi8_dev_s *dev);
 
 /* Interrupts logic */
 
@@ -82,9 +97,11 @@ static int nrf52_radioi8_isr_tim(int irq, void *context, void *arg);
 
 static struct nrf52_radioi8_tim_ops_s g_radioi8_tim_ops =
 {
-  .setup = nrf52_radioi8_tim,
-  .stop  = nrf52_radioi8_tim_stop,
-  .reset = nrf52_radioi8_tim_reset
+  .setup   = nrf52_radioi8_tim,
+  .stop    = nrf52_radioi8_tim_stop,
+  .reset   = nrf52_radioi8_tim_reset,
+  .ackarm  = nrf52_radioi8_tim_ackarm,
+  .ackdone = nrf52_radioi8_tim_ackdone
 };
 
 /* Timer instance */
@@ -94,6 +111,52 @@ static struct nrf52_radioi8_tim_s g_radioi8_tim;
 /****************************************************************************
  * Private Function
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nrf52_radioi8_tim_count
+ *
+ * Description:
+ *   Capture the timer, the TX delay channel is free when the timer is idle.
+ *
+ ****************************************************************************/
+
+static uint32_t nrf52_radioi8_tim_count(void)
+{
+  putreg32(TIM_TASKS_CAPTURE, NRF52_TIMER_BASE +
+           NRF52_TIM_TASKS_CAPTURE_OFFSET(NRF52_TIMER_CHAN_TXDELAY));
+
+  return getreg32(NRF52_TIMER_BASE +
+                  NRF52_TIM_CC_OFFSET(NRF52_TIMER_CHAN_TXDELAY));
+}
+
+/****************************************************************************
+ * Name: nrf52_radioi8_tim_idle
+ *
+ * Description:
+ *   Let RADIO PHYEND start the idle timer, or keep it for a timer event.
+ *
+ ****************************************************************************/
+
+static void nrf52_radioi8_tim_idle(struct nrf52_radioi8_dev_s *dev,
+                                   bool idle)
+{
+  struct nrf52_radioi8_tim_s *tim = dev->tim;
+
+  if (idle)
+    {
+      NRF52_TIM_STOP(tim->tim);
+      NRF52_TIM_CLEAR(tim->tim);
+      NRF52_TIM_SHORTS(tim->tim, NRF52_TIM_SHORT_COMPARE_STOP,
+                       NRF52_TIMER_CHAN_ACK, true);
+      nrf52_ppi_channel_enable(NRF52_TIMER_LINK_PHYEND, true);
+    }
+  else
+    {
+      nrf52_ppi_channel_enable(NRF52_TIMER_LINK_PHYEND, false);
+      NRF52_TIM_SHORTS(tim->tim, NRF52_TIM_SHORT_COMPARE_STOP,
+                       NRF52_TIMER_CHAN_ACK, false);
+    }
+}
 
 /****************************************************************************
  * Name: nrf52_radioi8_tim
@@ -123,6 +186,7 @@ static int nrf52_radioi8_tim(struct nrf52_radioi8_dev_s *dev, uint8_t chan,
 
   /* Stop timer and clear the counter */
 
+  nrf52_radioi8_tim_idle(dev, false);
   NRF52_TIM_STOP(tim->tim);
   NRF52_TIM_CLEAR(tim->tim);
 
@@ -132,7 +196,7 @@ static int nrf52_radioi8_tim(struct nrf52_radioi8_dev_s *dev, uint8_t chan,
 
   /* Set compare register */
 
-  NRF52_TIM_SETCC(tim->tim, chan, val);
+  NRF52_TIM_SETCC(tim->tim, chan, val * IEEE802154_SYMBOL_US);
 
   /* Configure interrupt */
 
@@ -187,6 +251,8 @@ static void nrf52_radioi8_tim_stop(struct nrf52_radioi8_dev_s *dev)
 
   dev->tim->tim_pending = false;
   dev->tim->tim_now     = -1;
+
+  nrf52_radioi8_tim_idle(dev, true);
 }
 
 /****************************************************************************
@@ -199,17 +265,106 @@ static void nrf52_radioi8_tim_stop(struct nrf52_radioi8_dev_s *dev)
 
 static void nrf52_radioi8_tim_reset(struct nrf52_radioi8_dev_s *dev)
 {
-  /* Configure TIMER - freq = 62500 */
+  /* Configure TIMER - freq = 1 MHz */
 
   NRF52_TIM_STOP(dev->tim->tim);
   NRF52_TIM_CONFIGURE(dev->tim->tim, NRF52_TIM_MODE_TIMER,
                       NRF52_TIM_WIDTH_32B);
   NRF52_TIM_SETPRE(dev->tim->tim, NRF52_TIMER_PRESCALER);
+  NRF52_TIM_SETCC(dev->tim->tim, NRF52_TIMER_CHAN_ACK,
+                NRF52_TIMER_ACKTXEN_US);
+
+  /* RADIO PHYEND starts the timer, the ACK compare enables TX */
+
+  nrf52_ppi_set_event_ep(NRF52_TIMER_LINK_PHYEND,
+                         NRF52_RADIO_EVENTS_PHYEND);
+  nrf52_ppi_set_task_ep(NRF52_TIMER_LINK_PHYEND,
+                        NRF52_TIMER_BASE + NRF52_TIM_TASKS_CLEAR_OFFSET);
+  nrf52_ppi_set_task2_ep(NRF52_TIMER_LINK_PHYEND,
+                         NRF52_TIMER_BASE + NRF52_TIM_TASKS_START_OFFSET);
+  nrf52_ppi_set_event_ep(NRF52_TIMER_LINK_ACKTXEN,
+                         NRF52_TIMER_BASE +
+                         NRF52_TIM_EVENTS_COMPARE_OFFSET(
+                           NRF52_TIMER_CHAN_ACK));
+  nrf52_ppi_set_task_ep(NRF52_TIMER_LINK_ACKTXEN, NRF52_RADIO_TASKS_TXEN);
+
+  nrf52_ppi_channel_enable(NRF52_TIMER_LINK_ACKTXEN, false);
 
   /* Reset state */
 
   dev->tim->tim_pending = false;
   dev->tim->tim_now     = -1;
+
+  nrf52_radioi8_tim_idle(dev, true);
+}
+
+/****************************************************************************
+ * Name: nrf52_radioi8_tim_ackarm
+ *
+ * Description:
+ *   Let the timer enable the ACK TX.  It runs since PHYEND only when it was
+ *   idle, and it must not have reached the ACK compare yet.
+ *
+ ****************************************************************************/
+
+static bool nrf52_radioi8_tim_ackarm(struct nrf52_radioi8_dev_s *dev)
+{
+  struct nrf52_radioi8_tim_s *tim = dev->tim;
+  bool armed = false;
+  uint32_t count;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  count = nrf52_radioi8_tim_count();
+  if (!tim->tim_pending && count > 0 && count < NRF52_TIMER_ACKTXEN_US)
+    {
+      nrf52_ppi_channel_enable(NRF52_TIMER_LINK_ACKTXEN, true);
+
+      /* The compare may pass while the channel is enabled */
+
+      if (nrf52_radioi8_tim_count() < NRF52_TIMER_ACKTXEN_US ||
+          (NRF52_RADIO_GETREG(dev->radio->lower, NRF52_RADIO_STATE_OFFSET) &
+           RADIO_STATE_MASK) != RADIO_STATE_DISABLED)
+        {
+          tim->tim_pending = true;
+          tim->tim_now     = NRF52_TIMER_CHAN_ACK;
+          armed            = true;
+        }
+      else
+        {
+          nrf52_ppi_channel_enable(NRF52_TIMER_LINK_ACKTXEN, false);
+        }
+    }
+
+  leave_critical_section(flags);
+  return armed;
+}
+
+/****************************************************************************
+ * Name: nrf52_radioi8_tim_ackdone
+ *
+ * Description:
+ *   The ACK TX is done, the timer is idle again.
+ *
+ ****************************************************************************/
+
+static void nrf52_radioi8_tim_ackdone(struct nrf52_radioi8_dev_s *dev)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  nrf52_ppi_channel_enable(NRF52_TIMER_LINK_ACKTXEN, false);
+
+  if (dev->tim->tim_now == NRF52_TIMER_CHAN_ACK)
+    {
+      dev->tim->tim_pending = false;
+      dev->tim->tim_now     = -1;
+      nrf52_radioi8_tim_idle(dev, true);
+    }
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -229,19 +384,6 @@ static void nrf52_radioi8_tim_expire(struct nrf52_radioi8_dev_s *dev)
 
   switch (tim->tim_now)
     {
-      /* RX ACK handler */
-
-      case NRF52_TIMER_CHAN_ACK:
-        {
-          nrf52_radioi8_trace_put(RADIO_TRACE_IRQ_TIMACKTX, 0);
-
-          /* Start TX */
-
-          dev->radio->ops->txstart(dev);
-
-          break;
-        }
-
       /* Delayed TX handler */
 
       case NRF52_TIMER_CHAN_TXDELAY:
@@ -301,6 +443,8 @@ static void nrf52_radioi8_tim_expire(struct nrf52_radioi8_dev_s *dev)
 
   tim->tim_pending = false;
   tim->tim_now     = -1;
+
+  nrf52_radioi8_tim_idle(dev, true);
 
   leave_critical_section(flags);
 }

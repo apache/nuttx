@@ -158,7 +158,8 @@
  */
 
 #define IEEE802154_ACKTX_INT            (RADIO_INT_PHYEND)
-#define IEEE802154_ACKTX_SHORTS         (RADIO_SHORTS_PHYEND_DISABLE)
+#define IEEE802154_ACKTX_SHORTS         (RADIO_SHORTS_TXREADY_START | \
+                                         RADIO_SHORTS_PHYEND_DISABLE)
 
 /* aUnitBackoffPeriod in us */
 
@@ -190,7 +191,6 @@ static void nrf52_radioi8_gts_setup(struct nrf52_radioi8_dev_s *dev,
 
 /* Ops */
 
-static void nrf52_radioi8_txstart(struct nrf52_radioi8_dev_s *dev);
 static void nrf52_radioi8_ccastart(struct nrf52_radioi8_dev_s *dev);
 static void nrf52_radioi8_notify_noack(struct nrf52_radioi8_dev_s *dev);
 static int nrf52_radioi8_rxenable(struct nrf52_radioi8_dev_s *dev,
@@ -266,7 +266,6 @@ static uint8_t aligned_data(8)
 
 static struct nrf52_radioi8_radio_ops_s g_radioi8_radio_ops =
 {
-  .txstart      = nrf52_radioi8_txstart,
   .ccastart     = nrf52_radioi8_ccastart,
   .notify_noack = nrf52_radioi8_notify_noack,
   .rxenable     = nrf52_radioi8_rxenable,
@@ -456,14 +455,16 @@ static void nrf52_radioi8_ack_transmit(struct nrf52_radioi8_dev_s *dev)
 
   dev->radio->state.state = NRF52_RADIO_STATE_ACKTX;
 
-  /* Enable TX - start TX is called from timer interrupt */
+  /* The timer started at PHYEND enables TX on time, enable it now when the
+   * timer was busy or is already behind.
+   */
 
-  NRF52_RADIO_PUTREG(lower, NRF52_RADIO_TASKS_TXEN_OFFSET, 1);
-
-  /* Run TIMER - TX is handled in timer isr */
+  if (!dev->tim->ops->ackarm(dev))
+    {
+      NRF52_RADIO_PUTREG(lower, NRF52_RADIO_TASKS_TXEN_OFFSET, 1);
+    }
 
   nrf52_radioi8_trace_put(RADIO_TRACE_ACKTX, pending);
-  dev->tim->ops->setup(dev, NRF52_TIMER_CHAN_ACK, IEEE802154_ACKIFS_SYMBOLS);
 }
 
 /****************************************************************************
@@ -687,24 +688,6 @@ static void nrf52_radioi8_dopoll_gts(void *arg)
   nxmutex_unlock(&dev->lock);
 }
 #endif  /* NRF52_GTS_SLOTS > 0 */
-
-/****************************************************************************
- * Name: nrf52_radioi8_txstart
- *
- * Description:
- *   Start transmission, TX must be armed (TXEN must be set).
- *
- ****************************************************************************/
-
-static void nrf52_radioi8_txstart(struct nrf52_radioi8_dev_s *dev)
-{
-  struct nrf52_radio_dev_s *lower = NULL;
-
-  DEBUGASSERT(dev);
-  lower = dev->radio->lower;
-
-  NRF52_RADIO_PUTREG(lower, NRF52_RADIO_TASKS_START_OFFSET, 1);
-}
 
 /****************************************************************************
  * Name: nrf52_radioi8_ccastart
@@ -2412,6 +2395,8 @@ out:
 static void nrf52_radioi8_state_acktx(struct nrf52_radioi8_dev_s *dev)
 {
   nrf52_radioi8_trace_put(RADIO_TRACE_IRQ_ACKTX, 0);
+
+  dev->tim->ops->ackdone(dev);
 
   /* Start the TX that waited for the ACK TX, after the IFS */
 

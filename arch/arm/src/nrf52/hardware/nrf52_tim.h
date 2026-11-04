@@ -73,6 +73,10 @@
 
 #define TIM_TASKS_CLEAR                    (1 << 0)                /* Bit 0: Clear Timer */
 
+/* TASKS_CAPTURE[x] Register */
+
+#define TIM_TASKS_CAPTURE                  (1 << 0)                /* Bit 0: Capture Timer value */
+
 /* SHORTS Register */
 
 #define TIM_SHORTS_COMPARE_CLEAR(x)        (1 << (x))              /* Bits 0-5: */
