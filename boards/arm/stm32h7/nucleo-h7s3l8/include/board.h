@@ -43,12 +43,10 @@
 
 /* The NUCLEO-H7S3L8 board provides the following clock sources:
  *
- *   MCO: 24 MHz from the ST-LINK is available as the HSE input
+ *   HSE: 24 MHz, HSE oscillator mode (not bypass)
  *   X2:  32.768 kHz crystal for LSE
  *
- * HSI is selected by default so that the board can run when the ST-LINK is
- * not supplying its MCO clock.  CONFIG_NUCLEO_H7S3L8_USE_HSE selects the
- * 24 MHz bypass clock instead.
+ * HSI is selected by default.  CONFIG_NUCLEO_H7S3L8_USE_HSE selects HSE.
  */
 
 #define STM32_BOARD_XTAL         24000000ul
@@ -71,7 +69,6 @@
 
 #ifdef CONFIG_NUCLEO_H7S3L8_USE_HSE
 #  define STM32_BOARD_USEHSE
-#  define STM32_HSEBYP_ENABLE
 #  define STM32_PLLCFG_PLLSRC    RCC_PLLCKSELR_PLLSRC_HSE
 #  define STM32_PLLCFG_PLL1M     RCC_PLLCKSELR_DIVM1(2)
 #  define STM32_PLLCFG_PLL1N     RCC_PLL1DIVR1_N(50)
