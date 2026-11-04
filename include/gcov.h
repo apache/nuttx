@@ -27,6 +27,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 
 /****************************************************************************
@@ -108,6 +110,19 @@ void __gcov_exit(void);
 #ifdef CONFIG_ARCH_HAVE_FORK
 pid_t __gcov_fork(void);
 #endif
+
+/****************************************************************************
+ * Name: __gcov_unload
+ *
+ * Description:
+ *   Forget the coverage data in the memory from addr to addr + size.  The
+ *   loader calls it before it frees a module.
+ *
+ ****************************************************************************/
+
+void __gcov_unload(FAR const void *addr, size_t size);
+#else
+#  define __gcov_unload(addr, size)
 #endif
 
 /****************************************************************************
