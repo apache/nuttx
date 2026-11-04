@@ -222,6 +222,7 @@ static int composite_msftdescriptor(FAR struct composite_dev_s *priv,
           size_t total_len     = sizeof(struct usb_msft_os_feature_desc_s) +
                                  (response->count - 1) *
                                  sizeof(struct usb_msft_os_function_desc_s);
+
           response->len[0]     = (total_len >> 0) & 0xff;
           response->len[1]     = (total_len >> 8) & 0xff;
           response->len[2]     = (total_len >> 16) & 0xff;
@@ -623,147 +624,151 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
       switch (ctrl->req)
         {
-        case USB_REQ_GETDESCRIPTOR:
-          {
-            /* The value field specifies the descriptor type in the MS byte
-             * and the descriptor index in the LS byte
-             * (order is little endian)
-             */
+          case USB_REQ_GETDESCRIPTOR:
+            {
+              /* The value field specifies the descriptor type in the MS byte
+               * and the descriptor index in the LS byte
+               * (order is little endian)
+               */
 
-            switch (ctrl->value[1])
-              {
-              case USB_DESC_TYPE_DEVICE:
+              switch (ctrl->value[1])
                 {
-                  ret = usbdev_copy_devdesc(ctrlreq->buf,
-                                            priv->descs->devdesc,
-                                            dev->speed);
+                  case USB_DESC_TYPE_DEVICE:
+                    {
+                      ret = usbdev_copy_devdesc(ctrlreq->buf,
+                                                priv->descs->devdesc,
+                                                dev->speed);
 
 #ifdef CONFIG_BOARD_USBDEV_PIDVID
-                  {
-                    uint16_t pid = board_usbdev_pid();
-                    uint16_t vid = board_usbdev_vid();
-                    FAR struct usb_devdesc_s *p_desc =
-                               (FAR struct usb_devdesc_s *)ctrlreq->buf;
+                      {
+                        uint16_t pid = board_usbdev_pid();
+                        uint16_t vid = board_usbdev_vid();
+                        FAR struct usb_devdesc_s *p_desc =
+                          (FAR struct usb_devdesc_s *)ctrlreq->buf;
 
-                    p_desc->vendor[0] = LSBYTE(vid);
-                    p_desc->vendor[1] = MSBYTE(vid);
+                        p_desc->vendor[0] = LSBYTE(vid);
+                        p_desc->vendor[1] = MSBYTE(vid);
 
-                    p_desc->product[0] = LSBYTE(pid);
-                    p_desc->product[1] = MSBYTE(pid);
-                  }
+                        p_desc->product[0] = LSBYTE(pid);
+                        p_desc->product[1] = MSBYTE(pid);
+                      }
 #endif
-                }
-                break;
+                    }
+                    break;
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-              case USB_DESC_TYPE_DEVICEQUALIFIER:
-                {
-                  ret = USB_SIZEOF_QUALDESC;
-                  memcpy(ctrlreq->buf, priv->descs->qualdesc, ret);
-                }
-                break;
+                  case USB_DESC_TYPE_DEVICEQUALIFIER:
+                    {
+                      ret = USB_SIZEOF_QUALDESC;
+                      memcpy(ctrlreq->buf, priv->descs->qualdesc, ret);
+                    }
+                    break;
 
-              case USB_DESC_TYPE_OTHERSPEEDCONFIG:
+                  case USB_DESC_TYPE_OTHERSPEEDCONFIG:
 #endif
 
-              case USB_DESC_TYPE_CONFIG:
-                {
-                    ret = composite_mkcfgdesc(driver, ctrlreq->buf,
-                                              dev->speed, ctrl->value[1]);
-                }
-                break;
-
-              case USB_DESC_TYPE_STRING:
-                {
-                  /* value == string index. Zero is the language ID. */
-
-                  uint8_t strid = ctrl->value[0];
-                  FAR struct usb_strdesc_s *buf =
-                             (FAR struct usb_strdesc_s *)ctrlreq->buf;
-
-                  ret = composite_mkstrdesc(driver, strid, buf);
-                }
-                break;
-
-              default:
-                {
-                  usbtrace(
-                       TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_GETUNKNOWNDESC),
-                       value);
-                }
-                break;
-              }
-          }
-          break;
-
-        case USB_REQ_SETCONFIGURATION:
-          {
-            if (ctrl->type == 0)
-              {
-                int i;
-
-                if (priv->config == value)
-                  {
-                    /* Already configured -- Do nothing */
-
-                    ret = OK;
+                  case USB_DESC_TYPE_CONFIG:
+                    {
+                      ret = composite_mkcfgdesc(driver, ctrlreq->buf,
+                                                dev->speed, ctrl->value[1]);
+                    }
                     break;
-                  }
 
-                /* Save the configuration and inform the constituent
-                 * classes
-                 */
+                  case USB_DESC_TYPE_STRING:
+                    {
+                      /* value == string index. Zero is the language ID. */
 
-                for (i = 0; i < priv->ndevices; i++)
-                  {
-                    ret = CLASS_SETUP(priv->device[i].dev,
-                                      dev,
-                                      ctrl,
-                                      dataout,
-                                      outlen);
-                  }
+                      uint8_t strid = ctrl->value[0];
+                      FAR struct usb_strdesc_s *buf =
+                        (FAR struct usb_strdesc_s *)ctrlreq->buf;
 
-                priv->config = value;
-              }
-          }
-          break;
+                      ret = composite_mkstrdesc(driver, strid, buf);
+                    }
+                    break;
 
-        case USB_REQ_GETCONFIGURATION:
-          {
-            if (ctrl->type == USB_DIR_IN)
-              {
-                ctrlreq->buf[0] = priv->config;
-                ret = 1;
-              }
-          }
-          break;
+                  default:
+                    {
+                      usbtrace(
+                        TRACE_CLSERROR(
+                          USBCOMPOSITE_TRACEERR_GETUNKNOWNDESC),
+                        value);
+                    }
+                    break;
+                }
+            }
+            break;
 
-        case USB_REQ_SETINTERFACE:
-          {
-            if (ctrl->type == USB_REQ_RECIPIENT_INTERFACE &&
-                priv->config != COMPOSITE_CONFIGIDNONE)
-              {
-                ret = composite_classsetup(priv, dev, ctrl, dataout, outlen);
-                dispatched = true;
-              }
-          }
-          break;
+          case USB_REQ_SETCONFIGURATION:
+            {
+              if (ctrl->type == 0)
+                {
+                  int i;
 
-        case USB_REQ_GETINTERFACE:
-          {
-            if (ctrl->type == (USB_DIR_IN | USB_REQ_RECIPIENT_INTERFACE) &&
-                priv->config == COMPOSITE_CONFIGIDNONE)
-              {
-                ret = composite_classsetup(priv, dev, ctrl, dataout, outlen);
-                dispatched = true;
-              }
-           }
-           break;
+                  if (priv->config == value)
+                    {
+                      /* Already configured -- Do nothing */
 
-        default:
-          usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_UNSUPPORTEDSTDREQ),
-                   ctrl->req);
-          break;
+                      ret = OK;
+                      break;
+                    }
+
+                  /* Save the configuration and inform the constituent
+                   * classes
+                   */
+
+                  for (i = 0; i < priv->ndevices; i++)
+                    {
+                      ret = CLASS_SETUP(priv->device[i].dev,
+                                        dev,
+                                        ctrl,
+                                        dataout,
+                                        outlen);
+                    }
+
+                  priv->config = value;
+                }
+            }
+            break;
+
+          case USB_REQ_GETCONFIGURATION:
+            {
+              if (ctrl->type == USB_DIR_IN)
+                {
+                  ctrlreq->buf[0] = priv->config;
+                  ret = 1;
+                }
+            }
+            break;
+
+          case USB_REQ_SETINTERFACE:
+            {
+              if (ctrl->type == USB_REQ_RECIPIENT_INTERFACE &&
+                  priv->config != COMPOSITE_CONFIGIDNONE)
+                {
+                  ret = composite_classsetup(priv, dev, ctrl,
+                                             dataout, outlen);
+                  dispatched = true;
+                }
+            }
+            break;
+
+          case USB_REQ_GETINTERFACE:
+            {
+              if (ctrl->type ==
+                    (USB_DIR_IN | USB_REQ_RECIPIENT_INTERFACE) &&
+                  priv->config == COMPOSITE_CONFIGIDNONE)
+                {
+                  ret = composite_classsetup(priv, dev, ctrl,
+                                             dataout, outlen);
+                  dispatched = true;
+                }
+            }
+            break;
+
+          default:
+            usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_UNSUPPORTEDSTDREQ),
+                     ctrl->req);
+            break;
         }
     }
 #ifdef CONFIG_COMPOSITE_MSFT_OS_DESCRIPTORS
@@ -781,9 +786,9 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
        * Non-Standard Class Requests
        **********************************************************************/
 
-       /* Class implementations should handle their own interface and
-        * endpoint requests.
-        */
+      /* Class implementations should handle their own interface and
+       * endpoint requests.
+       */
 
       ret = composite_classsetup(priv, dev, ctrl, dataout, outlen);
       dispatched = true;
