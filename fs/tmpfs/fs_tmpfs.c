@@ -2896,12 +2896,20 @@ static int tmpfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
     }
 
   /* Is the directory empty?  We cannot remove directories that still
-   * contain references to file system objects.  No can we remove the
-   * directory if there are outstanding references on it (other than
-   * our reference).
+   * contain references to file system objects.
    */
 
-  if (tdo->tdo_nentries > 0 || tdo->tdo_refs > 1)
+  if (tdo->tdo_nentries > 0)
+    {
+      ret = -ENOTEMPTY;
+      goto errout_with_objects;
+    }
+
+  /* Nor can we remove the directory if there are outstanding references on
+   * it (other than our reference).
+   */
+
+  if (tdo->tdo_refs > 1)
     {
       ret = -EBUSY;
       goto errout_with_objects;
