@@ -71,3 +71,13 @@ probably more useful for me than you, but there they are in case I'm wrong
 about that.
 
 b.g.
+
+Depth (time-of-flight) cameras
+------------------------------
+
+Multizone and depth time-of-flight sensors produce an image and are V4L2
+capture devices; single-zone sensors report one distance through the
+sensor framework (``SENSOR_TYPE_PROXIMITY``).  The frame is
+``V4L2_PIX_FMT_Z16``: one little-endian 16-bit distance in millimetres
+per pixel, 0 when the pixel has no valid target.  The resolutions and
+the frame rates are V4L2 frame sizes and frame intervals.

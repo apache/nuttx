@@ -93,6 +93,10 @@ extern "C"
 #define V4L2_PIX_FMT_Y16      v4l2_fourcc('Y', '1', '6', ' ')
 #define V4L2_PIX_FMT_Y16_BE   v4l2_fourcc_be('Y', '1', '6', ' ')
 
+/* Depth formats: 16-bit little endian distance per pixel */
+
+#define V4L2_PIX_FMT_Z16      v4l2_fourcc('Z', '1', '6', ' ')
+
 /* Grey bit-packed formats */
 
 #define V4L2_PIX_FMT_Y10BPACK v4l2_fourcc('Y', '1', '0', 'B')

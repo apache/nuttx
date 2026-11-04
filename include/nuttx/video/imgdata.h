@@ -50,6 +50,7 @@
 #define IMGDATA_PIX_FMT_NV12             (8)
 #define IMGDATA_PIX_FMT_RGB565X          (9)
 #define IMGDATA_PIX_FMT_ENTROPY          (10)
+#define IMGDATA_PIX_FMT_Z16              (11)
 
 /* Flags for imgdata_s.caps */
 
