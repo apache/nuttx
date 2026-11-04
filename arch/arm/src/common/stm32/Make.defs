@@ -127,10 +127,10 @@ CHIP_CSRCS += stm32_sdmmc_v2.c
 endif
 
 ifeq ($(CONFIG_STM32_HAVE_IP_OTG_V2),y)
-ifeq ($(CONFIG_USBDEV),y)
+ifneq ($(CONFIG_STM32_OTGFS_USBDEV)$(CONFIG_STM32_OTGHS_USBDEV),)
 CHIP_CSRCS += stm32_otgdev_v2.c
 endif
-ifeq ($(CONFIG_USBHOST),y)
+ifneq ($(CONFIG_STM32_OTGFS_HOST)$(CONFIG_STM32_OTGHS_HOST),)
 CHIP_CSRCS += stm32_otghost_v2.c
 ifeq ($(CONFIG_USBHOST_TRACE),y)
 CHIP_CSRCS += stm32_usbhost_v2.c
