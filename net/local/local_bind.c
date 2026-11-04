@@ -132,7 +132,13 @@ int psock_local_bind(FAR struct socket *psock,
     }
 #endif
 
+  /* A DGRAM connect() records its default peer in lc_dconnected rather than
+   * in lc_state, so binding after connect() keeps the peer and the address
+   * stays protected by the in-use check above.
+   */
+
   conn->lc_state = LOCAL_STATE_BOUND;
+
   return OK;
 
 #ifdef CONFIG_NET_LOCAL_DGRAM

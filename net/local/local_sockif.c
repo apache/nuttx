@@ -28,6 +28,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -39,6 +40,7 @@
 #include <netinet/in.h>
 #include <sys/param.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/net/net.h>
 #include <socket/socket.h>
@@ -449,9 +451,38 @@ static int local_getpeername(FAR struct socket *psock,
       return OK;
     }
 
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  /* connect() on a datagram socket only records a default peer address; it
+   * does not link to a peer connection, so lc_peer is NULL.  Report the
+   * recorded address instead.  Decide by socket type: a stream socket whose
+   * peer has closed also has lc_peer == NULL, and must still get ENOTCONN.
+   */
+
+  if (psock->s_type == SOCK_DGRAM && peer == NULL)
+    {
+      socklen_t copylen;
+
+      if (!conn->lc_dconnected)
+        {
+          return -ENOTCONN;
+        }
+
+      copylen = sizeof(conn->lc_daddr);
+      if (copylen > *addrlen)
+        {
+          copylen = *addrlen;
+        }
+
+      memcpy(unaddr, &conn->lc_daddr, copylen);
+      unaddr->sun_family = AF_LOCAL;
+      *addrlen = copylen;
+      return OK;
+    }
+#endif
+
   /* Verify that the socket has been connected */
 
-  if (conn->lc_state != LOCAL_STATE_CONNECTED)
+  if (conn->lc_state != LOCAL_STATE_CONNECTED || peer == NULL)
     {
       return -ENOTCONN;
     }
@@ -789,9 +820,12 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
 static int local_connect(FAR struct socket *psock,
                          FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-  /* Verify that a valid address has been provided */
+  /* Verify that a valid address has been provided.  A connectionless
+   * socket may also pass AF_UNSPEC to dissolve an existing association.
+   */
 
-  if (addr->sa_family != AF_LOCAL || addrlen < sizeof(sa_family_t))
+  if ((addr->sa_family != AF_LOCAL && addr->sa_family != AF_UNSPEC) ||
+      addrlen < sizeof(sa_family_t))
     {
       return -EBADF;
     }
@@ -804,6 +838,13 @@ static int local_connect(FAR struct socket *psock,
       case SOCK_STREAM:
         {
           FAR struct socket_conn_s *conn = psock->s_conn;
+
+          /* A connection-mode socket cannot dissolve its association. */
+
+          if (addr->sa_family == AF_UNSPEC)
+            {
+              return -EINVAL;
+            }
 
           /* Verify that the socket is not already connected */
 
@@ -822,9 +863,77 @@ static int local_connect(FAR struct socket *psock,
 #ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
         {
-          /* Perform the datagram connection logic */
+          FAR struct local_conn_s *conn = psock->s_conn;
+          FAR const struct sockaddr_un *unaddr =
+              (FAR const struct sockaddr_un *)addr;
 
-          return -ENOSYS;
+          if (addr->sa_family == AF_UNSPEC)
+            {
+              memset(&conn->lc_daddr, 0, sizeof(conn->lc_daddr));
+              conn->lc_dconnected = false;
+              return OK;
+            }
+
+          /* local_findconn() reads sun_path[0], so the caller must have
+           * supplied at least one byte of it, and it compares the name
+           * past a leading NUL:  an empty name would match any unbound
+           * socket, this one included.  psock_local_bind() rejects the
+           * same addresses.
+           */
+
+          if (addrlen <= sizeof(sa_family_t) + 1 ||
+              unaddr->sun_path[unaddr->sun_path[0] == '\0' ? 1 : 0] == '\0')
+            {
+              return -EINVAL;
+            }
+
+          /* Validate the destination before recording it, so that
+           * connect() reports a bad name instead of letting every later
+           * send() fail.  POSIX allows a connectionless connect() to
+           * check the address.
+           */
+
+          if (conn->lc_peer == NULL)
+            {
+              FAR struct local_conn_s *server;
+
+              local_lock();
+              server = local_findconn(conn, unaddr);
+              local_unlock();
+
+              if (server == NULL)
+                {
+                  struct stat buf;
+
+                  /* No socket of that name.  A pathname that exists in the
+                   * file system but is not one of our sockets is a
+                   * connection refused, anything else does not exist.  An
+                   * abstract name has no file system entry to probe.
+                   */
+
+                  if (unaddr->sun_path[0] != '\0' &&
+                      nx_stat(unaddr->sun_path, &buf, 1) == 0)
+                    {
+                      return -ECONNREFUSED;
+                    }
+
+                  return -ENOENT;
+                }
+            }
+
+          /* Record the default peer.  Copy only what the caller supplied
+           * so that a short addrlen does not read past its buffer.
+           */
+
+          if (addrlen > sizeof(conn->lc_daddr))
+            {
+              addrlen = sizeof(conn->lc_daddr);
+            }
+
+          memset(&conn->lc_daddr, 0, sizeof(conn->lc_daddr));
+          memcpy(&conn->lc_daddr, unaddr, addrlen);
+          conn->lc_dconnected = true;
+          return OK;
         }
         break;
 #endif /* CONFIG_NET_LOCAL_DGRAM */
