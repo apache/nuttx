@@ -27,11 +27,67 @@
 #include <nuttx/config.h>
 
 #include <sys/stat.h>
+#include <limits.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
 
 #include "libc.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: chdir_searchable
+ *
+ * Description:
+ *   Return true if the effective IDs have search permission on the
+ *   directory.  Root needs any execute bit, as in access() and exec().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_PERMISSION
+static bool chdir_searchable(FAR const struct stat *buf)
+{
+  mode_t xbit = S_IXOTH;
+  uid_t uid = geteuid();
+
+  if (uid == 0)
+    {
+      return (buf->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) != 0;
+    }
+
+  if (buf->st_uid == uid)
+    {
+      xbit = S_IXUSR;
+    }
+  else if (buf->st_gid == getegid())
+    {
+      xbit = S_IXGRP;
+    }
+#if NGROUPS_MAX > 0
+  else
+    {
+      gid_t groups[NGROUPS_MAX];
+      int ngroups = getgroups(NGROUPS_MAX, groups);
+      int i;
+
+      for (i = 0; i < ngroups; i++)
+        {
+          if (groups[i] == buf->st_gid)
+            {
+              xbit = S_IXGRP;
+              break;
+            }
+        }
+    }
+#endif
+
+  return (buf->st_mode & xbit) != 0;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -92,6 +148,16 @@ int chdir(FAR const char *path)
       set_errno(ENOTDIR);
       return ERROR;
     }
+
+#ifdef CONFIG_FS_PERMISSION
+  /* stat() needs no search permission on the last path component */
+
+  if (!chdir_searchable(&buf))
+    {
+      set_errno(EACCES);
+      return ERROR;
+    }
+#endif
 
   /* Yes, it is a directory.
    * Remove any trailing '/' characters from the path
