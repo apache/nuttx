@@ -323,7 +323,6 @@
 #  define RCC_PLLCFGR_PLL1RGE_8_16      (3 << RCC_PLLCFGR_PLL1RGE_SHIFT)
 #define RCC_PLLCFGR_PLL1PEN             (1 << 5)  /* PLL1 P output enable */
 #define RCC_PLLCFGR_PLL1QEN             (1 << 6)  /* PLL1 Q output enable */
-#define RCC_PLLCFGR_PLL1REN             (1 << 7)  /* PLL1 R output enable */
 #define RCC_PLLCFGR_PLL1SEN             (1 << 8)  /* PLL1 S output enable */
 #define RCC_PLLCFGR_PLL2FRACEN          (1 << 11) /* PLL2 fractional enable */
 #define RCC_PLLCFGR_PLL2VCOSEL          (1 << 12) /* PLL2 VCO selection */
@@ -346,8 +345,11 @@
 #define RCC_PLLCFGR_PLL3SEN             (1 << 30) /* PLL3 S output enable */
 
 #define RCC_PLLDIVR_DIVN_SHIFT          (0)  /* PLL N multiplier */
+#define RCC_PLLDIVR_DIVN_MASK           (0x1ff << RCC_PLLDIVR_DIVN_SHIFT)
 #define RCC_PLLDIVR_DIVP_SHIFT          (9)  /* PLL P divider */
+#define RCC_PLLDIVR_DIVP_MASK           (0x7f << RCC_PLLDIVR_DIVP_SHIFT)
 #define RCC_PLLDIVR_DIVQ_SHIFT          (16) /* PLL Q divider */
+#define RCC_PLLDIVR_DIVQ_MASK           (0x7f << RCC_PLLDIVR_DIVQ_SHIFT)
 #define RCC_PLLDIVR_DIVR_SHIFT          (24) /* PLL R divider */
 #  define RCC_PLLDIVR_DIVN(n)           (((n) - 1) << RCC_PLLDIVR_DIVN_SHIFT)
 #  define RCC_PLLDIVR_DIVP(n)           (((n) - 1) << RCC_PLLDIVR_DIVP_SHIFT)
@@ -356,7 +358,6 @@
 #define RCC_PLL1DIVR1_N(n)              RCC_PLLDIVR_DIVN(n)
 #define RCC_PLL1DIVR1_P(n)              RCC_PLLDIVR_DIVP(n)
 #define RCC_PLL1DIVR1_Q(n)              RCC_PLLDIVR_DIVQ(n)
-#define RCC_PLL1DIVR1_R(n)              RCC_PLLDIVR_DIVR(n)
 #define RCC_PLL2DIVR1_N(n)              RCC_PLLDIVR_DIVN(n)
 #define RCC_PLL2DIVR1_P(n)              RCC_PLLDIVR_DIVP(n)
 #define RCC_PLL2DIVR1_Q(n)              RCC_PLLDIVR_DIVQ(n)
