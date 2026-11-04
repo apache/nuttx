@@ -33,6 +33,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/wqueue.h>
 
+#include "arm_internal.h"
+#include "hardware/nrf54l_dppic.h"
+#include "hardware/nrf54l_tim.h"
 #include "nrf54l_ieee802154_tim.h"
 #include "nrf54l_ieee802154_trace.h"
 
@@ -42,21 +45,31 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_NRF54L_TIMER0
-#  error CONFIG_NRF54L_TIMER0 is needed to handle radio timings
+#ifndef CONFIG_NRF54L_TIMER6
+#  error CONFIG_NRF54L_TIMER6 is needed to handle radio timings
 #endif
 
-/* Timer instance - 0 */
+/* Timer instance - TIMER10 */
 
-#define NRF54L_IEEE802154_TIMER0 (0)
+#define NRF54L_IEEE802154_TIMER10 (6)
 
-/* Timer period set to 16us (symbol duration) */
+/* Timer period set to 1 us, 32 MHz / 32 = 1 MHz */
 
-#define NRF54L_TIMER_FREQUENCY   (1000000 / 16)
+#define NRF54L_TIMER_PRESCALER    NRF54L_TIM_PRE_DIV32
 
-/* 16MHz / (2 ** 8) =  62500 */
+/* The ACK of a received frame starts aTurnaroundTime after its last symbol
+ * (IEEE 802.15.4-2006 7.5.6.4.2).  While the timer is idle, RADIO PHYEND
+ * clears and starts it and it stops at the ACK compare.  For an ACK the
+ * compare enables TX through RADIO TXEN, TXREADY starts the TX.
+ */
 
-#define NRF54L_TIMER_PRESCALER   (8)
+#define NRF54L_TIMER_BASE         NRF54L_TIMER10_BASE
+#define NRF54L_TIMER_ACKTXEN_US   (IEEE802154_TURN_AROUND_TIME * \
+                                   IEEE802154_SYMBOL_US - \
+                                   NRF54L_RADIOI8_RAMPUP_US - \
+                                   NRF54L_RADIOI8_PHYEND_US)
+#define NRF54L_TIMER_LINK_PHYEND  (14)
+#define NRF54L_TIMER_LINK_ACKTXEN (15)
 
 /****************************************************************************
  * Private Function Prototypes
@@ -68,6 +81,8 @@ static int nrf54l_radioi8_tim(struct nrf54l_radioi8_dev_s *dev, uint8_t chan,
                              uint32_t val);
 static void nrf54l_radioi8_tim_stop(struct nrf54l_radioi8_dev_s *dev);
 static void nrf54l_radioi8_tim_reset(struct nrf54l_radioi8_dev_s *dev);
+static bool nrf54l_radioi8_tim_ackarm(struct nrf54l_radioi8_dev_s *dev);
+static void nrf54l_radioi8_tim_ackdone(struct nrf54l_radioi8_dev_s *dev);
 
 /* Interrupts logic */
 
@@ -82,9 +97,11 @@ static int nrf54l_radioi8_isr_tim(int irq, void *context, void *arg);
 
 static struct nrf54l_radioi8_tim_ops_s g_radioi8_tim_ops =
 {
-  .setup = nrf54l_radioi8_tim,
-  .stop  = nrf54l_radioi8_tim_stop,
-  .reset = nrf54l_radioi8_tim_reset
+  .setup   = nrf54l_radioi8_tim,
+  .stop    = nrf54l_radioi8_tim_stop,
+  .reset   = nrf54l_radioi8_tim_reset,
+  .ackarm  = nrf54l_radioi8_tim_ackarm,
+  .ackdone = nrf54l_radioi8_tim_ackdone
 };
 
 /* Timer instance */
@@ -94,6 +111,54 @@ static struct nrf54l_radioi8_tim_s g_radioi8_tim;
 /****************************************************************************
  * Private Function
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nrf54l_radioi8_tim_count
+ *
+ * Description:
+ *   Capture the timer, the TX delay channel is free when the timer is idle.
+ *
+ ****************************************************************************/
+
+static uint32_t nrf54l_radioi8_tim_count(void)
+{
+  putreg32(TIM_TASKS_CAPTURE, NRF54L_TIMER_BASE +
+           NRF54L_TIM_TASKS_CAPTURE_OFFSET(NRF54L_TIMER_CHAN_TXDELAY));
+
+  return getreg32(NRF54L_TIMER_BASE +
+                  NRF54L_TIM_CC_OFFSET(NRF54L_TIMER_CHAN_TXDELAY));
+}
+
+/****************************************************************************
+ * Name: nrf54l_radioi8_tim_idle
+ *
+ * Description:
+ *   Let RADIO PHYEND start the idle timer, or keep it for a timer event.
+ *
+ ****************************************************************************/
+
+static void nrf54l_radioi8_tim_idle(struct nrf54l_radioi8_dev_s *dev,
+                                    bool idle)
+{
+  struct nrf54l_radioi8_tim_s *tim = dev->tim;
+
+  if (idle)
+    {
+      NRF54L_TIM_STOP(tim->tim);
+      NRF54L_TIM_CLEAR(tim->tim);
+      NRF54L_TIM_SHORTS(tim->tim, NRF54L_TIM_SHORT_COMPARE_STOP,
+                        NRF54L_TIMER_CHAN_ACK, true);
+      putreg32(DPPIC_CHEN_CH(NRF54L_TIMER_LINK_PHYEND),
+               NRF54L_DPPIC10_BASE + NRF54L_DPPIC_CHENSET_OFFSET);
+    }
+  else
+    {
+      putreg32(DPPIC_CHEN_CH(NRF54L_TIMER_LINK_PHYEND),
+               NRF54L_DPPIC10_BASE + NRF54L_DPPIC_CHENCLR_OFFSET);
+      NRF54L_TIM_SHORTS(tim->tim, NRF54L_TIM_SHORT_COMPARE_STOP,
+                        NRF54L_TIMER_CHAN_ACK, false);
+    }
+}
 
 /****************************************************************************
  * Name: nrf54l_radioi8_tim
@@ -123,6 +188,7 @@ static int nrf54l_radioi8_tim(struct nrf54l_radioi8_dev_s *dev, uint8_t chan,
 
   /* Stop timer and clear the counter */
 
+  nrf54l_radioi8_tim_idle(dev, false);
   NRF54L_TIM_STOP(tim->tim);
   NRF54L_TIM_CLEAR(tim->tim);
 
@@ -132,7 +198,7 @@ static int nrf54l_radioi8_tim(struct nrf54l_radioi8_dev_s *dev, uint8_t chan,
 
   /* Set compare register */
 
-  NRF54L_TIM_SETCC(tim->tim, chan, val);
+  NRF54L_TIM_SETCC(tim->tim, chan, val * IEEE802154_SYMBOL_US);
 
   /* Configure interrupt */
 
@@ -187,6 +253,8 @@ static void nrf54l_radioi8_tim_stop(struct nrf54l_radioi8_dev_s *dev)
 
   dev->tim->tim_pending = false;
   dev->tim->tim_now     = -1;
+
+  nrf54l_radioi8_tim_idle(dev, true);
 }
 
 /****************************************************************************
@@ -199,17 +267,111 @@ static void nrf54l_radioi8_tim_stop(struct nrf54l_radioi8_dev_s *dev)
 
 static void nrf54l_radioi8_tim_reset(struct nrf54l_radioi8_dev_s *dev)
 {
-  /* Configure TIMER - freq = 62500 */
+  /* Configure TIMER - freq = 1 MHz */
 
   NRF54L_TIM_STOP(dev->tim->tim);
   NRF54L_TIM_CONFIGURE(dev->tim->tim, NRF54L_TIM_MODE_TIMER,
                       NRF54L_TIM_WIDTH_32B);
   NRF54L_TIM_SETPRE(dev->tim->tim, NRF54L_TIMER_PRESCALER);
+  NRF54L_TIM_SETCC(dev->tim->tim, NRF54L_TIMER_CHAN_ACK,
+                 NRF54L_TIMER_ACKTXEN_US);
+
+  /* RADIO PHYEND starts the timer, the ACK compare enables TX */
+
+  putreg32(DPPI_EN | NRF54L_TIMER_LINK_PHYEND,
+           NRF54L_TIMER_BASE + NRF54L_TIM_SUBSCRIBE_CLEAR_OFFSET);
+  putreg32(DPPI_EN | NRF54L_TIMER_LINK_PHYEND,
+           NRF54L_TIMER_BASE + NRF54L_TIM_SUBSCRIBE_START_OFFSET);
+  putreg32(DPPI_EN | NRF54L_TIMER_LINK_ACKTXEN,
+           NRF54L_TIMER_BASE +
+           NRF54L_TIM_PUBLISH_COMPARE_OFFSET(NRF54L_TIMER_CHAN_ACK));
+  NRF54L_RADIO_PUTREG(dev->radio->lower, NRF54L_RADIO_PUBLISH_PHYEND_OFFSET,
+                      DPPI_EN | NRF54L_TIMER_LINK_PHYEND);
+  NRF54L_RADIO_PUTREG(dev->radio->lower, NRF54L_RADIO_SUBSCRIBE_TXEN_OFFSET,
+                      DPPI_EN | NRF54L_TIMER_LINK_ACKTXEN);
+
+  putreg32(DPPIC_CHEN_CH(NRF54L_TIMER_LINK_ACKTXEN),
+           NRF54L_DPPIC10_BASE + NRF54L_DPPIC_CHENCLR_OFFSET);
 
   /* Reset state */
 
   dev->tim->tim_pending = false;
   dev->tim->tim_now     = -1;
+
+  nrf54l_radioi8_tim_idle(dev, true);
+}
+
+/****************************************************************************
+ * Name: nrf54l_radioi8_tim_ackarm
+ *
+ * Description:
+ *   Let the timer enable the ACK TX.  It runs since PHYEND only when it was
+ *   idle, and it must not have reached the ACK compare yet.
+ *
+ ****************************************************************************/
+
+static bool nrf54l_radioi8_tim_ackarm(struct nrf54l_radioi8_dev_s *dev)
+{
+  struct nrf54l_radioi8_tim_s *tim = dev->tim;
+  bool armed = false;
+  uint32_t count;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  count = nrf54l_radioi8_tim_count();
+  if (!tim->tim_pending && count > 0 && count < NRF54L_TIMER_ACKTXEN_US)
+    {
+      putreg32(DPPIC_CHEN_CH(NRF54L_TIMER_LINK_ACKTXEN),
+               NRF54L_DPPIC10_BASE + NRF54L_DPPIC_CHENSET_OFFSET);
+
+      /* The compare may pass while the channel is enabled */
+
+      if (nrf54l_radioi8_tim_count() < NRF54L_TIMER_ACKTXEN_US ||
+          (NRF54L_RADIO_GETREG(dev->radio->lower,
+                               NRF54L_RADIO_STATE_OFFSET) &
+           RADIO_STATE_MASK) != RADIO_STATE_DISABLED)
+        {
+          tim->tim_pending = true;
+          tim->tim_now     = NRF54L_TIMER_CHAN_ACK;
+          armed            = true;
+        }
+      else
+        {
+          putreg32(DPPIC_CHEN_CH(NRF54L_TIMER_LINK_ACKTXEN),
+                   NRF54L_DPPIC10_BASE + NRF54L_DPPIC_CHENCLR_OFFSET);
+        }
+    }
+
+  leave_critical_section(flags);
+  return armed;
+}
+
+/****************************************************************************
+ * Name: nrf54l_radioi8_tim_ackdone
+ *
+ * Description:
+ *   The ACK TX is done, the timer is idle again.
+ *
+ ****************************************************************************/
+
+static void nrf54l_radioi8_tim_ackdone(struct nrf54l_radioi8_dev_s *dev)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  putreg32(DPPIC_CHEN_CH(NRF54L_TIMER_LINK_ACKTXEN),
+           NRF54L_DPPIC10_BASE + NRF54L_DPPIC_CHENCLR_OFFSET);
+
+  if (dev->tim->tim_now == NRF54L_TIMER_CHAN_ACK)
+    {
+      dev->tim->tim_pending = false;
+      dev->tim->tim_now     = -1;
+      nrf54l_radioi8_tim_idle(dev, true);
+    }
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -229,19 +391,6 @@ static void nrf54l_radioi8_tim_expire(struct nrf54l_radioi8_dev_s *dev)
 
   switch (tim->tim_now)
     {
-      /* RX ACK handler */
-
-      case NRF54L_TIMER_CHAN_ACK:
-        {
-          nrf54l_radioi8_trace_put(RADIO_TRACE_IRQ_TIMACKTX, 0);
-
-          /* Start TX */
-
-          dev->radio->ops->txstart(dev);
-
-          break;
-        }
-
       /* Delayed TX handler */
 
       case NRF54L_TIMER_CHAN_TXDELAY:
@@ -302,6 +451,8 @@ static void nrf54l_radioi8_tim_expire(struct nrf54l_radioi8_dev_s *dev)
   tim->tim_pending = false;
   tim->tim_now     = -1;
 
+  nrf54l_radioi8_tim_idle(dev, true);
+
   leave_critical_section(flags);
 }
 
@@ -354,12 +505,12 @@ nrf54l_radioi8_tim_init(struct nrf54l_radioi8_dev_s *dev)
 {
   struct nrf54l_tim_dev_s *tim = NULL;
 
-  /* Reserve TIMER0 */
+  /* Reserve TIMER10, RADIO PHYEND reaches it over DPPIC10 */
 
-  tim = nrf54l_tim_init(NRF54L_IEEE802154_TIMER0);
+  tim = nrf54l_tim_init(NRF54L_IEEE802154_TIMER10);
   if (tim == NULL)
     {
-      wlerr("nrf54l_tim_init(0) failed %d\n", -errno);
+      wlerr("nrf54l_tim_init(6) failed %d\n", -errno);
       return NULL;
     }
 
