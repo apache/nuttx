@@ -37,12 +37,16 @@ Helpers
   when ``CONFIG_FS_PERMISSION`` is disabled.
 
 ``inode_checkpathperm``
-  Require ``X_OK`` on every ancestor of an inode, and on the inode itself
-  when it is a pseudo directory or a mountpoint (directory search /
+  Require ``X_OK`` on every ancestor of an inode (directory search /
   traverse).  If ``amode`` is non-zero, also require that access on the
   inode.  Takes the inode tree read lock unless ``INODE_CHECK_LOCKED`` is
   set (caller already holds ``inode_lock`` / ``inode_rlock``).  Empty
   macro returning ``0`` when ``CONFIG_FS_PERMISSION`` is disabled.
+
+``INODE_PATH_AMODE``
+  The ``amode`` for the inode that ``inode_find`` returns: ``X_OK`` on a
+  mountpoint when the path goes into the volume, and nothing on the last
+  path component.
 
 ``inode_checkopenperm``
   Validate that the inode supports the requested open access, then apply
@@ -78,15 +82,20 @@ Applying the mount directory's mode bits as file open modes would require
 read/write on the mount directory merely to open a file beneath it.
 
 Traverse is separate: callers use ``inode_checkpathperm`` so parent
-directories and the mountpoint itself still require ``X_OK``.
+directories, and the mountpoint for a path that goes into the volume, still
+require ``X_OK``.  As POSIX specifies, the last path component needs no search
+permission: a directory with no execute bit can still be found with ``stat()``
+and changed with ``chmod()``.  ``chdir()`` is different: it needs search
+permission on the directory itself.
 
 Typical order after a successful ``inode_find``:
 
-1. ``inode_checkpathperm(inode, 0, 0)`` — search permission on the path
-   prefix (and on the mountpoint when entering a volume).  Call sites that
-   already hold the tree lock pass ``INODE_CHECK_LOCKED``; mount and
-   pseudoFS create/remove may pass a non-zero ``amode`` (for example
-   ``W_OK``) to combine traverse and target checks in one call.
+1. ``inode_checkpathperm(inode, INODE_PATH_AMODE(&desc), 0)`` — search
+   permission on the path prefix (and on the mountpoint when entering a
+   volume).  Call sites that already hold the tree lock pass
+   ``INODE_CHECK_LOCKED``; mount and pseudoFS create/remove pass
+   ``W_OK | X_OK`` on the directory to combine traverse and target checks in
+   one call.
 2. Operation-specific checks — ``inode_checkopenperm``, or the
    filesystem's own methods for paths inside a mount.
 
@@ -115,7 +124,8 @@ Where the checks run
   ``inode_rlock`` unless the caller already holds the tree lock
   (``INODE_CHECK_LOCKED``).
 * Inside ``inode_reserve`` / ``inode_remove`` for pseudoFS create and remove
-  (ancestor ``X_OK`` and parent ``W_OK`` in one call, under ``inode_lock``).
+  (ancestor and parent ``X_OK`` and parent ``W_OK`` in one call, under
+  ``inode_lock``).
 
 Who enforces what
 -----------------
