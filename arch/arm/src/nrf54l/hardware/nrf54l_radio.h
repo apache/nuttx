@@ -55,6 +55,7 @@
 #define NRF54L_RADIO_TASKS_CCASTART_OFFSET   0x0028                 /* Start the clear channel assessment used in IEEE 802.15.4 mode */
 #define NRF54L_RADIO_TASKS_CCASTOP_OFFSET    0x002c                 /* Stop the clear channel assessment */
 #define NRF54L_RADIO_TASKS_SOFTRESET_OFFSET  0x00a4                 /* Reset all public registers */
+#define NRF54L_RADIO_SUBSCRIBE_TXEN_OFFSET   0x0100                 /* Subscribe to TXEN */
 #define NRF54L_RADIO_EVENTS_READY_OFFSET     0x0200                 /* RADIO has ramped up and is ready to be started */
 #define NRF54L_RADIO_EVENTS_TXREADY_OFFSET   0x0204                 /* RADIO has ramped up and is ready to be started TX path */
 #define NRF54L_RADIO_EVENTS_RXREADY_OFFSET   0x0208                 /* RADIO has ramped up and is ready to be started RX path */
@@ -77,6 +78,7 @@
 #define NRF54L_RADIO_EVENTS_RATEBOOST_OFFSET 0x0250                 /* Ble_LR CI field received */
 #define NRF54L_RADIO_EVENTS_MHRMATCH_OFFSET  0x0254                 /* MAC header match found */
 #define NRF54L_RADIO_EVENTS_SYNC_OFFSET      0x0258                 /* Possible preamble received */
+#define NRF54L_RADIO_PUBLISH_PHYEND_OFFSET   0x031c                 /* Publish PHYEND */
 #define NRF54L_RADIO_SHORTS_OFFSET           0x0400                 /* Shortcuts between local events and tasks */
 #define NRF54L_RADIO_INTENSET00_OFFSET       0x0488                 /* Enable interrupt */
 #define NRF54L_RADIO_INTENCLR00_OFFSET       0x0490                 /* Disable interrupt */
