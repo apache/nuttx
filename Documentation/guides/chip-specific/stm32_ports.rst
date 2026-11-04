@@ -1120,6 +1120,30 @@ size macros must use ``STM32_`` prefix (not ``STM32F7_``, ``STM32H5_``, etc.).
 **Per-family hardware register definitions** (in ``arch/arm/src/<family>/hardware/``)
 must use ``STM32_XXX_`` (not ``STM32L4_XXX_``, ``STM32WB4_XXX_``, etc.).
 
+Board clock configuration convention
+------------------------------------
+
+The board ``board.h`` configures the clock tree and the family RCC code
+writes what the board defines.  All families use the same interface:
+
+* Register field values, built from the field macros of the family RCC
+  header: ``STM32_PLLCFG_*`` for the PLLs and ``STM32_RCC_<REG>_<FIELD>`` for
+  the other fields, for example::
+
+    #define STM32_PLLCFG_PLLM        RCC_PLLCFG_PLLM(4)
+    #define STM32_RCC_CFGR_PPRE1     RCC_CFGR_PPRE1_HCLKd2
+
+* Clock frequencies matching those fields: ``STM32_SYSCLK_FREQUENCY``,
+  ``STM32_HCLK_FREQUENCY``, ``STM32_PCLKn_FREQUENCY`` and the other
+  ``STM32_<clock>_FREQUENCY`` macros, as constants or expressions of other
+  frequencies.
+* Peripheral input clocks: ``STM32_TIMn_CLKIN`` and ``STM32_LPTIMn_CLKIN``
+  (see above), one for every instance of the chip.
+
+The board does not pass numeric divisors for the RCC code to convert into
+register fields.  The RCC code keeps reserved register bits at their reset
+value.
+
 Next steps
 ==========
 
