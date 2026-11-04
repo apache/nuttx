@@ -7,7 +7,7 @@ running ``.tflite`` models on memory-constrained targets. NuttX integrates
 it from ``apps/mlearning/tflite-micro``.
 
 The build downloads a pinned TFLM snapshot
-(``cfa4c91d1b36c37c7c104b9c664615e59f1abfe3``, 24 February 2024) from
+(``fd2a85dfb3bedac81920e8667565b1044c6b6a43``, 4 November 2026) from
 https://github.com/tensorflow/tflite-micro and applies NuttX patches that
 add INT8-only operator registrations and an ``extern "C"`` entry point for
 the hello-world example.

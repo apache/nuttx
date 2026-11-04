@@ -11,7 +11,7 @@ tree (DSP plus NN) for NNABLA.
 
 Enable with ``CONFIG_MLEARNING_CMSIS_NN``. The Makefile and CMake build
 download a pinned CMSIS-NN commit
-(``72e1ebf623ab1660a3e14e4e36fdcddce46f1991``) and compile:
+(``18bb0fd4ecea4b17a5a3c444c8d3a8cf28b1e68f``) and compile:
 
 - Activation functions
 - Basic math
