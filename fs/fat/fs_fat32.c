@@ -1034,10 +1034,10 @@ static int fat_get_sectors(FAR struct file *filep, bool read)
    *          s_size                              f_pos
    */
 
-  /* zero area (1) */
+  /* zero area (1): there is none if s_size is on a cluster boundary */
 
   if (i == num_clu && filep->f_pos > shared->s_size &&
-      shared->s_size != 0)
+      (shared->s_size & (clu_size - 1)) != 0)
     {
       zero_start = ff->ff_shared->s_size & (clu_size - 1);
 
