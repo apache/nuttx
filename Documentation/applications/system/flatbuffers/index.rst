@@ -3,7 +3,7 @@
 =============================
 
 ``apps/system/flatbuffers`` vendors Google `FlatBuffers
-<https://github.com/google/flatbuffers>`_ ``v23.5.26`` and applies
+<https://github.com/google/flatbuffers>`_ ``v25.9.23`` and applies
 ``flatbuffers.patch``. TensorFlow Lite Micro uses the headers to read
 ``.tflite`` model schemas.
 
