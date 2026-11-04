@@ -1490,8 +1490,16 @@ static int usbhost_cfgdesc(FAR struct usbhost_ft232r_s *priv,
 
               /* Check for the FTDI data interface */
 
+              /* A composite device may spread the data interface over
+               * several alternate settings: alt 0 without endpoints and the
+               * one carrying the bulk endpoints afterwards.  Accept every
+               * descriptor of the interface that was taken as the data
+               * interface, not only the first one.
+               */
+
               if (ifdesc->classid == USB_CLASS_VENDOR_SPEC &&
-                  (found & USBHOST_DATAIF_FOUND) == 0)
+                  ((found & USBHOST_DATAIF_FOUND) == 0 ||
+                   ifdesc->ifno == priv->dataif))
                 {
                   /* Save the data interface number and mark that the data
                    * interface found has been found.
