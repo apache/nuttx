@@ -73,6 +73,8 @@
  * For now, NuttX simply leaves the clocking at 792MHz.
  */
 
+#define BOARD_CPU_FREQUENCY 792000000
+
 /* LED definitions **********************************************************/
 
 /* LEDs
