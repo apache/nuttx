@@ -226,7 +226,7 @@
 /* DMA2D AHB Master Timer Configuration Register */
 
 #define DMA2D_AMTCR_EN              (1 << 0) /* Enable */
-#define DMA2D_AMTCR_DT_SHIFT        (0)      /* Bits 8-15 Dead Time */
+#define DMA2D_AMTCR_DT_SHIFT        (8)      /* Bits 8-15 Dead Time */
 #define DMA2D_AMTCR_DT_MASK         (0xff << DMA2D_AMTCR_DT_SHIFT)
 #define DMA2D_AMTCR_DT(n)           ((uint32_t)(n) << DMA2D_AMTCR_DT_SHIFT)
 
