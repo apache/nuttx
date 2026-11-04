@@ -683,6 +683,27 @@ void __gcov_reset(void)
     }
 }
 
+void __gcov_unload(FAR const void *addr, size_t size)
+{
+  FAR const char *start = addr;
+  FAR struct gcov_info **prev;
+
+  prev = &__gcov_info_start;
+  while (*prev != NULL && *prev != &g_gcov_list_end)
+    {
+      FAR const char *info = (FAR const char *)*prev;
+
+      if (info >= start && info < start + size)
+        {
+          *prev = (*prev)->next;
+        }
+      else
+        {
+          prev = &(*prev)->next;
+        }
+    }
+}
+
 #if defined(CONFIG_LIB_SYSCALL) && defined(__KERNEL__)
 int gcov(int op)
 {
