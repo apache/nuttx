@@ -146,7 +146,7 @@ system_heap_reserve_uninitialize(FAR struct mm_heap_s *mm)
 static FAR struct mm_heap_s *
 system_heap_reserve_initialize(void)
 {
-  return KNR_HEAP;
+  return USR_HEAP;
 }
 
 static void
@@ -275,11 +275,33 @@ static int system_heap_mmap(FAR struct dma_buf *dmabuf,
   return 0;
 }
 
+static FAR void *system_heap_alloc_buffer(FAR struct dma_heap *heap,
+                                          size_t len)
+{
+#if CONFIG_DMABUF_SYSTEM_HEAP_RESERVE_SIZE > 0
+  return mm_memalign(heap->priv, 32, len);
+#else
+  UNUSED(heap);
+  return kumm_memalign(32, len);
+#endif
+}
+
+static void system_heap_free_buffer(FAR struct dma_heap *heap,
+                                    FAR void *buf)
+{
+#if CONFIG_DMABUF_SYSTEM_HEAP_RESERVE_SIZE > 0
+  mm_free(heap->priv, buf);
+#else
+  UNUSED(heap);
+  kumm_free(buf);
+#endif
+}
+
 static void system_heap_dma_buf_release(FAR struct dma_buf *dmabuf)
 {
   FAR struct system_heap_buffer *buffer = dmabuf->priv;
 
-  mm_free(buffer->heap->priv, buffer->buf);
+  system_heap_free_buffer(buffer->heap, buffer->buf);
   kmm_free(buffer);
 }
 
@@ -302,7 +324,7 @@ system_heap_allocate(FAR struct dma_heap *heap, size_t len,
    * correctly when importing this dma_buf.
    */
 
-  buffer->buf = mm_memalign(heap->priv, 32, len);
+  buffer->buf = system_heap_alloc_buffer(heap, len);
 
   if (buffer->buf == NULL)
     {
@@ -324,7 +346,7 @@ system_heap_allocate(FAR struct dma_heap *heap, size_t len,
   dmabuf = dma_buf_export(&exp_info);
   if (dmabuf == NULL)
     {
-      mm_free(buffer->heap->priv, buffer->buf);
+      system_heap_free_buffer(buffer->heap, buffer->buf);
       kmm_free(buffer);
     }
 
