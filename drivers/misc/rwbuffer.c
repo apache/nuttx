@@ -64,6 +64,9 @@
 
 static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
                          size_t nblocks, FAR uint8_t *rdbuffer);
+#ifdef CONFIG_DRVR_WRITEBUFFER
+static void rwb_wrstarttimeout(FAR struct rwbuffer_s *rwb);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -199,6 +202,7 @@ static void rwb_wrtimeout(FAR void *arg)
   /* The following assumes that the size of a pointer is 4-bytes or less */
 
   FAR struct rwbuffer_s *rwb = (FAR struct rwbuffer_s *)arg;
+  int ret;
 
   DEBUGASSERT(rwb != NULL);
 
@@ -209,8 +213,18 @@ static void rwb_wrtimeout(FAR void *arg)
    * worker thread.
    */
 
-  rwb_lock(&rwb->wrlock);
-  rwb_wrflush(rwb);
+  ret = rwb_lock(&rwb->wrlock);
+  if (ret < 0)
+    {
+      return;
+    }
+
+  ret = rwb_wrflush(rwb);
+  if (ret < 0)
+    {
+      rwb_wrstarttimeout(rwb);
+    }
+
   rwb_unlock(&rwb->wrlock);
 }
 #endif
