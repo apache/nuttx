@@ -82,34 +82,14 @@
 #if defined(CONFIG_SCHED_HPWORK)
 /* The state of the kernel mode, high priority work queue(s). */
 
-struct hp_wqueue_s g_hpwork =
-{
-  {
-    LIST_INITIAL_VALUE(g_hpwork.wq.expired),
-    LIST_INITIAL_VALUE(g_hpwork.wq.pending),
-    SEM_INITIALIZER(0),
-    SEM_INITIALIZER(0),
-    SP_UNLOCKED,
-    CONFIG_SCHED_HPNTHREADS,
-  }
-};
+struct hp_wqueue_s g_hpwork;
 
 #endif /* CONFIG_SCHED_HPWORK */
 
 #if defined(CONFIG_SCHED_LPWORK)
 /* The state of the kernel mode, low priority work queue(s). */
 
-struct lp_wqueue_s g_lpwork =
-{
-  {
-    LIST_INITIAL_VALUE(g_lpwork.wq.expired),
-    LIST_INITIAL_VALUE(g_lpwork.wq.pending),
-    SEM_INITIALIZER(0),
-    SEM_INITIALIZER(0),
-    SP_UNLOCKED,
-    CONFIG_SCHED_LPNTHREADS,
-  }
-};
+struct lp_wqueue_s g_lpwork;
 
 #endif /* CONFIG_SCHED_LPWORK */
 
@@ -622,6 +602,31 @@ int work_queue_priority_wq(FAR struct kwork_wqueue_s *wqueue)
 int work_queue_priority(int qid)
 {
   return work_queue_priority_wq(work_qid2wq(qid));
+}
+
+/****************************************************************************
+ * Name: work_initialize
+ *
+ * Description:
+ *   Set up the kernel work queues before any work can be queued.  The
+ *   queues live in .bss; only the self-referencing list heads and the
+ *   thread count differ from the zero state.
+ *
+ ****************************************************************************/
+
+void work_initialize(void)
+{
+#ifdef CONFIG_SCHED_HPWORK
+  list_initialize(&g_hpwork.wq.expired);
+  list_initialize(&g_hpwork.wq.pending);
+  g_hpwork.wq.nthreads = CONFIG_SCHED_HPNTHREADS;
+#endif
+
+#ifdef CONFIG_SCHED_LPWORK
+  list_initialize(&g_lpwork.wq.expired);
+  list_initialize(&g_lpwork.wq.pending);
+  g_lpwork.wq.nthreads = CONFIG_SCHED_LPNTHREADS;
+#endif
 }
 
 /****************************************************************************
