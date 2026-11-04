@@ -67,6 +67,14 @@ struct nrf52_radioi8_tim_ops_s
   /* Reset timer */
 
   void (*reset)(struct nrf52_radioi8_dev_s *dev);
+
+  /* Let the timer started at PHYEND enable the ACK TX */
+
+  bool (*ackarm)(struct nrf52_radioi8_dev_s *dev);
+
+  /* ACK TX done */
+
+  void (*ackdone)(struct nrf52_radioi8_dev_s *dev);
 };
 
 /* Timer interface */
