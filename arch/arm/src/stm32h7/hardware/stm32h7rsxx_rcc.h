@@ -255,7 +255,6 @@
 #  define RCC_CDCFGR_CPRE_SYSCLKd128    (13 << RCC_CDCFGR_CPRE_SHIFT)
 #  define RCC_CDCFGR_CPRE_SYSCLKd256    (14 << RCC_CDCFGR_CPRE_SHIFT)
 #  define RCC_CDCFGR_CPRE_SYSCLKd512    (15 << RCC_CDCFGR_CPRE_SHIFT)
-#  define RCC_CDCFGR_CPRE(n)            ((LOG2_FLOOR(n) + 7) << RCC_CDCFGR_CPRE_SHIFT)
 
 #define RCC_BMCFGR_BMPRE_SHIFT          (0) /* AHB clock prescaler */
 #define RCC_BMCFGR_BMPRE_MASK           (15 << RCC_BMCFGR_BMPRE_SHIFT)
@@ -266,9 +265,8 @@
 #  define RCC_BMCFGR_BMPRE_SYSCLKd16    (11 << RCC_BMCFGR_BMPRE_SHIFT)
 #  define RCC_BMCFGR_BMPRE_SYSCLKd64    (12 << RCC_BMCFGR_BMPRE_SHIFT)
 #  define RCC_BMCFGR_BMPRE_SYSCLKd128   (13 << RCC_BMCFGR_BMPRE_SHIFT)
-#  define RCC_BMCFGR_BMPRE_SYSCLKd256   (14 << RCC_BMCFGR_BMPRE_SHIFT)
-#  define RCC_BMCFGR_BMPRE_SYSCLKd512   (15 << RCC_BMCFGR_BMPRE_SHIFT)
-#  define RCC_BMCFGR_BMPRE(n)           ((LOG2_FLOOR(n) + 7) << RCC_BMCFGR_BMPRE_SHIFT)
+#  define RCC_BMCFGR_BMPRE_SYSCLKd256   (14 << RCC_BMCFGR_BMPRE_SHIFT)#  define RCC_BMCFGR_BMPRE_SYSCLKd512   (15 << RCC_BMCFGR_BMPRE_SHIFT)
+
 #define RCC_APBCFGR_PPRE1_SHIFT         (0)  /* APB1 clock prescaler */
 #define RCC_APBCFGR_PPRE1_MASK          (7 << RCC_APBCFGR_PPRE1_SHIFT)
 #  define RCC_APBCFGR_PPRE1_HCLK        (0 << RCC_APBCFGR_PPRE1_SHIFT)
@@ -276,7 +274,6 @@
 #  define RCC_APBCFGR_PPRE1_HCLKd4      (5 << RCC_APBCFGR_PPRE1_SHIFT)
 #  define RCC_APBCFGR_PPRE1_HCLKd8      (6 << RCC_APBCFGR_PPRE1_SHIFT)
 #  define RCC_APBCFGR_PPRE1_HCLKd16     (7 << RCC_APBCFGR_PPRE1_SHIFT)
-#  define RCC_APBCFGR_PPRE1(n)          ((LOG2_FLOOR(n) + 3) << RCC_APBCFGR_PPRE1_SHIFT)
 #define RCC_APBCFGR_PPRE2_SHIFT         (4)  /* APB2 clock prescaler */
 #define RCC_APBCFGR_PPRE2_MASK          (7 << RCC_APBCFGR_PPRE2_SHIFT)
 #  define RCC_APBCFGR_PPRE2_HCLK        (0 << RCC_APBCFGR_PPRE2_SHIFT)
@@ -284,7 +281,6 @@
 #  define RCC_APBCFGR_PPRE2_HCLKd4      (5 << RCC_APBCFGR_PPRE2_SHIFT)
 #  define RCC_APBCFGR_PPRE2_HCLKd8      (6 << RCC_APBCFGR_PPRE2_SHIFT)
 #  define RCC_APBCFGR_PPRE2_HCLKd16     (7 << RCC_APBCFGR_PPRE2_SHIFT)
-#  define RCC_APBCFGR_PPRE2(n)          ((LOG2_FLOOR(n) + 3) << RCC_APBCFGR_PPRE2_SHIFT)
 #define RCC_APBCFGR_PPRE4_SHIFT         (8)  /* APB4 clock prescaler */
 #define RCC_APBCFGR_PPRE4_MASK          (7 << RCC_APBCFGR_PPRE4_SHIFT)
 #  define RCC_APBCFGR_PPRE4_HCLK        (0 << RCC_APBCFGR_PPRE4_SHIFT)
@@ -292,7 +288,6 @@
 #  define RCC_APBCFGR_PPRE4_HCLKd4      (5 << RCC_APBCFGR_PPRE4_SHIFT)
 #  define RCC_APBCFGR_PPRE4_HCLKd8      (6 << RCC_APBCFGR_PPRE4_SHIFT)
 #  define RCC_APBCFGR_PPRE4_HCLKd16     (7 << RCC_APBCFGR_PPRE4_SHIFT)
-#  define RCC_APBCFGR_PPRE4(n)          ((LOG2_FLOOR(n) + 3) << RCC_APBCFGR_PPRE4_SHIFT)
 #define RCC_APBCFGR_PPRE5_SHIFT         (12) /* APB5 clock prescaler */
 #define RCC_APBCFGR_PPRE5_MASK          (7 << RCC_APBCFGR_PPRE5_SHIFT)
 #  define RCC_APBCFGR_PPRE5_HCLK        (0 << RCC_APBCFGR_PPRE5_SHIFT)
@@ -300,7 +295,6 @@
 #  define RCC_APBCFGR_PPRE5_HCLKd4      (5 << RCC_APBCFGR_PPRE5_SHIFT)
 #  define RCC_APBCFGR_PPRE5_HCLKd8      (6 << RCC_APBCFGR_PPRE5_SHIFT)
 #  define RCC_APBCFGR_PPRE5_HCLKd16     (7 << RCC_APBCFGR_PPRE5_SHIFT)
-#  define RCC_APBCFGR_PPRE5(n)          ((LOG2_FLOOR(n) + 3) << RCC_APBCFGR_PPRE5_SHIFT)
 
 /* PLL registers ************************************************************/
 
@@ -317,9 +311,6 @@
 #  define RCC_PLLCKSELR_DIVM1(n)        RCC_PLLCKSELR_DIVM(n, RCC_PLLCKSELR_DIVM1_SHIFT)
 #  define RCC_PLLCKSELR_DIVM2(n)        RCC_PLLCKSELR_DIVM(n, RCC_PLLCKSELR_DIVM2_SHIFT)
 #  define RCC_PLLCKSELR_DIVM3(n)        RCC_PLLCKSELR_DIVM(n, RCC_PLLCKSELR_DIVM3_SHIFT)
-#define RCC_PLLCKSELR_DIVM1_MASK        RCC_PLLCKSELR_DIVM_MASK(RCC_PLLCKSELR_DIVM1_SHIFT)
-#define RCC_PLLCKSELR_DIVM2_MASK        RCC_PLLCKSELR_DIVM_MASK(RCC_PLLCKSELR_DIVM2_SHIFT)
-#define RCC_PLLCKSELR_DIVM3_MASK        RCC_PLLCKSELR_DIVM_MASK(RCC_PLLCKSELR_DIVM3_SHIFT)
 
 #define RCC_PLLCFGR_PLL1FRACEN          (1 << 0)  /* PLL1 fractional enable */
 #define RCC_PLLCFGR_PLL1VCOSEL          (1 << 1)  /* PLL1 VCO selection */
@@ -339,10 +330,6 @@
 #define RCC_PLLCFGR_PLL2SSCGEN          (1 << 13)
 #define RCC_PLLCFGR_PLL2RGE_SHIFT       (14)      /* PLL2 input freq range */
 #define RCC_PLLCFGR_PLL2RGE_MASK        (3 << RCC_PLLCFGR_PLL2RGE_SHIFT)
-#  define RCC_PLLCFGR_PLL2RGE_1_2       (0 << RCC_PLLCFGR_PLL2RGE_SHIFT)
-#  define RCC_PLLCFGR_PLL2RGE_2_4       (1 << RCC_PLLCFGR_PLL2RGE_SHIFT)
-#  define RCC_PLLCFGR_PLL2RGE_4_8       (2 << RCC_PLLCFGR_PLL2RGE_SHIFT)
-#  define RCC_PLLCFGR_PLL2RGE_8_16      (3 << RCC_PLLCFGR_PLL2RGE_SHIFT)
 #define RCC_PLLCFGR_PLL2PEN             (1 << 16) /* PLL2 P output enable */
 #define RCC_PLLCFGR_PLL2QEN             (1 << 17) /* PLL2 Q output enable */
 #define RCC_PLLCFGR_PLL2REN             (1 << 18) /* PLL2 R output enable */
@@ -353,33 +340,19 @@
 #define RCC_PLLCFGR_PLL3SSCGEN          (1 << 24)
 #define RCC_PLLCFGR_PLL3RGE_SHIFT       (25)      /* PLL3 input freq range */
 #define RCC_PLLCFGR_PLL3RGE_MASK        (3 << RCC_PLLCFGR_PLL3RGE_SHIFT)
-#  define RCC_PLLCFGR_PLL3RGE_1_2       (0 << RCC_PLLCFGR_PLL3RGE_SHIFT)
-#  define RCC_PLLCFGR_PLL3RGE_2_4       (1 << RCC_PLLCFGR_PLL3RGE_SHIFT)
-#  define RCC_PLLCFGR_PLL3RGE_4_8       (2 << RCC_PLLCFGR_PLL3RGE_SHIFT)
-#  define RCC_PLLCFGR_PLL3RGE_8_16      (3 << RCC_PLLCFGR_PLL3RGE_SHIFT)
 #define RCC_PLLCFGR_PLL3PEN             (1 << 27) /* PLL3 P output enable */
 #define RCC_PLLCFGR_PLL3QEN             (1 << 28) /* PLL3 Q output enable */
 #define RCC_PLLCFGR_PLL3REN             (1 << 29) /* PLL3 R output enable */
 #define RCC_PLLCFGR_PLL3SEN             (1 << 30) /* PLL3 S output enable */
 
 #define RCC_PLLDIVR_DIVN_SHIFT          (0)  /* PLL N multiplier */
-#define RCC_PLLDIVR_DIVN_MASK           (0x1ff << RCC_PLLDIVR_DIVN_SHIFT)
 #define RCC_PLLDIVR_DIVP_SHIFT          (9)  /* PLL P divider */
-#define RCC_PLLDIVR_DIVP_MASK           (0x7f << RCC_PLLDIVR_DIVP_SHIFT)
 #define RCC_PLLDIVR_DIVQ_SHIFT          (16) /* PLL Q divider */
-#define RCC_PLLDIVR_DIVQ_MASK           (0x7f << RCC_PLLDIVR_DIVQ_SHIFT)
 #define RCC_PLLDIVR_DIVR_SHIFT          (24) /* PLL R divider */
-#define RCC_PLLDIVR_DIVR_MASK           (0x7f << RCC_PLLDIVR_DIVR_SHIFT)
-#define RCC_PLLDIVR_DIVS_SHIFT          (0)  /* PLL S divider */
-#define RCC_PLLDIVR_DIVS_MASK           (0x7 << RCC_PLLDIVR_DIVS_SHIFT)
-#define RCC_PLLDIVR_DIVT_SHIFT          (8)  /* PLL T divider */
-#define RCC_PLLDIVR_DIVT_MASK           (0x7 << RCC_PLLDIVR_DIVT_SHIFT)
 #  define RCC_PLLDIVR_DIVN(n)           (((n) - 1) << RCC_PLLDIVR_DIVN_SHIFT)
 #  define RCC_PLLDIVR_DIVP(n)           (((n) - 1) << RCC_PLLDIVR_DIVP_SHIFT)
 #  define RCC_PLLDIVR_DIVQ(n)           (((n) - 1) << RCC_PLLDIVR_DIVQ_SHIFT)
 #  define RCC_PLLDIVR_DIVR(n)           (((n) - 1) << RCC_PLLDIVR_DIVR_SHIFT)
-#  define RCC_PLLDIVR_DIVS(n)           (((n) - 1) << RCC_PLLDIVR_DIVS_SHIFT)
-#  define RCC_PLLDIVR_DIVT(n)           (((n) - 1) << RCC_PLLDIVR_DIVT_SHIFT)
 #define RCC_PLL1DIVR1_N(n)              RCC_PLLDIVR_DIVN(n)
 #define RCC_PLL1DIVR1_P(n)              RCC_PLLDIVR_DIVP(n)
 #define RCC_PLL1DIVR1_Q(n)              RCC_PLLDIVR_DIVQ(n)
