@@ -181,8 +181,8 @@ void __start_c(void)
 
   putreg32((uint32_t)_vectors, NVIC_VECTAB);
 
-  /* When chain-loaded by an FSBL that called HAL_Init(), SysTick may be
-   * left running.  Disable it and clear any pending interrupt so it does
+  /* When chain-loaded by a first-stage boot loader, SysTick may be left
+   * running.  Disable it and clear any pending interrupt so it does
    * not fire before NuttX has attached its handler.
    */
 

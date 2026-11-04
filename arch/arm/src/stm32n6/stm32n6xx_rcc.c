@@ -315,7 +315,6 @@ static inline void rcc_enableahb4(void)
 {
   /* Use the write-1-to-set ENSR alias rather than a read-modify-write on
    * ENR so concurrent producers (e.g. RCC IRQ later) cannot lose bits.
-   * Matches the ST LL pattern in stm32n6xx_ll_bus.h.
    */
 
   putreg32(RCC_AHB4ENR_GPIOAEN
@@ -722,9 +721,9 @@ void stm32_rcc_enableperipherals(void)
 
   /* Enable all AXISRAM bank clocks.  The boot ROM only enables AXISRAM1/2
    * which is sufficient for code execution, but the NuttX heap extends
-   * across all SRAM banks (up to AXISRAM5 at 0x34400000+).  Without these
-   * clocks, mm_initialize writing the tail node at the heap end will cause
-   * an IMPRECISERR bus fault.
+   * across AXISRAM1-6 and the CACHEAXI RAM.  Without these clocks,
+   * mm_initialize writing the tail node at the heap end will cause an
+   * IMPRECISERR bus fault.
    */
 
   putreg32(RCC_MEMENR_ALLAXISRAM | RCC_MEMENR_CACHEAXIRAMEN,
