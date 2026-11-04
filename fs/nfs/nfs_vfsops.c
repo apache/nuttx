@@ -624,7 +624,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
    * access is ignored.
    */
 
-  if ((oflags & (O_TRUNC | O_WRONLY)) == (O_TRUNC | O_WRONLY))
+  if ((oflags & O_TRUNC) != 0 && (oflags & O_ACCMODE) != O_RDONLY)
     {
       struct stat buf;
 

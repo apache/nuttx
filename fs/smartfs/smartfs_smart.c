@@ -285,7 +285,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
        * is writeable. O_TRUNC without write access is ignored.
        */
 
-      if ((oflags & (O_TRUNC | O_WRONLY)) == (O_TRUNC | O_WRONLY))
+      if ((oflags & O_TRUNC) != 0 && (oflags & O_ACCMODE) != O_RDONLY)
         {
           /* Truncate the file as part of the open */
 
