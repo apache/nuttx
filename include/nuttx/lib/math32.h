@@ -320,15 +320,17 @@ static inline_function uint64_t div64_const32(uint64_t n, uint32_t b)
   return res;
 }
 
-static inline_function uint64_t div64_const(uint64_t n, uint32_t base)
+static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
 {
+  DEBUGASSERT(base > 0);
+
   if (IS_POWER_OF_2(base))
     {
       n >>= LOG2_FLOOR(base);
     }
-  else if (UINTPTR_MAX == UINT32_MAX)
+  else if (base <= UINT32_MAX)
     {
-      n = div64_const32(n, base);
+      n = div64_const32(n, (uint32_t)base);
     }
   else
     {
