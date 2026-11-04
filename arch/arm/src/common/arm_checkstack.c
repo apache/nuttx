@@ -144,6 +144,7 @@ size_t arm_stack_check(void *stackbase, size_t nbytes)
           for (j = 0; j < 64; j++)
             {
               int ch;
+
               if (*ptr++ == STACK_COLOR)
                 {
                   ch = '.';
