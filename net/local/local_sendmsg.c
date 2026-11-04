@@ -135,91 +135,6 @@ fail:
 #endif /* CONFIG_NET_LOCAL_SCM */
 
 /****************************************************************************
- * Name: local_send
- *
- * Description:
- *   Send a local packet as a stream.
- *
- * Input Parameters:
- *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags (ignored for now)
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
- *   -1 is returned, and errno is set appropriately (see send() for the
- *   list of errno numbers).
- *
- ****************************************************************************/
-
-static ssize_t local_send(FAR struct socket *psock,
-                          FAR const struct iovec *buf,
-                          size_t len, int flags)
-{
-  ssize_t ret;
-
-  switch (psock->s_type)
-    {
-#ifdef CONFIG_NET_LOCAL_STREAM
-      case SOCK_STREAM:
-#endif /* CONFIG_NET_LOCAL_STREAM */
-#ifdef CONFIG_NET_LOCAL_DGRAM
-      case SOCK_DGRAM:
-#endif /* CONFIG_NET_LOCAL_DGRAM */
-        {
-          FAR struct local_conn_s *conn = psock->s_conn;
-
-          /* Local TCP packet send */
-
-          DEBUGASSERT(buf);
-
-          /* Verify that this is a connected peer socket and that it has
-           * opened the outgoing FIFO for write-only access.
-           */
-
-          if (conn->lc_state != LOCAL_STATE_CONNECTED)
-            {
-              nerr("ERROR: not connected\n");
-              return -ENOTCONN;
-            }
-
-          /* Check shutdown state */
-
-          if (conn->lc_outfile.f_inode == NULL)
-            {
-              return -EPIPE;
-            }
-
-          /* Send the packet */
-
-          ret = nxmutex_lock(&conn->lc_sendlock);
-          if (ret < 0)
-            {
-              /* May fail because the task was canceled. */
-
-              return ret;
-            }
-
-          ret = local_send_packet(&conn->lc_outfile, buf, len);
-          nxmutex_unlock(&conn->lc_sendlock);
-        }
-        break;
-      default:
-        {
-          /* EDESTADDRREQ.  Signifies that the socket is not connection-mode
-           * and no peer address is set.
-           */
-
-          ret = -EDESTADDRREQ;
-        }
-        break;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: local_sendto
  *
  * Description:
@@ -254,6 +169,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
   FAR struct local_conn_s *conn = psock->s_conn;
   FAR struct local_conn_s *server;
   FAR const struct sockaddr_un *unaddr = (FAR const struct sockaddr_un *)to;
+  FAR const char *path;
   ssize_t ret;
 
   /* Verify that a valid address has been provided */
@@ -286,7 +202,10 @@ static ssize_t local_sendto(FAR struct socket *psock,
 
   /* Verify that this is not a connected peer socket.  It need not be
    * bound, however.  If unbound, recvfrom will see this as a nameless
-   * connection.
+   * connection.  A DGRAM default peer set by connect() is not a state of
+   * its own, so it never reaches this check.  A socketpair() is
+   * LOCAL_STATE_CONNECTED with its outgoing FIFO already open, which the
+   * DEBUGASSERT below would catch, so refuse it here as master does.
    */
 
   if (conn->lc_state != LOCAL_STATE_UNBOUND &&
@@ -308,6 +227,23 @@ static ssize_t local_sendto(FAR struct socket *psock,
       return -ENOENT;
     }
 
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  /* POSIX: for a datagram socket the peer address set by connect() "limits
+   * the remote sender for subsequent recv() functions".  Refuse to deliver
+   * to a receiver that has connected to somebody else.
+   */
+
+  if (server->lc_dconnected &&
+      strncmp(server->lc_daddr.sun_path +
+              (server->lc_daddr.sun_path[0] == '\0' ? 1 : 0),
+              conn->lc_path, UNIX_PATH_MAX - 1) != 0)
+    {
+      local_unlock();
+      nerr("ERROR: Receiver is connected to another peer\n");
+      return -EPERM;
+    }
+#endif
+
   local_unlock();
 
   /* Make sure that dgram is sent safely */
@@ -325,27 +261,32 @@ static ssize_t local_sendto(FAR struct socket *psock,
 
   DEBUGASSERT(conn->lc_outfile.f_inode == NULL);
 
+  /* An abstract address starts with a NUL, which local_findconn() skips.
+   * Skip it here too so that the FIFO name matches the one the receiver
+   * bound, instead of being the empty name.
+   */
+
+  path = &unaddr->sun_path[unaddr->sun_path[0] == '\0' ? 1 : 0];
+
   /* Make sure that half duplex FIFO has been created.
    * REVISIT:  Or should be just make sure that it already exists?
    */
 
-  ret = local_create_halfduplex(conn, unaddr->sun_path, server->lc_rcvsize);
+  ret = local_create_halfduplex(conn, path, server->lc_rcvsize);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to create FIFO for %s: %zd\n",
-           unaddr->sun_path, ret);
+      nerr("ERROR: Failed to create FIFO for %s: %zd\n", path, ret);
       goto errout_with_lock;
     }
 
   /* Open the sending side of the transfer */
 
-  ret = local_open_sender(conn, unaddr->sun_path,
+  ret = local_open_sender(conn, path,
                           _SS_ISNONBLOCK(conn->lc_conn.s_flags) ||
                           (flags & MSG_DONTWAIT) != 0);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to open FIFO for %s: %zd\n",
-           unaddr->sun_path, ret);
+      nerr("ERROR: Failed to open FIFO for %s: %zd\n", path, ret);
 
       goto errout_with_halfduplex;
     }
@@ -391,6 +332,102 @@ errout_with_lock:
 #else
   return -EISCONN;
 #endif /* CONFIG_NET_LOCAL_DGRAM */
+}
+
+/****************************************************************************
+ * Name: local_send
+ *
+ * Description:
+ *   Send a local packet as a stream.
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags (ignored for now)
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   -1 is returned, and errno is set appropriately (see send() for the
+ *   list of errno numbers).
+ *
+ ****************************************************************************/
+
+static ssize_t local_send(FAR struct socket *psock,
+                          FAR const struct iovec *buf,
+                          size_t len, int flags)
+{
+  ssize_t ret;
+
+  switch (psock->s_type)
+    {
+      case SOCK_STREAM:
+        {
+          FAR struct local_conn_s *conn = psock->s_conn;
+
+          DEBUGASSERT(buf);
+
+          if (conn->lc_state != LOCAL_STATE_CONNECTED)
+            {
+              nerr("ERROR: not connected\n");
+              return -ENOTCONN;
+            }
+
+          if (conn->lc_outfile.f_inode == NULL)
+            {
+              return -EPIPE;
+            }
+
+          /* Serialize concurrent senders on the same socket */
+
+          ret = nxmutex_lock(&conn->lc_sendlock);
+          if (ret < 0)
+            {
+              /* May fail because the task was canceled. */
+
+              return ret;
+            }
+
+          ret = local_send_packet(&conn->lc_outfile, buf, len);
+          nxmutex_unlock(&conn->lc_sendlock);
+        }
+        break;
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+      case SOCK_DGRAM:
+        {
+          FAR struct local_conn_s *conn = psock->s_conn;
+
+          if (!conn->lc_dconnected)
+            {
+              return -EDESTADDRREQ;
+            }
+
+          ret = local_sendto(psock, buf, len, flags,
+                  (FAR const struct sockaddr *)&conn->lc_daddr,
+                  sizeof(conn->lc_daddr));
+
+          /* connect() checked that the peer existed, so a peer that has
+           * gone away since is a refused connection rather than a name
+           * that was never there.
+           */
+
+          if (ret == -ENOENT)
+            {
+              ret = -ECONNREFUSED;
+            }
+        }
+        break;
+#endif /* CONFIG_NET_LOCAL_DGRAM */
+
+      default:
+        {
+          ret = -EDESTADDRREQ;
+        }
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
