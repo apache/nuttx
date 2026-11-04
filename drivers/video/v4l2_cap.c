@@ -4049,6 +4049,9 @@ static int capture_enum_frminterval(FAR struct file *filep,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR capture_mng_t *cmng = inode->i_private;
+  FAR const struct v4l2_frmivalenum *ival = NULL;
+  uint32_t n = 0;
+  size_t i;
 
   if (cmng == NULL || f == NULL)
     {
@@ -4057,21 +4060,38 @@ static int capture_enum_frminterval(FAR struct file *filep,
 
   if (cmng->imgsensor && cmng->imgsensor->frmintervals)
     {
-      if (f->index >= cmng->imgsensor->frmintervals_num)
+      /* Entries with a frame size or a format only apply to it */
+
+      for (i = 0; i < cmng->imgsensor->frmintervals_num; i++)
+        {
+          ival = &cmng->imgsensor->frmintervals[i];
+          if ((ival->width != 0 && ival->width != f->width) ||
+              (ival->height != 0 && ival->height != f->height) ||
+              (ival->pixel_format != 0 &&
+               ival->pixel_format != f->pixel_format))
+            {
+              continue;
+            }
+
+          if (n++ == f->index)
+            {
+              break;
+            }
+        }
+
+      if (i >= cmng->imgsensor->frmintervals_num)
         {
           return -EINVAL;
         }
+
+      f->type = ival->type;
+      if (f->type == V4L2_FRMIVAL_TYPE_DISCRETE)
+        {
+          f->discrete = ival->discrete;
+        }
       else
         {
-          f->type = cmng->imgsensor->frmintervals[f->index].type;
-          if (f->type == V4L2_FRMIVAL_TYPE_DISCRETE)
-            {
-              f->discrete = cmng->imgsensor->frmintervals[f->index].discrete;
-            }
-          else
-            {
-              f->stepwise = cmng->imgsensor->frmintervals[f->index].stepwise;
-            }
+          f->stepwise = ival->stepwise;
         }
     }
   else
