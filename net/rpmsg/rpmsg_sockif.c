@@ -118,7 +118,17 @@ struct rpmsg_socket_conn_s
   uint32_t                       recvlen;
   FAR struct circbuf_s           recvbuf;
 
+  FAR struct rpmsg_socket_conn_s *server;
   FAR struct rpmsg_socket_conn_s *next;
+
+  /* Connections that have been created by rpmsg_socket_ns_bind() but have
+   * not yet sent their SYNC message, so are not on the accept queue yet.
+   * The listening socket owns this list so that it can detach them if it
+   * is closed first.  Only valid on a listening socket (backlog > 0).
+   */
+
+  FAR struct rpmsg_socket_conn_s *pendlist;
+  FAR struct rpmsg_socket_conn_s *pendnext;
 
   /* server listen-scoket listening: backlog > 0;
    * others: backlog = 0;
@@ -154,6 +164,12 @@ struct rpmsg_socket_conn_s
 
 static int        rpmsg_socket_setup(FAR struct socket *psock);
 static sockcaps_t rpmsg_socket_sockcaps(FAR struct socket *psock);
+static void       rpmsg_socket_pend_add(
+                    FAR struct rpmsg_socket_conn_s *server,
+                    FAR struct rpmsg_socket_conn_s *conn);
+static bool       rpmsg_socket_pend_remove(
+                    FAR struct rpmsg_socket_conn_s *server,
+                    FAR struct rpmsg_socket_conn_s *conn);
 static void       rpmsg_socket_addref(FAR struct socket *psock);
 static int        rpmsg_socket_bind(FAR struct socket *psock,
                                     FAR const struct sockaddr *addr,
@@ -334,6 +350,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct rpmsg_socket_conn_s *conn = ept->priv;
   FAR struct rpmsg_socket_sync_s *head = data;
+  FAR struct rpmsg_socket_conn_s *server;
 
   if (head->cmd == RPMSG_SOCKET_CMD_SYNC)
     {
@@ -349,6 +366,63 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
       rpmsg_socket_post(&conn->sendsem);
       rpmsg_socket_poll_notify(conn, POLLOUT);
       nxmutex_unlock(&conn->sendlock);
+
+      /* Accept new connection and complete the final handshake.
+       *
+       * conn->server is only valid while the listening socket still owns
+       * this connection on its pending list.  Take recvlock and re-check
+       * that we are still on that list: if the listener was closed (or the
+       * remote unbound) in the meantime it has already detached us and
+       * conn->server is NULL.
+       */
+
+      nxmutex_lock(&conn->recvlock);
+      server = conn->server;
+      nxmutex_unlock(&conn->recvlock);
+
+      if (server != NULL)
+        {
+          FAR struct rpmsg_socket_conn_s *tmp;
+          int cnt = 0;
+
+          nxmutex_lock(&server->recvlock);
+          if (!rpmsg_socket_pend_remove(server, conn))
+            {
+              /* Already detached by the listener. */
+
+              nxmutex_unlock(&server->recvlock);
+              return 0;
+            }
+
+          for (tmp = server; tmp->next; tmp = tmp->next)
+            {
+              if (++cnt >= server->backlog)
+                {
+                  /* Reject the connection */
+
+                  nerr("Reject the connection, listening backlog is full\n");
+                  nxmutex_unlock(&server->recvlock);
+                  rpmsg_destroy_ept(&conn->ept);
+                  rpmsg_socket_free(conn);
+                  return 0;
+                }
+            }
+
+          tmp->next = conn;
+          rpmsg_socket_post(&server->recvsem);
+          rpmsg_socket_poll_notify(server, POLLIN);
+          nxmutex_unlock(&server->recvlock);
+
+          /* The listener no longer owns this connection, so drop the back
+           * pointer:  the listening socket may be closed and freed at any
+           * time from now on, and rpmsg_socket_ns_unbind() must not take
+           * its recvlock afterwards.
+           */
+
+          nxmutex_lock(&conn->recvlock);
+          conn->server = NULL;
+          nxmutex_unlock(&conn->recvlock);
+        }
     }
   else if (head->cmd == RPMSG_SOCKET_CMD_DATA)
     {
@@ -461,6 +535,57 @@ static inline void rpmsg_socket_destroy_ept(
   rpmsg_destroy_ept(&conn->ept);
 }
 
+/****************************************************************************
+ * Name: rpmsg_socket_pend_add
+ *
+ * Description:
+ *   Track a connection that is waiting for its SYNC message on the
+ *   listening socket, so that the listener can detach it if it is closed
+ *   before the SYNC arrives.
+ *
+ * Assumptions:
+ *   server->recvlock is held by the caller.
+ *
+ ****************************************************************************/
+
+static void rpmsg_socket_pend_add(FAR struct rpmsg_socket_conn_s *server,
+                                  FAR struct rpmsg_socket_conn_s *conn)
+{
+  conn->pendnext   = server->pendlist;
+  server->pendlist = conn;
+}
+
+/****************************************************************************
+ * Name: rpmsg_socket_pend_remove
+ *
+ * Description:
+ *   Take a connection off the listening socket's waiting-for-SYNC list.
+ *   Returns true if it was found, i.e. if the listener had not already
+ *   detached it.
+ *
+ * Assumptions:
+ *   server->recvlock is held by the caller.
+ *
+ ****************************************************************************/
+
+static bool rpmsg_socket_pend_remove(FAR struct rpmsg_socket_conn_s *server,
+                                     FAR struct rpmsg_socket_conn_s *conn)
+{
+  FAR struct rpmsg_socket_conn_s **pp;
+
+  for (pp = &server->pendlist; *pp != NULL; pp = &(*pp)->pendnext)
+    {
+      if (*pp == conn)
+        {
+          *pp = conn->pendnext;
+          conn->pendnext = NULL;
+          return true;
+        }
+    }
+
+  return false;
+}
+
 static void rpmsg_socket_ns_bound(struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsg_socket_conn_s *conn = ept->priv;
@@ -478,15 +603,34 @@ static void rpmsg_socket_ns_bound(struct rpmsg_endpoint *ept)
 static void rpmsg_socket_ns_unbind(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsg_socket_conn_s *conn = ept->priv;
+  FAR struct rpmsg_socket_conn_s *server;
 
   nxmutex_lock(&conn->recvlock);
-
+  server = conn->server;
+  conn->server = NULL;
   conn->unbind = true;
   rpmsg_socket_post(&conn->sendsem);
   rpmsg_socket_post(&conn->recvsem);
   rpmsg_socket_poll_notify(conn, POLLIN | POLLOUT | POLLHUP | POLLERR);
 
   nxmutex_unlock(&conn->recvlock);
+
+  /* If the remote unbound before sending its SYNC, this connection is
+   * still owned by the listener and will never be accepted.  Drop it.
+   */
+
+  if (server != NULL)
+    {
+      nxmutex_lock(&server->recvlock);
+      if (rpmsg_socket_pend_remove(server, conn))
+        {
+          nxmutex_unlock(&server->recvlock);
+          rpmsg_socket_free(conn);
+          return;
+        }
+
+      nxmutex_unlock(&server->recvlock);
+    }
 }
 
 static void rpmsg_socket_ept_release(FAR struct rpmsg_endpoint *ept)
@@ -575,9 +719,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
                                  uint32_t dest)
 {
   FAR struct rpmsg_socket_conn_s *server = priv;
-  FAR struct rpmsg_socket_conn_s *tmp;
   FAR struct rpmsg_socket_conn_s *new;
-  int cnt = 0;
   int ret;
 
   new = rpmsg_socket_alloc();
@@ -593,6 +735,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
       return;
     }
 
+  new->server = server;
   new->ept.priv = new;
   new->ept.release_cb = rpmsg_socket_ept_release;
   ret = rpmsg_create_ept(&new->ept, rdev, name,
@@ -623,27 +766,15 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
   strlcpy(new->rpaddr.rp_name, name + RPMSG_SOCKET_NAME_PREFIX_LEN,
           sizeof(new->rpaddr.rp_name));
 
-  rpmsg_socket_ns_bound(&new->ept);
+  /* Let the listening socket own this connection until its SYNC arrives,
+   * so that it can detach it if the listener is closed in the meantime.
+   */
 
   nxmutex_lock(&server->recvlock);
-  for (tmp = server; tmp->next; tmp = tmp->next)
-    {
-      if (++cnt >= server->backlog)
-        {
-          /* Reject the connection */
-
-          nxmutex_unlock(&server->recvlock);
-          rpmsg_destroy_ept(&new->ept);
-          rpmsg_socket_free(new);
-          return;
-        }
-    }
-
-  tmp->next = new;
-
-  rpmsg_socket_post(&server->recvsem);
-  rpmsg_socket_poll_notify(server, POLLIN);
+  rpmsg_socket_pend_add(server, new);
   nxmutex_unlock(&server->recvlock);
+
+  rpmsg_socket_ns_bound(&new->ept);
 }
 
 static int rpmsg_socket_getaddr(FAR struct rpmsg_socket_conn_s *conn,
@@ -872,13 +1003,8 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
 
       nxmutex_unlock(&server->recvlock);
 
-      if (conn)
+      if (conn && conn->sendsize > 0)
         {
-          if (conn->sendsize == 0)
-            {
-              net_sem_wait(&conn->sendsem);
-            }
-
           newsock->s_domain = psock->s_domain;
           newsock->s_sockif = psock->s_sockif;
           newsock->s_type   = SOCK_STREAM;
@@ -1424,11 +1550,34 @@ static int rpmsg_socket_close(FAR struct socket *psock)
 
   if (conn->backlog > 0)
     {
+      FAR struct rpmsg_socket_conn_s *pend;
+
       rpmsg_unregister_callback(conn,
                                 NULL,
                                 NULL,
                                 rpmsg_socket_ns_match,
                                 rpmsg_socket_ns_bind);
+
+      /* Detach any connection still waiting for its SYNC: they hold a
+       * pointer to this listening socket which is about to be freed.
+       */
+
+      nxmutex_lock(&conn->recvlock);
+      while ((pend = conn->pendlist) != NULL)
+        {
+          conn->pendlist = pend->pendnext;
+          pend->pendnext = NULL;
+
+          nxmutex_lock(&pend->recvlock);
+          pend->server = NULL;
+          nxmutex_unlock(&pend->recvlock);
+
+          nxmutex_unlock(&conn->recvlock);
+          rpmsg_socket_destroy_ept(pend);
+          nxmutex_lock(&conn->recvlock);
+        }
+
+      nxmutex_unlock(&conn->recvlock);
     }
   else
     {
