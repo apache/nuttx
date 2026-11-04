@@ -849,6 +849,10 @@ static void convert_to_imgdatafmt(FAR video_format_t *video,
         data->pixelformat = IMGDATA_PIX_FMT_Z16;
         break;
 
+      case V4L2_PIX_FMT_SRGGB10P:
+        data->pixelformat = IMGDATA_PIX_FMT_SRGGB10P;
+        break;
+
       case V4L2_PIX_FMT_JPEG:
         data->pixelformat = IMGDATA_PIX_FMT_JPEG;
         break;
@@ -898,6 +902,10 @@ static void convert_to_imgsensorfmt(FAR video_format_t *video,
 
       case V4L2_PIX_FMT_Z16:
         sensor->pixelformat = IMGSENSOR_PIX_FMT_Z16;
+        break;
+
+      case V4L2_PIX_FMT_SRGGB10P:
+        sensor->pixelformat = IMGSENSOR_PIX_FMT_SRGGB10P;
         break;
 
       case V4L2_PIX_FMT_JPEG:
@@ -1591,6 +1599,8 @@ static size_t get_bufsize(FAR video_format_t *vf)
       case V4L2_PIX_FMT_NV12:
       case V4L2_PIX_FMT_YUV420:
         return ret * 3 / 2;
+      case V4L2_PIX_FMT_SRGGB10P:
+        return ret * 5 / 4;
       case V4L2_PIX_FMT_YUYV:
       case V4L2_PIX_FMT_UYVY:
       case V4L2_PIX_FMT_RGB565:
@@ -3042,6 +3052,7 @@ static int capture_try_fmt(FAR struct file *filep,
       case V4L2_PIX_FMT_RGB565:
       case V4L2_PIX_FMT_RGB565X:
       case V4L2_PIX_FMT_Z16:
+      case V4L2_PIX_FMT_SRGGB10P:
       case V4L2_PIX_FMT_JPEG:
       case V4L2_PIX_FMT_ENTROPY:
       case V4L2_PIX_FMT_JPEG_WITH_SUBIMG:

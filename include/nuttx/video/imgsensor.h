@@ -128,6 +128,7 @@
 #define IMGSENSOR_PIX_FMT_RGB565X          (9)
 #define IMGSENSOR_PIX_FMT_ENTROPY          (10)
 #define IMGSENSOR_PIX_FMT_Z16              (11)
+#define IMGSENSOR_PIX_FMT_SRGGB10P         (12)
 
 /* Method access helper macros */
 
