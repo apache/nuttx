@@ -2866,9 +2866,9 @@ static int fat_truncate(FAR struct file *filep, off_t length)
        * cluster of the file.
        */
 
-      savepos = filep->f_pos;
+      savepos      = filep->f_pos;
       filep->f_pos = oldsize;
-      ret = fat_get_sectors(filep, false);
+      ret          = fat_get_sectors(filep, false);
       filep->f_pos = savepos;
       if (ret < 0)
         {

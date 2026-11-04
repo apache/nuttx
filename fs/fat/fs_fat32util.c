@@ -1546,7 +1546,7 @@ int fat_dirshrink(struct fat_mountpt_s *fs, FAR uint8_t *direntry,
   /* This sector needs to be written back to disk eventually */
 
   fs->fs_dirty = true;
-  savesector = fs->fs_currentsector;
+  savesector   = fs->fs_currentsector;
 
   /* Now find the cluster change to be removed.  Start with the cluster
    * after the current one (which we know contains data).
