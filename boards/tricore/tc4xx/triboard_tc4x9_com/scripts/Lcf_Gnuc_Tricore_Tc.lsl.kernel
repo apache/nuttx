@@ -35,9 +35,9 @@
 /* Default linker script, for normal executables */
 OUTPUT_FORMAT("elf32-tricore")
 OUTPUT_ARCH("tricore")
-#if CONFIG_CPU_COREID == 0
-ENTRY(_START)
-#endif
+
+ENTRY(__start)
+EXTERN(__start)
 
 __TRICORE_DERIVATE_MEMORY_MAP__ = 0x490;
 
@@ -70,6 +70,7 @@ LCF_STARTPTR_NC   = NC_START(LCF_STARTPTR);
 LCF_TRAPVEC_START = LCF_STARTPTR + 0x100;
 
 COREID_LST(__INTTAB_CPU) = LCF_PFLASH_KERNEL_START;
+__INTTAB_CPU = LCF_PFLASH_KERNEL_START | 0x1FE0; /* sw managed single entry */
 
 LCF_STARTPTR_NC_CPU0 = NC_START(CORE0_PFLASH_KERNEL_START);
 LCF_STARTPTR_NC_CPU1 = NC_START(CORE1_PFLASH_KERNEL_START);
@@ -130,8 +131,10 @@ SECTIONS
     }
     CORE_SEC(.csa) (LCF_DSPR_KERNEL_START + LCF_CSA_OFFSET):
     {
+        PROVIDE(__CSA = .);
         PROVIDE(COREID_LST(__CSA) = .);
         . = . + LCF_CSA_SIZE;
+        PROVIDE(__CSA_END = .);
         PROVIDE(COREID_MID(__CSA, _END) = .);
     }
 }
@@ -167,6 +170,7 @@ SECTIONS
 {
     .traptab_tc (LCF_TRAPVEC_START) :
     {
+        PROVIDE(__TRAPTAB_CPU = .);
         PROVIDE(COREID_LST(__TRAPTAB_CPU) = .);
         KEEP (*(.COREID_LST(traptab_cpu)));
     } > pfls

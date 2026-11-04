@@ -45,7 +45,10 @@
 
 #include <arch/chip/irq.h>
 #include <arch/arch.h>
-#include <IfxCpu_Intrinsics.h>
+
+#ifndef __ASSEMBLY__
+#  include <IfxCpu_Intrinsics.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Prototypes
@@ -107,6 +110,8 @@
 
 #define XCPTCONTEXT_REGS (TC_CONTEXT_REGS * 2)
 #define XCPTCONTEXT_SIZE (sizeof(void *) * XCPTCONTEXT_REGS)
+
+#define FCD_RESERVE_SIZE (TC_CONTEXT_SIZE * 4)
 
 #define NR_IRQS          (2048)
 

@@ -68,7 +68,7 @@
 
 #define LCF_STARTPTR_CPU   LCF_PFLASH_KERNEL_START
 #define LCF_TRAPVEC_START  (LCF_STARTPTR_CPU + 0x20)
-#define LCF_INTVEC_START   LCF_PFLASH_KERNEL_START
+#define LCF_INTVEC_START   (LCF_PFLASH_KERNEL_START | 0x1FE0)
 
 #define LCF_STARTPTR_NC_CPU0 NC_START(CORE0_PFLASH_KERNEL_START)
 #define LCF_STARTPTR_NC_CPU1 NC_START(CORE1_PFLASH_KERNEL_START)
@@ -76,8 +76,6 @@
 #define LCF_STARTPTR_NC_CPU3 NC_START(CORE3_PFLASH_KERNEL_START)
 #define LCF_STARTPTR_NC_CPU4 NC_START(CORE4_PFLASH_KERNEL_START)
 #define LCF_STARTPTR_NC_CPU5 NC_START(CORE5_PFLASH_KERNEL_START)
-
-#define INTTAB     (LCF_INTVEC_START)
 
 #define RESET CORE0_PFLASH_KERNEL_START
 
@@ -178,19 +176,7 @@ derivative tc39
     {
         start_address
         (
-#if CONFIG_CPU_COREID == 0
-            symbol = "_START"
-#elif CONFIG_CPU_COREID == 1
-            symbol = "_START1"
-#elif CONFIG_CPU_COREID == 2
-            symbol = "_START2"
-#elif CONFIG_CPU_COREID == 3
-            symbol = "_START3"
-#elif CONFIG_CPU_COREID == 4
-            symbol = "_START4"
-#elif CONFIG_CPU_COREID == 5
-            symbol = "_START5"
-#endif
+            symbol = "__start"
         );
     }
 
@@ -307,6 +293,7 @@ derivative tc39
 #endif
                 }
             }
+            "__TRAPTAB_CPU" := LCF_TRAPVEC_START;
             "__TRAPTAB_CPU0" := LCF_TRAPVEC_START;
             "__TRAPTAB_CPU1" := LCF_TRAPVEC_START;
             "__TRAPTAB_CPU2" := LCF_TRAPVEC_START;
@@ -347,15 +334,16 @@ derivative tc39
         {
             group int_tab_tc (ordered)
             {
-                group (run_addr=(INTTAB)+0x1FE0) select ".text.inttab0.intvec.0ff";
+                group (run_addr=LCF_INTVEC_START) select ".text.inttab0.intvec.0ff";
             }
-            "_lc_u_int_tab" = (LCF_INTVEC_START);
-            "__INTTAB_CPU0" = (LCF_INTVEC_START);
-            "__INTTAB_CPU1" = (LCF_INTVEC_START);
-            "__INTTAB_CPU2" = (LCF_INTVEC_START);
-            "__INTTAB_CPU3" = (LCF_INTVEC_START);
-            "__INTTAB_CPU4" = (LCF_INTVEC_START);
-            "__INTTAB_CPU5" = (LCF_INTVEC_START);
+            "_lc_u_int_tab" = LCF_INTVEC_START;
+            "__INTTAB_CPU" = LCF_INTVEC_START;
+            "__INTTAB_CPU0" = LCF_INTVEC_START;
+            "__INTTAB_CPU1" = LCF_INTVEC_START;
+            "__INTTAB_CPU2" = LCF_INTVEC_START;
+            "__INTTAB_CPU3" = LCF_INTVEC_START;
+            "__INTTAB_CPU4" = LCF_INTVEC_START;
+            "__INTTAB_CPU5" = LCF_INTVEC_START;
         }
 
         /*Fixed memory Allocations for BMHD*/

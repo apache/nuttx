@@ -32,7 +32,7 @@ set(SRCS
     tricore_initialize.c
     tricore_initialstate.c
     tricore_irq.c
-    tricore_main.c
+    tricore_boot.c
     tricore_nputs.c
     tricore_perf.c
     tricore_registerdump.c
@@ -63,6 +63,12 @@ endif()
 
 if(CONFIG_ARCH_HAVE_DEBUG)
   list(APPEND SRCS tricore_hwdebug.c)
+endif()
+
+if(CONFIG_ARCH_TOOLCHAIN_TASKING)
+  list(APPEND SRCS tricore_head.asm)
+else()
+  list(APPEND SRCS tricore_head.S)
 endif()
 
 set(IFXFLAGS -DIFX_CFG_EXTEND_TRAP_HOOKS -DIFX_USE_SW_MANAGED_INT)

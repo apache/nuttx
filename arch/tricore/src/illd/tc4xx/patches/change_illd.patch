@@ -2,15 +2,16 @@ diff --git a/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Ssw/TC4xx
 index cf3c6c74010..f386599481e 100644
 --- a/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c
 +++ b/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c
-@@ -429,6 +429,7 @@ void Ifx_Ssw_doCppInit(void)
+@@ -429,7 +429,7 @@ void Ifx_Ssw_doCppInit(void)
  {
-     Ifx_Ssw_C_InitInline();
- 
 +#ifndef __NuttX__
+     Ifx_Ssw_C_InitInline();
+
+-#ifndef __NuttX__
  #ifdef __TASKING__
      extern void _main(void); /* cpp initialization */
      _main();
-@@ -451,10 +452,12 @@ void Ifx_Ssw_doCppInit(void)
+@@ -451,10 +451,12 @@ void Ifx_Ssw_doCppInit(void)
  #elif defined(__DCC__)
      /* Cpp Init part of the init_main called in C Init Inline */
  #endif
@@ -23,7 +24,7 @@ index cf3c6c74010..f386599481e 100644
  #ifdef __TASKING__
      extern void _doexit(void); /* cpp deinitialization */
      _doexit();
-@@ -474,6 +477,7 @@ void Ifx_Ssw_doCppExit(int status)
+@@ -474,6 +476,7 @@ void Ifx_Ssw_doCppExit(int status)
      extern void exit(int); /* cpp deinitialization */
      exit(0);
  #endif

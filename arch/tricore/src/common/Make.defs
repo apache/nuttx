@@ -22,6 +22,12 @@
 
 HEAD_CSRC += tricore_doirq.c
 
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_TASKING),y)
+CMN_ASRCS += tricore_head.asm
+else
+CMN_ASRCS += tricore_head.S
+endif
+
 CMN_CSRCS += tricore_allocateheap.c
 CMN_CSRCS += tricore_cache.c
 CMN_CSRCS += tricore_checkstack.c
@@ -33,7 +39,7 @@ CMN_CSRCS += tricore_idle.c
 CMN_CSRCS += tricore_initialize.c
 CMN_CSRCS += tricore_initialstate.c
 CMN_CSRCS += tricore_irq.c
-CMN_CSRCS += tricore_main.c
+CMN_CSRCS += tricore_boot.c
 CMN_CSRCS += tricore_nputs.c
 CMN_CSRCS += tricore_perf.c
 CMN_CSRCS += tricore_registerdump.c
