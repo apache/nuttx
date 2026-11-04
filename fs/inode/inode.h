@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <dirent.h>
 #include <sched.h>
+#include <unistd.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
@@ -433,6 +434,12 @@ void inode_release(FAR struct inode *inode);
 
 #define INODE_CHECK_LOCKED  (1 << 0)
 
+/* The access that a path needs on the inode from inode_find(): X_OK on a
+ * mountpoint to go into the volume, nothing on the last path component.
+ */
+
+#define INODE_PATH_AMODE(desc) (*(desc)->relpath != '\0' ? X_OK : 0)
+
 /****************************************************************************
  * Name: inode_checkperm
  *
@@ -449,8 +456,8 @@ void inode_release(FAR struct inode *inode);
  * Description:
  *   Enforce directory search (X_OK) on the path leading to 'inode', and
  *   optionally check 'amode' on 'inode' itself.  Requires X_OK on every
- *   ancestor, and on 'inode' when it is a pseudo directory or mountpoint.
- *   If 'amode' is non-zero, also requires that access on 'inode'.
+ *   ancestor.  If 'amode' is non-zero, also requires that access on 'inode':
+ *   use INODE_PATH_AMODE() when 'inode' comes from inode_find().
  *
  *   Takes the inode tree read lock unless INODE_CHECK_LOCKED is set in
  *   'flags' (caller already holds inode_lock/inode_rlock).

@@ -240,7 +240,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
    * so i_mode cannot race with concurrent chmod.
    */
 
-  ret = inode_checkpathperm(inode, 0, 0);
+  ret = inode_checkpathperm(inode, INODE_PATH_AMODE(&desc), 0);
   if (ret < 0)
     {
       goto errout_with_inode;

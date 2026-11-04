@@ -128,7 +128,7 @@ int nx_umount2(FAR const char *target, unsigned int flags)
 
   inode_lock();
 
-  ret = inode_checkpathperm(mountpt_inode, W_OK, INODE_CHECK_LOCKED);
+  ret = inode_checkpathperm(mountpt_inode, W_OK | X_OK, INODE_CHECK_LOCKED);
   if (ret < 0)
     {
       goto errout_with_lock;

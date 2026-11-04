@@ -89,7 +89,7 @@ int nx_unlink(FAR const char *pathname)
 
   if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops)
     {
-      ret = inode_checkpathperm(inode, 0, 0);
+      ret = inode_checkpathperm(inode, INODE_PATH_AMODE(&desc), 0);
       if (ret < 0)
         {
           goto errout_with_inode;
