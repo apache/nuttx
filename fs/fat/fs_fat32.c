@@ -534,7 +534,7 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
        * access is ignored.
        */
 
-      if ((oflags & (O_TRUNC | O_WRONLY)) == (O_TRUNC | O_WRONLY))
+      if ((oflags & O_TRUNC) != 0 && (oflags & O_ACCMODE) != O_RDONLY)
         {
           /* Truncate the file to zero length.  If the file is already
            * open elsewhere, the shared state is updated as well so that
