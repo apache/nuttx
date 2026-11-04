@@ -117,6 +117,7 @@ static int fdlist_extend(FAR struct fdlist *list, size_t row)
   int i;
   int j;
 
+retry:
   orig_rows = list->fl_rows;
   if (row <= orig_rows)
     {
@@ -156,12 +157,16 @@ static int fdlist_extend(FAR struct fdlist *list, size_t row)
 
   flags = spin_lock_irqsave_notrace(&list->fl_lock);
 
-  /* To avoid race condition, if the file list is updated by other threads
-   * and list rows is greater or equal than temp list,
-   * release the obsolete buffers
+  /* Another thread may have extended the list while we were allocating the
+   * buffers above.  We must not release the temporary buffers while holding
+   * fl_lock, because fs_heap_free() -> mm_lock() -> nxmutex_lock() may
+   * sleep, which spin_lock_irqsave() forbids.  Drop the lock, release the
+   * temporary
+   * buffers and retry instead.  For the rows the winning thread already
+   * published, retry re-reads orig_rows and returns 0 from the top.
    */
 
-  if (orig_rows != list->fl_rows && list->fl_rows >= row)
+  if (list->fl_rows != orig_rows)
     {
       spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
 
@@ -172,7 +177,7 @@ static int fdlist_extend(FAR struct fdlist *list, size_t row)
 
       fs_heap_free(fds);
 
-      return OK;
+      goto retry;
     }
 
   if (list->fl_fds != NULL)
