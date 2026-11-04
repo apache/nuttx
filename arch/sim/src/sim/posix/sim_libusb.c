@@ -57,6 +57,13 @@
 #define HOST_LIBUSB_EP_NUM(addr)   ((addr) & USB_ENDPOINT_NUMBER_MASK)
 #define HOST_LIBUSB_EP_DIR(addr)   ((addr) & USB_ENDPOINT_DIR_MASK)
 
+/* Class and vendor requests are issued synchronously from the class driver's
+ * thread, so they must not wait forever for a device that never answers.
+ */
+
+#define HOST_LIBUSB_CTRL_TIMEOUT_MS  5000
+#define HOST_LIBUSB_NINTERFACES(c) ((c)->bNumInterfaces)
+
 #ifdef CONFIG_SIM_USB_VID
 #  define USB_VID               CONFIG_SIM_USB_VID
 #else
@@ -286,6 +293,7 @@ static void host_libusb_inttransfer_cb(struct libusb_transfer *transfer)
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
 static void host_libusb_isotransfer_cb(struct libusb_transfer *transfer)
 {
+  struct host_libusb_hostdev_s *dev = &g_libusb_dev;
   struct libusb_iso_packet_descriptor *packet;
   struct host_usb_datareq_s *datareq;
   usbhost_asynch_t callback;
@@ -318,15 +326,23 @@ static void host_libusb_isotransfer_cb(struct libusb_transfer *transfer)
       callback(datareq->priv, length);
     }
 
-  free(datareq);
+  /* The class driver has been told about every packet already.  Hand the
+   * request back to the host thread, which owns its lifetime: freeing it
+   * here would release NuttX heap memory from the libusb event thread.
+   */
+
+  datareq->callback = NULL;
+  datareq->success  = true;
+  host_libusb_fifopush(&dev->completed, datareq);
+
   host_uninterruptible_no_return(libusb_free_transfer, transfer);
 }
 #endif
 
-static int host_libusb_ep0inhandle(struct host_libusb_hostdev_s *dev,
-                                   struct usb_ctrlrequest *ctrlreq,
-                                   struct host_usb_datareq_s *datareq,
-                                   int timeout)
+static int host_libusb_ep0submit(struct host_libusb_hostdev_s *dev,
+                                 struct usb_ctrlrequest *ctrlreq,
+                                 struct host_usb_datareq_s *datareq,
+                                 bool dirin, int timeout)
 {
   struct libusb_transfer *transfer;
   uint8_t *buffer;
@@ -334,7 +350,7 @@ static int host_libusb_ep0inhandle(struct host_libusb_hostdev_s *dev,
 
   if (!dev->handle)
     {
-      ERROR("host_libusb_ep0inhandle() fail: %s\n",
+      ERROR("host_libusb_ep0submit() fail: %s\n",
             host_uninterruptible(libusb_strerror, LIBUSB_ERROR_NO_DEVICE));
       return LIBUSB_ERROR_NO_DEVICE;
     }
@@ -347,6 +363,19 @@ static int host_libusb_ep0inhandle(struct host_libusb_hostdev_s *dev,
       return LIBUSB_ERROR_NO_MEM;
     }
 
+  host_uninterruptible_no_return(libusb_fill_control_setup,
+                                 buffer, ctrlreq->bRequestType,
+                                 ctrlreq->bRequest, ctrlreq->wValue,
+                                 ctrlreq->wIndex, ctrlreq->wLength);
+
+  /* An OUT transfer carries the payload the class driver handed over */
+
+  if (!dirin && ctrlreq->wLength > 0)
+    {
+      memcpy(buffer + LIBUSB_CONTROL_SETUP_SIZE, datareq->data,
+             ctrlreq->wLength);
+    }
+
   transfer = host_uninterruptible(libusb_alloc_transfer, 0);
   if (!transfer)
     {
@@ -356,10 +385,6 @@ static int host_libusb_ep0inhandle(struct host_libusb_hostdev_s *dev,
       goto err_with_buffer;
     }
 
-  host_uninterruptible_no_return(libusb_fill_control_setup,
-                                 buffer, ctrlreq->bRequestType,
-                                 ctrlreq->bRequest, ctrlreq->wValue,
-                                 ctrlreq->wIndex, ctrlreq->wLength);
   host_uninterruptible_no_return(libusb_fill_control_transfer,
                                  transfer, dev->handle, buffer,
                                  host_libusb_ep0transfer_cb,
@@ -382,10 +407,22 @@ err_with_buffer:
   return ret;
 }
 
+static int host_libusb_ep0inhandle(struct host_libusb_hostdev_s *dev,
+                                   struct usb_ctrlrequest *ctrlreq,
+                                   struct host_usb_datareq_s *datareq,
+                                   int timeout)
+{
+  return host_libusb_ep0submit(dev, ctrlreq, datareq, true, timeout);
+}
+
 static int host_libusb_ep0outhandle(struct host_libusb_hostdev_s *dev,
-                                    struct usb_ctrlrequest *ctrlreq)
+                                    struct usb_ctrlrequest *ctrlreq,
+                                    struct host_usb_datareq_s *datareq,
+                                    bool *submitted)
 {
   int ret = LIBUSB_SUCCESS;
+
+  *submitted = false;
 
   if (!dev->handle)
     {
@@ -394,31 +431,104 @@ static int host_libusb_ep0outhandle(struct host_libusb_hostdev_s *dev,
       return LIBUSB_ERROR_NO_DEVICE;
     }
 
-  if ((ctrlreq->bRequestType & USB_TYPE_MASK) !=
-      USB_TYPE_STANDARD)
+  if ((ctrlreq->bRequestType & USB_TYPE_MASK) != USB_TYPE_STANDARD)
     {
+      /* Class and vendor requests carry the payload of the class driver: a
+       * UVC camera is configured through SET_CUR requests on its video
+       * control interface, for instance.  Submit them like every other
+       * transfer in this file, so that a device which never answers leaves
+       * the calling thread waiting on its own request instead of blocking
+       * the lock every other transfer needs.
+       */
+
+      ret = host_libusb_ep0submit(dev, ctrlreq, datareq, false,
+                                  HOST_LIBUSB_CTRL_TIMEOUT_MS);
+      if (ret == LIBUSB_SUCCESS)
+        {
+          *submitted = true;
+        }
+      else
+        {
+          ERROR("control transfer submit failed: %s\n",
+                host_uninterruptible(libusb_strerror, ret));
+        }
+
       return ret;
     }
 
   switch (ctrlreq->bRequest)
     {
       case USB_REQ_SET_CONFIGURATION:
-        ret = host_uninterruptible(libusb_detach_kernel_driver,
-                                   dev->handle, 0);
-        if (ret == LIBUSB_SUCCESS)
-          {
-            ret = host_uninterruptible(libusb_set_configuration,
-                                       dev->handle,
-                                       ctrlreq->wValue);
-            ret |= host_uninterruptible(libusb_claim_interface,
-                                        dev->handle, 0);
-          }
-        else if (ret == LIBUSB_ERROR_NOT_FOUND)
-          {
-            return LIBUSB_SUCCESS;
-          }
+        {
+          struct libusb_config_descriptor *config = NULL;
+          int cfg = -1;
+          int i;
+
+          /* Switching configuration fails once an interface is claimed or
+           * while usbfs holds the device, so only switch when the requested
+           * configuration is not active yet.
+           */
+
+          ret = host_uninterruptible(libusb_get_configuration, dev->handle,
+                                     &cfg);
+          if (ret == LIBUSB_SUCCESS && cfg != ctrlreq->wValue)
+            {
+              ret = host_uninterruptible(libusb_set_configuration,
+                                         dev->handle, ctrlreq->wValue);
+              if (ret != LIBUSB_SUCCESS &&
+                  ret != LIBUSB_ERROR_NOT_FOUND &&
+                  ret != LIBUSB_ERROR_BUSY)
+                {
+                  ERROR("set_configuration() failed: %s\n",
+                        host_uninterruptible(libusb_strerror, ret));
+                  break;
+                }
+            }
+
+          /* Claim every interface of the active configuration: a class
+           * driver that switches alternate settings on an interface other
+           * than interface0 gets LIBUSB_ERROR_NOT_FOUND from SET_INTERFACE
+           * otherwise.  The kernel drivers were already released by the
+           * automatic detach enabled in host_usbhost_open().
+           */
+
+          ret = host_uninterruptible(libusb_get_active_config_descriptor,
+                                     dev->priv, &config);
+          if (ret != LIBUSB_SUCCESS || config == NULL)
+            {
+              ERROR("get_active_config_descriptor() failed: %s\n",
+                    host_uninterruptible(libusb_strerror, ret));
+              break;
+            }
+
+          for (i = 0; i < HOST_LIBUSB_NINTERFACES(config); i++)
+            {
+              ret = host_uninterruptible(libusb_claim_interface, dev->handle,
+                                         i);
+              if (ret != LIBUSB_SUCCESS)
+                {
+                  ERROR("claim_interface(%d) failed: %s\n", i,
+                        host_uninterruptible(libusb_strerror, ret));
+                }
+            }
+
+          host_uninterruptible_no_return(libusb_free_config_descriptor,
+                                         config);
+          ret = LIBUSB_SUCCESS;
+        }
         break;
-      case USB_REQ_SET_INTERFACE: /* TODO */
+      case USB_REQ_SET_INTERFACE:
+        host_uninterruptible_no_return(libusb_claim_interface, dev->handle,
+                                       ctrlreq->wIndex);
+        ret = host_uninterruptible(libusb_set_interface_alt_setting,
+                                   dev->handle, ctrlreq->wIndex,
+                                   ctrlreq->wValue);
+        if (ret != LIBUSB_SUCCESS)
+          {
+            ERROR("set_interface_alt_setting(%d, %d) failed: %s\n",
+                  ctrlreq->wIndex, ctrlreq->wValue,
+                  host_uninterruptible(libusb_strerror, ret));
+          }
         break;
       default:
         break;
@@ -556,6 +666,7 @@ static bool host_libusb_connectdevice(void)
       struct libusb_device_descriptor dev_desc;
       int ret = host_uninterruptible(libusb_get_device_descriptor,
                                      dev, &dev_desc);
+
       if (ret != LIBUSB_SUCCESS)
         {
           ERROR("libusb_get_device_descriptor() failed: %s\n",
@@ -620,9 +731,20 @@ int host_usbhost_ep0trans(struct host_usb_ctrlreq_s *ctrlreq,
 
   if (!(libusb_ctrlreq.bRequestType & USB_DIR_IN))
     {
-      ret = host_libusb_ep0outhandle(dev, &libusb_ctrlreq);
-      datareq->success = (ret != LIBUSB_SUCCESS) ? false : true;
-      host_libusb_fifopush(&dev->completed, datareq);
+      bool submitted = false;
+
+      ret = host_libusb_ep0outhandle(dev, &libusb_ctrlreq, datareq,
+                                     &submitted);
+
+      /* A class or vendor request completes through its callback; a
+       * standard one is finished here.
+       */
+
+      if (!submitted)
+        {
+          datareq->success = (ret != LIBUSB_SUCCESS) ? false : true;
+          host_libusb_fifopush(&dev->completed, datareq);
+        }
     }
   else
     {
@@ -765,6 +887,7 @@ void host_usbhost_close(void)
 struct host_usb_datareq_s *host_usbhost_getcomplete(void)
 {
   struct host_libusb_hostdev_s *dev = &g_libusb_dev;
+
   return host_libusb_fifopop(&dev->completed);
 }
 

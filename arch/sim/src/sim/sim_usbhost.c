@@ -52,7 +52,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SIM_USBHOST_BUFSIZE     256
+/* Configuration descriptors of composite devices are larger than the
+ * enumeration buffer used to be: a UVC camera with several formats and frame
+ * sizes easily exceeds 700 bytes, and some report more than 2 KiB.
+ */
+
+#define SIM_USBHOST_BUFSIZE     4096
 #define SIM_USBHOST_PERIOD      MSEC2TICK(CONFIG_SIM_LOOP_INTERVAL)
 
 #define RHPNDX(rh)              ((rh)->hport.hport.port)
