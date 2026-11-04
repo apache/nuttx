@@ -616,7 +616,10 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
   recipient = ctrl->type & USB_REQ_RECIPIENT_MASK;
 
   if ((ctrl->type & USB_REQ_TYPE_MASK) == USB_REQ_TYPE_STANDARD &&
-      recipient == USB_REQ_RECIPIENT_DEVICE)
+      (recipient == USB_REQ_RECIPIENT_DEVICE ||
+       (recipient == USB_REQ_RECIPIENT_INTERFACE &&
+        (ctrl->req == USB_REQ_GETINTERFACE ||
+         ctrl->req == USB_REQ_SETINTERFACE))))
     {
       /**********************************************************************
        * Standard Requests
@@ -756,7 +759,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
             {
               if (ctrl->type ==
                     (USB_DIR_IN | USB_REQ_RECIPIENT_INTERFACE) &&
-                  priv->config == COMPOSITE_CONFIGIDNONE)
+                  priv->config != COMPOSITE_CONFIGIDNONE)
                 {
                   ret = composite_classsetup(priv, dev, ctrl,
                                              dataout, outlen);
