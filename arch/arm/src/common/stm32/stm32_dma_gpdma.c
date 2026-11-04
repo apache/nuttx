@@ -34,6 +34,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/cache.h>
 #include <nuttx/signal.h>
 
 #include "arm_internal.h"
@@ -460,6 +461,10 @@ static int gpdma_setup_circular(struct gpdma_ch_s *chan,
   lli[1].dar = lli[0].dar;
   lli[1].llr = (lli[0].llr & ~GPDMA_CXLLR_LA_MASK)
              | (((uint32_t)&lli[0]) & GPDMA_CXLLR_LA_MASK);
+
+  /* The GPDMA fetches the linked list items from memory */
+
+  up_clean_dcache((uintptr_t)&lli[0], (uintptr_t)&lli[2]);
 
   gpdmach_putreg(chan, CH_CXSAR_OFFSET,   lli[0].sar);
   gpdmach_putreg(chan, CH_CXDAR_OFFSET,   lli[0].dar);
