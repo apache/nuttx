@@ -261,6 +261,10 @@ void arm_cpu_boot(int cpu)
 
   up_irqinitialize();
 
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  arm_perf_secondary_init();
+#endif
+
   /* The next thing that we expect to happen is for logic running on CPU0
    * to call up_cpu_start() which generate an SGI and a context switch to
    * the configured NuttX IDLE task.

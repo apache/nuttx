@@ -497,6 +497,12 @@ void arm_boot(void)
   PROGRESS('P');
 #endif
 
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  /* Start the cycle counter of this CPU */
+
+  up_perf_init((void *)BOARD_CPU_FREQUENCY);
+#endif
+
   /* Now we can enable all other CPUs.  The enabled CPUs will start execution
    * at __cpuN_start and, after very low-level CPU initialization has been
    * performed, will branch to arm_cpu_boot()
