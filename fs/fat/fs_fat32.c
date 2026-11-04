@@ -266,6 +266,7 @@ static void fat_shared_reset_cursors(FAR struct fat_mountpt_s *fs,
       if (ff->ff_shared == shared)
         {
           ff->ff_currentcluster   = shared->s_startcluster;
+          ff->ff_currentsector    = 0;
           ff->ff_sectorsincluster = fs->fs_fatsecperclus;
           ff->ff_pos              = 0;
         }
@@ -388,11 +389,11 @@ static int fat_shrinkshared(FAR struct fat_mountpt_s *fs,
 
       if (remaining <= clustersize)
         {
-          /* No.. then nullify next cluster -- removing it from the
-           * chain.
+          /* Keep the retained cluster allocated and terminate its chain.
+           * A zero FAT entry would mark this live cluster as free.
            */
 
-          ret = fat_putcluster(fs, lastcluster, 0);
+          ret = fat_putcluster(fs, lastcluster, FAT_EOF);
           if (ret < 0)
             {
               return ret;
@@ -2805,6 +2806,13 @@ static int fat_truncate(FAR struct file *filep, off_t length)
           ndx      = (shared->s_dirindex & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
           direntry = &fs->fs_buffer[ndx];
 
+          /* The open file may have grown without a directory sync yet.
+           * Truncate the canonical chain rather than a stale on-disk one.
+           */
+
+          DIR_PUTFSTCLUSTHI(direntry, shared->s_startcluster >> 16);
+          DIR_PUTFSTCLUSTLO(direntry, shared->s_startcluster & 0xffff);
+
           /* Handle the simple case where we are shrinking the file to
            * zero length.
            */
@@ -2840,12 +2848,37 @@ static int fat_truncate(FAR struct file *filep, off_t length)
     }
   else
     {
+      off_t savepos;
+
       /* Otherwise we are extending the file.  This is essentially the same
        * as a write except that (1) we write zeros and (2) we don't update
        * the file position.
        */
 
+      ret = fat_shared_invalidate(fs, ff->ff_shared);
+      if (ret < 0)
+        {
+          goto errout_with_lock;
+        }
+
+      /* Position the traversal cursor at EOF. The caller's file offset
+       * can be anywhere, and a newly opened handle starts at the first
+       * cluster of the file.
+       */
+
+      savepos = filep->f_pos;
+      filep->f_pos = oldsize;
+      ret = fat_get_sectors(filep, false);
+      filep->f_pos = savepos;
+      if (ret < 0)
+        {
+          fat_shared_reset_cursors(fs, ff->ff_shared);
+          goto errout_with_lock;
+        }
+
+      ff->ff_bflags |= FFBUFF_MODIFIED;
       ret = fat_dirextend(fs, ff, length);
+      fat_shared_reset_cursors(fs, ff->ff_shared);
       if (ret >= 0)
         {
           /* The truncation has completed without error.  Update the file
@@ -2855,6 +2888,11 @@ static int fat_truncate(FAR struct file *filep, off_t length)
           ff->ff_shared->s_size = length;
           ret = OK;
         }
+    }
+
+  if (ret == OK && oldsize != length)
+    {
+      ff->ff_bflags |= FFBUFF_MODIFIED;
     }
 
 errout_with_lock:
