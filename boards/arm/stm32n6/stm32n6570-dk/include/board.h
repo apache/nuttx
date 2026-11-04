@@ -245,8 +245,8 @@
  * Connected to the on-board ST-Link to provide a Virtual COM Port.
  */
 
-#define GPIO_USART1_TX   GPIO_USART1_TX_1
-#define GPIO_USART1_RX   GPIO_USART1_RX_1
+#define GPIO_USART1_TX   (GPIO_USART1_TX_1 | GPIO_SPEED_50MHZ)
+#define GPIO_USART1_RX   (GPIO_USART1_RX_1 | GPIO_SPEED_50MHZ)
 
 /****************************************************************************
  * Public Data
