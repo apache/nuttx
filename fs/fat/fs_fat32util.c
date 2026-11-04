@@ -1520,6 +1520,7 @@ int fat_dirshrink(struct fat_mountpt_s *fs, FAR uint8_t *direntry,
 {
   off_t clustersize;
   off_t remaining;
+  off_t savesector;
   uint32_t writetime;
   int32_t lastcluster;
   int32_t cluster;
@@ -1545,6 +1546,7 @@ int fat_dirshrink(struct fat_mountpt_s *fs, FAR uint8_t *direntry,
   /* This sector needs to be written back to disk eventually */
 
   fs->fs_dirty = true;
+  savesector = fs->fs_currentsector;
 
   /* Now find the cluster change to be removed.  Start with the cluster
    * after the current one (which we know contains data).
@@ -1565,11 +1567,11 @@ int fat_dirshrink(struct fat_mountpt_s *fs, FAR uint8_t *direntry,
 
       if (remaining <= clustersize)
         {
-          /* No.. then nullify next cluster -- removing it from the
-           * chain.
+          /* Keep the retained cluster allocated and terminate its chain.
+           * A zero FAT entry would mark this live cluster as free.
            */
 
-          ret = fat_putcluster(fs, lastcluster, 0);
+          ret = fat_putcluster(fs, lastcluster, FAT_EOF);
           if (ret < 0)
             {
               return ret;
@@ -1602,7 +1604,11 @@ int fat_dirshrink(struct fat_mountpt_s *fs, FAR uint8_t *direntry,
       remaining  -= clustersize;
     }
 
-  return OK;
+  /* FAT lookups reuse fs_buffer. Restore the directory sector for callers
+   * that still hold a pointer into it, just as fat_dirtruncate() does.
+   */
+
+  return fat_fscacheread(fs, savesector);
 }
 
 /****************************************************************************
