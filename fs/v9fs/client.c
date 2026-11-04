@@ -1607,7 +1607,9 @@ int v9fs_client_open(FAR struct v9fs_client_s *client,
       fidp->iounit = client->msize - V9FS_IOHDRSZ;
     }
 
-  return 0;
+  /* Return 1 for a directory: the caller must not read it as a file */
+
+  return (response.qid.type & V9FS_QTDIR) != 0 ? 1 : 0;
 }
 
 /****************************************************************************

@@ -237,6 +237,14 @@ static int v9fs_vfs_open(FAR struct file *filep, FAR const char *relpath,
           ferr("ERROR: Failed to open the fid: %d\n", ret);
           goto err_put;
         }
+
+      /* A directory: file_vopen() opens it with the directory operations */
+
+      if (ret > 0)
+        {
+          ret = -EISDIR;
+          goto err_put;
+        }
     }
   else if (ret == -ENOENT && (oflags & O_CREAT) != 0)
     {
