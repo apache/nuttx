@@ -422,8 +422,9 @@ Functions
 
   .. note:: ``CONFIG_LIBC_MAX_EXITFUNS`` must be larger than 0 to build
     ``atexit()``, ``on_exit()`` and ``at_quick_exit()``.  A C++ ELF
-    program (built with ``-fno-use-cxa-atexit``) with a static object in
-    a function calls ``atexit()`` too.
+    program (built with ``-fno-use-cxa-atexit``) with a static object
+    calls ``atexit()`` too, so the default is 1 when both ``CONFIG_ELF``
+    and ``CONFIG_HAVE_CXX`` are enabled.
 
   The number of functions is limited only by memory: the first
   ``CONFIG_LIBC_MAX_EXITFUNS`` entries are in the task information, the

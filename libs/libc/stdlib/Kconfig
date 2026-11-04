@@ -32,6 +32,7 @@ config LIBC_MAX_TMPFILE
 
 config LIBC_MAX_EXITFUNS
 	int "Number of preallocated exit functions"
+	default 1 if ELF && HAVE_CXX
 	default 0
 	---help---
 		The number of exit functions (atexit(), on_exit(), at_quick_exit()
@@ -43,9 +44,10 @@ config LIBC_MAX_EXITFUNS
 		With 0, there are no exit functions: atexit(), on_exit() and
 		at_quick_exit() are not built, so a program that calls them does
 		not link, and __cxa_atexit() registers nothing (the destructors
-		of static C++ objects do not run).  A C++ ELF program (built with
-		-fno-use-cxa-atexit) with a static object in a function calls
-		atexit(), so it needs a value larger than 0.
+		of static C++ objects do not run).  A C++ ELF program is built with
+		-fno-use-cxa-atexit, so a static object calls atexit() (GCC: a
+		static object in a function, Clang: every static object).  That is
+		why the default is 1 when both ELF and C++ are enabled.
 
 config LIBC_DISABLE_HEXSTR_TO_FLOAT
 	bool "Disable hex-string to float/double conversions"
