@@ -54,7 +54,6 @@ struct syslog_stream_s
 static ssize_t syslog_stream_write(FAR syslog_channel_t *channel,
                                    FAR const char *buffer, size_t buflen);
 static int syslog_stream_putc(FAR syslog_channel_t *channel, int ch);
-static int syslog_stream_force(FAR syslog_channel_t *channel, int ch);
 static int syslog_stream_flush(FAR syslog_channel_t *channel);
 void syslog_stream_uninit(FAR syslog_channel_t *channel);
 
