@@ -964,7 +964,6 @@ nrf53_radioi8_register(struct nrf53_radio_board_s *board)
       return NULL;
     }
 
-  DEBUGASSERT(dev->radio->ops->txstart);
   DEBUGASSERT(dev->radio->ops->notify_noack);
   DEBUGASSERT(dev->radio->ops->ccastart);
   DEBUGASSERT(dev->radio->ops->rxenable);

@@ -81,6 +81,8 @@
 #define NRF53_RADIO_EVENTS_RXREADY_OFFSET    0x0158                 /* RADIO has ramped up and is ready to be started RX path */
 #define NRF53_RADIO_EVENTS_MHRMATCH_OFFSET   0x015c                 /* MAC header match found */
 #define NRF53_RADIO_EVENTS_PHYEND_OFFSET     0x016c                 /* Last bit is sent on air */
+#define NRF53_RADIO_SUBSCRIBE_TXEN_OFFSET    0x0080                 /* Subscribe to TXEN */
+#define NRF53_RADIO_PUBLISH_PHYEND_OFFSET    0x01ec                 /* Publish PHYEND */
 #define NRF53_RADIO_SHORTS_OFFSET            0x0200                 /* Shortcuts between local events and tasks */
 #define NRF53_RADIO_INTENSET_OFFSET          0x0304                 /* Enable interrupt */
 #define NRF53_RADIO_INTENCLR_OFFSET          0x0308                 /* Disable interrupt */

@@ -60,6 +60,10 @@
 
 #define NRF53_RADIOI8_RAMPUP_US       (40)
 
+/* Latency from the last bit on air to the RADIO PHYEND event */
+
+#define NRF53_RADIOI8_PHYEND_US       (23)
+
 /* Air time of a frame with the given PHR: SHR, PHR and PSDU, 32 us/octet */
 
 #define NRF53_RADIOI8_FRAME_US(phr)   (((phr) + 6) * 2 * IEEE802154_SYMBOL_US)
@@ -148,10 +152,6 @@ struct ieee802154_cca_s;
 
 struct nrf53_radioi8_radio_ops_s
 {
-  /* Start transmission - TX must be armed (TXEN set) */
-
-  void (*txstart)(struct nrf53_radioi8_dev_s *dev);
-
   /* Start CCA - RX must be armed (RXEN set) */
 
   void (*ccastart)(struct nrf53_radioi8_dev_s *dev);

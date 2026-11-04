@@ -60,4 +60,8 @@
 
 #define DPPI_CHEN_CH(x)                       (1 << x)              /* Enable or disable channel x */
 
+/* PUBLISH and SUBSCRIBE registers of all peripherals */
+
+#define DPPI_EN                               (1 << 31)             /* Bit 31: Enable */
+
 #endif /* __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_DPPI_H */

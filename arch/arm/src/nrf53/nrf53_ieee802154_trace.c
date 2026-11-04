@@ -52,7 +52,6 @@ static const char *g_radio_trace_str[] =
   "RADIO IRQ: TX CCA BUSY",
   "RADIO IRQ: BEACON TX",
 
-  "TIM IRQ: TIM ACK TX",
   "TIM IRQ; TIM TX DELAY",
   "TIM IRQ: TIM WAIT ACK",
   "TIM IRQ: TIM CSMA DELAY",
