@@ -805,6 +805,10 @@ int sim_usbhost_initialize(void)
   ret = usbhost_cdcacm_initialize();
 #endif
 
+#ifdef CONFIG_USBHOST_UVC
+  ret = usbhost_uvc_initialize();
+#endif
+
   /* Initialize the device operations */
 
   priv->drvr.ep0configure   = sim_usbhost_ep0configure;
