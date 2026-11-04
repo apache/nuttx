@@ -85,7 +85,8 @@ static FAR struct inode *inode_unlink(FAR const char *path)
         {
           /* Caller holds the inode tree lock. */
 
-          ret = inode_checkpathperm(desc.parent, W_OK, INODE_CHECK_LOCKED);
+          ret = inode_checkpathperm(desc.parent, W_OK | X_OK,
+                                    INODE_CHECK_LOCKED);
           if (ret < 0)
             {
               inode = NULL;

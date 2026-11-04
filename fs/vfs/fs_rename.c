@@ -576,7 +576,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 
   DEBUGASSERT(oldinode != NULL);
 
-  ret = inode_checkpathperm(oldinode, 0, 0);
+  ret = inode_checkpathperm(oldinode, INODE_PATH_AMODE(&olddesc), 0);
   if (ret < 0)
     {
       inode_release(oldinode);

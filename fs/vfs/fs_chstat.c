@@ -74,7 +74,7 @@ static int chstat_recursive(FAR const char *path,
 
   DEBUGASSERT(inode != NULL);
 
-  ret = inode_checkpathperm(inode, 0, 0);
+  ret = inode_checkpathperm(inode, INODE_PATH_AMODE(&desc), 0);
   if (ret < 0)
     {
       inode_release(inode);

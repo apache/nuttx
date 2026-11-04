@@ -412,9 +412,10 @@ int nx_mount(FAR const char *source, FAR const char *target,
           goto errout_with_search;
         }
 
-      /* Require search on ancestors and write on the mount target. */
+      /* Require search on ancestors, and search and write on the target. */
 
-      ret = inode_checkpathperm(mountpt_inode, W_OK, INODE_CHECK_LOCKED);
+      ret = inode_checkpathperm(mountpt_inode, W_OK | X_OK,
+                                INODE_CHECK_LOCKED);
       if (ret < 0)
         {
           inode_release(mountpt_inode);

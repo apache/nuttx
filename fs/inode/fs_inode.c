@@ -240,10 +240,9 @@ int inode_checkperm(FAR struct inode *inode, int amode)
  * Name: inode_checkpathperm
  *
  * Description:
- *   Require X_OK on every ancestor of 'inode', and on 'inode' itself when
- *   it is a directory or mountpoint that must be traversed.  If 'amode' is
- *   non-zero, also require that access on 'inode'.  Takes the inode tree
- *   read lock unless INODE_CHECK_LOCKED is set in 'flags'.
+ *   Require X_OK on every ancestor of 'inode'.  If 'amode' is non-zero,
+ *   also require that access on 'inode'.  Takes the inode tree read lock
+ *   unless INODE_CHECK_LOCKED is set in 'flags'.
  *
  ****************************************************************************/
 
@@ -261,19 +260,6 @@ int inode_checkpathperm(FAR struct inode *inode, int amode, int flags)
   if (!locked)
     {
       inode_rlock();
-    }
-
-  if (INODE_IS_PSEUDODIR(inode)
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-      || INODE_IS_MOUNTPT(inode)
-#endif
-     )
-    {
-      ret = inode_checkperm(inode, X_OK);
-      if (ret < 0)
-        {
-          goto errout;
-        }
     }
 
   for (node = inode->i_parent; node != NULL; node = node->i_parent)

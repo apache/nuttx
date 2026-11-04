@@ -102,7 +102,7 @@ int mkdir(const char *pathname, mode_t mode)
           goto errout_with_inode;
         }
 
-      ret = inode_checkpathperm(inode, 0, 0);
+      ret = inode_checkpathperm(inode, INODE_PATH_AMODE(&desc), 0);
       if (ret < 0)
         {
           goto errout_with_inode;
