@@ -1163,6 +1163,66 @@ Of course, this configuration can only be used in environments that support X11!
       -CONFIG_EXAMPLES_NXTERM=n
       +CONFIG_EXAMPLES_NXTERM=y
 
+nxcamera
+--------
+
+This configuration tests the V4L2 drivers. The sim camera driver
+(``CONFIG_SIM_CAMERA``) opens the V4L2 capture devices of the host and
+registers each one as ``/dev/videoN`` in the simulator, and ``nxcamera``
+streams frames from such a device to the framebuffer or to a file.
+
+**Capture**
+
+A host without a camera can use the ``v4l2loopback`` module, fed with a test
+pattern by FFmpeg:
+
+.. code:: console
+
+   $ sudo modprobe v4l2loopback
+   $ ffmpeg -re -f lavfi -i testsrc=size=640x480:rate=30 \
+       -pix_fmt yuv420p -f v4l2 /dev/video0
+
+To write ten frames to a file on the host, enable ``CONFIG_FS_HOSTFS`` and
+``CONFIG_SIM_HOSTFS`` and run:
+
+.. code:: console
+
+   nsh> mount -t hostfs -o fs=/tmp /host
+   nsh> nxcamera
+   nxcamera> input /dev/video0
+   nxcamera> output /host/frames.yuv 10
+   nxcamera> stream 640 480 30 YU12
+   nxcamera> q
+
+``frames.yuv`` then holds ten 640x480 YUV 4:2:0 frames.
+
+**Memory-to-memory decoding**
+
+The sim decoder (``CONFIG_SIM_VIDEO_DECODER``) is a V4L2 memory-to-memory
+device, ``/dev/video1`` by default, that decodes H.264 with OpenH264. On top of
+this configuration it needs:
+
+* ``CONFIG_VIDEOUTILS_OPENH264`` and ``CONFIG_SIM_VIDEO_DECODER``
+* ``CONFIG_HAVE_CXX`` and ``CONFIG_HAVE_CXXINITIALIZE``, for the C++ runtime
+  OpenH264 uses (the default minimal C++ library is enough)
+* ``CONFIG_SYSTEM_NXCODEC``, ``CONFIG_FS_HOSTFS`` and ``CONFIG_SIM_HOSTFS``
+* ``CONFIG_NSH_MAXARGUMENTS=16``, for the ``nxcodec`` command line
+
+Create a stream on the host:
+
+.. code:: console
+
+   $ ffmpeg -f lavfi -i testsrc=size=320x240:rate=30 -t 2 -c:v libx264 \
+       -profile:v baseline -pix_fmt yuv420p -f h264 /tmp/t.h264
+
+and decode it in the simulator to YUV 4:2:0 frames:
+
+.. code:: console
+
+   nsh> mount -t hostfs -o fs=/tmp /host
+   nsh> cd /host
+   nsh> nxcodec -d /dev/video1 -s 320x240 -f H264 -i t.h264 -f YU12 -o o.yuv
+
 nxdoom
 ------
 
