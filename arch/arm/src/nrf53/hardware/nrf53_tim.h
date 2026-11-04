@@ -46,8 +46,10 @@
 #define NRF53_TIM_TASKS_CLEAR_OFFSET       0x000c                  /* Clear time */
 #define NRF53_TIM_TASKS_SHUTDOWN_OFFSET    0x0010                  /* Shutdown Timer */
 #define NRF53_TIM_TASKS_CAPTURE_OFFSET(x)  (0x0040 + ((x) * 4))    /* Capture Timer value to CC[x] */
+#define NRF53_TIM_SUBSCRIBE_START_OFFSET   0x0080                  /* Subscribe to START */
+#define NRF53_TIM_SUBSCRIBE_CLEAR_OFFSET   0x008c                  /* Subscribe to CLEAR */
 #define NRF53_TIM_EVENTS_COMPARE_OFFSET(x) (0x0140 + ((x) * 4))    /* Compare event on CC[x] */
-                                                                   /* TODO: 0x080-0x1c0 */
+#define NRF53_TIM_PUBLISH_COMPARE_OFFSET(x) (0x01c0 + ((x) * 4))   /* Publish COMPARE[x] */
 #define NRF53_TIM_SHORTS_OFFSET            0x0200                  /* Shortcuts between local events and tasks */
 #define NRF53_TIM_INTEN_OFFSET             0x0300                  /* Enable or disable interrupt */
 #define NRF53_TIM_INTENSET_OFFSET          0x0304                  /* Enable interrupt */
@@ -75,6 +77,10 @@
 /* TASKS_CLEAR Register */
 
 #define TIM_TASKS_CLEAR                    (1 << 0)                /* Bit 0: Clear Timer */
+
+/* TASKS_CAPTURE[x] Register */
+
+#define TIM_TASKS_CAPTURE                  (1 << 0)                /* Bit 0: Capture Timer value */
 
 /* SHORTS Register */
 
