@@ -132,9 +132,11 @@ struct rpmsg_socket_conn_s
 
   /* server listen-scoket listening: backlog > 0;
    * others: backlog = 0;
+   * pending is current number of pending connections;
    */
 
   int                            backlog;
+  int                            pending;
 
   /* The remote connection's credentials */
 
@@ -383,7 +385,6 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
       if (server != NULL)
         {
           FAR struct rpmsg_socket_conn_s *tmp;
-          int cnt = 0;
 
           nxmutex_lock(&server->recvlock);
           if (!rpmsg_socket_pend_remove(server, conn))
@@ -394,20 +395,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
               return 0;
             }
 
-          for (tmp = server; tmp->next; tmp = tmp->next)
-            {
-              if (++cnt >= server->backlog)
-                {
-                  /* Reject the connection */
-
-                  nerr("Reject the connection, listening backlog is full\n");
-                  nxmutex_unlock(&server->recvlock);
-                  rpmsg_destroy_ept(&conn->ept);
-                  rpmsg_socket_free(conn);
-                  return 0;
-                }
-            }
-
+          for (tmp = server; tmp->next; tmp = tmp->next);
           tmp->next = conn;
           rpmsg_socket_post(&server->recvsem);
           rpmsg_socket_poll_notify(server, POLLIN);
@@ -616,7 +604,8 @@ static void rpmsg_socket_ns_unbind(FAR struct rpmsg_endpoint *ept)
   nxmutex_unlock(&conn->recvlock);
 
   /* If the remote unbound before sending its SYNC, this connection is
-   * still owned by the listener and will never be accepted.  Drop it.
+   * still owned by the listener and will never be accepted.  Release its
+   * backlog slot and drop it.
    */
 
   if (server != NULL)
@@ -624,8 +613,17 @@ static void rpmsg_socket_ns_unbind(FAR struct rpmsg_endpoint *ept)
       nxmutex_lock(&server->recvlock);
       if (rpmsg_socket_pend_remove(server, conn))
         {
+          server->pending--;
           nxmutex_unlock(&server->recvlock);
-          rpmsg_socket_free(conn);
+
+          /* conn->ept is still registered:  openamp drops its reference
+           * after this callback returns, and release_cb then frees the
+           * connection.  Clear crefs so that it actually does, and do not
+           * free here.
+           */
+
+          conn->crefs = 0;
+          rpmsg_destroy_ept(&conn->ept);
           return;
         }
 
@@ -735,29 +733,66 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
       return;
     }
 
-  new->server = server;
+  new->server   = server;
+  new->priority = server->priority;
   new->ept.priv = new;
   new->ept.release_cb = rpmsg_socket_ept_release;
-  ret = rpmsg_create_ept(&new->ept, rdev, name,
-                         RPMSG_ADDR_ANY, dest,
-                         rpmsg_socket_ept_cb, rpmsg_socket_ns_unbind);
-  if (ret < 0)
+
+  /* Take the backlog slot and join the listener's pending list before the
+   * endpoint exists.  rpmsg_create_ept() sends the NS ack, after which the
+   * remote may answer with its SYNC at once;  the handler must already be
+   * able to find this connection on the list.
+   */
+
+  nxmutex_lock(&server->recvlock);
+  if (server->pending >= server->backlog)
     {
+      /* Reject the connection.  The endpoint has to be created even so:
+       * destroying it is what sends NS_DESTROY to the client, which is how
+       * the client learns the connection was refused.  Without it connect()
+       * would block until its send timeout expires.  Drop the back pointer
+       * first, this connection never joins the listener's pending list.
+       */
+
+      nerr("Reject the connection, Max listen %d\n", server->backlog);
+      nxmutex_unlock(&server->recvlock);
+
+      new->server = NULL;
+      if (rpmsg_create_ept(&new->ept, rdev, name, RPMSG_ADDR_ANY, dest,
+                           rpmsg_socket_ept_cb,
+                           rpmsg_socket_ns_unbind) >= 0)
+        {
+          rpmsg_destroy_ept(&new->ept);
+        }
+
       rpmsg_socket_free(new);
       return;
     }
+
+  /* The slot is released by accept(), by rpmsg_socket_ns_unbind() or when
+   * the listening socket is closed.
+   */
+
+  server->pending++;
+  rpmsg_socket_pend_add(server, new);
+  nxmutex_unlock(&server->recvlock);
 
   /* The accepted connection inherits the listener's priority, so that
    * getsockopt(SO_PRIORITY) on it reports the priority actually in use.
    */
 
-  new->priority = server->priority;
-
   ret = rpmsg_set_priority(&new->ept, new->priority);
   if (ret < 0)
     {
-      rpmsg_socket_free(new);
-      return;
+      goto errout_with_pending;
+    }
+
+  ret = rpmsg_create_ept(&new->ept, rdev, name,
+                         RPMSG_ADDR_ANY, dest,
+                         rpmsg_socket_ept_cb, rpmsg_socket_ns_unbind);
+  if (ret < 0)
+    {
+      goto errout_with_pending;
     }
 
   new->rpaddr.rp_family = AF_RPMSG;
@@ -766,15 +801,23 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
   strlcpy(new->rpaddr.rp_name, name + RPMSG_SOCKET_NAME_PREFIX_LEN,
           sizeof(new->rpaddr.rp_name));
 
-  /* Let the listening socket own this connection until its SYNC arrives,
-   * so that it can detach it if the listener is closed in the meantime.
+  rpmsg_socket_ns_bound(&new->ept);
+  return;
+
+errout_with_pending:
+
+  /* The endpoint was never created, so nothing will call release_cb.
+   * Give the backlog slot back and drop the connection.
    */
 
   nxmutex_lock(&server->recvlock);
-  rpmsg_socket_pend_add(server, new);
-  nxmutex_unlock(&server->recvlock);
+  if (rpmsg_socket_pend_remove(server, new))
+    {
+      server->pending--;
+    }
 
-  rpmsg_socket_ns_bound(&new->ept);
+  nxmutex_unlock(&server->recvlock);
+  rpmsg_socket_free(new);
 }
 
 static int rpmsg_socket_getaddr(FAR struct rpmsg_socket_conn_s *conn,
@@ -999,6 +1042,7 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
           conn = server->next;
           server->next = conn->next;
           conn->next = NULL;
+          server->pending--;
         }
 
       nxmutex_unlock(&server->recvlock);
@@ -1567,12 +1611,20 @@ static int rpmsg_socket_close(FAR struct socket *psock)
         {
           conn->pendlist = pend->pendnext;
           pend->pendnext = NULL;
+          conn->pending--;
 
           nxmutex_lock(&pend->recvlock);
           pend->server = NULL;
           nxmutex_unlock(&pend->recvlock);
 
           nxmutex_unlock(&conn->recvlock);
+
+          /* A pending connection still holds the reference taken by
+           * rpmsg_socket_alloc(), so clear it before destroying the
+           * endpoint;  otherwise release_cb will not free it.
+           */
+
+          pend->crefs = 0;
           rpmsg_socket_destroy_ept(pend);
           nxmutex_lock(&conn->recvlock);
         }
