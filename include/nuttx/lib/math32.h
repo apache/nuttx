@@ -268,30 +268,32 @@ static inline_function uint64_t div64_const32(uint64_t n, uint32_t b)
   uint32_t p;
   uint32_t bias;
 
-  p = 1 << LOG2_FLOOR(b);
+  DEBUGASSERT(b > 1);
+
+  p = 1u << LOG2_FLOOR(b);
   m = (~0ULL / b) * p;
-  m += (((~0ULL % b + 1) * p) + b - 1) / b;
-  x = ~0ULL / b * b - 1;
-  res = ((m & 0xffffffff) * (x & 0xffffffff)) >> 32;
-  t = res += (m & 0xffffffff) * (x >> 32);
-  res += (x & 0xffffffff) * (m >> 32);
-  t = (res < t) ? (1ULL << 32) : 0;
+  m += (((~0ULL % b + 1u) * p) + b - 1u) / b;
+  x = ~0ULL / b * b - 1u;
+  res = ((m & 0xffffffffu) * (x & 0xffffffffu)) >> 32;
+  t = res += (m & 0xffffffffu) * (x >> 32);
+  res += (x & 0xffffffffu) * (m >> 32);
+  t = (res < t) ? (1ULL << 32) : 0u;
   res = (res >> 32) + t;
   res += (m >> 32) * (x >> 32);
   res /= p;
 
-  if (~0ULL % (b / (b & -b)) == 0)
+  if (~0ULL % (b / (b & -b)) == 0u)
     {
       n /= (b & -b);
       m = ~0ULL / (b / (b & -b));
-      p = 1;
-      bias = 1;
+      p = 1u;
+      bias = 1u;
     }
   else if (res != x / b)
     {
-      bias = 1;
+      bias = 1u;
       m = (~0ULL / b) * p;
-      m += ((~0ULL % b + 1) * p) / b;
+      m += ((~0ULL % b + 1u) * p) / b;
     }
   else
     {
@@ -309,7 +311,7 @@ static inline_function uint64_t div64_const32(uint64_t n, uint32_t b)
           m >>= LOG2_FLOOR(bits);
         }
 
-      bias = 0;
+      bias = 0u;
     }
 
   res = umul64_const(m, n, bias);
@@ -339,11 +341,11 @@ static inline_function uint64_t div64_const(uint64_t n, uint32_t base)
 #define div_const(n, base) \
   ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
 #define div_const_roundup(n, base) \
-  ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1, base) : \
-   (((n) + (base) - 1) / (base)))
+  ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1u, base) : \
+   (((n) + (base) - 1u) / (base)))
 #define div_const_roundnearest(n, base) \
-  ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2), base) : \
-   (((n) + ((base) / 2)) / (base)))
+  ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2u), base) : \
+   (((n) + ((base) / 2u)) / (base)))
 
 /* Division optimizing method proposed by T. Granlund and L. Montgomery.
  * This method converts the runtime-invariant integer division
