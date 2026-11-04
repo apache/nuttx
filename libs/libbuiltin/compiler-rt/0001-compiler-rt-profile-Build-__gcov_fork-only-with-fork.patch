@@ -1,0 +1,26 @@
+From: Marco Casaroli <marco.casaroli@gmail.com>
+Subject: [PATCH] compiler-rt/profile: Build __gcov_fork() only with fork()
+
+NuttX declares fork() only with CONFIG_ARCH_HAVE_FORK.  Instrumented code
+calls __gcov_fork() only in place of a call to fork(), so nothing needs it
+in other configurations.  The second COMPILER_RT_VISIBILITY that follows the
+block makes the first one harmless, and the hunks do not touch the line of
+the outer #if, which differs between the LLVM versions.
+
+---
+ lib/profile/GCDAProfiling.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/lib/profile/GCDAProfiling.c
++++ b/lib/profile/GCDAProfiling.c
+@@ -588,2 +588,3 @@
+ COMPILER_RT_VISIBILITY
++#ifdef CONFIG_ARCH_HAVE_FORK
+ pid_t __gcov_fork() {
+@@ -602,5 +603,6 @@
+   return pid;
+ }
+ #endif
++#endif
+ 
+ COMPILER_RT_VISIBILITY

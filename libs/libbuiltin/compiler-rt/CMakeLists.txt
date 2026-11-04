@@ -41,6 +41,9 @@ if(CONFIG_LIB_COMPILER_RT)
           ""
           TEST_COMMAND
           ""
+      PATCH_COMMAND
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/compiler-rt <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-compiler-rt-profile-Build-__gcov_fork-only-with-fork.patch
       DOWNLOAD_NO_PROGRESS true
       TIMEOUT 100)
 
