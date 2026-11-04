@@ -71,6 +71,7 @@
 #include "stm32_rcc.h"
 #include "stm32_pwr.h"
 #include "stm32_gpio.h"
+#include "hardware/stm32n6xxx_ramcfg.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -200,11 +201,6 @@
 #define RCC_CONFIG_CCIP(reg, field) \
   modifyreg32(STM32_RCC_##reg, RCC_##reg##_##field##_MASK, \
               STM32_RCC_##reg##_##field)
-
-/* RAMCFG control register of AXISRAMn (n = 1..6) and its shutdown bit */
-
-#define STM32_RAMCFG_AXISRAM_CR(n) (STM32_RAMCFG_BASE + ((n) - 1) * 0x80)
-#define RAMCFG_CR_SRAMSD           (1 << 20)
 
 /****************************************************************************
  * Private Functions
