@@ -141,6 +141,10 @@ The last 32kB of the application core RAM is used for a shared memory (address =
 BLE Support
 ===========
 
+The BLE controller on the network core can be either the native
+:doc:`/os/wireless/ble_ll` with the nRF53 radio driver described in
+:doc:`ble_ll`, or Nordic's SoftDevice Controller.
+
 BLE is supported in the nRF53 using Nordic's `SoftDevice Controller <https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrfxlib/softdevice_controller/README.html>`_.
 
 Tool Issues
@@ -192,3 +196,4 @@ Supported Boards
    :maxdepth: 1
 
    boards/*/*
+   ble_ll.rst

@@ -80,6 +80,13 @@ The host advertises its GAP service at startup. To scan::
 Stop advertising with ``bt bnep0 advertise stop`` before restarting it with
 ``bt bnep0 advertise start``.
 
+blell_nimble
+------------
+
+NimBLE host from apps on top of the BLE Link Layer
+(:doc:`/platforms/arm/nrf54l/ble_ll`), with the ``nimble`` example, GRTC
+tickless scheduling and the UARTE20 console.
+
 ieee802154_6lowpan
 ------------------
 

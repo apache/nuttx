@@ -47,17 +47,26 @@
 
 /* Register addresses for DPPI **********************************************/
 
-#define NRF53_DPPI_CHEEP(x)                   (NRF53_DPPI_BASE + NRF53_DPPI_CHEEP_OFFSET(x))
-#define NRF53_DPPI_CHTEP(x)                   (NRF53_DPPI_BASE + NRF53_DPPI_CHTEP_OFFSET(x))
-#define NRF53_DPPI_SUBCHGEN(x)                (NRF53_DPPI_BASE + NRF53_DPPI_SUBCHGEN_OFFSET(x))
-#define NRF53_DPPI_SUBCHGDIS(x)               (NRF53_DPPI_BASE + NRF53_DPPI_SUBCHGDIS_OFFSET(x))
-#define NRF53_DPPI_CHEN                       (NRF53_DPPI_BASE + NRF53_DPPI_CHEN_OFFSET)
-#define NRF53_DPPI_CHENSET                    (NRF53_DPPI_BASE + NRF53_DPPI_CHENSET_OFFSET)
-#define NRF53_DPPI_CHENCLR                    (NRF53_DPPI_BASE + NRF53_DPPI_CHENCLR_OFFSET)
-#define NRF53_DPPI_CHG(x)                     (NRF53_DPPI_BASE + NRF53_DPPI_CHG_OFFSET(x))
+#define NRF53_DPPI_TASK_CHGEN(x)              (NRF53_DPPIC_BASE + NRF53_DPPI_TASK_CHGEN_OFFSET(x))
+#define NRF53_DPPI_TASK_CHGDIS(x)             (NRF53_DPPIC_BASE + NRF53_DPPI_TASK_CHGDIS_OFFSET(x))
+#define NRF53_DPPI_TASK_SUBCHGEN(x)           (NRF53_DPPIC_BASE + NRF53_DPPI_TASK_SUBCHGEN_OFFSET(x))
+#define NRF53_DPPI_TASK_SUBCHGDIS(x)          (NRF53_DPPIC_BASE + NRF53_DPPI_TASK_SUBCHGDIS_OFFSET(x))
+#define NRF53_DPPI_CHEN                       (NRF53_DPPIC_BASE + NRF53_DPPI_CHEN_OFFSET)
+#define NRF53_DPPI_CHENSET                    (NRF53_DPPIC_BASE + NRF53_DPPI_CHENSET_OFFSET)
+#define NRF53_DPPI_CHENCLR                    (NRF53_DPPIC_BASE + NRF53_DPPI_CHENCLR_OFFSET)
+#define NRF53_DPPI_CHG(x)                     (NRF53_DPPIC_BASE + NRF53_DPPI_CHG_OFFSET(x))
 
 /* Register Bitfield Definitions for DPPI ***********************************/
 
 #define DPPI_CHEN_CH(x)                       (1 << x)              /* Enable or disable channel x */
+
+/* SUBSCRIBE and PUBLISH registers of all peripherals */
+
+#define DPPI_SUBSCRIBE_CHIDX_SHIFT            (0)                   /* Bits 0-7: DPPI channel */
+#define DPPI_SUBSCRIBE_CHIDX_MASK             (0xff << DPPI_SUBSCRIBE_CHIDX_SHIFT)
+#define DPPI_SUBSCRIBE_EN                     (1 << 31)             /* Bit 31: Enable subscription */
+#define DPPI_PUBLISH_CHIDX_SHIFT              (0)                   /* Bits 0-7: DPPI channel */
+#define DPPI_PUBLISH_CHIDX_MASK               (0xff << DPPI_PUBLISH_CHIDX_SHIFT)
+#define DPPI_PUBLISH_EN                       (1 << 31)             /* Bit 31: Enable publishing */
 
 #endif /* __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_DPPI_H */

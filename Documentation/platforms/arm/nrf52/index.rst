@@ -255,6 +255,10 @@ have been set by a bootloader.
 BLE Support
 ===========
 
+The BLE controller can be either the native :doc:`/os/wireless/ble_ll`
+with the nRF52 radio driver described in :doc:`ble_ll`, or Nordic's
+SoftDevice Controller.
+
 BLE is supported in nRF52 using Nordic's `SoftDevice Controller <https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrfxlib/softdevice_controller/README.html>`_, using HCI interface. To enable BLE support
 you need to call :c:func:`nrf52_sdc_initialize` on boot, which will initialize the BLE controller.
 
@@ -278,4 +282,5 @@ Supported Boards
    :maxdepth: 1
 
    boards/*/*
+   ble_ll.rst
    ieee802154.rst

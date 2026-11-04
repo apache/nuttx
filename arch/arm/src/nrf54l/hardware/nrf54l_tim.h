@@ -77,6 +77,15 @@
 
 #define TIM_TASKS_CLEAR                    (1 << 0)                /* Bit 0: Clear Timer */
 
+/* SUBSCRIBE and PUBLISH Registers */
+
+#define TIM_SUBSCRIBE_CHIDX_SHIFT          (0)                     /* Bits 0-7: DPPI channel */
+#define TIM_SUBSCRIBE_CHIDX_MASK           (0xff << TIM_SUBSCRIBE_CHIDX_SHIFT)
+#define TIM_SUBSCRIBE_EN                   (1 << 31)               /* Bit 31: Enable subscription */
+#define TIM_PUBLISH_CHIDX_SHIFT            (0)                     /* Bits 0-7: DPPI channel */
+#define TIM_PUBLISH_CHIDX_MASK             (0xff << TIM_PUBLISH_CHIDX_SHIFT)
+#define TIM_PUBLISH_EN                     (1 << 31)               /* Bit 31: Enable publishing */
+
 /* SHORTS Register */
 
 #define TIM_SHORTS_COMPARE_CLEAR(x)        (1 << (x))              /* Bits 0-5: */

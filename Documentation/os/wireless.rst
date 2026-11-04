@@ -9,3 +9,9 @@ Components:
 - ``wireless/bluetooth`` - Bluetooth Low Energy Support
 - ``wireless/pktradio`` - Packet Radio Support
 - ``wireless/ieee802154`` - IEEE 802.15.4 Support
+- ``wireless/ble_ll`` - Bluetooth Low Energy Link Layer (controller)
+
+.. toctree::
+   :maxdepth: 1
+
+   wireless/ble_ll.rst

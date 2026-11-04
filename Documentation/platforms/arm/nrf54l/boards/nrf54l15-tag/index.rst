@@ -102,6 +102,13 @@ at startup. To scan::
   bt bnep0 scan get
   bt bnep0 scan stop
 
+blell_nimble
+------------
+
+NSH over RTT with the NimBLE host from apps on top of the BLE Link Layer
+(:doc:`/platforms/arm/nrf54l/ble_ll`), the ``nimble`` example and GRTC
+tickless scheduling.
+
 Flash & Debug
 =============
 

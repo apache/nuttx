@@ -59,6 +59,9 @@
 #define NRF53_RADIO_TASKS_EDSTOP_OFFSET      0x0028                 /* Stop the energy detect measurement  */
 #define NRF53_RADIO_TASKS_CCASTART_OFFSET    0x002c                 /* Start the clear channel assessment used in IEEE 802.15.4 mode */
 #define NRF53_RADIO_TASKS_CCASTOP_OFFSET     0x0030                 /* Stop the clear channel assessment */
+#define NRF53_RADIO_SUBSCRIBE_TXEN_OFFSET    0x0080                 /* Subscribe configuration for task TXEN */
+#define NRF53_RADIO_SUBSCRIBE_RXEN_OFFSET    0x0084                 /* Subscribe configuration for task RXEN */
+#define NRF53_RADIO_SUBSCRIBE_DISABLE_OFFSET 0x0090                 /* Subscribe configuration for task DISABLE */
 #define NRF53_RADIO_EVENTS_READY_OFFSET      0x0100                 /* RADIO has ramped up and is ready to be started */
 #define NRF53_RADIO_EVENTS_ADDRESS_OFFSET    0x0104                 /* Address sent or received */
 #define NRF53_RADIO_EVENTS_PAYLOAD_OFFSET    0x0108                 /* Packet payload sent or received */
@@ -81,6 +84,9 @@
 #define NRF53_RADIO_EVENTS_RXREADY_OFFSET    0x0158                 /* RADIO has ramped up and is ready to be started RX path */
 #define NRF53_RADIO_EVENTS_MHRMATCH_OFFSET   0x015c                 /* MAC header match found */
 #define NRF53_RADIO_EVENTS_PHYEND_OFFSET     0x016c                 /* Last bit is sent on air */
+#define NRF53_RADIO_PUBLISH_ADDRESS_OFFSET   0x0184                 /* Publish configuration for event ADDRESS */
+#define NRF53_RADIO_PUBLISH_END_OFFSET       0x018c                 /* Publish configuration for event END */
+#define NRF53_RADIO_PUBLISH_BCMATCH_OFFSET   0x01a8                 /* Publish configuration for event BCMATCH */
 #define NRF53_RADIO_SHORTS_OFFSET            0x0200                 /* Shortcuts between local events and tasks */
 #define NRF53_RADIO_INTENSET_OFFSET          0x0304                 /* Enable interrupt */
 #define NRF53_RADIO_INTENCLR_OFFSET          0x0308                 /* Disable interrupt */
@@ -136,6 +142,9 @@
 #define NRF53_RADIO_TASKS_EDSTOP      (NRF53_RADIO_BASE + NRF53_RADIO_TASKS_EDSTOP_OFFSET)
 #define NRF53_RADIO_TASKS_CCASTART    (NRF53_RADIO_BASE + NRF53_RADIO_TASKS_CCASTART_OFFSET)
 #define NRF53_RADIO_TASKS_CCASTOP     (NRF53_RADIO_BASE + NRF53_RADIO_TASKS_CCASTOP_OFFSET)
+#define NRF53_RADIO_SUBSCRIBE_TXEN    (NRF53_RADIO_BASE + NRF53_RADIO_SUBSCRIBE_TXEN_OFFSET)
+#define NRF53_RADIO_SUBSCRIBE_RXEN    (NRF53_RADIO_BASE + NRF53_RADIO_SUBSCRIBE_RXEN_OFFSET)
+#define NRF53_RADIO_SUBSCRIBE_DISABLE (NRF53_RADIO_BASE + NRF53_RADIO_SUBSCRIBE_DISABLE_OFFSET)
 #define NRF53_RADIO_EVENTS_READY      (NRF53_RADIO_BASE + NRF53_RADIO_EVENTS_READY_OFFSET)
 #define NRF53_RADIO_EVENTS_ADDRESS    (NRF53_RADIO_BASE + NRF53_RADIO_EVENTS_ADDRESS_OFFSET)
 #define NRF53_RADIO_EVENTS_PAYLOAD    (NRF53_RADIO_BASE + NRF53_RADIO_EVENTS_PAYLOAD_OFFSET)
@@ -158,6 +167,9 @@
 #define NRF53_RADIO_EVENTS_RXREADY    (NRF53_RADIO_BASE + NRF53_RADIO_EVENTS_RXREADY_OFFSET)
 #define NRF53_RADIO_EVENTS_MHRMATCH   (NRF53_RADIO_BASE + NRF53_RADIO_EVENTS_MHRMATCH_OFFSET)
 #define NRF53_RADIO_EVENTS_PHYEND     (NRF53_RADIO_BASE + NRF53_RADIO_EVENTS_PHYEND_OFFSET)
+#define NRF53_RADIO_PUBLISH_ADDRESS   (NRF53_RADIO_BASE + NRF53_RADIO_PUBLISH_ADDRESS_OFFSET)
+#define NRF53_RADIO_PUBLISH_END       (NRF53_RADIO_BASE + NRF53_RADIO_PUBLISH_END_OFFSET)
+#define NRF53_RADIO_PUBLISH_BCMATCH   (NRF53_RADIO_BASE + NRF53_RADIO_PUBLISH_BCMATCH_OFFSET)
 #define NRF53_RADIO_SHORTS            (NRF53_RADIO_BASE + NRF53_RADIO_SHORTS_OFFSET)
 #define NRF53_RADIO_INTENSET          (NRF53_RADIO_BASE + NRF53_RADIO_INTENSET_OFFSET)
 #define NRF53_RADIO_INTENCLR          (NRF53_RADIO_BASE + NRF53_RADIO_INTENCLR_OFFSET)

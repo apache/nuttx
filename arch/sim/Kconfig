@@ -694,6 +694,23 @@ config SIM_HCISOCKET_DEVID
 		Attached the local bluetooth device use specific
 		Bluetooth HCI number id when --bt-dev is not passed.
 
+config SIM_BLE_LL
+	bool "BLE Link Layer null radio"
+	default n
+	depends on WIRELESS_BLE_LL
+	---help---
+		Null radio lower half for the BLE Link Layer.  Transmissions are
+		logged and discarded; used to test multiple Link Layer instances.
+
+config SIM_BLE_LL_NINSTANCES
+	int "Number of BLE Link Layer instances"
+	default 1
+	range 1 4
+	depends on SIM_BLE_LL
+	---help---
+		Number of independent null radio instances to register, each as
+		its own Bluetooth HCI driver.
+
 config SIM_I2CBUS
 	bool "Simulated I2C Bus"
 	default n

@@ -55,6 +55,10 @@
 #  include "nrf52_sdc.h"
 #endif
 
+#ifdef CONFIG_NRF52_BLE_CONTROLLER
+#  include "nrf52_ble.h"
+#endif
+
 #ifdef CONFIG_IEEE802154_MRF24J40
 #  include "nrf52_mrf24j40.h"
 #endif
@@ -144,6 +148,14 @@ int nrf52_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: nrf52_sdc_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_NRF52_BLE_CONTROLLER
+  ret = nrf52_ble_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf52_ble_initialize() failed: %d\n", ret);
     }
 #endif
 

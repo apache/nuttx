@@ -239,7 +239,7 @@ config NRF54L_TIMER5
 config NRF54L_TIMER6
 	bool "TIMER6 (TIMER10)"
 	select NRF54L_TIMER
-	depends on !NRF54L_SOFTDEVICE_CONTROLLER
+	depends on !NRF54L_SOFTDEVICE_CONTROLLER && !NRF54L_BLE_CONTROLLER
 	default n
 
 config NRF54L_PWM0
@@ -271,7 +271,7 @@ config NRF54L_GRTC
 config NRF54L_RADIO
 	bool "RADIO"
 	depends on EXPERIMENTAL
-	depends on !NRF54L_SOFTDEVICE_CONTROLLER
+	depends on !NRF54L_SOFTDEVICE_CONTROLLER && !NRF54L_BLE_CONTROLLER
 	default n
 
 config NRF54L_USBDEV
@@ -727,3 +727,22 @@ config NRF54L_SDC_PUB_ADDR
 		static random address configure it through HCI instead.
 
 endif # NRF54L_SOFTDEVICE_CONTROLLER
+
+config NRF54L_BLE_CONTROLLER
+	bool "BLE Link Layer radio"
+	depends on WIRELESS_BLE_LL
+	depends on !NRF54L_SOFTDEVICE_CONTROLLER
+	depends on ALLOW_BSD_COMPONENTS
+	select NRF54L_GRTC
+	select NRF54L_USE_LFCLK
+	select CRYPTO
+	select CRYPTO_SW_AES
+	select BLE_LL_HAVE_CODED_PHY
+	---help---
+		Radio lower half for the BLE Link Layer (wireless/ble_ll).
+
+		It makes use of RADIO, TIMER10, CCM00 and AAR00, GRTC interrupt
+		group 2 with compare channels 2 and 3, and DPPI/PPIB channels 6
+		to 12, so these will be unavailable for direct use by user.  AES
+		block encryption uses the software AES library.
+

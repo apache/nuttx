@@ -48,6 +48,10 @@
 #  include "nrf54l_sdc.h"
 #endif
 
+#ifdef CONFIG_NRF54L_BLE_CONTROLLER
+#  include "nrf54l_ble.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -139,6 +143,16 @@ int nrf54l_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: SDC initialization failed: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_NRF54L_BLE_CONTROLLER
+  /* Register the BLE Link Layer */
+
+  ret = nrf54l_ble_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf54l_ble_initialize() failed: %d\n", ret);
     }
 #endif
 

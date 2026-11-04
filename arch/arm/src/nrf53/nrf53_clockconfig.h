@@ -29,6 +29,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -83,6 +85,28 @@ extern "C"
  ****************************************************************************/
 
 void nrf53_clockconfig(void);
+
+/****************************************************************************
+ * Name: nrf53_clock_hfxo_request
+ *
+ * Description:
+ *   Request the HFCLK crystal oscillator.  The oscillator is started on the
+ *   first request; the caller must wait for it to stabilize.
+ *
+ ****************************************************************************/
+
+bool nrf53_clock_hfxo_request(void);
+
+/****************************************************************************
+ * Name: nrf53_clock_hfxo_release
+ *
+ * Description:
+ *   Release the HFCLK crystal oscillator.  The oscillator is stopped when
+ *   the last request is released.
+ *
+ ****************************************************************************/
+
+bool nrf53_clock_hfxo_release(void);
 
 #if defined(__cplusplus)
 }

@@ -25,6 +25,7 @@ include $(TOPDIR)/Make.defs
 # Add IEEE 802.15.4 files to the build
 
 include bluetooth/Make.defs
+include ble_ll/Make.defs
 include ieee802154/Make.defs
 include pktradio/Make.defs
 

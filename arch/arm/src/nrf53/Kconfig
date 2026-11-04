@@ -275,7 +275,7 @@ config NRF53_QSPI
 config NRF53_TIMER0
 	bool "TIMER0"
 	select NRF53_TIMER
-	depends on !NRF53_SOFTDEVICE_CONTROLLER
+	depends on !NRF53_SOFTDEVICE_CONTROLLER && !NRF53_BLE_CONTROLLER
 	default n
 
 config NRF53_TIMER1
@@ -309,7 +309,7 @@ config NRF53_SAADC
 config NRF53_RTC0
 	bool "RTC0"
 	select NRF53_RTC
-	depends on !NRF53_SOFTDEVICE_CONTROLLER
+	depends on !NRF53_SOFTDEVICE_CONTROLLER && !NRF53_BLE_CONTROLLER
 	default n
 
 config NRF53_RTC1
@@ -321,7 +321,7 @@ config NRF53_RADIO
 	bool "RADIO"
 	depends on EXPERIMENTAL
 	depends on NRF53_NETCORE
-	depends on !NRF53_SOFTDEVICE_CONTROLLER
+	depends on !NRF53_SOFTDEVICE_CONTROLLER && !NRF53_BLE_CONTROLLER
 	default n
 
 config NRF53_USBDEV
@@ -452,8 +452,8 @@ if NRF53_SYSTIMER_RTC
 
 config NRF53_SYSTIMER_RTC_INSTANCE
 	int "RTC timer instance"
-	default 0 if !NRF53_SOFTDEVICE_CONTROLLER
-	default 1 if NRF53_SOFTDEVICE_CONTROLLER
+	default 1 if NRF53_SOFTDEVICE_CONTROLLER || NRF53_BLE_CONTROLLER
+	default 0
 	range 0 1
 	---help---
 		Which RTC instance to use to drive the system timer
@@ -919,3 +919,18 @@ config NRF53_SDC_PUB_ADDR
 	default 0x0000000000
 
 endif # NRF53_SOFTDEVICE_CONTROLLER
+
+config NRF53_BLE_CONTROLLER
+	bool "BLE Link Layer radio"
+	depends on WIRELESS_BLE_LL
+	depends on NRF53_NETCORE
+	depends on !NRF53_SOFTDEVICE_CONTROLLER
+	select NRF53_USE_LFCLK
+	select BLE_LL_HAVE_HW_WHITELIST
+	select BLE_LL_HAVE_CODED_PHY
+	---help---
+		Radio lower half for the BLE Link Layer (wireless/ble_ll).
+
+		It makes use of RADIO, TIMER0, RTC0, CCM, AAR, ECB and RNG so
+		these will be unavailable for direct use by user.  It also uses
+		DPPI channels 0-5.

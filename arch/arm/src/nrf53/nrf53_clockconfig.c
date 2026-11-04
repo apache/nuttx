@@ -48,6 +48,16 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_NRF53_HFCLK_XTAL
+static uint8_t g_hfxo_refcnt = 1;
+#else
+static uint8_t g_hfxo_refcnt;
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -137,4 +147,66 @@ void nrf53_clockconfig(void)
 
   putreg32(1, NRF53_REGULATORS_MAINDCDCEN);
 #endif
+}
+
+/****************************************************************************
+ * Name: nrf53_clock_hfxo_request
+ *
+ * Description:
+ *   Request the HFCLK crystal oscillator.  The oscillator is started on the
+ *   first request; the caller must wait for it to stabilize.
+ *
+ * Returned Value:
+ *   true if this call started the oscillator.
+ *
+ ****************************************************************************/
+
+bool nrf53_clock_hfxo_request(void)
+{
+  irqstate_t flags;
+  bool       started = false;
+
+  flags = up_irq_save();
+
+  DEBUGASSERT(g_hfxo_refcnt < UINT8_MAX);
+
+  if (g_hfxo_refcnt++ == 0)
+    {
+      putreg32(0x1, NRF53_CLOCK_TASKS_HFCLKSTART);
+      started = true;
+    }
+
+  up_irq_restore(flags);
+  return started;
+}
+
+/****************************************************************************
+ * Name: nrf53_clock_hfxo_release
+ *
+ * Description:
+ *   Release the HFCLK crystal oscillator.  The oscillator is stopped when
+ *   the last request is released.
+ *
+ * Returned Value:
+ *   true if this call stopped the oscillator.
+ *
+ ****************************************************************************/
+
+bool nrf53_clock_hfxo_release(void)
+{
+  irqstate_t flags;
+  bool       stopped = false;
+
+  flags = up_irq_save();
+
+  DEBUGASSERT(g_hfxo_refcnt > 0);
+
+  if (--g_hfxo_refcnt == 0)
+    {
+      putreg32(0x1, NRF53_CLOCK_TASKS_HFCLKSTOP);
+      stopped = true;
+    }
+
+  up_irq_restore(flags);
+  return stopped;
 }

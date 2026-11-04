@@ -1,0 +1,436 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config BLE_LL_HAVE_HW_WHITELIST
+	bool
+	default n
+	---help---
+		Selected by radio lower halves that implement hardware filter
+		accept list matching.
+
+config BLE_LL_HAVE_CODED_PHY
+	bool
+	default n
+	---help---
+		Selected by radio lower halves that support the LE Coded PHY.
+
+menuconfig WIRELESS_BLE_LL
+	bool "BLE Link Layer (controller)"
+	default n
+	depends on DRIVERS_BLUETOOTH || NET_BLUETOOTH
+	select MM_IOB
+	select SCHED_WORKQUEUE
+	---help---
+		Bluetooth Low Energy controller (Link Layer) derived from the
+		Apache Mynewt NimBLE controller.  The Link Layer is a generic upper
+		half that runs on top of a radio lower half and is exposed as a
+		Bluetooth HCI driver.
+
+if WIRELESS_BLE_LL
+
+config BLE_LL_PRIORITY
+	int "Link Layer thread priority"
+	default 250
+	---help---
+		Priority of the Link Layer work queue thread.  The Link Layer must
+		run above all other users of the radio scheduling deadlines.
+
+config BLE_LL_STACKSIZE
+	int "Link Layer thread stack size"
+	default 2048
+
+config BLE_LL_TMR_FREQ
+	int
+	default 32768
+	---help---
+		Frequency of the lower-half free-running timer.
+
+config BLE_LL_BT_VERSION
+	int "Bluetooth Core Specification version"
+	default 50
+	range 50 54
+	---help---
+		Supported Bluetooth Core Specification version multiplied by 10.
+
+menu "Roles"
+
+config BLE_LL_ROLE_BROADCASTER
+	bool "Broadcaster"
+	default y
+
+config BLE_LL_ROLE_OBSERVER
+	bool "Observer"
+	default y
+
+config BLE_LL_ROLE_PERIPHERAL
+	bool "Peripheral"
+	default y
+	select BLE_LL_ROLE_BROADCASTER
+
+config BLE_LL_ROLE_CENTRAL
+	bool "Central"
+	default y
+	select BLE_LL_ROLE_OBSERVER
+
+endmenu # Roles
+
+config BLE_LL_MAX_CONNECTIONS
+	int "Maximum number of connections"
+	default 1
+	depends on BLE_LL_ROLE_CENTRAL || BLE_LL_ROLE_PERIPHERAL
+
+menu "Features"
+
+config BLE_LL_CFG_FEAT_LE_ENCRYPTION
+	bool "LE Encryption"
+	default y
+	depends on BLE_LL_ROLE_CENTRAL || BLE_LL_ROLE_PERIPHERAL
+
+config BLE_LL_CFG_FEAT_LE_PING
+	bool "LE Ping"
+	default y
+	depends on BLE_LL_CFG_FEAT_LE_ENCRYPTION
+
+config BLE_LL_CFG_FEAT_CONN_PARAM_REQ
+	bool "Connection Parameters Request procedure"
+	default y
+	depends on BLE_LL_ROLE_CENTRAL || BLE_LL_ROLE_PERIPHERAL
+
+config BLE_LL_CFG_FEAT_PERIPH_INIT_FEAT_XCHG
+	bool "Peripheral-initiated Features Exchange"
+	default y
+	depends on BLE_LL_ROLE_CENTRAL || BLE_LL_ROLE_PERIPHERAL
+
+config BLE_LL_CFG_FEAT_DATA_LEN_EXT
+	bool "LE Data Packet Length Extension"
+	default y
+	depends on BLE_LL_ROLE_CENTRAL || BLE_LL_ROLE_PERIPHERAL
+
+config BLE_LL_CFG_FEAT_LL_PRIVACY
+	bool "LL Privacy"
+	default y
+
+config BLE_LL_CFG_FEAT_LE_2M_PHY
+	bool "LE 2M PHY"
+	default y
+
+config BLE_LL_CFG_FEAT_LE_CODED_PHY
+	bool "LE Coded PHY"
+	default n
+	depends on BLE_LL_HAVE_CODED_PHY
+
+config BLE_LL_CFG_FEAT_LE_CSA2
+	bool "Channel Selection Algorithm #2"
+	default y
+
+config BLE_LL_CFG_FEAT_LL_EXT_ADV
+	bool "Extended advertising"
+	default n
+	select BLE_LL_CFG_FEAT_LE_CSA2
+	---help---
+		Extended advertising, extended scanning and connection
+		establishment on the secondary advertising channels.
+
+config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV
+	bool "Periodic advertising"
+	default n
+	depends on BLE_LL_CFG_FEAT_LL_EXT_ADV
+	---help---
+		Periodic advertising and synchronization to periodic advertising
+		trains.
+
+config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV_SYNC_TRANSFER
+	bool "Periodic Advertising Sync Transfer"
+	default n
+	depends on BLE_LL_CFG_FEAT_LL_PERIODIC_ADV
+	depends on BLE_LL_ROLE_CENTRAL || BLE_LL_ROLE_PERIPHERAL
+	depends on BLE_LL_BT_VERSION >= 51
+
+config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV_ADI_SUPPORT
+	bool "Periodic Advertising ADI"
+	default n
+	depends on BLE_LL_CFG_FEAT_LL_PERIODIC_ADV
+	depends on BLE_LL_BT_VERSION >= 53
+
+config BLE_LL_CFG_FEAT_LL_ENHANCED_CONN_UPDATE
+	bool "LE Enhanced Connection Update (subrating)"
+	default n
+	depends on BLE_LL_ROLE_CENTRAL || BLE_LL_ROLE_PERIPHERAL
+	depends on BLE_LL_BT_VERSION >= 53
+
+config BLE_LL_ADV_CODING_SELECTION
+	bool "Advertising Coding Selection"
+	default n
+	depends on BLE_LL_CFG_FEAT_LL_EXT_ADV && BLE_LL_CFG_FEAT_LE_CODED_PHY
+	depends on BLE_LL_BT_VERSION >= 54
+
+config BLE_LL_CFG_FEAT_CTRL_TO_HOST_FLOW_CONTROL
+	bool "Controller to Host flow control"
+	default n
+	depends on BLE_LL_ROLE_CENTRAL || BLE_LL_ROLE_PERIPHERAL
+
+config BLE_LL_CFG_FEAT_LL_SCA_UPDATE
+	bool "Sleep Clock Accuracy Update procedure"
+	default n
+	depends on BLE_LL_BT_VERSION >= 52
+
+config BLE_LL_EXT_ADV_ADVA_IN_AUX
+	bool "Put AdvA in AUX_ADV_IND"
+	default y
+	depends on BLE_LL_CFG_FEAT_LL_EXT_ADV
+	---help---
+		Put AdvA in AUX_ADV_IND instead of ADV_EXT_IND.
+
+config BLE_LL_PHY
+	bool
+	default y if BLE_LL_CFG_FEAT_LE_2M_PHY || BLE_LL_CFG_FEAT_LE_CODED_PHY
+
+config BLE_LL_HW_WHITELIST
+	bool
+	default y if BLE_LL_HAVE_HW_WHITELIST && !BLE_LL_CFG_FEAT_LL_EXT_ADV
+
+config BLE_LL_HW_WHITELIST_SIZE
+	int
+	default 8
+	depends on BLE_LL_HW_WHITELIST
+
+config BLE_LL_PHY_VARIABLE_TIFS
+	bool
+
+endmenu # Features
+
+menu "Link Layer parameters"
+
+config BLE_LL_SCA
+	int "Sleep clock accuracy (ppm)"
+	default 60
+	range 0 500
+	---help---
+		Sleep clock accuracy of the device including drift and jitter.
+
+config BLE_LL_MANUFACTURER_ID
+	hex "Manufacturer ID"
+	default 0x0b65
+	---help---
+		Company identifier reported in the LL version and HCI Read Local
+		Version Information.  The default is assigned to the Apache Software
+		Foundation (Mynewt NimBLE).
+
+config BLE_LL_PUBLIC_DEV_ADDR
+	hex "Public device address"
+	default 0x000000000000
+	---help---
+		Public device address.  Zero means no public address is configured
+		and the address is requested from the radio lower half.
+
+config BLE_LL_TX_PWR_DBM
+	int "Default transmit power (dBm)"
+	default 0
+
+config BLE_LL_TX_PWR_MAX_DBM
+	int "Maximum transmit power (dBm)"
+	default 20
+
+config BLE_LL_WHITELIST_SIZE
+	int "Filter accept list size"
+	default 8
+
+config BLE_LL_RESOLV_LIST_SIZE
+	int "Resolving list size"
+	default 4
+	depends on BLE_LL_CFG_FEAT_LL_PRIVACY
+
+config BLE_LL_SCAN_ACTIVE_SCAN_NRPA
+	bool "Use NRPA for active scan"
+	default y
+	depends on BLE_LL_CFG_FEAT_LL_PRIVACY
+
+config BLE_LL_NUM_SCAN_DUP_ADVS
+	int "Number of advertisers tracked for duplicate filtering"
+	default 8
+	range 1 255
+	depends on BLE_LL_ROLE_OBSERVER
+
+config BLE_LL_NUM_SCAN_RSP_ADVS
+	int "Number of advertisers tracked for scan responses"
+	default 8
+	depends on BLE_LL_ROLE_OBSERVER
+
+config BLE_LL_RNG_BUFSIZE
+	int "Random number buffer size"
+	default 32
+
+config BLE_LL_RFMGMT_ENABLE_TIME
+	int "RF clock enable time (usec)"
+	default 0
+	---help---
+		Time required to start the radio clock before an RF event.  Zero
+		keeps the radio clock always enabled.
+
+config BLE_LL_SUPP_MAX_RX_BYTES
+	int "Maximum supported RX payload"
+	default 251
+	range 27 251
+
+config BLE_LL_SUPP_MAX_TX_BYTES
+	int "Maximum supported TX payload"
+	default 251
+	range 27 251
+
+config BLE_LL_CONN_INIT_MAX_TX_BYTES
+	int "Initial maximum TX payload"
+	default 27
+	range 27 251
+
+config BLE_LL_CONN_INIT_AUTO_DLE
+	bool "Automatic data length update"
+	default y
+	depends on BLE_LL_CFG_FEAT_DATA_LEN_EXT
+
+config BLE_LL_CONN_INIT_SLOTS
+	int "Initial connection event slots"
+	default 4
+
+config BLE_LL_CONN_INIT_MIN_WIN_OFFSET
+	int "Minimum transmit window offset"
+	default 0
+
+config BLE_LL_CONN_EVENT_END_MARGIN
+	int "Connection event end margin (usec)"
+	default 0
+
+config BLE_LL_CONN_PHY_DEFAULT_PREF_MASK
+	int "Default preferred PHY mask"
+	default 7
+
+config BLE_LL_CONN_PHY_PREFER_2M
+	bool "Prefer 2M PHY"
+	default n
+	depends on BLE_LL_CFG_FEAT_LE_2M_PHY
+
+config BLE_LL_CONN_PHY_INIT_UPDATE
+	bool "Update PHY after connection"
+	default n
+	depends on BLE_LL_PHY
+
+config BLE_LL_CONN_STRICT_SCHED
+	bool "Strict connection scheduling"
+	default n
+	depends on BLE_LL_ROLE_CENTRAL
+
+config BLE_LL_CONN_STRICT_SCHED_FIXED
+	bool "Fixed strict scheduling period"
+	default n
+	depends on BLE_LL_CONN_STRICT_SCHED
+
+config BLE_LL_CONN_STRICT_SCHED_SLOT_US
+	int "Strict scheduling slot duration (usec)"
+	default 3750
+	depends on BLE_LL_CONN_STRICT_SCHED
+
+config BLE_LL_CONN_STRICT_SCHED_PERIOD_SLOTS
+	int "Strict scheduling period (slots)"
+	default 8
+	depends on BLE_LL_CONN_STRICT_SCHED
+
+config BLE_LL_NUM_COMP_PKT_ITVL_MS
+	int "Number of completed packets event interval (msec)"
+	default 2000
+
+config BLE_LL_MULTI_ADV_INSTANCES
+	int "Additional advertising sets" if BLE_LL_ROLE_BROADCASTER
+	default 0
+	---help---
+		Number of advertising sets in addition to the default one.
+
+config BLE_LL_EXT_ADV_MAX_SIZE
+	int "Maximum advertising data size" if BLE_LL_CFG_FEAT_LL_EXT_ADV
+	default 31
+	range 31 1650
+
+config BLE_LL_SCAN_AUX_SEGMENT_CNT
+	int "Concurrently scanned auxiliary segments"
+	default 8
+	depends on BLE_LL_CFG_FEAT_LL_EXT_ADV && BLE_LL_ROLE_OBSERVER
+
+config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV_SYNC_CNT
+	int "Maximum number of periodic syncs"
+	default 1
+	depends on BLE_LL_CFG_FEAT_LL_PERIODIC_ADV && BLE_LL_ROLE_OBSERVER
+
+config BLE_LL_CFG_FEAT_LL_PERIODIC_ADV_SYNC_LIST_CNT
+	int "Periodic advertiser list size"
+	default 1
+	depends on BLE_LL_CFG_FEAT_LL_PERIODIC_ADV && BLE_LL_ROLE_OBSERVER
+
+config BLE_LL_SCHED_AUX_MAFS_DELAY
+	int "Extra AUX_ADV_IND delay (usec)" if BLE_LL_CFG_FEAT_LL_EXT_ADV
+	default 0
+
+config BLE_LL_SCHED_AUX_CHAIN_MAFS_DELAY
+	int "Extra AUX_CHAIN_IND delay (usec)" if BLE_LL_CFG_FEAT_LL_EXT_ADV
+	default 0
+
+config BLE_LL_SCHED_SCAN_AUX_PDU_LEN
+	int "Expected AUX_ADV_IND PDU length"
+	default 41
+	range 1 257
+	depends on BLE_LL_CFG_FEAT_LL_EXT_ADV && BLE_LL_ROLE_OBSERVER
+	---help---
+		Time reserved by the scheduler when scanning AUX_ADV_IND and
+		AUX_CHAIN_IND PDUs.
+
+config BLE_LL_SCHED_SCAN_SYNC_PDU_LEN
+	int "Expected AUX_SYNC_IND PDU length"
+	default 32
+	range 1 257
+	depends on BLE_LL_CFG_FEAT_LL_PERIODIC_ADV && BLE_LL_ROLE_OBSERVER
+	---help---
+		Time reserved by the scheduler when scanning AUX_SYNC_IND and
+		AUX_CHAIN_IND PDUs.
+
+endmenu # Link Layer parameters
+
+menu "HCI"
+
+config BLE_LL_ACL_FROM_HS_COUNT
+	int "ACL buffers from host"
+	default 10
+	depends on BLE_LL_ROLE_CENTRAL || BLE_LL_ROLE_PERIPHERAL
+
+config BLE_LL_ACL_SIZE
+	int "ACL buffer size"
+	default 251
+
+config BLE_LL_EVT_COUNT
+	int "HCI event buffers"
+	default 4
+
+config BLE_LL_EVT_DISCARDABLE_COUNT
+	int "Discardable HCI event buffers"
+	default 16
+	---help---
+		Buffers for events that can be dropped, like advertising reports.
+
+config BLE_LL_EVT_SIZE
+	int "HCI event buffer size"
+	default 70
+	range 70 257
+	---help---
+		Maximum HCI event size.  Advertising reports longer than this are
+		split into multiple events.  It must not exceed the event buffer
+		size of the host.
+
+config BLE_LL_HCI_VS_OCF_OFFSET
+	int
+	default 0
+
+endmenu # HCI
+
+config BLE_LL_STATS
+	bool "Link Layer statistics"
+	default n
+
+endif # WIRELESS_BLE_LL
