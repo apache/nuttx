@@ -59,6 +59,27 @@ config BINFMT_SCRIPT
 		The interpreter itself must be loadable by another registered
 		binfmt handler (builtin, ELF, etc.).
 
+config BINFMT_BUILTIN_STRICT_PATH
+	bool "Match a builtin application by path as POSIX specifies"
+	default n
+	depends on BUILTIN
+	---help---
+		By default, the builtin binary format looks up only the last part of
+		a path, so exec("/nonexistent/hello") starts the builtin application
+		"hello", and so does exec("/tmp/hello") for a file that is not a
+		program.  POSIX wants ENOENT and ENOEXEC.
+
+		With this option, a name with a '/' matches a builtin application
+		only if it names a file in a mounted BINFS (FS_BINFS).  A bare name
+		still matches.
+
+		Code that starts a builtin application by a path with no file there
+		then fails.  Without a BINFS at /bin this includes popen() without
+		LIBC_ENVPATH ("/bin/sh": no shell, so a shell command fails with
+		ENOENT), a script with "#!/bin/sh", the shell "/bin/sh" of BASIC and
+		dropbear, the default shell of ADB, and the shell "/bin/nsh" that
+		getpwnam() reports for root.
+
 config ELF
 	bool "Enable the ELF Binary Format"
 	default n
