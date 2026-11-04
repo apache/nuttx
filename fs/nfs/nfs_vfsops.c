@@ -1728,7 +1728,7 @@ next_entry:
        * file?
        */
 
-       else
+      else
         {
           finfo("No data but not end of directory???\n");
           goto read_dir;
@@ -1802,37 +1802,37 @@ next_entry:
   tmp = fxdr_unsigned(uint32_t, obj_attributes.fa_type);
   switch (tmp)
     {
-    default:
-    case NFNON:        /* Unknown type */
-      break;
+      default:
+      case NFNON:        /* Unknown type */
+        break;
 
-    case NFSOCK:       /* Socket */
-      entry->d_type = DTYPE_SOCK;
-      break;
+      case NFSOCK:       /* Socket */
+        entry->d_type = DTYPE_SOCK;
+        break;
 
-    case NFLNK:        /* Symbolic link */
-      entry->d_type = DTYPE_LINK;
-      break;
+      case NFLNK:        /* Symbolic link */
+        entry->d_type = DTYPE_LINK;
+        break;
 
-    case NFREG:        /* Regular file */
-      entry->d_type = DTYPE_FILE;
-      break;
+      case NFREG:        /* Regular file */
+        entry->d_type = DTYPE_FILE;
+        break;
 
-    case NFDIR:        /* Directory */
-      entry->d_type = DTYPE_DIRECTORY;
-      break;
+      case NFDIR:        /* Directory */
+        entry->d_type = DTYPE_DIRECTORY;
+        break;
 
-    case NFBLK:        /* Block special device file */
-      entry->d_type = DTYPE_BLK;
-      break;
+      case NFBLK:        /* Block special device file */
+        entry->d_type = DTYPE_BLK;
+        break;
 
-    case NFFIFO:       /* Named FIFO */
-      entry->d_type = DTYPE_FIFO;
-      break;
+      case NFFIFO:       /* Named FIFO */
+        entry->d_type = DTYPE_FIFO;
+        break;
 
-    case NFCHR:        /* Character special device file */
-      entry->d_type = DTYPE_CHR;
-      break;
+      case NFCHR:        /* Character special device file */
+        entry->d_type = DTYPE_CHR;
+        break;
     }
 
   finfo("type: %d->%d\n", (int)tmp, entry->d_type);
@@ -2866,37 +2866,37 @@ static mode_t nfs_stat_mode(unsigned int mode, unsigned int type)
 
   switch (type)
     {
-    default:
-    case NFNON:   /* Unknown type */
-      break;
+      default:
+      case NFNON:   /* Unknown type */
+        break;
 
-    case NFREG:   /* Regular file */
-      mode |= S_IFREG;
-      break;
+      case NFREG:   /* Regular file */
+        mode |= S_IFREG;
+        break;
 
-    case NFDIR:   /* Directory */
-      mode |= S_IFDIR;
-      break;
+      case NFDIR:   /* Directory */
+        mode |= S_IFDIR;
+        break;
 
-    case NFBLK:   /* Block special device file */
-      mode |= S_IFBLK;
-      break;
+      case NFBLK:   /* Block special device file */
+        mode |= S_IFBLK;
+        break;
 
-    case NFCHR:   /* Character special device file */
-      mode |= S_IFCHR;
-      break;
+      case NFCHR:   /* Character special device file */
+        mode |= S_IFCHR;
+        break;
 
-    case NFLNK:   /* Symbolic link */
-      mode |= S_IFLNK;
-      break;
+      case NFLNK:   /* Symbolic link */
+        mode |= S_IFLNK;
+        break;
 
-    case NFSOCK:  /* Socket */
-      mode |= S_IFSOCK;
-      break;
+      case NFSOCK:  /* Socket */
+        mode |= S_IFSOCK;
+        break;
 
-    case NFFIFO:  /* Named pipe */
-      mode |= S_IFIFO;
-      break;
+      case NFFIFO:  /* Named pipe */
+        mode |= S_IFIFO;
+        break;
     }
 
   return mode;
