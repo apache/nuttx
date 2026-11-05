@@ -45,15 +45,9 @@
                                 (((n) - (d)/2)/(d)) : (((n) + (d)/2)/(d)))
 
 /* Returns one plus the index of the most significant 1-bit of n,
- * or if n is zero, returns zero.
+ * or if n is zero, returns zero.  The argument is evaluated multiple
+ * times and must be free of side effects.
  */
-
-#if UINTPTR_MAX > UINT32_MAX
-#  define FLS(n) ((n) & UINT64_C(0xffffffff00000000) ? 32 + \
-                  FLS32((size_t)(n) >> 32) : FLS32(n))
-#else
-#  define FLS(n) FLS32(n)
-#endif
 
 #define FLS32(n) ((n) & 0xffff0000 ? 16 + FLS16((n) >> 16) : FLS16(n))
 #define FLS16(n) ((n) & 0xff00     ?  8 + FLS8 ((n) >>  8) : FLS8 (n))
@@ -61,6 +55,19 @@
 #define FLS4(n)  ((n) & 0xc        ?  2 + FLS2 ((n) >>  2) : FLS2 (n))
 #define FLS2(n)  ((n) & 0x2        ?  1 + FLS1 ((n) >>  1) : FLS1 (n))
 #define FLS1(n)  ((n) & 0x1        ?  1 : 0)
+
+/* Widen before shifting so narrow types never see oversized shift counts. */
+
+#define FLS64(n) ((uint64_t)(n) >> 32 ? \
+                  32 + FLS32((uint32_t)((uint64_t)(n) >> 32)) : FLS32(n))
+
+#ifdef __INT128_DEFINED
+#  define FLS128(n) ((uint128_t)(n) >> 64 ? \
+                     64 + FLS64((uint64_t)((uint128_t)(n) >> 64)) : FLS64(n))
+#  define FLS(n) (sizeof((n)) <= sizeof(uint64_t) ? FLS64(n) : FLS128(n))
+#else
+#  define FLS(n) FLS64(n)
+#endif
 
 /* Checks if an integer is power of two at compile time */
 
