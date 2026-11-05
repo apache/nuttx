@@ -393,6 +393,80 @@ static int vsprintf_putnum(FAR struct lib_outstream_s *stream,
   return len;
 }
 
+#ifdef CONFIG_LIBC_PRINTF_C23
+/* Parse the rest of wN or wfN, and set the flags of the length that has this
+ * size.  Return false for any other N, with fmt after the w.
+ */
+
+static bool vsprintf_wnlength(FAR const IPTR char **fmtp,
+                              FAR uint16_t *flags)
+{
+  FAR const IPTR char *fmt = *fmtp;
+  size_t size;
+  int bits = 0;
+  bool fast;
+  int ch;
+
+  ch = fmt_char(fmt);
+  fast = ch == 'f';
+  if (fast)
+    {
+      ch = fmt_char(fmt);
+    }
+
+  while (ch >= '0' && ch <= '9' && bits < 100)
+    {
+      bits = 10 * bits + (ch - '0');
+      ch = fmt_char(fmt);
+    }
+
+  fmt_ungetc(fmt);
+
+  switch (bits)
+    {
+      case 8:
+        size = fast ? sizeof(int_fast8_t) : sizeof(int8_t);
+        break;
+
+      case 16:
+        size = fast ? sizeof(int_fast16_t) : sizeof(int16_t);
+        break;
+
+      case 32:
+        size = fast ? sizeof(int_fast32_t) : sizeof(int32_t);
+        break;
+
+      case 64:
+        size = sizeof(int64_t);
+        break;
+
+      default:
+        return false;
+    }
+
+  *fmtp = fmt;
+
+  if (size == sizeof(signed char))
+    {
+      *flags |= FL_SHORT | FL_REPD_TYPE;
+    }
+  else if (size == sizeof(short) && size != sizeof(int))
+    {
+      *flags |= FL_SHORT;
+    }
+  else if (size == sizeof(long) && size != sizeof(int))
+    {
+      *flags |= FL_LONG;
+    }
+  else if (size != sizeof(int))
+    {
+      *flags |= FL_LONG | FL_REPD_TYPE;
+    }
+
+  return true;
+}
+#endif
+
 #ifdef CONFIG_LIBC_PRINTF_HEXFLOAT
 static size_t vsprintf_puthex(FAR struct lib_outstream_s *stream,
                               FAR struct hexfloat_s *hex, uint16_t flags,
@@ -846,6 +920,18 @@ set_star:
                   continue;
                 }
             }
+
+#ifdef CONFIG_LIBC_PRINTF_C23
+          if (c == 'w')
+            {
+              if (vsprintf_wnlength(&fmt, &flags))
+                {
+                  continue;
+                }
+
+              break; /* An unknown size: the rest of the format is text */
+            }
+#endif
 
           if (c == 'j')
             {
