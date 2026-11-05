@@ -52,7 +52,7 @@
  * Private Data
  ****************************************************************************/
 
-static IfxCpu_Trap g_trapinfo;
+static struct tricore_trap_s g_trapinfo;
 
 /* Bus trap hook for safety test modules (e.g., BusMonTst). */
 
@@ -64,12 +64,7 @@ static tricore_bustrap_hook_t g_bustrap_hook;
 
 static void tricore_trapinfo(volatile void *trap)
 {
-  IfxCpu_Trap *ctrap = (IfxCpu_Trap *)trap;
-
-  g_trapinfo.tCpu   = ctrap->tCpu;
-  g_trapinfo.tClass = ctrap->tClass;
-  g_trapinfo.tId    = ctrap->tId;
-  g_trapinfo.tAddr  = ctrap->tAddr;
+  g_trapinfo = *(struct tricore_trap_s *)trap;
 }
 
 /****************************************************************************
@@ -384,9 +379,9 @@ void tricore_trapcall(volatile void *trap)
   uintptr_t *regs;
   bool was_interrupt_context;
 
-  IfxCpu_Trap *ctrap = (IfxCpu_Trap *)trap;
-  IfxCpu_Trap_Class tclass = (IfxCpu_Trap_Class)ctrap->tClass;
-  unsigned int tid = ctrap->tId;
+  struct tricore_trap_s *ctrap = (struct tricore_trap_s *)trap;
+  IfxCpu_Trap_Class tclass = (IfxCpu_Trap_Class)ctrap->tclass;
+  unsigned int tid = ctrap->tid;
 
   tricore_trapinfo(trap);
 
