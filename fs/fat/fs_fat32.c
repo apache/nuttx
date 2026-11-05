@@ -553,6 +553,12 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
                 {
                   goto errout_with_lock;
                 }
+
+              /* The directory entry may not describe the live chain yet. */
+
+              DIR_PUTFSTCLUSTHI(direntry, truncshared->s_startcluster >> 16);
+              DIR_PUTFSTCLUSTLO(direntry,
+                               truncshared->s_startcluster & 0xffff);
             }
 
           ret = fat_dirtruncate(fs, direntry);
