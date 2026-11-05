@@ -115,10 +115,11 @@ static void nxtask_reset_task(FAR struct tcb_s *tcb, bool remove)
 #endif
 
   /* Remove the TCB from whatever list it is in.  After this point, the TCB
-   * should no longer be accessible to the system
+   * should no longer be accessible to the system.  nxtask_recover() has
+   * already removed a task that waits on a semaphore.
    */
 
-  if (remove)
+  if (remove && tcb->task_state != TSTATE_WAIT_SEM)
     {
       nxsched_remove_readytorun(tcb);
     }
