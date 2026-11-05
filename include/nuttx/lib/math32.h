@@ -320,6 +320,21 @@ static inline_function uint64_t div64_const32(uint64_t n, uint32_t b)
   return res;
 }
 
+#ifdef CONFIG_DEBUG_NOOPT
+
+/* Without optimization the magic number setup is not folded at compile
+ * time but runs on every call (it even contains several divisions),
+ * which is far slower than a plain division.
+ */
+
+#  define div64_const(n, base) ((n) / (base))
+#else
+
+/* The divisor is expected to be a compile-time constant so that the
+ * magic multiplier setup below is folded away; for runtime-invariant
+ * divisors use the invdiv API instead.
+ */
+
 static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
 {
   DEBUGASSERT(base > 0);
@@ -339,6 +354,7 @@ static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
 
   return n;
 }
+#endif
 
 #define div_const(n, base) \
   ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
