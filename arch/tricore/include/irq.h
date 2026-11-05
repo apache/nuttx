@@ -134,6 +134,8 @@
 #define TRICORE_SRCNUM_PER_GPSR  8
 #define TRICORE_SRC2IRQ(src_addr) \
   (((uintptr_t)(src_addr) - TRICORE_SRC_BASE) / 4)
+#define TRICORE_IRQ2SRC(irq) \
+  ((volatile uint32_t *)(TRICORE_SRC_BASE + (irq) * 4))
 #define TRICORE_GPSR_IRQNUM(src_cpu, dest_cpu)  \
   TRICORE_SRC2IRQ(TRICORE_SRC_GPSR_BASE + \
                   ((src_cpu) * TRICORE_SRCNUM_PER_GPSR + (dest_cpu)) * 4)
