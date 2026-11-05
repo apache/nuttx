@@ -67,9 +67,13 @@ FAR char *__ultoa_invert(unsigned long long val, FAR char *str, int base)
       else
         {
           if (upper)
-            v += 'A' - 10;
+            {
+              v += 'A' - 10;
+            }
           else
-            v += 'a' - 10;
+            {
+              v += 'a' - 10;
+            }
         }
 
       *str++ = v;
