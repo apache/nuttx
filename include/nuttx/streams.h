@@ -235,6 +235,7 @@ struct lib_rawsostream_s
   int                    fd;
 };
 
+#if CONFIG_STREAM_OUT_BUFFER_SIZE > 0
 struct lib_bufferedoutstream_s
 {
   struct lib_outstream_s      common;
@@ -242,6 +243,7 @@ struct lib_bufferedoutstream_s
   size_t                      pending;
   char                        buffer[CONFIG_STREAM_OUT_BUFFER_SIZE];
 };
+#endif
 
 struct lib_hexdumpstream_s
 {
@@ -477,8 +479,10 @@ void lib_rawsostream(FAR struct lib_rawsostream_s *stream, int fd);
  *
  ****************************************************************************/
 
+#if CONFIG_STREAM_OUT_BUFFER_SIZE > 0
 void lib_bufferedoutstream(FAR struct lib_bufferedoutstream_s *stream,
                            FAR struct lib_outstream_s *backend);
+#endif
 
 /****************************************************************************
  * Name: lib_hexdumpstream
