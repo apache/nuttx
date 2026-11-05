@@ -50,5 +50,7 @@ int vfprintf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
   n = lib_vsprintf(&stdoutstream.common, fmt, ap);
   funlockfile(stream);
 
-  return n;
+  /* The stream counts only what it could write */
+
+  return n >= 0 && stdoutstream.common.nput != n ? EOF : n;
 }
