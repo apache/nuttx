@@ -96,6 +96,8 @@ static void cpu1_boot(void)
   arm_initialize_stack();
 #endif
 
+  arm_color_intstack();
+
   if (cpu == 1)
     {
       putreg32((uint32_t)_stext, NVIC_VECTAB); /* use CPU0 vectors */
