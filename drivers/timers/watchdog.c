@@ -1246,6 +1246,8 @@ void watchdog_unregister(FAR void *handle)
   FAR struct watchdog_lowerhalf_s *lower;
 #ifdef CONFIG_WATCHDOG_AUTOMONITOR_TASKS
   FAR struct watchdog_user_s *user;
+  struct list_node users;
+  irqstate_t flags;
 #endif
 
   /* Recover the pointer to the upper-half driver state */
@@ -1267,7 +1269,17 @@ void watchdog_unregister(FAR void *handle)
 #endif
 
 #ifdef CONFIG_WATCHDOG_AUTOMONITOR_TASKS
-  while ((user = list_remove_head_type(&upper->users, struct watchdog_user_s,
+  /* A keepalive trigger running in interrupt context, or on another cpu,
+   * may still walk the channels: detach them under the lock and free them
+   * outside of it.
+   */
+
+  flags = spin_lock_irqsave(&upper->slock);
+  list_move(&upper->users, &users);
+  list_initialize(&upper->users);
+  spin_unlock_irqrestore(&upper->slock, flags);
+
+  while ((user = list_remove_head_type(&users, struct watchdog_user_s,
                                        node)) != NULL)
     {
       kmm_free(user);
