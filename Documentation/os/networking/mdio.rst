@@ -8,7 +8,7 @@ MDIO Bus Driver
 
 The NuttX MDIO bus driver provides a standardized interface for communicating with Ethernet PHY (Physical Layer) transceivers.
 It employs a classic upper-half/lower-half architecture to abstract hardware-specific logic from the generic MDIO protocol,
-which is currently compliant with Clause 22 of the IEEE 802.3 standard.
+which supports both Clause 22 and (optionally, under ``CONFIG_MDIO_CLAUSE_45``) Clause 45 of the IEEE 802.3 standard.
 The primary implementation of the upper-half can be found in ``drivers/net/mdio.c``.
 
 Driver Architecture
@@ -44,7 +44,8 @@ Key Data Structures
 1.  ``struct mdio_ops_s``: A structure containing function pointers that the lower-half driver must implement to perform hardware-level operations.
     *   ``read``: Performs a Clause 22 MDIO read operation.
     *   ``write``: Performs a Clause 22 MDIO write operation.
-    *   ``reset``: An optional function to execute a hardware-specific PHY reset.
+    *   ``read_c45`` / ``write_c45``: Optional native Clause 45 (MMD) read/write operations, available when ``CONFIG_MDIO_CLAUSE_45`` is enabled. When a lower-half leaves them NULL, the upper-half falls back to indirect MMD access over the Clause 22 registers 13/14.
+    *   ``reset``: An optional PHY hardware reset-line control. It is a level control, not a one-shot pulse: ``value != 0`` asserts reset (drives the PHY into reset) and ``value == 0`` deasserts it (releases the PHY). The lower-half owns pin polarity and the datasheet-mandated settle delays, and is responsible for any idempotency since a single bus may host several PHY addresses.
 
 2.  ``struct mdio_lowerhalf_s``: The container for the lower-half instance, which holds a pointer to the ``mdio_ops_s`` vtable 
     and an optional private data pointer for the driver's internal state.
