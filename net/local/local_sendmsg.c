@@ -458,7 +458,8 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
   FAR const struct sockaddr *to = msg->msg_name;
   FAR const struct iovec *buf = msg->msg_iov;
   socklen_t tolen = msg->msg_namelen;
-  size_t len = msg->msg_iovlen;
+  size_t iovlen = msg->msg_iovlen;
+  ssize_t ret;
 
 #ifdef CONFIG_NET_LOCAL_SCM
   FAR struct local_conn_s *conn = psock->s_conn;
@@ -467,6 +468,24 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
   if (msg->msg_control &&
       msg->msg_controllen > sizeof(struct cmsghdr))
     {
+      /* Stream sockets require data to be sent with control messages */
+
+      if (psock->s_type == SOCK_STREAM)
+        {
+          size_t total = 0;
+          size_t i;
+
+          for (i = 0; i < iovlen; i++)
+            {
+              total += buf[i].iov_len;
+            }
+
+          if (total == 0)
+            {
+              return -EINVAL;
+            }
+        }
+
       count = local_sendctl(conn, msg);
       if (count < 0)
         {
@@ -474,19 +493,19 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
         }
     }
 
-  len = to ? local_sendto(psock, buf, len, flags, to, tolen) :
-             local_send(psock, buf, len, flags);
+  ret = to ? local_sendto(psock, buf, iovlen, flags, to, tolen) :
+             local_send(psock, buf, iovlen, flags);
 
-  if (len < 0 && count > 0)
+  if (ret < 0 && count > 0)
     {
       local_lock();
       local_freectl(conn, count);
       local_unlock();
     }
 #else
-  len = to ? local_sendto(psock, buf, len, flags, to, tolen) :
-             local_send(psock, buf, len, flags);
+  ret = to ? local_sendto(psock, buf, iovlen, flags, to, tolen) :
+             local_send(psock, buf, iovlen, flags);
 #endif
 
-  return len;
+  return ret;
 }
