@@ -104,6 +104,18 @@
 #define FL_FLTEXP          0x4000
 #define FL_FLTFIX          0x8000
 
+/* %b and %B: only an integer conversion has this bit.  A flag that is 0 lets
+ * the compiler remove the code of its feature.
+ */
+
+#ifdef CONFIG_LIBC_PRINTF_C23
+#  define FL_ALTBIN        0x8000
+#  define fmt_isbinary(c)  (((c) | 0x20) == 'b')
+#else
+#  define FL_ALTBIN        0
+#  define fmt_isbinary(c)  0
+#endif
+
 /* The # flag.  FL_ALT stays for the prefix of %p.  A flag that is 0 lets the
  * compiler remove the code of its feature.
  */
@@ -513,7 +525,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   int prec;
   union
   {
+#ifdef CONFIG_LIBC_PRINTF_C23
+    char __buf[sizeof(ultoa_uint_t) * CHAR_BIT]; /* -1 in binary */
+#else
     char __buf[22]; /* Size for -1 in octal, without '\0' */
+#endif
 #ifdef CONFIG_LIBC_FLOATINGPOINT
     struct dtoa_s __dtoa;
 #endif
@@ -920,7 +936,7 @@ set_star:
               type = FL_IS_LDOUBLE(flags) ? TYPE_LONG_DOUBLE : TYPE_DOUBLE;
             }
           else if (c == 'i' || c == 'd' || c == 'u' || c == 'p' ||
-                   c == 'o' || c == 'x' || c == 'X')
+                   c == 'o' || c == 'x' || c == 'X' || fmt_isbinary(c))
             {
               if ((flags & FL_LONG) == 0)
                 {
@@ -1641,7 +1657,8 @@ str_lpad:
               c = __ultoa_invert(x, buf, 10) - buf;
             }
         }
-      else if (c != 'u' && c != 'o' && c != 'p' && (c | 0x20) != 'x')
+      else if (c != 'u' && c != 'o' && c != 'p' && (c | 0x20) != 'x' &&
+               !fmt_isbinary(c))
         {
           /* An unknown conversion, or the end of the format.  The size of
            * the argument is not known, so read no more arguments.  Print the
@@ -1816,6 +1833,25 @@ str_lpad:
                 base = 16;
                 break;
 
+#ifdef CONFIG_LIBC_PRINTF_C23
+              case 'B':
+                if ((flags & FL_ALT_FORM) != 0)
+                  {
+                    flags |= FL_ALTUPP;
+                  }
+
+                /* FALLTHROUGH */
+
+              case 'b':
+                if ((flags & FL_ALT_FORM) != 0)
+                  {
+                    flags |= FL_ALTHEX | FL_ALTBIN;
+                  }
+
+                base = 2;
+                break;
+#endif
+
               default: /* 'X' */
                 if ((flags & FL_ALT_FORM) != 0)
                   {
@@ -1914,8 +1950,9 @@ str_lpad:
           stream_putc('0', stream);
           if (FL_ALT_IS_HEX(flags))
             {
+              ch = (flags & FL_ALTBIN) != 0 ? 'b' : 'x';
               stream_putc(FL_ALT_FORM != 0 && (flags & FL_ALTUPP) != 0 ?
-                          'X' : 'x', stream);
+                          ch - 0x20 : ch, stream);
             }
         }
       else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
