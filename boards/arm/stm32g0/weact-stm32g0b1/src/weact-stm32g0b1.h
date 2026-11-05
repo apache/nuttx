@@ -53,7 +53,9 @@
 #define MAX_IRQBUTTON  BUTTON_USER
 #define NUM_IRQBUTTONS 1
 
-#define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
+#define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PULLDOWN | GPIO_PORTC | GPIO_PIN13)
+
+#define BUTTONS_DRIVER_PATH "/dev/buttons"
 
 /****************************************************************************
  * Public Data
