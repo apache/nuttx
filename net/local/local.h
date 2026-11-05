@@ -515,8 +515,9 @@ int local_send_preamble(FAR struct local_conn_s *conn,
  *
  ****************************************************************************/
 
-int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
-                      size_t len);
+ssize_t local_send_packet(FAR struct file *filep,
+                          FAR const struct iovec *buf,
+                          size_t len);
 
 /****************************************************************************
  * Name: local_recvmsg

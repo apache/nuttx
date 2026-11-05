@@ -59,8 +59,9 @@
  *
  ****************************************************************************/
 
-static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
-                            size_t len)
+static ssize_t local_fifo_write(FAR struct file *filep,
+                                FAR const uint8_t *buf,
+                                size_t len)
 {
   ssize_t nwritten = 0;
   ssize_t ret = 0;
@@ -120,21 +121,27 @@ int local_send_preamble(FAR struct local_conn_s *conn,
 {
   FAR const struct iovec *end = buf + len;
   FAR const struct iovec *iov;
-  int ret;
+  ssize_t ret;
   lc_size_t pathlen;
   lc_size_t pktlen;
+  size_t total = 0;
+
+  if (rcvsize <= sizeof(lc_size_t))
+    {
+      return -EMSGSIZE;
+    }
 
   /* Send the packet length */
 
-  for (pktlen = 0, iov = buf; iov != end; iov++)
+  for (iov = buf; iov != end; iov++)
     {
-      pktlen += iov->iov_len;
-    }
+      if (iov->iov_len > rcvsize - sizeof(lc_size_t) - total)
+        {
+          nerr("ERROR: Packet is too big\n");
+          return -EMSGSIZE;
+        }
 
-  if (pktlen > rcvsize - sizeof(lc_size_t))
-    {
-      nerr("ERROR: Packet is too big: %d\n", pktlen);
-      return -EMSGSIZE;
+      total += iov->iov_len;
     }
 
   pathlen = strlen(conn->lc_path);
@@ -142,10 +149,11 @@ int local_send_preamble(FAR struct local_conn_s *conn,
                          sizeof(lc_size_t));
   if (ret != sizeof(lc_size_t))
     {
-      nerr("ERROR: local send path length failed ret: %d\n", ret);
+      nerr("ERROR: local send path length failed ret: %zd\n", ret);
       return ret;
     }
 
+  pktlen = total;
   ret = local_fifo_write(filep, (FAR const uint8_t *)&pktlen,
                          sizeof(lc_size_t));
   if (ret != sizeof(lc_size_t))
@@ -174,22 +182,28 @@ int local_send_preamble(FAR struct local_conn_s *conn,
  *
  ****************************************************************************/
 
-int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
-                      size_t len)
+ssize_t local_send_packet(FAR struct file *filep,
+                          FAR const struct iovec *buf,
+                          size_t len)
 {
   FAR const struct iovec *end = buf + len;
   FAR const struct iovec *iov;
-  int ret = -EINVAL;
-  lc_size_t sendlen;
+  ssize_t ret = 0;
+  ssize_t sendlen = 0;
 
-  for (sendlen = 0, iov = buf; iov != end; iov++)
+  if (len == 0)
+    {
+      return 0;
+    }
+
+  for (iov = buf; iov != end; iov++)
     {
       ret = local_fifo_write(filep, iov->iov_base, iov->iov_len);
       if (ret < 0)
         {
           if (ret != -EAGAIN)
             {
-              nerr("ERROR: local send packet failed ret: %d\n", ret);
+              nerr("ERROR: local send packet failed ret: %zd\n", ret);
             }
 
           break;
