@@ -132,7 +132,6 @@ set(SDK_CSRCS
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuLbist.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuRcu.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuWdt.c"
-    "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Src/Std/IfxSrc.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Stm/Std/IfxStm.c"
     "${ILLD_DIR}/Libraries/Infra/Platform/Tricore/Compilers/CompilerTasking.c"
     "${ILLD_DIR}/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_Infra.c"
