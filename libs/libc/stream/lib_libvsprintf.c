@@ -509,9 +509,12 @@ static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
 
   if ((flags & (FL_FLTEXP | FL_FLTFIX)) == 0)
     {
-      /* 'g(G)' format */
+      /* 'g(G)' format: P is the precision, with 0 as 1 */
 
-      prec = ndigs;
+      if (prec == 0)
+        {
+          prec = 1;
+        }
 
       /* Remove trailing zeros */
 
@@ -664,12 +667,6 @@ static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
         }
       while (1);
 
-      if (n == exp && (dtoa->digits[0] > '5' ||
-          (dtoa->digits[0] == '5' && !(dtoa->flags & DTOA_CARRY))))
-        {
-          out = '1';
-        }
-
       stream_putc(out, stream);
 
       if ((flags & FL_ALT_FORM) != 0 && n == -1)
@@ -683,11 +680,6 @@ static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
        *
        * Mantissa
        */
-
-      if (dtoa->digits[0] != '1')
-        {
-          dtoa->flags &= ~DTOA_CARRY;
-        }
 
       stream_putc(dtoa->digits[0], stream);
       if (prec > 0)
@@ -716,7 +708,7 @@ static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
 
       stream_putc(flags & FL_FLTUPP ? 'E' : 'e', stream);
       ndigs = '+';
-      if (exp < 0 || (exp == 0 && (dtoa->flags & DTOA_CARRY) != 0))
+      if (exp < 0)
         {
           exp = -exp;
           ndigs = '-';
@@ -748,8 +740,7 @@ static size_t vsprintf_float(FAR struct lib_outstream_s *stream,
 {
   struct dtoa_s dtoa;
   unsigned int ndigs;   /* Number of digits to convert */
-  int ndecimal;         /* Digits after decimal (for 'f' format), 0 if
-                         * no limit */
+  int ndecimal;         /* Digits after the point for %f, -1 for no limit */
 
   if ((flags & FL_PREC) == 0)
     {
@@ -758,25 +749,20 @@ static size_t vsprintf_float(FAR struct lib_outstream_s *stream,
 
   flags &= ~(FL_FLTEXP | FL_FLTFIX);
 
-  ndigs = MIN(prec, DTOA_MAX_DIG);
-  ndecimal = 0;
+  ndigs = prec;
+  ndecimal = -1;
 
   if (c == 'e')
     {
-      if (ndigs < DTOA_MAX_DIG)
-        {
-          ndigs++;
-        }
-
+      ndigs = prec < INT_MAX ? prec + 1 : prec;
       flags |= FL_FLTEXP;
     }
   else if (c == 'f')
     {
-      ndecimal = ndigs;
-      ndigs = DTOA_MAX_DIG;
+      ndecimal = prec;
       flags |= FL_FLTFIX;
     }
-  else if (ndigs == 0)
+  else if (prec == 0)
     {
       ndigs = 1;
     }
