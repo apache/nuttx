@@ -191,14 +191,9 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
   off_t offset;
   ssize_t ret;
   clock_t ticktime;
-
-#if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
-  double now;
-#else
   uint64_t sec;
   unsigned int remainder;
   unsigned int csec;
-#endif
 
   finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
@@ -220,14 +215,6 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
 
       ticktime = clock_systime_ticks() - INITIAL_SYSTEM_TIMER_TICKS;
 
-#if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
-      /* Convert the up time to a seconds + hundredths of seconds string */
-
-      now       = (double)ticktime / (double)CLK_TCK;
-      linesize  = procfs_snprintf(attr->line, UPTIME_LINELEN,
-                                  "%10.2f\n", now);
-
-#else
       /* Convert the system up time to seconds + hundredths of seconds */
 
       sec       = ticktime / CLK_TCK;
@@ -249,7 +236,6 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
       linesize = procfs_snprintf(attr->line, UPTIME_LINELEN,
                                  "%7" PRIu64 ".%02u\n", sec, csec);
 
-#endif
       /* Save the linesize in case we are re-entered with f_pos > 0 */
 
       attr->linesize = linesize;
