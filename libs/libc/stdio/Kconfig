@@ -123,6 +123,13 @@ config LIBC_PRINTF_INT_PRECISION
 		argument and prints "?".  The precision of %s and of a floating
 		point conversion stays.
 
+config LIBC_PRINTF_SHORT
+	bool "Enable the h and hh length modifiers in printf"
+	default y
+	---help---
+		Enables the conversion of the value to short or char, as in %hd and
+		%hhx.  Without it, printf() reads the argument and prints "?".
+
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
 	default LIBC_PRINTF_FULL || (!DEFAULT_SMALL && ARCH_FPU && !LIBC_PRINTF_MINIMAL)
