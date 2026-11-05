@@ -53,24 +53,17 @@
  * Name: arm_color_intstack
  *
  * Description:
- *   Set the interrupt stack to a value so that later we can determine how
- *   much stack space was used by interrupt handling logic
+ *   Set the interrupt stack of the calling CPU to a value so that later we
+ *   can determine how much stack space was used by interrupt handling logic.
+ *   Another CPU can be in an interrupt handler at this time, so its stack
+ *   is not touched.  Each CPU calls this before it enables its interrupts.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
 void arm_color_intstack(void)
 {
-#ifdef CONFIG_SMP
-  int cpu;
-
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
-    {
-      arm_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
-    }
-#else
-  arm_stack_color((void *)g_intstackalloc, INTSTACK_SIZE);
-#endif
+  arm_stack_color((void *)up_get_intstackbase(this_cpu()), INTSTACK_SIZE);
 }
 #endif
 
