@@ -32,10 +32,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CPU_CCTRL        0xFC00  /* Counter Control */
-#define CPU_CCNT         0xFC04  /* CPU Clock Cycle Count */
-
-/* CPU_CCTRL Count Enable bit. */
+/* TRICORE_CPU_CCTRL Count Enable bit. */
 
 #define CCTRL_COUNT_ENABLE (1 << 1)
 
@@ -60,19 +57,19 @@ static invdiv_param64_t g_invdiv_param;
 
 static void tricore_reset_ccnt(void)
 {
-  uint32_t cctrl = tricore_mfcr(CPU_CCTRL);
+  uint32_t cctrl = tricore_mfcr(TRICORE_CPU_CCTRL);
 
   /* Disable and clear the CPU cycle counter */
 
   cctrl &= ~CCTRL_COUNT_ENABLE;
-  tricore_mtcr(CPU_CCTRL, cctrl);
-  tricore_mtcr(CPU_CCNT, 0);
+  tricore_mtcr(TRICORE_CPU_CCTRL, cctrl);
+  tricore_mtcr(TRICORE_CPU_CCNT, 0);
   UP_ISB();
 
   /* Re-enable the CPU cycle counter */
 
   cctrl |= CCTRL_COUNT_ENABLE;
-  tricore_mtcr(CPU_CCTRL, cctrl);
+  tricore_mtcr(TRICORE_CPU_CCTRL, cctrl);
   UP_ISB();
 }
 
@@ -96,7 +93,7 @@ unsigned long up_perf_getfreq(void)
 
 clock_t up_perf_gettime(void)
 {
-  return (clock_t)(tricore_mfcr(CPU_CCNT) & CCNT_VALUE_MASK);
+  return (clock_t)(tricore_mfcr(TRICORE_CPU_CCNT) & CCNT_VALUE_MASK);
 }
 
 void up_perf_convert(clock_t elapsed, struct timespec *ts)
