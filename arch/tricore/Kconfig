@@ -123,6 +123,14 @@ config CPU_COREID
 	default 0
 	range 0 6
 
+config TRICORE_TRAP_ALERT
+	bool "Describe traps in the alert output"
+	default !DEFAULT_SMALL
+	depends on DEBUG_ALERT
+	---help---
+		Print the trap name and reason before the trap panics.  The
+		panic message has the trap class and TIN in any case.
+
 config TRICORE_FCU_CSA_NUM
 	int "Context save areas for the FCU trap"
 	default 0
