@@ -112,10 +112,25 @@
 #define TRICORE_TRAP_MSG_LEN      24
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* Last trap and the trap status registers, for the coredump */
+
+struct tricore_trapinfo_s
+{
+  struct tricore_trap_s trap;
+  uint32_t pstr;   /* Program synchronous trap status */
+  uint32_t dstr;   /* Data synchronous trap status */
+  uint32_t datr;   /* Data asynchronous trap */
+  uint32_t deadd;  /* Data error address */
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct tricore_trap_s g_trapinfo;
+static struct tricore_trapinfo_s g_trapinfo;
 
 /* FCU pool, also read by tricore_fcu_entry in tricore_vectors.S/.asm */
 
@@ -209,7 +224,11 @@ static const char * const g_trap_reasons[8][8] =
 
 static void tricore_trapinfo(volatile void *trap)
 {
-  g_trapinfo = *(struct tricore_trap_s *)trap;
+  g_trapinfo.trap  = *(struct tricore_trap_s *)trap;
+  g_trapinfo.pstr  = tricore_mfcr(TRICORE_CPU_PSTR);
+  g_trapinfo.dstr  = tricore_mfcr(TRICORE_CPU_DSTR);
+  g_trapinfo.datr  = tricore_mfcr(TRICORE_CPU_DATR);
+  g_trapinfo.deadd = tricore_mfcr(TRICORE_CPU_DEADD);
 }
 
 /* The message tells a panic notifier which trap it was.  The buffer is on
