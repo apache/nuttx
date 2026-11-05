@@ -63,6 +63,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The union of the arguments holds a long double only if a path needs it */
+
+#if defined(HAVE_HEXFLOAT_LDOUBLE) || defined(HAVE_DTOA_LDOUBLE)
+#  define HAVE_ARG_LDOUBLE
+#endif
+
 #define stream_putc(c,stream)  (total_len++, lib_stream_putc(stream, c))
 #define stream_puts(buf, len, stream) \
         (total_len += len, lib_stream_puts(stream, buf, len))
@@ -242,7 +248,7 @@ union arg_u
   unsigned long long ull;
   double d;
   FAR char *cp;
-#ifdef HAVE_HEXFLOAT_LDOUBLE
+#ifdef HAVE_ARG_LDOUBLE
   long double ld;
 #endif
 };
@@ -575,6 +581,13 @@ static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
         {
           flen++;
         }
+
+#ifdef HAVE_DTOA_LDOUBLE
+      if (exp >= 1000 || exp <= -1000)
+        {
+          flen++;
+        }
+#endif
     }
 
   if (sign != 0)
@@ -780,6 +793,33 @@ vsprintf_float_big(FAR struct lib_outstream_s *stream, double value,
 
   n = __dtoa_big_start(&big, limbs, value, dtoa, max_digits, ndecimal);
   return vsprintf_putfloat(stream, dtoa, n, flags, width, prec);
+}
+#endif
+
+#ifdef HAVE_DTOA_LDOUBLE
+/* Only %L calls this function, so only these calls have this stack */
+
+static noinline_function size_t
+vsprintf_ldouble(FAR struct lib_outstream_s *stream, long double value,
+                 uint16_t flags, int width, int prec, int c)
+{
+  struct dtoa_s dtoa;
+  struct dtoa_big_s big;
+  uint16_t limbs[DTOA_BIG_LD_LIMBS];
+  int32_t n;
+
+  if ((flags & FL_PREC) == 0)
+    {
+      prec = 6;
+    }
+
+  flags &= ~(FL_FLTEXP | FL_FLTFIX);
+  flags |= c == 'e' ? FL_FLTEXP : c == 'f' ? FL_FLTFIX : 0;
+
+  n = __dtoa_big_start_ld(&big, limbs, value, &dtoa,
+                          c == 'e' && prec < INT_MAX ? prec + 1 :
+                          prec == 0 ? 1 : prec, c == 'f' ? prec : -1);
+  return vsprintf_putfloat(stream, &dtoa, n, flags, width, prec);
 }
 #endif
 
@@ -1559,10 +1599,37 @@ set_star:
           flags &= ~FL_FLTUPP;
 
 flt_oper:
+#ifdef HAVE_DTOA_LDOUBLE
+          if (FL_IS_LDOUBLE(flags))
+            {
+              long double ldvalue;
+
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+              if ((flags & FL_ARGNUMBER) != 0)
+                {
+                  ldvalue = arglist->value[argnumber - 1].ld;
+                }
+              else
+#  endif
+                {
+                  ldvalue = va_arg(ap, long double);
+                }
+
+              if (c == 'a')
+                {
+                  goto put_unavailable;
+                }
+
+              total_len += vsprintf_ldouble(stream, ldvalue, flags, width,
+                                            prec, c);
+              continue;
+            }
+#endif
+
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
             {
-#  ifdef HAVE_HEXFLOAT_LDOUBLE
+#  ifdef HAVE_ARG_LDOUBLE
               if (FL_IS_LDOUBLE(flags))
                 {
                   value = vsprintf_ldtod(arglist->value[argnumber - 1].ld);
@@ -2252,7 +2319,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
 #ifdef CONFIG_HAVE_LONG_DOUBLE
           case TYPE_LONG_DOUBLE:
-#  ifdef HAVE_HEXFLOAT_LDOUBLE
+#  ifdef HAVE_ARG_LDOUBLE
             arglist.value[i].ld = va_arg(ap, long double);
 #  elif defined(CONFIG_LIBC_FLOATINGPOINT) || \
         defined(CONFIG_LIBC_PRINTF_HEXFLOAT)
