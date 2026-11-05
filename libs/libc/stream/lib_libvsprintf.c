@@ -225,6 +225,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   FAR const char *pnt;
   size_t size;
   int ch;
+  int star;
   unsigned char len;
   int total_len = 0;
 
@@ -408,14 +409,8 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                             }
                           else
                             {
-                              if ((flags & FL_PREC) == 0)
-                                {
-                                  width = (int)arglist->value[index - 1].u;
-                                }
-                              else
-                                {
-                                  prec = (int)arglist->value[index - 1].u;
-                                }
+                              star = arglist->value[index - 1].u;
+                              goto set_star;
                             }
                         }
                       else
@@ -434,16 +429,22 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
               if (c >= '0' && c <= '9')
                 {
-                  c -= '0';
+                  star = width;
                   if ((flags & FL_PREC) != 0)
                     {
-                      prec = 10 * prec + c;
-                      continue;
+                      star = prec;
                     }
 
-                  width = 10 * width + c;
-                  flags |= FL_WIDTH;
-                  continue;
+                  if (star > (INT_MAX - 9) / 10)
+                    {
+                      star = INT_MAX;
+                    }
+                  else
+                    {
+                      star = 10 * star + (c - '0');
+                    }
+
+                  goto set_star;
                 }
 
               if (c == '*')
@@ -460,24 +461,23 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                     }
 #endif
 
+                  star = va_arg(ap, int);
+
+set_star:
                   if ((flags & FL_PREC) != 0)
                     {
-                      prec = va_arg(ap, int);
-                      if (prec < 0)
-                        {
-                          prec = 0;
-                        }
+                      prec = star < 0 ? 0 : star;
                     }
                   else
                     {
-                      width = va_arg(ap, int);
                       flags |= FL_WIDTH;
-
-                      if (width < 0)
+                      if (star < 0)
                         {
-                          width = -width;
+                          star = star == INT_MIN ? INT_MAX : -star;
                           flags |= FL_LPAD;
                         }
+
+                      width = star;
                     }
 
                   continue;
