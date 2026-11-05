@@ -1174,7 +1174,18 @@ static int rptun_do_start(FAR struct remoteproc *rproc)
 
       /* Remote proc start */
 
-      if (ret >= 0)
+      if (ret < 0)
+        {
+          /* remoteproc_config() left it READY, which only
+           * remoteproc_start() leaves; go back so that rptun_dev_stop()
+           * and a later start see an idle core.
+           */
+
+          metal_mutex_acquire(&rproc->lock);
+          rproc->state = RPROC_OFFLINE;
+          metal_mutex_release(&rproc->lock);
+        }
+      else
         {
           ret = remoteproc_start(rproc);
           if (ret >= 0)
