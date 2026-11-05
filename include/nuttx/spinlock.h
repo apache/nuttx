@@ -163,12 +163,12 @@ void spin_lock_notrace(FAR volatile spinlock_t *lock)
   int32_t ticket = atomic_add_relaxed(&lock->next, 1);
   while (atomic_read_acquire(&lock->owner) != ticket)
     {
-      UP_WFE();
+      SPINLOCK_WAIT();
     }
 #else /* CONFIG_TICKET_SPINLOCK */
   while (atomic_xchg_acquire((FAR atomic_t *)lock, SP_LOCKED) == SP_LOCKED)
     {
-      UP_WFE();
+      SPINLOCK_WAIT();
     }
 #endif
 }
@@ -352,7 +352,7 @@ spin_unlock_notrace(FAR volatile spinlock_t *lock)
 #else
   atomic_set_release((FAR atomic_t *)lock, SP_UNLOCKED);
 #endif
-  UP_SEV();
+  SPINLOCK_WAKE();
 }
 #else
 #  define spin_unlock_notrace(lock)
@@ -604,7 +604,7 @@ void rspin_lock(FAR rspinlock_t *lock)
               break;
             }
 
-          UP_WFE();
+          SPINLOCK_WAIT();
         }
 
       /* The local value shares the same memory location with the
@@ -937,7 +937,7 @@ bool rspin_unlock(FAR rspinlock_t *lock)
   if (RSPINLOCK_COUNT(val) == 1u)
     {
       atomic_set_release(&lock->val, 0u);
-      UP_SEV();
+      SPINLOCK_WAKE();
       ret = true;
     }
   else
@@ -1068,7 +1068,7 @@ SPINLOCK_INLINE void read_lock(FAR volatile rwlock_t *lock)
 
           if (old == RW_SP_WRITE_LOCKED)
             {
-              UP_WFE();
+              SPINLOCK_WAIT();
             }
         }
     }
@@ -1151,7 +1151,7 @@ static inline_function void read_unlock(FAR volatile rwlock_t *lock)
   DEBUGASSERT(atomic_read(lock) >= RW_SP_READ_LOCKED);
 
   atomic_sub_release(lock, 1);
-  UP_SEV();
+  SPINLOCK_WAKE();
 }
 
 /****************************************************************************
@@ -1194,7 +1194,7 @@ SPINLOCK_INLINE void write_lock(FAR volatile rwlock_t *lock)
           break;
         }
 
-      UP_WFE();
+      SPINLOCK_WAIT();
     }
 
   nxsched_critmon_busywait(false, return_address(0));
@@ -1260,7 +1260,7 @@ static inline_function void write_unlock(FAR volatile rwlock_t *lock)
   DEBUGASSERT(atomic_read(lock) == RW_SP_WRITE_LOCKED);
 
   atomic_set_release(lock, RW_SP_UNLOCKED);
-  UP_SEV();
+  SPINLOCK_WAKE();
 }
 
 /****************************************************************************
