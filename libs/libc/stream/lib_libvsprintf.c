@@ -112,6 +112,11 @@
 
 #define fmt_ungetc(fmt)   ((fmt)--)
 
+/* e, f, g and a in either case: 0x20 makes an ASCII letter lower case */
+
+#define fmt_isfloat(c)    ((((c) | 0x20) >= 'e' && ((c) | 0x20) <= 'g') || \
+                           ((c) | 0x20) == 'a')
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -596,8 +601,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
             {
               if (stream == NULL)
                 {
-                  if ((c >= 'E' && c <= 'G')
-                      || (c >= 'e' && c <= 'g'))
+                  if (fmt_isfloat(c))
                     {
                       arglist->type[argnumber - 1] = TYPE_DOUBLE;
                     }
@@ -645,13 +649,13 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #endif
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT
-      if (c >= 'E' && c <= 'G')
+      if ((c >= 'E' && c <= 'G') || c == 'A')
         {
           flags |= FL_FLTUPP;
           c += 'e' - 'E';
           goto flt_oper;
         }
-      else if (c >= 'e' && c <= 'g')
+      else if ((c >= 'e' && c <= 'g') || c == 'a')
         {
           double value;
           int exp;              /* Exponent of master decimal digit */
@@ -704,6 +708,15 @@ flt_oper:
 #endif
             {
               value = va_arg(ap, double);
+            }
+
+          /* %a has no output yet */
+
+          if (c == 'a')
+            {
+              pnt  = "?";
+              size = 1;
+              goto str_lpad;
             }
 
           ndigs = __dtoa_engine(value, &_dtoa, ndigs,
@@ -982,7 +995,7 @@ flt_oper:
         }
 
 #else /* !CONFIG_LIBC_FLOATINGPOINT */
-      if ((c >= 'E' && c <= 'G') || (c >= 'e' && c <= 'g'))
+      if (fmt_isfloat(c))
         {
 #  ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) == 0)
@@ -991,8 +1004,8 @@ flt_oper:
               va_arg(ap, double);
             }
 
-          pnt  = "*float*";
-          size = sizeof("*float*") - 1;
+          pnt  = "?";
+          size = 1;
           goto str_lpad;
         }
 #endif

@@ -59,6 +59,8 @@ config LIBC_FLOATINGPOINT
 	---help---
 		By default, floating point support in printf, sscanf, etc. is
 		disabled.  This option will enable floating point support.
+		Without it, printf() takes the argument of %e, %f and %g and
+		prints "?".
 
 config LIBC_NUMBERED_ARGS
 	bool "Enable numbered arguments in printf"
