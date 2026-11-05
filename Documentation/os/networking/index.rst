@@ -69,6 +69,8 @@ Network Support
   netdev.rst
   netdriver.rst
   mdio.rst
+  phylib.rst
+  phylib_vendor_porting.rst
   netguardsize.rst
   netlink.rst
   slip.rst
