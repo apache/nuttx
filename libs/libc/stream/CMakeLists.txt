@@ -57,6 +57,10 @@ if(CONFIG_LIBC_FLOATINGPOINT)
   list(APPEND SRCS lib_dtoa_engine.c lib_dtoa_data.c)
 endif()
 
+if(CONFIG_LIBC_PRINTF_HEXFLOAT)
+  list(APPEND SRCS lib_hexfloat.c)
+endif()
+
 if(CONFIG_FILE_STREAM)
   list(APPEND SRCS lib_stdinstream.c lib_stdoutstream.c lib_stdsistream.c
        lib_stdsostream.c)

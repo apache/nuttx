@@ -41,6 +41,10 @@ ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
 CSRCS += lib_dtoa_engine.c lib_dtoa_data.c
 endif
 
+ifeq ($(CONFIG_LIBC_PRINTF_HEXFLOAT),y)
+CSRCS += lib_hexfloat.c
+endif
+
 # The remaining sources files depend upon C streams
 
 ifeq ($(CONFIG_FILE_STREAM),y)

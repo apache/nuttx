@@ -130,6 +130,15 @@ config LIBC_PRINTF_SHORT
 		Enables the conversion of the value to short or char, as in %hd and
 		%hhx.  Without it, printf() reads the argument and prints "?".
 
+config LIBC_PRINTF_HEXFLOAT
+	bool "Enable %a and %A in printf"
+	default LIBC_PRINTF_FULL
+	---help---
+		Enables the output of %a and %A: the exact value in hexadecimal, such
+		as 0x1.8p+0 for 1.5.  It needs no floating point operation, so it
+		does not need LIBC_FLOATINGPOINT and it pulls in no soft-float code.
+		Without it, printf() reads the argument and prints "?".
+
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
 	default LIBC_PRINTF_FULL || (!DEFAULT_SMALL && ARCH_FPU && !LIBC_PRINTF_MINIMAL)
