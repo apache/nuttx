@@ -393,6 +393,45 @@ static int vsprintf_putnum(FAR struct lib_outstream_s *stream,
   return len;
 }
 
+#ifdef CONFIG_LIBC_PRINTF_PERCENT_N
+/* Store the count of %n at the size of its length modifier */
+
+static void vsprintf_store(FAR void *ptr, uint16_t flags, size_t count)
+{
+  if (ptr == NULL)
+    {
+      return;
+    }
+
+  if ((flags & FL_LONG) != 0)
+    {
+      if ((flags & FL_REPD_TYPE) != 0)
+        {
+          *(FAR long long *)ptr = count;
+        }
+      else
+        {
+          *(FAR long *)ptr = count;
+        }
+    }
+  else if ((flags & FL_SHORT) != 0)
+    {
+      if ((flags & FL_REPD_TYPE) != 0)
+        {
+          *(FAR signed char *)ptr = count;
+        }
+      else
+        {
+          *(FAR short *)ptr = count;
+        }
+    }
+  else
+    {
+      *(FAR int *)ptr = count;
+    }
+}
+#endif
+
 #ifdef CONFIG_LIBC_PRINTF_C23
 /* Parse the rest of wN or wfN, and set the flags of the length that has this
  * size.  Return false for any other N, with fmt after the w.
@@ -1567,10 +1606,16 @@ put_unavailable:
                 pnt = va_arg(ap, FAR char *);
               }
 
-            /* %n only takes its pointer: a format never writes to memory */
+            /* %n only takes its pointer: a format never writes to memory,
+             * unless the option says so.
+             */
 
             if (c == 'n')
               {
+#ifdef CONFIG_LIBC_PRINTF_PERCENT_N
+                vsprintf_store((FAR void *)pnt, flags, total_len);
+                continue;
+#endif
                 pnt  = "?";
                 size = 1;
                 goto str_lpad;

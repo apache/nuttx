@@ -148,6 +148,17 @@ config LIBC_PRINTF_C23
 		unknown conversions: printf() prints the rest of the format as text
 		and reads no more arguments.
 
+config LIBC_PRINTF_PERCENT_N
+	bool "Enable %n in printf (dangerous)"
+	default n
+	---help---
+		Dangerous.  With this option, %n stores the count of the bytes so far
+		through its pointer, so a format string can write to memory.  A format
+		that an attacker can change then gives a write to any address.  Keep it
+		off unless a program needs it.  No profile turns it on.
+
+		Without it, printf() reads the pointer, stores nothing and prints "?".
+
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
 	default LIBC_PRINTF_FULL || (!DEFAULT_SMALL && ARCH_FPU && !LIBC_PRINTF_MINIMAL)
