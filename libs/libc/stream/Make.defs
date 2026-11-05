@@ -41,6 +41,10 @@ ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
 CSRCS += lib_dtoa_bits.c
 endif
 
+ifeq ($(CONFIG_LIBC_PRINTF_EXACT),y)
+CSRCS += lib_dtoa_big.c
+endif
+
 ifeq ($(CONFIG_LIBC_PRINTF_HEXFLOAT),y)
 CSRCS += lib_hexfloat.c
 endif
