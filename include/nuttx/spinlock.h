@@ -54,6 +54,20 @@ extern "C"
 #  define SPINLOCK_INLINE static inline_function
 #endif
 
+/* Lock wait policy, see "Spinlock wait policy" in sched/Kconfig.
+ * SPINLOCK_WAKE() maps to UP_SEV(), which on Arm already carries the
+ * DSB required before SEV in the lock release sequence (ARM DDI 0406C,
+ * "Use of WFE and SEV with Locks").
+ */
+
+#ifdef CONFIG_SPINLOCK_WFESEV
+#  define SPINLOCK_WAIT()  UP_WFE()
+#  define SPINLOCK_WAKE()  UP_SEV()
+#else
+#  define SPINLOCK_WAIT()
+#  define SPINLOCK_WAKE()
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
