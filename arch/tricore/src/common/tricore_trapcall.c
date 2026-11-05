@@ -39,6 +39,13 @@
 
 #include "tricore_internal.h"
 
+/* The trap handler still uses the iLLD until it is native */
+
+#include <IfxCpu_reg.h>
+#include <Ifx_Ssw_Compilers.h>
+#include <Compilers/Compilers.h>
+#include <IfxCpu_Intrinsics.h>
+
 #include "IfxCpu_Trap.h"
 
 /****************************************************************************
