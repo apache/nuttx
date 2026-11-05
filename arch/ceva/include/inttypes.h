@@ -150,7 +150,7 @@
 #define SCNdLEAST64 "lld"
 
 #define SCNdFAST8   "hhd"
-#define SCNdFAST16  "hd"
+#define SCNdFAST16  "d"
 #define SCNdFAST32  "d"
 #define SCNdFAST64  "lld"
 
@@ -168,7 +168,7 @@
 #define SCNiLEAST64 "lli"
 
 #define SCNiFAST8   "hhi"
-#define SCNiFAST16  "hi"
+#define SCNiFAST16  "i"
 #define SCNiFAST32  "i"
 #define SCNiFAST64  "lli"
 
@@ -186,7 +186,7 @@
 #define SCNoLEAST64 "llo"
 
 #define SCNoFAST8   "hho"
-#define SCNoFAST16  "ho"
+#define SCNoFAST16  "o"
 #define SCNoFAST32  "o"
 #define SCNoFAST64  "llo"
 
@@ -204,7 +204,7 @@
 #define SCNuLEAST64 "llu"
 
 #define SCNuFAST8   "hhu"
-#define SCNuFAST16  "hu"
+#define SCNuFAST16  "u"
 #define SCNuFAST32  "u"
 #define SCNuFAST64  "llu"
 
@@ -222,7 +222,7 @@
 #define SCNxLEAST64 "llx"
 
 #define SCNxFAST8   "hhx"
-#define SCNxFAST16  "hx"
+#define SCNxFAST16  "x"
 #define SCNxFAST32  "x"
 #define SCNxFAST64  "llx"
 
