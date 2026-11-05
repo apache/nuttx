@@ -1034,6 +1034,7 @@ flt_oper:
             pnt = buf;
             goto str_lpad;
 
+          case 'n':
           case 's':
           case 'S':
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
@@ -1045,6 +1046,15 @@ flt_oper:
 #endif
               {
                 pnt = va_arg(ap, FAR char *);
+              }
+
+            /* %n only takes its pointer: a format never writes to memory */
+
+            if (c == 'n')
+              {
+                pnt  = "?";
+                size = 1;
+                goto str_lpad;
               }
 
             if (pnt == NULL)
