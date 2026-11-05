@@ -605,7 +605,8 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                     {
                       arglist->type[argnumber - 1] = TYPE_DOUBLE;
                     }
-                  else if (c == 'i' || c == 'd' || c == 'u' || c == 'p')
+                  else if (c == 'i' || c == 'd' || c == 'u' || c == 'p' ||
+                           c == 'o' || c == 'x' || c == 'X')
                     {
                       if ((flags & FL_LONG) == 0)
                         {
@@ -624,7 +625,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                     {
                       arglist->type[argnumber - 1] = TYPE_INT;
                     }
-                  else if (c == 's')
+                  else if (c == 's' || c == 'S' || c == 'n')
                     {
                       arglist->type[argnumber - 1] = TYPE_CHAR_POINTER;
                     }
@@ -1524,7 +1525,11 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
   /* We do 2 passes of parsing and fill the arglist between the passes. */
 
-  struct arg_s arglist;
+  struct arg_s arglist =
+    {
+      { 0 }
+    };
+
   int numargs = vsprintf_internal(NULL, &arglist, NL_ARGMAX, fmt, ap);
   union arg_u argvalue[MAX(numargs, 1)];
   int i;
@@ -1555,6 +1560,15 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
           case TYPE_CHAR_POINTER:
             arglist.value[i].cp = va_arg(ap, FAR char *);
+            break;
+
+          default:
+
+            /* A number was not used, so its size is not known and the next
+             * arguments cannot be found.  Use only the arguments before it.
+             */
+
+            numargs = i;
             break;
         }
     }
