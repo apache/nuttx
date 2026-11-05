@@ -62,33 +62,47 @@
  *   On success, zero (OK) is returned.  A negated errno value is returned
  *   on any failure:
  *
- *   EBADF    Message queue opened not opened for reading.
+ *   EBADF    Not a message queue, or opened not opened for reading.
  *   EMSGSIZE 'msglen' was less than the maxmsgsize attribute of the message
  *            queue.
  *   EINVAL   Invalid 'msg' or 'msgq'
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_FEATURES
 static int nxmq_verify_receive(FAR struct file *mq,
                                FAR char *msg, size_t msglen)
 {
   FAR struct inode *inode = mq->f_inode;
   FAR struct mqueue_inode_s *msgq;
 
+#ifdef CONFIG_DEBUG_FEATURES
   if (inode == NULL)
+    {
+      return -EBADF;
+    }
+#endif
+
+  /* The descriptor must refer to a message queue, otherwise i_private
+   * belongs to some other driver.
+   */
+
+  if (!INODE_IS_MQUEUE(inode))
     {
       return -EBADF;
     }
 
   msgq = inode->i_private;
 
-  /* Verify the input parameters */
+#ifdef CONFIG_DEBUG_FEATURES
+  /* Verify the pointers (sanity check only) */
 
   if (!msg || !msgq)
     {
       return -EINVAL;
     }
+#endif
+
+  /* The checks below are required by POSIX and are always enforced */
 
   if ((mq->f_oflags & O_ACCMODE) == O_WRONLY)
     {
@@ -102,7 +116,6 @@ static int nxmq_verify_receive(FAR struct file *mq,
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: file_mq_timedreceive_internal
@@ -157,7 +170,6 @@ ssize_t file_mq_timedreceive_internal(FAR struct file *mq, FAR char *msg,
       return -EINVAL;
     }
 
-#ifdef CONFIG_DEBUG_FEATURES
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.
    */
@@ -167,7 +179,6 @@ ssize_t file_mq_timedreceive_internal(FAR struct file *mq, FAR char *msg,
     {
       return ret;
     }
-#endif
 
   msgq = mq->f_inode->i_private;
 
@@ -568,7 +579,7 @@ ssize_t nxmq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
  *
  *   EAGAIN   The queue was empty, and the O_NONBLOCK flag was set
  *            for the message queue description referred to by 'mqdes'.
- *   EBADF    Message queue opened not opened for reading.
+ *   EBADF    Not a message queue, or opened not opened for reading.
  *   EMSGSIZE 'msglen' was less than the maxmsgsize attribute of the
  *            message queue.
  *   EINTR    The call was interrupted by a signal handler.

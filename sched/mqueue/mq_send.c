@@ -64,29 +64,48 @@
  *   returned.
  *
  *     EINVAL   Either msg or msgq is NULL or the value of prio is invalid.
- *     EBADF    Message queue opened not opened for writing.
+ *     EBADF    Not a message queue, or opened not opened for writing.
  *     EMSGSIZE 'msglen' was greater than the maxmsgsize attribute of the
  *               message queue.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_FEATURES
 static int nxmq_verify_send(FAR FAR struct file *mq, FAR const char *msg,
                             size_t msglen, unsigned int prio)
 {
   FAR struct inode *inode = mq->f_inode;
   FAR struct mqueue_inode_s *msgq;
 
+#ifdef CONFIG_DEBUG_FEATURES
   if (inode == NULL)
+    {
+      return -EBADF;
+    }
+#endif
+
+  /* The descriptor must refer to a message queue, otherwise i_private
+   * belongs to some other driver.
+   */
+
+  if (!INODE_IS_MQUEUE(inode))
     {
       return -EBADF;
     }
 
   msgq = inode->i_private;
 
-  /* Verify the input parameters */
+#ifdef CONFIG_DEBUG_FEATURES
+  /* Verify the pointers (sanity check only) */
 
-  if (msg == NULL || msgq == NULL || prio >= MQ_PRIO_MAX)
+  if (msg == NULL || msgq == NULL)
+    {
+      return -EINVAL;
+    }
+#endif
+
+  /* The checks below are required by POSIX and are always enforced */
+
+  if (prio >= MQ_PRIO_MAX)
     {
       return -EINVAL;
     }
@@ -103,7 +122,6 @@ static int nxmq_verify_send(FAR FAR struct file *mq, FAR const char *msg,
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: nxmq_alloc_msg
@@ -294,7 +312,6 @@ int file_mq_timedsend_internal(FAR struct file *mq, FAR const char *msg,
       return -EINVAL;
     }
 
-#ifdef CONFIG_DEBUG_FEATURES
   /* Verify the input parameters on any failures to verify. */
 
   ret = nxmq_verify_send(mq, msg, msglen, prio);
@@ -302,7 +319,6 @@ int file_mq_timedsend_internal(FAR struct file *mq, FAR const char *msg,
     {
       return ret;
     }
-#endif
 
   msgq = mq->f_inode->i_private;
 
