@@ -984,9 +984,13 @@ flt_oper:
 #else /* !CONFIG_LIBC_FLOATINGPOINT */
       if ((c >= 'E' && c <= 'G') || (c >= 'e' && c <= 'g'))
         {
-#  ifndef CONFIG_LIBC_NUMBERED_ARGS
-          va_arg(ap, double);
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+          if ((flags & FL_ARGNUMBER) == 0)
 #  endif
+            {
+              va_arg(ap, double);
+            }
+
           pnt  = "*float*";
           size = sizeof("*float*") - 1;
           goto str_lpad;
