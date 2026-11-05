@@ -193,6 +193,20 @@
 #  define CLOCK_MAX                             LLONG_MAX
 #endif
 
+/* The number of bits in a long and in an int (XSI) */
+
+#if LONG_MAX > 2147483647L
+#  define LONG_BIT                              64
+#else
+#  define LONG_BIT                              32
+#endif
+
+#if INT_MAX > 32767
+#  define WORD_BIT                              32
+#else
+#  define WORD_BIT                              16
+#endif
+
 /* Other invariant values */
 
 /* CHARCLASS_NAME_MAX
