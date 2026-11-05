@@ -248,7 +248,8 @@ belonging to a unified interface:
   ``struct pollfd_s`` (``include/nuttx/poll.h``) is the kernel copy of one
   ``struct pollfd`` entry. It has 32-bit ``events`` and ``revents`` and the
   fields ``arg``, ``cb`` and ``priv`` that the kernel and the driver use.
-  The driver reports events with ``poll_notify()``.
+  ``filep`` is for ``poll()`` itself. The driver reports events with
+  ``poll_notify()``.
 
   :param FAR struct file * filep: Open file's pointer.
   :param FAR struct pollfd_s * fds: The structure describing the events to be

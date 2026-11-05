@@ -86,25 +86,16 @@ static inline void poll_teardown(FAR struct pollfd_s *fds, nfds_t nfds,
   *count = 0;
   for (i = 0; i < nfds; i++)
     {
-      if (fds[i].fd >= 0)
+      /* Use the file of the setup and not the descriptor: another thread
+       * may have closed the descriptor during the poll.
+       */
+
+      if (fds[i].filep != NULL)
         {
-          FAR struct file *filep;
-          int ret;
+          int ret = file_poll(fds[i].filep, &fds[i], false);
 
-          ret = file_get(fds[i].fd, &filep);
-          if (ret >= 0)
-            {
-              ret = file_poll(filep, &fds[i], false);
-
-              /* Calling putfilep twice to ensure reference counting
-               * for filep remains consistent with its state for
-               * before the poll.
-               */
-
-              file_put(filep);
-              file_put(filep);
-            }
-
+          file_put(fds[i].filep);
+          fds[i].filep = NULL;
           if (ret < 0)
             {
               fds[i].revents |= POLLERR;
@@ -150,6 +141,7 @@ static inline int poll_setup(FAR struct pollfd_s *fds, nfds_t nfds,
       fds[i].cb      = poll_default_cb;
       fds[i].revents = 0;
       fds[i].priv    = NULL;
+      fds[i].filep   = NULL;
 
       /* Check for invalid descriptors. "If the value of fd is less than 0,
        * events shall be ignored, and revents shall be set to 0 in that entry
@@ -167,10 +159,16 @@ static inline int poll_setup(FAR struct pollfd_s *fds, nfds_t nfds,
           ret = file_get(fds[i].fd, &filep);
           if (ret >= 0)
             {
+              /* The reference stays until poll_teardown() */
+
               ret = file_poll(filep, &fds[i], true);
               if (ret < 0)
                 {
                   file_put(filep);
+                }
+              else
+                {
+                  fds[i].filep = filep;
                 }
             }
 
