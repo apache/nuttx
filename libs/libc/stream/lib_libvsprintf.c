@@ -97,6 +97,14 @@
 #define FL_FLTEXP          0x4000
 #define FL_FLTFIX          0x8000
 
+/* A value longer than long has output only with this option */
+
+#if defined(CONFIG_LIBC_PRINTF_LONG_LONG) || ULLONG_MAX == ULONG_MAX
+#  define HAVE_LONG_LONG_OUTPUT 1
+#else
+#  define HAVE_LONG_LONG_OUTPUT 0
+#endif
+
 /* L, as ll, means a long double in a floating point conversion */
 
 #ifdef CONFIG_HAVE_LONG_DOUBLE
@@ -843,6 +851,7 @@ flt_oper:
 
           if (c == 'a')
             {
+put_unavailable:
               pnt  = "?";
               size = 1;
               goto str_lpad;
@@ -1153,6 +1162,7 @@ flt_oper:
                 }
             }
 
+put_unavailable:
           pnt  = "?";
           size = 1;
           goto str_lpad;
@@ -1313,7 +1323,7 @@ str_lpad:
 
       if (c == 'd' || c == 'i')
         {
-          long long x;
+          ultoa_int_t x;
 
           if ((flags & FL_LONG) != 0 && (flags & FL_REPD_TYPE) != 0)
             {
@@ -1326,6 +1336,11 @@ str_lpad:
 #endif
                 {
                   x = va_arg(ap, long long);
+                }
+
+              if (!HAVE_LONG_LONG_OUTPUT)
+                {
+                  goto put_unavailable;
                 }
             }
           else
@@ -1371,7 +1386,7 @@ str_lpad:
           flags &= ~(FL_NEGATIVE | FL_ALT);
           if (x < 0)
             {
-              x = -(unsigned long long)x;
+              x = -(ultoa_uint_t)x;
               flags |= FL_NEGATIVE;
             }
 
@@ -1403,7 +1418,7 @@ str_lpad:
       else
         {
           int base;
-          unsigned long long x;
+          ultoa_uint_t x;
 
           if ((flags & FL_LONG) != 0 && (flags & FL_REPD_TYPE) != 0)
             {
@@ -1416,6 +1431,11 @@ str_lpad:
 #endif
                 {
                   x = va_arg(ap, unsigned long long);
+                }
+
+              if (!HAVE_LONG_LONG_OUTPUT)
+                {
+                  goto put_unavailable;
                 }
             }
           else
