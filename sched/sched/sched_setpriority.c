@@ -36,6 +36,7 @@
 
 #include "irq/irq.h"
 #include "sched/sched.h"
+#include "semaphore/semaphore.h"
 
 /****************************************************************************
  * Private Functions
@@ -227,6 +228,18 @@ static inline void nxsched_blocked_setpriority(FAR struct tcb_s *tcb,
   tasklist = TLIST_BLOCKED(tcb);
   if (TLIST_ISPRIORITIZED(task_state))
     {
+      FAR struct addrenv_s *oldenv = NULL;
+      bool selected = false;
+
+      /* The wait list of a semaphore can be in the address environment of
+       * the waiter only.
+       */
+
+      if (task_state == TSTATE_WAIT_SEM)
+        {
+          selected = nxsem_waiter_select(tcb, &oldenv);
+        }
+
       /* Remove the TCB from the prioritized task list */
 
       dq_rem((FAR dq_entry_t *)tcb, tasklist);
@@ -238,6 +251,11 @@ static inline void nxsched_blocked_setpriority(FAR struct tcb_s *tcb,
       /* Put it back into the prioritized list at the correct position. */
 
       nxsched_add_prioritized(tcb, tasklist);
+
+      if (selected)
+        {
+          nxsem_waiter_restore(this_task(), oldenv);
+        }
     }
 
   /* CASE 3b. The task resides in a non-prioritized list. */

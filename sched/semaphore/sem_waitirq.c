@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
@@ -39,6 +40,66 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+/****************************************************************************
+ * Name: nxsem_waiter_select
+ *
+ * Description:
+ *   Select the address environment of the waiter if its semaphore is in
+ *   user memory and the caller runs in another one.  Call
+ *   nxsem_waiter_restore() before the waiter becomes ready to run.
+ *
+ * Input Parameters:
+ *   wtcb   - The TCB of the thread that waits on the semaphore
+ *   oldenv - The location to save the current address environment
+ *
+ * Returned Value:
+ *   true if the address environment changed.
+ *
+ * Assumptions:
+ *   Called in a critical section.  Can be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+bool nxsem_waiter_select(FAR struct tcb_s *wtcb,
+                         FAR struct addrenv_s **oldenv)
+{
+  if (wtcb->addrenv_own == NULL ||
+      wtcb->addrenv_own == this_task()->addrenv_curr ||
+      !up_addrenv_user_vaddr((uintptr_t)wtcb->waitobj))
+    {
+      return false;
+    }
+
+  addrenv_select(wtcb->addrenv_own, oldenv);
+  return true;
+}
+
+/****************************************************************************
+ * Name: nxsem_waiter_restore
+ *
+ * Description:
+ *   Undo nxsem_waiter_select().  Not addrenv_restore(): priority
+ *   inheritance in an interrupt handler can change this_task().
+ *
+ * Input Parameters:
+ *   rtcb   - this_task() at the time of nxsem_waiter_select()
+ *   oldenv - The address environment that nxsem_waiter_select() saved
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsem_waiter_restore(FAR struct tcb_s *rtcb,
+                          FAR struct addrenv_s *oldenv)
+{
+  addrenv_give(rtcb->addrenv_curr);
+  rtcb->addrenv_curr = oldenv;
+  addrenv_switch(this_task());
+}
+#endif
 
 /****************************************************************************
  * Name: nxsem_wait_irq
@@ -72,19 +133,30 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR sem_t *sem = wtcb->waitobj;
-  bool mutex = NXSEM_IS_MUTEX(sem);
+  FAR struct addrenv_s *oldenv = NULL;
+  bool selected;
+  bool wakeup;
+  bool mutex;
 
   /* It is possible that an interrupt/context switch beat us to the punch
    * and already changed the task's state.
    */
 
   DEBUGASSERT(sem != NULL);
+
+  /* The semaphore can be in the address environment of the waiter only */
+
+  selected = nxsem_waiter_select(wtcb, &oldenv);
+
+  mutex = NXSEM_IS_MUTEX(sem);
+
   DEBUGASSERT(mutex || atomic_read(NXSEM_COUNT(sem)) < 0);
   DEBUGASSERT(!mutex || NXSEM_MBLOCKING(atomic_read(NXSEM_MHOLDER(sem))));
 
   /* Mutex is never interrupted by a signal or canceled */
 
-  if (!(mutex && (errcode == EINTR || errcode == ECANCELED)))
+  wakeup = !(mutex && (errcode == EINTR || errcode == ECANCELED));
+  if (wakeup)
     {
       /* Restore the correct priority of all threads that hold references
        * to this semaphore.
@@ -112,7 +184,15 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
         {
           atomic_add(NXSEM_COUNT(sem), 1);
         }
+    }
 
+  if (selected)
+    {
+      nxsem_waiter_restore(rtcb, oldenv);
+    }
+
+  if (wakeup)
+    {
       /* Indicate that the wait is over. */
 
       wtcb->waitobj = NULL;
