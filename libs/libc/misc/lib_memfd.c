@@ -37,13 +37,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The name is only for debug: LIBC_MEM_FD_NAME_MAX cuts it so that it
+ * fits in NAME_MAX with the 6 characters of mktemp().  shm_open() counts
+ * the directory and its '/' as part of the name.  The precision of "%.*s"
+ * is an int.
+ */
+
 #ifdef CONFIG_LIBC_MEMFD_TMPFS
 #  define LIBC_MEM_FD_VFS_PATH CONFIG_LIBC_TMPDIR "/" CONFIG_LIBC_MEM_FD_VFS_PATH
+#  define LIBC_MEM_FD_NAME_MAX (CONFIG_NAME_MAX - 6)
 #else
 #  define LIBC_MEM_FD_VFS_PATH CONFIG_LIBC_MEM_FD_VFS_PATH
+#  define LIBC_MEM_FD_NAME_MAX \
+     (CONFIG_NAME_MAX - (int)sizeof(LIBC_MEM_FD_VFS_PATH) - 6)
 #endif
 
-#define LIBC_MEM_FD_VFS_PATH_FMT LIBC_MEM_FD_VFS_PATH "/%sXXXXXX"
+#define LIBC_MEM_FD_VFS_PATH_FMT LIBC_MEM_FD_VFS_PATH "/%.*sXXXXXX"
 
 /****************************************************************************
  * Public Functions
@@ -58,6 +67,12 @@ int memfd_create(FAR const char *name, unsigned int flags)
   FAR char *path;
   int ret;
 
+  /* MFD_CLOEXEC is O_CLOEXEC.  The other MFD_* flags are not open()
+   * flags (MFD_ALLOW_SEALING has the value of O_DIRECTORY).
+   */
+
+  flags &= MFD_CLOEXEC;
+
   path = lib_get_pathbuffer();
   if (path == NULL)
     {
@@ -66,18 +81,19 @@ int memfd_create(FAR const char *name, unsigned int flags)
     }
 
 retry:
-  snprintf(path, PATH_MAX, LIBC_MEM_FD_VFS_PATH_FMT, name);
+  snprintf(path, PATH_MAX, LIBC_MEM_FD_VFS_PATH_FMT,
+           LIBC_MEM_FD_NAME_MAX, name);
   mktemp(path);
 
 #  ifdef CONFIG_LIBC_MEMFD_SHMFS
-  ret = shm_open(path, O_RDWR | O_EXCL | flags, 0660);
+  ret = shm_open(path, O_RDWR | O_CREAT | O_EXCL | flags, 0660);
   if (ret >= 0)
     {
       shm_unlink(path);
     }
 #  else
   mkdir(LIBC_MEM_FD_VFS_PATH, 0666);
-  ret = open(path, O_RDWR | O_EXCL | flags, 0660);
+  ret = open(path, O_RDWR | O_CREAT | O_EXCL | flags, 0660);
   if (ret >= 0)
     {
       unlink(path);
