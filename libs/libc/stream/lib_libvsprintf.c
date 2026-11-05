@@ -531,6 +531,28 @@ static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
           prec = 1;
         }
 
+      if ((flags & FL_ALT_FORM) != 0)
+        {
+          /* Keep the trailing zeros: P digits in all */
+
+          if (-4 <= exp && exp < prec)
+            {
+              flags |= FL_FLTFIX;
+              if (exp < 0 && prec > INT_MAX + exp + 1)
+                {
+                  return INT_MAX + 1u;
+                }
+
+              prec -= exp + 1;
+            }
+          else
+            {
+              prec--;
+            }
+
+          goto flt_put;
+        }
+
       /* Remove trailing zeros */
 
 #ifdef CONFIG_LIBC_PRINTF_EXACT
@@ -567,6 +589,8 @@ static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
           prec = ndigs - 1;
         }
     }
+
+flt_put:
 
   /* Conversion result length, width := free space length */
 
