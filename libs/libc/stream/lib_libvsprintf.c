@@ -124,6 +124,18 @@
 #define FL_ALT_IS_HEX(f)   (FL_ALT_FORM == 0 || !HAVE_OCTAL_OUTPUT || \
                             ((f) & FL_ALTHEX) != 0)
 
+/* An integer conversion with a feature that is off prints a question mark.
+ * A flag that is 0 lets the compiler remove the code of its feature.
+ */
+
+#ifdef CONFIG_LIBC_PRINTF_INT_PRECISION
+#  define FL_INT_PREC          FL_PREC
+#  define FL_INT_PREC_UNAVAIL  0
+#else
+#  define FL_INT_PREC          0
+#  define FL_INT_PREC_UNAVAIL  FL_PREC
+#endif
+
 /* A value longer than long has output only with this option */
 
 #if defined(CONFIG_LIBC_PRINTF_LONG_LONG) || ULLONG_MAX == ULONG_MAX
@@ -1417,7 +1429,7 @@ str_lpad:
               flags |= FL_NEGATIVE;
             }
 
-          if ((flags & FL_PREC) != 0 && prec == 0 && x == 0)
+          if ((flags & FL_INT_PREC) != 0 && prec == 0 && x == 0)
             {
               c = 0;
             }
@@ -1611,7 +1623,7 @@ str_lpad:
                 break;
             }
 
-          if ((flags & FL_PREC) != 0 && prec == 0 && x == 0)
+          if ((flags & FL_INT_PREC) != 0 && prec == 0 && x == 0)
             {
               c = 0;
             }
@@ -1623,9 +1635,14 @@ str_lpad:
           flags &= ~FL_NEGATIVE;
         }
 
+      if ((flags & FL_INT_PREC_UNAVAIL) != 0)
+        {
+          goto put_unavailable;
+        }
+
       len = c;
 
-      if ((flags & FL_PREC) != 0)
+      if ((flags & FL_INT_PREC) != 0)
         {
           flags &= ~FL_ZFILL;
           if (len < prec)

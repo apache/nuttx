@@ -115,6 +115,14 @@ config LIBC_PRINTF_LEFT_JUSTIFY
 		Enables left-justified output, as in %-5d.  Without it, printf()
 		ignores the flag and pads on the left.
 
+config LIBC_PRINTF_INT_PRECISION
+	bool "Enable the precision of an integer in printf"
+	default !LIBC_PRINTF_MINIMAL
+	---help---
+		Enables a precision such as %.3d.  Without it, printf() reads the
+		argument and prints "?".  The precision of %s and of a floating
+		point conversion stays.
+
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
 	default LIBC_PRINTF_FULL || (!DEFAULT_SMALL && ARCH_FPU && !LIBC_PRINTF_MINIMAL)
