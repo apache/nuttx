@@ -242,6 +242,7 @@ static int imxrt_nmi(int irq, void *context, void *arg)
   return 0;
 }
 
+#ifndef CONFIG_ARCH_HIPRI_INTERRUPT
 static int imxrt_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
@@ -249,6 +250,7 @@ static int imxrt_pendsv(int irq, void *context, void *arg)
   PANIC();
   return 0;
 }
+#endif
 
 static int imxrt_reserved(int irq, void *context, void *arg)
 {
@@ -507,7 +509,13 @@ void up_irqinitialize(void)
 #endif
   irq_attach(IMXRT_IRQ_BUSFAULT, arm_busfault, NULL);
   irq_attach(IMXRT_IRQ_USAGEFAULT, arm_usagefault, NULL);
+  /* With high priority interrupts PendSV is not an error: the OS pends it
+   * (signal delivery) and a high priority interrupt may use it.
+   */
+
+#ifndef CONFIG_ARCH_HIPRI_INTERRUPT
   irq_attach(IMXRT_IRQ_PENDSV, imxrt_pendsv, NULL);
+#endif
   arm_enable_dbgmonitor();
   irq_attach(IMXRT_IRQ_DBGMONITOR, arm_dbgmonitor, NULL);
   irq_attach(IMXRT_IRQ_RESERVED, imxrt_reserved, NULL);
