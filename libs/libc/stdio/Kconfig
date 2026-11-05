@@ -52,9 +52,38 @@ config NUNGET_CHARS
 		Number of characters that can be buffered by ungetc() (Only if
 		FILE_STREAM equals y)
 
+choice
+	prompt "printf profile"
+	default LIBC_PRINTF_DEFAULT
+	---help---
+		A profile only sets the defaults of the printf feature options.
+		Each option keeps its own prompt, so any feature can be added to
+		or removed from any profile.
+
+		printf() is safe with a correct call in every profile.  A feature
+		that is off still reads its argument at the right size, so the
+		arguments after it stay correct.
+
+config LIBC_PRINTF_MINIMAL
+	bool "Minimal"
+	---help---
+		The smallest printf.  It has less than the Default profile.
+
+config LIBC_PRINTF_DEFAULT
+	bool "Default"
+	---help---
+		The features that printf has always had by default.
+
+config LIBC_PRINTF_FULL
+	bool "Full"
+	---help---
+		All features.
+
+endchoice # printf profile
+
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
-	default !DEFAULT_SMALL && ARCH_FPU
+	default LIBC_PRINTF_FULL || (!DEFAULT_SMALL && ARCH_FPU && !LIBC_PRINTF_MINIMAL)
 	depends on !LIBM_NONE
 	---help---
 		By default, floating point support in printf, sscanf, etc. is
@@ -64,7 +93,7 @@ config LIBC_FLOATINGPOINT
 
 config LIBC_NUMBERED_ARGS
 	bool "Enable numbered arguments in printf"
-	default n
+	default LIBC_PRINTF_FULL
 	---help---
 		Enables support for numbered arguments in printf.
 
