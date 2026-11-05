@@ -102,8 +102,12 @@ config RPMSG_PORT_SPI_THREAD_STACKSIZE
 	default 4096
 
 config RPMSG_PORT_SPI_CRC
-	bool "Rpmsg SPI Port Use CRC Check"
+	bool "Rpmsg SPI Port Use Checksum"
 	default n
+	---help---
+		Check every frame with a 16-bit XOR checksum (xorsum16()). It
+		catches corrupted framing at little cost, but it is not a CRC: it
+		misses errors that flip the same bit in two 16-bit words.
 
 config RPMSG_PORT_SPI_RX_THRESHOLD
 	int "Rpmsg SPI Port Rx Buffer Threshold"
@@ -144,8 +148,12 @@ config RPMSG_PORT_UART_TX_THREAD_STACKSIZE
 	default DEFAULT_TASK_STACKSIZE
 
 config RPMSG_PORT_UART_CRC
-	bool "Rpmsg UART Port CRC Enable"
+	bool "Rpmsg UART Port Checksum Enable"
 	default n
+	---help---
+		Check every frame with a 16-bit XOR checksum (xorsum16()). It
+		catches corrupted framing at little cost, but it is not a CRC: it
+		misses errors that flip the same bit in two 16-bit words.
 
 config RPMSG_PORT_UART_COMPRESSION
 	bool "Rpmsg UART Port LZF Compression"
