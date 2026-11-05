@@ -167,7 +167,9 @@ NXInit sets the following built-in properties on its own:
   2. A single soft-reset reason string, for software-triggered resets
      (``BOARDIOC_RESETCAUSE_CPU_SOFT``): ``reboot``, ``assert``,
      ``kernel_panic``, ``bootloader``, ``recovery``, ``factory_reset``,
-     ``factory_reset_inquiry``, ``thermal``.
+     ``factory_reset_inquiry``, ``thermal``, ``shutdown``, ``unknown``.
+     ``shutdown`` stands for a power-off soft reset, and ``unknown`` for
+     a subreason NXInit does not recognize.
 
   Since the property is matched with ``fnmatch`` and alternatives can be
   separated with ``|``, a trigger can match on the cause, the subreason, or
