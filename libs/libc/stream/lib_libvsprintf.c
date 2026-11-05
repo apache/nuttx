@@ -97,11 +97,21 @@
 #define FL_FLTEXP          0x4000
 #define FL_FLTFIX          0x8000
 
+/* L, as ll, means a long double in a floating point conversion */
+
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+#  define FL_IS_LDOUBLE(f) (((f) & (FL_LONG | FL_REPD_TYPE)) == \
+                            (FL_LONG | FL_REPD_TYPE))
+#else
+#  define FL_IS_LDOUBLE(f) 0
+#endif
+
 #define TYPE_INT           1
 #define TYPE_LONG          2
 #define TYPE_LONG_LONG     3
 #define TYPE_DOUBLE        4
 #define TYPE_CHAR_POINTER  5
+#define TYPE_LONG_DOUBLE   6
 
 /* Support special access to CODE-space strings for Harvard architectures */
 
@@ -538,7 +548,14 @@ set_star:
               continue;
             }
 
-          if (c == 'l' || c == 'L')
+          if (c == 'L')
+            {
+              flags |= FL_LONG | FL_REPD_TYPE;
+              flags &= ~FL_SHORT;
+              continue;
+            }
+
+          if (c == 'l')
             {
               if ((flags & FL_LONG) != 0)
                 {
@@ -607,7 +624,7 @@ set_star:
 
           if (fmt_isfloat(c))
             {
-              type = TYPE_DOUBLE;
+              type = FL_IS_LDOUBLE(flags) ? TYPE_LONG_DOUBLE : TYPE_DOUBLE;
             }
           else if (c == 'i' || c == 'd' || c == 'u' || c == 'p' ||
                    c == 'o' || c == 'x' || c == 'X')
@@ -706,6 +723,15 @@ flt_oper:
           if ((flags & FL_ARGNUMBER) != 0)
             {
               value = arglist->value[argnumber - 1].d;
+            }
+          else
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+          if (FL_IS_LDOUBLE(flags))
+            {
+              /* The output has the precision of a double */
+
+              value = va_arg(ap, long double);
             }
           else
 #endif
@@ -1015,7 +1041,16 @@ flt_oper:
           if ((flags & FL_ARGNUMBER) == 0)
 #  endif
             {
-              va_arg(ap, double);
+#  ifdef CONFIG_HAVE_LONG_DOUBLE
+              if (FL_IS_LDOUBLE(flags))
+                {
+                  va_arg(ap, long double);
+                }
+              else
+#  endif
+                {
+                  va_arg(ap, double);
+                }
             }
 
           pnt  = "?";
@@ -1595,6 +1630,16 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_HAVE_DOUBLE
           case TYPE_DOUBLE:
             arglist.value[i].d = va_arg(ap, double);
+            break;
+#endif
+
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+          case TYPE_LONG_DOUBLE:
+#  ifdef CONFIG_LIBC_FLOATINGPOINT
+            arglist.value[i].d = va_arg(ap, long double);
+#  else
+            va_arg(ap, long double);
+#  endif
             break;
 #endif
 
