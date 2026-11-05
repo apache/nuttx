@@ -102,6 +102,12 @@ config LIBC_PRINTF_ALT_FORM
 		for %#.0f.  Without it, printf() ignores the flag, so %#x of 255
 		prints "ff".  %p keeps its 0x.
 
+config LIBC_PRINTF_OCTAL
+	bool "Enable %o in printf"
+	default y
+	---help---
+		Without it, printf() reads the argument of %o and prints "?".
+
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
 	default LIBC_PRINTF_FULL || (!DEFAULT_SMALL && ARCH_FPU && !LIBC_PRINTF_MINIMAL)
