@@ -60,6 +60,30 @@ void nxsem_initialize(void);
 
 void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 
+/* Access the semaphore of a waiter that can be in another address
+ * environment.
+ */
+
+struct addrenv_s;
+
+#ifdef CONFIG_BUILD_KERNEL
+bool nxsem_waiter_select(FAR struct tcb_s *wtcb,
+                         FAR struct addrenv_s **oldenv);
+void nxsem_waiter_restore(FAR struct tcb_s *rtcb,
+                          FAR struct addrenv_s *oldenv);
+#else
+static inline bool nxsem_waiter_select(FAR struct tcb_s *wtcb,
+                                       FAR struct addrenv_s **oldenv)
+{
+  return false;
+}
+
+static inline void nxsem_waiter_restore(FAR struct tcb_s *rtcb,
+                                        FAR struct addrenv_s *oldenv)
+{
+}
+#endif
+
 /* Handle semaphore timer expiration */
 
 void nxsem_timeout(wdparm_t arg);
