@@ -88,8 +88,8 @@ void tricore_dump_trapctrl(void)
 {
   _alert("PSTR:%-14.8" PRIX32 "DSTR:%-14.8" PRIX32
          "DATR:%-14.8" PRIX32 "DEADD:%-13.8" PRIX32 "\n\n",
-         tricore_mfcr(CPU_PSTR), tricore_mfcr(CPU_DSTR),
-         tricore_mfcr(CPU_DATR), tricore_mfcr(CPU_DEADD));
+         tricore_mfcr(TRICORE_CPU_PSTR), tricore_mfcr(TRICORE_CPU_DSTR),
+         tricore_mfcr(TRICORE_CPU_DATR), tricore_mfcr(TRICORE_CPU_DEADD));
 }
 
 /****************************************************************************
