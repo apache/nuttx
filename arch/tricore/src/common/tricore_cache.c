@@ -33,13 +33,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CPU_DCON0        0x9040  /* Data Memory Configuration 0 */
-#define CPU_DCON1        0x9008  /* Data Memory Configuration 1 */
-#define CPU_DCON2        0x9000  /* Data Memory Configuration 2 */
-#define CPU_PCON0        0x920C  /* Program Memory Configuration 0 */
-#define CPU_PCON1        0x9204  /* Program Memory Configuration 1 */
-#define CPU_PCON2        0x9208  /* Program Memory Configuration 2 */
-
 /* I/D-cache line size in bits. */
 
 #define ICACHE_LINE_SIZE 256
@@ -117,7 +110,7 @@ size_t up_get_icache_linesize(void)
 
 size_t up_get_icache_size(void)
 {
-  return (tricore_mfcr(CPU_PCON2) & ICACHE_SIZE_MASK) * 1000;
+  return (tricore_mfcr(TRICORE_CPU_PCON2) & ICACHE_SIZE_MASK) * 1000;
 }
 
 /****************************************************************************
@@ -139,7 +132,7 @@ size_t up_get_icache_size(void)
 
 void up_enable_icache(void)
 {
-  tricore_mtcr(CPU_PCON0, PCON0_ENABLE);
+  tricore_mtcr(TRICORE_CPU_PCON0, PCON0_ENABLE);
 
   UP_ISB();
 }
@@ -160,7 +153,7 @@ void up_enable_icache(void)
 
 void up_disable_icache(void)
 {
-  tricore_mtcr(CPU_PCON0, PCON0_DISABLE);
+  tricore_mtcr(TRICORE_CPU_PCON0, PCON0_DISABLE);
 
   UP_ISB();
 }
@@ -201,7 +194,7 @@ void up_invalidate_icache(uintptr_t start, uintptr_t end)
 
 void up_invalidate_icache_all(void)
 {
-  tricore_mtcr(CPU_PCON1, PCON1_INVALIDATE);
+  tricore_mtcr(TRICORE_CPU_PCON1, PCON1_INVALIDATE);
 
   UP_ISB();
 }
@@ -243,7 +236,7 @@ size_t up_get_dcache_linesize(void)
 
 size_t up_get_dcache_size(void)
 {
-  return (tricore_mfcr(CPU_DCON2) & DCACHE_SIZE_MASK) * 1000;
+  return (tricore_mfcr(TRICORE_CPU_DCON2) & DCACHE_SIZE_MASK) * 1000;
 }
 
 /****************************************************************************
@@ -267,14 +260,14 @@ void up_enable_dcache(void)
 {
   /* Check if the D-Cache is enabled */
 
-  if ((tricore_mfcr(CPU_DCON0) & DCON0_DISABLE) == 0)
+  if ((tricore_mfcr(TRICORE_CPU_DCON0) & DCON0_DISABLE) == 0)
     {
       return;
     }
 
   up_invalidate_dcache_all();
 
-  tricore_mtcr(CPU_DCON0, DCON0_ENABLE);
+  tricore_mtcr(TRICORE_CPU_DCON0, DCON0_ENABLE);
 
   UP_DSB();
   UP_ISB();
@@ -296,7 +289,7 @@ void up_enable_dcache(void)
 
 void up_disable_dcache(void)
 {
-  tricore_mtcr(CPU_DCON0, DCON0_DISABLE);
+  tricore_mtcr(TRICORE_CPU_DCON0, DCON0_DISABLE);
 
   UP_DSB();
   UP_ISB();
@@ -364,7 +357,7 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 
 void up_invalidate_dcache_all(void)
 {
-  tricore_mtcr(CPU_DCON1, DCON1_INVALIDATE);
+  tricore_mtcr(TRICORE_CPU_DCON1, DCON1_INVALIDATE);
 
   UP_DSB();
   UP_ISB();
