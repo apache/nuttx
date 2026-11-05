@@ -76,6 +76,9 @@ int nxsem_wait_slow(FAR sem_t *sem)
   sigset_t pendingset;
 #endif
   FAR struct tcb_s *rtcb = this_task();
+#ifdef CONFIG_MM_KMAP
+  FAR sem_t *usem;
+#endif
   irqstate_t flags;
   int ret = OK;
   bool unlocked;
@@ -203,6 +206,7 @@ int nxsem_wait_slow(FAR sem_t *sem)
       DEBUGASSERT(rtcb->waitobj == NULL);
 
 #ifdef CONFIG_MM_KMAP
+      usem = sem;
       sem = kmm_map_user(rtcb, sem, sizeof(*sem));
 #endif
 
@@ -298,7 +302,10 @@ int nxsem_wait_slow(FAR sem_t *sem)
       ret = rtcb->errcode != OK ? -rtcb->errcode : OK;
 
 #ifdef CONFIG_MM_KMAP
+      /* Use the address of the caller after the unmap */
+
       kmm_unmap(sem);
+      sem = usem;
 #endif
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
