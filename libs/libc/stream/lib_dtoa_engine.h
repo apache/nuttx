@@ -42,6 +42,7 @@
 
 #include <nuttx/compiler.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <float.h>
 
@@ -57,6 +58,20 @@
 #  define DTOA_MAX_DIG      9
 #endif
 
+/* No value has more decimals than this, so a larger number means the same */
+
+#define DTOA_MAX_DECIMALS   20000
+
+/* The limbs of the largest value in base 10000, or of the smallest one in
+ * base 65536, whichever has more.
+ */
+
+#if DBL_MANT_DIG == 53
+#  define DTOA_BIG_LIMBS    78
+#else
+#  define DTOA_BIG_LIMBS    11
+#endif
+
 #define DTOA_MINUS          1
 #define DTOA_ZERO           2
 #define DTOA_INF            4
@@ -66,11 +81,37 @@
  * Public Types
  ****************************************************************************/
 
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+
+/* The state of the exact digits */
+
+struct dtoa_big_s
+{
+  FAR uint16_t *limbs;
+  uint64_t hi;              /* The mantissa */
+  uint64_t lo;
+  int32_t e2;               /* The value is the mantissa * 2^e2 */
+  int32_t n;                /* The digits that count */
+  int32_t nz;               /* The digits up to the last one that is not 0 */
+  int32_t up;               /* The digit that grows by 1 */
+  int32_t pos;              /* The digits that the output took */
+  int limb;                 /* The limbs left of the integer part */
+  int nl;                   /* The limbs left of the fraction */
+  uint16_t group;           /* The last 4 digits */
+  uint8_t ingroup;          /* The digits left in it */
+  bool infrac;
+  char cur;                 /* Digit pos - 1 */
+};
+#endif
+
 struct dtoa_s
 {
   int32_t exp;
   uint8_t flags;
   char digits[DTOA_MAX_DIG + 1];
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+  FAR struct dtoa_big_s *big; /* Not NULL: the digits come from here */
+#endif
 };
 
 /****************************************************************************
@@ -79,5 +120,12 @@ struct dtoa_s
 
 int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
                   int max_decimals);
+
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+int32_t __dtoa_big_start(FAR struct dtoa_big_s *b, FAR uint16_t *limbs,
+                         double x, FAR struct dtoa_s *dtoa,
+                         int32_t max_digits, int32_t decimals);
+char __dtoa_big_digit(FAR struct dtoa_big_s *b, int32_t i);
+#endif
 
 #endif /* __LIBS_LIBC_STREAM_LIB_DTOA_ENGINE_H */

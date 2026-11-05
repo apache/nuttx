@@ -24,7 +24,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdbool.h>
 #include <string.h>
 
 #include "lib_dtoa_engine.h"
@@ -58,9 +57,13 @@ typedef uint32_t dtoa_bits_t;
 #define DTOA_FIX_BITS      60
 #define DTOA_FIX_MASK      ((1ull << DTOA_FIX_BITS) - 1)
 
-/* No value has more decimals than this, so a larger one means the same */
+/* Each product adds an error of at most 2 units of 2^-60 at 10 */
 
-#define DTOA_MAX_DECIMALS  20000
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+#  define DTOA_ERR_MUL()   (err += 2)
+#else
+#  define DTOA_ERR_MUL()
+#endif
 
 /****************************************************************************
  * Private Types
@@ -242,7 +245,7 @@ static void dtoa_put(FAR struct dtoa_out_s *o, int d, int32_t decimals)
  */
 
 static int dtoa_fixed(uint64_t m, int e2, FAR struct dtoa_s *dtoa,
-                      int32_t max_digits, int32_t decimals)
+                      int32_t max_digits, int32_t decimals, int32_t wanted)
 {
   struct dtoa_out_s o;
   uint64_t ipart = m;
@@ -306,6 +309,18 @@ static int dtoa_fixed(uint64_t m, int e2, FAR struct dtoa_s *dtoa,
       return 1;
     }
 
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+  /* The digits after the buffer are not all 0 */
+
+  if ((o.next > 0 || o.rest) &&
+      (decimals >= 0 ? decimals + o.exp + 1 : wanted) > max_digits)
+    {
+      return -1;
+    }
+#else
+  UNUSED(wanted);
+#endif
+
   return dtoa_finish(dtoa, o.n, o.exp, o.next, o.rest, max_digits,
                      decimals >= 0);
 }
@@ -333,8 +348,11 @@ static uint64_t dtoa_mulhi(uint64_t a, uint64_t b)
  */
 
 static int dtoa_scaled(uint64_t m, int b, FAR struct dtoa_s *dtoa,
-                       int32_t max_digits, int32_t decimals)
+                       int32_t max_digits, int32_t decimals, int32_t wanted)
 {
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+  uint64_t err = 0;         /* The error of y, in units of 2^-60 */
+#endif
   uint64_t y;
   int32_t exp;
   int32_t n;
@@ -359,6 +377,8 @@ static int dtoa_scaled(uint64_t m, int b, FAR struct dtoa_s *dtoa,
                   m <<= 1;
                   b--;
                 }
+
+              DTOA_ERR_MUL();
             }
         }
     }
@@ -376,6 +396,7 @@ static int dtoa_scaled(uint64_t m, int b, FAR struct dtoa_s *dtoa,
         }
 
       exp--;
+      DTOA_ERR_MUL();
     }
   else if (b > 3)
     {
@@ -388,6 +409,7 @@ static int dtoa_scaled(uint64_t m, int b, FAR struct dtoa_s *dtoa,
         }
 
       exp++;
+      DTOA_ERR_MUL();
     }
 
   y = m;
@@ -396,28 +418,66 @@ static int dtoa_scaled(uint64_t m, int b, FAR struct dtoa_s *dtoa,
       y >>= 1;
     }
 
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+  /* The mantissa with the shift above, and a margin */
+
+  err += 8;
+#else
+  UNUSED(wanted);
+#endif
+
   n = max_digits;
   if (decimals >= 0)
     {
       int32_t lim = decimals + exp + 1;
 
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+      if (lim < 1 || lim > max_digits)
+        {
+          return -1;
+        }
+#else
       if (lim < 0)
         {
           dtoa_zero(dtoa);
           return 1;
         }
+#endif
 
       if (lim < n)
         {
           n = lim;
         }
     }
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+  else if (wanted > max_digits)
+    {
+      return -1;
+    }
+#endif
 
   for (i = 0; i < n; i++)
     {
       dtoa->digits[i] = (char)(y >> DTOA_FIX_BITS) + '0';
       y = (y & DTOA_FIX_MASK) * 10;
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+      err *= 10;
+#endif
     }
+
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+  /* The distance from a tie must be larger than the error */
+
+  {
+    uint64_t half = 5ull << DTOA_FIX_BITS;
+    uint64_t dist = y > half ? y - half : half - y;
+
+    if (err >= (1ull << DTOA_FIX_BITS) || dist <= err)
+      {
+        return -1;
+      }
+  }
+#endif
 
   return dtoa_finish(dtoa, n, exp, (int)(y >> DTOA_FIX_BITS),
                      (y & DTOA_FIX_MASK) != 0, max_digits, decimals >= 0);
@@ -437,7 +497,8 @@ static int dtoa_scaled(uint64_t m, int b, FAR struct dtoa_s *dtoa,
  *
  * Returned Value:
  *   The number of digits in dtoa->digits, with dtoa->exp the exponent of the
- *   first one.
+ *   first one.  With LIBC_PRINTF_EXACT, -1 if these digits are not proven
+ *   correct: then __dtoa_big_start() must give them.
  *
  ****************************************************************************/
 
@@ -470,6 +531,9 @@ int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
 
   dtoa->flags = (u >> (sizeof(u) * 8 - 1)) != 0 ? DTOA_MINUS : 0;
   dtoa->exp = 0;
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+  dtoa->big = NULL;
+#endif
 
   if (ef == DTOA_EXP_MASK)
     {
@@ -517,8 +581,8 @@ int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
 
   if (b < 63 && e2 >= -DTOA_FIX_BITS)
     {
-      return dtoa_fixed(m, e2, dtoa, limit, decimals);
+      return dtoa_fixed(m, e2, dtoa, limit, decimals, max_digits);
     }
 
-  return dtoa_scaled(n, b, dtoa, limit, decimals);
+  return dtoa_scaled(n, b, dtoa, limit, decimals, max_digits);
 }

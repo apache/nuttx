@@ -217,6 +217,15 @@
 #  define vsprintf_ldtod(v) ((double)(v))
 #endif
 
+/* Digit i of the conversion.  The exact digits come one after the other */
+
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+#  define dtoa_digit(d, i) ((d)->big != NULL ? \
+                            __dtoa_big_digit((d)->big, (i)) : (d)->digits[i])
+#else
+#  define dtoa_digit(d, i) ((d)->digits[i])
+#endif
+
 /* e, f, g and a in either case: 0x20 makes an ASCII letter lower case */
 
 #define fmt_isfloat(c)    ((((c) | 0x20) >= 'e' && ((c) | 0x20) <= 'g') || \
@@ -518,9 +527,18 @@ static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
 
       /* Remove trailing zeros */
 
-      while (ndigs > 0 && dtoa->digits[ndigs - 1] == '0')
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+      if (dtoa->big != NULL)
         {
-          ndigs--;
+          ndigs = dtoa->big->nz;
+        }
+      else
+#endif
+        {
+          while (ndigs > 0 && dtoa->digits[ndigs - 1] == '0')
+            {
+              ndigs--;
+            }
         }
 
       if (-4 <= exp && exp < prec)
@@ -626,7 +644,7 @@ static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
 
           if (uexp - n < ndigs)
             {
-              out = dtoa->digits[exp - n];
+              out = dtoa_digit(dtoa, exp - n);
             }
           else
             {
@@ -649,7 +667,7 @@ static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
 
                   if (next < -prec ||
                       (offset < ndigs &&
-                       dtoa->digits[offset] != '0'))
+                       dtoa_digit(dtoa, offset) != '0'))
                     {
                       break;
                     }
@@ -681,7 +699,7 @@ static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
        * Mantissa
        */
 
-      stream_putc(dtoa->digits[0], stream);
+      stream_putc(dtoa_digit(dtoa, 0), stream);
       if (prec > 0)
         {
           int nbytes;
@@ -689,6 +707,18 @@ static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
           stream_putc('.', stream);
 
           nbytes = MIN(prec, ndigs > 1 ? ndigs - 1 : 0);
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+          if (dtoa->big != NULL)
+            {
+              int i;
+
+              for (i = 1; i <= nbytes; i++)
+                {
+                  stream_putc(__dtoa_big_digit(dtoa->big, i), stream);
+                }
+            }
+          else
+#endif
           if (nbytes > 0)
             {
               stream_puts(&dtoa->digits[1], nbytes, stream);
@@ -734,6 +764,25 @@ tail:
   return total_len;
 }
 
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+/* Only a value that the engine cannot prove comes here.  So only these calls
+ * have the big numbers on the stack.
+ */
+
+static noinline_function size_t
+vsprintf_float_big(FAR struct lib_outstream_s *stream, double value,
+                   FAR struct dtoa_s *dtoa, uint16_t flags, int width,
+                   int prec, int max_digits, int ndecimal)
+{
+  struct dtoa_big_s big;
+  uint16_t limbs[DTOA_BIG_LIMBS];
+  int32_t n;
+
+  n = __dtoa_big_start(&big, limbs, value, dtoa, max_digits, ndecimal);
+  return vsprintf_putfloat(stream, dtoa, n, flags, width, prec);
+}
+#endif
+
 static size_t vsprintf_float(FAR struct lib_outstream_s *stream,
                              double value, uint16_t flags, int width,
                              int prec, int c)
@@ -768,6 +817,16 @@ static size_t vsprintf_float(FAR struct lib_outstream_s *stream,
     }
 
   ndigs = __dtoa_engine(value, &dtoa, ndigs, ndecimal);
+
+#ifdef CONFIG_LIBC_PRINTF_EXACT
+  if ((int)ndigs < 0)
+    {
+      return vsprintf_float_big(stream, value, &dtoa, flags, width, prec,
+                                c == 'e' && prec < INT_MAX ? prec + 1 :
+                                prec == 0 ? 1 : prec, ndecimal);
+    }
+#endif
+
   return vsprintf_putfloat(stream, &dtoa, ndigs, flags, width, prec);
 }
 #endif
