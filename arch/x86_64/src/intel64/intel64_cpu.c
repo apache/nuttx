@@ -409,10 +409,16 @@ void x86_64_cpu_priv_set(uint8_t cpu)
    *       than for kernel segments). Then this instruction needs to
    *       set CS segment for SYSRET at (USERDATA_SEL - 8) to work
    *       correctly.
+   *
+   *       The base must also carry the user RPL.  Intel CPUs force the
+   *       RPL of SS to 3, AMD CPUs load SS as computed: with RPL 0 the
+   *       next interrupt from user mode saves that SS, and the iretq
+   *       back to user mode fails with #GP.
    */
 
   write_msr(MSR_STAR, MSR_STAR_CSSYSCALL(X86_GDT_CODE_SEL) |
-            MSR_STAR_CSSYSRET(X86_GDT_USERDATA_SEL - 8));
+            MSR_STAR_CSSYSRET((X86_GDT_USERDATA_SEL - 8) |
+                              X86_GDT_RPL_USER));
 
   /* Mask applied to RFLAGS when making a syscall */
 
