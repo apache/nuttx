@@ -183,6 +183,20 @@ config LIBC_PRINTF_EXACT
 		digits.  Only the other values use big numbers: about 300 bytes of
 		more stack, and a longer time, on these calls only.
 
+config LIBC_PRINTF_EXACT_LDOUBLE
+	bool "Enable exact long double in printf"
+	default LIBC_PRINTF_FULL
+	depends on LIBC_PRINTF_EXACT
+	---help---
+		Without it, %Le, %Lf and %Lg have the precision and the range of a
+		double.  With it, all digits are exact, on a CPU where long double has
+		more bits than a double: binary128 and the 80-bit format of x86.
+
+		It adds about 300 bytes of flash on such a CPU, and nothing on another
+		one.  A call with %L needs about 2.7 KB more stack, in a function that
+		only %L calls, so a call without %L has no cost in stack.  Check the
+		stack of a task that prints with %L.
+
 config LIBC_NUMBERED_ARGS
 	bool "Enable numbered arguments in printf"
 	default LIBC_PRINTF_FULL

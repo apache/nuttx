@@ -72,6 +72,18 @@
 #  define DTOA_BIG_LIMBS    11
 #endif
 
+/* A long double with more bits than a double.  The 64-bit mantissa format is
+ * the little-endian one of x86.  It needs 16384 bits in base 10000.
+ */
+
+#if defined(CONFIG_LIBC_PRINTF_EXACT_LDOUBLE) && \
+    defined(CONFIG_HAVE_LONG_DOUBLE) && \
+    (LDBL_MANT_DIG == 113 || \
+     (LDBL_MANT_DIG == 64 && !defined(CONFIG_ENDIAN_BIG)))
+#  define HAVE_DTOA_LDOUBLE
+#  define DTOA_BIG_LD_LIMBS 1240
+#endif
+
 #define DTOA_MINUS          1
 #define DTOA_ZERO           2
 #define DTOA_INF            4
@@ -126,6 +138,11 @@ int32_t __dtoa_big_start(FAR struct dtoa_big_s *b, FAR uint16_t *limbs,
                          double x, FAR struct dtoa_s *dtoa,
                          int32_t max_digits, int32_t decimals);
 char __dtoa_big_digit(FAR struct dtoa_big_s *b, int32_t i);
+#  ifdef HAVE_DTOA_LDOUBLE
+int32_t __dtoa_big_start_ld(FAR struct dtoa_big_s *b, FAR uint16_t *limbs,
+                            long double x, FAR struct dtoa_s *dtoa,
+                            int32_t max_digits, int32_t decimals);
+#  endif
 #endif
 
 #endif /* __LIBS_LIBC_STREAM_LIB_DTOA_ENGINE_H */

@@ -33,6 +33,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_ENDIAN_BIG
+#  define DTOA_W_HI 0
+#  define DTOA_W_LO 1
+#else
+#  define DTOA_W_HI 1
+#  define DTOA_W_LO 0
+#endif
+
 /* An up value: no digit grows, or the digits were all 9 */
 
 #define DTOA_UP_NONE  -1
@@ -377,3 +385,78 @@ char __dtoa_big_digit(FAR struct dtoa_big_s *b, int32_t i)
 
   return b->cur + '0' + (i == b->up ? 1 : 0);
 }
+
+#ifdef HAVE_DTOA_LDOUBLE
+/****************************************************************************
+ * Name: __dtoa_big_start_ld
+ *
+ * Description:
+ *   The same for a long double.  limbs has DTOA_BIG_LD_LIMBS entries.  This
+ *   also finds the sign, infinity, NaN and 0 itself.
+ *
+ ****************************************************************************/
+
+int32_t __dtoa_big_start_ld(FAR struct dtoa_big_s *b, FAR uint16_t *limbs,
+                            long double x, FAR struct dtoa_s *dtoa,
+                            int32_t max_digits, int32_t decimals)
+{
+  bool nonfinite;
+  int ef;
+
+#  if LDBL_MANT_DIG == 113
+  uint64_t w[2];
+
+  memcpy(w, &x, sizeof(w));
+  dtoa->flags = (w[DTOA_W_HI] >> 63) != 0 ? DTOA_MINUS : 0;
+  ef = (w[DTOA_W_HI] >> 48) & 0x7fff;
+  b->hi = w[DTOA_W_HI] & 0xffffffffffffull;
+  b->lo = w[DTOA_W_LO];
+  nonfinite = ef == 0x7fff;
+  dtoa->flags |= nonfinite && (b->hi | b->lo) != 0 ? DTOA_NAN : 0;
+  if (ef != 0 && !nonfinite)
+    {
+      b->hi |= 1ull << 48;
+    }
+
+  b->e2 = (int32_t)(ef != 0 ? ef : 1) - 16383 - 112;
+#  else
+  uint16_t se;
+
+  memcpy(&b->lo, &x, sizeof(b->lo));
+  memcpy(&se, (FAR const char *)&x + sizeof(b->lo), sizeof(se));
+  dtoa->flags = (se >> 15) != 0 ? DTOA_MINUS : 0;
+  ef = se & 0x7fff;
+  b->hi = 0;
+  nonfinite = ef == 0x7fff;
+  dtoa->flags |= nonfinite && (b->lo << 1) != 0 ? DTOA_NAN : 0;
+  b->e2 = (int32_t)(ef != 0 ? ef : 1) - 16383 - 63;
+#  endif
+
+  b->limbs = limbs;
+  dtoa->big = NULL;
+  dtoa->exp = 0;
+
+  if (nonfinite)
+    {
+      if ((dtoa->flags & DTOA_NAN) == 0)
+        {
+          dtoa->flags |= DTOA_INF;
+        }
+
+      dtoa->digits[0] = '\0';
+      return 0;
+    }
+
+  if ((b->hi | b->lo) == 0)
+    {
+      /* The output prints a 0 for each digit that it does not have */
+
+      dtoa->flags |= DTOA_ZERO;
+      dtoa->digits[0] = '0';
+      dtoa->digits[1] = '\0';
+      return 1;
+    }
+
+  return big_analyze(b, dtoa, max_digits, decimals);
+}
+#endif
