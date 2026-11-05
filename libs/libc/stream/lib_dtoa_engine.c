@@ -93,7 +93,9 @@ int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
     {
       flags |= DTOA_ZERO;
       for (i = 0; i < max_digits; i++)
-        dtoa->digits[i] = '0';
+        {
+          dtoa->digits[i] = '0';
+        }
     }
   else if (isnan(x))
     {
