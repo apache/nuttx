@@ -346,9 +346,9 @@ static int fat_shared_release(FAR struct fat_mountpt_s *fs,
  * Name: fat_shrinkshared
  *
  * Description:
- *   Shrink a file described only by its shared (in-memory) state to a
- *   smaller, non-zero length.  Used when the directory entry is gone
- *   (unlinked file) and fat_dirshrink() has no entry to work with.
+ *   Trim the shared cluster chain to a non-zero length.  Used for unlinked
+ *   files and to release clusters allocated by a failed extension without
+ *   changing the directory entry.
  *
  *   The caller holds fs_lock and has already invalidated attached caches.
  *
@@ -364,8 +364,7 @@ static int fat_shrinkshared(FAR struct fat_mountpt_s *fs,
   int32_t cluster;
   int ret;
 
-  DEBUGASSERT(shared->s_pending && length > 0 &&
-              length < shared->s_size);
+  DEBUGASSERT(length > 0 && length <= shared->s_size);
 
   lastcluster = shared->s_startcluster;
 
@@ -2882,18 +2881,47 @@ static int fat_truncate(FAR struct file *filep, off_t length)
        * cluster of the file.
        */
 
+      ff->ff_bflags |= FFBUFF_MODIFIED;
+
       savepos      = filep->f_pos;
       filep->f_pos = oldsize;
       ret          = fat_get_sectors(filep, false);
       filep->f_pos = savepos;
-      if (ret < 0)
+      if (ret >= 0)
         {
-          fat_shared_reset_cursors(fs, ff->ff_shared);
-          goto errout_with_lock;
+          ret = fat_dirextend(fs, ff, length);
         }
 
-      ff->ff_bflags |= FFBUFF_MODIFIED;
-      ret = fat_dirextend(fs, ff, length);
+      if (ret < 0)
+        {
+          int errcode = ret;
+
+          /* All pre-existing data was flushed before extension.  Discard
+           * cached zeros before releasing their clusters.
+           */
+
+          ff->ff_bflags     &= ~(FFBUFF_DIRTY | FFBUFF_VALID);
+          ff->ff_cachesector = 0;
+
+          if (oldsize == 0)
+            {
+              ret = fat_removechain(fs, ff->ff_shared->s_startcluster);
+              if (ret >= 0)
+                {
+                  ff->ff_shared->s_startcluster = 0;
+                }
+            }
+          else
+            {
+              ret = fat_shrinkshared(fs, ff, oldsize);
+            }
+
+          if (ret >= 0)
+            {
+              ret = errcode;
+            }
+        }
+
       fat_shared_reset_cursors(fs, ff->ff_shared);
       if (ret >= 0)
         {
