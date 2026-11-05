@@ -80,6 +80,11 @@ int ttyname_r(int fd, FAR char *buf, size_t buflen)
       FAR char *path = lib_get_tempbuffer(PATH_MAX);
       int ret;
 
+      if (path == NULL)
+        {
+          return ENOMEM;
+        }
+
       if (fcntl(fd, F_GETPATH, path) < 0)
         {
           ret = get_errno();
