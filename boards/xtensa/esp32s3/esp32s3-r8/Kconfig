@@ -50,6 +50,8 @@ config ESP32S3_SPIFLASH_LITTLEFS
 	bool "LittleFS"
 	select FS_LITTLEFS
 
+endchoice # ESP32S3_SPIFLASH_FS
+
 config ESP32S3_R8_LCD
 	bool "Enable ESP32-S3-R8 LCD"
 	default n
