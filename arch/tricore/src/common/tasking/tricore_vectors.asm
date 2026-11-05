@@ -29,6 +29,7 @@
 
 	.extern	tricore_trapcall
 	.extern	tricore_svcall
+	.extern	tricore_doirq
 	.extern	tricore_fcu_recover
 	.extern	g_tricore_fcu_pool
 
@@ -67,6 +68,23 @@ label:
 	TRAPTAB	4, tricore_trap_vectors_cpu4
 	TRAPTAB	5, tricore_trap_vectors_cpu5
 
+INTVEC	.macro	cpu, label
+	.sdecl	".text.intvec_cpu\cpu",code,protect
+	.sect	".text.intvec_cpu\cpu"
+	.align	32
+	.global	label
+label:
+	svlcx
+	j	tricore_int_entry
+	.endm
+
+	INTVEC	0, tricore_int_vector_cpu0
+	INTVEC	1, tricore_int_vector_cpu1
+	INTVEC	2, tricore_int_vector_cpu2
+	INTVEC	3, tricore_int_vector_cpu3
+	INTVEC	4, tricore_int_vector_cpu4
+	INTVEC	5, tricore_int_vector_cpu5
+
 ; struct tricore_trap_s: taddr at 0, tid at 4, tclass at 5, tcpu at 6
 
 TRAPENTRY	.macro	name, handler
@@ -93,6 +111,13 @@ name:
 
 	TRAPENTRY	tricore_trap_entry, tricore_trapcall
 	TRAPENTRY	tricore_syscall_entry, tricore_svcall
+
+tricore_int_entry:
+	movh.a	a2, #@HIS(tricore_doirq)
+	lea	a2, [a2]@LOS(tricore_doirq)
+	jli	a2
+	rslcx
+	rfe
 
 tricore_ctx_entry:
 	jeq	d15, #4, tricore_fcu_entry
