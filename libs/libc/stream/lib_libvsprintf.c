@@ -123,6 +123,24 @@
 
 #define fmt_ungetc(fmt)   ((fmt)--)
 
+/* binary128 converts by hand, so that printf() does not pull in the
+ * soft-float code of libgcc.  Any other long double uses a cast.
+ */
+
+#if defined(CONFIG_LIBC_FLOATINGPOINT) && defined(CONFIG_HAVE_LONG_DOUBLE) && \
+    LDBL_MANT_DIG == 113 && DBL_MANT_DIG == 53
+#  define HAVE_LDTOD_BY_HAND
+#  ifdef CONFIG_ENDIAN_BIG
+#    define LDTOD_HI 0
+#    define LDTOD_LO 1
+#  else
+#    define LDTOD_HI 1
+#    define LDTOD_LO 0
+#  endif
+#else
+#  define vsprintf_ldtod(v) ((double)(v))
+#endif
+
 /* e, f, g and a in either case: 0x20 makes an ASCII letter lower case */
 
 #define fmt_isfloat(c)    ((((c) | 0x20) >= 'e' && ((c) | 0x20) <= 'g') || \
@@ -191,6 +209,88 @@ static int vsprintf_repeat(FAR struct lib_outstream_s *stream, int ch,
 
   return total_len;
 }
+
+#ifdef HAVE_LDTOD_BY_HAND
+/* Round to nearest, ties to even, as the cast does.  All 64-bit shifts have
+ * a constant count, so a 32-bit CPU needs no libgcc call either.
+ */
+
+static double vsprintf_ldtod(long double value)
+{
+  union
+  {
+    long double ld;
+    uint64_t w[2];
+  } in;
+
+  union
+  {
+    double d;
+    uint64_t u;
+  } out;
+
+  uint64_t frac;
+  uint64_t rest;
+  int exp;
+
+  in.ld = value;
+  exp   = (in.w[LDTOD_HI] >> 48) & 0x7fff;
+  frac  = ((in.w[LDTOD_HI] & 0x0000ffffffffffffull) << 4) |
+          (in.w[LDTOD_LO] >> 60);
+  rest  = in.w[LDTOD_LO] << 4;
+  out.u = in.w[LDTOD_HI] & 0x8000000000000000ull;
+
+  if (exp == 0x7fff)
+    {
+      /* Infinity, or a NaN: its result stays a NaN and is quiet */
+
+      out.u |= 0x7ff0000000000000ull | frac;
+      if ((frac | rest) != 0)
+        {
+          out.u |= 0x0008000000000000ull;
+        }
+
+      return out.d;
+    }
+
+  exp -= 16383 - 1023;
+  if (exp >= 0x7ff)
+    {
+      out.u |= 0x7ff0000000000000ull;
+      return out.d;
+    }
+
+  if (exp <= 0)
+    {
+      if (exp < -52)
+        {
+          return out.d;
+        }
+
+      /* A subnormal result: shift the bits into rest and keep a sticky bit */
+
+      frac |= 0x0010000000000000ull;
+      do
+        {
+          rest = (frac << 63) | (rest >> 1) | (rest & 1);
+          frac >>= 1;
+        }
+      while (exp++ < 0);
+
+      exp = 0;
+    }
+
+  if ((rest >> 63) != 0 && ((rest << 1) != 0 || (frac & 1) != 0))
+    {
+      frac++;
+    }
+
+  /* A carry out of frac goes into the exponent, as it must */
+
+  out.u += ((uint64_t)exp << 52) + frac;
+  return out.d;
+}
+#endif
 
 static int vsprintf_putnum(FAR struct lib_outstream_s *stream,
                            FAR char *buf, int len)
@@ -731,7 +831,7 @@ flt_oper:
             {
               /* The output has the precision of a double */
 
-              value = va_arg(ap, long double);
+              value = vsprintf_ldtod(va_arg(ap, long double));
             }
           else
 #endif
@@ -1636,7 +1736,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_HAVE_LONG_DOUBLE
           case TYPE_LONG_DOUBLE:
 #  ifdef CONFIG_LIBC_FLOATINGPOINT
-            arglist.value[i].d = va_arg(ap, long double);
+            arglist.value[i].d = vsprintf_ldtod(va_arg(ap, long double));
 #  else
             va_arg(ap, long double);
 #  endif
