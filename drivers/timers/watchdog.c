@@ -599,8 +599,8 @@ static ssize_t wdog_read(FAR struct file *filep, FAR char *buffer,
           buflen,
           "Status       :\n"
           "  flags      : 0x%08" PRIx32 "\n"
-          "  timeout    : %" PRId32 "\n"
-          "  timeleft   : %" PRId32 "\n",
+          "  timeout    : %" PRIu32 "\n"
+          "  timeleft   : %" PRIu32 "\n",
           status.flags, status.timeout, status.timeleft
         );
   if (ret < 0)
