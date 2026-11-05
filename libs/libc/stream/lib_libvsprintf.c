@@ -136,6 +136,16 @@
 #  define FL_INT_PREC_UNAVAIL  FL_PREC
 #endif
 
+#ifdef CONFIG_LIBC_PRINTF_SHORT
+#  define FL_INT_SHORT         FL_SHORT
+#  define FL_INT_SHORT_UNAVAIL 0
+#else
+#  define FL_INT_SHORT         0
+#  define FL_INT_SHORT_UNAVAIL FL_SHORT
+#endif
+
+#define FL_INT_UNAVAIL       (FL_INT_PREC_UNAVAIL | FL_INT_SHORT_UNAVAIL)
+
 /* A value longer than long has output only with this option */
 
 #if defined(CONFIG_LIBC_PRINTF_LONG_LONG) || ULLONG_MAX == ULONG_MAX
@@ -1409,7 +1419,7 @@ str_lpad:
                   x = va_arg(ap, int);
                 }
 
-              if ((flags & FL_SHORT) != 0)
+              if ((flags & FL_INT_SHORT) != 0)
                 {
                   if ((flags & FL_REPD_TYPE) == 0)
                     {
@@ -1504,7 +1514,7 @@ str_lpad:
                   x = va_arg(ap, unsigned int);
                 }
 
-              if ((flags & FL_SHORT) != 0)
+              if ((flags & FL_INT_SHORT) != 0)
                 {
                   if ((flags & FL_REPD_TYPE) == 0)
                     {
@@ -1635,7 +1645,7 @@ str_lpad:
           flags &= ~FL_NEGATIVE;
         }
 
-      if ((flags & FL_INT_PREC_UNAVAIL) != 0)
+      if ((flags & FL_INT_UNAVAIL) != 0)
         {
           goto put_unavailable;
         }
