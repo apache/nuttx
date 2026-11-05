@@ -143,9 +143,10 @@ config LIBC_PRINTF_C23
 	bool "Enable the C23 conversions in printf"
 	default LIBC_PRINTF_FULL
 	---help---
-		Enables %b and %B, the binary output of an integer.  Without it,
-		they are unknown conversions: printf() prints the rest of the format
-		as text and reads no more arguments.
+		Enables %b and %B, the binary output of an integer, and the wN and
+		wfN length modifiers, as in %w64d and %wf32x.  Without it, they are
+		unknown conversions: printf() prints the rest of the format as text
+		and reads no more arguments.
 
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
