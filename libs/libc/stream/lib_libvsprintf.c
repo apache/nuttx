@@ -595,57 +595,58 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
         }
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
-      if ((flags & FL_ARGNUMBER) != 0)
+      if ((flags & FL_ARGNUMBER) != 0 && argnumber > numargs)
         {
-          if (argnumber > 0 && argnumber <= numargs)
+          goto ret;
+        }
+
+      if (stream == NULL)
+        {
+          unsigned char type; /* We do only parsing */
+
+          if (fmt_isfloat(c))
             {
-              if (stream == NULL)
+              type = TYPE_DOUBLE;
+            }
+          else if (c == 'i' || c == 'd' || c == 'u' || c == 'p' ||
+                   c == 'o' || c == 'x' || c == 'X')
+            {
+              if ((flags & FL_LONG) == 0)
                 {
-                  if (fmt_isfloat(c))
-                    {
-                      arglist->type[argnumber - 1] = TYPE_DOUBLE;
-                    }
-                  else if (c == 'i' || c == 'd' || c == 'u' || c == 'p' ||
-                           c == 'o' || c == 'x' || c == 'X')
-                    {
-                      if ((flags & FL_LONG) == 0)
-                        {
-                          arglist->type[argnumber - 1] = TYPE_INT;
-                        }
-                      else if ((flags & FL_REPD_TYPE) == 0)
-                        {
-                          arglist->type[argnumber - 1] = TYPE_LONG;
-                        }
-                      else
-                        {
-                          arglist->type[argnumber - 1] = TYPE_LONG_LONG;
-                        }
-                    }
-                  else if (c == 'c')
-                    {
-                      arglist->type[argnumber - 1] = TYPE_INT;
-                    }
-                  else if (c == 's' || c == 'S' || c == 'n')
-                    {
-                      arglist->type[argnumber - 1] = TYPE_CHAR_POINTER;
-                    }
-
-                  if (argnumber > total_len)
-                    {
-                      total_len = argnumber;
-                    }
-
-                  continue; /* We do only parsing */
+                  type = TYPE_INT;
                 }
+              else if ((flags & FL_REPD_TYPE) == 0)
+                {
+                  type = TYPE_LONG;
+                }
+              else
+                {
+                  type = TYPE_LONG_LONG;
+                }
+            }
+          else if (c == 'c')
+            {
+              type = TYPE_INT;
+            }
+          else if (c == 's' || c == 'S' || c == 'n')
+            {
+              type = TYPE_CHAR_POINTER;
             }
           else
             {
-              goto ret;
+              goto ret; /* The second pass reads no argument after this */
             }
-        }
-      else if (stream == NULL)
-        {
-          continue; /* We do only parsing */
+
+          if ((flags & FL_ARGNUMBER) != 0)
+            {
+              arglist->type[argnumber - 1] = type;
+              if (argnumber > total_len)
+                {
+                  total_len = argnumber;
+                }
+            }
+
+          continue;
         }
 #endif
 
@@ -1238,6 +1239,22 @@ str_lpad:
               c = __ultoa_invert(x, buf, 10) - buf;
             }
         }
+      else if (c != 'u' && c != 'o' && c != 'p' && (c | 0x20) != 'x')
+        {
+          /* An unknown conversion, or the end of the format.  The size of
+           * the argument is not known, so read no more arguments.  Print the
+           * rest of the format as it is.
+           */
+
+          stream_putc('%', stream);
+          while (c != '\0')
+            {
+              stream_putc(c, stream);
+              c = fmt_char(fmt);
+            }
+
+          goto ret;
+        }
       else
         {
           int base;
@@ -1385,7 +1402,7 @@ str_lpad:
                 base = 16;
                 break;
 
-              case 'X':
+              default: /* 'X' */
                 if ((flags & FL_ALT) != 0)
                   {
                     flags |= (FL_ALTHEX | FL_ALTUPP);
@@ -1393,11 +1410,6 @@ str_lpad:
 
                 base = 16 | XTOA_UPPER;
                 break;
-
-              default:
-                stream_putc('%', stream);
-                stream_putc(c, stream);
-                continue;
             }
 
           if ((flags & FL_PREC) != 0 && prec == 0 && x == 0)
