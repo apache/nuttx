@@ -1358,7 +1358,15 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 set_star:
                   if ((flags & FL_PREC) != 0)
                     {
-                      prec = star < 0 ? 0 : star;
+                      /* A negative precision means that there is none */
+
+                      if (star < 0)
+                        {
+                          flags &= ~FL_PREC;
+                          star = 0;
+                        }
+
+                      prec = star;
                     }
                   else
                     {
