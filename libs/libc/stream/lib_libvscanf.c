@@ -27,6 +27,7 @@
 #include <nuttx/streams.h>
 
 #include <errno.h>
+#include <float.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -46,6 +47,12 @@
 #  define FLOATINGPOINT_MODS "aAfFeEgG"
 #else
 #  define FLOATINGPOINT_MODS
+#endif
+
+/* Where a long double is a double, it uses the code of the double */
+
+#if defined(CONFIG_HAVE_LONG_DOUBLE) && LDBL_MANT_DIG != DBL_MANT_DIG
+#  define HAVE_SCANF_LDOUBLE
 #endif
 
 #define MAXLN   128
@@ -315,11 +322,19 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                 {
                   noassign = true;
                 }
-              else if (fmt_char(fmt) == 'l' || fmt_char(fmt) == 'L')
+              else if (fmt_char(fmt) == 'L')
+                {
+                  /* A long double; a GNU extension makes it a long long for
+                   * an integer conversion.
+                   */
+
+                  modifier = LL_MOD;
+                }
+              else if (fmt_char(fmt) == 'l')
                 {
                   modifier = L_MOD;
 
-                  if (*(fmt + 1) == 'l' || *(fmt + 1) == 'L')
+                  if (*(fmt + 1) == 'l')
                     {
                       modifier = LL_MOD;
                       fmt++;
@@ -921,6 +936,10 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
 
           else if (strchr("aAfFeEgG", fmt_char(fmt)) != NULL)
             {
+#ifdef HAVE_SCANF_LDOUBLE
+              FAR long double *pld = NULL;
+#endif
+
 #ifdef CONFIG_HAVE_DOUBLE
               FAR double *pd = NULL;
 #endif
@@ -940,6 +959,14 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                    * double.
                    */
 
+#ifdef HAVE_SCANF_LDOUBLE
+                  if (modifier == LL_MOD)
+                    {
+                      pld = next_arg(varg, vabuf, FAR long double *);
+                      *pld = 0.0;
+                    }
+                  else
+#endif
 #ifdef CONFIG_HAVE_DOUBLE
                   if (modifier >= L_MOD)
                     {
@@ -977,6 +1004,9 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                   bool sign;
                   bool stopconv;
                   int errsave;
+#  ifdef HAVE_SCANF_LDOUBLE
+                  long double ldvalue;
+#  endif
 #  ifdef CONFIG_HAVE_DOUBLE
                   double dvalue;
 #  endif
@@ -1060,6 +1090,15 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                   errsave = get_errno();
                   set_errno(0);
 
+#  ifdef HAVE_SCANF_LDOUBLE
+                  if (modifier == LL_MOD)
+                    {
+                      /* Get the converted long double value */
+
+                      ldvalue = strtold(tmp, &endptr);
+                    }
+                  else
+#  endif
 #  ifdef CONFIG_HAVE_DOUBLE
                   if (modifier >= L_MOD)
                     {
@@ -1093,6 +1132,15 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                        * or a double.
                        */
 
+#  ifdef HAVE_SCANF_LDOUBLE
+                      if (modifier == LL_MOD)
+                        {
+                          /* Return the long double value */
+
+                          *pld = ldvalue;
+                        }
+                      else
+#  endif
 #  ifdef CONFIG_HAVE_DOUBLE
                       if (modifier >= L_MOD)
                         {
