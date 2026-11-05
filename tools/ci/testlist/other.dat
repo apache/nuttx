@@ -9,6 +9,11 @@
 /renesas/rx65n/rx65n-grrose
 /renesas/rx65n/rx65n-rsk2mb
 
+/rh850
+
+# rh850 Boards build by CMake
+CMake,qemu-rh850-u2c:nsh
+
 /x86
 
 # Sparc-gaisler-elf toolchain doesn't provide macOS binaries
