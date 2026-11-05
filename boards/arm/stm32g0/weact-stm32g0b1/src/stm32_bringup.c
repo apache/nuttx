@@ -89,6 +89,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_INPUT_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize(BUTTONS_DRIVER_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
