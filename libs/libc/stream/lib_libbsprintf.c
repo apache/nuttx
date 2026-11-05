@@ -84,6 +84,15 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
           memset(fmtstr, 0, sizeof(fmtstr));
         }
 
+      /* A conversion that does not fit ends the output.  The space is for
+       * this character, or for the digits and the sign of a "*".
+       */
+
+      if (len >= sizeof(fmtstr) - 12)
+        {
+          break;
+        }
+
       var = (FAR void *)(data + offset);
       fmtstr[len++] = c;
 
