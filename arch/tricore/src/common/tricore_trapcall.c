@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <nuttx/debug.h>
@@ -100,6 +101,10 @@
 #  define tricore_trap_return() __asm__ volatile ("ji %a11")
 #endif
 
+/* Panic message of a trap, "Trap c=<class> t=<TIN>" */
+
+#define TRICORE_TRAP_MSG_LEN      24
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -127,6 +132,20 @@ static tricore_bustrap_hook_t g_bustrap_hook;
 static void tricore_trapinfo(volatile void *trap)
 {
   g_trapinfo = *(struct tricore_trap_s *)trap;
+}
+
+/* The message tells a panic notifier which trap it was.  The buffer is on
+ * the stack of the trapping CPU, which the panic does not return to.
+ */
+
+static void tricore_trap_panic(unsigned int tclass, uint32_t tid,
+                               void *regs)
+{
+  char msg[TRICORE_TRAP_MSG_LEN];
+
+  snprintf(msg, sizeof(msg), "Trap c=%u t=%" PRIu32, tclass, tid);
+  up_irq_save();
+  PANIC_WITH_REGS(msg, regs);
 }
 
 /****************************************************************************
@@ -160,8 +179,7 @@ int weak_function tricore_nmitrap(uint32_t tid, void *context, void *arg)
   _alert("\tClass %d TID: %d regs: %p\n",
          TRICORE_TRAP_CLASS_NMI, tid, context);
 
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  tricore_trap_panic(TRICORE_TRAP_CLASS_NMI, tid, context);
   return OK;
 }
 
@@ -183,8 +201,7 @@ int tricore_mmutrap(uint32_t tid, void *context, void *arg)
       _alert("\tVirtual Address Protection\n");
     }
 
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  tricore_trap_panic(TRICORE_TRAP_CLASS_MMU, tid, context);
   return OK;
 }
 
@@ -231,8 +248,7 @@ int tricore_internalprotrape(uint32_t tid, void *context, void *arg)
       _alert("\tGlobal Register Write Protection\n");
     }
 
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  tricore_trap_panic(TRICORE_TRAP_CLASS_PROT, tid, context);
   return OK;
 }
 
@@ -282,8 +298,7 @@ int tricore_insterrorstrap(uint32_t tid, void *context, void *arg)
     }
 #endif
 
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  tricore_trap_panic(TRICORE_TRAP_CLASS_INSN, tid, context);
   return OK;
 }
 
@@ -329,8 +344,7 @@ int tricore_contexmnttrap(uint32_t tid, void *context, void *arg)
       _alert("\tNesting Error:RFE with non-zero call depth\n");
     }
 
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  tricore_trap_panic(TRICORE_TRAP_CLASS_CTX, tid, context);
   return OK;
 }
 
@@ -400,8 +414,7 @@ int tricore_bustrap(uint32_t tid, void *context, void *arg)
       _alert("\tTemporal Asynchronous Error\n");
     }
 
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  tricore_trap_panic(TRICORE_TRAP_CLASS_BUS, tid, context);
   return OK;
 }
 
@@ -423,8 +436,7 @@ int tricore_assertiontrap(uint32_t tid, void *context, void *arg)
       _alert("\tSticky Arithmetic Overflow\n");
     }
 
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  tricore_trap_panic(TRICORE_TRAP_CLASS_ASSERT, tid, context);
   return OK;
 }
 
@@ -517,8 +529,7 @@ void tricore_trapcall(volatile void *trap)
       tricore_trap_return();
     }
 
-  up_irq_save();
-  PANIC_WITH_REGS("Trap", regs);
+  tricore_trap_panic(tclass, tid, regs);
 }
 
 /****************************************************************************
