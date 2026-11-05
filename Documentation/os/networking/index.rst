@@ -71,6 +71,8 @@ Network Support
   netpoll.rst
   note.rst
   mdio.rst
+  phylib.rst
+  phylib_vendor_porting.rst
   netguardsize.rst
   netlink.rst
   slip.rst
