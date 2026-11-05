@@ -32,6 +32,7 @@
 #include <netdb.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <sys/socket.h>
 
 #ifdef CONFIG_LIBC_NETDB
 
@@ -69,6 +70,16 @@
 
 #define CONFIG_NETDB_MAX_IPADDR (CONFIG_NETDB_MAX_IPv4ADDR + \
                                  CONFIG_NETDB_MAX_IPv6ADDR)
+
+/* The address family of gethostbyname() and gethostbyname_r: IPv4 where the
+ * system has it, whatever else the system has.
+ */
+
+#ifdef CONFIG_NET_IPv4
+#  define NETDB_HOSTBYNAME_FAMILY AF_INET
+#else
+#  define NETDB_HOSTBYNAME_FAMILY AF_UNSPEC
+#endif
 
 /****************************************************************************
  * Public Types

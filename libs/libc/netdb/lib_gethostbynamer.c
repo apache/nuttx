@@ -28,6 +28,8 @@
 
 #include <netdb.h>
 
+#include "netdb/lib_netdb.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -49,6 +51,9 @@
  *   gethostname_r() is *not* POSIX but is similar to a Glibc extension and
  *   is used internally by NuttX to implement the POSIX gethostname().
  *
+ *   With CONFIG_NET_IPv4 this function gives only IPv4 addresses, as
+ *   gethostbyname() does.  Use gethostbyname2_r() for IPv6.
+ *
  * Input Parameters:
  *   name - The name of the host to find.
  *   host - Caller provided location to return the host data.
@@ -69,7 +74,7 @@ int gethostbyname_r(FAR const char *name,
                     size_t buflen, FAR struct hostent **result,
                     FAR int *h_errnop)
 {
-  return gethostbyname2_r(name, AF_UNSPEC,
+  return gethostbyname2_r(name, NETDB_HOSTBYNAME_FAMILY,
                           host, buf, buflen, result, h_errnop);
 }
 

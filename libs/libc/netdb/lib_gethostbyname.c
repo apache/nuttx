@@ -28,6 +28,8 @@
 
 #include <netdb.h>
 
+#include "netdb/lib_netdb.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -46,6 +48,10 @@
  *   and its struct in_addr equivalent into the h_addr_list[0] field of the
  *   returned hostent structure.
  *
+ *   With CONFIG_NET_IPv4 this function gives only IPv4 addresses, also on
+ *   a system that has IPv6: programs copy h_addr_list[0] into a struct
+ *   sockaddr_in.  Use getaddrinfo() or gethostbyname2() for IPv6.
+ *
  * Input Parameters:
  *   name - The name of the host to find.
  *
@@ -62,6 +68,6 @@
 
 FAR struct hostent *gethostbyname(FAR const char *name)
 {
-  return gethostbyname2(name, AF_UNSPEC);
+  return gethostbyname2(name, NETDB_HOSTBYNAME_FAMILY);
 }
 
