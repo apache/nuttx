@@ -226,7 +226,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   size_t size;
   int ch;
   int star;
-  unsigned char len;
+  unsigned int len;
   int total_len = 0;
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
