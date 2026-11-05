@@ -54,6 +54,7 @@ typedef uint32_t pollevent_t;
 
 /* The poll callback type */
 
+struct file;
 struct pollfd_s;
 typedef CODE void (*pollcb_t)(FAR struct pollfd_s *fds);
 
@@ -69,6 +70,10 @@ struct pollfd_s
   FAR void    *arg;     /* The poll callback function argument */
   pollcb_t     cb;      /* The poll callback function */
   FAR void    *priv;    /* For use by drivers */
+
+  /* The file of the setup, for poll() itself */
+
+  FAR struct file *filep;
 };
 
 /****************************************************************************
