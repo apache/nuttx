@@ -2498,7 +2498,7 @@ Connect the HX711 to the STM32F4 board using the following pins:
     gain................: 128
     value per unit......: 0
     nsh> hx711 -v 813 -t 10
-    Taring with *float*g precision
+    Taring with ?g precision
     nsh> hx711 -r 10
     -2
     0
