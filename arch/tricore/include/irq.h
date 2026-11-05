@@ -45,7 +45,6 @@
 
 #include <arch/chip/irq.h>
 #include <arch/arch.h>
-#include <IfxCpu_Intrinsics.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
@@ -242,7 +241,10 @@ noinstrument_function static inline_function uintptr_t up_getsp(void)
 
 noinstrument_function static inline_function irqstate_t up_irq_save(void)
 {
-  return __disable_and_save();
+  irqstate_t flags;
+
+  __asm__ volatile ("disable %0" : "=d"(flags) : : "memory");
+  return flags;
 }
 
 /****************************************************************************
@@ -256,7 +258,7 @@ noinstrument_function static inline_function irqstate_t up_irq_save(void)
 noinstrument_function static inline_function
 void up_irq_restore(irqstate_t flags)
 {
-  __restore(flags);
+  __asm__ volatile ("restore %0" : : "d"(flags) : "memory");
 }
 
 /****************************************************************************
