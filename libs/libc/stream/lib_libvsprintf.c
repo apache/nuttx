@@ -692,7 +692,7 @@ flt_oper:
             }
           else
             {
-              ndigs = prec;
+              ndigs = prec != 0 ? prec : 1;
               ndecimal = 0;
             }
 
