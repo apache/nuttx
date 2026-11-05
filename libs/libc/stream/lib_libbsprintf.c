@@ -38,25 +38,25 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
                  FAR const void *buf)
 {
   begin_packed_struct union
-    {
-      char c;
-      char s[1];
-      short int si;
-      int i;
-      long l;
-      long long ll;
-      intmax_t im;
-      size_t sz;
-      ptrdiff_t pd;
-      uintptr_t p;
+  {
+    char c;
+    char s[1];
+    short int si;
+    int i;
+    long l;
+    long long ll;
+    intmax_t im;
+    size_t sz;
+    ptrdiff_t pd;
+    uintptr_t p;
 #ifdef CONFIG_HAVE_DOUBLE
-      float f;
-      double d;
+    float f;
+    double d;
 #  ifdef CONFIG_HAVE_LONG_DOUBLE
-      long double ld;
+    long double ld;
 #  endif
 #endif
-    }
+  }
 
   end_packed_struct *var;
   FAR const char *prec = NULL;
