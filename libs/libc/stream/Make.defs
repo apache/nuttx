@@ -38,7 +38,7 @@ CSRCS += lib_bufferedoutstream.c
 endif
 
 ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
-CSRCS += lib_dtoa_engine.c lib_dtoa_data.c
+CSRCS += lib_dtoa_bits.c
 endif
 
 ifeq ($(CONFIG_LIBC_PRINTF_HEXFLOAT),y)
