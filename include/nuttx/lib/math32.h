@@ -479,11 +479,16 @@ do \
 } \
 while(0)
 
-/* Helper function to calculate 2 64-bit unsigned integers multiplication
- * The result is the highest half of the 128-bit unsigned integer.
+/* UMULH: high 64 bits of a * b.  Architectures may override it with a
+ * native or assembly implementation via up_umulh64(), which must
+ * evaluate both arguments.
  */
 
-static inline_function uint64_t invdiv_umulh64(uint64_t a, uint64_t b)
+#ifdef up_umulh64
+#  define umulh64(a, b) up_umulh64(a, b)
+#else
+
+static inline_function uint64_t umulh64(uint64_t a, uint64_t b)
 {
 #ifndef __SIZEOF_INT128__
   /* If the compiler do not support uint128_t */
@@ -502,21 +507,14 @@ static inline_function uint64_t invdiv_umulh64(uint64_t a, uint64_t b)
 
   return m4 + (m2 >> 32) + (m3 >> 32) + (c >> 32);
 #else
-  /* This code will be compiled to UMULH instruction
-   * on the architectures like x86_64 and AArch64.
-   * The UMULH instruction can calculate the highest half
-   * of the 128-bit multiplication result.
-   * It is faster than any of software implementation.
-   * If the compiler do not support uint128_t, it is better to manually
-   * implement this function using UMULH instructions via
-   * the inline assembly.
-   */
+  /* Compiles to a single UMULH instruction on x86_64 and AArch64. */
 
   __uint128_t a128 = a;
   __uint128_t res128 = a128 * b;
   return res128 >> 64;
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: invdiv_init_param64
@@ -594,12 +592,11 @@ uint64_t invdiv_u64(uint64_t n, FAR const invdiv_param64_t *ip)
   uint8_t  sh1 = 1;
   uint8_t  sh2 = ip->shift;
 
-  /* Calculate the 128-bit mres = 64-bit n * 64-bit m, where t1 = mres >> 64.
-   * Please do not use `umul64_const` or `umul64` here.
-   * The `invdiv_umulh64` has significant better performance over them.
+  /* t1 is the high half of the 128-bit product n * m.  Both operands
+   * are runtime values here, so umulh64() is the right primitive.
    */
 
-  t1 = invdiv_umulh64(n, m);
+  t1 = umulh64(n, m);
   t2 = (n - t1) >> sh1;
 
   return (t1 + t2) >> sh2;
