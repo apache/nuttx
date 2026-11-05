@@ -94,6 +94,14 @@ config LIBC_PRINTF_LONG_LONG
 		because the timestamps of syslog and the times in /proc print with
 		%jd.
 
+config LIBC_PRINTF_ALT_FORM
+	bool "Enable the # flag in printf"
+	default !LIBC_PRINTF_MINIMAL
+	---help---
+		Enables the alternative form: 0x for %#x, 0 for %#o, and the point
+		for %#.0f.  Without it, printf() ignores the flag, so %#x of 255
+		prints "ff".  %p keeps its 0x.
+
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
 	default LIBC_PRINTF_FULL || (!DEFAULT_SMALL && ARCH_FPU && !LIBC_PRINTF_MINIMAL)
