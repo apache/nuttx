@@ -21,7 +21,7 @@ The board features:
 - USB OTG FS with Type-C connector,
 - Serial Wire Debug header for use with an external SWD/JTAG adapter.
 
-LEDs
+LED
 ====
 
 The WeAct STM32G0B1 board has only one software controllable LED on PC6.
@@ -31,7 +31,7 @@ enabled.
 If enabled the LED is simply turned on when the board boots
 successfully, and is blinking on panic / assertion failed.
 
-Buttons
+Button
 =======
 
 The WeAct STM32G0B1 board has only one button on PC13.
@@ -56,3 +56,14 @@ nsh
 
 Configures the NuttShell (nsh) located at apps/examples/nsh. This
 configuration enables a serial console on UART3.
+
+userled
+-------
+
+This is a config example to blink onboard led with userled driver and leds example.
+
+buttons
+-------
+
+This is a config example to test onboard user button with input driver and buttons example in signal mode.
+
