@@ -127,7 +127,8 @@ Data Frame Format
    │ 2 byte │ 2 byte │ 2 byte │ 2 byte │   N bytes    │
    └────────┴────────┴────────┴────────┴──────────────┘
 
-- crc: CRC16 checksum (optional, enabled via CONFIG_RPMSG_PORT_UART_CRC)
+- crc: 16-bit XOR checksum of the rest of the frame, see ``xorsum16()``
+  (optional, enabled via CONFIG_RPMSG_PORT_UART_CRC)
 - cmd: Command field (unused for data frames, set to 0)
 - avail: Available space (unused for data frames, set to 0)
 - len: Total length including header
