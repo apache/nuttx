@@ -99,9 +99,9 @@
 #define INT_FAST8_MAX       INT8_MAX
 #define UINT_FAST8_MAX      UINT8_MAX
 
-#define INT_FAST16_MIN      INT16_MIN
-#define INT_FAST16_MAX      INT16_MAX
-#define UINT_FAST16_MAX     UINT16_MAX
+#define INT_FAST16_MIN      INT_MIN
+#define INT_FAST16_MAX      INT_MAX
+#define UINT_FAST16_MAX     UINT_MAX
 
 #ifdef __INT24_DEFINED
 #  define INT_FAST24_MIN    INT24_MIN
