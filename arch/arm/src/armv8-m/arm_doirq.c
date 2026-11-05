@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <assert.h>
 
@@ -34,11 +35,39 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 #include <sched/sched.h>
+#include "irq/irq.h"
 
 #include "arm_internal.h"
 #include "exc_return.h"
 #include "nvic.h"
 #include "psr.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+/****************************************************************************
+ * Name: arm_pendsv_attached
+ *
+ * Description:
+ *   With high priority interrupts, PendSV is the way a high priority
+ *   interrupt gets back into the OS, so a handler may be attached to it.
+ *   But the OS also pends PendSV itself (up_schedule_sigaction() to deliver
+ *   a signal to the running task, exception_direct()).  So PendSV is only
+ *   dispatched if a handler was attached: otherwise it would end in
+ *   irq_unexpected_isr() and a kernel panic.
+ *
+ ****************************************************************************/
+
+static inline bool arm_pendsv_attached(void)
+{
+  int ndx = IRQ_TO_NDX(NVIC_IRQ_PENDSV);
+
+  return ndx >= 0 && g_irqvector[ndx].handler != NULL &&
+         g_irqvector[ndx].handler != irq_unexpected_isr;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -94,9 +123,12 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   if (irq == NVIC_IRQ_PENDSV)
     {
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
-      /* Dispatch the PendSV interrupt */
+      /* Dispatch the PendSV interrupt, if a handler is attached */
 
-      irq_dispatch(irq, regs);
+      if (arm_pendsv_attached())
+        {
+          irq_dispatch(irq, regs);
+        }
 #endif
 
       up_irq_save();
