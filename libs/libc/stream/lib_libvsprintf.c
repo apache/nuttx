@@ -146,6 +146,10 @@
 
 #define FL_INT_UNAVAIL       (FL_INT_PREC_UNAVAIL | FL_INT_SHORT_UNAVAIL)
 
+/* Where long has the size of int, read it as an int: the code is smaller */
+
+#define FL_LONG_READ       (sizeof(long) != sizeof(int) ? FL_LONG : 0)
+
 /* A value longer than long has output only with this option */
 
 #if defined(CONFIG_LIBC_PRINTF_LONG_LONG) || ULLONG_MAX == ULONG_MAX
@@ -1393,7 +1397,7 @@ str_lpad:
                 }
             }
           else
-          if ((flags & FL_LONG) != 0)
+          if ((flags & FL_LONG_READ) != 0)
             {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
@@ -1488,7 +1492,7 @@ str_lpad:
                 }
             }
           else
-          if ((flags & FL_LONG) != 0)
+          if ((flags & FL_LONG_READ) != 0)
             {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
