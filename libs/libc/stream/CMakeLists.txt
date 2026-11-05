@@ -54,7 +54,7 @@ if(NOT CONFIG_STREAM_OUT_BUFFER_SIZE EQUAL 0)
 endif()
 
 if(CONFIG_LIBC_FLOATINGPOINT)
-  list(APPEND SRCS lib_dtoa_engine.c lib_dtoa_data.c)
+  list(APPEND SRCS lib_dtoa_bits.c)
 endif()
 
 if(CONFIG_LIBC_PRINTF_HEXFLOAT)
