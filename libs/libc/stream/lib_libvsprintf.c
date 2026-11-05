@@ -73,7 +73,11 @@
 #define FL_ZFILL           0x0001
 #define FL_PLUS            0x0002
 #define FL_SPACE           0x0004
-#define FL_LPAD            0x0008
+#ifdef CONFIG_LIBC_PRINTF_LEFT_JUSTIFY
+#  define FL_LPAD          0x0008
+#else
+#  define FL_LPAD          0      /* The compiler removes its code */
+#endif
 #define FL_ALT             0x0010
 
 #define FL_ARGNUMBER       0x0020
@@ -1723,7 +1727,7 @@ tail:
 
       /* Tail is possible.  */
 
-      if (width > 0)
+      if (FL_LPAD != 0 && width > 0)
         {
           stream_repeat(' ', width, stream);
         }

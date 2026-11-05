@@ -108,6 +108,13 @@ config LIBC_PRINTF_OCTAL
 	---help---
 		Without it, printf() reads the argument of %o and prints "?".
 
+config LIBC_PRINTF_LEFT_JUSTIFY
+	bool "Enable the - flag in printf"
+	default y
+	---help---
+		Enables left-justified output, as in %-5d.  Without it, printf()
+		ignores the flag and pads on the left.
+
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
 	default LIBC_PRINTF_FULL || (!DEFAULT_SMALL && ARCH_FPU && !LIBC_PRINTF_MINIMAL)
