@@ -291,6 +291,19 @@ RUN mkdir -p riscv-none-elf-gcc && \
   | tar -C riscv-none-elf-gcc --strip-components 1 -xz
 
 ###############################################################################
+# Build image for tool required by RH850 builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-rh850
+# Download the RH850 GCC toolchain and qemu-system-rh850 prebuilt by Linumiz
+RUN mkdir -p v850-elf-gcc && \
+  curl -s -L --fail "https://github.com/linumiz/rh850-gcc-toolchain/releases/download/v1.0.0/v850-elf-toolchain-linux-x86_64.tar.gz" \
+  | tar -C v850-elf-gcc -xz && \
+  rm -rf v850-elf-gcc/share
+RUN mkdir -p qemu-rh850 && \
+  curl -s -L --fail "https://github.com/linumiz/qemu-rh850/releases/download/v1.0.0/qemu-rh850-linux-x86_64.tar.gz" \
+  | tar -C qemu-rh850 -xz
+
+###############################################################################
 # Build image for tool required by SPARC builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-sparc
@@ -522,6 +535,11 @@ ENV PATH="/tools/renesas-toolchain/rx-elf-gcc/bin:$PATH"
 COPY --from=nuttx-toolchain-riscv /tools/riscv-none-elf-gcc/ riscv-none-elf-gcc/
 ENV PATH="/tools/riscv-none-elf-gcc/bin:$PATH"
 
+# RH850 toolchain and QEMU
+COPY --from=nuttx-toolchain-rh850 /tools/v850-elf-gcc/ v850-elf-gcc/
+COPY --from=nuttx-toolchain-rh850 /tools/qemu-rh850/ qemu-rh850/
+ENV PATH="/tools/v850-elf-gcc/bin:/tools/qemu-rh850/bin:$PATH"
+
 # SPARC toolchain
 COPY --from=nuttx-toolchain-sparc /tools/sparc-gaisler-elf-gcc/ sparc-gaisler-elf-gcc/
 ENV PATH="/tools/sparc-gaisler-elf-gcc/bin:$PATH"
@@ -579,6 +597,7 @@ RUN mkdir -p /ccache && \
   ln -sf `which ccache` /tools/ccache/bin/g++ && \
   ln -sf `which ccache` /tools/ccache/bin/p32-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/rx-elf-gcc && \
+  ln -sf `which ccache` /tools/ccache/bin/v850-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/riscv-none-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/riscv-none-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/sparc-gaisler-elf-gcc && \

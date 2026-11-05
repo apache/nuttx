@@ -169,6 +169,40 @@ riscv_gcc_toolchain() {
   command riscv-none-elf-gcc --version
 }
 
+rh850_gcc_toolchain() {
+  add_path "${NUTTXTOOLS}"/v850-elf-gcc/bin
+
+  if [ ! -f "${NUTTXTOOLS}/v850-elf-gcc/bin/v850-elf-gcc" ]; then
+    local basefile
+    basefile=v850-elf-toolchain-linux-x86_64
+    cd "${NUTTXTOOLS}"
+    # Download the RH850 GCC toolchain prebuilt by Linumiz
+    curl -O -L -s https://github.com/linumiz/rh850-gcc-toolchain/releases/download/v1.0.0/${basefile}.tar.gz
+    mkdir -p v850-elf-gcc
+    tar -C v850-elf-gcc -xzf ${basefile}.tar.gz
+    rm ${basefile}.tar.gz
+  fi
+
+  command v850-elf-gcc --version
+}
+
+rh850_qemu() {
+  add_path "${NUTTXTOOLS}"/qemu-rh850/bin
+
+  if [ ! -f "${NUTTXTOOLS}/qemu-rh850/bin/qemu-system-rh850" ]; then
+    local basefile
+    basefile=qemu-rh850-linux-x86_64
+    cd "${NUTTXTOOLS}"
+    # Download qemu-system-rh850 prebuilt by Linumiz
+    curl -O -L -s https://github.com/linumiz/qemu-rh850/releases/download/v1.0.0/${basefile}.tar.gz
+    mkdir -p qemu-rh850
+    tar -C qemu-rh850 -xzf ${basefile}.tar.gz
+    rm ${basefile}.tar.gz
+  fi
+
+  command qemu-system-rh850 --version
+}
+
 rx_gcc_toolchain() {
   add_path "${NUTTXTOOLS}"/renesas-toolchain/rx-elf-gcc/bin
 
@@ -332,6 +366,7 @@ setup_links() {
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/g++
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/p32-gcc
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/rx-elf-gcc
+  ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/v850-elf-gcc
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/riscv-none-elf-gcc
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/riscv-none-elf-g++
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/sparc-gaisler-elf-gcc
@@ -350,7 +385,7 @@ install_build_tools() {
   mkdir -p "${NUTTXTOOLS}"
   echo "#!/usr/bin/env sh" > "${NUTTXTOOLS}"/env.sh
 
-  install="arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain bloaty kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rx_gcc_toolchain sparc_gcc_toolchain xtensa_esp_gcc_toolchain util_linux wasi_sdk raspberrypi_pico_sdk"
+  install="arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain bloaty kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rh850_gcc_toolchain rh850_qemu rx_gcc_toolchain sparc_gcc_toolchain xtensa_esp_gcc_toolchain util_linux wasi_sdk raspberrypi_pico_sdk"
 
   oldpath=$(cd . && pwd -P)
   for func in ${install}; do
