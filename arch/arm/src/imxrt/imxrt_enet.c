@@ -2874,19 +2874,35 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
             }
           else
             {
-              /* TODO: Autonegotiation has right now failed. Maybe the Eth
-               * cable is not connected.  PHY chip have mechanisms to
-               * configure link OK. We should leave autconf on, and find a
-               * way to re-configure MCU whenever the link is ready.
+              /* Autonegotiation has failed.  Maybe the Ethernet cable is
+               * not connected.
+               */
+
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+              /* Leave autonegotiation on, so the PHY brings the link up
+               * when the cable is connected.  The link change is then
+               * reported (SIOCMIINOTIFY) and the interface brought up
+               * again, which configures the MAC for the negotiated link
+               * (e.g. by the NETINIT monitor).  Forcing 10Mbps here
+               * can leave the link down for good: a LAN8720A forced to
+               * 10Mbps half duplex was seen to never link with an
+               * autonegotiating partner after the cable was connected.
+               */
+
+              ninfo("%s: Autonegotiation failed [%d] (is cable plugged-in ?)"
+                    ", waiting for the link\n",
+                    BOARD_PHY_NAME, retries);
+#else
+              /* Nothing will reconfigure the MAC when the link comes up
+               * later: stop autonegotiation and use 10Mbps.
                */
 
               ninfo("%s: Autonegotiation failed [%d] (is cable plugged-in ?)"
                     ", default to 10Mbs mode\n",
                     BOARD_PHY_NAME, retries);
 
-              /* Stop auto negotiation */
-
               imxrt_writemii(priv, phyaddr, MII_MCR, 0);
+#endif
             }
 #  if defined(CONFIG_ETH0_PHY_MULTI)
         }
