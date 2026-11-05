@@ -1345,7 +1345,8 @@ str_lpad:
                       {
                         FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
 
-                        lib_bsprintf(stream, vaf->fmt, vaf->va);
+                        total_len += lib_bsprintf(stream, vaf->fmt,
+                                                  vaf->va);
                         continue;
                       }
 
@@ -1356,10 +1357,11 @@ str_lpad:
                         va_list copy;
 
                         va_copy(copy, *vaf->va);
-                        lib_vsprintf(stream, vaf->fmt, copy);
+                        total_len += lib_vsprintf(stream, vaf->fmt, copy);
                         va_end(copy);
 #  else
-                        lib_vsprintf(stream, vaf->fmt, *vaf->va);
+                        total_len += lib_vsprintf(stream, vaf->fmt,
+                                                  *vaf->va);
 #  endif
                         continue;
                       }
