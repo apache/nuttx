@@ -47,6 +47,7 @@
 #endif
 
 #include <assert.h>
+#include <errno.h>
 #include <limits.h>
 #include <string.h>
 #include <wchar.h>
@@ -227,7 +228,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   int ch;
   int star;
   unsigned int len;
-  int total_len = 0;
+  size_t total_len = 0;
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
   int argnumber = 0;
@@ -236,7 +237,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   UNUSED(numargs);
 #endif
 
-  for (; ; )
+  while (total_len <= INT_MAX)
     {
 #ifndef CONFIG_ARCH_ROMGETC
       FAR const char *start = fmt;
@@ -840,6 +841,12 @@ flt_oper:
               flen += 1;
             }
 
+          if (flen > INT_MAX)
+            {
+              total_len = INT_MAX + 1u;
+              goto ret;
+            }
+
           width = width > flen ? width - flen : 0;
 
           /* Output before first digit */
@@ -1044,8 +1051,7 @@ flt_oper:
                 size = wcrtomb(buf, (wchar_t)ch, &ps);
                 if (size == (size_t)-1)
                   {
-                    total_len = -1;
-                    goto ret;
+                    return -1;
                   }
               }
             else
@@ -1105,8 +1111,7 @@ flt_oper:
                     n = wcrtomb(mb, ws[i], &ps);
                     if (n == (size_t)-1)
                       {
-                        total_len = -1;
-                        goto ret;
+                        return -1;
                       }
 
                     if ((flags & FL_PREC) != 0 && size + n > (size_t)prec)
@@ -1464,6 +1469,12 @@ str_lpad:
           len += 1;
         }
 
+      if (len > INT_MAX)
+        {
+          total_len = INT_MAX + 1u;
+          goto ret;
+        }
+
       if ((flags & FL_LPAD) == 0)
         {
           if ((flags & FL_ZFILL) != 0)
@@ -1529,6 +1540,12 @@ tail:
     }
 
 ret:
+  if (total_len > INT_MAX)
+    {
+      set_errno(EOVERFLOW);
+      return -1;
+    }
+
   return total_len;
 }
 
