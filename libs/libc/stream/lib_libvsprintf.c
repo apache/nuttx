@@ -97,6 +97,22 @@
 #define FL_FLTEXP          0x4000
 #define FL_FLTFIX          0x8000
 
+/* The # flag.  FL_ALT stays for the prefix of %p.  A flag that is 0 lets the
+ * compiler remove the code of its feature.
+ */
+
+#ifdef CONFIG_LIBC_PRINTF_ALT_FORM
+#  define FL_ALT_FORM      FL_ALT
+#  define FL_POINTER       FL_ALT
+#else
+#  define FL_ALT_FORM      0
+#  define FL_POINTER       (FL_ALT | FL_ALTHEX)
+#endif
+
+/* Only %x, %X and %p have FL_ALT: then FL_ALTHEX needs no test */
+
+#define FL_ALT_IS_HEX(f)   (FL_ALT_FORM == 0 || ((f) & FL_ALTHEX) != 0)
+
 /* A value longer than long has output only with this option */
 
 #if defined(CONFIG_LIBC_PRINTF_LONG_LONG) || ULLONG_MAX == ULONG_MAX
@@ -467,7 +483,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                     continue;
 
                   case '#':
-                    flags |= FL_ALT;
+                    flags |= FL_ALT_FORM;
                     continue;
 
                   /* XSI thousands grouping: the C locale has no
@@ -971,7 +987,7 @@ put_unavailable:
             {
               flen += prec + 1u;
             }
-          else if ((flags & FL_ALT) != 0)
+          else if ((flags & FL_ALT_FORM) != 0)
             {
               flen += 1;
             }
@@ -1079,7 +1095,7 @@ put_unavailable:
 
               stream_putc(out, stream);
 
-              if ((flags & FL_ALT) != 0 && n == -1)
+              if ((flags & FL_ALT_FORM) != 0 && n == -1)
                 {
                   stream_putc('.', stream);
                 }
@@ -1114,7 +1130,7 @@ put_unavailable:
                       stream_repeat('0', prec - nbytes, stream);
                     }
                 }
-              else if ((flags & FL_ALT) != 0)
+              else if ((flags & FL_ALT_FORM) != 0)
                 {
                   stream_putc('.', stream);
                 }
@@ -1383,7 +1399,7 @@ str_lpad:
                 }
             }
 
-          flags &= ~(FL_NEGATIVE | FL_ALT);
+          flags &= ~(FL_NEGATIVE | FL_ALT_FORM);
           if (x < 0)
             {
               x = -(ultoa_uint_t)x;
@@ -1483,7 +1499,7 @@ str_lpad:
           switch (c)
             {
               case 'u':
-                flags &= ~FL_ALT;
+                flags &= ~FL_ALT_FORM;
                 base = 10;
                 break;
 
@@ -1556,12 +1572,12 @@ str_lpad:
                   }
 #endif
 
-                flags |= FL_ALT;
+                flags |= FL_POINTER;
 
                 /* no break */
 
               case 'x':
-                if ((flags & FL_ALT) != 0)
+                if ((flags & FL_ALT_FORM) != 0)
                   {
                     flags |= FL_ALTHEX;
                   }
@@ -1570,7 +1586,7 @@ str_lpad:
                 break;
 
               default: /* 'X' */
-                if ((flags & FL_ALT) != 0)
+                if ((flags & FL_ALT_FORM) != 0)
                   {
                     flags |= (FL_ALTHEX | FL_ALTUPP);
                   }
@@ -1599,7 +1615,7 @@ str_lpad:
           if (len < prec)
             {
               len = prec;
-              if ((flags & FL_ALT) != 0 && (flags & FL_ALTHEX) == 0)
+              if ((flags & FL_ALT_FORM) != 0 && !FL_ALT_IS_HEX(flags))
                 {
                   flags &= ~FL_ALT;
                 }
@@ -1612,14 +1628,14 @@ str_lpad:
            * "0" from the flag, and a hexadecimal value has no prefix.
            */
 
-          if (c == 0 ? (flags & FL_ALTHEX) != 0 : buf[c - 1] == '0')
+          if (c == 0 ? FL_ALT_IS_HEX(flags) : buf[c - 1] == '0')
             {
               flags &= ~(FL_ALT | FL_ALTHEX | FL_ALTUPP);
             }
           else
             {
               len += 1;
-              if ((flags & FL_ALTHEX) != 0)
+              if (FL_ALT_IS_HEX(flags))
                 {
                   len += 1;
                 }
@@ -1660,9 +1676,10 @@ str_lpad:
       if ((flags & FL_ALT) != 0)
         {
           stream_putc('0', stream);
-          if ((flags & FL_ALTHEX) != 0)
+          if (FL_ALT_IS_HEX(flags))
             {
-              stream_putc(flags & FL_ALTUPP ? 'X' : 'x', stream);
+              stream_putc(FL_ALT_FORM != 0 && (flags & FL_ALTUPP) != 0 ?
+                          'X' : 'x', stream);
             }
         }
       else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
