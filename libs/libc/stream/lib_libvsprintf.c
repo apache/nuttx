@@ -662,6 +662,7 @@ set_star:
           double value;
           int exp;              /* Exponent of master decimal digit */
           int n;
+          unsigned int flen;    /* Length of the conversion */
           uint8_t sign;         /* Sign character (or 0) */
           unsigned int ndigs;   /* Number of digits to convert */
           int ndecimal;         /* Digits after decimal (for 'f' format), 0 if
@@ -814,28 +815,28 @@ flt_oper:
 
           if ((flags & FL_FLTFIX) != 0)
             {
-              n = (exp > 0 ? exp + 1 : 1);
+              flen = (exp > 0 ? exp + 1 : 1);
             }
           else
             {
-              n = 5;              /* 1e+00 */
+              flen = 5;           /* 1e+00 */
             }
 
           if (sign != 0)
             {
-              n += 1;
+              flen += 1;
             }
 
           if (prec != 0)
             {
-              n += prec + 1;
+              flen += prec + 1u;
             }
           else if ((flags & FL_ALT) != 0)
             {
-              n += 1;
+              flen += 1;
             }
 
-          width = width > n ? width - n : 0;
+          width = width > flen ? width - flen : 0;
 
           /* Output before first digit */
 
@@ -860,6 +861,7 @@ flt_oper:
             {
               /* 'f' format */
 
+              unsigned int uexp = exp;
               char out;
 
               /* At this point, we should have exp exponent of leftmost digit
@@ -880,7 +882,7 @@ flt_oper:
 
                   /* Pull digits from buffer when in-range, otherwise use 0 */
 
-                  if (0 <= exp - n && exp - n < ndigs)
+                  if (uexp - n < ndigs)
                     {
                       out = _dtoa.digits[exp - n];
                     }
@@ -901,10 +903,10 @@ flt_oper:
                       while (n != -1)
                         {
                           int next = n - 1;
-                          int offset = exp - n;
+                          unsigned int offset = uexp - n;
 
                           if (next < -prec ||
-                              (0 <= offset && offset < ndigs &&
+                              (offset < ndigs &&
                                _dtoa.digits[offset] != '0'))
                             {
                               break;
