@@ -820,6 +820,10 @@ flt_oper:
           else
             {
               flen = 5;           /* 1e+00 */
+              if (exp >= 100 || exp <= -100)
+                {
+                  flen++;
+                }
             }
 
           if (sign != 0)
