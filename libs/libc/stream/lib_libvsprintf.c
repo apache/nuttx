@@ -109,9 +109,16 @@
 #  define FL_POINTER       (FL_ALT | FL_ALTHEX)
 #endif
 
+#ifdef CONFIG_LIBC_PRINTF_OCTAL
+#  define HAVE_OCTAL_OUTPUT 1
+#else
+#  define HAVE_OCTAL_OUTPUT 0
+#endif
+
 /* Only %x, %X and %p have FL_ALT: then FL_ALTHEX needs no test */
 
-#define FL_ALT_IS_HEX(f)   (FL_ALT_FORM == 0 || ((f) & FL_ALTHEX) != 0)
+#define FL_ALT_IS_HEX(f)   (FL_ALT_FORM == 0 || !HAVE_OCTAL_OUTPUT || \
+                            ((f) & FL_ALTHEX) != 0)
 
 /* A value longer than long has output only with this option */
 
@@ -1504,6 +1511,11 @@ str_lpad:
                 break;
 
               case 'o':
+                if (!HAVE_OCTAL_OUTPUT)
+                  {
+                    goto put_unavailable;
+                  }
+
                 base = 8;
                 break;
 
