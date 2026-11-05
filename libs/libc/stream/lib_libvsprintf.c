@@ -663,14 +663,13 @@ set_star:
           int exp;              /* Exponent of master decimal digit */
           int n;
           uint8_t sign;         /* Sign character (or 0) */
-          uint8_t ndigs;        /* Number of digits to convert */
-          uint8_t ndecimal;     /* Digits after decimal (for 'f' format), 0 if
+          unsigned int ndigs;   /* Number of digits to convert */
+          int ndecimal;         /* Digits after decimal (for 'f' format), 0 if
                                  * no limit */
 
           flags &= ~FL_FLTUPP;
 
 flt_oper:
-          ndigs = 0;
           if ((flags & FL_PREC) == 0)
             {
               prec = 6;
@@ -678,27 +677,27 @@ flt_oper:
 
           flags &= ~(FL_FLTEXP | FL_FLTFIX);
 
+          ndigs = MIN(prec, DTOA_MAX_DIG);
+          ndecimal = 0;
+
           if (c == 'e')
             {
-              ndigs = prec + 1;
-              ndecimal = 0;
+              if (ndigs < DTOA_MAX_DIG)
+                {
+                  ndigs++;
+                }
+
               flags |= FL_FLTEXP;
             }
           else if (c == 'f')
             {
+              ndecimal = ndigs;
               ndigs = DTOA_MAX_DIG;
-              ndecimal = prec;
               flags |= FL_FLTFIX;
             }
-          else
+          else if (ndigs == 0)
             {
-              ndigs = prec != 0 ? prec : 1;
-              ndecimal = 0;
-            }
-
-          if (ndigs > DTOA_MAX_DIG)
-            {
-              ndigs = DTOA_MAX_DIG;
+              ndigs = 1;
             }
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
