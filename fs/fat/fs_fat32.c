@@ -1072,6 +1072,11 @@ static int fat_get_sectors(FAR struct file *filep, bool read)
     {
       cluster = fat_extendchain(fs, cluster);
 
+      if (cluster == 0)
+        {
+          return -ENOSPC;
+        }
+
       if (cluster < 2 || cluster >= fs->fs_nclusters + 2)
         {
           return -EIO;
@@ -1094,6 +1099,11 @@ static int fat_get_sectors(FAR struct file *filep, bool read)
   if (i == new_num_clu - 1)
     {
       cluster = fat_extendchain(fs, cluster);
+
+      if (cluster == 0)
+        {
+          return -ENOSPC;
+        }
 
       if (cluster < 2 || cluster >= fs->fs_nclusters + 2)
         {
