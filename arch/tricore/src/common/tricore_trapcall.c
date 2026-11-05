@@ -106,6 +106,16 @@
 
 static struct tricore_trap_s g_trapinfo;
 
+/* FCU pool, also read by tricore_fcu_entry in tricore_vectors.S/.asm */
+
+uintptr_t *g_tricore_fcu_pool;
+static size_t g_tricore_fcu_num;
+
+#if CONFIG_TRICORE_FCU_CSA_NUM > 0
+static uintptr_t g_fcu_csa[CONFIG_TRICORE_FCU_CSA_NUM * TC_CONTEXT_REGS]
+  aligned_data(TC_CONTEXT_SIZE);
+#endif
+
 /* Bus trap hook for safety test modules (e.g., BusMonTst). */
 
 static tricore_bustrap_hook_t g_bustrap_hook;
@@ -512,6 +522,79 @@ void tricore_trapcall(volatile void *trap)
 }
 
 /****************************************************************************
+ * Name: tricore_fcu_register_pool
+ *
+ * Description:
+ *   Register the context save areas that the free context list underflow
+ *   (FCU) trap uses to report the trap when no free CSA is left.  The pool
+ *   is linked only when the trap happens, so it may also be RAM that is in
+ *   use until then.
+ *
+ * Input Parameters:
+ *   base - 64-byte aligned start of the pool
+ *   num  - Number of context save areas, at least 20: two for the trapped
+ *          context, the rest for the panic path
+ *
+ ****************************************************************************/
+
+void tricore_fcu_register_pool(void *base, size_t num)
+{
+  DEBUGASSERT(base != NULL);
+  DEBUGASSERT(((uintptr_t)base & (TC_CONTEXT_SIZE - 1)) == 0);
+
+  g_tricore_fcu_num  = num;
+  g_tricore_fcu_pool = base;
+}
+
+/****************************************************************************
+ * Name: tricore_fcu_recover
+ *
+ * Description:
+ *   Entered by a jump from tricore_fcu_entry, after the trapped upper and
+ *   lower context were saved into the first two CSAs of the FCU pool.
+ *   Link the rest of the pool into the free context list, point PCXI at
+ *   the saved lower context and report the trap through the normal trap
+ *   entry, as a context management trap with TIN 4.
+ *
+ ****************************************************************************/
+
+noinstrument_function void tricore_fcu_recover(void)
+{
+  uintptr_t *csa = g_tricore_fcu_pool;
+  size_t i;
+
+  for (i = 2; i < g_tricore_fcu_num - 1; i++)
+    {
+      csa[i * TC_CONTEXT_REGS + REG_LPCXI] =
+        tricore_addr2csa(&csa[(i + 1) * TC_CONTEXT_REGS]);
+    }
+
+  csa[(g_tricore_fcu_num - 1) * TC_CONTEXT_REGS + REG_LPCXI] = 0;
+  csa[TC_CONTEXT_REGS + REG_LPCXI] = tricore_addr2csa(csa) | PCXI_UL;
+
+  tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(&csa[TC_CONTEXT_REGS]));
+  tricore_mtcr(TRICORE_CPU_FCX,
+               tricore_addr2csa(&csa[2 * TC_CONTEXT_REGS]));
+  UP_ISB();
+
+  /* A11 is the trap return address, from the saved upper context */
+
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
+  __asm__ volatile ("ld.a a11, [%0]12\n\t"
+                    "mov d15, #4\n\t"
+                    "mov d5, #3\n\t"
+                    "j tricore_trap_entry\n\t" : : "a"(csa));
+#else
+  __asm__ volatile ("ld.a %%a11, [%0]12\n\t"
+                    "mov %%d15, 4\n\t"
+                    "mov %%d5, 3\n\t"
+                    "j tricore_trap_entry\n\t" : : "a"(csa));
+#endif
+
+  for (; ; );
+}
+
+/****************************************************************************
  * Function:  tricore_trapinit
  *
  * Description:
@@ -521,6 +604,10 @@ void tricore_trapcall(volatile void *trap)
 
 void tricore_trapinit(void)
 {
+#if CONFIG_TRICORE_FCU_CSA_NUM > 0
+  tricore_fcu_register_pool(g_fcu_csa, CONFIG_TRICORE_FCU_CSA_NUM);
+#endif
+
 #ifdef CONFIG_COREDUMP
   coredump_add_memory_region(&g_trapinfo, sizeof(g_trapinfo),
                              PF_REGISTER);

@@ -123,6 +123,16 @@ config CPU_COREID
 	default 0
 	range 0 6
 
+config TRICORE_FCU_CSA_NUM
+	int "Context save areas for the FCU trap"
+	default 0
+	---help---
+		Context save areas reserved for a free context list underflow
+		(FCU) trap, so that the trap can still be reported when no free
+		context save area is left.  0 reserves none, then the core stops
+		in the trap unless the board passes its own pool to
+		tricore_fcu_register_pool.  At least 20 are needed.
+
 if ARCH_CHIP_TC3XX
 source "arch/tricore/src/tc3xx/Kconfig"
 endif

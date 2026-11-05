@@ -201,6 +201,8 @@ void tricore_svcall(volatile void *trap);
 void tricore_trapcall(volatile void *trap);
 void tricore_trapinit(void);
 void tricore_bustrap_register_hook(tricore_bustrap_hook_t hook);
+void tricore_fcu_register_pool(void *base, size_t num);
+void tricore_fcu_recover(void);
 
 /* Context Save Areas *******************************************************/
 

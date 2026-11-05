@@ -29,10 +29,17 @@
 
 	.extern	tricore_trapcall
 	.extern	tricore_svcall
+	.extern	tricore_fcu_recover
+	.extern	g_tricore_fcu_pool
 
 TRAPSLOT	.macro	cls, entry
 	svlcx
 	mov	d5, #cls
+	j	entry
+	.align	32
+	.endm
+
+TRAPJUMP	.macro	entry
 	j	entry
 	.align	32
 	.endm
@@ -46,7 +53,7 @@ label:
 	TRAPSLOT	0, tricore_trap_entry
 	TRAPSLOT	1, tricore_trap_entry
 	TRAPSLOT	2, tricore_trap_entry
-	TRAPSLOT	3, tricore_trap_entry
+	TRAPJUMP	tricore_ctx_entry
 	TRAPSLOT	4, tricore_trap_entry
 	TRAPSLOT	5, tricore_trap_entry
 	TRAPSLOT	6, tricore_syscall_entry
@@ -63,6 +70,7 @@ label:
 ; struct tricore_trap_s: taddr at 0, tid at 4, tclass at 5, tcpu at 6
 
 TRAPENTRY	.macro	name, handler
+	.global	name
 name:
 	sub.a	sp, #8
 	st.a	[sp]0, a11
@@ -85,5 +93,20 @@ name:
 
 	TRAPENTRY	tricore_trap_entry, tricore_trapcall
 	TRAPENTRY	tricore_syscall_entry, tricore_svcall
+
+tricore_ctx_entry:
+	jeq	d15, #4, tricore_fcu_entry
+	svlcx
+	mov	d5, #3
+	j	tricore_trap_entry
+
+tricore_fcu_entry:
+	movh.a	a4, #@HIS(g_tricore_fcu_pool)
+	ld.a	a4, [a4]@LOS(g_tricore_fcu_pool)
+fcu_nopool:
+	jz.a	a4, fcu_nopool
+	stucx	[a4]0
+	stlcx	[a4]64
+	j	tricore_fcu_recover
 
 	.end
