@@ -57,6 +57,10 @@ if(CONFIG_LIBC_FLOATINGPOINT)
   list(APPEND SRCS lib_dtoa_bits.c)
 endif()
 
+if(CONFIG_LIBC_PRINTF_EXACT)
+  list(APPEND SRCS lib_dtoa_big.c)
+endif()
+
 if(CONFIG_LIBC_PRINTF_HEXFLOAT)
   list(APPEND SRCS lib_hexfloat.c)
 endif()

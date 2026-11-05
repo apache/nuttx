@@ -169,6 +169,20 @@ config LIBC_FLOATINGPOINT
 		Without it, printf() takes the argument of %e, %f and %g and
 		prints "?".
 
+config LIBC_PRINTF_EXACT
+	bool "Enable exact floating point in printf"
+	default LIBC_PRINTF_FULL
+	depends on LIBC_FLOATINGPOINT
+	---help---
+		Without it, %e, %f and %g have at most 17 correct significant digits,
+		the digits after them print as 0, and a value very near a tie can
+		round the wrong way.
+
+		With it, all digits of a double are exact and correctly rounded, also
+		%.1074f.  The fast path stays for the usual values, and it proves its
+		digits.  Only the other values use big numbers: about 300 bytes of
+		more stack, and a longer time, on these calls only.
+
 config LIBC_NUMBERED_ARGS
 	bool "Enable numbered arguments in printf"
 	default LIBC_PRINTF_FULL
