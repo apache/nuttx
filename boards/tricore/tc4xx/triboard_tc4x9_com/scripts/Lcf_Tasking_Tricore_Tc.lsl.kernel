@@ -362,7 +362,19 @@ derivative tc4D
         {
             group int_tab_tc (ordered)
             {
-                group (run_addr=(INTTAB)+0x1FE0) select ".text.inttab0.intvec.0ff";
+#if CONFIG_CPU_COREID == 0
+                group (run_addr=(INTTAB)+0x1FE0) select ".text.intvec_cpu0";
+#elif CONFIG_CPU_COREID == 1
+                group (run_addr=(INTTAB)+0x1FE0) select ".text.intvec_cpu1";
+#elif CONFIG_CPU_COREID == 2
+                group (run_addr=(INTTAB)+0x1FE0) select ".text.intvec_cpu2";
+#elif CONFIG_CPU_COREID == 3
+                group (run_addr=(INTTAB)+0x1FE0) select ".text.intvec_cpu3";
+#elif CONFIG_CPU_COREID == 4
+                group (run_addr=(INTTAB)+0x1FE0) select ".text.intvec_cpu4";
+#elif CONFIG_CPU_COREID == 5
+                group (run_addr=(INTTAB)+0x1FE0) select ".text.intvec_cpu5";
+#endif
             }
             "_lc_u_int_tab" = (LCF_INTVEC_START);
             "__INTTAB_CPU0" = (LCF_INTVEC_START);

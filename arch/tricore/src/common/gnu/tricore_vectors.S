@@ -40,6 +40,10 @@
  * so is %sp when the trap switched to the interrupt stack.  Without a pool
  * the core stops in tricore_fcu_entry.
  *
+ * The interrupt vector, one per core, saves the lower context and enters
+ * tricore_doirq the same way.  The startup code sets the priority bits
+ * of BIV, so every interrupt priority enters this one vector.
+ *
  * tasking/tricore_vectors.asm is the same code in the TASKING syntax.
  ****************************************************************************/
 
@@ -79,6 +83,22 @@ tricore_trap_vectors_cpu\cpu:
 	TRAPTAB 4
 	TRAPTAB 5
 
+	.macro	INTVEC cpu
+	.section .intvec_cpu\cpu, "ax", %progbits
+	.p2align 5
+	.global	tricore_int_vector_cpu\cpu
+tricore_int_vector_cpu\cpu:
+	svlcx
+	j	tricore_int_entry
+	.endm
+
+	INTVEC 0
+	INTVEC 1
+	INTVEC 2
+	INTVEC 3
+	INTVEC 4
+	INTVEC 5
+
 	/* struct tricore_trap_s: taddr at 0, tid at 4, tclass at 5, tcpu at 6 */
 
 	.macro	TRAPENTRY name, handler
@@ -106,6 +126,14 @@ tricore_trap_vectors_cpu\cpu:
 
 	TRAPENTRY tricore_trap_entry, tricore_trapcall
 	TRAPENTRY tricore_syscall_entry, tricore_svcall
+
+	.type	tricore_int_entry, %function
+tricore_int_entry:
+	movh.a	%a2, hi:tricore_doirq
+	lea	%a2, [%a2]lo:tricore_doirq
+	jli	%a2
+	rslcx
+	rfe
 
 	.type	tricore_ctx_entry, %function
 tricore_ctx_entry:

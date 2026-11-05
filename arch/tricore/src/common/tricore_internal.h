@@ -190,6 +190,7 @@ extern uintptr_t        _eheap[]; /* End+1 of .heap */
 /* Interrupt ****************************************************************/
 
 void tricore_ack_irq(int irq);
+void tricore_doirq(void);
 
 /* Signal handling **********************************************************/
 
