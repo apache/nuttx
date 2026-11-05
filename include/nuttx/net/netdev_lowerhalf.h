@@ -328,7 +328,7 @@ void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev);
  *
  ****************************************************************************/
 
-#define netdev_lower_quota_load(dev, type) atomic_read(&dev->quota[type])
+#define netdev_lower_quota_load(dev, type) atomic_read(&(dev)->quota_ptr[type])
 
 /****************************************************************************
  * Name: netdev_lower_vlan_add
