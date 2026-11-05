@@ -154,7 +154,6 @@ set(SDK_CSRCS
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Dma/Dma/IfxDma_Dma.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Dma/Std/IfxDma.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Port/Std/IfxPort.c"
-    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Src/Std/IfxSrc.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxCpu_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxStm_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Cpu/Std/IfxCpu.c"
