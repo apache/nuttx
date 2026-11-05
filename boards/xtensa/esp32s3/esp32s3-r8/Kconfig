@@ -1,0 +1,97 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ESP32S3_R8
+
+config ESP32S3_STORAGE_MTD_OFFSET
+	hex "Storage MTD base address in SPI Flash"
+	default 0x180000
+	depends on ESP32S3_MTD
+	---help---
+		MTD base address in SPI Flash.
+
+config ESP32S3_STORAGE_MTD_SIZE
+	hex "Storage MTD size in SPI Flash"
+	default 0x100000
+	range 0x0 0x400000 if ESP32S3_FLASH_4M
+	range 0x0 0x800000 if ESP32S3_FLASH_8M
+	range 0x0 0x1000000 if ESP32S3_FLASH_16M
+	range 0x0 0x2000000 if ESP32S3_FLASH_32M
+	depends on ESP32S3_MTD
+	---help---
+		MTD size in SPI Flash.
+
+choice ESP32S3_SPIFLASH_FS
+	prompt "Mount SPI Flash MTD on bring-up"
+	default ESP32S3_SPIFLASH_SMARTFS
+	depends on ESP32S3_MTD
+	optional
+	---help---
+		Mount the SPI Flash MTD with the selected File System format on board
+		bring-up.
+		If not selected, the MTD will be registered as a device node on /dev.
+
+config ESP32S3_SPIFLASH_SMARTFS
+	bool "SmartFS"
+	select FS_SMARTFS
+	select MTD_SMART
+
+config ESP32S3_SPIFLASH_NXFFS
+	bool "NXFFS"
+	select FS_NXFFS
+
+config ESP32S3_SPIFLASH_SPIFFS
+	bool "SPIFFS"
+	select FS_SPIFFS
+
+config ESP32S3_SPIFLASH_LITTLEFS
+	bool "LittleFS"
+	select FS_LITTLEFS
+
+config ESP32S3_R8_LCD
+	bool "Enable ESP32-S3-R8 LCD"
+	default n
+	select ESP32S3_SPI2
+	select SPI_CMDDATA
+	select LCD
+	select LCD_DEV
+	select LCD_ST7789
+	---help---
+		Enable board LCD support, IC is LCD_ST7789V.
+
+config ESP32S3_R8_TOUCHSCREEN
+	bool "Enable ESP32-S3-R8 touchscreen"
+	default n
+	select ESP32S3_I2C0
+	select INPUT
+	select INPUT_FT5X06
+	---help---
+		Enable the board FT5X06 touchscreen on I2C0.
+
+config ESP32S3_R8_QMI8658
+	bool "Enable ESP32-S3-R8 QMI8658 IMU"
+	default n
+	select ESP32S3_I2C0
+	select SENSORS
+	select SENSORS_QMI8658
+	---help---
+		Enable the board QMI8658 accelerometer and gyroscope on I2C0.
+
+config ESP32S3_R8_AUDIO
+	bool "Enable ESP32-S3-R8 audio"
+	default n
+	select DRIVERS_AUDIO
+	select AUDIO
+	select AUDIO_I2S
+	select AUDIO_ES8311
+	select AUDIO_ES7210
+	select AUDIO_DRIVER_SPECIFIC_BUFFERS
+	select ESP32S3_I2C0
+	select ESP32S3_I2S
+	select ESP32S3_I2S0
+	---help---
+		Enable board audio playback and capture support using ES8311 and ES7210.
+
+endif # ARCH_BOARD_ESP32S3_R8
