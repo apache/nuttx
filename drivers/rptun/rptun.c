@@ -1394,8 +1394,14 @@ static int rptun_dev_unlink(FAR struct inode *inode)
       return ret;
     }
 
+  /* Not queued when unlinked by a failed rptun_initialize() */
+
   nxrmutex_lock(&g_rptun_lock);
-  dq_rem(&priv->entry, &g_rptun_priv);
+  if (dq_inqueue(&priv->entry, &g_rptun_priv))
+    {
+      dq_rem(&priv->entry, &g_rptun_priv);
+    }
+
   nxrmutex_unlock(&g_rptun_lock);
 
   remoteproc_remove(&priv->rproc);
@@ -1702,7 +1708,9 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
               if (ret < 0)
                 {
                   unregister_driver(name);
+#ifdef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
                   kmm_free(priv);
+#endif
                   rptunerr("rptun start failed %d\n", ret);
                 }
             }
