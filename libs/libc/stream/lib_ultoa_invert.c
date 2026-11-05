@@ -43,7 +43,7 @@
  * Public Functions
  ****************************************************************************/
 
-FAR char *__ultoa_invert(unsigned long long val, FAR char *str, int base)
+FAR char *__ultoa_invert(ultoa_uint_t val, FAR char *str, int base)
 {
   int upper = 0;
 

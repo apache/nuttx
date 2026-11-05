@@ -81,6 +81,19 @@ config LIBC_PRINTF_FULL
 
 endchoice # printf profile
 
+config LIBC_PRINTF_LONG_LONG
+	bool "Enable 64-bit integers in printf on a 32-bit CPU"
+	default !LIBC_PRINTF_MINIMAL || SYSLOG_TIMESTAMP || FS_PROCFS
+	---help---
+		Enables the output of %lld, %llu, %llx, %jd and the others where
+		long long is longer than long.  Without it, printf() needs no 64-bit
+		division.  It reads the argument and prints "?".  This option has
+		no effect on a CPU where long has 64 bits.
+
+		The Minimal profile leaves it on with SYSLOG_TIMESTAMP or FS_PROCFS,
+		because the timestamps of syslog and the times in /proc print with
+		%jd.
+
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
 	default LIBC_PRINTF_FULL || (!DEFAULT_SMALL && ARCH_FPU && !LIBC_PRINTF_MINIMAL)
