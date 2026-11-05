@@ -51,7 +51,7 @@ STARTUP_OBJS ?= $(HEAD_COBJ)
 # Flat build or kernel-mode objects
 
 ASRCS = $(CHIP_ASRCS) $(CMN_ASRCS)
-AOBJS = $(ASRCS:.S=$(OBJEXT))
+AOBJS = $(ASRCS:$(ASMEXT)=$(OBJEXT))
 
 CSRCS = $(CHIP_CSRCS) $(CMN_CSRCS)
 COBJS = $(CSRCS:.c=$(OBJEXT))
@@ -62,7 +62,7 @@ OBJS = $(AOBJS) $(COBJS)
 # User-mode objects
 
 UASRCS = $(CHIP_UASRCS) $(CMN_UASRCS)
-UAOBJS = $(UASRCS:.S=$(OBJEXT))
+UAOBJS = $(UASRCS:$(ASMEXT)=$(OBJEXT))
 
 UCSRCS = $(CHIP_UCSRCS) $(CMN_UCSRCS)
 UCOBJS = $(UCSRCS:.c=$(OBJEXT))
@@ -129,7 +129,7 @@ all: $(HEAD_COBJ) $(BIN)
 
 .PHONY: board$(DELIM)libboard$(LIBEXT)
 
-$(AOBJS) $(UAOBJS): %$(OBJEXT): %.S
+$(AOBJS) $(UAOBJS): %$(OBJEXT): %$(ASMEXT)
 	$(call ASSEMBLE, $<, $@)
 
 $(COBJS) $(UCOBJS) $(HEAD_COBJ): %$(OBJEXT): %.c
@@ -199,7 +199,7 @@ endif
 
 # Dependencies
 
-makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:$(ASMEXT)=.dds)
 	$(call CATFILE, Make.dep, $^)
 	$(call DELFILE, $^)
 
@@ -229,7 +229,7 @@ distclean:: clean
 ifeq ($(BOARDMAKE),y)
 	$(Q) $(MAKE) -C board distclean
 endif
-	$(call DELFILE, $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds))
+	$(call DELFILE, $(CSRCS:.c=.ddc) $(ASRCS:$(ASMEXT)=.dds))
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 
