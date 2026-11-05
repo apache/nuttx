@@ -268,6 +268,14 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                              FAR const IPTR char *fmt, va_list ap)
            printf_like(4, 0);
 
+/* Not inline, so that the frame of vsprintf_internal has no digits */
+
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+static noinline_function size_t
+vsprintf_float(FAR struct lib_outstream_s *stream, double value,
+               uint16_t flags, int width, int prec, int c);
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -429,6 +437,352 @@ static void vsprintf_store(FAR void *ptr, uint16_t flags, size_t count)
     {
       *(FAR int *)ptr = count;
     }
+}
+#endif
+
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+static size_t vsprintf_putfloat(FAR struct lib_outstream_s *stream,
+                                FAR struct dtoa_s *dtoa, unsigned int ndigs,
+                                uint16_t flags, int width, int prec)
+{
+  size_t total_len = 0;
+  int exp;              /* Exponent of master decimal digit */
+  int n;
+  unsigned int flen;    /* Length of the conversion */
+  unsigned int len;
+  uint8_t sign;         /* Sign character (or 0) */
+  char buf[12];
+
+  exp = dtoa->exp;
+
+  sign = 0;
+  if (dtoa->flags & DTOA_MINUS)
+    {
+      sign = '-';
+    }
+  else if ((flags & FL_PLUS) != 0)
+    {
+      sign = '+';
+    }
+  else if ((flags & FL_SPACE) != 0)
+    {
+      sign = ' ';
+    }
+
+  if (dtoa->flags & (DTOA_NAN | DTOA_INF))
+    {
+      FAR const char *p;
+
+      ndigs = sign ? 4 : 3;
+      if (width > ndigs)
+        {
+          width -= ndigs;
+          if ((flags & FL_LPAD) == 0)
+            {
+              stream_repeat(' ', width, stream);
+              width = 0;
+            }
+        }
+      else
+        {
+          width = 0;
+        }
+
+      if (sign)
+        {
+          stream_putc(sign, stream);
+        }
+
+      if (dtoa->flags & DTOA_NAN)
+        {
+          p = (flags & FL_FLTUPP) != 0 ? g_nan_upper : g_nan_lower;
+        }
+      else
+        {
+          p = (flags & FL_FLTUPP) != 0 ? g_inf_upper : g_inf_lower;
+        }
+
+      stream_puts(p, 3, stream);
+
+      goto tail;
+    }
+
+  if ((flags & (FL_FLTEXP | FL_FLTFIX)) == 0)
+    {
+      /* 'g(G)' format */
+
+      prec = ndigs;
+
+      /* Remove trailing zeros */
+
+      while (ndigs > 0 && dtoa->digits[ndigs - 1] == '0')
+        {
+          ndigs--;
+        }
+
+      if (-4 <= exp && exp < prec)
+        {
+          flags |= FL_FLTFIX;
+
+          if (exp < 0 || ndigs > exp)
+            {
+              prec = ndigs - (exp + 1);
+            }
+          else
+            {
+              prec = 0;
+            }
+        }
+      else
+        {
+          /* Limit displayed precision to available precision */
+
+          prec = ndigs - 1;
+        }
+    }
+
+  /* Conversion result length, width := free space length */
+
+  if ((flags & FL_FLTFIX) != 0)
+    {
+      flen = (exp > 0 ? exp + 1 : 1);
+    }
+  else
+    {
+      flen = 5;           /* 1e+00 */
+      if (exp >= 100 || exp <= -100)
+        {
+          flen++;
+        }
+    }
+
+  if (sign != 0)
+    {
+      flen += 1;
+    }
+
+  if (prec != 0)
+    {
+      flen += prec + 1u;
+    }
+  else if ((flags & FL_ALT_FORM) != 0)
+    {
+      flen += 1;
+    }
+
+  if (flen > INT_MAX)
+    {
+      return INT_MAX + 1u;
+    }
+
+  width = width > flen ? width - flen : 0;
+
+  /* Output before first digit */
+
+  if ((flags & (FL_LPAD | FL_ZFILL)) == 0)
+    {
+      stream_repeat(' ', width, stream);
+      width = 0;
+    }
+
+  if (sign != 0)
+    {
+      stream_putc(sign, stream);
+    }
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      stream_repeat('0', width, stream);
+      width = 0;
+    }
+
+  if ((flags & FL_FLTFIX) != 0)
+    {
+      /* 'f' format */
+
+      unsigned int uexp = exp;
+      char out;
+
+      /* At this point, we should have exp exponent of leftmost digit
+       * in dtoa->digits ndigs number of buffer digits to print prec
+       * number of digits after decimal In the loop, 'n' walks over
+       * the exponent value
+       */
+
+      n = exp > 0 ? exp : 0;    /* Exponent of left digit */
+      do
+        {
+          /* Insert decimal point at correct place */
+
+          if (n == -1)
+            {
+              stream_putc('.', stream);
+            }
+
+          /* Pull digits from buffer when in-range, otherwise use 0 */
+
+          if (uexp - n < ndigs)
+            {
+              out = dtoa->digits[exp - n];
+            }
+          else
+            {
+              out = '0';
+            }
+
+          if (--n < -prec)
+            {
+              break;
+            }
+
+          if (out == '0')
+            {
+              int zeroes = 1;
+
+              while (n != -1)
+                {
+                  int next = n - 1;
+                  unsigned int offset = uexp - n;
+
+                  if (next < -prec ||
+                      (offset < ndigs &&
+                       dtoa->digits[offset] != '0'))
+                    {
+                      break;
+                    }
+
+                  zeroes++;
+                  n = next;
+                }
+
+              stream_repeat('0', zeroes, stream);
+            }
+          else
+            {
+              stream_putc(out, stream);
+            }
+        }
+      while (1);
+
+      if (n == exp && (dtoa->digits[0] > '5' ||
+          (dtoa->digits[0] == '5' && !(dtoa->flags & DTOA_CARRY))))
+        {
+          out = '1';
+        }
+
+      stream_putc(out, stream);
+
+      if ((flags & FL_ALT_FORM) != 0 && n == -1)
+        {
+          stream_putc('.', stream);
+        }
+    }
+  else
+    {
+      /* 'e(E)' format
+       *
+       * Mantissa
+       */
+
+      if (dtoa->digits[0] != '1')
+        {
+          dtoa->flags &= ~DTOA_CARRY;
+        }
+
+      stream_putc(dtoa->digits[0], stream);
+      if (prec > 0)
+        {
+          int nbytes;
+
+          stream_putc('.', stream);
+
+          nbytes = MIN(prec, ndigs > 1 ? ndigs - 1 : 0);
+          if (nbytes > 0)
+            {
+              stream_puts(&dtoa->digits[1], nbytes, stream);
+            }
+
+          if (prec > nbytes)
+            {
+              stream_repeat('0', prec - nbytes, stream);
+            }
+        }
+      else if ((flags & FL_ALT_FORM) != 0)
+        {
+          stream_putc('.', stream);
+        }
+
+      /* Exponent */
+
+      stream_putc(flags & FL_FLTUPP ? 'E' : 'e', stream);
+      ndigs = '+';
+      if (exp < 0 || (exp == 0 && (dtoa->flags & DTOA_CARRY) != 0))
+        {
+          exp = -exp;
+          ndigs = '-';
+        }
+
+      stream_putc(ndigs, stream);
+      len = __ultoa_invert(exp, buf, 10) - buf;
+
+      if (exp >= 0 && exp <= 9)
+        {
+          stream_putc('0', stream);
+        }
+
+      total_len += vsprintf_putnum(stream, buf, len);
+    }
+
+tail:
+  if (FL_LPAD != 0 && width > 0)
+    {
+      stream_repeat(' ', width, stream);
+    }
+
+  return total_len;
+}
+
+static size_t vsprintf_float(FAR struct lib_outstream_s *stream,
+                             double value, uint16_t flags, int width,
+                             int prec, int c)
+{
+  struct dtoa_s dtoa;
+  unsigned int ndigs;   /* Number of digits to convert */
+  int ndecimal;         /* Digits after decimal (for 'f' format), 0 if
+                         * no limit */
+
+  if ((flags & FL_PREC) == 0)
+    {
+      prec = 6;
+    }
+
+  flags &= ~(FL_FLTEXP | FL_FLTFIX);
+
+  ndigs = MIN(prec, DTOA_MAX_DIG);
+  ndecimal = 0;
+
+  if (c == 'e')
+    {
+      if (ndigs < DTOA_MAX_DIG)
+        {
+          ndigs++;
+        }
+
+      flags |= FL_FLTEXP;
+    }
+  else if (c == 'f')
+    {
+      ndecimal = ndigs;
+      ndigs = DTOA_MAX_DIG;
+      flags |= FL_FLTFIX;
+    }
+  else if (ndigs == 0)
+    {
+      ndigs = 1;
+    }
+
+  ndigs = __dtoa_engine(value, &dtoa, ndigs, ndecimal);
+  return vsprintf_putfloat(stream, &dtoa, ndigs, flags, width, prec);
 }
 #endif
 
@@ -643,16 +997,12 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #else
     char __buf[22]; /* Size for -1 in octal, without '\0' */
 #endif
-#ifdef CONFIG_LIBC_FLOATINGPOINT
-    struct dtoa_s __dtoa;
-#endif
 #ifdef CONFIG_LIBC_PRINTF_HEXFLOAT
     struct hexfloat_s __hex;
 #endif
   } u;
 
 #define buf     (u.__buf)
-#define _dtoa   (u.__dtoa)
 #define _hex    (u.__hex)
 
   FAR const char *pnt;
@@ -1160,47 +1510,10 @@ set_star:
       else if ((c >= 'e' && c <= 'g') || c == 'a')
         {
           double value;
-          int exp;              /* Exponent of master decimal digit */
-          int n;
-          unsigned int flen;    /* Length of the conversion */
-          uint8_t sign;         /* Sign character (or 0) */
-          unsigned int ndigs;   /* Number of digits to convert */
-          int ndecimal;         /* Digits after decimal (for 'f' format), 0 if
-                                 * no limit */
 
           flags &= ~FL_FLTUPP;
 
 flt_oper:
-          if ((flags & FL_PREC) == 0)
-            {
-              prec = 6;
-            }
-
-          flags &= ~(FL_FLTEXP | FL_FLTFIX);
-
-          ndigs = MIN(prec, DTOA_MAX_DIG);
-          ndecimal = 0;
-
-          if (c == 'e')
-            {
-              if (ndigs < DTOA_MAX_DIG)
-                {
-                  ndigs++;
-                }
-
-              flags |= FL_FLTEXP;
-            }
-          else if (c == 'f')
-            {
-              ndecimal = ndigs;
-              ndigs = DTOA_MAX_DIG;
-              flags |= FL_FLTFIX;
-            }
-          else if (ndigs == 0)
-            {
-              ndigs = 1;
-            }
-
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
             {
@@ -1240,290 +1553,8 @@ put_unavailable:
               goto str_lpad;
             }
 
-          ndigs = __dtoa_engine(value, &_dtoa, ndigs,
-                                ndecimal);
-          exp = _dtoa.exp;
-
-          sign = 0;
-          if (_dtoa.flags & DTOA_MINUS)
-            {
-              sign = '-';
-            }
-          else if ((flags & FL_PLUS) != 0)
-            {
-              sign = '+';
-            }
-          else if ((flags & FL_SPACE) != 0)
-            {
-              sign = ' ';
-            }
-
-          if (_dtoa.flags & (DTOA_NAN | DTOA_INF))
-            {
-              FAR const char *p;
-
-              ndigs = sign ? 4 : 3;
-              if (width > ndigs)
-                {
-                  width -= ndigs;
-                  if ((flags & FL_LPAD) == 0)
-                    {
-                      stream_repeat(' ', width, stream);
-                      width = 0;
-                    }
-                }
-              else
-                {
-                  width = 0;
-                }
-
-              if (sign)
-                {
-                  stream_putc(sign, stream);
-                }
-
-              if (_dtoa.flags & DTOA_NAN)
-                {
-                  p = (flags & FL_FLTUPP) != 0 ? g_nan_upper : g_nan_lower;
-                }
-              else
-                {
-                  p = (flags & FL_FLTUPP) != 0 ? g_inf_upper : g_inf_lower;
-                }
-
-              stream_puts(p, 3, stream);
-
-              goto tail;
-            }
-
-          if ((flags & (FL_FLTEXP | FL_FLTFIX)) == 0)
-            {
-              /* 'g(G)' format */
-
-              prec = ndigs;
-
-              /* Remove trailing zeros */
-
-              while (ndigs > 0 && _dtoa.digits[ndigs - 1] == '0')
-                {
-                  ndigs--;
-                }
-
-              if (-4 <= exp && exp < prec)
-                {
-                  flags |= FL_FLTFIX;
-
-                  if (exp < 0 || ndigs > exp)
-                    {
-                      prec = ndigs - (exp + 1);
-                    }
-                  else
-                    {
-                      prec = 0;
-                    }
-                }
-              else
-                {
-                  /* Limit displayed precision to available precision */
-
-                  prec = ndigs - 1;
-                }
-            }
-
-          /* Conversion result length, width := free space length */
-
-          if ((flags & FL_FLTFIX) != 0)
-            {
-              flen = (exp > 0 ? exp + 1 : 1);
-            }
-          else
-            {
-              flen = 5;           /* 1e+00 */
-              if (exp >= 100 || exp <= -100)
-                {
-                  flen++;
-                }
-            }
-
-          if (sign != 0)
-            {
-              flen += 1;
-            }
-
-          if (prec != 0)
-            {
-              flen += prec + 1u;
-            }
-          else if ((flags & FL_ALT_FORM) != 0)
-            {
-              flen += 1;
-            }
-
-          if (flen > INT_MAX)
-            {
-              total_len = INT_MAX + 1u;
-              goto ret;
-            }
-
-          width = width > flen ? width - flen : 0;
-
-          /* Output before first digit */
-
-          if ((flags & (FL_LPAD | FL_ZFILL)) == 0)
-            {
-              stream_repeat(' ', width, stream);
-              width = 0;
-            }
-
-          if (sign != 0)
-            {
-              stream_putc(sign, stream);
-            }
-
-          if ((flags & FL_LPAD) == 0)
-            {
-              stream_repeat('0', width, stream);
-              width = 0;
-            }
-
-          if ((flags & FL_FLTFIX) != 0)
-            {
-              /* 'f' format */
-
-              unsigned int uexp = exp;
-              char out;
-
-              /* At this point, we should have exp exponent of leftmost digit
-               * in _dtoa.digits ndigs number of buffer digits to print prec
-               * number of digits after decimal In the loop, 'n' walks over
-               * the exponent value
-               */
-
-              n = exp > 0 ? exp : 0;    /* Exponent of left digit */
-              do
-                {
-                  /* Insert decimal point at correct place */
-
-                  if (n == -1)
-                    {
-                      stream_putc('.', stream);
-                    }
-
-                  /* Pull digits from buffer when in-range, otherwise use 0 */
-
-                  if (uexp - n < ndigs)
-                    {
-                      out = _dtoa.digits[exp - n];
-                    }
-                  else
-                    {
-                      out = '0';
-                    }
-
-                  if (--n < -prec)
-                    {
-                      break;
-                    }
-
-                  if (out == '0')
-                    {
-                      int zeroes = 1;
-
-                      while (n != -1)
-                        {
-                          int next = n - 1;
-                          unsigned int offset = uexp - n;
-
-                          if (next < -prec ||
-                              (offset < ndigs &&
-                               _dtoa.digits[offset] != '0'))
-                            {
-                              break;
-                            }
-
-                          zeroes++;
-                          n = next;
-                        }
-
-                      stream_repeat('0', zeroes, stream);
-                    }
-                  else
-                    {
-                      stream_putc(out, stream);
-                    }
-                }
-              while (1);
-
-              if (n == exp && (_dtoa.digits[0] > '5' ||
-                  (_dtoa.digits[0] == '5' && !(_dtoa.flags & DTOA_CARRY))))
-                {
-                  out = '1';
-                }
-
-              stream_putc(out, stream);
-
-              if ((flags & FL_ALT_FORM) != 0 && n == -1)
-                {
-                  stream_putc('.', stream);
-                }
-            }
-          else
-            {
-              /* 'e(E)' format
-               *
-               * Mantissa
-               */
-
-              if (_dtoa.digits[0] != '1')
-                {
-                  _dtoa.flags &= ~DTOA_CARRY;
-                }
-
-              stream_putc(_dtoa.digits[0], stream);
-              if (prec > 0)
-                {
-                  int nbytes;
-
-                  stream_putc('.', stream);
-
-                  nbytes = MIN(prec, ndigs > 1 ? ndigs - 1 : 0);
-                  if (nbytes > 0)
-                    {
-                      stream_puts(&_dtoa.digits[1], nbytes, stream);
-                    }
-
-                  if (prec > nbytes)
-                    {
-                      stream_repeat('0', prec - nbytes, stream);
-                    }
-                }
-              else if ((flags & FL_ALT_FORM) != 0)
-                {
-                  stream_putc('.', stream);
-                }
-
-              /* Exponent */
-
-              stream_putc(flags & FL_FLTUPP ? 'E' : 'e', stream);
-              ndigs = '+';
-              if (exp < 0 || (exp == 0 && (_dtoa.flags & DTOA_CARRY) != 0))
-                {
-                  exp = -exp;
-                  ndigs = '-';
-                }
-
-              stream_putc(ndigs, stream);
-              len = __ultoa_invert(exp, buf, 10) - buf;
-
-              if (exp >= 0 && exp <= 9)
-                {
-                  stream_putc('0', stream);
-                }
-
-              total_len += vsprintf_putnum(stream, buf, len);
-            }
-
-          goto tail;
+          total_len += vsprintf_float(stream, value, flags, width, prec, c);
+          continue;
         }
 
 #else /* !CONFIG_LIBC_FLOATINGPOINT */
