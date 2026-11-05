@@ -39,6 +39,7 @@
 #endif
 
 #include <arch/barriers.h>
+#include <arch/csfr.h>
 
 /****************************************************************************
  * Pre-processor Definitions
