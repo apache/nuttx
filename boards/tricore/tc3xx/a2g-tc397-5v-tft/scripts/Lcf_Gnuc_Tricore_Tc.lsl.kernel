@@ -180,7 +180,7 @@ SECTIONS
     .COREID_MID(inttab_tc, _0FF) (COREID_LST(__INTTAB_CPU) + 0x1FE0) :
     {
         . = ALIGN(8);
-        KEEP (*(.COREID_MID(intvec_tc, _255)));
+        KEEP (*(.intvec));
         . = ALIGN(0x2000);
     } > pfls
 }

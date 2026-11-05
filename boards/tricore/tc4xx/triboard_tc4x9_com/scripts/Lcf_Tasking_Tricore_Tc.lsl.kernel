@@ -362,7 +362,7 @@ derivative tc4D
         {
             group int_tab_tc (ordered)
             {
-                group (run_addr=(INTTAB)+0x1FE0) select ".text.inttab0.intvec.0ff";
+                group (run_addr=(INTTAB)+0x1FE0) select ".text.intvec";
             }
             "_lc_u_int_tab" = (LCF_INTVEC_START);
             "__INTTAB_CPU0" = (LCF_INTVEC_START);
