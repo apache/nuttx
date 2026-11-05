@@ -55,6 +55,10 @@
   - changed-files:
       - any-glob-to-any-file: 'arch/renesas/**'
 
+"Arch: rh850":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/rh850/**'
+
 "Arch: risc-v":
   - changed-files:
       - any-glob-to-any-file: 'arch/risc-v/**'
@@ -120,6 +124,10 @@
 "Board: renesas":
   - changed-files:
       - any-glob-to-any-file: 'boards/renesas/**'
+
+"Board: rh850":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/rh850/**'
 
 "Board: risc-v":
   - changed-files:
