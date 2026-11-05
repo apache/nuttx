@@ -1451,7 +1451,11 @@ str_lpad:
 
       if ((flags & FL_ALT) != 0)
         {
-          if (buf[c - 1] == '0')
+          /* c is 0 for a value of 0 with a precision of 0: then %#o has a
+           * "0" from the flag, and a hexadecimal value has no prefix.
+           */
+
+          if (c == 0 ? (flags & FL_ALTHEX) != 0 : buf[c - 1] == '0')
             {
               flags &= ~(FL_ALT | FL_ALTHEX | FL_ALTUPP);
             }
