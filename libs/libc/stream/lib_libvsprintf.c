@@ -371,6 +371,12 @@ vsprintf_scan_literal(FAR struct lib_outstream_s *stream,
                       total_len += litlen;
                       lib_stream_puts(stream, start, litlen);
                     }
+
+                  if (c == '\0')
+                    {
+                      total_len++;
+                      lib_stream_putc(stream, '%');
+                    }
                 }
 
               break;
@@ -401,6 +407,17 @@ vsprintf_scan_literal(FAR struct lib_outstream_s *stream,
           c = fmt_char(fmt);
           if (c != '%')
             {
+              if (c == '\0')
+                {
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+                  if (stream != NULL)
+#  endif
+                    {
+                      total_len++;
+                      lib_stream_putc(stream, '%');
+                    }
+                }
+
               break;
             }
         }
