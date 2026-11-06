@@ -21,7 +21,6 @@
 ############################################################################
 
 CHIP_CSRCS += tc3xx_timerisr.c
-CHIP_CSRCS += tc3xx_serial.c
 CHIP_CSRCS += tc3xx_wdt.c
 CHIP_CSRCS += tc3xx_clockconfig.c
 CHIP_CSRCS += tc3xx_start.c

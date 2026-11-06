@@ -23,11 +23,13 @@
 include $(TOPDIR)/Make.defs
 include chip/Make.defs
 include common/Make.defs
+include aurix/Make.defs
 
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common
+INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)aurix
 INCLUDES += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
 
 CPPFLAGS += $(INCLUDES)
@@ -126,6 +128,7 @@ endif
 
 VPATH += chip
 VPATH += common
+VPATH += aurix
 
 all: $(HEAD_OBJ) $(BIN)
 
