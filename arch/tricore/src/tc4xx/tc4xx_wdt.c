@@ -116,8 +116,55 @@ static void tc4xx_wdt_service_one(uintptr_t ctrla, uint32_t pw)
 }
 
 /****************************************************************************
+ * Name: tc4xx_wdt_reload_one
+ *
+ * Description:
+ *   Change the reload value of a watchdog, in the order of the iLLD
+ *   startup code.
+ *
+ ****************************************************************************/
+
+static void tc4xx_wdt_reload_one(uintptr_t ctrla, uint32_t pw,
+                                 uint32_t reload)
+{
+  uintptr_t ctrlb = ctrla + 4;
+  uint32_t a = getreg32(ctrla);
+  uint32_t b = getreg32(ctrlb);
+
+  if ((a & TC4XX_WTU_CTRLA_LCK) != 0)
+    {
+      a &= ~(TC4XX_WTU_CTRLA_LCK | TC4XX_WTU_CTRLA_PW_MASK);
+      a |= pw << TC4XX_WTU_CTRLA_PW_SHIFT;
+      putreg32(a, ctrla);
+    }
+
+  b &= ~TC4XX_WTU_CTRLB_TIMR_MASK;
+  b |= reload << TC4XX_WTU_CTRLB_TIMR_SHIFT;
+  putreg32(a, ctrla);
+  putreg32(b, ctrlb);
+  putreg32(a | TC4XX_WTU_CTRLA_LCK, ctrla);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tc4xx_wdt_reload
+ *
+ * Description:
+ *   Change the reload value of the CPU0 and the system watchdog.
+ *
+ ****************************************************************************/
+
+void tc4xx_wdt_reload(uint32_t reload)
+{
+  tc4xx_wdt_reload_one(TC4XX_WTU_WDTCPU_CTRLA(0),
+                       tc4xx_wdt_password(TC4XX_WTU_WDTCPU_CTRLA(0)),
+                       reload);
+  tc4xx_wdt_reload_one(TC4XX_WTU_WDTSYS_CTRLA,
+                       tc4xx_wdt_password(TC4XX_WTU_WDTSYS_CTRLA), reload);
+}
 
 /****************************************************************************
  * Name: tc4xx_wdt_service

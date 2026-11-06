@@ -36,7 +36,7 @@
 OUTPUT_FORMAT("elf32-tricore")
 OUTPUT_ARCH("tricore")
 #if CONFIG_CPU_COREID == 0
-ENTRY(_START)
+ENTRY(__start)
 #endif
 
 __TRICORE_DERIVATE_MEMORY_MAP__ = 0x490;
@@ -136,7 +136,7 @@ SECTIONS
     }
 }
 
-/*Fixed memory Allocations for _START*/
+/*Fixed memory Allocations for __start*/
 CORE_ID = GLOBAL ;
 SECTIONS
 {
