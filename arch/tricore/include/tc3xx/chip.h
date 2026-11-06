@@ -45,4 +45,18 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
+/* CPU module SFR base address of each core */
+
+#define TRICORE_CPU_MODULE_BASES         \
+  {                                      \
+    0xf8800000, 0xf8820000, 0xf8840000,  \
+    0xf8860000, 0xf8880000, 0xf88c0000   \
+  }
+
+/* Set entry address and release core registers. */
+
+#define CPU_SFR_PC_OFFSET    0x1fe08u
+#define CPU_SFR_HALT_OFFSET  0x1fe14u
+#define CPU_SFR_HALT_BHALT   (1u << 24)
+
 #endif /* __ARCH_TRICORE_INCLUDE_TC3XX_CHIP_H */

@@ -20,9 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS arm64_head.S)
-
-# TODO: support kernel startup obj ctr0
+target_sources(nuttx PRIVATE arm64_head.S)
 
 list(APPEND SRCS arm64_vector_table.S arm64_vectors.S)
 list(APPEND SRCS arm64_fork_func.S)

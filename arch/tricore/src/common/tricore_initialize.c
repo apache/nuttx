@@ -62,19 +62,7 @@ volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 void up_initialize(void)
 {
-#ifdef CONFIG_ARCH_PERF_EVENTS
-  up_perf_init((void *)CONFIG_CPU_CLOCK_FREQUENCY);
-#endif
-
   tricore_trapinit();
-
-#ifdef CONFIG_ARCH_ICACHE
-  up_enable_icache();
-#endif
-
-#ifdef CONFIG_ARCH_DCACHE
-  up_enable_dcache();
-#endif
 
   /* Initialize the serial device driver */
 

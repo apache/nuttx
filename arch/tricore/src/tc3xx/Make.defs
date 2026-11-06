@@ -20,6 +20,7 @@
 #
 ############################################################################
 
+CHIP_CSRCS += tc3xx_boot.c
 CHIP_CSRCS += tc3xx_timerisr.c
 CHIP_CSRCS += tc3xx_serial.c
 
@@ -111,9 +112,7 @@ SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuRcu.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuWdt.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Src/Std/IfxSrc.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Stm/Std/IfxStm.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Platform/Tricore/Compilers/CompilerTasking.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_Infra.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_Tc0.c
 
 CFLAGS += $(addprefix ${INCDIR_PREFIX},$(SDK_INCDIR))
 

@@ -58,9 +58,35 @@
     __val;                                                             \
   })
 
+/* TriCore core special function register (CSFR) */
+
+#define CPU_PSW             0xFE04  /* Program Status Word */
+#define CPU_CORE_ID         0xFE1C  /* CPU Core Identification */
+#define CPU_BIV             0xFE20  /* Base Interrupt Vector Pointer */
+#define CPU_BTV             0xFE24  /* Base Trap Vector Pointer */
+#define CPU_ISP             0xFE28  /* Interrupt Stack Pointer */
+#define CPU_FCX             0xFE38  /* Free CSA List Head Pointer */
+#define CPU_LCX             0xFE3C  /* Free CSA List Limit Pointer */
+#define CPU_VCON0           0xB000  /* CPU virtualization control */
+
+/* Initial PSW values */
+
+#define TRICORE_PSW_IS      0xa80   /* PSW.CDE | PSW.IS | supervisor */
+#define TRICORE_PSW_DEFAULT 0x880   /* PSW.CDE | supervisor */
+
+/* PSPR scratch area used as sp/CSA while BIST destroys the ram */
+
+#ifdef CONFIG_ARCH_BIST
+#  define PSPR_USTACK       0x7010eb00
+#  define PSPR_CSA          0x7010ec00
+#  define PSPR_SIZE         0x1000
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Function Prototypes
@@ -74,5 +100,7 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_TRICORE_INCLUDE_ARCH_H */

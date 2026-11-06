@@ -123,6 +123,17 @@ config CPU_COREID
 	default 0
 	range 0 6
 
+config ARCH_BIST
+	bool "Run built-in self-test (BIST) during early startup"
+	default n
+	---help---
+		Run built-in self-test before C environment is set up. BIST may
+		destroy entire ram.
+
+config ARCH_RELEASE_CORES
+	bool "whether it is necessary to kick other cores"
+	default n
+
 if ARCH_CHIP_TC3XX
 source "arch/tricore/src/tc3xx/Kconfig"
 endif

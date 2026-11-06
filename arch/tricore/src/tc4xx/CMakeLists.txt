@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS tc4xx_timerisr.c tc4xx_serial.c)
+set(SRCS tc4xx_boot.c tc4xx_timerisr.c tc4xx_serial.c)
 
 target_sources(arch PRIVATE ${SRCS})
 
@@ -166,9 +166,7 @@ set(SDK_CSRCS
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Smu/Std/IfxSmu.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Vmt/Std/IfxVmt.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Wtu/Std/IfxWtu.c"
-    "${ILLD_DIR}/Libraries/Infra/Platform/Compilers/CompilerTasking.c"
-    "${ILLD_DIR}/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c"
-    "${ILLD_DIR}/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Tc0.c")
+    "${ILLD_DIR}/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c")
 
 target_sources(nuttx PRIVATE ${SDK_CSRCS})
 

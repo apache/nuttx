@@ -200,6 +200,11 @@ uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,
                              uintptr_t psw, bool irqsave);
 void tricore_reclaim_csa(uintptr_t pcxi);
 
+/* Low level initialization provided by the chip layer **********************/
+
+void tricore_boot(void);
+void tricore_cpu_boot(int cpu);
+
 /* Low level serial output **************************************************/
 
 void tricore_lowputc(char ch);
