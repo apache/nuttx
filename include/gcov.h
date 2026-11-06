@@ -29,14 +29,18 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <sys/types.h>
 
 /****************************************************************************
- * Public Types
+ * Preprocessor Definitions
  ****************************************************************************/
 
-struct gcov_info;
+#ifdef CONFIG_LIB_SYSCALL
+#  define GCOV_OP_RESET   1
+#  define GCOV_OP_DUMP    2
+#  define GCOV_OP_MIN     GCOV_OP_RESET
+#  define GCOV_OP_MAX     GCOV_OP_DUMP
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -45,6 +49,23 @@ struct gcov_info;
 #ifdef __cplusplus
 extern "C"
 {
+#endif
+
+#ifdef CONFIG_LIB_SYSCALL
+/****************************************************************************
+ * Name: gcov
+ *
+ * Description:
+ *   Request kernel space gcov data operations.
+ *
+ * Parameters:
+ *   op - operation code between GCOV_OP_MIN and GCOV_OP_MAX
+ *
+ * Return:
+ *   status code.
+ ****************************************************************************/
+
+extern int gcov(int op);
 #endif
 
 /****************************************************************************
@@ -68,23 +89,6 @@ extern void __gcov_reset(void);
 extern void __gcov_dump(void);
 
 #if defined(CONFIG_COVERAGE_MINI) && defined(CONFIG_ARCH_TOOLCHAIN_GCC)
-
-/****************************************************************************
- * Name: __gcov_init, __gcov_merge_add, __gcov_exit, __gcov_fork
- *
- * Description:
- *   The functions that instrumented code calls.  The symbol table of the
- *   loadable modules takes them from here.
- *
- ****************************************************************************/
-
-void __gcov_init(FAR struct gcov_info *info);
-void __gcov_merge_add(FAR uint64_t *counters, unsigned int n_counters);
-void __gcov_exit(void);
-#ifdef CONFIG_ARCH_HAVE_FORK
-pid_t __gcov_fork(void);
-#endif
-
 /****************************************************************************
  * Name: __gcov_unload
  *
@@ -98,6 +102,63 @@ void __gcov_unload(FAR const void *addr, size_t size);
 #else
 #  define __gcov_unload(addr, size)
 #endif
+
+/****************************************************************************
+ * Name: __gcov_info_to_gcda
+ *
+ * Description:
+ *   Convert the gcov information referenced by INFO to a gcda data stream.
+ *
+ * Parameters:
+ *   info - Pointer to the gcov information.
+ *   filename - Callback function to get the filename.
+ *   dump - Callback function to write the gcda data.
+ *   allocate - Callback function to allocate memory.
+ *   arg - User-provided argument.
+ *
+ ****************************************************************************/
+
+extern void __gcov_info_to_gcda(FAR const struct gcov_info *info,
+                                FAR void (*filename)(FAR const char *,
+                                                     FAR void *),
+                                FAR void (*dump)(FAR const void *,
+                                                 unsigned int, FAR void *),
+                                FAR void *(*allocate)(unsigned int,
+                                                      FAR void *),
+                                FAR void *arg);
+
+/****************************************************************************
+ * Name: __gcov_filename_to_gcfn
+ *
+ * Description:
+ *   Convert the filename to a gcfn data stream.
+ *
+ * Parameters:
+ *   filename - Pointer to the filename.
+ *   dump - Callback function to write the gcfn data.
+ *   arg - User-provided argument.
+ *
+ ****************************************************************************/
+
+extern void __gcov_filename_to_gcfn(FAR const char *filename,
+                                    FAR void (*dump)(FAR const void *,
+                                                     unsigned int,
+                                                     FAR void *),
+                                     FAR void *arg);
+
+/****************************************************************************
+ * Name: __gcov_dump_to_memory
+ *
+ * Description:
+ *   Dump gcov data directly to memory
+ *
+ * Parameters:
+ *   ptr - Memory Address
+ *   size - Memory block size
+ *
+ ****************************************************************************/
+
+size_t __gcov_dump_to_memory(FAR void *ptr, size_t size);
 
 #ifdef __cplusplus
 }
