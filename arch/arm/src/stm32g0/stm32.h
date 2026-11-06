@@ -51,4 +51,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* FDCAN1 shares interrupt vectors with TIM16 and TIM17. */
+
+#if defined(CONFIG_STM32_FDCAN1) && \
+    (defined(CONFIG_STM32_TIM16) || defined(CONFIG_STM32_TIM17))
+#  error "FDCAN1 cannot be used with TIM16 or TIM17"
+#endif
+
 #endif /* __ARCH_ARM_SRC_STM32G0_STM32_H */

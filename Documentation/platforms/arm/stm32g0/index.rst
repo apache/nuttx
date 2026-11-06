@@ -17,9 +17,9 @@ Peripheral Support
 
 The following list indicates peripherals supported in NuttX:
 
-==========  =======  =====
+==========  =======  ======
 Peripheral  Support  Notes
-==========  =======  =====
+==========  =======  ======
 FLASH       No
 PM          No
 RCC         Yes      
@@ -47,10 +47,11 @@ I2C         Yes
 USART       Yes
 LPUSART     No
 SPI         Yes
+FDCAN       Yes      FDCAN1
 UCPD        No
 USB         ?
 HDIM_CEC    No
-==========  =======  =====
+==========  =======  ======
 
 Supported Boards
 ================
