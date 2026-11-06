@@ -54,6 +54,11 @@ else
 endif
 
 HEAD_ASRC += tricore_vectors$(ASMEXT)
+
+ifeq ($(CONFIG_ARCH_CHIP_TC3XX),y)
+HEAD_ASRC += tricore_head$(ASMEXT)
+CMN_CSRCS += tricore_start.c
+endif
 VPATH += common$(DELIM)$(TRICORE_SUBDIR)
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)

@@ -1,0 +1,272 @@
+/****************************************************************************
+ * arch/tricore/src/common/tasking/tricore_head.asm
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <arch/csfr.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define TRICORE_PSW_RESET  0x980   /* Supervisor, call depth counting on */
+#define TRICORE_BIV_VECTOR 0x1fe0  /* Single interrupt vector at INTTAB + 0x1fe0 */
+
+#define TC3XX_WDTCPU0_CON0 0xf003624c  /* CPU0 watchdog CON0, 0xc apart per CPU */
+
+/* Make the CSA link word of the CSA address in addr: the segment in bits
+ * 19:16 and the offset in bits 15:0.
+ */
+
+tricore_csa_link .macro addr, tmp1, tmp2
+	extr.u	tmp1, addr, #6, #16
+	extr.u	tmp2, addr, #12, #20
+	insert	addr, tmp2, tmp1, #0, #16
+	.endm
+
+	.extern	tricore_wdt_disable
+	.extern	_data_flash
+	.extern	_sdata
+	.extern	_edata
+	.extern	_sbss
+	.extern	_ebss
+	.extern	tricore_clockconfig
+	.extern	tricore_start
+	.extern	__ustack
+	.extern	__istack
+	.extern	__csa_begin
+	.extern	__csa_end
+	.extern	__a0_mem
+	.extern	__a1_mem
+	.extern	__a8_mem
+	.extern	__a9_mem
+	.extern	__TRAPTAB_CPU0
+	.extern	__INTTAB_CPU0
+	.extern	__psram_ustack
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tricore_head
+ *
+ * Description:
+ *   Set up the core registers and the CSA list, which the code has to do
+ *   before it can call anything: the trap and interrupt vectors, the
+ *   interrupt stack, the caches and the free CSA list with LCX at the
+ *   third last entry.  Then set the stack, the small data base registers
+ *   and the PSW, disable the watchdogs, copy .data and clear .bss, set
+ *   up the clocks (see tricore_internal.h) and jump to tricore_start.
+ *
+ *   On TC3xx BTV, BIV, ISP, PCON0 and DCON0 are CPU ENDINIT protected,
+ *   so the ENDINIT of the CPU watchdog is cleared around them.
+ *
+ ****************************************************************************/
+
+	.sdecl	".text.tricore_head",code
+	.sect	".text.tricore_head"
+tricore_head:
+	jl	tc3xx_endinit_clear
+
+	movh.a	a15, #@HIS(__TRAPTAB_CPU0)
+	lea	a15, [a15]@LOS(__TRAPTAB_CPU0)
+	mov.d	d15, a15
+	mtcr	#TRICORE_CPU_BTV, d15
+	isync
+
+	; Caches on, interrupt vector, interrupt stack
+
+	mov	d15, #0
+	mtcr	#TRICORE_CPU_PCON0, d15
+	isync
+	mtcr	#TRICORE_CPU_DCON0, d15
+	isync
+
+	movh.a	a15, #@HIS(__INTTAB_CPU0)
+	lea	a15, [a15]@LOS(__INTTAB_CPU0)
+	lea	a15, [a15]TRICORE_BIV_VECTOR
+	mov.d	d15, a15
+	mtcr	#TRICORE_CPU_BIV, d15
+	isync
+
+	movh.a	a15, #@HIS(__istack)
+	lea	a15, [a15]@LOS(__istack)
+	mov.d	d15, a15
+	mtcr	#TRICORE_CPU_ISP, d15
+	isync
+
+	; Free CSA list from __csa_begin to __csa_end, LCX at the third last
+
+	movh.a	a15, #@HIS(__csa_begin)
+	lea	a15, [a15]@LOS(__csa_begin)
+	movh.a	a14, #@HIS(__csa_end)
+	lea	a14, [a14]@LOS(__csa_end)
+	mov.d	d15, a15
+	tricore_csa_link d15, d14, d13
+	mtcr	#TRICORE_CPU_FCX, d15
+	isync
+1:
+	addi	d15, d15, #1
+	st.w	[a15], d15
+	lea	a15, [a15]64
+	jne.a	a15, a14, 1p
+
+	mov	d14, #0
+	st.w	[a15]-64, d14
+	addi	d15, d15, #-3
+	mtcr	#TRICORE_CPU_LCX, d15
+	isync
+
+	jl	tc3xx_endinit_set
+
+	movh.a	a10, #@HIS(__ustack)
+	lea	a10, [a10]@LOS(__ustack)
+	dsync
+
+	movh.a	a1, #@HIS(__a1_mem)
+	lea	a1, [a1]@LOS(__a1_mem)
+	movh.a	a0, #@HIS(__a0_mem)
+	lea	a0, [a0]@LOS(__a0_mem)
+	movh.a	a8, #@HIS(__a8_mem)
+	lea	a8, [a8]@LOS(__a8_mem)
+	movh.a	a9, #@HIS(__a9_mem)
+	lea	a9, [a9]@LOS(__a9_mem)
+
+	mov	d0, #TRICORE_PSW_RESET
+	mtcr	#TRICORE_CPU_PSW, d0
+	isync
+
+	call	tricore_wdt_disable
+
+	; Copy .data from its image in flash and clear .bss, a word at a time
+	; up to the word aligned ends that the linker script gives
+
+	movh.a	a2, #@HIS(_data_flash)
+	lea	a2, [a2]@LOS(_data_flash)
+	movh.a	a3, #@HIS(_sdata)
+	lea	a3, [a3]@LOS(_sdata)
+	movh.a	a4, #@HIS(_edata)
+	lea	a4, [a4]@LOS(_edata)
+	j	7n
+6:
+	ld.w	d15, [a2+]4
+	st.w	[a3+]4, d15
+7:
+	lt.a	d15, a3, a4
+	jnz	d15, 6p
+
+	mov	d14, #0
+	movh.a	a3, #@HIS(_sbss)
+	lea	a3, [a3]@LOS(_sbss)
+	movh.a	a4, #@HIS(_ebss)
+	lea	a4, [a4]@LOS(_ebss)
+	j	9n
+8:
+	st.w	[a3+]4, d14
+9:
+	lt.a	d15, a3, a4
+	jnz	d15, 8p
+
+	call	tricore_clockconfig
+	jz	d2, 5n
+	debug
+5:
+	movh.a	a15, #@HIS(tricore_start)
+	lea	a15, [a15]@LOS(tricore_start)
+	ji	a15
+
+/****************************************************************************
+ * Name: tc3xx_endinit_clear, tc3xx_endinit_set
+ *
+ * Description:
+ *   Clear (tc3xx_endinit_clear) or set (tc3xx_endinit_set) the ENDINIT
+ *   of the watchdog of the calling CPU with the password and the lock
+ *   sequence, and wait until it has changed.  Called with jl, before
+ *   any CSA exists.  CPU5 has the core ID 6 on TC39x.
+ *
+ ****************************************************************************/
+
+tc3xx_endinit_clear:
+	mov	d5, #0
+	j	2n
+
+tc3xx_endinit_set:
+	mov	d5, #1
+2:
+	mfcr	d4, #TRICORE_CPU_CORE_ID
+	extr.u	d4, d4, #0, #3
+	jne	d4, #6, 3n
+	mov	d4, #5
+3:
+	sh	d15, d4, #1
+	add	d4, d15, d4
+	movh.a	a15, #@HIS(TC3XX_WDTCPU0_CON0)
+	lea	a15, [a15]@LOS(TC3XX_WDTCPU0_CON0)
+	addsc.a	a15, a15, d4, #2
+
+	; Password access with the inverted password bits 7:2, then the
+	; modify access with LCK set and the new ENDINIT
+
+	ld.w	d15, [a15]
+	xor	d15, d15, #0xfc
+	insert	d15, d15, #1, #0, #2
+	st.w	[a15], d15
+	or	d4, d5, #2
+	insert	d15, d15, d4, #0, #2
+	st.w	[a15], d15
+4:
+	ld.w	d15, [a15]
+	extr.u	d15, d15, #0, #1
+	jne	d15, d5, 4p
+	ji	a11
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: __start
+ *
+ * Description:
+ *   Reset entry of CPU0.  It only sets the boot stack in the PSPR and
+ *   jumps to tricore_head, as the linker script keeps .start to 0x20
+ *   bytes ahead of the interface constants.
+ *
+ *   This is the TASKING syntax of gnu/tricore_head.S.
+ *
+ ****************************************************************************/
+
+	.sdecl	".text.start",code,protect
+	.sect	".text.start"
+	.global	__start
+__start:
+	movh.a	a10, #@HIS(__psram_ustack)
+	lea	a10, [a10]@LOS(__psram_ustack)
+	dsync
+	movh.a	a15, #@HIS(tricore_head)
+	lea	a15, [a15]@LOS(tricore_head)
+	ji	a15
+
+	.end

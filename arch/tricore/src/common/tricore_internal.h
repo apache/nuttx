@@ -192,13 +192,18 @@ extern uintptr_t        _eheap[]; /* End+1 of .heap */
 void tricore_ack_irq(int irq);
 void tricore_doirq(void);
 
-/* Watchdog *****************************************************************/
+/* Startup ******************************************************************/
 
-void tricore_wdt_disable(void);
+/* tricore_head calls these on CPU0 in this order, and copies .data and
+ * clears .bss itself between tricore_wdt_disable and tricore_clockconfig.
+ * tricore_wdt_disable runs with the stack and the CSAs set up, but before
+ * .data and .bss: it may only use registers and constants.
+ */
 
-/* Clocks *******************************************************************/
-
-int tricore_clockconfig(void);
+void tricore_wdt_disable(void);    /* Chip: CPU and safety watchdogs off */
+int tricore_clockconfig(void);     /* Chip: oscillator, PLLs and dividers */
+void tricore_start(void);          /* Start the other cores, enter NuttX */
+void tricore_main(void);           /* Per core entry into NuttX */
 
 /* Signal handling **********************************************************/
 

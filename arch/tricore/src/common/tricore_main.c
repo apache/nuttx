@@ -79,7 +79,7 @@ static void tricore_core_sync(volatile uint32_t *sync)
     }
 }
 
-static void core_main(void)
+void tricore_main(void)
 {
   static volatile uint32_t g_sync_event;
 
@@ -124,35 +124,35 @@ void core0_main(void)
 
   tricore_wdt_disable();
 
-  core_main();
+  tricore_main();
 }
 
 void core1_main(void)
 {
-  core_main();
+  tricore_main();
 }
 
 void core2_main(void)
 {
-  core_main();
+  tricore_main();
 }
 
 void core3_main(void)
 {
-  core_main();
+  tricore_main();
 }
 
 void core4_main(void)
 {
-  core_main();
+  tricore_main();
 }
 
 void core5_main(void)
 {
-  core_main();
+  tricore_main();
 }
 
 void core6_main(void)
 {
-  core_main();
+  tricore_main();
 }

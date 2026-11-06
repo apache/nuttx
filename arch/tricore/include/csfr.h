@@ -37,6 +37,9 @@
 #define TRICORE_CPU_PSW             0xfe04  /* Program Status Word */
 #define TRICORE_CPU_PC              0xfe08  /* Program Counter */
 #define TRICORE_CPU_CORE_ID         0xfe1c  /* Core Identification */
+#define TRICORE_CPU_BIV             0xfe20  /* Base Interrupt Vector */
+#define TRICORE_CPU_BTV             0xfe24  /* Base Trap Vector */
+#define TRICORE_CPU_ISP             0xfe28  /* Interrupt Stack Pointer */
 #define TRICORE_CPU_ICR             0xfe2c  /* Interrupt Control Register */
 #define TRICORE_CPU_FCX             0xfe38  /* Free CSA List Head Pointer */
 #define TRICORE_CPU_LCX             0xfe3c  /* Free CSA List Limit Pointer */
