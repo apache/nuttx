@@ -40,6 +40,8 @@
 #define TC4XX_WTU_CTRLA_PW_MASK    (0x7fff << TC4XX_WTU_CTRLA_PW_SHIFT)
 #define TC4XX_WTU_CTRLA_TCVI_SHIFT 16                /* Timer check value */
 #define TC4XX_WTU_CTRLB_DR         (1 << 0)          /* Disable request */
+#define TC4XX_WTU_CTRLB_TIMR_SHIFT 16                /* Reload value */
+#define TC4XX_WTU_CTRLB_TIMR_MASK  (0xffff << TC4XX_WTU_CTRLB_TIMR_SHIFT)
 #define TC4XX_WTU_STAT_TC          (1 << 8)          /* Timer check */
 #define TC4XX_WTU_STAT_TIM_SHIFT   16                /* Timer value */
 

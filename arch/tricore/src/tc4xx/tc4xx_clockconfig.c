@@ -427,6 +427,33 @@ static int tc4xx_clock_switch(void)
 }
 
 /****************************************************************************
+ * Name: tc4xx_osc_power_on
+ *
+ * Description:
+ *   Power up the crystal oscillator in external crystal mode, as the
+ *   iLLD startup code does before the clock setup.
+ *
+ ****************************************************************************/
+
+static void tc4xx_osc_power_on(void)
+{
+  uint32_t regval = getreg32(TC4XX_CLOCK_OSCCON) & ~TC4XX_OSCCON_MODE_MASK;
+  uint32_t count = TC4XX_CCU_LCK_TIMEOUT;
+
+  while ((getreg32(TC4XX_CLOCK_CCUSTAT) & TC4XX_CCUSTAT_LCK) != 0)
+    {
+      if (--count == 0)
+        {
+          putreg32(regval, TC4XX_CLOCK_OSCCON);
+          __asm__ volatile ("debug");
+          return;
+        }
+    }
+
+  putreg32(regval, TC4XX_CLOCK_OSCCON);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -434,9 +461,9 @@ static int tc4xx_clock_switch(void)
  * Name: tricore_clockconfig
  *
  * Description:
- *   Set up the flash wait states, the clock distribution, the oscillators
- *   and the PLLs.  Called by the startup code before the C runtime is
- *   initialized, so it may only use constant data.
+ *   Power up the crystal, then set up the flash wait states, the clock
+ *   distribution, the oscillators and the PLLs.  Called by the startup code
+ *   before the C runtime is initialized, so it may only use constant data.
  *
  * Returned Value:
  *   0 on success, 1 if a wait for the hardware gave up.
@@ -447,6 +474,8 @@ int tricore_clockconfig(void)
 {
   int ret;
   int pll;
+
+  tc4xx_osc_power_on();
 
   ret = tc4xx_clock_distribute();
   if (ret != 0)

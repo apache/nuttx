@@ -24,9 +24,16 @@
 #define __ARCH_TRICORE_SRC_TC4XX_TC4XX_WDT_H
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <stdint.h>
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 void tc4xx_wdt_service(void);
+void tc4xx_wdt_reload(uint32_t reload);
 
 #endif /* __ARCH_TRICORE_SRC_TC4XX_TC4XX_WDT_H */
