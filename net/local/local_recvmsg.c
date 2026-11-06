@@ -560,9 +560,13 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   readlen = addrlen;
   offset += sizeof(pktlen);
 
-  if (from && fromlen && *fromlen)
+  /* The address has the family, the name and a NUL.  The address of an
+   * unbound sender has the family only.
+   */
+
+  if (from && fromlen && *fromlen > sizeof(sa_family_t))
     {
-      pathlen = MIN(*fromlen - 1, readlen);
+      pathlen = MIN(*fromlen - sizeof(sa_family_t) - 1, readlen);
       ret = psock_fifo_read(psock, from->sa_data, offset,
                             &pathlen, flags, false);
       if (ret < 0)
@@ -573,7 +577,12 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       from->sa_family = AF_LOCAL;
       from->sa_data[pathlen] = '\0';
-      *fromlen = pathlen;
+      *fromlen = sizeof(sa_family_t);
+      if (addrlen > 0)
+        {
+          *fromlen += pathlen + 1;
+        }
+
       readlen -= pathlen;
     }
 
