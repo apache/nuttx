@@ -204,13 +204,14 @@
 #        define STM32_FLASH_SIZE        128 * 4096
 #      endif
 #    elif defined(CONFIG_STM32_STM32G49XX)
-#      elif defined(CONFIG_STM32_FLASH_CONFIG_C)
+#      if defined(CONFIG_STM32_FLASH_CONFIG_C)
 #        define STM32_FLASH_NPAGES      128
 #        define STM32_FLASH_PAGESIZE    2048
 
 #      elif defined(CONFIG_STM32_FLASH_CONFIG_E)
 #        define STM32_FLASH_NPAGES      256
 #        define STM32_FLASH_PAGESIZE    2048
+#      endif
 #    endif
 
 /* Define the Valid Configuration the F1 and F3  */
