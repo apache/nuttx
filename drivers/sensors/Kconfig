@@ -29,6 +29,7 @@ config SENSORS_USE_FLOAT
 
 config SENSORS_USE_B16
 	bool "Use b16_t as data type for sensors"
+	select LIBC_BFORMAT_B16
 	---help---
 		Use b16_t (fixed-point type) as data type for sensors.
 		This option is recommended for targets without FPU support.
