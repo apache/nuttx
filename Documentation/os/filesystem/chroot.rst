@@ -87,43 +87,38 @@ the original walk from ``g_root_inode``:
 4. Continue the original inode-tree walk on that host path.
 
 Without a jail the same canonicalize step still runs, so
-``chroot(".")`` under a mount (``$PWD/.``) does not pass a leftover
-``.`` to the filesystem as ``relpath``.
+``chroot(".")`` under a mount (the current directory and ``/.``) does
+not pass a leftover ``.`` to the filesystem as ``relpath``.
 
 There is no separate jailed walk, and no extra ``..`` handling inside
 the tree traversal.
 
-Why ``chroot()`` does not touch ``PWD``
------------------------------------------
+Why ``chroot()`` does not change the current directory
+-------------------------------------------------------
 
-Relative lookups go through ``inode_search()``, which prepends
-``$PWD`` to the path and then calls the exact same absolute-path
-logic described above. That raises an obvious question: what happens
-to a task's current directory when its whole notion of "root" just
-moved?
+Relative lookups go through ``inode_search_setup()``, which joins the
+host path of the current directory of the task group (see
+:ref:`current-directory`) to the path and then runs the same
+canonicalize step as above.  That raises an obvious question: what
+happens to a task's current directory when its whole notion of "root"
+just moved?
 
-An earlier version of this change rewrote ``PWD`` inside ``chroot()``
-itself to keep it consistent with the new jail. That turned out to be
-both the wrong layer and unnecessary:
+``chroot()`` leaves the current directory where it is.  POSIX
+``chroot()`` does not touch the current directory either -- the
+well-known Unix idiom is that the *caller* must ``chdir()`` immediately
+after ``chroot()``, precisely so that no stale reference to the old
+tree is left lying around.
 
-* ``chroot()`` is a filesystem primitive; ``PWD`` is environ state.
-  POSIX ``chroot()`` does not touch the current directory either --
-  the well-known Unix idiom is that the *caller* must ``chdir()``
-  immediately after ``chroot()``, precisely so that no stale
-  reference to the old tree is left lying around.
-* It is not needed for containment. A stale ``PWD`` used in a
-  relative lookup after ``chroot()`` is still rewritten by
-  ``inode_search_setup()`` (prepend the jail path, canonicalize, clamp
-  ``..``) before the tree walk. The lookup can fail or land on a
-  path inside the jail that was not intended, but it cannot resolve
-  to a node outside the jail.
+It is not needed for containment.  A current directory inside the new
+root is the start of relative lookups, and ``..`` stops at the root.  A
+current directory outside the new root is not the start of a lookup:
+each relative path gives ``ENOENT``, and ``getcwd()`` too.  So a lookup
+can fail, but it cannot resolve to a node outside the jail.
 
-So ``chroot()`` leaves ``PWD`` alone, and the caller is responsible
-for calling ``chdir()`` afterward if a sane current directory inside
+The caller calls ``chdir()`` afterward if a current directory inside
 the jail is needed -- exactly as the NSH ``chroot`` command already
-does with its trailing ``chdir("/")`` (see `NSH`_ below), which sets
-``PWD`` correctly via the ordinary ``chdir()`` path, with no special
-jail-aware logic required.
+does with its trailing ``chdir("/")`` (see `NSH`_ below), with no
+special jail-aware logic required.
 
 Why the privilege gate lives in ``chroot()`` itself
 -----------------------------------------------------
@@ -170,10 +165,16 @@ Semantics
   it cannot be used to escape.
 * The jail is stored on the task group as the absolute path ``tg_root``.
   Child tasks inherit it.  Kernel threads do not.
-* ``chroot()`` does not modify ``PWD`` or any other environ state; the
-  caller is responsible for calling ``chdir()`` afterward if a
-  specific current directory inside the jail is needed.  See
-  `Why chroot() does not touch PWD`_.
+* ``chroot()`` does not change the current directory or any environ
+  state; the caller is responsible for calling ``chdir()`` afterward if
+  a specific current directory inside the jail is needed.  See
+  `Why chroot() does not change the current directory`_.
+* A current directory outside the root gives ``ENOENT`` for each
+  relative path and for ``getcwd()``.  So after ``chroot()`` relative
+  names cannot reach the host tree, also before the ``chdir()``.  (On
+  other systems relative names can still reach the old tree until the
+  program changes the current directory.)  A task group that never
+  called ``chdir()`` has ``CONFIG_LIBC_HOMEDIR`` inside its root.
 
 NSH
 ===
@@ -187,9 +188,10 @@ The NSH ``chroot`` command performs the usual Unix dance::
 With no extra arguments the current NSH session stays jailed (``pwd``
 shows ``/``, ``ls /`` lists the jail tree) because of the trailing
 ``chdir("/")`` in the sequence above, not because ``chroot()`` itself
-touches ``PWD``.  An optional command is executed with ``execvp()``
-after the jail is in place; NSH closes non-stdio, non-``O_CLOEXEC``
-descriptors first (see below).
+changes the current directory.  NSH sets ``PWD`` after the ``chdir()``.
+An optional command is executed with ``execvp()`` after the jail is in
+place; NSH closes non-stdio, non-``O_CLOEXEC`` descriptors first (see
+below).
 
 When ``CONFIG_SCHED_USER_IDENTITY`` is enabled, drop extra privilege
 after the jail is in place (for example ``setuid()`` to a non-root
