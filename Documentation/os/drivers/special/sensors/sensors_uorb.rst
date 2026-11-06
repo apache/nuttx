@@ -61,6 +61,12 @@ The framework supports two types of sensor data:
 
 Currently all sensors support ``float``, support for ``b16_t`` is work-in-progress.
 
+With ``CONFIG_SENSORS_USE_B16=y``, ``CONFIG_LIBC_BFORMAT_B16`` is selected so that
+``%hf`` in the uORB format strings is a ``b16_t``. This lets tools like
+``uorb_listener`` and ``uorb_generator`` print and parse ``b16_t`` data (scanning
+requires ``CONFIG_LIBC_FLOATINGPOINT``). Other programs that print
+``sensor_data_t`` members as float must be updated.
+
 .. warning::
 
    Using fixed-point math instead of floating point may cause sensors measurements
