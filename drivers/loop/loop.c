@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
@@ -70,6 +71,29 @@ static const struct file_operations g_loop_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+/****************************************************************************
+ * Name: loop_copyname
+ *
+ * Description:
+ *   Read a name in user memory once, into copy (PATH_MAX + 1 bytes): the
+ *   inode tree lock is held when the name is used.  NULL stays NULL.
+ *
+ ****************************************************************************/
+
+static FAR const char *loop_copyname(FAR char *copy, FAR const char *name)
+{
+  if (name == NULL)
+    {
+      return NULL;
+    }
+
+  memccpy(copy, name, '\0', PATH_MAX);
+  copy[PATH_MAX] = '\0';
+  return copy;
+}
+#endif
 
 /****************************************************************************
  * Name: loop_read
@@ -118,7 +142,17 @@ static int loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
           else
             {
-              ret = losetup(setup->devname, setup->filename, setup->sectsize,
+              FAR const char *devname = setup->devname;
+              FAR const char *filename = setup->filename;
+#ifdef CONFIG_BUILD_KERNEL
+              char name[PATH_MAX + 1];
+              char file[PATH_MAX + 1];
+
+              devname = loop_copyname(name, devname);
+              filename = loop_copyname(file, filename);
+#endif
+
+              ret = losetup(devname, filename, setup->sectsize,
                             setup->offset, setup->readonly);
             }
         }
@@ -142,6 +176,12 @@ static int loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
           else
             {
+#ifdef CONFIG_BUILD_KERNEL
+              char name[PATH_MAX + 1];
+
+              devname = loop_copyname(name, devname);
+#endif
+
               ret = loteardown(devname);
             }
         }

@@ -140,6 +140,14 @@ Each type field has a format as follows:
   cannot cast a union sigval to a uinptr_t either.  Rather, we need
   to cast a specific union member fieldname to ``uintptr_t``.
 
+* formal type | actual type | ``path``:
+
+  For a path that the kernel reads.  In a kernel build the stub reads the
+  path from user memory once, into a copy on the kernel stack, and calls the
+  function with the copy.  Another thread can change or unmap the path during
+  the call, so kernel code must not read it from user memory when it holds a
+  lock.  In other builds this is the same as ``formal type | actual type``.
+
 Variadic Functions
 ------------------
 
