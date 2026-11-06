@@ -333,6 +333,24 @@ void local_subref(FAR struct local_conn_s *conn);
 FAR struct local_conn_s *local_nextconn(FAR struct local_conn_s *conn);
 
 /****************************************************************************
+ * Name: local_copyaddr
+ *
+ * Description:
+ *   Copy an address from a program.  It has addrlen bytes and no NUL has to
+ *   follow its name, so what follows it in the memory of the program is not
+ *   part of it.  The copy always ends with a NUL.
+ *
+ * Input Parameters:
+ *   unaddr  - The copy
+ *   addr    - The address of the program
+ *   addrlen - The length of the address
+ *
+ ****************************************************************************/
+
+void local_copyaddr(FAR struct sockaddr_un *unaddr,
+                    FAR const struct sockaddr *addr, socklen_t addrlen);
+
+/****************************************************************************
  * Name: local_findconn
  *
  * Description:

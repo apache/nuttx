@@ -838,6 +838,8 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
 static int local_connect(FAR struct socket *psock,
                          FAR const struct sockaddr *addr, socklen_t addrlen)
 {
+  struct sockaddr_un kaddr;
+
   /* Verify that a valid address has been provided.  A connectionless
    * socket may also pass AF_UNSPEC to dissolve an existing association.
    */
@@ -847,6 +849,8 @@ static int local_connect(FAR struct socket *psock,
     {
       return -EBADF;
     }
+
+  local_copyaddr(&kaddr, addr, addrlen);
 
   /* Perform the connection depending on the protocol type */
 
@@ -873,7 +877,8 @@ static int local_connect(FAR struct socket *psock,
 
           /* It's not...  Connect to the local Unix domain server */
 
-          return psock_local_connect(psock, addr);
+          return psock_local_connect(psock,
+                                     (FAR const struct sockaddr *)&kaddr);
         }
         break;
 #endif /* CONFIG_NET_LOCAL_STREAM */
@@ -882,8 +887,7 @@ static int local_connect(FAR struct socket *psock,
       case SOCK_DGRAM:
         {
           FAR struct local_conn_s *conn = psock->s_conn;
-          FAR const struct sockaddr_un *unaddr =
-              (FAR const struct sockaddr_un *)addr;
+          FAR const struct sockaddr_un *unaddr = &kaddr;
 
           if (addr->sa_family == AF_UNSPEC)
             {

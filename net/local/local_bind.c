@@ -51,20 +51,23 @@ int psock_local_bind(FAR struct socket *psock,
                      FAR const struct sockaddr *addr, socklen_t addrlen)
 {
   FAR struct local_conn_s *conn = psock->s_conn;
-  FAR const struct sockaddr_un *unaddr =
-    (FAR const struct sockaddr_un *)addr;
+  FAR const struct sockaddr_un *unaddr;
   FAR struct local_conn_s *found;
+  struct sockaddr_un kaddr;
   int index;
 #ifdef CONFIG_NET_LOCAL_DGRAM
   int ret;
 #endif
 
-  DEBUGASSERT(unaddr->sun_family == AF_LOCAL);
+  DEBUGASSERT(addr->sa_family == AF_LOCAL);
 
   if (addrlen <= sizeof(sa_family_t) + 1)
     {
       return -EINVAL;
     }
+
+  local_copyaddr(&kaddr, addr, addrlen);
+  unaddr = &kaddr;
 
   conn = psock->s_conn;
 
