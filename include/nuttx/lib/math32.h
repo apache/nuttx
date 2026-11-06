@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <assert.h>
 #include <limits.h>
 #include <inttypes.h>
 #include <stdint.h>
@@ -44,15 +45,9 @@
                                 (((n) - (d)/2)/(d)) : (((n) + (d)/2)/(d)))
 
 /* Returns one plus the index of the most significant 1-bit of n,
- * or if n is zero, returns zero.
+ * or if n is zero, returns zero.  The argument is evaluated multiple
+ * times and must be free of side effects.
  */
-
-#if UINTPTR_MAX > UINT32_MAX
-#  define FLS(n) ((n) & UINT64_C(0xffffffff00000000) ? 32 + \
-                  FLS32((size_t)(n) >> 32) : FLS32(n))
-#else
-#  define FLS(n) FLS32(n)
-#endif
 
 #define FLS32(n) ((n) & 0xffff0000 ? 16 + FLS16((n) >> 16) : FLS16(n))
 #define FLS16(n) ((n) & 0xff00     ?  8 + FLS8 ((n) >>  8) : FLS8 (n))
@@ -60,6 +55,19 @@
 #define FLS4(n)  ((n) & 0xc        ?  2 + FLS2 ((n) >>  2) : FLS2 (n))
 #define FLS2(n)  ((n) & 0x2        ?  1 + FLS1 ((n) >>  1) : FLS1 (n))
 #define FLS1(n)  ((n) & 0x1        ?  1 : 0)
+
+/* Widen before shifting so narrow types never see oversized shift counts. */
+
+#define FLS64(n) ((uint64_t)(n) >> 32 ? \
+                  32 + FLS32((uint32_t)((uint64_t)(n) >> 32)) : FLS32(n))
+
+#ifdef __INT128_DEFINED
+#  define FLS128(n) ((uint128_t)(n) >> 64 ? \
+                     64 + FLS64((uint64_t)((uint128_t)(n) >> 64)) : FLS64(n))
+#  define FLS(n) (sizeof((n)) <= sizeof(uint64_t) ? FLS64(n) : FLS128(n))
+#else
+#  define FLS(n) FLS64(n)
+#endif
 
 /* Checks if an integer is power of two at compile time */
 
@@ -195,159 +203,174 @@ extern "C"
 
 /* Default C implementation for umul64_const()
  *
- * Prototype: uint64_t umul64_const(uint64_t retval, uint64_t m,
- *                                  uint64_t n, bool bias);
- * Semantic:  retval = ((bias ? m : 0) + m * n) >> 64
+ * Prototype: uint64_t umul64_const(uint64_t m, uint64_t n, int bias);
+ * Semantic:  return ((bias ? m : 0) + m * n) >> 64
  *
  * The product is a 128-bit value, scaled down to 64 bits.
  * Assuming constant propagation to optimize away unused conditional code.
  * Architectures may provide their own optimized assembly implementation.
  */
 
-#  ifdef up_umul64_const
-#    define umul64_const(res, m, n, bias) \
-      (res) = up_umul64_const(m, n, bias)
-#  else
-#    define umul64_const(res, m, n, bias) \
-      do \
-        { \
-          uint32_t __m_lo = (m) & 0xffffffff; \
-          uint32_t __m_hi = (m) >> 32; \
-          uint32_t __n_lo = (n) & 0xffffffff; \
-          uint32_t __n_hi = (n) >> 32; \
-          uint32_t __res_lo; \
-          uint32_t __res_hi; \
-          uint32_t __tmp; \
-          \
-          if (!(bias)) \
-            { \
-              (res) = ((uint64_t)__m_lo * __n_lo) >> 32; \
-            } \
-          else if (!((m) & ((1ULL << 63) | (1ULL << 31)))) \
-            { \
-              (res) = ((m) + (uint64_t)__m_lo * __n_lo) >> 32; \
-            } \
-          else \
-            { \
-              (res) = (m) + (uint64_t)__m_lo * __n_lo; \
-              __res_lo = (res) >> 32; \
-              __res_hi = (__res_lo < __m_hi); \
-              (res) = __res_lo | ((uint64_t)__res_hi << 32); \
-            } \
-          \
-          if (!((m) & ((1ULL << 63) | (1ULL << 31)))) \
-            { \
-              (res) += (uint64_t)__m_lo * __n_hi; \
-              (res) += (uint64_t)__m_hi * __n_lo; \
-              (res) >>= 32; \
-            } \
-          else \
-            { \
-              (res) += (uint64_t)__m_lo * __n_hi; \
-              __tmp = (res) >> 32; \
-              (res) += (uint64_t)__m_hi * __n_lo; \
-              __res_lo = (res) >> 32; \
-              __res_hi = (__res_lo < __tmp); \
-              (res) = __res_lo | ((uint64_t)__res_hi << 32); \
-            } \
-          \
-          (res) += (uint64_t)__m_hi * __n_hi; \
-        } \
-      while (0)
-#  endif
+/* Due to compilation issues, use inline functions instead of macros. */
 
-#  define div64_const32(n, b) \
-    do \
-      { \
-        uint64_t ___res; \
-        uint64_t ___x; \
-        uint64_t ___t; \
-        uint64_t ___m; \
-        uint64_t ___n = (n); \
-        uint32_t ___p; \
-        uint32_t ___bias; \
-        uint32_t ___b = (b); \
-        ___p = 1 << LOG2_FLOOR(___b); \
-        ___m = (~0ULL / ___b) * ___p; \
-        ___m += (((~0ULL % ___b + 1) * ___p) + ___b - 1) / ___b; \
-        ___x = ~0ULL / ___b * ___b - 1; \
-        ___res = ((___m & 0xffffffff) * (___x & 0xffffffff)) >> 32; \
-        ___t = ___res += (___m & 0xffffffff) * (___x >> 32); \
-        ___res += (___x & 0xffffffff) * (___m >> 32); \
-        ___t = (___res < ___t) ? (1ULL << 32) : 0; \
-        ___res = (___res >> 32) + ___t; \
-        ___res += (___m >> 32) * (___x >> 32); \
-        ___res /= ___p; \
-        if (~0ULL % (___b / (___b & -___b)) == 0) \
-          { \
-            ___n /= (___b & -___b); \
-            ___m = ~0ULL / (___b / (___b & -___b)); \
-            ___p = 1; \
-            ___bias = 1; \
-          } \
-        else if (___res != ___x / ___b) \
-          { \
-            ___bias = 1; \
-            ___m = (~0ULL / ___b) * ___p; \
-            ___m += ((~0ULL % ___b + 1) * ___p) / ___b; \
-          } \
-        else \
-          { \
-            uint32_t ___bits = -(___m & -___m); \
-            ___bits |= ___m >> 32; \
-            ___bits = (~___bits) << 1; \
-            if (!___bits) \
-              { \
-                ___p /= (___m & -___m); \
-                ___m /= (___m & -___m); \
-              } \
-            else \
-              { \
-                ___p >>= LOG2_FLOOR(___bits); \
-                ___m >>= LOG2_FLOOR(___bits); \
-              } \
-            ___bias = 0; \
-          } \
-        umul64_const(___res, ___m, ___n, ___bias); \
-        \
-        ___res /= ___p; \
-        (n) = ___res; \
-      } \
-    while (0)
-
-#if defined(CONFIG_HAVE_EXPRESSION_STATEMENT)
-#  define div64_const(n, base) \
-    ({ \
-      uint64_t __n = (n); \
-      uint32_t __base = (base); \
-      if (IS_POWER_OF_2(__base)) \
-        { \
-          (__n) >>= LOG2_FLOOR(__base); \
-        } \
-      else if (UINTPTR_MAX == UINT32_MAX) \
-        { \
-          div64_const32(__n, __base); \
-        } \
-      else \
-        { \
-          __n /= __base; \
-        } \
-        __n; \
-      })
-
-#  define div_const(n, base) \
-    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
-#  define div_const_roundup(n, base) \
-    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1, base) : \
-     (((n) + (base) - 1) / (base)))
-#  define div_const_roundnearest(n, base) \
-    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2), base) : \
-     (((n) + ((base) / 2)) / (base)))
+#ifdef up_umul64_const
+#  define umul64_const(m, n, bias) up_umul64_const(m, n, bias)
 #else
-#  define div_const(n, base) ((n) / (base))
-#  define div_const_roundup(n, base) (((n) + (base) - 1) / (base))
-#  define div_const_roundnearest(n, base) (((n) + ((base) / 2)) / (base))
+static inline_function uint64_t umul64_const(uint64_t m, uint64_t n,
+                                             int bias)
+{
+  uint32_t m_lo = (m) & 0xffffffff;
+  uint32_t m_hi = (m) >> 32;
+  uint32_t n_lo = (n) & 0xffffffff;
+  uint32_t n_hi = (n) >> 32;
+  uint32_t res_lo;
+  uint32_t res_hi;
+  uint32_t tmp;
+  uint64_t res;
+
+  if (!(bias))
+    {
+      res = ((uint64_t)m_lo * n_lo) >> 32;
+    }
+  else if (!((m) & ((1ULL << 63) | (1ULL << 31))))
+    {
+      res = ((m) + (uint64_t)m_lo * n_lo) >> 32;
+    }
+  else
+    {
+      res = (m) + (uint64_t)m_lo * n_lo;
+      res_lo = res >> 32;
+      res_hi = (res_lo < m_hi);
+      res = res_lo | ((uint64_t)res_hi << 32);
+    }
+
+  if (!((m) & ((1ULL << 63) | (1ULL << 31))))
+    {
+      res += (uint64_t)m_lo * n_hi;
+      res += (uint64_t)m_hi * n_lo;
+      res >>= 32;
+    }
+  else
+    {
+      res += (uint64_t)m_lo * n_hi;
+      tmp = res >> 32;
+      res += (uint64_t)m_hi * n_lo;
+      res_lo = res >> 32;
+      res_hi = (res_lo < tmp);
+      res = res_lo | ((uint64_t)res_hi << 32);
+    }
+
+  res += (uint64_t)m_hi * n_hi;
+
+  return res;
+}
 #endif
+
+static inline_function uint64_t div64_const32(uint64_t n, uint32_t b)
+{
+  uint64_t res;
+  uint64_t x;
+  uint64_t t;
+  uint64_t m;
+  uint32_t p;
+  uint32_t bias;
+
+  DEBUGASSERT(b > 1);
+
+  p = 1u << LOG2_FLOOR(b);
+  m = (~0ULL / b) * p;
+  m += (((~0ULL % b + 1u) * p) + b - 1u) / b;
+  x = ~0ULL / b * b - 1u;
+  res = ((m & 0xffffffffu) * (x & 0xffffffffu)) >> 32;
+  t = res += (m & 0xffffffffu) * (x >> 32);
+  res += (x & 0xffffffffu) * (m >> 32);
+  t = (res < t) ? (1ULL << 32) : 0u;
+  res = (res >> 32) + t;
+  res += (m >> 32) * (x >> 32);
+  res /= p;
+
+  if (~0ULL % (b / (b & -b)) == 0u)
+    {
+      n /= (b & -b);
+      m = ~0ULL / (b / (b & -b));
+      p = 1u;
+      bias = 1u;
+    }
+  else if (res != x / b)
+    {
+      bias = 1u;
+      m = (~0ULL / b) * p;
+      m += ((~0ULL % b + 1u) * p) / b;
+    }
+  else
+    {
+      uint32_t bits = -(m & -m);
+      bits |= m >> 32;
+      bits = (~bits) << 1;
+      if (!bits)
+        {
+          p /= (m & -m);
+          m /= (m & -m);
+        }
+      else
+        {
+          p >>= LOG2_FLOOR(bits);
+          m >>= LOG2_FLOOR(bits);
+        }
+
+      bias = 0u;
+    }
+
+  res = umul64_const(m, n, bias);
+  res /= p;
+
+  return res;
+}
+
+#ifdef CONFIG_DEBUG_NOOPT
+
+/* Without optimization the magic number setup is not folded at compile
+ * time but runs on every call (it even contains several divisions),
+ * which is far slower than a plain division.
+ */
+
+#  define div64_const(n, base) ((n) / (base))
+#else
+
+/* The divisor is expected to be a compile-time constant so that the
+ * magic multiplier setup below is folded away; for runtime-invariant
+ * divisors use the invdiv API instead.
+ */
+
+static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
+{
+  DEBUGASSERT(base > 0);
+
+  if (IS_POWER_OF_2(base))
+    {
+      n >>= LOG2_FLOOR(base);
+    }
+  else if (base <= UINT32_MAX)
+    {
+      n = div64_const32(n, (uint32_t)base);
+    }
+  else
+    {
+      n /= base;
+    }
+
+  return n;
+}
+#endif
+
+#define div_const(n, base) \
+  ((is_constexpr(base) && !is_constexpr(n) && \
+    sizeof((n)) == sizeof(uint64_t)) ? div64_const(n, base) : \
+   ((n) / (base)))
+#define div_const_roundup(n, base) \
+  div_const((n) + (base) - 1u, base)
+#define div_const_roundnearest(n, base) \
+  div_const((n) + ((base) / 2u), base)
 
 /* Division optimizing method proposed by T. Granlund and L. Montgomery.
  * This method converts the runtime-invariant integer division
@@ -380,6 +403,8 @@ void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *ip)
   int      l  = log2ceil(d);
   uint64_t t1 = (uint64_t)1 << 32;
   uint64_t t2 = (uint64_t)1 << l;
+
+  DEBUGASSERT(d > 1);
 
   ip->mult  = (t1 * (t2 - d)) / d + 1;
 #if ULONG_MAX == 4294967295UL
@@ -459,13 +484,18 @@ do \
 } \
 while(0)
 
-/* Helper function to calculate 2 64-bit unsigned integers multiplication
- * The result is the highest half of the 128-bit unsigned integer.
+/* UMULH: high 64 bits of a * b.  Architectures may override it with a
+ * native or assembly implementation via up_umulh64(), which must
+ * evaluate both arguments.
  */
 
-static inline_function uint64_t invdiv_umulh64(uint64_t a, uint64_t b)
+#ifdef up_umulh64
+#  define umulh64(a, b) up_umulh64(a, b)
+#else
+
+static inline_function uint64_t umulh64(uint64_t a, uint64_t b)
 {
-#ifndef __SIZEOF_INT128__
+#ifndef __INT128_DEFINED
   /* If the compiler do not support uint128_t */
 
   uint64_t al = a & UINT32_MAX;
@@ -482,21 +512,14 @@ static inline_function uint64_t invdiv_umulh64(uint64_t a, uint64_t b)
 
   return m4 + (m2 >> 32) + (m3 >> 32) + (c >> 32);
 #else
-  /* This code will be compiled to UMULH instruction
-   * on the architectures like x86_64 and AArch64.
-   * The UMULH instruction can calculate the highest half
-   * of the 128-bit multiplication result.
-   * It is faster than any of software implementation.
-   * If the compiler do not support uint128_t, it is better to manually
-   * implement this function using UMULH instructions via
-   * the inline assembly.
-   */
+  /* Compiles to a single UMULH instruction on x86_64 and AArch64. */
 
-  __uint128_t a128 = a;
-  __uint128_t res128 = a128 * b;
+  uint128_t a128 = a;
+  uint128_t res128 = a128 * b;
   return res128 >> 64;
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: invdiv_init_param64
@@ -519,7 +542,9 @@ void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *ip)
   int      l = log2ceil(d);
   uint64_t t = ((uint64_t)1 << l) - d;
 
-#ifndef __SIZEOF_INT128__
+  DEBUGASSERT(d > 1);
+
+#ifndef __INT128_DEFINED
   /* If the compiler do not support UINT128 */
 
   uint64_t q[2];
@@ -540,7 +565,7 @@ void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *ip)
 
   ip->mult = q[0] + 1;
 #else
-  __uint128_t one128 = 1;
+  uint128_t one128 = 1;
   ip->mult = (one128 << 64) * t / d + 1;
 #endif
   ip->shift = l - 1;
@@ -572,12 +597,11 @@ uint64_t invdiv_u64(uint64_t n, FAR const invdiv_param64_t *ip)
   uint8_t  sh1 = 1;
   uint8_t  sh2 = ip->shift;
 
-  /* Calculate the 128-bit mres = 64-bit n * 64-bit m, where t1 = mres >> 64.
-   * Please do not use `umul64_const` or `umul64` here.
-   * The `invdiv_umulh64` has significant better performance over them.
+  /* t1 is the high half of the 128-bit product n * m.  Both operands
+   * are runtime values here, so umulh64() is the right primitive.
    */
 
-  t1 = invdiv_umulh64(n, m);
+  t1 = umulh64(n, m);
   t2 = (n - t1) >> sh1;
 
   return (t1 + t2) >> sh2;

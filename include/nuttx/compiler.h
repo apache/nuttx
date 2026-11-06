@@ -1137,7 +1137,7 @@
 #  define const_function
 #  define predict_true(x) (x)
 #  define predict_false(x) (x)
-#  define is_constexpr(x)  (0)
+#  define is_constexpr(x) __builtin_constant_p(x)
 #  define compiler_assume(x)
 #  define locate_code(n)
 #  define aligned_data(n)
@@ -1411,7 +1411,7 @@
 #  define const_function
 #  define predict_true(x) (x)
 #  define predict_false(x) (x)
-#  define is_constexpr(x)  (0)
+#  define is_constexpr(x)               __builtin_constant_p(x)
 #  define compiler_assume(x)
 #  define aligned_data(n)               __attribute__((aligned(n)))
 #  define locate_code(n)                __attribute__((section(n)))

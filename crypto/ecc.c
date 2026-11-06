@@ -31,6 +31,7 @@
  ****************************************************************************/
 
 #include <fcntl.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -107,7 +108,9 @@
  ****************************************************************************/
 
 #if SUPPORTS_INT128
+#  ifndef __INT128_DEFINED
 typedef unsigned __int128 uint128_t;
+#  endif
 #else
 typedef struct
 {
