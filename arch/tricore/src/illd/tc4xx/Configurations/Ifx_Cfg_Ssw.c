@@ -119,7 +119,7 @@ void Ifx_Ssw_PowerOnCrystalOsc(void)
 
 void Ifx_Ssw_PllInit(void)
 {
-  if (IfxClock_init(&IfxClock_defaultClockConfig) != 0U)
+  if (tricore_clockconfig() != 0)
     {
       __debug();
     }
