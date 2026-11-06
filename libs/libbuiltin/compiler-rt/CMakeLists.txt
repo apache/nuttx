@@ -92,8 +92,10 @@ if(CONFIG_BUILTIN_COMPILER_RT)
   list(APPEND RT_BUILTINS_SRCS ${SRCSTMP})
 
   if(NOT CONFIG_LIB_COMPILER_RT_HAS_BFLOAT16)
-    set(RT_BUILTINS_BFLOAT16_SRCS ${BUILTINS_DIR}/truncdfbf2.c
-                                  ${BUILTINS_DIR}/truncsfbf2.c)
+    set(RT_BUILTINS_BFLOAT16_SRCS
+        ${BUILTINS_DIR}/truncdfbf2.c ${BUILTINS_DIR}/truncsfbf2.c
+        ${BUILTINS_DIR}/trunctfbf2.c ${BUILTINS_DIR}/truncxfbf2.c
+        ${BUILTINS_DIR}/extendbfsf2.c)
     list(REMOVE_ITEM RT_BUILTINS_SRCS ${RT_BUILTINS_BFLOAT16_SRCS})
   endif()
 
@@ -111,7 +113,10 @@ if(CONFIG_BUILTIN_COMPILER_RT)
       ${BUILTINS_DIR}/floatuntixf.c
       ${BUILTINS_DIR}/mulxc3.c
       ${BUILTINS_DIR}/powixf2.c
-      ${BUILTINS_DIR}/trunctfxf2.c)
+      ${BUILTINS_DIR}/trunctfxf2.c
+      ${BUILTINS_DIR}/extendhfxf2.c
+      ${BUILTINS_DIR}/truncxfhf2.c
+      ${BUILTINS_DIR}/truncxfbf2.c)
 
   if(NOT CONFIG_ARCH_X86_64)
     list(REMOVE_ITEM RT_BUILTINS_SRCS ${x86_80_BIT_SOURCES})
