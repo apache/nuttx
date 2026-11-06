@@ -27,8 +27,11 @@
  * Included Files
  ****************************************************************************/
 
-#define UART_PIN_RX IfxAsclin0_RXA_P14_1_IN     /* UART receive port pin  */
-#define UART_PIN_TX IfxAsclin0_TX_P14_0_OUT     /* UART transmit port pin */
+/* UART0 pins: ASCLIN0 RXA on P14.1, TX on P14.0 (alternate output 2) */
+
+#define UART_PIN_PORT              0xf003ae00  /* P14 */
+#define UART_PIN_RX                1
+#define UART_PIN_TX                0
 
 /****************************************************************************
  * Pre-processor Definitions
