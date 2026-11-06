@@ -33,4 +33,23 @@ config STREAM_BASE64_BUFFER_SIZE
 	int "Output base64 stream buffer size"
 	default 128
 
+config LIBC_BFORMAT_B16
+	bool "Treat %hf in binary format strings as b16_t"
+	default n
+	---help---
+		The binary format functions lib_bsprintf() and lib_bscanf() (used,
+		for example, by the uORB listener and generator) read and write
+		the members of a structure according to a printf-style format
+		string.  By default %hf is a float.  If this option is enabled,
+		%hf is a b16_t (16.16 fixed-point) value instead.
+
+		This option is selected by SENSORS_USE_B16, so that the sensor
+		data can be printed and scanned when sensor_data_t is b16_t.
+
+		Without LIBC_FLOATINGPOINT, b16_t values are printed as
+		"integer.fraction" with four decimal digits and the width and
+		precision of the conversion are ignored.  Scanning %hf into a
+		b16_t requires LIBC_FLOATINGPOINT; without it, scanning is not
+		supported (as for float).
+
 endmenu # Locale Support
