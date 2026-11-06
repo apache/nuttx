@@ -31,6 +31,7 @@
 #include <arch/arch.h>
 
 #include "tricore_internal.h"
+#include "tc4xx_wdt.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -42,11 +43,15 @@
 #define TC4XX_WTU_WDTCPU_CTRLB(n)  (0xf0000040 + (n) * 0x30)
 #define TC4XX_WTU_WDTSYS_CTRLA     0xf00001a8
 #define TC4XX_WTU_WDTSYS_CTRLB     0xf00001ac
+#define TC4XX_WTU_STAT_OFFSET      8                 /* From CTRLA */
 
 #define TC4XX_WTU_CTRLA_LCK        (1 << 0)          /* Lock */
 #define TC4XX_WTU_CTRLA_PW_SHIFT   1                 /* Password */
 #define TC4XX_WTU_CTRLA_PW_MASK    (0x7fff << TC4XX_WTU_CTRLA_PW_SHIFT)
+#define TC4XX_WTU_CTRLA_TCVI_SHIFT 16                /* Timer check value */
 #define TC4XX_WTU_CTRLB_DR         (1 << 0)          /* Disable request */
+#define TC4XX_WTU_STAT_TC          (1 << 8)          /* Timer check */
+#define TC4XX_WTU_STAT_TIM_SHIFT   16                /* Timer value */
 
 /* The low seven password bits read inverted */
 
@@ -88,8 +93,67 @@ static void tc4xx_wdt_disable(uintptr_t ctrla, uintptr_t ctrlb)
 }
 
 /****************************************************************************
+ * Name: tc4xx_wdt_password
+ ****************************************************************************/
+
+static uint32_t tc4xx_wdt_password(uintptr_t ctrla)
+{
+  return ((getreg32(ctrla) & TC4XX_WTU_CTRLA_PW_MASK) >>
+          TC4XX_WTU_CTRLA_PW_SHIFT) ^ TC4XX_WTU_PW_INVERTED;
+}
+
+/****************************************************************************
+ * Name: tc4xx_wdt_service_one
+ *
+ * Description:
+ *   Service a watchdog: unlock CTRLA with the password, with the inverted
+ *   timer value if the timer check is enabled, then lock it again.
+ *
+ ****************************************************************************/
+
+static void tc4xx_wdt_service_one(uintptr_t ctrla, uint32_t pw)
+{
+  uint32_t a = getreg32(ctrla);
+
+  if ((a & TC4XX_WTU_CTRLA_LCK) != 0)
+    {
+      uint32_t stat = getreg32(ctrla + TC4XX_WTU_STAT_OFFSET);
+
+      a &= ~(TC4XX_WTU_CTRLA_LCK | TC4XX_WTU_CTRLA_PW_MASK);
+      a |= pw << TC4XX_WTU_CTRLA_PW_SHIFT;
+      if ((stat & TC4XX_WTU_STAT_TC) != 0)
+        {
+          a &= ~(0xffff << TC4XX_WTU_CTRLA_TCVI_SHIFT);
+          a |= (~stat >> TC4XX_WTU_STAT_TIM_SHIFT) <<
+               TC4XX_WTU_CTRLA_TCVI_SHIFT;
+        }
+
+      putreg32(a, ctrla);
+    }
+
+  putreg32(a | TC4XX_WTU_CTRLA_LCK, ctrla);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tc4xx_wdt_service
+ *
+ * Description:
+ *   Service the CPU0 and the system watchdog, for the long waits of the
+ *   clock setup, which runs before the watchdogs are disabled.
+ *
+ ****************************************************************************/
+
+void tc4xx_wdt_service(void)
+{
+  tc4xx_wdt_service_one(TC4XX_WTU_WDTCPU_CTRLA(0),
+                        tc4xx_wdt_password(TC4XX_WTU_WDTCPU_CTRLA(0)));
+  tc4xx_wdt_service_one(TC4XX_WTU_WDTSYS_CTRLA,
+                        tc4xx_wdt_password(TC4XX_WTU_WDTSYS_CTRLA));
+}
 
 /****************************************************************************
  * Name: tricore_wdt_disable
