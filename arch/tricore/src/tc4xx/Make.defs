@@ -21,10 +21,11 @@
 ############################################################################
 
 CHIP_CSRCS += tc4xx_timerisr.c
-CHIP_CSRCS += tc4xx_serial.c
 CHIP_CSRCS += tc4xx_wdt.c
 CHIP_CSRCS += tc4xx_clockconfig.c
 CHIP_CSRCS += tc4xx_ram.c
+
+include common/aurix/Make.defs
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
   CHIP_UCSRCS += tc4d9_userspace.c

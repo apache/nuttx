@@ -20,9 +20,11 @@
 #
 # ##############################################################################
 
-set(SRCS tc3xx_timerisr.c tc3xx_serial.c tc3xx_wdt.c tc3xx_clockconfig.c)
+set(SRCS tc3xx_timerisr.c tc3xx_wdt.c tc3xx_clockconfig.c)
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/tricore/src/common/aurix aurix)
 
 set(ILLD_UNPACK "${CMAKE_CURRENT_SOURCE_DIR}/../illd/tc3xx")
 set(ILLD_TARBALL "${ILLD_UNPACK}/illd.tar.gz")
