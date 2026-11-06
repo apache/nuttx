@@ -613,6 +613,12 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
       case MAC802154IOC_NOTIFY_REGISTER:
         {
+          ret = nxsig_event_valid(&macarg->event);
+          if (ret < 0)
+            {
+              break;
+            }
+
           /* Save the notification events */
 
           dev->md_notify_event      = macarg->event;

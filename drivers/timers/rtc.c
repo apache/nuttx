@@ -368,386 +368,409 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    /* RTC_RD_TIME returns the current RTC time.
-     *
-     * Argument: A writeable reference to a struct rtc_time to receive the
-     *           RTC's time.
-     */
+      /* RTC_RD_TIME returns the current RTC time.
+       *
+       * Argument: A writeable reference to a struct rtc_time to receive the
+       *           RTC's time.
+       */
 
-    case RTC_RD_TIME:
-      {
-        FAR struct rtc_time *rtctime =
-          (FAR struct rtc_time *)((uintptr_t)arg);
+      case RTC_RD_TIME:
+        {
+          FAR struct rtc_time *rtctime =
+            (FAR struct rtc_time *)((uintptr_t)arg);
 
-        if (ops->rdtime)
-          {
-            ret = ops->rdtime(upper->lower, rtctime);
-          }
-      }
-      break;
+          if (ops->rdtime)
+            {
+              ret = ops->rdtime(upper->lower, rtctime);
+            }
+        }
+        break;
 
-    /* RTC_SET_TIME sets the RTC's time
-     *
-     * Argument: A read-only reference to a struct rtc_time containing
-     *           the new time to be set.
-     */
+      /* RTC_SET_TIME sets the RTC's time
+       *
+       * Argument: A read-only reference to a struct rtc_time containing
+       *           the new time to be set.
+       */
 
-    case RTC_SET_TIME:
-      {
-        FAR const struct rtc_time *rtctime =
-          (FAR const struct rtc_time *)((uintptr_t)arg);
+      case RTC_SET_TIME:
+        {
+          FAR const struct rtc_time *rtctime =
+            (FAR const struct rtc_time *)((uintptr_t)arg);
 
-        if (ops->settime)
-          {
-            ret = ops->settime(upper->lower, rtctime);
-            if (ret == 0)
-              {
-                /* If the RTC time was set successfully, then update the
-                 * current system time to match.
-                 */
+          if (ops->settime)
+            {
+              ret = ops->settime(upper->lower, rtctime);
+              if (ret == 0)
+                {
+                  /* If the RTC time was set successfully, then update the
+                   * current system time to match.
+                   */
 
-                clock_synchronize(NULL);
-              }
-          }
-      }
-      break;
+                  clock_synchronize(NULL);
+                }
+            }
+        }
+        break;
 
-    /* RTC_HAVE_SET_TIME checks if RTC's time had been set
-     *
-     * Argument: A writable reference to a bool to receive true/false return
-     *           value of the check.
-     */
+      /* RTC_HAVE_SET_TIME checks if RTC's time had been set
+       *
+       * Argument: A writable reference to a bool to receive true/false
+       * return
+       *           value of the check.
+       */
 
-    case RTC_HAVE_SET_TIME:
-      {
-        FAR bool *have_set_time = (FAR bool *)((uintptr_t)arg);
+      case RTC_HAVE_SET_TIME:
+        {
+          FAR bool *have_set_time = (FAR bool *)((uintptr_t)arg);
 
-        if (ops->havesettime)
-          {
-            *have_set_time = ops->havesettime(upper->lower);
-            ret = OK;
-          }
-      }
-      break;
+          if (ops->havesettime)
+            {
+              *have_set_time = ops->havesettime(upper->lower);
+              ret = OK;
+            }
+        }
+        break;
 
 #ifdef CONFIG_RTC_ALARM
-    /* RTC_SET_ALARM sets the alarm time.
-     *
-     * Argument: A read-only reference to a struct rtc_time containing the
-     *           new alarm time to be set.
-     */
+      /* RTC_SET_ALARM sets the alarm time.
+       *
+       * Argument: A read-only reference to a struct rtc_time containing the
+       *           new alarm time to be set.
+       */
 
-    case RTC_SET_ALARM:
-      {
-        FAR const struct rtc_setalarm_s *alarminfo =
-          (FAR const struct rtc_setalarm_s *)((uintptr_t)arg);
-        FAR struct rtc_alarminfo_s *upperinfo;
-        struct lower_setalarm_s lowerinfo;
-        int alarmid;
+      case RTC_SET_ALARM:
+        {
+          FAR const struct rtc_setalarm_s *alarminfo =
+            (FAR const struct rtc_setalarm_s *)((uintptr_t)arg);
+          FAR struct rtc_alarminfo_s *upperinfo;
+          struct lower_setalarm_s lowerinfo;
+          int alarmid;
 
-        DEBUGASSERT(alarminfo != NULL);
-        alarmid = alarminfo->id;
-        DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
+          DEBUGASSERT(alarminfo != NULL);
 
-        /* Is the alarm active? */
+          ret = nxsig_event_valid(&alarminfo->event);
+          if (ret < 0)
+            {
+              break;
+            }
 
-        upperinfo = &upper->alarminfo[alarmid];
-        if (upperinfo->active)
-          {
-            /* Yes, cancel the alarm */
+          alarmid = alarminfo->id;
+          DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
 
-            if (ops->cancelalarm)
-              {
-                ops->cancelalarm(upper->lower, alarmid);
-              }
+          /* Is the alarm active? */
 
-            upperinfo->active = false;
-          }
+          upperinfo = &upper->alarminfo[alarmid];
+          if (upperinfo->active)
+            {
+              /* Yes, cancel the alarm */
 
-        if (ops->setalarm)
-          {
-            pid_t pid;
+              if (ops->cancelalarm)
+                {
+                  ops->cancelalarm(upper->lower, alarmid);
+                }
 
-            /* A PID of zero means to signal the calling task */
+              upperinfo->active = false;
+            }
 
-            pid = alarminfo->pid;
-            if (pid == 0)
-              {
-                pid = nxsched_getpid();
-              }
+          if (ops->setalarm)
+            {
+              pid_t pid;
 
-            /* Save the signal info to be used to notify the caller when the
-             * alarm expires.
-             */
+              /* A PID of zero means to signal the calling task */
 
-            upperinfo->active = true;
-            upperinfo->pid    = pid;
-            upperinfo->event  = alarminfo->event;
+              pid = alarminfo->pid;
+              if (pid == 0)
+                {
+                  pid = nxsched_getpid();
+                }
 
-            /* Format the alarm info needed by the lower half driver */
+              /* Save the signal info to be used to notify the caller when
+               * the alarm expires.
+               */
 
-            lowerinfo.id   = alarmid;
-            lowerinfo.cb   = rtc_alarm_callback;
-            lowerinfo.priv = (FAR void *)upper;
-            lowerinfo.time = alarminfo->time;
+              upperinfo->active = true;
+              upperinfo->pid    = pid;
+              upperinfo->event  = alarminfo->event;
 
-            /* Then set the alarm */
+              /* Format the alarm info needed by the lower half driver */
 
-            ret = ops->setalarm(upper->lower, &lowerinfo);
-            if (ret < 0)
-              {
-                upperinfo->active = false;
-              }
-          }
-      }
-      break;
+              lowerinfo.id   = alarmid;
+              lowerinfo.cb   = rtc_alarm_callback;
+              lowerinfo.priv = (FAR void *)upper;
+              lowerinfo.time = alarminfo->time;
 
-    /* RTC_SET_RELATIVE sets the alarm time relative to the current time.
-     *
-     * Argument: A read-only reference to a struct rtc_setrelative_s
-     *           containing the new relative alarm time to be set.
-     */
+              /* Then set the alarm */
 
-    case RTC_SET_RELATIVE:
-      {
-        FAR const struct rtc_setrelative_s *alarminfo =
-          (FAR const struct rtc_setrelative_s *)((uintptr_t)arg);
-        FAR struct rtc_alarminfo_s *upperinfo;
-        struct lower_setrelative_s lowerinfo;
-        int alarmid;
+              ret = ops->setalarm(upper->lower, &lowerinfo);
+              if (ret < 0)
+                {
+                  upperinfo->active = false;
+                }
+            }
+        }
+        break;
 
-        DEBUGASSERT(alarminfo != NULL);
-        alarmid = alarminfo->id;
-        DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
+      /* RTC_SET_RELATIVE sets the alarm time relative to the current time.
+       *
+       * Argument: A read-only reference to a struct rtc_setrelative_s
+       *           containing the new relative alarm time to be set.
+       */
 
-        /* Is the alarm active? */
+      case RTC_SET_RELATIVE:
+        {
+          FAR const struct rtc_setrelative_s *alarminfo =
+            (FAR const struct rtc_setrelative_s *)((uintptr_t)arg);
+          FAR struct rtc_alarminfo_s *upperinfo;
+          struct lower_setrelative_s lowerinfo;
+          int alarmid;
 
-        upperinfo = &upper->alarminfo[alarmid];
-        if (upperinfo->active)
-          {
-            /* Yes, cancel the alarm */
+          DEBUGASSERT(alarminfo != NULL);
 
-            if (ops->cancelalarm)
-              {
-                ops->cancelalarm(upper->lower, alarmid);
-              }
+          ret = nxsig_event_valid(&alarminfo->event);
+          if (ret < 0)
+            {
+              break;
+            }
 
-            upperinfo->active = false;
-          }
+          alarmid = alarminfo->id;
+          DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
 
-        if (ops->setrelative)
-          {
-            pid_t pid;
+          /* Is the alarm active? */
 
-            /* A PID of zero means to signal the calling task */
+          upperinfo = &upper->alarminfo[alarmid];
+          if (upperinfo->active)
+            {
+              /* Yes, cancel the alarm */
 
-            pid = alarminfo->pid;
-            if (pid == 0)
-              {
-                pid = nxsched_getpid();
-              }
+              if (ops->cancelalarm)
+                {
+                  ops->cancelalarm(upper->lower, alarmid);
+                }
 
-            /* Save the signal info to be used to notify the caller when the
-             * alarm expires.
-             */
+              upperinfo->active = false;
+            }
 
-            upperinfo->active = true;
-            upperinfo->pid    = pid;
-            upperinfo->event  = alarminfo->event;
+          if (ops->setrelative)
+            {
+              pid_t pid;
 
-            /* Format the alarm info needed by the lower half driver */
+              /* A PID of zero means to signal the calling task */
 
-            lowerinfo.id      = alarmid;
-            lowerinfo.cb      = rtc_alarm_callback;
-            lowerinfo.priv    = (FAR void *)upper;
-            lowerinfo.reltime = alarminfo->reltime;
+              pid = alarminfo->pid;
+              if (pid == 0)
+                {
+                  pid = nxsched_getpid();
+                }
 
-            /* Then set the alarm */
+              /* Save the signal info to be used to notify the caller when
+               * the alarm expires.
+               */
 
-            ret = ops->setrelative(upper->lower, &lowerinfo);
-            if (ret < 0)
-              {
-                upperinfo->active = false;
-              }
-          }
-      }
-      break;
+              upperinfo->active = true;
+              upperinfo->pid    = pid;
+              upperinfo->event  = alarminfo->event;
 
-    /* RTC_CANCEL_ALARM cancel the alarm.
-     *
-     * Argument: An ALARM ID value that indicates which alarm should be
-     *           canceled.
-     */
+              /* Format the alarm info needed by the lower half driver */
 
-    case RTC_CANCEL_ALARM:
-      {
-        FAR struct rtc_alarminfo_s *upperinfo;
-        int alarmid = (int)arg;
+              lowerinfo.id      = alarmid;
+              lowerinfo.cb      = rtc_alarm_callback;
+              lowerinfo.priv    = (FAR void *)upper;
+              lowerinfo.reltime = alarminfo->reltime;
 
-        DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
+              /* Then set the alarm */
 
-        upperinfo = &upper->alarminfo[alarmid];
+              ret = ops->setrelative(upper->lower, &lowerinfo);
+              if (ret < 0)
+                {
+                  upperinfo->active = false;
+                }
+            }
+        }
+        break;
 
-        if (ops->cancelalarm)
-          {
-            ret = ops->cancelalarm(upper->lower, alarmid);
-            if (ret == OK)
-              {
-                upperinfo->active = false;
-                nxsig_cancel_notification(&upperinfo->work);
-              }
-          }
-      }
-      break;
+      /* RTC_CANCEL_ALARM cancel the alarm.
+       *
+       * Argument: An ALARM ID value that indicates which alarm should be
+       *           canceled.
+       */
 
-    /* RTC_RD_ALARM query the alarm.
-     *
-     * Argument: A writable reference to the queried alarm.
-     *
-     */
+      case RTC_CANCEL_ALARM:
+        {
+          FAR struct rtc_alarminfo_s *upperinfo;
+          int alarmid = (int)arg;
 
-    case RTC_RD_ALARM:
-      {
-        FAR struct rtc_rdalarm_s *alarmquery =
-          (FAR struct rtc_rdalarm_s *)((uintptr_t)arg);
-        FAR struct rtc_alarminfo_s *upperinfo;
-        struct lower_rdalarm_s lowerinfo;
-        int alarmid;
+          DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
 
-        DEBUGASSERT(alarmquery != NULL);
-        alarmid = alarmquery->id;
-        DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
+          upperinfo = &upper->alarminfo[alarmid];
 
-        /* Is the alarm active? */
+          if (ops->cancelalarm)
+            {
+              ret = ops->cancelalarm(upper->lower, alarmid);
+              if (ret == OK)
+                {
+                  upperinfo->active = false;
+                  nxsig_cancel_notification(&upperinfo->work);
+                }
+            }
+        }
+        break;
 
-        upperinfo = &upper->alarminfo[alarmid];
-        alarmquery->active = upperinfo->active;
+      /* RTC_RD_ALARM query the alarm.
+       *
+       * Argument: A writable reference to the queried alarm.
+       *
+       */
 
-        lowerinfo.id = alarmid;
-        lowerinfo.priv = (FAR void *)upper;
-        lowerinfo.time = (FAR struct rtc_time *)&alarmquery->time;
+      case RTC_RD_ALARM:
+        {
+          FAR struct rtc_rdalarm_s *alarmquery =
+            (FAR struct rtc_rdalarm_s *)((uintptr_t)arg);
+          FAR struct rtc_alarminfo_s *upperinfo;
+          struct lower_rdalarm_s lowerinfo;
+          int alarmid;
 
-        if (ops->rdalarm)
-          {
-            ret = ops->rdalarm(upper->lower, &lowerinfo);
-          }
-      }
-      break;
+          DEBUGASSERT(alarmquery != NULL);
+          alarmid = alarmquery->id;
+          DEBUGASSERT(alarmid >= 0 && alarmid < CONFIG_RTC_NALARMS);
+
+          /* Is the alarm active? */
+
+          upperinfo = &upper->alarminfo[alarmid];
+          alarmquery->active = upperinfo->active;
+
+          lowerinfo.id = alarmid;
+          lowerinfo.priv = (FAR void *)upper;
+          lowerinfo.time = (FAR struct rtc_time *)&alarmquery->time;
+
+          if (ops->rdalarm)
+            {
+              ret = ops->rdalarm(upper->lower, &lowerinfo);
+            }
+        }
+        break;
 #endif /* CONFIG_RTC_ALARM */
 
 #ifdef CONFIG_RTC_PERIODIC
-    /* RTC_SET_PERIODIC set a periodic wakeup.
-     *
-     * Argument: A read-only reference to a struct rtc_setperiodic_s
-     *           containing the new wakeup period to be set.
-     */
+      /* RTC_SET_PERIODIC set a periodic wakeup.
+       *
+       * Argument: A read-only reference to a struct rtc_setperiodic_s
+       *           containing the new wakeup period to be set.
+       */
 
-    case RTC_SET_PERIODIC:
-      {
-        FAR const struct rtc_setperiodic_s *alarminfo =
-          (FAR const struct rtc_setperiodic_s *)((uintptr_t)arg);
-        FAR struct rtc_alarminfo_s *upperinfo;
-        struct lower_setperiodic_s lowerinfo;
-        int id;
+      case RTC_SET_PERIODIC:
+        {
+          FAR const struct rtc_setperiodic_s *alarminfo =
+            (FAR const struct rtc_setperiodic_s *)((uintptr_t)arg);
+          FAR struct rtc_alarminfo_s *upperinfo;
+          struct lower_setperiodic_s lowerinfo;
+          int id;
 
-        DEBUGASSERT(alarminfo != NULL);
-        id = alarminfo->id;
-        DEBUGASSERT(id >= 0);
+          DEBUGASSERT(alarminfo != NULL);
 
-        /* Is the alarm active? */
+          ret = nxsig_event_valid(&alarminfo->event);
+          if (ret < 0)
+            {
+              break;
+            }
 
-        upperinfo = &upper->periodicinfo;
-        if (upperinfo->active)
-          {
-            /* Yes, cancel it */
+          id = alarminfo->id;
+          DEBUGASSERT(id >= 0);
 
-            if (ops->cancelperiodic)
-              {
-                ops->cancelperiodic(upper->lower, id);
-              }
+          /* Is the alarm active? */
 
-            upperinfo->active = false;
-          }
+          upperinfo = &upper->periodicinfo;
+          if (upperinfo->active)
+            {
+              /* Yes, cancel it */
 
-        if (ops->setperiodic)
-          {
-            pid_t pid;
+              if (ops->cancelperiodic)
+                {
+                  ops->cancelperiodic(upper->lower, id);
+                }
 
-            /* A PID of zero means to signal the calling task */
+              upperinfo->active = false;
+            }
 
-            pid = alarminfo->pid;
-            if (pid == 0)
-              {
-                pid = nxsched_getpid();
-              }
+          if (ops->setperiodic)
+            {
+              pid_t pid;
 
-            /* Save the signal info to be used to notify the caller when the
-             * alarm expires.
-             */
+              /* A PID of zero means to signal the calling task */
 
-            upperinfo->active = true;
-            upperinfo->pid    = pid;
-            upperinfo->event  = alarminfo->event;
+              pid = alarminfo->pid;
+              if (pid == 0)
+                {
+                  pid = nxsched_getpid();
+                }
 
-            /* Format the alarm info needed by the lower half driver. */
+              /* Save the signal info to be used to notify the caller when
+               * the alarm expires.
+               */
 
-            lowerinfo.id     = id;
-            lowerinfo.cb     = rtc_periodic_callback;
-            lowerinfo.priv   = (FAR void *)upper;
-            lowerinfo.period = alarminfo->period;
+              upperinfo->active = true;
+              upperinfo->pid    = pid;
+              upperinfo->event  = alarminfo->event;
 
-            /* Then set the periodic wakeup. */
+              /* Format the alarm info needed by the lower half driver. */
 
-            ret = ops->setperiodic(upper->lower, &lowerinfo);
-            if (ret < 0)
-              {
-                upperinfo->active = false;
-              }
-          }
-      }
-      break;
+              lowerinfo.id     = id;
+              lowerinfo.cb     = rtc_periodic_callback;
+              lowerinfo.priv   = (FAR void *)upper;
+              lowerinfo.period = alarminfo->period;
 
-    /* RTC_CANCEL_PERIODIC cancel the periodic wakeup.
-     *
-     * Argument: An ID value that indicates which wakeup should be canceled.
-     */
+              /* Then set the periodic wakeup. */
 
-    case RTC_CANCEL_PERIODIC:
-      {
-        FAR struct rtc_alarminfo_s *upperinfo;
-        int id = (int)arg;
+              ret = ops->setperiodic(upper->lower, &lowerinfo);
+              if (ret < 0)
+                {
+                  upperinfo->active = false;
+                }
+            }
+        }
+        break;
 
-        DEBUGASSERT(id >= 0);
+      /* RTC_CANCEL_PERIODIC cancel the periodic wakeup.
+       *
+       * Argument: An ID value that indicates which wakeup should be
+       * canceled.
+       */
 
-        upperinfo = &upper->periodicinfo;
+      case RTC_CANCEL_PERIODIC:
+        {
+          FAR struct rtc_alarminfo_s *upperinfo;
+          int id = (int)arg;
 
-        if (ops->cancelperiodic)
-          {
-            ret = ops->cancelperiodic(upper->lower, id);
-            if (ret == OK)
-              {
-                upperinfo->active = false;
-                nxsig_cancel_notification(&upperinfo->work);
-              }
-          }
-      }
-      break;
+          DEBUGASSERT(id >= 0);
+
+          upperinfo = &upper->periodicinfo;
+
+          if (ops->cancelperiodic)
+            {
+              ret = ops->cancelperiodic(upper->lower, id);
+              if (ret == OK)
+                {
+                  upperinfo->active = false;
+                  nxsig_cancel_notification(&upperinfo->work);
+                }
+            }
+        }
+        break;
 #endif /* CONFIG_RTC_PERIODIC */
 
-    /* Forward any unrecognized IOCTLs to the lower half driver... they
-     * may represent some architecture-specific command.
-     */
+      /* Forward any unrecognized IOCTLs to the lower half driver... they
+       * may represent some architecture-specific command.
+       */
 
-    default:
-      {
+      default:
+        {
 #ifdef CONFIG_RTC_IOCTL
-        if (ops->ioctl)
-          {
-            ret = ops->ioctl(upper->lower, cmd, arg);
-          }
+          if (ops->ioctl)
+            {
+              ret = ops->ioctl(upper->lower, cmd, arg);
+            }
 #endif
-      }
-      break;
+        }
+        break;
     }
 
   nxmutex_unlock(&upper->lock);

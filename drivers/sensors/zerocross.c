@@ -424,7 +424,7 @@ static int zc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct sigevent *event =
             (FAR struct sigevent *)((uintptr_t)arg);
 
-          if (event)
+          if (event && nxsig_event_valid(event) == OK)
             {
               /* Save the notification events */
 
