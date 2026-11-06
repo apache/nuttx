@@ -330,6 +330,16 @@
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
  *   Dependencies:   None
+ *
+ * CANIOC_GET_ERRORS
+ *   Description:    Get the CAN controller error state and counters.
+ *
+ *   Argument:       A pointer to a write-able instance of struct
+ *                   canioc_errors_s in which the values will be returned.
+ *   returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
  */
 
 #define CANIOC_RTR                _CANIOC(1)
@@ -353,9 +363,10 @@
 #define CANIOC_GET_TRANSVSTATE    _CANIOC(19)
 #define CANIOC_SET_MSGALIGN       _CANIOC(20)
 #define CANIOC_GET_MSGALIGN       _CANIOC(21)
+#define CANIOC_GET_ERRORS         _CANIOC(22)
 
 #define CAN_FIRST                 0x0001         /* First common command */
-#define CAN_NCMDS                 21             /* 21 common commands   */
+#define CAN_NCMDS                 22             /* 22 common commands   */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half CAN driver to the lower-half CAN driver via the
@@ -907,6 +918,33 @@ struct canioc_bittiming_s
   uint8_t               bt_tseg1;        /* TSEG1 in time quanta */
   uint8_t               bt_tseg2;        /* TSEG2 in time quanta */
   uint8_t               bt_sjw;          /* Synchronization Jump Width in time quanta */
+};
+
+/* CANIOC_GET_ERRORS:
+ *
+ * The state is error-active unless the controller reports otherwise;
+ * WARNING is error-active with either error counter at or above 96.
+ * PASSIVE and BUSOFF follow the controller's own state.
+ */
+
+#define CANIOC_ERRSTATE_ACTIVE    0
+#define CANIOC_ERRSTATE_WARNING   1
+#define CANIOC_ERRSTATE_PASSIVE   2
+#define CANIOC_ERRSTATE_BUSOFF    3
+
+struct canioc_errors_s
+{
+  uint8_t               state;           /* CANIOC_ERRSTATE_* */
+  uint8_t               txerr;           /* Transmit error counter (TEC) */
+  uint8_t               rxerr;           /* Receive error counter (REC) */
+  uint32_t              errors;          /* Bus errors observed since the
+                                          * device was opened, monotonic */
+  uint32_t              arb_errors;      /* Errors observed during the
+                                          * arbitration phase */
+  uint32_t              data_errors;     /* Errors observed during the
+                                          * data phase */
+  uint32_t              rx_overruns;     /* RX frames the controller
+                                          * overwrote unread */
 };
 
 /* CANIOC_GET_CONNMODES/CANIOC_SET_CONNMODES:
