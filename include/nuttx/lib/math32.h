@@ -360,12 +360,16 @@ static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
 
 #define div_const(n, base) \
   ((sizeof((n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
+/* Unit constant in the essential type of x (x > 0), so MISRA C Rule 10.4
+ * holds for both signed and unsigned arguments.
+ */
+
+#define MATH32_ONE(x) ((x) / (x))
+
 #define div_const_roundup(n, base) \
-  ((sizeof((n)) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1u, base) : \
-   (((n) + (base) - 1u) / (base)))
+  div_const((n) + (base) - MATH32_ONE(base), base)
 #define div_const_roundnearest(n, base) \
-  ((sizeof((n)) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2u), base) : \
-   (((n) + ((base) / 2u)) / (base)))
+  div_const((n) + ((base) / (MATH32_ONE(base) + MATH32_ONE(base))), base)
 
 /* Division optimizing method proposed by T. Granlund and L. Montgomery.
  * This method converts the runtime-invariant integer division
