@@ -78,4 +78,12 @@
 #define IFX_CFG_SSW_ENABLE_KEYOFF_MBIST_DSPRS_DMARAM     (0U)
 #endif
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#if IFX_CFG_SSW_ENABLE_PLL_INIT == 1U
+int tricore_clockconfig(void);
+#endif
+
 #endif /* __ARCH_TRICORE_SRC_ILLD_TC4XX_CONFIGURATIONS_IFX_CFG_SSW_H */
