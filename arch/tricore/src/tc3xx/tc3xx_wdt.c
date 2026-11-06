@@ -33,6 +33,7 @@
 
 #include "tricore_internal.h"
 #include "hardware/tc3xx_wdt.h"
+#include "tc3xx_wdt.h"
 
 /****************************************************************************
  * Private Functions
@@ -85,6 +86,22 @@ static void tc3xx_wdt_disable(uintptr_t con0, uintptr_t con1)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tc3xx_wdt_safety_endinit
+ *
+ * Description:
+ *   Set or clear the safety ENDINIT, which protects the clock registers.
+ *
+ ****************************************************************************/
+
+void tc3xx_wdt_safety_endinit(bool set)
+{
+  uint32_t pw = ((getreg32(TC3XX_SCU_WDTS_CON0) & TC3XX_WDT_CON0_PW_MASK) >>
+                 TC3XX_WDT_CON0_PW_SHIFT) ^ TC3XX_WDT_PW_INVERTED;
+
+  tc3xx_wdt_endinit(TC3XX_SCU_WDTS_CON0, pw, set);
+}
 
 /****************************************************************************
  * Name: tricore_wdt_disable

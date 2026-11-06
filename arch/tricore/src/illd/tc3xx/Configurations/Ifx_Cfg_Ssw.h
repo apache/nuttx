@@ -83,14 +83,14 @@ extern void Ifx_Ssw_Monbist(void);
 #endif
 
 #if IFX_CFG_SSW_ENABLE_PLL_INIT == 1U
-#include "IfxScuCcu.h"
+int tricore_clockconfig(void);
 
-#define IFX_CFG_SSW_CALLOUT_PLL_INIT()                    \
-{                                                         \
-  if (IfxScuCcu_init(&IfxScuCcu_defaultClockConfig) == 1) \
-    {                                                     \
-      __debug();                                          \
-    }                                                     \
+#define IFX_CFG_SSW_CALLOUT_PLL_INIT()   \
+{                                        \
+  if (tricore_clockconfig() != 0)        \
+    {                                    \
+      __asm__ volatile ("debug");        \
+    }                                    \
 }
 
 #endif
