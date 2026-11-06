@@ -236,5 +236,9 @@ void arm64_boot_secondary_c_routine(void)
 
   arm64_timer_secondary_init();
 
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  arm64_perf_secondary_init();
+#endif
+
   arm64_smp_init_top();
 }
