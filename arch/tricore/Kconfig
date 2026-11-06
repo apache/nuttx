@@ -113,6 +113,11 @@ config ARCH_MPU_CODE_NREGIONS
 	---help---
 		The code regions count
 
+config ARCH_DEBUG_TRAP_ALERT
+	bool "TriCore Trap Alert Debug"
+	default !DEFAULT_SMALL
+	depends on DEBUG_ALERT
+
 config HAVE_SECURITY_CORE
 	bool
 	---help---

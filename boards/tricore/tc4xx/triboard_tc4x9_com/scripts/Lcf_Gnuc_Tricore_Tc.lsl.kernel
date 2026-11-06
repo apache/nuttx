@@ -168,7 +168,7 @@ SECTIONS
     .traptab_tc (LCF_TRAPVEC_START) :
     {
         PROVIDE(COREID_LST(__TRAPTAB_CPU) = .);
-        KEEP (*(.COREID_LST(traptab_cpu)));
+        KEEP (*(.traptab));
     } > pfls
 }
 
