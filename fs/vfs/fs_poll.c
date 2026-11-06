@@ -305,6 +305,55 @@ void poll_notify(FAR struct pollfd_s **afds, int nfds, pollevent_t eventset)
 }
 
 /****************************************************************************
+ * Name: poll_setup_dispatch
+ *
+ * Description:
+ *   Dispatch a poll setup to the underlying driver poll handler.  When the
+ *   pollfd is already registered (fds->priv != NULL), i.e. a persistent
+ *   poll consumer such as epoll is re-querying readiness after a prior
+ *   registration, a legacy driver that has not been migrated to the
+ *   persistent/refresh model will refuse with -EBUSY because no free slot
+ *   is found.  In that case, rebuild the binding
+ *   through the legacy teardown + set-up cycle so the semantics stay
+ *   intact.  The saved priv pointer is restored before tearing down
+ *   because some legacy drivers clear it on a failed set-up.
+ *
+ * Input Parameters:
+ *   poll - The driver poll handler
+ *   filep - File structure instance
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+static int poll_setup_dispatch(FAR int (*poll)(FAR struct file *filep,
+                                FAR struct pollfd_s *fds, bool setup),
+                               FAR struct file *filep,
+                               FAR struct pollfd_s *fds)
+{
+  FAR void *prev_priv = fds->priv;
+  int ret;
+
+  ret = poll(filep, fds, true);
+  if (ret == -EBUSY && prev_priv != NULL)
+    {
+      /* The driver has not been migrated yet and the pollfd was already
+       * bound (persistent poll consumer).  Restore the previous binding
+       * and re-establish it through the legacy teardown + set-up cycle.
+       */
+
+      fds->priv = prev_priv;
+      poll(filep, fds, false);
+      ret = poll(filep, fds, true);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: file_poll
  *
  * Description:
@@ -342,7 +391,15 @@ int file_poll(FAR struct file *filep, FAR struct pollfd_s *fds, bool setup)
         {
           /* Yes, it does... Setup the poll */
 
-          ret = inode->u.i_ops->poll(filep, fds, setup);
+          if (setup)
+            {
+              ret = poll_setup_dispatch(inode->u.i_ops->poll, filep, fds);
+            }
+          else
+            {
+              ret = inode->u.i_ops->poll(filep, fds, false);
+            }
+
           if (ret < 0)
             {
               ferr("poll failed:%p, setup:%d, ret:%d\n",
@@ -353,7 +410,15 @@ int file_poll(FAR struct file *filep, FAR struct pollfd_s *fds, bool setup)
       else if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops != NULL &&
                inode->u.i_mops->poll != NULL)
         {
-          ret = inode->u.i_mops->poll(filep, fds, setup);
+          if (setup)
+            {
+              ret = poll_setup_dispatch(inode->u.i_mops->poll, filep, fds);
+            }
+          else
+            {
+              ret = inode->u.i_mops->poll(filep, fds, false);
+            }
+
           if (ret < 0)
             {
               ferr("poll failed:%p, setup:%d, ret:%d\n",
