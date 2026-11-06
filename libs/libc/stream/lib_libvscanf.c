@@ -26,6 +26,10 @@
 
 #include <nuttx/streams.h>
 
+#ifdef CONFIG_LIBC_BFORMAT_B16
+#  include <fixedmath.h>
+#endif
+
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
@@ -1107,7 +1111,36 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                           /* Return the float value */
 
 #  ifdef CONFIG_HAVE_FLOAT
-                          *pf = fvalue;
+#    ifdef CONFIG_LIBC_BFORMAT_B16
+                          if (modifier == H_MOD && !varg)
+                            {
+                              /* Binary format: %hf is a b16_t, rounded to
+                               * the nearest value and saturated.
+                               */
+
+                              FAR b16_t *pb16 = (FAR b16_t *)pf;
+
+                              if (fvalue >= 32768.0f)
+                                {
+                                  *pb16 = b16MAX;
+                                }
+                              else if (fvalue <= -32768.0f)
+                                {
+                                  *pb16 = b16MIN;
+                                }
+                              else
+                                {
+                                  float r = fvalue * 65536.0f;
+
+                                  *pb16 = (b16_t)(r < 0 ? r - 0.5f :
+                                                          r + 0.5f);
+                                }
+                            }
+                          else
+#    endif
+                            {
+                              *pf = fvalue;
+                            }
 #  endif
                         }
 
