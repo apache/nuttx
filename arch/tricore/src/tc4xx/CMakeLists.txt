@@ -178,6 +178,3 @@ if(NOT CONFIG_TRICORE_TOOLCHAIN_TASKING)
                                        -Wno-unused-but-set-parameter)
   target_compile_options(nuttx PRIVATE -Wno-implicit-fallthrough)
 endif()
-
-target_compile_definitions(arch PRIVATE -DMODULE_STM0=MODULE_CPU0
-                                        -DSRC_STM0SR0=SRC_STMCPU0_SR2)
