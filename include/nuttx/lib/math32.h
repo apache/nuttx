@@ -359,12 +359,12 @@ static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
 #endif
 
 #define div_const(n, base) \
-  ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
+  ((sizeof((n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
 #define div_const_roundup(n, base) \
-  ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1u, base) : \
+  ((sizeof((n)) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1u, base) : \
    (((n) + (base) - 1u) / (base)))
 #define div_const_roundnearest(n, base) \
-  ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2u), base) : \
+  ((sizeof((n)) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2u), base) : \
    (((n) + ((base) / 2u)) / (base)))
 
 /* Division optimizing method proposed by T. Granlund and L. Montgomery.
