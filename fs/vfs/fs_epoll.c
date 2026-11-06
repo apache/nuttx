@@ -367,16 +367,23 @@ static int epoll_collect(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
   list_initialize(&deliver);
   list_initialize(&refresh);
 
+  nxmutex_lock(&eph->lock);
+
   /* Phase 1: atomically move at most maxevents ready nodes out of the
    * ready list into a private queue, so nodes not delivered to userspace
    * stay queued for the next epoll_wait().
+   *
+   * Keep epn->queued true while a node is on the private deliver/refresh
+   * queues.  The same rnode link is still in use there, so a concurrent
+   * driver notification must not enqueue it into eph->ready again.  The
+   * epoll mutex also prevents epoll_ctl() from trying to dequeue a node
+   * from these private queues.
    */
 
   flags = spin_lock_irqsave(&eph->ready_lock);
   while (i < maxevents && !list_is_empty(&eph->ready))
     {
       epn = container_of(list_remove_head(&eph->ready), epoll_node_t, rnode);
-      epn->queued = false;
       list_add_tail(&deliver, &epn->rnode);
       i++;
     }
@@ -397,7 +404,6 @@ static int epoll_collect(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
 
   /* Phase 2: classify and deliver. */
 
-  nxmutex_lock(&eph->lock);
   while (!list_is_empty(&deliver))
     {
       epn = container_of(list_remove_head(&deliver), epoll_node_t, rnode);
@@ -415,6 +421,10 @@ static int epoll_collect(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
            */
 
           file_poll(epn->filep, &epn->pfd, false);
+          flags = spin_lock_irqsave(&eph->ready_lock);
+          epn->queued = false;
+          spin_unlock_irqrestore(&eph->ready_lock, flags);
+
           list_delete(&epn->node);
           list_add_tail(&eph->oneshot, &epn->node);
         }

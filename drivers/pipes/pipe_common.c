@@ -345,9 +345,20 @@ int pipecommon_close(FAR struct file *filep)
 
           if (--dev->d_nwriters <= 0)
             {
-              /* Inform poll readers that other end closed. */
+              /* Inform poll readers that other end closed.  Match
+               * pipecommon_poll(), which reports POLLHUP only under
+               * buffer policy 0: under policy 1 the data stays valid for
+               * the next reader, so the loss of the last writer is not an
+               * end-of-file condition.  A datagram socket opens and closes
+               * its sending FIFO for every packet, so reporting POLLHUP
+               * here would flag a hangup on each datagram.
+               */
 
-              poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS, POLLHUP);
+              if (PIPE_IS_POLICY_0(dev->d_flags))
+                {
+                  poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS,
+                              POLLHUP);
+                }
 
               pipecommon_wakeup(&dev->d_rdsem);
             }
