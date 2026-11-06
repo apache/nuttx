@@ -27,20 +27,9 @@ set(SRCS
     lib_psfa_addopen.c
     lib_psfa_destroy.c
     lib_psfa_init.c
-    lib_psa_getflags.c
     lib_psa_getschedparam.c
-    lib_psa_getschedpolicy.c
     lib_psa_init.c
-    lib_psa_setflags.c
-    lib_psa_setschedparam.c
-    lib_psa_setschedpolicy.c
-    lib_psa_getsigmask.c
-    lib_psa_setsigmask.c
-    lib_psa_getstacksize.c
-    lib_psa_setstacksize.c
-    lib_psa_getpriority.c
-    lib_psa_setpriority.c
-    lib_psa_destroy.c)
+    lib_psa_setschedparam.c)
 
 if(NOT CONFIG_BUILD_KERNEL)
   list(APPEND SRCS lib_psa_getstackaddr.c lib_psa_setstackaddr.c)
