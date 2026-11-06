@@ -1833,6 +1833,16 @@ config USBDEV_FS_NEP0REQS
 	---help---
 		The number of ep0 requests that can be in flight
 
+config USBDEV_FS_BULK_REQLEN
+	int "Request buffer size per endpoint"
+	default 0
+	range 0 32768
+	---help---
+		Request buffer size of each endpoint, rounded up to a multiple
+		of the default request size.  Reads and writes use up to this
+		many bytes per request.  0 keeps the default size (the
+		configuration descriptor size on ep0).
+
 endif #USBDEV_FS
 
 menuconfig USBMTP
