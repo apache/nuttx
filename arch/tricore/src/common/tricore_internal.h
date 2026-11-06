@@ -129,6 +129,19 @@ typedef void (*up_vector_t)(void);
  */
 
 typedef int (*tricore_bustrap_hook_t)(uint32_t tid, void *context);
+
+/* Trap information that tricore_vectors.S/.asm builds on the stack and
+ * passes to tricore_trapcall and tricore_svcall; keep the layout in
+ * sync with the vectors.
+ */
+
+struct tricore_trap_s
+{
+  uintptr_t taddr;  /* Trap return address (A11) */
+  uint8_t   tid;    /* Trap identification number (TIN) */
+  uint8_t   tclass; /* Trap class */
+  uint8_t   tcpu;   /* Core that took the trap */
+};
 #endif
 
 /****************************************************************************
@@ -188,6 +201,8 @@ void tricore_svcall(volatile void *trap);
 void tricore_trapcall(volatile void *trap);
 void tricore_trapinit(void);
 void tricore_bustrap_register_hook(tricore_bustrap_hook_t hook);
+void tricore_fcu_register_pool(void *base, size_t num);
+void tricore_fcu_recover(void);
 
 /* Context Save Areas *******************************************************/
 
