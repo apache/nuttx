@@ -95,5 +95,6 @@
 #define TC4XX_CCU_CLKSELS_RAMP     2
 #define TC4XX_CCU_CLKSELP          (1 << 16)   /* Set: backup clock */
 #define TC4XX_CCUCON_UP            (1 << 30)   /* SYSCCUCON0 and 1 */
+#define TC4XX_PERCCUCON1_ASCLINFDIV (0xf << 0)
 
 #endif /* __ARCH_TRICORE_SRC_TC4XX_HARDWARE_TC4XX_CLOCK_H */
