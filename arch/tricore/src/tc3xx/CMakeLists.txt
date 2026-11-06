@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS tc3xx_timerisr.c tc3xx_serial.c)
+set(SRCS tc3xx_timerisr.c tc3xx_serial.c tc3xx_wdt.c)
 
 target_sources(arch PRIVATE ${SRCS})
 

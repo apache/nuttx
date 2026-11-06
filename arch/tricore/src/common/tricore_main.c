@@ -30,12 +30,6 @@
 #include "Ifx_Types.h"
 #include "IfxCpu.h"
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
-#  include "IfxWtu.h"
-#else
-#  include "IfxScuWdt.h"
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -82,13 +76,7 @@ void core0_main(void)
    * to ensure the normal startup of the system.
    */
 
-#if defined(CONFIG_ARCH_CHIP_TC3XX)
-  IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
-  IfxScuWdt_disableSafetyWatchdog(IfxScuWdt_getSafetyWatchdogPassword());
-#elif defined(CONFIG_ARCH_CHIP_TC4XX)
-  IfxWtu_disableCpuWatchdog(IfxWtu_getCpuWatchdogPassword());
-  IfxWtu_disableSystemWatchdog(IfxWtu_getSystemWatchdogPassword());
-#endif
+  tricore_wdt_disable();
 
   core_main();
 }
