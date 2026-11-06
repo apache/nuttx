@@ -55,6 +55,7 @@ static bool is_union(const char *type)
 static const char *check_funcptr(const char *type)
 {
   const char *str = strstr(type, "(*)");
+
   if (str)
     {
       return str + 2;
@@ -66,6 +67,7 @@ static const char *check_funcptr(const char *type)
 static const char *check_array(const char *type)
 {
   const char *str = strchr(type, '[');
+
   if (str)
     {
       return str;
@@ -113,6 +115,7 @@ static void get_formalparmtype(const char *arg, char *formal)
 static void get_actualparmtype(const char *arg, char *actual)
 {
   const char *pstart = strchr(arg, '|');
+
   if (pstart)
     {
       /* The actual parameter type starts after the '|' */
@@ -352,7 +355,7 @@ static void generate_proxy(int nfixed, int nparms)
   fprintf(stream, ");\n");
   if (strcmp(g_parm[RETTYPE_INDEX], "noreturn") == 0)
     {
-        fprintf(stream, "  while(1);\n");
+      fprintf(stream, "  while(1);\n");
     }
 
   fprintf(stream, "}\n");
@@ -514,8 +517,8 @@ static void generate_stub(int nfixed, int nparms)
        * -- Yech.
        */
 
-     get_formalparmtype(g_parm[PARM1_INDEX + i], formal);
-     get_actualparmtype(g_parm[PARM1_INDEX + i], actual);
+      get_formalparmtype(g_parm[PARM1_INDEX + i], formal);
+      get_actualparmtype(g_parm[PARM1_INDEX + i], actual);
 
       /* Treat the first argument in the list differently from the others..
        * It does not need a comma before it.
@@ -673,7 +676,7 @@ static void generate_wrapper(int nfixed, int nparms)
 
   if (i < nparms)
     {
-       fprintf(stream, ", ...)\n{\n");
+      fprintf(stream, ", ...)\n{\n");
     }
   else
     {
@@ -940,15 +943,15 @@ int main(int argc, char **argv, char **envp)
 
   if (optind >= argc)
     {
-       fprintf(stderr, "Missing <CSV file>\n");
-       show_usage(argv[0]);
+      fprintf(stderr, "Missing <CSV file>\n");
+      show_usage(argv[0]);
     }
 
   csvpath = argv[optind];
   if (++optind < argc)
     {
-       fprintf(stderr, "Unexpected garbage at the end of the line\n");
-       show_usage(argv[0]);
+      fprintf(stderr, "Unexpected garbage at the end of the line\n");
+      show_usage(argv[0]);
     }
 
   /* Open the CSV file */
@@ -969,6 +972,7 @@ int main(int argc, char **argv, char **envp)
       /* Parse the line from the CVS file */
 
       int nargs = parse_csvline(ptr);
+
       if (nargs < PARM1_INDEX)
         {
           fprintf(stderr, "Only %d arguments found: %s\n", nargs, g_line);
