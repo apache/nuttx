@@ -55,7 +55,7 @@ struct usbdev_fs_req_s
 {
   sq_entry_t               node;    /* Implements a singly linked list */
   FAR struct usbdev_req_s *req;     /* The contained request */
-  uint16_t                 offset;  /* Offset to valid data in the RX request */
+  size_t                   offset;  /* Offset to valid data in the RX request */
 };
 
 struct usbdev_ctrlreq_s
@@ -84,6 +84,8 @@ struct usbdev_fs_ep_s
   FAR usbdev_fs_waiter_sem_t *sems;       /* List of blocking request */
   struct sq_queue_s           reqq;       /* Available request containers */
   FAR struct usbdev_fs_req_s *reqbuffer;  /* Request buffer */
+  size_t                      reqsize;
+  uint16_t                    reqnum;
   FAR struct pollfd_s        *fds[CONFIG_USBDEV_FS_NPOLLWAITERS];
   spinlock_t                  spinlock;
 
@@ -217,7 +219,7 @@ static void usbdev_fs_notify(FAR struct usbdev_fs_ep_s *fs_ep,
 
 static int usbdev_fs_submit_wrreq(FAR struct usbdev_ep_s *ep,
                                   FAR struct usbdev_fs_req_s *container,
-                                  uint16_t len)
+                                  size_t len)
 {
   FAR struct usbdev_req_s *req = container->req;
 
@@ -236,11 +238,25 @@ static int usbdev_fs_submit_wrreq(FAR struct usbdev_ep_s *ep,
  ****************************************************************************/
 
 static int usbdev_fs_submit_rdreq(FAR struct usbdev_ep_s *ep,
-                                  FAR struct usbdev_fs_req_s *container)
+                                  FAR struct usbdev_fs_req_s *container,
+                                  size_t want)
 {
+  FAR struct usbdev_fs_ep_s *fs_ep = (FAR struct usbdev_fs_ep_s *)ep->fs;
   FAR struct usbdev_req_s *req = container->req;
+  size_t pending = 0;
+  uint16_t i;
 
-  req->len = ep->maxpacket;
+  for (i = 0; i < fs_ep->reqnum; i++)
+    {
+      if (&fs_ep->reqbuffer[i] != container)
+        {
+          pending += fs_ep->reqbuffer[i].req->len;
+        }
+    }
+
+  want = ALIGN_UP(want, ep->maxpacket);
+  req->len = want > pending ? MIN(want - pending, fs_ep->reqsize) :
+                              ep->maxpacket;
   return EP_SUBMIT(ep, req);
 }
 
@@ -317,7 +333,7 @@ restart_req:
 
   /* Restart request */
 
-  usbdev_fs_submit_rdreq(fs_ep->ep, container);
+  usbdev_fs_submit_rdreq(fs_ep->ep, container, 0);
 }
 
 /****************************************************************************
@@ -627,7 +643,8 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
   while (!sq_empty(queue))
     {
       FAR struct usbdev_fs_req_s *container;
-      uint16_t reqlen;
+      size_t reqlen;
+      size_t rlen;
 
       if (is_ep0)
         {
@@ -660,6 +677,7 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
       container = container_of(sq_peek(queue),
                                struct usbdev_fs_req_s, node);
 
+      rlen = container->req->len;
       reqlen = container->req->xfrd - container->offset;
 
       if (reqlen > len)
@@ -697,7 +715,7 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
       sq_remfirst(queue);
       spin_unlock_irqrestore(&fs_ep->spinlock, flags);
 
-      ret = usbdev_fs_submit_rdreq(fs_ep->ep, container);
+      ret = usbdev_fs_submit_rdreq(fs_ep->ep, container, len);
       if (ret < 0)
         {
           /* TODO handle error */
@@ -710,7 +728,7 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
        * returned directly.
        */
 
-      if (reqlen < fs_ep->ep->maxpacket)
+      if (reqlen < rlen)
         {
           break;
         }
@@ -736,7 +754,7 @@ static ssize_t usbdev_fs_write(FAR struct file *filep,
   FAR struct usbdev_fs_req_s *container;
   FAR struct usbdev_req_s *req;
   irqstate_t flags;
-  int wlen = 0;
+  size_t wlen = 0;
   int ret;
 
   ret = nxmutex_lock(&fs_ep->lock);
@@ -781,7 +799,7 @@ static ssize_t usbdev_fs_write(FAR struct file *filep,
 
   while (!sq_empty(&fs_ep->reqq))
     {
-      uint16_t cur_len;
+      size_t cur_len;
 
       /* Get available TX request slot */
 
@@ -796,13 +814,10 @@ static ssize_t usbdev_fs_write(FAR struct file *filep,
 
       /* Fill the request with data */
 
-      if (len > fs_ep->ep->maxpacket)
+      cur_len = ALIGN_DOWN(fs_ep->reqsize, fs_ep->ep->maxpacket);
+      if (len <= fs_ep->reqsize || cur_len == 0)
         {
-          cur_len = fs_ep->ep->maxpacket;
-        }
-      else
-        {
-          cur_len = len;
+          cur_len = MIN(len, fs_ep->reqsize);
         }
 
       memcpy(req->buf, &buffer[wlen], cur_len);
@@ -995,14 +1010,15 @@ static int usbdev_fs_ep_bind(FAR struct usbdev_s *dev, uint8_t epno,
                              FAR const struct usbdev_epinfo_s *epinfo,
                              FAR struct usbdev_fs_ep_s *fs_ep)
 {
-#if defined(CONFIG_USBDEV_SUPERSPEED)
-  size_t reqsize = epinfo->sssize;
-#elif defined(CONFIG_USBDEV_DUALSPEED)
-  size_t reqsize = epinfo->hssize;
-#else
-  size_t reqsize = epinfo->fssize;
-#endif
   uint16_t i;
+
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+  fs_ep->reqsize = epinfo->sssize;
+#elif defined(CONFIG_USBDEV_DUALSPEED)
+  fs_ep->reqsize = epinfo->hssize;
+#else
+  fs_ep->reqsize = epinfo->fssize;
+#endif
 
   /* Initialize fs ep lock */
 
@@ -1044,28 +1060,34 @@ static int usbdev_fs_ep_bind(FAR struct usbdev_s *dev, uint8_t epno,
         {
           if (epinfo->compdesc.mxburst >= USB_SS_BULK_EP_MAXBURST)
             {
-              reqsize = reqsize * USB_SS_BULK_EP_MAXBURST;
+              fs_ep->reqsize *= USB_SS_BULK_EP_MAXBURST;
             }
           else
             {
-              reqsize = reqsize * (epinfo->compdesc.mxburst + 1);
+              fs_ep->reqsize *= (epinfo->compdesc.mxburst + 1);
             }
         }
       else if (transtpye == USB_EP_ATTR_XFER_INT)
         {
           if (epinfo->compdesc.mxburst >= USB_SS_INT_EP_MAXBURST)
             {
-              reqsize = reqsize * USB_SS_INT_EP_MAXBURST;
+              fs_ep->reqsize *= USB_SS_INT_EP_MAXBURST;
             }
           else
             {
-              reqsize = reqsize * (epinfo->compdesc.mxburst + 1);
+              fs_ep->reqsize *= (epinfo->compdesc.mxburst + 1);
             }
         }
     }
 #endif
 
   fs_ep->ep->fs = fs_ep;
+
+#if CONFIG_USBDEV_FS_BULK_REQLEN > 0
+  fs_ep->reqsize = ALIGN_UP(CONFIG_USBDEV_FS_BULK_REQLEN, fs_ep->reqsize);
+#endif
+
+  fs_ep->reqnum = epinfo->reqnum;
 
   /* Initialize request buffer */
 
@@ -1093,7 +1115,7 @@ static int usbdev_fs_ep_bind(FAR struct usbdev_s *dev, uint8_t epno,
       FAR struct usbdev_fs_req_s *container;
 
       container = &fs_ep->reqbuffer[i];
-      container->req = usbdev_allocreq(fs_ep->ep, reqsize);
+      container->req = usbdev_allocreq(fs_ep->ep, fs_ep->reqsize);
       if (container->req == NULL)
         {
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDALLOCREQ), -ENOMEM);
@@ -1316,7 +1338,7 @@ static int usbdev_fs_classsetconfig(FAR struct usbdev_fs_dev_s *fs,
 
               container = &fs_ep->reqbuffer[j];
               container->req->callback = usbdev_fs_rdcomplete;
-              usbdev_fs_submit_rdreq(fs_ep->ep, container);
+              usbdev_fs_submit_rdreq(fs_ep->ep, container, 0);
             }
         }
     }
