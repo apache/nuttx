@@ -151,7 +151,19 @@
 #define STM32_IRQ_TIM14        (STM32_IRQ_EXTINT + 19) /* 19: TIM14 */
 #define STM32_IRQ_TIM15        (STM32_IRQ_EXTINT + 20) /* 20: TIM15 */
 #define STM32_IRQ_TIM16        (STM32_IRQ_EXTINT + 21) /* 21: TIM16 */
+
+#if defined(CONFIG_STM32_STM32G0B1) || \
+    defined(CONFIG_STM32_STM32G0C1)
+#  define STM32_IRQ_FDCAN1_0   (STM32_IRQ_EXTINT + 21) /* 21: FDCAN1 interrupt line 0 */
+#endif
+
 #define STM32_IRQ_TIM17        (STM32_IRQ_EXTINT + 22) /* 22: TIM17 */
+
+#if defined(CONFIG_STM32_STM32G0B1) || \
+    defined(CONFIG_STM32_STM32G0C1)
+#  define STM32_IRQ_FDCAN1_1   (STM32_IRQ_EXTINT + 22) /* 22: FDCAN1 interrupt line 1 */
+#endif
+
 #define STM32_IRQ_I2C1         (STM32_IRQ_EXTINT + 23) /* 23: I2C1 */
 #define STM32_IRQ_EXTI23       (STM32_IRQ_EXTINT + 23) /* 23: EXTI_23 */
 #define STM32_IRQ_I2C2         (STM32_IRQ_EXTINT + 24) /* 24: I2C2 */

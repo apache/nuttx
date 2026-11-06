@@ -49,8 +49,8 @@
 
 /* Peripheral Base Addresses ************************************************/
 
-#define STM32_APB1_BASE      0x40000000     /* 0x40000000-0x4000b3ff: APB1 */
-                                            /* 0x4000b400-0x4000ffff: Reserved */
+#define STM32_APB1_BASE      0x40000000     /* 0x40000000-0x4000bbff: APB1 */
+                                            /* 0x4000bc00-0x4000ffff: Reserved */
 #define STM32_APB2_BASE      0x40010000     /* 0x40010000-0x40015800: APB2 */
                                             /* 0x40015c00-0x4001ffff: Reserved */
 #define STM32_AHB_BASE       0x40020000     /* 0x40020000-0x400263ff: AHB */
@@ -75,6 +75,7 @@
 #define STM32_I2C1_BASE      0x40005400     /* 0x40005400-0x400057ff I2C1 */
 #define STM32_I2C2_BASE      0x40005800     /* 0x40005800-0x40005bff I2C2 */
 #define STM32_USB_BASE       0x40005c00     /* 0x40005c00-0x40005fff USB */
+#define STM32_FDCAN1_BASE    0x40006400     /* 0x40006400-0x400067ff FDCAN1 */
 #define STM32_CRS_BASE       0x40006C00     /* 0x40006C00-0x40006fff CRS */
 #define STM32_PWR_BASE       0x40007000     /* 0x40007000-0x400073ff PWR */
 #define STM32_DAC1_BASE      0x40007400     /* 0x40007400-0x400077ff DAC 1 */
@@ -87,6 +88,7 @@
 #define STM32_UCPD1_BASE     0x4000a000     /* 0x4000a000-0x4000a3ff UCPD1 */
 #define STM32_UCPD2_BASE     0x4000a400     /* 0x4000a400-0x4000a7ff UCPD2 */
 #define STM32_TAMP_BASE      0x4000b000     /* 0x4000b000-0x4000b3ff TAMP */
+#define STM32_CANRAM_BASE    0x4000b400     /* 0x4000b400-0x4000bbff FDCAN message RAM */
 
 /* APB2 Base Addresses ******************************************************/
 
