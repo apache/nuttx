@@ -110,6 +110,14 @@
 static spinlock_t g_crimonitor_lock = SP_UNLOCKED;
 #endif
 
+/* The time of the last CPU load update of each CPU.  The run time of the
+ * threads (run_start, run_time) is only changed by their own CPU.
+ */
+
+#ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
+static clock_t g_cpuload_start[CONFIG_SMP_NCPUS];
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -137,12 +145,13 @@ clock_t g_busywait_total[CONFIG_SMP_NCPUS];
  * Name: nxsched_critmon_cpuload
  *
  * Description:
- *   Update the running time of all running threads when switching threads
+ *   Give the running thread of a CPU the CPU load ticks since the last
+ *   update of that CPU.
  *
  * Input Parameters:
- *   tcb   - The task that we are performing the load operations on.
- *   current - The current time
- *   tick - The ticks that we process in this cpuload.
+ *   tcb     - The thread that runs on the CPU.
+ *   cpu     - The CPU.
+ *   current - The current time.
  *
  * Returned Value:
  *   None
@@ -150,36 +159,13 @@ clock_t g_busywait_total[CONFIG_SMP_NCPUS];
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
-static void nxsched_critmon_cpuload(FAR struct tcb_s *tcb, clock_t current,
-                                    clock_t tick)
+static void nxsched_critmon_cpuload(FAR struct tcb_s *tcb, int cpu,
+                                    clock_t current)
 {
-  int i;
+  clock_t elapsed = current - g_cpuload_start[cpu];
 
-  UNUSED(i);
-
-  /* Update the cpuload of the thread ready to be suspended */
-
-  nxsched_process_taskload_ticks(tcb, tick);
-
-  /* Update the cpuload of threads running on other CPUs */
-
-#  ifdef CONFIG_SMP
-  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
-    {
-      FAR struct tcb_s *rtcb = current_task(i);
-
-      if (tcb->cpu == rtcb->cpu)
-        {
-          continue;
-        }
-
-      nxsched_process_taskload_ticks(rtcb, tick);
-
-      /* Update start time, avoid repeated statistics when the next call */
-
-      rtcb->run_start = current;
-    }
-#  endif
+  g_cpuload_start[cpu] = current;
+  nxsched_process_taskload_ticks(tcb, elapsed * CLK_TCK / perf_getfreq());
 }
 #endif
 
@@ -381,12 +367,25 @@ void nxsched_switch_critmon(FAR struct tcb_s *from, FAR struct tcb_s *to)
 #endif
 
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
-  clock_t tick = elapsed * CLK_TCK / perf_getfreq();
+  int thiscpu = this_cpu();
+  int i;
 
-  nxsched_critmon_cpuload(from, current, tick);
+  /* Update the CPU load of the running threads of all CPUs */
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      nxsched_critmon_cpuload(i == thiscpu ? from : current_task(i), i,
+                              current);
+    }
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+  /* A zero run_start tells nxsched_critmon_runtime() that the thread does
+   * not run.  Clear it before run_time changes.
+   */
+
+  from->run_start = 0;
+  SMP_WMB();
   from->run_time += elapsed;
   to->run_start = current;
   if (elapsed > from->run_max)
@@ -468,23 +467,57 @@ void nxsched_switch_critmon(FAR struct tcb_s *from, FAR struct tcb_s *to)
 void nxsched_update_critmon(FAR struct tcb_s *tcb)
 {
   clock_t current = perf_gettime();
-  clock_t elapsed = current - tcb->run_start;
+  clock_t start = tcb->run_start;
 
-  if (tcb->task_state == TSTATE_TASK_RUNNING)
+  /* Only the CPU of the thread changes run_start and run_time */
+
+  if (tcb->task_state == TSTATE_TASK_RUNNING && start != 0)
     {
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
-      clock_t tick = elapsed * CLK_TCK / perf_getfreq();
-
-      nxsched_process_taskload_ticks(tcb, tick);
+#  ifdef CONFIG_SMP
+      nxsched_critmon_cpuload(tcb, tcb->cpu, current);
+#  else
+      nxsched_critmon_cpuload(tcb, 0, current);
+#  endif
 #endif
 
-      tcb->run_start = current;
-      tcb->run_time += elapsed;
-      if (elapsed > tcb->run_max)
+      if (current - start > tcb->run_max)
         {
-          tcb->run_max = elapsed;
-          CHECK_THREAD(tcb->pid, elapsed);
+          tcb->run_max = current - start;
+          CHECK_THREAD(tcb->pid, current - start);
         }
     }
+}
+#endif
+
+/****************************************************************************
+ * Name: nxsched_critmon_runtime
+ *
+ * Description:
+ *   Return the run time of a thread.  If the thread runs now, add the time
+ *   since it started to run.
+ *
+ ****************************************************************************/
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+clock_t nxsched_critmon_runtime(FAR struct tcb_s *tcb)
+{
+  irqstate_t flags = up_irq_save();
+  clock_t runtime = tcb->run_time;
+  clock_t start;
+
+  /* Read run_time before run_start: nxsched_switch_critmon() clears
+   * run_start before it adds the time slice to run_time.
+   */
+
+  SMP_RMB();
+  start = tcb->run_start;
+  if (start != 0 && tcb->task_state == TSTATE_TASK_RUNNING)
+    {
+      runtime += perf_gettime() - start;
+    }
+
+  up_irq_restore(flags);
+  return runtime;
 }
 #endif

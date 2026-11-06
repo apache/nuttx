@@ -2511,6 +2511,10 @@ XSI Timers:
 | :c:func:`setitimer`            | Yes     |
 +--------------------------------+---------+
 
+``ITIMER_VIRTUAL`` and ``ITIMER_PROF`` need ``CONFIG_SCHED_CRITMONITOR``.
+Both count the CPU time of the process: NuttX does not count the user time
+and the system time separately.
+
 XSI_USER_GROUPS
 ---------------
 
@@ -2943,8 +2947,13 @@ _POSIX_CPUTIME
 +--------------------------------+---------+
 | API                            | Support |
 +================================+=========+
+| CLOCK_PROCESS_CPUTIME_ID       | Yes     |
++--------------------------------+---------+
 | :c:func:`clock_getcpuclockid`  | Yes     |
 +--------------------------------+---------+
+
+``timer_create()`` takes the CPU-time clocks of ``_POSIX_CPUTIME`` and
+``_POSIX_THREAD_CPUTIME``.
 
 _POSIX_MEMORY_PROTECTION
 ------------------------

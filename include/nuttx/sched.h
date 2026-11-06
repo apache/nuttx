@@ -491,6 +491,9 @@ struct task_group_s
 
 #ifdef HAVE_GROUP_MEMBERS
   sq_queue_t tg_members;            /* List of members for task             */
+#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+  clock_t tg_run_time;              /* Run time of the members that left    */
+#  endif
 #endif
 
 #ifdef CONFIG_BINFMT_LOADABLE
@@ -549,9 +552,13 @@ struct task_group_s
 #endif
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
-  /* Interval timer *********************************************************/
+  /* Interval timers, indexed by ITIMER_* ***********************************/
 
-  timer_t itimer;
+#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+  timer_t itimer[3];                /* ITIMER_REAL, _VIRTUAL and _PROF          */
+#  else
+  timer_t itimer[1];                /* ITIMER_REAL                              */
+#  endif
 #endif
 
   /* PIC data space and address environments ********************************/

@@ -74,6 +74,97 @@ static inline void timer_overrun(FAR struct posix_timer_s *timer, clock_t n)
     }
 }
 
+#ifdef HAVE_CPUTIME_TIMER
+/****************************************************************************
+ * Name: timer_cputicks
+ *
+ * Description:
+ *   Read the CPU-time clock of the timer, in ticks rounded down.
+ *
+ ****************************************************************************/
+
+static int timer_cputicks(FAR struct posix_timer_s *timer,
+                          FAR clock_t *ticks)
+{
+  struct timespec ts;
+  int ret;
+
+  ret = nxclock_gettime(timer->pt_clock, &ts);
+  if (ret >= 0)
+    {
+      *ticks = clock_time2ticks_floor(&ts);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: timer_cpustart
+ *
+ * Description:
+ *   Start the watchdog of a CPU-time timer.  The CPU time cannot reach
+ *   pt_expected before the watchdog expires.  timer_timeout() then reads
+ *   the clock again and starts the watchdog again if that is necessary.
+ *
+ ****************************************************************************/
+
+static int timer_cpustart(FAR struct posix_timer_s *timer, clock_t ticks)
+{
+  clock_t delay = timer->pt_expected - ticks;
+
+  if (delay < 0)
+    {
+      delay = 0;
+    }
+
+#ifdef CONFIG_SMP
+  /* The threads of a process can run on all CPUs at the same time */
+
+  if ((timer->pt_clock & CLOCK_MASK) == CLOCK_PROCESS_CPUTIME_ID)
+    {
+      delay = div_round_up(delay, CONFIG_SMP_NCPUS);
+    }
+#endif
+
+  return wd_start(&timer->pt_wdog, delay, timer_timeout, (wdparm_t)timer);
+}
+
+/****************************************************************************
+ * Name: timer_cpusettime
+ *
+ * Description:
+ *   Arm a CPU-time timer.  pt_expected is a time on the CPU-time clock.
+ *
+ ****************************************************************************/
+
+static int timer_cpusettime(FAR struct posix_timer_s *timer, int flags,
+                            FAR const struct timespec *value)
+{
+  struct timespec ts;
+  int ret;
+
+  ret = nxclock_gettime(timer->pt_clock, &ts);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if ((flags & TIMER_ABSTIME) != 0)
+    {
+      timer->pt_expected = clock_time2ticks(value);
+    }
+  else
+    {
+      struct timespec expected;
+
+      clock_timespec_add(&ts, value, &expected);
+      timer->pt_expected = clock_time2ticks(&expected);
+    }
+
+  return timer_cpustart(timer, clock_time2ticks_floor(&ts));
+}
+#endif /* HAVE_CPUTIME_TIMER */
+
 /****************************************************************************
  * Name: timer_signotify
  *
@@ -158,7 +249,20 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
     {
       /* Check whether next expected time is reached */
 
-      ticks = clock_systime_ticks();
+#ifdef HAVE_CPUTIME_TIMER
+      if (timer_iscputime(timer))
+        {
+          if (timer_cputicks(timer, &ticks) < 0)
+            {
+              return;
+            }
+        }
+      else
+#endif
+        {
+          ticks = clock_systime_ticks();
+        }
+
       delay = ticks - timer->pt_expected;
 
       /* Calculate the number of timer overruns and the next expected tick.
@@ -178,8 +282,17 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
       timer_overrun(timer, frame - 1u);
       timer->pt_expected += frame * timer->pt_delay;
 
-      wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
-                       timer_timeout, itimer);
+#ifdef HAVE_CPUTIME_TIMER
+      if (timer_iscputime(timer))
+        {
+          timer_cpustart(timer, ticks);
+        }
+      else
+#endif
+        {
+          wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
+                           timer_timeout, itimer);
+        }
     }
 }
 
@@ -207,6 +320,28 @@ static void timer_timeout(wdparm_t itimer)
 
   if (timer)
     {
+#ifdef HAVE_CPUTIME_TIMER
+      clock_t ticks;
+
+      /* Wait until the CPU time reaches the expiration time.  Stop if the
+       * thread or the process of the clock does not exist any more.
+       */
+
+      if (timer_iscputime(timer))
+        {
+          if (timer_cputicks(timer, &ticks) < 0)
+            {
+              return;
+            }
+
+          if (!clock_compare(timer->pt_expected, ticks))
+            {
+              timer_cpustart(timer, ticks);
+              return;
+            }
+        }
+#endif
+
       /* Send the specified signal to the specified task.   Increment the
        * reference count on the timer first so that will not be deleted until
        * after the signal handler returns.
@@ -315,13 +450,20 @@ int timer_settime(timer_t timerid, int flags,
     {
       if (ovalue)
         {
-          /* Get the number of ticks before the underlying watchdog expires */
+#ifdef HAVE_CPUTIME_TIMER
+          if (timer_iscputime(timer))
+            {
+              timer_cpuremaining(timer, &ovalue->it_value);
+            }
+          else
+#endif
+            {
+              /* Get the number of ticks before the watchdog expires */
 
-          delay = wd_gettime(&timer->pt_wdog);
+              delay = wd_gettime(&timer->pt_wdog);
+              clock_ticks2time(&ovalue->it_value, delay);
+            }
 
-          /* Convert that to a struct timespec and return it */
-
-          clock_ticks2time(&ovalue->it_value, delay);
           clock_ticks2time(&ovalue->it_interval, timer->pt_delay);
         }
 
@@ -354,33 +496,43 @@ int timer_settime(timer_t timerid, int flags,
               timer->pt_delay = 0u;
             }
 
-          /* Check if abstime is selected */
-
-          if ((flags & TIMER_ABSTIME) != 0)
+#ifdef HAVE_CPUTIME_TIMER
+          if (timer_iscputime(timer))
             {
-              /* Calculate a delay corresponding to the
-               * absolute time in 'value'.
-               */
-
-              clock_abstime2ticks(timer->pt_clock, &value->it_value, &delay);
+              ret = timer_cpusettime(timer, flags, &value->it_value);
             }
           else
+#endif
             {
-              /* Calculate a delay assuming that 'value' holds the
-               * relative time to wait.
-               * We have internal knowledge that clock_time2ticks always
-               * returns success.
-               */
+              /* Check if abstime is selected */
 
-              delay = clock_time2ticks(&value->it_value);
+              if ((flags & TIMER_ABSTIME) != 0)
+                {
+                  /* Calculate a delay corresponding to the
+                   * absolute time in 'value'.
+                   */
+
+                  clock_abstime2ticks(timer->pt_clock, &value->it_value,
+                                      &delay);
+                }
+              else
+                {
+                  /* Calculate a delay assuming that 'value' holds the
+                   * relative time to wait.
+                   * We have internal knowledge that clock_time2ticks always
+                   * returns success.
+                   */
+
+                  delay = clock_time2ticks(&value->it_value);
+                }
+
+              timer->pt_expected = clock_delay2abstick(delay);
+
+              /* Then start the watchdog */
+
+              ret = wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
+                                    timer_timeout, (wdparm_t)timer);
             }
-
-          timer->pt_expected = clock_delay2abstick(delay);
-
-          /* Then start the watchdog */
-
-          ret = wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
-                                timer_timeout, (wdparm_t)timer);
         }
     }
 

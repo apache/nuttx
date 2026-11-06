@@ -28,6 +28,7 @@
 
 #include <errno.h>
 #include <time.h>
+#include <sys/param.h>
 #include <sys/time.h>
 
 #include "sched/sched.h"
@@ -79,16 +80,16 @@ int getitimer(int which, FAR struct itimerval *value)
 
   int ret = OK;
 
-  if (which != ITIMER_REAL || !value)
+  if ((unsigned int)which >= nitems(rtcb->group->itimer) || !value)
     {
       set_errno(EINVAL);
       ret = ERROR;
     }
   else
     {
-      if (rtcb->group->itimer)
+      if (rtcb->group->itimer[which])
         {
-          ret = timer_gettime(rtcb->group->itimer, &spec);
+          ret = timer_gettime(rtcb->group->itimer[which], &spec);
         }
 
       if (ret == OK)
