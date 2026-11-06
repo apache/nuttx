@@ -458,6 +458,9 @@ struct binary_s;                    /* Forward reference                        
                                     /* Defined in include/nuttx/binfmt/binfmt.h */
 #endif
 
+struct fs_cwd_s;                    /* Forward reference                        */
+                                    /* Defined in fs/vfs/fs_cwd.c               */
+
 struct task_group_s
 {
   pid_t tg_pid;                     /* The ID of the task within the group      */
@@ -588,6 +591,7 @@ struct task_group_s
   /* File descriptors *******************************************************/
 
   struct fdlist tg_fdlist;          /* Maps file descriptor to file         */
+  FAR struct fs_cwd_s *tg_cwd;      /* Current directory, NULL = home       */
 
 #ifdef CONFIG_FS_CHROOT
   /* chroot() jail **********************************************************/

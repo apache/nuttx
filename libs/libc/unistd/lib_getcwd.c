@@ -27,10 +27,12 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <limits.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <errno.h>
+
+#include <nuttx/fs/fs.h>
 
 #include "libc.h"
 
@@ -46,7 +48,9 @@
  *   directory in the array pointed to by 'buf', and returns 'buf.' The
  *   pathname copied to the array shall contain no components that are
  *   symbolic links. The 'size' argument is the size in bytes of the
- *   character array pointed to by the 'buf' argument.
+ *   character array pointed to by the 'buf' argument.  The current working
+ *   directory is kernel state of the task group (chdir(), fchdir()); the
+ *   environment variable PWD has no part in it.
  *
  *   As an extension to the POSIX.1-2001 standard, getcwd() allocates
  *   the buffer dynamically using lib_malloc if buf is NULL. In this case,
@@ -69,8 +73,9 @@
  *   ERANGE
  *     The size argument is greater than 0, but is smaller than the length
  *     of the current working directory pathname +1.
- *   EACCES
- *     Read or search permission was denied for a component of the pathname.
+ *   ENOENT
+ *     The current working directory was removed, or it is outside the
+ *     chroot() root of the caller.
  *   ENOMEM
  *     Insufficient storage space is available.
  *
@@ -78,53 +83,42 @@
 
 FAR char *getcwd(FAR char *buf, size_t size)
 {
-  char *pwd;
+  FAR char *alloc = NULL;
+  int ret;
 
   /* Verify input parameters */
 
-  if (buf && size == 0)
+  if (buf != NULL && size == 0)
     {
       set_errno(EINVAL);
       return NULL;
     }
 
-  if (size == 0)
-    {
-      size = PATH_MAX + 1;
-    }
-
-#ifndef CONFIG_DISABLE_ENVIRON
-
-  /* If no working directory is defined, then default to the home directory */
-
-  pwd = getenv("PWD");
-  if (pwd == NULL)
-#endif /* !CONFIG_DISABLE_ENVIRON */
-    {
-      pwd = CONFIG_LIBC_HOMEDIR;
-    }
-
-  /* Verify that the cwd will fit into the user-provided buffer */
-
-  if (strlen(pwd) + 1 > size)
-    {
-      set_errno(ERANGE);
-      return NULL;
-    }
-
   if (buf == NULL)
     {
-      buf = lib_malloc(size);
-      if (!buf)
+      if (size == 0)
+        {
+          size = PATH_MAX;
+        }
+
+      alloc = lib_malloc(size);
+      if (alloc == NULL)
         {
           set_errno(ENOMEM);
           return NULL;
         }
+
+      buf = alloc;
     }
 
-  /* Copy the cwd to the user buffer */
+  ret = nx_getcwd(buf, size);
+  if (ret < 0)
+    {
+      lib_free(alloc);
+      set_errno(-ret);
+      return NULL;
+    }
 
-  strlcpy(buf, pwd, size);
   return buf;
 }
 

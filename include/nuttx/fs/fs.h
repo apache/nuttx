@@ -195,6 +195,7 @@ struct statfs;
 struct pollfd_s;
 struct mtd_dev_s;
 struct uio;
+struct task_group_s;
 
 /* The internal representation of type DIR is just a container for an inode
  * reference, and the path of directory.
@@ -1827,6 +1828,48 @@ int nx_fstat(int fd, FAR struct stat *buf);
  ****************************************************************************/
 
 int nx_stat(FAR const char *path, FAR struct stat *buf, int resolve);
+
+/****************************************************************************
+ * Name: nx_getcwd
+ *
+ * Description:
+ *   Copy the absolute path of the current directory of the caller to
+ *   'buf', as the path that the caller uses (inside its chroot() root).
+ *   The current directory is kernel state of the task group, which
+ *   chdir() and fchdir() set.  getcwd() of libc calls this function; it
+ *   is a system call in protected and kernel builds.
+ *
+ * Returned Value:
+ *   The length of the path with its NUL on success.  A negated errno value
+ *   on failure: -EINVAL if 'buf' is NULL or 'size' is zero, -ERANGE if the
+ *   path does not fit, -ENOENT if the directory was removed or is outside
+ *   the root of the caller.
+ *
+ ****************************************************************************/
+
+int nx_getcwd(FAR char *buf, size_t size);
+
+/****************************************************************************
+ * Name: fs_cwd_inherit
+ *
+ * Description:
+ *   Give the new task group 'group' the current directory of the task
+ *   group of the caller.  The groups share it until one of them calls
+ *   chdir() or fchdir().
+ *
+ ****************************************************************************/
+
+void fs_cwd_inherit(FAR struct task_group_s *group);
+
+/****************************************************************************
+ * Name: fs_cwd_release
+ *
+ * Description:
+ *   Release the current directory of a task group that is destroyed.
+ *
+ ****************************************************************************/
+
+void fs_cwd_release(FAR struct task_group_s *group);
 
 /****************************************************************************
  * Name: file_fchstat

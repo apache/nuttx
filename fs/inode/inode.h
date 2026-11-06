@@ -252,6 +252,24 @@ int inode_search_setup(FAR struct inode_search_s *desc,
 void inode_search_release(FAR struct inode_search_s *desc);
 
 /****************************************************************************
+ * Name: fs_cwd_join
+ *
+ * Description:
+ *   Write the host path "<current directory>/<path>" of the caller to
+ *   'buffer' for a relative 'path'.  The current directory is the kernel
+ *   state of the task group, not the environment.
+ *
+ * Returned Value:
+ *   The size that the result needs, with its NUL: if it is larger than
+ *   'buflen', the result in 'buffer' is cut short and the caller tries
+ *   again with a larger buffer.  -ENOENT if the current directory was
+ *   removed, or if it is outside the chroot() root of the caller.
+ *
+ ****************************************************************************/
+
+int fs_cwd_join(FAR const char *path, FAR char *buffer, size_t buflen);
+
+/****************************************************************************
  * Name: inode_find
  *
  * Description:

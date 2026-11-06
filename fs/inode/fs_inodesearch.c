@@ -48,7 +48,6 @@ static int _inode_compare(FAR const char *fname, FAR struct inode *inode);
 static int _inode_linktarget(FAR struct inode **inode,
                              FAR struct inode_search_s *desc);
 #endif
-static FAR const char *_inode_getcwd(void);
 static int _inode_canonicalize(FAR char *path, FAR char *dst_min);
 
 /****************************************************************************
@@ -432,29 +431,6 @@ static FAR const char *_inode_root_path(void)
 #endif
 
 /****************************************************************************
- * Name: _inode_getcwd
- *
- * Description:
- *   Return the current working directory
- *
- ****************************************************************************/
-
-static FAR const char *_inode_getcwd(void)
-{
-  FAR const char *pwd = "";
-
-#ifndef CONFIG_DISABLE_ENVIRON
-  pwd = getenv("PWD");
-  if (pwd == NULL)
-    {
-      pwd = CONFIG_LIBC_HOMEDIR;
-    }
-#endif
-
-  return pwd;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -480,8 +456,9 @@ void inode_search_release(FAR struct inode_search_s *desc)
  *
  * Description:
  *   Initialize a search descriptor and make 'path' host-absolute: join
- *   $PWD if it is relative, prepend the chroot jail if one is installed,
- *   and canonicalize "." / "..".  For simple absolute paths that already
+ *   the current directory of the task group if it is relative, prepend the
+ *   chroot jail to an absolute path if one is installed, and canonicalize
+ *   "." / "..".  For simple absolute paths that already
  *   need no expansion or canonicalization, desc->path may point directly at
  *   the caller-provided path and desc->buffer will remain NULL.
  *
@@ -490,7 +467,6 @@ void inode_search_release(FAR struct inode_search_s *desc)
 int inode_search_setup(FAR struct inode_search_s *desc,
                        FAR const char *path, bool nofollow)
 {
-  FAR const char *cwd = NULL;
   FAR const char *root = NULL;
   FAR char *dst_min;
   size_t rootlen = 0;
@@ -535,12 +511,14 @@ int inode_search_setup(FAR struct inode_search_s *desc,
       return OK;
     }
 
-  /* For a relative path the absolute form is "<cwd>/<path>".  That
-   * concatenation can exceed PATH_MAX even when the relative path
+  /* For a relative path the absolute form is "<cwd>/<path>", with the
+   * host path of the current directory of the task group (fs_cwd_join()).
+   * That concatenation can exceed PATH_MAX even when the relative path
    * itself is within PATH_MAX: a relative path of PATH_MAX-1 bytes
    * is legal per pathconf(_PC_PATH_MAX), but the prefix added by the
-   * cwd pushes the uncanonicalized form past the limit.  Size the
-   * buffer to hold the full absolute form so that ".." segments are
+   * cwd pushes the uncanonicalized form past the limit.  Then a second
+   * buffer of the size that fs_cwd_join() gives holds the full absolute
+   * form, so that ".." segments are
    * collapsed against the correct suffix; truncating first could
    * drop the trailing component and let ".." collapse the path onto
    * a directory (yielding the wrong errno, e.g. EISDIR, instead of
@@ -548,17 +526,7 @@ int inode_search_setup(FAR struct inode_search_s *desc,
    * result whose canonicalized length reaches PATH_MAX.
    */
 
-  if (*path != '/')
-    {
-      cwd = _inode_getcwd();
-      buflen = strlen(cwd) + 1 + strlen(path) + 1;
-    }
-  else
-    {
-      buflen = strlen(path) + 1;
-    }
-
-  buflen += rootlen;
+  buflen = strlen(path) + 1 + rootlen;
   if (buflen < PATH_MAX)
     {
       buflen = PATH_MAX;
@@ -570,20 +538,37 @@ int inode_search_setup(FAR struct inode_search_s *desc,
       return -ENOMEM;
     }
 
-  if (root != NULL)
+  if (*path != '/')
     {
-      if (cwd != NULL)
+      ret = fs_cwd_join(path, desc->buffer, buflen);
+      if (ret > 0 && ret > buflen)
         {
-          snprintf(desc->buffer, buflen, "%s%s/%s", root, cwd, path);
+          /* Too long for the first buffer: once more with the size */
+
+          inode_search_release(desc);
+          buflen = ret;
+          desc->buffer = lib_get_tempbuffer(buflen);
+          if (desc->buffer == NULL)
+            {
+              return -ENOMEM;
+            }
+
+          ret = fs_cwd_join(path, desc->buffer, buflen);
+          if (ret > 0 && ret > buflen)
+            {
+              ret = -ENAMETOOLONG;
+            }
         }
-      else
+
+      if (ret < 0)
         {
-          snprintf(desc->buffer, buflen, "%s%s", root, path);
+          inode_search_release(desc);
+          return ret;
         }
     }
-  else if (cwd != NULL)
+  else if (root != NULL)
     {
-      snprintf(desc->buffer, buflen, "%s/%s", cwd, path);
+      snprintf(desc->buffer, buflen, "%s%s", root, path);
     }
   else
     {
