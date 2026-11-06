@@ -121,7 +121,6 @@ set(SDK_CSRCS
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Cpu/Std/IfxCpu.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxAsclin_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxCpu_cfg.c"
-    "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxStm_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_Impl/TC39xB/IfxPort_cfg_TC39xB.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_PinMap/TC39xB/IfxAsclin_PinMap_TC39xB_LFBGA292.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Pms/Std/IfxPmsEvr.c"
@@ -132,7 +131,6 @@ set(SDK_CSRCS
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuLbist.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuRcu.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuWdt.c"
-    "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Stm/Std/IfxStm.c"
     "${ILLD_DIR}/Libraries/Infra/Platform/Tricore/Compilers/CompilerTasking.c"
     "${ILLD_DIR}/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_Infra.c"
     "${ILLD_DIR}/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_Tc0.c")
