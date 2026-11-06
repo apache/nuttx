@@ -403,6 +403,56 @@ static int tc3xx_pll_ramp_up(void)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: tricore_clock_asclinf
+ *
+ * Description:
+ *   Return the fast ASCLIN clock (fASCLINF) in Hz, from the peripheral PLL
+ *   output 2 and the ASCLINF divider, computed as the iLLD IfxScuCcu does.
+ *
+ ****************************************************************************/
+
+uint32_t tricore_clock_asclinf(void)
+{
+  static const uint8_t divs[16] =
+  {
+    1, 1, 2, 3, 4, 5, 6, 6, 8, 8, 10, 10, 12, 12, 12, 15
+  };
+
+  uint32_t div = getreg32(TC3XX_SCU_CCUCON2) & TC3XX_CCUCON2_ASCLINFDIV;
+  uint32_t con0 = getreg32(TC3XX_SCU_PERPLLCON0);
+  uint32_t con1 = getreg32(TC3XX_SCU_PERPLLCON1);
+  uint64_t pll2;
+
+  if (div == 0)
+    {
+      return 0;
+    }
+
+  /* Backup clock, 100 MHz */
+
+  if ((getreg32(TC3XX_SCU_CCUCON0) & TC3XX_CCUCON0_CLKSEL_MASK) !=
+      TC3XX_CCUCON0_CLKSEL_PLL)
+    {
+      return 100000000 / divs[div];
+    }
+
+  /* The PLL output 2 divider is K3DIV + 1 times 2, or times 1.6 without
+   * DIVBY, counted here in tenths
+   */
+
+  pll2 = ((uint64_t)TC3XX_XTAL_MHZ * 1000000 *
+          (((con0 & TC3XX_PLLCON0_NDIV_MASK) >> TC3XX_PLLCON0_NDIV_SHIFT) +
+           1) * 10) /
+         ((((con0 & TC3XX_PLLCON0_PDIV_MASK) >> TC3XX_PLLCON0_PDIV_SHIFT) +
+           1) *
+          (((con1 & TC3XX_PLLCON1_K3DIV_MASK) >> TC3XX_PLLCON1_K3DIV_SHIFT) +
+           1) *
+          ((con0 & TC3XX_PLLCON0_DIVBY) != 0 ? 20 : 16));
+
+  return pll2 / divs[div];
+}
+
+/****************************************************************************
  * Name: tricore_clockconfig
  *
  * Description:
