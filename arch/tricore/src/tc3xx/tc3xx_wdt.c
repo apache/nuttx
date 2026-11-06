@@ -104,6 +104,30 @@ void tc3xx_wdt_safety_endinit(bool set)
 }
 
 /****************************************************************************
+ * Name: tc3xx_wdt_cpu_endinit
+ *
+ * Description:
+ *   Set or clear the ENDINIT of the calling CPU, which protects for example
+ *   the module clock control and the pad driver registers.  CPU5 has the
+ *   core ID 6 on TC39x, hence the limit to 5.
+ *
+ ****************************************************************************/
+
+void tc3xx_wdt_cpu_endinit(bool set)
+{
+  uint32_t cpu = tricore_mfcr(TRICORE_CPU_CORE_ID);
+  uintptr_t con0;
+  uint32_t pw;
+
+  cpu = cpu > 5 ? 5 : cpu;
+  con0 = TC3XX_SCU_WDTCPU_CON0(cpu);
+  pw = ((getreg32(con0) & TC3XX_WDT_CON0_PW_MASK) >>
+        TC3XX_WDT_CON0_PW_SHIFT) ^ TC3XX_WDT_PW_INVERTED;
+
+  tc3xx_wdt_endinit(con0, pw, set);
+}
+
+/****************************************************************************
  * Name: tricore_wdt_disable
  *
  * Description:
