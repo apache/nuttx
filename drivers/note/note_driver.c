@@ -1255,7 +1255,7 @@ void sched_note_syscall_enter(int nr, int argc, ...)
 
           argc = 0;
         }
-        else
+      else
         {
           if (formatted && argc == 0)
             {
@@ -1307,7 +1307,7 @@ void sched_note_syscall_enter(int nr, int argc, ...)
       note_add(*driver, &note, length);
     }
 
-    va_end(ap);
+  va_end(ap);
 }
 
 void sched_note_syscall_leave(int nr, uintptr_t result)
@@ -1565,25 +1565,26 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
       if (!formatted)
         {
           begin_packed_struct union
-            {
-              int i;
-              long l;
-              long long ll;
-              intmax_t im;
-              size_t sz;
-              ptrdiff_t ptr;
-              FAR void *p;
-              FAR const char *s;
+          {
+            int i;
+            long l;
+            long long ll;
+            intmax_t im;
+            size_t sz;
+            ptrdiff_t ptr;
+            FAR void *p;
+            FAR const char *s;
 #ifdef CONFIG_HAVE_DOUBLE
-              double d;
+            double d;
 #  ifdef CONFIG_HAVE_LONG_DOUBLE
-              long double ld;
+            long double ld;
 #  endif
 #endif
-            }
+          }
 
           end_packed_struct *var;
           size_t next = 0;
+
           formatted = true;
           note = (FAR struct note_printf_s *)data;
           length = sizeof(data) - SIZEOF_NOTE_PRINTF(0);
@@ -1608,7 +1609,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
 
                           next += sizeof(var->i);
                         }
-                      break;
+                        break;
                       case NOTE_PRINTF_UINT64:
                         {
                           if (next + sizeof(var->ll) > length)
@@ -1619,10 +1620,11 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                           var->ll = va_arg(*va, long long);
                           next += sizeof(var->ll);
                         }
-                      break;
+                        break;
                       case NOTE_PRINTF_STRING:
                         {
                           size_t len;
+
                           var->s = va_arg(*va, FAR const char *);
                           len = strlen(var->s) + 1;
                           if (next + len > length)
@@ -1633,7 +1635,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                           strlcpy(note->npt_data + next, var->s, len);
                           next += len;
                         }
-                      break;
+                        break;
                       case NOTE_PRINTF_DOUBLE:
                         {
                           var->d = va_arg(*va, double);
@@ -1644,7 +1646,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
 
                           next += sizeof(var->d);
                         }
-                      break;
+                        break;
                     }
                 }
             }
@@ -1768,6 +1770,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                   else if (c == 's')
                     {
                       size_t len;
+
                       var->s = va_arg(*va, FAR char *);
                       len = strlen(var->s) + 1;
                       if (next + len > length)
@@ -1862,12 +1865,12 @@ void sched_note_filter_mode(FAR struct note_filter_named_mode_s *oldm,
         {
           if (newm->name[0] == '\0')
             {
-               (*driver)->filter.mode = newm->mode;
+              (*driver)->filter.mode = newm->mode;
             }
           else if (0 == strcmp((*driver)->name, newm->name))
             {
-               (*driver)->filter.mode = newm->mode;
-               break;
+              (*driver)->filter.mode = newm->mode;
+              break;
             }
         }
     }
@@ -1928,12 +1931,12 @@ void sched_note_filter_syscall(FAR struct note_filter_named_syscall_s *oldf,
         {
           if (newf->name[0] == '\0')
             {
-               (*driver)->filter.syscall_mask = newf->syscall_mask;
+              (*driver)->filter.syscall_mask = newf->syscall_mask;
             }
           else if (0 == strcmp((*driver)->name, newf->name))
             {
-               (*driver)->filter.syscall_mask = newf->syscall_mask;
-               break;
+              (*driver)->filter.syscall_mask = newf->syscall_mask;
+              break;
             }
         }
     }
@@ -1995,12 +1998,12 @@ void sched_note_filter_irq(FAR struct note_filter_named_irq_s *oldf,
         {
           if (newf->name[0] == '\0')
             {
-               (*driver)->filter.irq_mask = newf->irq_mask;
+              (*driver)->filter.irq_mask = newf->irq_mask;
             }
           else if (0 == strcmp((*driver)->name, newf->name))
             {
-               (*driver)->filter.irq_mask = newf->irq_mask;
-               break;
+              (*driver)->filter.irq_mask = newf->irq_mask;
+              break;
             }
         }
     }
@@ -2062,12 +2065,12 @@ void sched_note_filter_tag(FAR struct note_filter_named_tag_s *oldf,
         {
           if (newf->name[0] == '\0')
             {
-               (*driver)->filter.tag_mask = newf->tag_mask;
+              (*driver)->filter.tag_mask = newf->tag_mask;
             }
           else if (0 == strcmp((*driver)->name, newf->name))
             {
-               (*driver)->filter.tag_mask = newf->tag_mask;
-               break;
+              (*driver)->filter.tag_mask = newf->tag_mask;
+              break;
             }
         }
     }
