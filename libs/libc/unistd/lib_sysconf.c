@@ -289,6 +289,9 @@ long sysconf(int name)
       case _SC_AIO_LISTIO_MAX:
         return AIO_LISTIO_MAX;
 
+      case _SC_IOV_MAX:
+        return IOV_MAX;
+
       default:
 #if 0 /* Assume valid but not implemented for the time being */
         errcode = EINVAL;
