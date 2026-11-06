@@ -26,6 +26,10 @@
 
 #include <nuttx/streams.h>
 
+#ifdef CONFIG_LIBC_BFORMAT_B16
+#  include <fixedmath.h>
+#endif
+
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
@@ -49,6 +53,14 @@
 #endif
 
 #define MAXLN   128
+
+/* In a binary format (varg is false), %hf is a b16_t */
+
+#ifdef CONFIG_LIBC_BFORMAT_B16
+#  define VSCANF_ISB16(m, v) ((m) == H_MOD && !(v))
+#else
+#  define VSCANF_ISB16(m, v) false
+#endif
 
 #define HH_MOD -2
 #define H_MOD  -1
@@ -87,9 +99,56 @@ union vabuf_u
   va_list ap;
 };
 
+#if defined(CONFIG_LIBC_BFORMAT_B16) && defined(CONFIG_LIBC_FLOATINGPOINT)
+#  ifdef CONFIG_HAVE_DOUBLE
+typedef double vscanf_real_t;
+#  else
+typedef float vscanf_real_t;
+#  endif
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: vscanf_tob16
+ *
+ * Description:
+ *   Convert a real value to the nearest b16_t (ties away from zero),
+ *   saturating at the b16_t range.  The conversion is done in double when
+ *   the toolchain supports it, otherwise in float, which has a 24-bit
+ *   mantissa and so is not exact for values above 256.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_LIBC_BFORMAT_B16) && defined(CONFIG_LIBC_FLOATINGPOINT)
+static b16_t vscanf_tob16(vscanf_real_t value)
+{
+  vscanf_real_t r = value * 65536;
+
+  if (r < 0)
+    {
+      r -= 0.5;
+    }
+  else
+    {
+      r += 0.5;
+    }
+
+  if (r >= 2147483648.0)
+    {
+      return (b16_t)b16MAX;
+    }
+
+  if (r <= -2147483648.0)
+    {
+      return (b16_t)b16MIN;
+    }
+
+  return (b16_t)r;
+}
+#endif
 
 /****************************************************************************
  * Name:  findscanset
@@ -1062,9 +1121,11 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                   set_errno(0);
 
 #  ifdef CONFIG_HAVE_DOUBLE
-                  if (modifier >= L_MOD)
+                  if (modifier >= L_MOD || VSCANF_ISB16(modifier, varg))
                     {
-                      /* Get the converted double value */
+                      /* Get the converted double value (also for a b16_t,
+                       * so that the rounding is not done in float).
+                       */
 
                       dvalue = strtod(tmp, &endptr);
                     }
@@ -1095,6 +1156,15 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                        */
 
 #  ifdef CONFIG_HAVE_DOUBLE
+#    ifdef CONFIG_LIBC_BFORMAT_B16
+                      if (VSCANF_ISB16(modifier, varg))
+                        {
+                          /* Return the b16_t value */
+
+                          *(FAR b16_t *)pf = vscanf_tob16(dvalue);
+                        }
+                      else
+#    endif
                       if (modifier >= L_MOD)
                         {
                           /* Return the double value */
@@ -1107,7 +1177,16 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                           /* Return the float value */
 
 #  ifdef CONFIG_HAVE_FLOAT
-                          *pf = fvalue;
+#    if defined(CONFIG_LIBC_BFORMAT_B16) && !defined(CONFIG_HAVE_DOUBLE)
+                          if (VSCANF_ISB16(modifier, varg))
+                            {
+                              *(FAR b16_t *)pf = vscanf_tob16(fvalue);
+                            }
+                          else
+#    endif
+                            {
+                              *pf = fvalue;
+                            }
 #  endif
                         }
 
