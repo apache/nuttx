@@ -144,7 +144,7 @@ argument.
    printf("%.3e", 3.14159)   "3.142e+00"
    printf("%.3g", 3.14159)   "3.14"
    printf("%.3s", "abcde")   "abc"
-   printf("%.*f", 1, 2.25)   "2.3"
+   printf("%.*f", 1, 2.25)   "2.2"
    printf("%8.2f", 3.14159)  "    3.14"
    printf("%.0f", 2.5)       "2"
 
@@ -287,6 +287,8 @@ Option                         Minimal     Default      Full
 ``LIBC_FLOATINGPOINT``         off         see below    on
 ``LIBC_PRINTF_HEXFLOAT``       off         off          on
 ``LIBC_PRINTF_C23``            off         off          on
+``LIBC_PRINTF_EXACT``          off         off          on
+``LIBC_PRINTF_EXACT_LDOUBLE``  off         off          on
 ``LIBC_PRINTF_PERCENT_N``      off         off          off
 ``LIBC_NUMBERED_ARGS``         off         off          on
 ``LIBC_LOCALE``                off         off          on
@@ -307,6 +309,14 @@ because the log time stamps and ``/proc`` print ``time_t`` and ``uint64_t``.
 ``LIBC_PRINTF_HEXFLOAT`` does not need ``LIBC_FLOATINGPOINT``.  It uses no
 floating point operation and pulls in no soft-float code, so a small board with
 floating point off can still print the exact value of a ``double``.
+
+``LIBC_PRINTF_EXACT`` prints the correctly rounded digits of each ``double``,
+ties to even, with no limit on the number of digits.  Most values take the same
+short path as without the option.  A value that the short path cannot prove
+correct takes ``vsprintf_float_big()``, with a larger stack frame.
+``LIBC_PRINTF_EXACT_LDOUBLE`` does the same for ``long double``, and needs
+``LIBC_PRINTF_EXACT``.  Its buffer is on the stack of ``vsprintf_ldouble()``, which
+only ``%Le``, ``%Lf`` and ``%Lg`` call.
 
 ``LIBC_PRINTF_PERCENT_N`` is dangerous.  With it, ``%n`` stores the count of the
 bytes so far through its pointer, at the size of its length modifier, and prints
@@ -376,22 +386,49 @@ These are outside the guarantee, because ``printf()`` cannot detect them:
 What is outside the guarantee
 =============================
 
-The guarantee is about safety.  The output of the floating point engine is not
-exact, and some forms do not match the standard yet:
+The guarantee is about safety.  Without ``LIBC_PRINTF_EXACT`` the output of
+``%e``, ``%f`` and ``%g`` is not exact, and some forms do not match the standard
+yet.  Each call below shows the output of Default, and of Full with the exact
+options on:
 
 .. code-block:: text
 
-   printf("%.0f", 1e22)     "10000000000000000000000"
-   printf("%.20f", 0.1)     "0.10000000000000000000"
-   printf("%.17e", 0.1)     "1.00000000000000000e-01"
-   printf("%f", 1e300)      "1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.000000"
-   printf("%g", 1234567.0)  "1.23457e+06"
-   printf("%#g", 1.0)       "1."
-   printf("%Lf", 1e300L)    "1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.000000"
+   printf("%.0f", 0.5)
+     Default: "0"
+     Exact:   "0"
+   printf("%.0f", 2.5)
+     Default: "2"
+     Exact:   "2"
+   printf("%.2f", 1.005)
+     Default: "1.00"
+     Exact:   "1.00"
+   printf("%.0f", 1e22)
+     Default: "10000000000000000000000"
+     Exact:   "10000000000000000000000"
+   printf("%.20f", 0.1)
+     Default: "0.10000000000000001000"
+     Exact:   "0.10000000000000000555"
+   printf("%.17e", 0.1)
+     Default: "1.00000000000000010e-01"
+     Exact:   "1.00000000000000006e-01"
+   printf("%.25e", 1e23)
+     Default: "9.9999999999999992000000000e+22"
+     Exact:   "9.9999999999999991611392000e+22"
+   printf("%g", 1234567.0)
+     Default: "1.23457e+06"
+     Exact:   "1.23457e+06"
+   printf("%#g", 1.0)
+     Default: "1."
+     Exact:   "1."
+   printf("%.30Le", 0.1L)
+     Default: "1.000000000000000100000000000000e-01"
+     Exact:   "1.000000000000000000000000000000e-01"
 
-- ``%e``, ``%f`` and ``%g`` have at most 15 significant digits.  The digits after
-  them print as 0.  The last digits can differ from a correctly rounded result,
-  and ``%.0f`` does not round.
+- Without ``LIBC_PRINTF_EXACT``, ``%e``, ``%f`` and ``%g`` have at most 17
+  significant digits.  The digits after them print as 0.  The last digits can
+  differ from a correctly rounded result.
+- Without ``LIBC_PRINTF_EXACT_LDOUBLE``, ``%Le``, ``%Lf`` and ``%Lg`` have the
+  precision and the range of a ``double``.
 - ``%#g`` does not keep the trailing zeros.
 - ``%lc`` and ``%ls`` without ``LIBC_LOCALE`` print narrow characters.
 - A negative precision from ``*`` counts as 0, and not as omitted.
@@ -425,13 +462,23 @@ Image text, in bytes:
    * - Default
      - 46,724
      - 34,436
-     - 230,462
-     - 328,268
+     - 231,272
+     - 329,284
    * - Full
-     - 58,856
-     - 40,460
-     - 233,046
-     - 331,896
+     - 57,928
+     - 40,004
+     - 235,668
+     - 335,092
+   * - ``LIBC_PRINTF_EXACT`` added, floating point on
+     - +1528
+     - +1360
+     - +1624
+     - +1912
+   * - ``LIBC_PRINTF_EXACT_LDOUBLE`` added to that
+     - +0
+     - +0
+     - +162
+     - +324
    * - ``LIBC_PRINTF_HEXFLOAT`` added to Minimal
      - +836
      - +820
@@ -461,13 +508,13 @@ The objects of printf (text and data), in bytes:
    * - Default
      - 1,839
      - 1,797
-     - 4,445
-     - 5,465
+     - 5,329
+     - 6,477
    * - Full
-     - 5,439
-     - 5,281
-     - 6,901
-     - 8,849
+     - 7,563
+     - 7,209
+     - 9,685
+     - 12,041
 
 ``libgcc`` in the image, in bytes:
 
@@ -487,12 +534,12 @@ The objects of printf (text and data), in bytes:
    * - Default
      - 2,028
      - 1,012
-     - 4,546
+     - 4,492
      - 361
    * - Full
-     - 10,432
-     - 3,400
-     - 4,546
+     - 7,376
+     - 1,012
+     - 4,492
      - 361
 
 Stack frame of ``vsprintf_internal()``, in bytes:
@@ -513,19 +560,55 @@ Stack frame of ``vsprintf_internal()``, in bytes:
    * - Default
      - 88
      - 72
-     - 144
+     - 128
      - 160
    * - Full
+     - 192
      - 184
-     - 176
-     - 208
+     - 192
      - 256
+
+
+Stack frames of the floating point functions, with both exact options on, in bytes:
+
+.. list-table::
+   :header-rows: 1
+
+   * - 
+     - Cortex-M0
+     - Cortex-M3
+     - rv32
+     - arm64
+   * - ``vsprintf_float()``
+     - 88
+     - 96
+     - 96
+     - 112
+   * - ``__dtoa_engine()``
+     - 104
+     - 88
+     - 112
+     - 64
+   * - ``vsprintf_putfloat()``
+     - 72
+     - 80
+     - 96
+     - 128
+   * - ``vsprintf_float_big()``
+     - 256
+     - 256
+     - 256
+     - 288
+   * - ``vsprintf_ldouble()``
+     - -
+     - -
+     - 2624
+     - 2624
 
 Floating point is off by default on the two Cortex boards, and on by default on the other two.  Full has it on everywhere.
 
-Floating point on a CPU with no FPU pulls in the soft-float code of ``libgcc``,
-which is most of its cost: see the row of ``libgcc``.  A program that already
-uses ``double`` has that code anyway.  ``%lld`` needs a 64-bit division on a
+``%e``, ``%f`` and ``%g`` use integer operations only, and pull in no soft-float
+code.  Other code in the image can: see the row of ``libgcc``.  ``%lld`` needs a 64-bit division on a
 32-bit CPU, and the kernel clock code often needs it too.
 
 ``LIBC_NUMBERED_ARGS`` also adds a variable length array to the stack of
