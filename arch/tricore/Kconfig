@@ -26,6 +26,8 @@ config ARCH_TC1V6
 	bool
 	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_HIPRI_INTERRUPT
+	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_POWEROFF
@@ -41,6 +43,8 @@ config ARCH_TC1V8
 	select ARCH_HAVE_DEBUG
 	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_HIPRI_INTERRUPT
+	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS
@@ -87,6 +91,15 @@ config ARCH_CHIP
 	string
 	default "tc3xx"		if ARCH_CHIP_TC3XX
 	default "tc4xx"		if ARCH_CHIP_TC4XX
+
+config ARCH_IRQ_DISABLE_PRIORITY
+	int "IRQ disable priority threshold"
+	default 250
+	range 1 255
+	depends on ARCH_HIPRI_INTERRUPT
+	---help---
+		Interrupts with SRPN > this value are treated as
+		high-priority and will not be masked.
 
 config ARCH_DCACHE_ADDR
 	hex "AURIX Dcache base address"
