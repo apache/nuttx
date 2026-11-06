@@ -42,18 +42,6 @@
 #include "tricore_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* The interrupt vector enters tricore_doirq with jli, return with ji */
-
-#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
-#  define tricore_irq_return() __asm__ volatile ("ji a11" : : : "a11")
-#else
-#  define tricore_irq_return() __asm__ volatile ("ji %a11")
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -141,5 +129,5 @@ void tricore_doirq(void)
   board_autoled_off(LED_INIRQ);
 #endif
 
-  tricore_irq_return();
+  tricore_jump_backto_link();
 }
