@@ -47,17 +47,23 @@
  *
  ****************************************************************************/
 
-static void atfork_prepare(void)
+static int atfork_prepare(void)
 {
   FAR struct task_info_s *info = task_get_info();
   FAR struct list_node *list = &info->ta_atfork;
   FAR struct pthread_atfork_s *entry;
+  int ret;
 
   /* POSIX: the prepare handlers are called in the reverse order of
    * registration.  pthread_atfork() adds each entry at the tail.
    */
 
-  nxrmutex_lock(&info->ta_lock);
+  ret = nxrmutex_lock(&info->ta_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   list_for_every_entry_reverse(list, entry,
                                struct pthread_atfork_s, node)
     {
@@ -68,6 +74,7 @@ static void atfork_prepare(void)
     }
 
   nxrmutex_unlock(&info->ta_lock);
+  return OK;
 }
 
 /****************************************************************************
@@ -86,7 +93,11 @@ static void atfork_child(void)
 
   /* The child handlers are called in the order of registration */
 
-  nxrmutex_lock(&info->ta_lock);
+  if (nxrmutex_lock(&info->ta_lock) < 0)
+    {
+      return;
+    }
+
   list_for_every_entry(list, entry,
                        struct pthread_atfork_s, node)
     {
@@ -115,7 +126,11 @@ static void atfork_parent(void)
 
   /* The parent handlers are called in the order of registration */
 
-  nxrmutex_lock(&info->ta_lock);
+  if (nxrmutex_lock(&info->ta_lock) < 0)
+    {
+      return;
+    }
+
   list_for_every_entry(list, entry,
                        struct pthread_atfork_s, node)
     {
@@ -163,8 +178,14 @@ pid_t vfork(void)
   pid_t pid;
 
 #ifdef CONFIG_PTHREAD_ATFORK
-  atfork_prepare();
+  pid = atfork_prepare();
+  if (pid < 0)
+    {
+      set_errno(-pid);
+      return ERROR;
+    }
 #endif
+
   pid = up_fork(true);
 
 #ifdef CONFIG_PTHREAD_ATFORK
@@ -210,7 +231,12 @@ pid_t fork(void)
   pid_t pid;
 
 #ifdef CONFIG_PTHREAD_ATFORK
-  atfork_prepare();
+  pid = atfork_prepare();
+  if (pid < 0)
+    {
+      set_errno(-pid);
+      return ERROR;
+    }
 #endif
 
   /* Hold the lock of the task information during the copy.  Then no other
@@ -218,7 +244,16 @@ pid_t fork(void)
    * handlers while the child gets its copy of them.
    */
 
-  nxrmutex_lock(&info->ta_lock);
+  pid = nxrmutex_lock(&info->ta_lock);
+  if (pid < 0)
+    {
+#ifdef CONFIG_PTHREAD_ATFORK
+      atfork_parent();
+#endif
+      set_errno(-pid);
+      return ERROR;
+    }
+
   pid = up_fork(false);
 
   if (pid == 0)

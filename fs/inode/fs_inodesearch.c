@@ -435,7 +435,8 @@ static FAR const char *_inode_root_path(void)
  * Name: _inode_getcwd
  *
  * Description:
- *   Return the current working directory
+ *   Return the current working directory, or NULL if the lock of the
+ *   environment failed (ECANCELED, see getenv()).
  *
  ****************************************************************************/
 
@@ -447,6 +448,15 @@ static FAR const char *_inode_getcwd(void)
   pwd = getenv("PWD");
   if (pwd == NULL)
     {
+      /* Not set: the home directory.  But if the lock of the environment
+       * failed (ECANCELED, see getenv()), the directory is not known.
+       */
+
+      if (get_errno() == ECANCELED)
+        {
+          return NULL;
+        }
+
       pwd = CONFIG_LIBC_HOMEDIR;
     }
 #endif
@@ -551,6 +561,11 @@ int inode_search_setup(FAR struct inode_search_s *desc,
   if (*path != '/')
     {
       cwd = _inode_getcwd();
+      if (cwd == NULL)
+        {
+          return -ECANCELED;
+        }
+
       buflen = strlen(cwd) + 1 + strlen(path) + 1;
     }
   else

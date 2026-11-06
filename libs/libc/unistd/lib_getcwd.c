@@ -101,6 +101,17 @@ FAR char *getcwd(FAR char *buf, size_t size)
   if (pwd == NULL)
 #endif /* !CONFIG_DISABLE_ENVIRON */
     {
+#ifndef CONFIG_DISABLE_ENVIRON
+      /* Not set: the home directory.  But if the lock of the environment
+       * failed (ECANCELED, see getenv()), the directory is not known.
+       */
+
+      if (get_errno() == ECANCELED)
+        {
+          return NULL;
+        }
+
+#endif
       pwd = CONFIG_LIBC_HOMEDIR;
     }
 

@@ -83,6 +83,16 @@ int lib_getfullpath(int dirfd, FAR const char *path,
       pwd = getenv("PWD");
       if (pwd == NULL)
         {
+          /* Not set: the home directory.  But if the lock of the
+           * environment failed (ECANCELED, see getenv()), the directory is
+           * not known.
+           */
+
+          if (get_errno() == ECANCELED)
+            {
+              return -ECANCELED;
+            }
+
           pwd = CONFIG_LIBC_HOMEDIR;
         }
 #endif
