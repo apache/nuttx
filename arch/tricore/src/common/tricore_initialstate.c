@@ -61,7 +61,7 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Reclaim possible CSA links */
 
-  pcxi = tricore_addr2csa(xcp->regs);
+  pcxi = xcp->regs ? tricore_addr2csa(xcp->regs + TC_CONTEXT_REGS) : 0;
   if (pcxi & FCX_FREE)
     {
       tricore_reclaim_csa(pcxi);
@@ -91,7 +91,8 @@ void up_initial_state(struct tcb_s *tcb)
       return;
     }
 
-  xcp->regs = tricore_alloc_csa((uintptr_t)tcb->start,
+  xcp->regs = tricore_alloc_csa(tcb,
+                                (uintptr_t)tcb->start,
                                 (uintptr_t)tcb->stack_base_ptr +
                                            tcb->adj_stack_size,
                                 PSW_IO_SUPERVISOR | PSW_CDE, false);

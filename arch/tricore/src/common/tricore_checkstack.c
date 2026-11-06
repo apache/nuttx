@@ -70,7 +70,7 @@ size_t tricore_stack_check(uintptr_t alloc, size_t size)
   uintptr_t start;
   uintptr_t end;
   uint32_t *ptr;
-  size_t mark;
+  size_t checksize;
 
   if (size == 0)
     {
@@ -84,21 +84,35 @@ size_t tricore_stack_check(uintptr_t alloc, size_t size)
 
   /* Get the adjusted size based on the top and bottom of the stack */
 
-  size  = end - start;
+  size = (end - start) >> 2;
+  checksize = size;
 
-  /* RISC-V uses a push-down stack:  the stack grows toward lower addresses
-   * in memory.  We need to start at the lowest address in the stack memory
-   * allocation and search to higher addresses.  The first word we encounter
-   * that does not have the magic value is the high water mark.
-   */
+  /* Find the first colored CSA, skipping each CSA's PCXI link word. */
 
-  for (ptr = (uint32_t *)start, mark = (size >> 2);
-       mark > 0 && *ptr == STACK_COLOR;
-       ptr++, mark--);
+  for (ptr = (uint32_t *)start; size >= TC_CONTEXT_REGS;
+       size -= TC_CONTEXT_REGS, ptr += TC_CONTEXT_REGS)
+    {
+      if (*(ptr + 1) == STACK_COLOR)
+        {
+          break;
+        }
+    }
 
-  /* Return our guess about how much stack space was used */
+  /* Count the remaining unused words.  PCXI link words are always unused. */
 
-  return mark << 2;
+  for (; checksize > 0 && size > 0; size--, ptr++)
+    {
+      if (*ptr == STACK_COLOR || TC_CONTEXT_ALIGNED(ptr))
+        {
+          checksize--;
+        }
+      else
+        {
+          break;
+        }
+    }
+
+  return checksize << 2;
 }
 
 /****************************************************************************
