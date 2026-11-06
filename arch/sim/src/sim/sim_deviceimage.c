@@ -299,6 +299,11 @@ char *sim_deviceimage(void)
    */
 
   pbuffer = kmm_malloc(bufsize);
+  if (pbuffer == NULL)
+    {
+      inflateEnd(&strm);
+      return NULL;
+    }
 
   /* Set up the input buffer */
 
@@ -326,11 +331,11 @@ char *sim_deviceimage(void)
           case Z_DATA_ERROR:
           case Z_MEM_ERROR:
           case Z_STREAM_ERROR:
-              serr("ERROR: inflate FAILED: ret=%d msg=\"%s\"\n",
-                    ret, strm.msg ? strm.msg : "No message");
-              inflateEnd(&strm);
-              kmm_free(pbuffer);
-              return NULL;
+            serr("ERROR: inflate FAILED: ret=%d msg=\"%s\"\n",
+                  ret, strm.msg ? strm.msg : "No message");
+            inflateEnd(&strm);
+            kmm_free(pbuffer);
+            return NULL;
         }
 
       /* If avail_out is zero, then inflate() returned only because it is
@@ -342,6 +347,7 @@ char *sim_deviceimage(void)
         {
           int newbufsize = bufsize + 128 * 1024;
           char *newbuffer = kmm_realloc(pbuffer, newbufsize);
+
           if (!newbuffer)
             {
               kmm_free(pbuffer);
@@ -362,6 +368,7 @@ char *sim_deviceimage(void)
 
           int newbufsize = bufsize - strm.avail_out;
           char *newbuffer = kmm_realloc(pbuffer, newbufsize);
+
           if (!newbuffer)
             {
               kmm_free(pbuffer);
