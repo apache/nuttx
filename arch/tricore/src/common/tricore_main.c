@@ -37,6 +37,33 @@
 #include "chip.h"
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Entries of the other cores, provided by the linker script; TC4xx still
+ * starts from the iLLD startup code
+ */
+
+#ifdef CONFIG_ARCH_CHIP_TC3XX
+extern uintptr_t __start1[];
+extern uintptr_t __start2[];
+extern uintptr_t __start3[];
+extern uintptr_t __start4[];
+extern uintptr_t __start5[];
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_CHIP_TC3XX
+static uintptr_t * const g_tricore_entry[] =
+{
+  __start1, __start2, __start3, __start4, __start5
+};
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -79,7 +106,7 @@ static void tricore_core_sync(volatile uint32_t *sync)
     }
 }
 
-static void core_main(void)
+void tricore_main(void)
 {
   static volatile uint32_t g_sync_event;
 
@@ -115,6 +142,40 @@ static void core_main(void)
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_CHIP_TC3XX
+/****************************************************************************
+ * Name: tricore_start
+ *
+ * Description:
+ *   C entry of the startup, jumped to from tricore_head on CPU0 once the
+ *   core registers, the CSA list, the watchdogs, the RAMs, the C runtime
+ *   and the clocks are set up.  Release CPU1 to TRICORE_START_CORES at
+ *   __start1 and on, the start of their own images, as the iLLD startup
+ *   code does, and enter NuttX.
+ *
+ ****************************************************************************/
+
+void tricore_start(void)
+{
+  int cpu;
+
+  for (cpu = 1; cpu <= TRICORE_START_CORES; cpu++)
+    {
+      uintptr_t pc = (uintptr_t)g_tricore_entry[cpu - 1];
+
+      putreg32((getreg32(TRICORE_START_PC(cpu)) & 1) | (pc & ~1),
+               TRICORE_START_PC(cpu));
+      if ((getreg32(TRICORE_START_HALT(cpu)) & TRICORE_START_BHALT) != 0)
+        {
+          putreg32(getreg32(TRICORE_START_HALT(cpu)) & ~TRICORE_START_BHALT,
+                   TRICORE_START_HALT(cpu));
+        }
+    }
+
+  tricore_main();
+}
+#endif
+
 void core0_main(void)
 {
   /* All WDTs except WDTCPU0 and system watchdog WDTSYS are in
@@ -124,35 +185,35 @@ void core0_main(void)
 
   tricore_wdt_disable();
 
-  core_main();
+  tricore_main();
 }
 
 void core1_main(void)
 {
-  core_main();
+  tricore_main();
 }
 
 void core2_main(void)
 {
-  core_main();
+  tricore_main();
 }
 
 void core3_main(void)
 {
-  core_main();
+  tricore_main();
 }
 
 void core4_main(void)
 {
-  core_main();
+  tricore_main();
 }
 
 void core5_main(void)
 {
-  core_main();
+  tricore_main();
 }
 
 void core6_main(void)
 {
-  core_main();
+  tricore_main();
 }
