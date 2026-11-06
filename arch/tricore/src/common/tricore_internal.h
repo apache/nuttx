@@ -242,6 +242,10 @@ void tricore_fpuinit(void);
 int tricore_init_dbgmonitor(void);
 #endif
 
+#ifdef CONFIG_BUILD_PROTECTED
+void tricore_userspace(void);
+#endif
+
 /* System Timer *************************************************************/
 
 struct oneshot_lowerhalf_s *

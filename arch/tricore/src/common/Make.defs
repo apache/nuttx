@@ -63,6 +63,16 @@ ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
 CMN_CSRCS += tricore_schedulesigaction.c tricore_sigdeliver.c
 endif
 
+ifeq ($(CONFIG_BUILD_PROTECTED)$(CONFIG_BUILD_KERNEL),y)
+  CMN_CSRCS += tricore_task_start.c
+  CMN_CSRCS += tricore_pthread_start.c
+  CMN_CSRCS += tricore_signal_dispatch.c
+
+  ifeq ($(CONFIG_BUILD_PROTECTED),y)
+    CMN_UASRCS += tricore_signal_handler.c
+  endif
+endif
+
 ifeq ($(CONFIG_ARCH_USE_MPU),y)
   CMN_CSRCS += tricore_mpu.c
 endif

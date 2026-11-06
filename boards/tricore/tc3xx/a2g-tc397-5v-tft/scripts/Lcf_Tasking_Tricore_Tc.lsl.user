@@ -184,6 +184,6 @@ derivative tc39
             select "(.zdata|.zdata.*)";
         }
         "_sdata_pflash" = "_lc_gb_udata_rom";
-        #include "symbol_share.ld"
+        "_eronly" = "_lc_gb_udata_rom";
     }
 }
