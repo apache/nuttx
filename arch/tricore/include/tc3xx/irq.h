@@ -37,6 +37,24 @@
 
 #define TRICORE_UART_RX_IRQ      21
 
+/* Interrupt router: the IRQ number is the index of the service request
+ * control (SRC) register from TRICORE_SRC_BASE.
+ */
+
+#define TRICORE_SRC_BASE         0xf0038000  /* SRC_CPU0SB, IRQ 0 */
+#define TRICORE_SRC_GPSR_BASE    0xf0038990  /* SRC_GPSR0SR0 */
+#define TRICORE_INT_SRB_BASE     0xf0037010  /* INT_SRB0 */
+
+#define TRICORE_SRC_SRPN_MASK    0xff        /* Service request priority */
+#define TRICORE_SRC_SRE          (1 << 10)   /* Service request enable */
+#define TRICORE_SRC_TOS_SHIFT    11          /* Type of service (core) */
+#define TRICORE_SRC_TOS_MASK     (0x7 << TRICORE_SRC_TOS_SHIFT)
+#define TRICORE_SRC_CLRR         (1 << 25)   /* Clear request */
+
+/* TOS of a core: 0 is CPU0, 1 is the DMA, 2 to 6 are CPU1 to CPU5 */
+
+#define TRICORE_SRC_TOS_CPU(n)   ((n) == 0 ? 0 : (n) + 1)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

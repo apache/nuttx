@@ -41,18 +41,20 @@
 
 #include "tricore_internal.h"
 
-/* The interrupt entry still uses the iLLD until it is native */
-
-#include <IfxCpu_reg.h>
-#include <Ifx_Ssw_Compilers.h>
-#include <Compilers/Compilers.h>
-#include <IfxCpu_Intrinsics.h>
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
+/****************************************************************************
+ * Name: tricore_doirq
+ *
+ * Description:
+ *   Common interrupt handler, entered from the interrupt vector in
+ *   tricore_vectors.S/.asm with the lower context saved.
+ *
+ ****************************************************************************/
+
+void tricore_doirq(void)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   struct tcb_s *tcb = this_task();
@@ -60,11 +62,9 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
-  Ifx_CPU_ICR icr;
-  uintptr_t *regs;
-
-  icr.U = tricore_mfcr(CPU_ICR);
-  regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
+  int irq = NDX_TO_IRQ(tricore_mfcr(TRICORE_CPU_ICR) &
+                       TRICORE_ICR_CCPN_MASK);
+  uintptr_t *regs = tricore_csa2addr(tricore_mfcr(TRICORE_CPU_PCXI));
 
   if (*running_task != NULL)
     {
@@ -83,9 +83,9 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
   /* Deliver the IRQ */
 
-  tricore_ack_irq(NDX_TO_IRQ(icr.B.CCPN));
+  tricore_ack_irq(irq);
 
-  irq_dispatch(NDX_TO_IRQ(icr.B.CCPN), regs);
+  irq_dispatch(irq, regs);
 
   /* Check for a context switch. */
 
@@ -113,7 +113,7 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
       *running_task = tcb;
 
-      tricore_mtcr(CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
+      tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
       UP_ISB();
     }
 
@@ -128,4 +128,6 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
   (*running_task)->xcp.regs = NULL;
   board_autoled_off(LED_INIRQ);
 #endif
+
+  tricore_jump_backto_link();
 }

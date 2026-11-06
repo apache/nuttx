@@ -30,9 +30,9 @@
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/timers/arch_alarm.h>
 
-#include "tricore_internal.h"
+#include <arch/chip/chip.h>
 
-#include "IfxStm.h"
+#include "tricore_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -51,8 +51,7 @@ void up_timer_initialize(void)
 {
   struct oneshot_lowerhalf_s *lower;
 
-  lower = tricore_systimer_initialize(&MODULE_CPU0,
-                                      TRICORE_SRC2IRQ(&SRC_STMCPU0_SR2),
+  lower = tricore_systimer_initialize(TRICORE_STM0_BASE, TRICORE_STM0_IRQ,
                                       SCU_FREQUENCY);
 
   DEBUGASSERT(lower != NULL);

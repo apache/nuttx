@@ -30,6 +30,40 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* System timer (STM) of CPU0 and its interrupt */
+
+#define TRICORE_STM0_BASE          0xf0001000  /* MODULE_STM0 */
+#define TRICORE_STM0_IRQ           192         /* SRC_STM0SR0 */
+
+#define TRICORE_STM_TIM0_OFFSET    0x10        /* Timer bits [31:0] */
+#define TRICORE_STM_CAP_OFFSET     0x2c        /* Timer bits [63:32] */
+
+/* System timer (STM) register offsets and bits */
+
+#define TRICORE_STM_CMP0_OFFSET    0x30        /* Compare register 0 */
+#define TRICORE_STM_CMCON_OFFSET   0x38        /* Compare match control */
+#define TRICORE_STM_ICR_OFFSET     0x3c        /* Interrupt control */
+#define TRICORE_STM_ISCR_OFFSET    0x40        /* Interrupt set/clear */
+#define TRICORE_STM_OCS_OFFSET     0xe8        /* OCDS control and status */
+
+#define TRICORE_STM_CMCON_MSIZE0   (0x1f << 0) /* CMP0 compare size - 1 */
+#define TRICORE_STM_CMCON_MSTART0  (0x1f << 8) /* CMP0 first compared bit */
+#define TRICORE_STM_ICR_CMP0EN     (1 << 0)    /* CMP0 interrupt enable */
+#define TRICORE_STM_ICR_CMP0OS     (1 << 2)    /* CMP0 output, 0 is STMIR0 */
+#define TRICORE_STM_ISCR_CMP0IRR   (1 << 0)    /* Clear CMP0 request */
+#define TRICORE_STM_OCS_SUS_HARD   (1 << 24)   /* Hard suspend on halt */
+#define TRICORE_STM_OCS_SUS_MASK   (0xf << 24)
+#define TRICORE_STM_OCS_SUS_P      (1 << 28)   /* SUS write protection */
+
+/* OCS can only be written with OCDS enabled (CBS_OSTATE.OEN) */
+
+#define TRICORE_CBS_OSTATE         0xf0000480
+#define TRICORE_CBS_OSTATE_OEN     (1 << 0)
+
+/****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
 

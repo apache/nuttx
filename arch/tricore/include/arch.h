@@ -59,6 +59,16 @@
     __val;                                                             \
   })
 
+/* Return from a handler that the trap or interrupt vector entered with
+ * jli, to the vector code at A11.
+ */
+
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
+#  define tricore_jump_backto_link() __asm__ volatile ("ji a11" : : : "a11")
+#else
+#  define tricore_jump_backto_link() __asm__ volatile ("ji %a11")
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
