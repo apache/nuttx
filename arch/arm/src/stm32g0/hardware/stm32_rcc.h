@@ -49,6 +49,7 @@
 #define STM32_RCC_APB1SMENR_OFFSET      0x004C  /* APB1 peripheral clock enable in Sleep mode register */
 #define STM32_RCC_APB2SMENR_OFFSET      0x0050  /* APB2 peripheral clock enable in Sleep mode register */
 #define STM32_RCC_CCIPR_OFFSET          0x0054  /* Clock configuration register */
+#define STM32_RCC_CCIPR2_OFFSET         0x0058  /* Clock configuration register 2 */
 #define STM32_RCC_BDCR_OFFSET           0x005c  /* RTC domain control register */
 #define STM32_RCC_CSR_OFFSET            0x0060  /* Control/status register */
 
@@ -74,6 +75,7 @@
 #define STM32_RCC_APB1SMENR         (STM32_RCC_BASE+STM32_RCC_APB1SMENR_OFFSET)
 #define STM32_RCC_APB2SMENR         (STM32_RCC_BASE+STM32_RCC_APB2SMENR_OFFSET)
 #define STM32_RCC_CCIPR             (STM32_RCC_BASE+STM32_RCC_CCIPR_OFFSET)
+#define STM32_RCC_CCIPR2            (STM32_RCC_BASE+STM32_RCC_CCIPR2_OFFSET)
 #define STM32_RCC_BDCR              (STM32_RCC_BASE+STM32_RCC_BDCR_OFFSET)
 #define STM32_RCC_CSR               (STM32_RCC_BASE+STM32_RCC_CSR_OFFSET)
 
@@ -220,7 +222,8 @@
                                               /* Bits 2-3: Reserved */
 #define RCC_APB1RSTR_TIM6RST        (1 << 4)  /* Bit 4:  Timer 6 reset */
 #define RCC_APB1RSTR_TIM7RST        (1 << 5)  /* Bit 5:  Timer 7 reset */
-                                              /* Bits 6-12: Reserved */
+                                              /* Bits 6-11: Reserved */
+#define RCC_APB1RSTR_FDCANRST       (1 << 12) /* Bit 12: FDCAN reset */
 #define RCC_APB1RSTR_USBRST         (1 << 13) /* Bit 13: USB reset */
 #define RCC_APB1RSTR_SPI2RST        (1 << 14) /* Bit 14: SPI 2 reset */
                                               /* Bits 15-16: Reserved */
@@ -287,7 +290,7 @@
 #define RCC_APB1ENR_TIM7EN          (1 << 5)  /* Bit 5:  Timer 7 enable */
                                               /* Bits 6-10: Reserved */
 #define RCC_APB1ENR_WWDGEN          (1 << 11) /* Bit 11: Window watchdog enable */
-                                              /* Bit 12: Reserved */
+#define RCC_APB1ENR_FDCANEN         (1 << 12) /* Bit 12: FDCAN enable */
 #define RCC_APB1ENR_USBEN           (1 << 13) /* Bit 13: USB enable */
 #define RCC_APB1ENR_SPI2EN          (1 << 14) /* Bit 14: SPI 2 enable */
                                               /* Bit 15: Reserved */
@@ -350,6 +353,14 @@
 #define RCC_CCIPR_ADCSEL_SYSCLK     (0)
 #define RCC_CCIPR_ADCSEL_PLLPCLK    (1 << RCC_CCIPR_ADCSEL_SHIFT)
 #define RCC_CCIPR_ADCSEL_HSI16      (2 << RCC_CCIPR_ADCSEL_SHIFT)
+
+/* Clock configuration register 2 (STM32G0B1/G0C1) */
+
+#define RCC_CCIPR2_FDCANSEL_SHIFT   (8)
+#define RCC_CCIPR2_FDCANSEL_MASK    (3 << RCC_CCIPR2_FDCANSEL_SHIFT)
+#define RCC_CCIPR2_FDCANSEL_PCLK    (0 << RCC_CCIPR2_FDCANSEL_SHIFT)
+#define RCC_CCIPR2_FDCANSEL_PLLQ    (1 << RCC_CCIPR2_FDCANSEL_SHIFT)
+#define RCC_CCIPR2_FDCANSEL_HSE     (2 << RCC_CCIPR2_FDCANSEL_SHIFT)
 
 /* TODO: RTC domain control register */
 
