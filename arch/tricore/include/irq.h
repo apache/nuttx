@@ -133,9 +133,10 @@
 
 #define TRICORE_SRCNUM_PER_GPSR  8
 #define TRICORE_SRC2IRQ(src_addr) \
-  (((uintptr_t)(src_addr) - (uintptr_t)&MODULE_SRC) / 4)
+  (((uintptr_t)(src_addr) - TRICORE_SRC_BASE) / 4)
 #define TRICORE_GPSR_IRQNUM(src_cpu, dest_cpu)  \
-  TRICORE_SRC2IRQ(&SRC_GPSR00 + src_cpu * 8 + dest_cpu)
+  TRICORE_SRC2IRQ(TRICORE_SRC_GPSR_BASE + \
+                  ((src_cpu) * TRICORE_SRCNUM_PER_GPSR + (dest_cpu)) * 4)
 
 /* For use with EABI and floating point, the stack must be aligned to 8-byte
  * addresses.

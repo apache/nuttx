@@ -131,13 +131,9 @@ SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Clock/Std/IfxClock.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Dma/Dma/IfxDma_Dma.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Dma/Std/IfxDma.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Port/Std/IfxPort.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Src/Std/IfxSrc.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxCpu_cfg.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxStm_cfg.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Cpu/Std/IfxCpu.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Cpu/Trap/IfxCpu_Trap.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Scu/Std/IfxScuEru.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Stm/Std/IfxStm.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Smm/Std/IfxSmm.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Smm/Std/IfxSmmRst.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Smu/Std/IfxSmu.c
@@ -148,10 +144,6 @@ SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Tc0.c
 
 CFLAGS += $(addprefix ${INCDIR_PREFIX},$(SDK_INCDIR))
-CFLAGS += -DSRC_CPU_CPU0_SB=SRC_CPU0SB
-CFLAGS += -DSRC_GPSR00=SRC_GPSR0SR0
-CFLAGS += -DMODULE_STM0=MODULE_CPU0
-CFLAGS += -DSRC_STM0SR0=SRC_STMCPU0_SR2
 
 VPATH += $(dir $(SDK_CSRCS))
 

@@ -31,8 +31,7 @@
 #include <nuttx/timers/arch_alarm.h>
 
 #include "tricore_internal.h"
-
-#include "IfxStm.h"
+#include "tricore_stm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -49,10 +48,14 @@
  * 40 CPU cycles (100ns at 400Mhz) ~ 10 timer cycles (for 100 Mhz timer).
  */
 
-#define IFX_CFG_CPU_CLOCK_FREQUENCY 100000000
+#define TRICORE_SYSTIMER_CPU_FREQUENCY 100000000
 
 #define TRICORE_SYSTIMER_MIN_DELAY \
-  (40ull * SCU_FREQUENCY / IFX_CFG_CPU_CLOCK_FREQUENCY)
+  (40ull * SCU_FREQUENCY / TRICORE_SYSTIMER_CPU_FREQUENCY)
+
+/* STM register of the timer */
+
+#define TRICORE_STM_REG(priv, offset)  ((priv)->tbase + (offset))
 
 /****************************************************************************
  * Private Types
@@ -66,7 +69,7 @@
 struct tricore_systimer_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lower;
-  volatile void             *tbase;
+  uintptr_t                 tbase;
   spinlock_t                lock;
 };
 
@@ -82,7 +85,16 @@ tricore_systimer_get_time(struct tricore_systimer_lowerhalf_s *priv)
 
   flags = spin_lock_irqsave(&priv->lock);
 
-  ticks = IfxStm_get(priv->tbase);
+#ifdef TRICORE_STM_ABS_OFFSET
+  ticks = *(volatile uint64_t *)
+          TRICORE_STM_REG(priv, TRICORE_STM_ABS_OFFSET);
+#else
+  /* Reading TIM0 latches the upper 32 bits into CAP */
+
+  ticks  = getreg32(TRICORE_STM_REG(priv, TRICORE_STM_TIM0_OFFSET));
+  ticks |= (uint64_t)getreg32(TRICORE_STM_REG(priv, TRICORE_STM_CAP_OFFSET))
+           << 32;
+#endif
 
   spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -97,7 +109,9 @@ tricore_systimer_set_timecmp(struct tricore_systimer_lowerhalf_s *priv,
 
   flags = spin_lock_irqsave(&priv->lock);
 
-  IfxStm_updateCompare(priv->tbase, IfxStm_Comparator_0, value);
+  /* CMP0 compares the timer bits [31:0] */
+
+  putreg32((uint32_t)value, TRICORE_STM_REG(priv, TRICORE_STM_CMP0_OFFSET));
 
   spin_unlock_irqrestore(&priv->lock, flags);
 }
@@ -300,9 +314,10 @@ static struct tricore_systimer_lowerhalf_s g_tricore_oneshot_lowerhalf =
  ****************************************************************************/
 
 struct oneshot_lowerhalf_s *
-tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
+tricore_systimer_initialize(uintptr_t tbase, int irq, uint64_t freq)
 {
   struct tricore_systimer_lowerhalf_s *priv = &g_tricore_oneshot_lowerhalf;
+  uint32_t regval;
 
   priv->tbase = tbase;
   spin_lock_init(&priv->lock);
@@ -311,17 +326,40 @@ tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
 
   oneshot_count_init(&priv->lower, (uint32_t)freq);
 
-  IfxStm_setSuspendMode(priv->tbase, IfxStm_SuspendMode_hard);
+  /* Stop the timer while the core is halted by the debugger */
 
-  IfxStm_setCompareControl(tbase,
-      IfxStm_Comparator_0,
-      IfxStm_ComparatorOffset_0,
-      IfxStm_ComparatorSize_32Bits,
-      IfxStm_ComparatorInterrupt_ir0);
+#ifdef TRICORE_CBS_OSTATE
+  if ((getreg32(TRICORE_CBS_OSTATE) & TRICORE_CBS_OSTATE_OEN) != 0)
+    {
+      putreg32(TRICORE_STM_OCS_SUS_P | TRICORE_STM_OCS_SUS_HARD,
+               TRICORE_STM_REG(priv, TRICORE_STM_OCS_OFFSET));
+      regval = getreg32(TRICORE_STM_REG(priv, TRICORE_STM_OCS_OFFSET));
+      putreg32(regval & ~TRICORE_STM_OCS_SUS_P,
+               TRICORE_STM_REG(priv, TRICORE_STM_OCS_OFFSET));
+    }
+#else
+  putreg32(TRICORE_STM_OCS_SUS_P | TRICORE_STM_OCS_SUS_HARD,
+           TRICORE_STM_REG(priv, TRICORE_STM_OCS_OFFSET));
+#endif
 
-  IfxStm_clearCompareFlag(tbase, IfxStm_Comparator_0);
+  /* CMP0 compares the timer bits [31:0] and raises STMIR0 */
+
+  regval  = getreg32(TRICORE_STM_REG(priv, TRICORE_STM_CMCON_OFFSET));
+  regval &= ~(TRICORE_STM_CMCON_MSIZE0 | TRICORE_STM_CMCON_MSTART0);
+  regval |= 31 & TRICORE_STM_CMCON_MSIZE0;
+  putreg32(regval, TRICORE_STM_REG(priv, TRICORE_STM_CMCON_OFFSET));
+
+  regval  = getreg32(TRICORE_STM_REG(priv, TRICORE_STM_ICR_OFFSET));
+  putreg32(regval & ~TRICORE_STM_ICR_CMP0OS,
+           TRICORE_STM_REG(priv, TRICORE_STM_ICR_OFFSET));
+
+  putreg32(TRICORE_STM_ISCR_CMP0IRR,
+           TRICORE_STM_REG(priv, TRICORE_STM_ISCR_OFFSET));
   tricore_systimer_set_timecmp(priv, UINT64_MAX);
-  IfxStm_enableComparatorInterrupt(tbase, IfxStm_Comparator_0);
+
+  regval = getreg32(TRICORE_STM_REG(priv, TRICORE_STM_ICR_OFFSET));
+  putreg32(regval | TRICORE_STM_ICR_CMP0EN,
+           TRICORE_STM_REG(priv, TRICORE_STM_ICR_OFFSET));
 
   irq_attach(irq, tricore_systimer_interrupt, priv);
   up_enable_irq(irq);
