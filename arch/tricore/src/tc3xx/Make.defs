@@ -22,6 +22,7 @@
 
 CHIP_CSRCS += tc3xx_timerisr.c
 CHIP_CSRCS += tc3xx_serial.c
+CHIP_CSRCS += tc3xx_wdt.c
 
 VPATH += tc3xx
 
