@@ -67,3 +67,7 @@ buttons
 
 This is a config example to test onboard user button with input driver and buttons example in signal mode.
 
+dronecan
+--------
+
+This configuration enables the DroneCAN example on FDCAN1 at 1 Mbit/s.
