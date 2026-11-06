@@ -172,7 +172,8 @@ static ssize_t local_sendto(FAR struct socket *psock,
 #ifdef CONFIG_NET_LOCAL_DGRAM
   FAR struct local_conn_s *conn = psock->s_conn;
   FAR struct local_conn_s *server;
-  FAR const struct sockaddr_un *unaddr = (FAR const struct sockaddr_un *)to;
+  FAR const struct sockaddr_un *unaddr;
+  struct sockaddr_un kaddr;
   FAR const char *path;
   ssize_t ret;
 
@@ -195,6 +196,9 @@ static ssize_t local_sendto(FAR struct socket *psock,
 
       return -EFAULT;
     }
+
+  local_copyaddr(&kaddr, to, tolen);
+  unaddr = &kaddr;
 
   /* If this is a connected socket, then return EISCONN */
 

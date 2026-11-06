@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -77,6 +78,23 @@ FAR struct local_conn_s *local_nextconn(FAR struct local_conn_s *conn)
     }
 
   return (FAR struct local_conn_s *)conn->lc_conn.s_node.flink;
+}
+
+/****************************************************************************
+ * Name: local_copyaddr
+ *
+ * Description:
+ *   Copy an address from a program.  It has addrlen bytes and no NUL has to
+ *   follow its name, so what follows it in the memory of the program is not
+ *   part of it.  The copy always ends with a NUL.
+ *
+ ****************************************************************************/
+
+void local_copyaddr(FAR struct sockaddr_un *unaddr,
+                    FAR const struct sockaddr *addr, socklen_t addrlen)
+{
+  memset(unaddr, 0, sizeof(*unaddr));
+  memcpy(unaddr, addr, MIN(addrlen, sizeof(*unaddr) - 1));
 }
 
 /****************************************************************************
