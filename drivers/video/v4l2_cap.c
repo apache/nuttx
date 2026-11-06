@@ -4161,19 +4161,29 @@ static int capture_poll(FAR struct file *filep,
 
   if (setup)
     {
-      if (type_inf->fds == NULL)
+      /* This is a request to set up the poll.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
+       */
+
+      if (fds->priv == NULL)
         {
-          type_inf->fds = fds;
-          fds->priv     = &type_inf->fds;
-          if (!video_framebuff_is_empty(&type_inf->bufinf))
+          if (type_inf->fds == NULL)
             {
-              poll_notify(&fds, 1, POLLIN);
+              type_inf->fds = fds;
+              fds->priv     = &type_inf->fds;
+            }
+          else
+            {
+              spin_unlock_irqrestore_nopreempt(&cmng->lock, flags);
+              return -EBUSY;
             }
         }
-      else
+
+      if (!video_framebuff_is_empty(&type_inf->bufinf))
         {
-          spin_unlock_irqrestore_nopreempt(&cmng->lock, flags);
-          return -EBUSY;
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else if (fds->priv)

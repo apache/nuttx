@@ -248,27 +248,33 @@ static int signalfd_file_poll(FAR struct file *filep,
     }
 
   /* This is a request to set up the poll. Find an available
-   * slot for the poll structure reference
+   * slot for the poll structure reference.  If the poll is already bound
+   * (fds->priv != NULL) this is a refresh request from a persistent poll
+   * consumer (e.g. epoll): skip the re-binding and just re-query the
+   * current readiness below.
    */
 
-  for (i = 0; i < CONFIG_SIGNAL_FD_NPOLLWAITERS; i++)
+  if (fds->priv == NULL)
     {
-      /* Find an available slot */
-
-      if (!dev->fds[i])
+      for (i = 0; i < CONFIG_SIGNAL_FD_NPOLLWAITERS; i++)
         {
-          /* Bind the poll structure and this slot */
+          /* Find an available slot */
 
-          dev->fds[i] = fds;
-          fds->priv   = &dev->fds[i];
-          break;
+          if (!dev->fds[i])
+            {
+              /* Bind the poll structure and this slot */
+
+              dev->fds[i] = fds;
+              fds->priv   = &dev->fds[i];
+              break;
+            }
         }
-    }
 
-  if (i >= CONFIG_SIGNAL_FD_NPOLLWAITERS)
-    {
-      ret = -EBUSY;
-      goto out;
+      if (i >= CONFIG_SIGNAL_FD_NPOLLWAITERS)
+        {
+          ret = -EBUSY;
+          goto out;
+        }
     }
 
   /* Notify the POLLIN event if the counter is not zero */

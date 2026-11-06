@@ -251,29 +251,37 @@ static int pressure_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
   flags = spin_lock_irqsave(&g_pressure_lock);
   if (setup)
     {
-      if (priv->fds == NULL)
+      /* This is a request to set up the poll. Bind the poll structure to
+       * the single slot.  If the poll is already bound (fds->priv != NULL)
+       * this is a refresh request from a persistent poll consumer
+       * (e.g. epoll): skip the re-binding and just re-query the current
+       * readiness below.
+       */
+
+      if (fds->priv == NULL)
         {
+          if (priv->fds != NULL)
+            {
+              spin_unlock_irqrestore(&g_pressure_lock, flags);
+              return -EBUSY;
+            }
+
           priv->fds = fds;
           fds->priv = &priv->fds;
-
-          /* If the remaining memory is less than the threshold and
-           * lasttick is CLOCK_MAX, it means the event is triggered for
-           * the first time and we should always send a notification.
-           */
-
-          if (g_remaining <= priv->threshold && (priv->lasttick ==
-              CLOCK_MAX || current - priv->lasttick >= priv->interval))
-            {
-              priv->lasttick = current;
-              spin_unlock_irqrestore(&g_pressure_lock, flags);
-              poll_notify(&priv->fds, 1, POLLPRI);
-              return OK;
-            }
         }
-      else
+
+      /* If the remaining memory is less than the threshold and
+       * lasttick is CLOCK_MAX, it means the event is triggered for
+       * the first time and we should always send a notification.
+       */
+
+      if (g_remaining <= priv->threshold && (priv->lasttick ==
+          CLOCK_MAX || current - priv->lasttick >= priv->interval))
         {
+          priv->lasttick = current;
           spin_unlock_irqrestore(&g_pressure_lock, flags);
-          return -EBUSY;
+          poll_notify(&priv->fds, 1, POLLPRI);
+          return OK;
         }
     }
   else if (fds->priv)

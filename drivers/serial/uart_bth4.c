@@ -397,24 +397,34 @@ static int uart_bth4_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
 
   if (setup)
     {
-      for (i = 0; i < CONFIG_UART_BTH4_NPOLLWAITERS; i++)
-        {
-          /* Find an available slot */
+      /* This is a request to set up the poll.  Find an available
+       * slot for the poll structure reference.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
+       */
 
-          if (!dev->fds[i])
+      if (fds->priv == NULL)
+        {
+          for (i = 0; i < CONFIG_UART_BTH4_NPOLLWAITERS; i++)
             {
-              /* Bind the poll structure and this slot */
+              /* Find an available slot */
 
-              dev->fds[i] = fds;
-              fds->priv   = &dev->fds[i];
-              break;
+              if (!dev->fds[i])
+                {
+                  /* Bind the poll structure and this slot */
+
+                  dev->fds[i] = fds;
+                  fds->priv   = &dev->fds[i];
+                  break;
+                }
             }
-        }
 
-      if (i >= CONFIG_UART_BTH4_NPOLLWAITERS)
-        {
-          fds->priv = NULL;
-          ret = -EBUSY;
+          if (i >= CONFIG_UART_BTH4_NPOLLWAITERS)
+            {
+              fds->priv = NULL;
+              ret = -EBUSY;
+            }
         }
 
       if (!circbuf_is_empty(&dev->circbuf))

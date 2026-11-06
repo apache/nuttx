@@ -496,18 +496,28 @@ static int bat_gauge_poll(FAR struct file *filep,
 
   if (setup)
     {
-      if (priv->fds == NULL)
+      /* This is a request to set up the poll.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
+       */
+
+      if (fds->priv == NULL)
         {
-          priv->fds = fds;
-          fds->priv = &priv->fds;
-          if (priv->mask != 0)
+          if (priv->fds == NULL)
             {
-              poll_notify(&fds, 1, POLLIN);
+              priv->fds = fds;
+              fds->priv = &priv->fds;
+            }
+          else
+            {
+              ret = -EBUSY;
             }
         }
-      else
+
+      if (priv->mask != 0)
         {
-          ret = -EBUSY;
+          poll_notify(&fds, 1, POLLIN);
         }
     }
   else if (fds->priv != NULL)

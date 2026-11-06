@@ -104,25 +104,35 @@ static int nxmq_file_poll(FAR struct file *filep,
 
   if (setup)
     {
-      for (i = 0; i < CONFIG_FS_MQUEUE_NPOLLWAITERS; i++)
-        {
-          /* Find an available slot */
+      /* This is a request to set up the poll. Find an available
+       * slot for the poll structure reference.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
+       */
 
-          if (msgq->fds[i] == NULL)
+      if (fds->priv == NULL)
+        {
+          for (i = 0; i < CONFIG_FS_MQUEUE_NPOLLWAITERS; i++)
             {
-              /* Bind the poll structure and this slot */
+              /* Find an available slot */
 
-              msgq->fds[i] = fds;
-              fds->priv    = &msgq->fds[i];
-              break;
+              if (msgq->fds[i] == NULL)
+                {
+                  /* Bind the poll structure and this slot */
+
+                  msgq->fds[i] = fds;
+                  fds->priv    = &msgq->fds[i];
+                  break;
+                }
             }
-        }
 
-      if (i >= CONFIG_FS_MQUEUE_NPOLLWAITERS)
-        {
-          fds->priv = NULL;
-          ret       = -EBUSY;
-          goto errout;
+          if (i >= CONFIG_FS_MQUEUE_NPOLLWAITERS)
+            {
+              fds->priv = NULL;
+              ret       = -EBUSY;
+              goto errout;
+            }
         }
 
       /* Immediately notify on any of the requested events */
