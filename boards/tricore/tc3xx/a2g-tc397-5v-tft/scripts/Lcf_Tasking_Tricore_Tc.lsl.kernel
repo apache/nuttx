@@ -179,7 +179,7 @@ derivative tc39
         start_address
         (
 #if CONFIG_CPU_COREID == 0
-            symbol = "_START"
+            symbol = "__start"
 #elif CONFIG_CPU_COREID == 1
             symbol = "_START1"
 #elif CONFIG_CPU_COREID == 2
@@ -269,7 +269,7 @@ derivative tc39
             "__CSA5_END":= "__CSA_END";
         }
 
-        /*Fixed memory Allocations for _START*/
+        /*Fixed memory Allocations for __start*/
         group (ordered)
         {
           group  interface_const (run_addr=mem:pfls[0x0020])
