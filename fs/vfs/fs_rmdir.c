@@ -185,6 +185,10 @@ int rmdir(FAR const char *pathname)
 #ifdef CONFIG_FS_NOTIFY
   notify_unlink(pathname);
 #endif
+
+  /* A current directory there is removed with it */
+
+  fs_cwd_removed(pathname);
   return OK;
 
 errout_with_inode:

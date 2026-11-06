@@ -414,6 +414,197 @@ static int cwd_get(FAR char *buf)
 }
 
 /****************************************************************************
+ * Name: cwd_hostpath
+ *
+ * Description:
+ *   Write the canonical host path of 'path' to 'buf' (PATH_MAX bytes): the
+ *   form of the paths that chdir() keeps.  The last component is not
+ *   followed: only its directory is resolved, so this works after the
+ *   last component was removed or renamed.
+ *
+ ****************************************************************************/
+
+static int cwd_hostpath(FAR const char *path, FAR char *buf)
+{
+  FAR const char *base;
+  FAR char *dir = NULL;
+  size_t baselen = 0;
+  size_t len;
+  int ret;
+
+  len = strlen(path);
+  while (len > 1 && path[len - 1] == '/')
+    {
+      len--;
+    }
+
+  /* The last component, and its directory */
+
+  base = path + len;
+  while (base > path && *(base - 1) != '/')
+    {
+      base--;
+    }
+
+  baselen = path + len - base;
+  if (baselen == 0 || baselen > NAME_MAX ||
+      (base[0] == '.' && (baselen == 1 || (baselen == 2 && base[1] == '.'))))
+    {
+      base = NULL;     /* "/", "." or "..": resolve the whole path */
+    }
+
+  if (base != NULL)
+    {
+      if (base - path > PATH_MAX)
+        {
+          return -ENAMETOOLONG;
+        }
+
+      dir = lib_get_pathbuffer();
+      if (dir == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      if (base == path)
+        {
+          strlcpy(dir, ".", PATH_MAX);
+        }
+      else if (base == path + 1)
+        {
+          strlcpy(dir, "/", PATH_MAX);
+        }
+      else
+        {
+          strlcpy(dir, path, base - path);
+        }
+
+      path = dir;
+    }
+
+  if (lib_realpath(path, buf, false) == NULL)
+    {
+      ret = -get_errno();
+    }
+  else
+    {
+      ret = OK;
+      if (base != NULL)
+        {
+          len = strlen(buf);
+          if (len > 1)
+            {
+              buf[len++] = '/';
+            }
+
+          if (len + baselen >= PATH_MAX)
+            {
+              ret = -ENAMETOOLONG;
+            }
+          else
+            {
+              memcpy(buf + len, base, baselen);
+              buf[len + baselen] = '\0';
+            }
+        }
+
+      if (ret >= 0)
+        {
+          ret = cwd_tohost(buf);
+        }
+    }
+
+  if (dir != NULL)
+    {
+      lib_put_pathbuffer(dir);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cwd_rename
+ *
+ * Description:
+ *   Each current directory at or below the host path 'oldpath' gets the
+ *   new host path, and a current directory at 'newpath' (an empty
+ *   directory that the rename replaced) is removed.
+ *
+ ****************************************************************************/
+
+static void cwd_rename(FAR const char *oldpath, FAR const char *newpath)
+{
+  FAR struct fs_cwd_s *cwd;
+  size_t oldlen = strlen(oldpath);
+  size_t newlen = strlen(newpath);
+  FAR char *path;
+
+  if (strcmp(oldpath, newpath) == 0)
+    {
+      return;
+    }
+
+  nxmutex_lock(&g_cwd_lock);
+  list_for_every_entry(&g_cwd_list, cwd, struct fs_cwd_s, node)
+    {
+      if (cwd->removed)
+        {
+          continue;
+        }
+
+      /* An empty directory that the rename replaced */
+
+      if (strcmp(cwd->path, newpath) == 0)
+        {
+          cwd->removed = true;
+          continue;
+        }
+
+      if (!cwd_under(cwd->path, oldpath))
+        {
+          continue;
+        }
+
+      path = fs_heap_malloc(newlen + strlen(cwd->path + oldlen) + 1);
+      if (path == NULL)
+        {
+          continue;   /* Keep the old name */
+        }
+
+      memcpy(path, newpath, newlen);
+      strcpy(path + newlen, cwd->path + oldlen);
+      fs_heap_free(cwd->path);
+      cwd->path = path;
+    }
+
+  nxmutex_unlock(&g_cwd_lock);
+}
+
+/****************************************************************************
+ * Name: cwd_remove
+ *
+ * Description:
+ *   A current directory at the host path 'path' is removed.
+ *
+ ****************************************************************************/
+
+static void cwd_remove(FAR const char *path)
+{
+  FAR struct fs_cwd_s *cwd;
+
+  nxmutex_lock(&g_cwd_lock);
+  list_for_every_entry(&g_cwd_list, cwd, struct fs_cwd_s, node)
+    {
+      if (strcmp(cwd->path, path) == 0)
+        {
+          cwd->removed = true;
+        }
+    }
+
+  nxmutex_unlock(&g_cwd_lock);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -517,6 +708,100 @@ int fs_cwd_join(FAR const char *path, FAR char *buffer, size_t buflen)
   /* The size that the joined path needs, with its NUL */
 
   return ret < 0 ? ret : len + 1;
+}
+
+/****************************************************************************
+ * Name: fs_cwd_renamed
+ *
+ * Description:
+ *   See fs/inode/inode.h.
+ *
+ ****************************************************************************/
+
+void fs_cwd_renamed(FAR const char *oldpath, FAR const char *newpath)
+{
+  FAR char *oldhost;
+  FAR char *newhost;
+
+  if (list_is_empty(&g_cwd_list))
+    {
+      return;
+    }
+
+  oldhost = lib_get_pathbuffer();
+  newhost = lib_get_pathbuffer();
+  if (oldhost != NULL && newhost != NULL &&
+      cwd_hostpath(oldpath, oldhost) >= 0 &&
+      cwd_hostpath(newpath, newhost) >= 0)
+    {
+      cwd_rename(oldhost, newhost);
+    }
+
+  if (newhost != NULL)
+    {
+      lib_put_pathbuffer(newhost);
+    }
+
+  if (oldhost != NULL)
+    {
+      lib_put_pathbuffer(oldhost);
+    }
+}
+
+/****************************************************************************
+ * Name: fs_cwd_removed
+ *
+ * Description:
+ *   See fs/inode/inode.h.
+ *
+ ****************************************************************************/
+
+void fs_cwd_removed(FAR const char *path)
+{
+  FAR char *host;
+
+  if (list_is_empty(&g_cwd_list))
+    {
+      return;
+    }
+
+  host = lib_get_pathbuffer();
+  if (host != NULL)
+    {
+      if (cwd_hostpath(path, host) >= 0)
+        {
+          cwd_remove(host);
+        }
+
+      lib_put_pathbuffer(host);
+    }
+}
+
+/****************************************************************************
+ * Name: fs_cwd_busy
+ *
+ * Description:
+ *   See fs/inode/inode.h.
+ *
+ ****************************************************************************/
+
+bool fs_cwd_busy(FAR const char *path)
+{
+  FAR struct fs_cwd_s *cwd;
+  bool busy = false;
+
+  nxmutex_lock(&g_cwd_lock);
+  list_for_every_entry(&g_cwd_list, cwd, struct fs_cwd_s, node)
+    {
+      if (!cwd->removed && cwd_under(cwd->path, path))
+        {
+          busy = true;
+          break;
+        }
+    }
+
+  nxmutex_unlock(&g_cwd_lock);
+  return busy;
 }
 
 /****************************************************************************
