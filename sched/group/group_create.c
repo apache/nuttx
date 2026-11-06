@@ -32,6 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/debug.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
@@ -253,6 +254,19 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
       goto errout_with_group;
     }
 
+  /* Inherit the current directory.  Kernel threads share one group, which
+   * keeps its own.
+   */
+
+  if (ttype != TCB_FLAG_TTYPE_KERNEL)
+    {
+      ret = fs_cwd_inherit(group);
+      if (ret < 0)
+        {
+          goto errout_with_group;
+        }
+    }
+
 #ifdef CONFIG_SCHED_CAPABILITIES
   group->tg_caps = this_task()->group != NULL ?
                    this_task()->group->tg_caps : PR_CAP_ALL;
@@ -300,6 +314,11 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
   return OK;
 
 errout_with_group:
+  if (group != &g_kthread_group)
+    {
+      fs_cwd_release(group);
+    }
+
 #ifdef CONFIG_FS_CHROOT
   if (group->tg_root != NULL)
     {

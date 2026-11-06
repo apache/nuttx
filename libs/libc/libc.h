@@ -324,10 +324,6 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
                            FAR char *buf, size_t buflen);
 #endif
 
-#ifndef CONFIG_DISABLE_ENVIRON
-int lib_restoredir(void);
-#endif
-
 /* Defined in tls/tls_getinfo.c.  tls/tls_emutls.c sets them, and exit(),
  * pthread_exit() and the loader call them.
  */

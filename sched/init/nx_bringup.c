@@ -515,6 +515,8 @@ void nx_bringup(void)
    */
 
 #ifdef CONFIG_LIBC_HOMEDIR
+  /* Information for the shell: the current directory is not PWD */
+
   setenv("PWD", CONFIG_LIBC_HOMEDIR, 1);
 #endif
 

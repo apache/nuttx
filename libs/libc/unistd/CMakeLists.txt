@@ -67,8 +67,6 @@ set(SRCS
     lib_lockf.c
     lib_flock.c
     lib_getpass.c
-    lib_chdir.c
-    lib_fchdir.c
     lib_confstr.c
     lib_ulimit.c)
 
@@ -110,10 +108,6 @@ if(NOT CONFIG_SCHED_USER_IDENTITY)
     lib_setgroups.c)
 elseif(NOT CONFIG_SCHED_NGROUPS)
   list(APPEND SRCS lib_getgroups.c lib_setgroups.c)
-endif()
-
-if(NOT CONFIG_DISABLE_ENVIRON)
-  list(APPEND SRCS lib_restoredir.c)
 endif()
 
 if(CONFIG_LIBC_EXECFUNCS)

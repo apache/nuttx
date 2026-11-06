@@ -612,6 +612,7 @@ struct task_group_s
   /* File descriptors *******************************************************/
 
   struct fdlist tg_fdlist;          /* Maps file descriptor to file         */
+  FAR char *tg_cwd;                 /* Current directory, NULL = home       */
 
 #ifdef CONFIG_FS_CHROOT
   /* chroot() jail **********************************************************/

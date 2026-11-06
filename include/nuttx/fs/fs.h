@@ -228,6 +228,7 @@ struct statfs;
 struct pollfd_s;
 struct mtd_dev_s;
 struct uio;
+struct task_group_s;
 
 /* The internal representation of type DIR is just a container for an inode
  * reference, and the path of directory.
@@ -1952,6 +1953,30 @@ int nx_fstat(int fd, FAR struct stat *buf);
  ****************************************************************************/
 
 int nx_stat(FAR const char *path, FAR struct stat *buf, int resolve);
+
+/****************************************************************************
+ * Name: fs_cwd_inherit
+ *
+ * Description:
+ *   Give the new task group 'group' a copy of the current directory of the
+ *   task group of the caller.
+ *
+ * Returned Value:
+ *   OK on success, -ENOMEM if the copy cannot be allocated.
+ *
+ ****************************************************************************/
+
+int fs_cwd_inherit(FAR struct task_group_s *group);
+
+/****************************************************************************
+ * Name: fs_cwd_release
+ *
+ * Description:
+ *   Release the current directory of a task group that is destroyed.
+ *
+ ****************************************************************************/
+
+void fs_cwd_release(FAR struct task_group_s *group);
 
 /****************************************************************************
  * Name: file_fchstat
