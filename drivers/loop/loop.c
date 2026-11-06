@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
@@ -117,9 +118,24 @@ static int loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
           else
             {
-              ret = losetup(setup->devname, setup->filename,
-                            setup->sectsize, setup->offset,
-                            setup->readonly);
+              FAR const char *devname = setup->devname;
+#ifdef CONFIG_BUILD_KERNEL
+              char name[PATH_MAX + 1];
+
+              /* Read a name in user memory once: the inode tree lock is
+               * held when the driver is registered.
+               */
+
+              if (devname != NULL)
+                {
+                  strncpy(name, devname, PATH_MAX);
+                  name[PATH_MAX] = '\0';
+                  devname = name;
+                }
+#endif
+
+              ret = losetup(devname, setup->filename, setup->sectsize,
+                            setup->offset, setup->readonly);
             }
         }
         break;
@@ -142,6 +158,21 @@ static int loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
           else
             {
+#ifdef CONFIG_BUILD_KERNEL
+              char name[PATH_MAX + 1];
+
+              /* Read a name in user memory once: the inode tree lock is
+               * held when the driver is registered.
+               */
+
+              if (devname != NULL)
+                {
+                  strncpy(name, devname, PATH_MAX);
+                  name[PATH_MAX] = '\0';
+                  devname = name;
+                }
+#endif
+
               ret = loteardown(devname);
             }
         }

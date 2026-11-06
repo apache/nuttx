@@ -52,6 +52,13 @@ static bool is_union(const char *type)
   return strncmp(type, "union ", 6) == 0;
 }
 
+static bool is_path(const char *type)
+{
+  size_t len = strlen(type);
+
+  return len > 5 && strcmp(type + len - 5, "|path") == 0;
+}
+
 static const char *check_funcptr(const char *type)
 {
   const char *str = strstr(type, "(*)");
@@ -435,6 +442,18 @@ static void generate_stub(int nfixed, int nparms)
   fprintf(stream, "#include <string.h>\n");
   fprintf(stream, "#endif\n");
 
+  for (i = 0; i < nparms; i++)
+    {
+      if (is_path(g_parm[PARM1_INDEX + i]))
+        {
+          fprintf(stream, "#ifdef CONFIG_BUILD_KERNEL\n");
+          fprintf(stream, "#include <limits.h>\n");
+          fprintf(stream, "#include <string.h>\n");
+          fprintf(stream, "#endif\n");
+          break;
+        }
+    }
+
   if (strlen(g_parm[HEADER_INDEX]) > 0)
     {
       fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
@@ -466,6 +485,51 @@ static void generate_stub(int nfixed, int nparms)
     }
 
   fprintf(stream, ")\n{\n");
+
+  /* In a kernel build another thread of the caller can change or unmap a
+   * path at any time.  Read it from user memory once, here, where no lock is
+   * held.  The function called below only sees the copy.
+   */
+
+  for (i = 0; i < nparms; i++)
+    {
+      if (is_path(g_parm[PARM1_INDEX + i]))
+        {
+          break;
+        }
+    }
+
+  if (i < nparms)
+    {
+      int j;
+
+      fprintf(stream, "#ifdef CONFIG_BUILD_KERNEL\n");
+
+      for (j = i; j < nparms; j++)
+        {
+          if (is_path(g_parm[PARM1_INDEX + j]))
+            {
+              fprintf(stream, "  char _path%d[PATH_MAX + 1];\n", j + 1);
+            }
+        }
+
+      for (j = i; j < nparms; j++)
+        {
+          if (is_path(g_parm[PARM1_INDEX + j]))
+            {
+              fprintf(stream, "\n  if (parm%d != 0)\n    {\n", j + 1);
+              fprintf(stream, "      strncpy(_path%d, "
+                              "(FAR const char *)parm%d, PATH_MAX);\n",
+                              j + 1, j + 1);
+              fprintf(stream, "      _path%d[PATH_MAX] = '\\0';\n", j + 1);
+              fprintf(stream, "      parm%d = (uintptr_t)_path%d;\n",
+                              j + 1, j + 1);
+              fprintf(stream, "    }\n");
+            }
+        }
+
+      fprintf(stream, "#endif\n\n");
+    }
 
   /* Fixed union illegal type for cast */
 

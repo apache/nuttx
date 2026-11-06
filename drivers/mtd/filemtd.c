@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mount.h>
+#include <limits.h>
 #include <stdint.h>
 #include <fcntl.h>
 #include <string.h>
@@ -718,12 +719,28 @@ static int mtd_loop_ioctl(FAR struct file *filep, int cmd,
             }
           else
             {
+              FAR const char *devname = setup->devname;
+#ifdef CONFIG_BUILD_KERNEL
+              char name[PATH_MAX + 1];
+
+              /* Read a name in user memory once: the inode tree lock is
+               * held when the driver is registered.
+               */
+
+              if (devname != NULL)
+                {
+                  strncpy(name, devname, PATH_MAX);
+                  name[PATH_MAX] = '\0';
+                  devname = name;
+                }
+#endif
+
 #  ifndef CONFIG_MTD_CONFIG_NONE
-              ret = mtd_loop_setup(setup->devname, setup->filename,
+              ret = mtd_loop_setup(devname, setup->filename,
                                    setup->sectsize, setup->erasesize,
                                    setup->offset, setup->configdata);
 #  else
-              ret = mtd_loop_setup(setup->devname, setup->filename,
+              ret = mtd_loop_setup(devname, setup->filename,
                                    setup->sectsize, setup->erasesize,
                                    setup->offset);
 #  endif
@@ -749,6 +766,21 @@ static int mtd_loop_ioctl(FAR struct file *filep, int cmd,
             }
           else
             {
+#ifdef CONFIG_BUILD_KERNEL
+              char name[PATH_MAX + 1];
+
+              /* Read a name in user memory once: the inode tree lock is
+               * held when the driver is registered.
+               */
+
+              if (devname != NULL)
+                {
+                  strncpy(name, devname, PATH_MAX);
+                  name[PATH_MAX] = '\0';
+                  devname = name;
+                }
+#endif
+
               ret = mtd_loop_teardown(devname);
             }
         }
