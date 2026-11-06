@@ -27,10 +27,11 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET_TCP
 
-#include <string.h>
-#include <errno.h>
-#include <nuttx/debug.h>
 #include <assert.h>
+#include <errno.h>
+#include <limits.h>
+#include <string.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/tls.h>
@@ -879,9 +880,23 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
   FAR struct sockaddr   *from    = msg->msg_name;
   FAR socklen_t         *fromlen = &msg->msg_namelen;
   FAR struct tcp_conn_s *conn;
+  size_t                 total   = 0;
   ssize_t                nrecv   = 0;
   ssize_t                ret     = 0;
   int                    i;
+
+  /* The sum of the iov_len values must fit in an ssize_t */
+
+  for (i = 0; i < msg->msg_iovlen; i++)
+    {
+      if (msg->msg_iov[i].iov_len > SSIZE_MAX - total)
+        {
+          nwarn("WARNING: The sum of the iov_len values is too large\n");
+          return -EINVAL;
+        }
+
+      total += msg->msg_iov[i].iov_len;
+    }
 
   conn = psock->s_conn;
   conn_dev_lock(&conn->sconn, conn->dev);
