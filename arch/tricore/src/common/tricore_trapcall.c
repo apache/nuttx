@@ -93,14 +93,6 @@
 #define TRICORE_TIN_OVF           1  /* Class 5: arithmetic overflow */
 #define TRICORE_TIN_SOVF          2  /* Class 5: sticky overflow */
 
-/* The trap vectors enter tricore_trapcall with jli, return with ji */
-
-#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
-#  define tricore_trap_return() __asm__ volatile ("ji a11" : : : "a11")
-#else
-#  define tricore_trap_return() __asm__ volatile ("ji %a11")
-#endif
-
 /* Panic message of a trap, "Trap c=<class> t=<TIN>" */
 
 #define TRICORE_TRAP_MSG_LEN      24
@@ -338,7 +330,7 @@ void tricore_trapcall(volatile void *trap)
     {
       tricore_nmitrap(tid, regs, NULL);
       up_set_interrupt_context(false);
-      tricore_trap_return();
+      tricore_jump_backto_link();
     }
 
   /* A bus trap hook of a safety test module (e.g., BusMonTst) may handle
@@ -359,7 +351,7 @@ void tricore_trapcall(volatile void *trap)
           g_running_tasks[this_cpu()]->xcp.regs = NULL;
         }
 
-      tricore_trap_return();
+      tricore_jump_backto_link();
     }
 
   tricore_trap_fpu(tclass, tid);

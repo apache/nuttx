@@ -109,9 +109,5 @@ void tricore_svcall(volatile void *trap)
 
   /* Return to the caller, tricore_svcall is entered by a jump */
 
-#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
-  __asm__ volatile ("ji a11" : : : "a11");
-#else
-  __asm__ volatile ("ji %a11");
-#endif
+  tricore_jump_backto_link();
 }
