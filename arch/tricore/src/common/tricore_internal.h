@@ -199,6 +199,7 @@ void tricore_wdt_disable(void);
 /* Clocks *******************************************************************/
 
 int tricore_clockconfig(void);
+uint32_t tricore_clock_asclinf(void);
 
 /* Signal handling **********************************************************/
 
