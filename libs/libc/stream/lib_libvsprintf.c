@@ -314,6 +314,1116 @@ static int vsprintf_putnum(FAR struct lib_outstream_s *stream,
   return len;
 }
 
+/****************************************************************************
+ * Name: vsprintf_scan_literal
+ *
+ * Description:
+ *   Scan and emit ordinary literal text until the next conversion specifier.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_scan_literal(FAR struct lib_outstream_s *stream,
+                      FAR const IPTR char **fmtp,
+                      FAR unsigned char *conv)
+{
+  FAR const IPTR char *fmt = *fmtp;
+  unsigned char c;
+  int total_len = 0;
+
+#ifndef CONFIG_ARCH_ROMGETC
+  FAR const char *start = fmt;
+
+  for (; ; )
+    {
+      c = fmt_char(fmt);
+      if (c == '\0')
+        {
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+          if (stream != NULL)
+#  endif
+            {
+              size_t litlen = (fmt - start) - 1;
+
+              if (litlen > 0)
+                {
+                  total_len += litlen;
+                  lib_stream_puts(stream, start, litlen);
+                }
+            }
+
+          break;
+        }
+
+      if (c == '%')
+        {
+          size_t litlen = (fmt - start) - 1;
+
+          c = fmt_char(fmt);
+          if (c != '%')
+            {
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+              if (stream != NULL)
+#  endif
+                {
+                  if (litlen > 0)
+                    {
+                      total_len += litlen;
+                      lib_stream_puts(stream, start, litlen);
+                    }
+
+                  if (c == '\0')
+                    {
+                      total_len++;
+                      lib_stream_putc(stream, '%');
+                    }
+                }
+
+              break;
+            }
+
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+          if (stream != NULL)
+#  endif
+            {
+              total_len += litlen + 1;
+              lib_stream_puts(stream, start, litlen + 1);
+            }
+
+          start = fmt;
+        }
+    }
+#else
+  for (; ; )
+    {
+      c = fmt_char(fmt);
+      if (c == '\0')
+        {
+          break;
+        }
+
+      if (c == '%')
+        {
+          c = fmt_char(fmt);
+          if (c != '%')
+            {
+              if (c == '\0')
+                {
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+                  if (stream != NULL)
+#  endif
+                    {
+                      total_len++;
+                      lib_stream_putc(stream, '%');
+                    }
+                }
+
+              break;
+            }
+        }
+
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+      if (stream != NULL)
+#  endif
+        {
+          total_len++;
+          lib_stream_putc(stream, c);
+        }
+    }
+#endif
+
+  *fmtp = fmt;
+  *conv = c;
+
+  return total_len;
+}
+
+/****************************************************************************
+ * Name: vsprintf_put_field
+ *
+ * Description:
+ *   Emit a field with leading padding and update the remaining width.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_field(FAR struct lib_outstream_s *stream,
+                   FAR const char *pnt, size_t size,
+                   FAR int *width, uint16_t flags)
+{
+  int total_len = 0;
+  int w = *width;
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      if (w > 0 && size < w)
+        {
+          int pad = w - size;
+
+          total_len += vsprintf_repeat(stream, ' ', pad);
+          w -= pad;
+        }
+    }
+
+  total_len += size;
+  lib_stream_puts(stream, pnt, size);
+  *width = w >= size ? w - size : 0;
+
+  return total_len;
+}
+
+/****************************************************************************
+ * Name: vsprintf_put_char
+ *
+ * Description:
+ *   Emit a character conversion, including wide-character handling.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_char(FAR struct lib_outstream_s *stream,
+                  uint16_t flags, int ch, FAR int *width,
+                  FAR char *buf)
+{
+  FAR const char *pnt;
+  size_t size;
+
+#ifdef CONFIG_LIBC_LOCALE
+  if ((flags & FL_LONG) != 0)
+    {
+      mbstate_t ps;
+
+      /* %lc: a wide character, written as its multibyte sequence. */
+
+      memset(&ps, 0, sizeof(ps));
+      size = wcrtomb(buf, (wchar_t)ch, &ps);
+      if (size == (size_t)-1)
+        {
+          return -1;
+        }
+    }
+  else
+#endif
+    {
+      buf[0] = ch;
+      size = 1;
+    }
+
+  pnt = buf;
+
+  /* Share normal field padding/output with string conversions. */
+
+  return vsprintf_put_field(stream, pnt, size, width, flags);
+}
+
+#ifdef CONFIG_LIBC_LOCALE
+/****************************************************************************
+ * Name: vsprintf_put_wstring
+ *
+ * Description:
+ *   Emit a wide string conversion as multibyte characters.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_wstring(FAR struct lib_outstream_s *stream,
+                     FAR const wchar_t *ws, uint16_t flags,
+                     FAR int *width, int prec)
+{
+  char mb[MB_LEN_MAX];
+  mbstate_t ps;
+  size_t size;
+  size_t n;
+  int total_len = 0;
+  int i;
+
+  /* %ls: a wide string, written as multibyte characters.  The precision
+   * limits the bytes, and a character that does not fit is not written in
+   * part.  First count the bytes.
+   */
+
+  memset(&ps, 0, sizeof(ps));
+  for (size = 0, i = 0; ws[i] != L'\0'; i++)
+    {
+      n = wcrtomb(mb, ws[i], &ps);
+      if (n == (size_t)-1)
+        {
+          return -1;
+        }
+
+      if ((flags & FL_PREC) != 0 && size + n > (size_t)prec)
+        {
+          break;
+        }
+
+      size += n;
+    }
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      if (*width > 0 && size < *width)
+        {
+          int pad = *width - size;
+
+          total_len += vsprintf_repeat(stream, ' ', pad);
+          *width -= pad;
+        }
+    }
+
+  memset(&ps, 0, sizeof(ps));
+  for (n = 0, i = 0; n < size; i++)
+    {
+      size_t m = wcrtomb(mb, ws[i], &ps);
+
+      total_len += m;
+      lib_stream_puts(stream, mb, m);
+      n += m;
+    }
+
+  *width = *width >= size ? *width - size : 0;
+
+  return total_len;
+}
+#endif
+
+#ifdef CONFIG_LIBC_NUMBERED_ARGS
+/****************************************************************************
+ * Name: vsprintf_check_arg
+ *
+ * Description:
+ *   Validate numbered arguments and record their type during the parse pass.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_check_arg(FAR struct lib_outstream_s *stream,
+                   FAR struct arg_s *arglist, int numargs,
+                   int argnumber, uint16_t flags,
+                   unsigned char c, FAR size_t *total_len)
+{
+  if ((flags & FL_ARGNUMBER) != 0)
+    {
+      if (argnumber <= 0 || argnumber > numargs)
+        {
+          return -1;
+        }
+
+      if (stream == NULL)
+        {
+          unsigned char type;
+
+          if (fmt_isfloat(c))
+            {
+              type = FL_IS_LDOUBLE(flags) ? TYPE_LONG_DOUBLE : TYPE_DOUBLE;
+            }
+          else if (c == 'i' || c == 'd' || c == 'u' || c == 'p' ||
+                   c == 'o' || c == 'x' || c == 'X')
+            {
+              if ((flags & FL_LONG) == 0)
+                {
+                  type = TYPE_INT;
+                }
+              else if ((flags & FL_REPD_TYPE) == 0)
+                {
+                  type = TYPE_LONG;
+                }
+              else
+                {
+                  type = TYPE_LONG_LONG;
+                }
+            }
+          else if (c == 'c')
+            {
+              type = TYPE_INT;
+            }
+          else if (c == 's' || c == 'S' || c == 'n')
+            {
+              type = TYPE_CHAR_POINTER;
+            }
+          else
+            {
+              return -1;
+            }
+
+          arglist->type[argnumber - 1] = type;
+          if (argnumber > *total_len)
+            {
+              *total_len = argnumber;
+            }
+
+          return 1; /* We do only parsing */
+        }
+    }
+  else if (stream == NULL)
+    {
+      return 1; /* We do only parsing */
+    }
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: vsprintf_pointer_flags
+ *
+ * Description:
+ *   Select integer-size flags that match the platform pointer size.
+ *
+ ****************************************************************************/
+
+static inline_function void
+vsprintf_pointer_flags(FAR uint16_t *flags)
+{
+  /* Determine size of pointer and set flags accordingly */
+
+  *flags &= ~(FL_LONG | FL_REPD_TYPE);
+
+  if (sizeof(FAR void *) == sizeof(unsigned long long))
+    {
+      *flags |= FL_LONG | FL_REPD_TYPE;
+    }
+  else if (sizeof(FAR void *) == sizeof(unsigned long))
+    {
+      *flags |= FL_LONG;
+    }
+}
+
+#ifdef CONFIG_LIBC_PRINT_EXTENSION
+/****************************************************************************
+ * Name: vsprintf_pointer_extension
+ *
+ * Description:
+ *   Handle CONFIG_LIBC_PRINT_EXTENSION pointer conversion extensions.
+ *
+ ****************************************************************************/
+
+static int
+vsprintf_pointer_extension(FAR struct lib_outstream_s *stream,
+                           FAR const IPTR char **fmt,
+                           unsigned long long x, FAR size_t *total_len)
+{
+  unsigned char c = fmt_char(*fmt);
+
+  switch (c)
+    {
+      case 'B':
+        {
+          FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
+
+          *total_len += lib_bsprintf(stream, vaf->fmt, vaf->va);
+          return 1;
+        }
+
+      case 'V':
+        {
+          FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
+#  ifdef va_copy
+          va_list copy;
+
+          va_copy(copy, *vaf->va);
+          *total_len += lib_vsprintf(stream, vaf->fmt, copy);
+          va_end(copy);
+#  else
+          *total_len += lib_vsprintf(stream, vaf->fmt, *vaf->va);
+#  endif
+          return 1;
+        }
+
+      case 'S':
+      case 's':
+        {
+#  ifdef CONFIG_ALLSYMS
+          FAR const struct symtab_s *symbol;
+          FAR void *addr = (FAR void *)(uintptr_t)x;
+          size_t symbolsize;
+          FAR const char *name;
+          size_t namelen;
+
+          symbol = allsyms_findbyvalue(addr, &symbolsize);
+          if (symbol != NULL)
+            {
+              name = symbol->sym_name;
+              namelen = strlen(name);
+
+              *total_len += namelen;
+              lib_stream_puts(stream, name, namelen);
+
+              if (c == 'S')
+                {
+                  *total_len +=
+                    lib_sprintf_internal(stream, "+%#tx/%#zx",
+                                         addr - symbol->sym_value,
+                                         symbolsize);
+                }
+
+              return 1;
+            }
+#  endif
+          break;
+        }
+
+      default:
+        fmt_ungetc(*fmt);
+        break;
+    }
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: vsprintf_put_integer
+ *
+ * Description:
+ *   Emit integer prefixes, signs, precision padding, and converted digits.
+ *
+ ****************************************************************************/
+
+static inline_function size_t
+vsprintf_put_integer(FAR struct lib_outstream_s *stream,
+                     uint16_t flags, FAR char *buf, int digits,
+                     FAR int *width, int prec)
+{
+  unsigned int len = digits;
+  size_t total_len = 0;
+  int w = *width;
+
+  if ((flags & FL_PREC) != 0)
+    {
+      flags &= ~FL_ZFILL;
+      if (len < prec)
+        {
+          len = prec;
+          if ((flags & FL_ALT) != 0 && (flags & FL_ALTHEX) == 0)
+            {
+              flags &= ~FL_ALT;
+            }
+        }
+    }
+
+  if ((flags & FL_ALT) != 0)
+    {
+      /* digits is 0 for a value of 0 with a precision of 0: then %#o has
+       * a "0" from the flag, and a hexadecimal value has no prefix.
+       */
+
+      if (digits == 0 ? (flags & FL_ALTHEX) != 0 : buf[digits - 1] == '0')
+        {
+          flags &= ~(FL_ALT | FL_ALTHEX | FL_ALTUPP);
+        }
+      else
+        {
+          len += 1;
+          if ((flags & FL_ALTHEX) != 0)
+            {
+              len += 1;
+            }
+        }
+    }
+  else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
+    {
+      len += 1;
+    }
+
+  if (len > INT_MAX)
+    {
+      *width = 0;
+      return INT_MAX + 1u;
+    }
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      if ((flags & FL_ZFILL) != 0)
+        {
+          prec = digits;
+          if (len < w)
+            {
+              prec += w - len;
+              len = w;
+            }
+        }
+
+      if (len < w)
+        {
+          total_len += vsprintf_repeat(stream, ' ', w - len);
+          len = w;
+        }
+    }
+
+  w = len < w ? w - len : 0;
+
+  if ((flags & FL_ALT) != 0)
+    {
+      total_len++;
+      lib_stream_putc(stream, '0');
+      if ((flags & FL_ALTHEX) != 0)
+        {
+          total_len++;
+          lib_stream_putc(stream, flags & FL_ALTUPP ? 'X' : 'x');
+        }
+    }
+  else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
+    {
+      unsigned char z = ' ';
+
+      if ((flags & FL_PLUS) != 0)
+        {
+          z = '+';
+        }
+
+      if ((flags & FL_NEGATIVE) != 0)
+        {
+          z = '-';
+        }
+
+      total_len++;
+      lib_stream_putc(stream, z);
+    }
+
+  if (prec > digits)
+    {
+      total_len += vsprintf_repeat(stream, '0', prec - digits);
+      prec = digits;
+    }
+
+  total_len += vsprintf_putnum(stream, buf, digits);
+  *width = w;
+
+  return total_len;
+}
+
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+/****************************************************************************
+ * Name: vsprintf_put_naninf
+ *
+ * Description:
+ *   Emit NaN or Inf floating-point output with padding and sign handling.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_naninf(FAR struct lib_outstream_s *stream,
+                    uint16_t flags, int dtoa_flags, int sign,
+                    FAR int *width)
+{
+  FAR const char *p;
+  int total_len = 0;
+  int w = *width;
+  int len = sign ? 4 : 3;
+
+  if (w > len)
+    {
+      w -= len;
+      if ((flags & FL_LPAD) == 0)
+        {
+          total_len += vsprintf_repeat(stream, ' ', w);
+          w = 0;
+        }
+    }
+  else
+    {
+      w = 0;
+    }
+
+  if (sign)
+    {
+      total_len++;
+      lib_stream_putc(stream, sign);
+    }
+
+  if (dtoa_flags & DTOA_NAN)
+    {
+      p = (flags & FL_FLTUPP) != 0 ? g_nan_upper : g_nan_lower;
+    }
+  else
+    {
+      p = (flags & FL_FLTUPP) != 0 ? g_inf_upper : g_inf_lower;
+    }
+
+  total_len += 3;
+  lib_stream_puts(stream, p, 3);
+  *width = w;
+
+  return total_len;
+}
+
+/****************************************************************************
+ * Name: vsprintf_float_sign
+ *
+ * Description:
+ *   Select the sign character for a floating-point conversion.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_float_sign(uint16_t flags, FAR const struct dtoa_s *dtoa)
+{
+  if ((dtoa->flags & DTOA_MINUS) != 0)
+    {
+      return '-';
+    }
+
+  if ((flags & FL_PLUS) != 0)
+    {
+      return '+';
+    }
+
+  if ((flags & FL_SPACE) != 0)
+    {
+      return ' ';
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: vsprintf_float_format
+ *
+ * Description:
+ *   Initialize dtoa digit limits and float-mode flags for a conversion.
+ *
+ ****************************************************************************/
+
+static inline_function void
+vsprintf_float_format(unsigned char c, int prec,
+                      FAR uint16_t *flags,
+                      FAR unsigned int *ndigs,
+                      FAR int *ndecimal)
+{
+  *ndigs = MIN(prec, DTOA_MAX_DIG);
+  *ndecimal = 0;
+  *flags &= ~(FL_FLTEXP | FL_FLTFIX);
+
+  if (c == 'e')
+    {
+      if (*ndigs < DTOA_MAX_DIG)
+        {
+          (*ndigs)++;
+        }
+
+      *flags |= FL_FLTEXP;
+    }
+  else if (c == 'f')
+    {
+      *ndecimal = *ndigs;
+      *ndigs    = DTOA_MAX_DIG;
+      *flags |= FL_FLTFIX;
+    }
+  else if (*ndigs == 0)
+    {
+      *ndigs = 1;
+    }
+}
+
+/****************************************************************************
+ * Name: vsprintf_adjust_float_general
+ *
+ * Description:
+ *   Adjust %%g/%%G precision and choose fixed or exponent notation.
+ *
+ ****************************************************************************/
+
+static inline_function void
+vsprintf_adjust_float_general(FAR uint16_t *flags,
+                              FAR int *prec,
+                              FAR unsigned int *ndigs, int exp,
+                              FAR const struct dtoa_s *dtoa)
+{
+  if ((*flags & (FL_FLTEXP | FL_FLTFIX)) != 0)
+    {
+      return;
+    }
+
+  /* 'g(G)' format */
+
+  *prec = *ndigs;
+
+  /* Remove trailing zeros */
+
+  while (*ndigs > 0 && dtoa->digits[*ndigs - 1] == '0')
+    {
+      (*ndigs)--;
+    }
+
+  if (-4 <= exp && exp < *prec)
+    {
+      *flags |= FL_FLTFIX;
+
+      if (exp < 0 || *ndigs > exp)
+        {
+          *prec = *ndigs - (exp + 1);
+        }
+      else
+        {
+          *prec = 0;
+        }
+    }
+  else
+    {
+      /* Limit displayed precision to available precision */
+
+      *prec = *ndigs - 1;
+    }
+}
+
+/****************************************************************************
+ * Name: vsprintf_float_length
+ *
+ * Description:
+ *   Calculate the formatted floating-point output length.
+ *
+ ****************************************************************************/
+
+static inline_function unsigned int
+vsprintf_float_length(uint16_t flags, int sign, int exp, int prec)
+{
+  unsigned int len;
+
+  if ((flags & FL_FLTFIX) != 0)
+    {
+      len = exp > 0 ? exp + 1 : 1;
+    }
+  else
+    {
+      len = 5;              /* 1e+00 */
+      if (exp >= 100 || exp <= -100)
+        {
+          len++;
+        }
+    }
+
+  if (sign != 0)
+    {
+      len += 1;
+    }
+
+  if (prec != 0)
+    {
+      len += prec + 1u;
+    }
+  else if ((flags & FL_ALT) != 0)
+    {
+      len += 1;
+    }
+
+  return len;
+}
+
+/****************************************************************************
+ * Name: vsprintf_put_float_prefix
+ *
+ * Description:
+ *   Emit floating-point padding, sign, and zero-fill prefix bytes.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_float_prefix(FAR struct lib_outstream_s *stream,
+                          uint16_t flags, int sign,
+                          FAR int *width, int len)
+{
+  int total_len = 0;
+  int w = *width;
+
+  w = w > len ? w - len : 0;
+
+  if ((flags & (FL_LPAD | FL_ZFILL)) == 0)
+    {
+      total_len += vsprintf_repeat(stream, ' ', w);
+      w = 0;
+    }
+
+  if (sign != 0)
+    {
+      total_len++;
+      lib_stream_putc(stream, sign);
+    }
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      total_len += vsprintf_repeat(stream, '0', w);
+      w = 0;
+    }
+
+  *width = w;
+
+  return total_len;
+}
+
+/****************************************************************************
+ * Name: vsprintf_put_float_fixed
+ *
+ * Description:
+ *   Emit the fixed-format floating-point digit sequence.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_float_fixed(FAR struct lib_outstream_s *stream, uint16_t flags,
+                         FAR const struct dtoa_s *dtoa, int exp,
+                         unsigned int ndigs, int prec)
+{
+  char out;
+  int n;
+  int total_len = 0;
+
+  /* At this point, we should have exp exponent of leftmost digit in
+   * dtoa->digits ndigs number of buffer digits to print prec number
+   * of digits after decimal In the loop, 'n' walks over the exponent
+   * value.
+   */
+
+  n = exp > 0 ? exp : 0;
+  do
+    {
+      /* Insert decimal point at correct place */
+
+      if (n == -1)
+        {
+          total_len++;
+          lib_stream_putc(stream, '.');
+        }
+
+      /* Pull digits from buffer when in-range, otherwise use 0 */
+
+      if (0 <= exp - n && exp - n < ndigs)
+        {
+          out = dtoa->digits[exp - n];
+        }
+      else
+        {
+          out = '0';
+        }
+
+      if (--n < -prec)
+        {
+          break;
+        }
+
+      if (out == '0')
+        {
+          int zeroes = 1;
+
+          while (n != -1)
+            {
+              int next = n - 1;
+              int offset = exp - n;
+
+              if (next < -prec ||
+                  (0 <= offset && offset < ndigs &&
+                   dtoa->digits[offset] != '0'))
+                {
+                  break;
+                }
+
+              zeroes++;
+              n = next;
+            }
+
+          total_len += vsprintf_repeat(stream, '0', zeroes);
+        }
+      else
+        {
+          total_len++;
+          lib_stream_putc(stream, out);
+        }
+    }
+  while (1);
+
+  if (n == exp && (dtoa->digits[0] > '5' ||
+      (dtoa->digits[0] == '5' && !(dtoa->flags & DTOA_CARRY))))
+    {
+      out = '1';
+    }
+
+  total_len++;
+  lib_stream_putc(stream, out);
+
+  if ((flags & FL_ALT) != 0 && n == -1)
+    {
+      total_len++;
+      lib_stream_putc(stream, '.');
+    }
+
+  return total_len;
+}
+
+/****************************************************************************
+ * Name: vsprintf_put_float_exp
+ *
+ * Description:
+ *   Emit the exponent-format floating-point digit sequence.
+ *
+ ****************************************************************************/
+
+static inline_function int
+vsprintf_put_float_exp(FAR struct lib_outstream_s *stream,
+                       uint16_t flags, FAR struct dtoa_s *dtoa,
+                       int exp, unsigned int ndigs, int prec, FAR char *buf)
+{
+  int nbytes;
+  int sign;
+  int len;
+  int total_len = 0;
+
+  if (dtoa->digits[0] != '1')
+    {
+      dtoa->flags &= ~DTOA_CARRY;
+    }
+
+  total_len++;
+  lib_stream_putc(stream, dtoa->digits[0]);
+  if (prec > 0)
+    {
+      total_len++;
+      lib_stream_putc(stream, '.');
+
+      nbytes = MIN(prec, ndigs > 1 ? ndigs - 1 : 0);
+      if (nbytes > 0)
+        {
+          total_len += nbytes;
+          lib_stream_puts(stream, &dtoa->digits[1], nbytes);
+        }
+
+      if (prec > nbytes)
+        {
+          total_len += vsprintf_repeat(stream, '0', prec - nbytes);
+        }
+    }
+  else if ((flags & FL_ALT) != 0)
+    {
+      total_len++;
+      lib_stream_putc(stream, '.');
+    }
+
+  /* Exponent */
+
+  total_len++;
+  lib_stream_putc(stream, flags & FL_FLTUPP ? 'E' : 'e');
+  sign = '+';
+  if (exp < 0 || (exp == 0 && (dtoa->flags & DTOA_CARRY) != 0))
+    {
+      exp = -exp;
+      sign = '-';
+    }
+
+  total_len++;
+  lib_stream_putc(stream, sign);
+  len = __ultoa_invert(exp, buf, 10) - buf;
+
+  if (exp >= 0 && exp <= 9)
+    {
+      total_len++;
+      lib_stream_putc(stream, '0');
+    }
+
+  total_len += vsprintf_putnum(stream, buf, len);
+
+  return total_len;
+}
+
+/****************************************************************************
+ * Name: vsprintf_put_float
+ *
+ * Description:
+ *   Handle a complete floating-point conversion.
+ *
+ ****************************************************************************/
+
+static inline_function size_t
+vsprintf_put_float(FAR struct lib_outstream_s *stream,
+                   uint16_t flags, unsigned char c,
+                   FAR int *width, int prec,
+                   FAR struct dtoa_s *dtoa, FAR char *buf,
+                   double value)
+{
+  int exp;              /* Exponent of master decimal digit */
+  unsigned int flen;    /* Length of the conversion */
+  int sign;             /* Sign character (or 0) */
+  unsigned int ndigs;   /* Number of digits to convert */
+  int ndecimal;         /* Digits after decimal (for 'f' format), 0 if no
+                         * limit */
+  size_t total_len = 0;
+
+  if ((c >= 'E' && c <= 'G') || c == 'A')
+    {
+      flags |= FL_FLTUPP;
+      c += 'e' - 'E';
+    }
+  else
+    {
+      flags &= ~FL_FLTUPP;
+    }
+
+  if ((flags & FL_PREC) == 0)
+    {
+      prec = 6;
+    }
+
+  /* %a has no output yet */
+
+  if (c == 'a')
+    {
+      return vsprintf_put_field(stream, "?", 1, width, flags);
+    }
+
+  /* Initialize dtoa precision and select the requested float mode. */
+
+  vsprintf_float_format(c, prec, &flags, &ndigs, &ndecimal);
+
+  ndigs = __dtoa_engine(value, dtoa, ndigs, ndecimal);
+  exp = dtoa->exp;
+
+  /* Select the optional sign prefix before handling special values. */
+
+  sign = vsprintf_float_sign(flags, dtoa);
+
+  if ((dtoa->flags & (DTOA_NAN | DTOA_INF)) != 0)
+    {
+      /* Emit NaN/Inf and return because they have no mantissa body. */
+
+      return vsprintf_put_naninf(stream, flags, dtoa->flags, sign, width);
+    }
+
+  /* Apply the %g/%G fixed-versus-exponent selection rules. */
+
+  vsprintf_adjust_float_general(&flags, &prec, &ndigs, exp, dtoa);
+
+  /* Conversion result length, width := free space length */
+
+  flen = vsprintf_float_length(flags, sign, exp, prec);
+  if (flen > INT_MAX)
+    {
+      return INT_MAX + 1u;
+    }
+
+  /* Emit any leading padding, sign, or zero-fill prefix. */
+
+  total_len += vsprintf_put_float_prefix(stream, flags, sign, width, flen);
+
+  if ((flags & FL_FLTFIX) != 0)
+    {
+      /* 'f' format */
+
+      /* Emit fixed-format digits after the common prefix. */
+
+      total_len += vsprintf_put_float_fixed(stream, flags, dtoa, exp,
+                                            ndigs, prec);
+    }
+  else
+    {
+      /* 'e(E)' format */
+
+      /* Emit exponent-format digits after the common prefix. */
+
+      total_len += vsprintf_put_float_exp(stream, flags, dtoa, exp,
+                                          ndigs, prec, buf);
+    }
+
+  return total_len;
+}
+#endif
+
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                              FAR struct arg_s *arglist, int numargs,
                              FAR const IPTR char *fmt, va_list ap)
@@ -335,9 +1445,8 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
   FAR const char *pnt;
   size_t size;
-  int ch;
   int star;
-  unsigned int len;
+  int result;
   size_t total_len = 0;
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
@@ -349,87 +1458,13 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
   while (total_len <= INT_MAX)
     {
-#ifndef CONFIG_ARCH_ROMGETC
-      FAR const char *start = fmt;
+      /* Emit literal text before handling the next conversion. */
 
-      for (; ; )
+      total_len += vsprintf_scan_literal(stream, &fmt, &c);
+      if (c == '\0')
         {
-          c = fmt_char(fmt);
-          if (c == '\0')
-            {
-#ifdef CONFIG_LIBC_NUMBERED_ARGS
-              if (stream != NULL)
-#endif
-                {
-                  size_t litlen = (fmt - start) - 1;
-
-                  if (litlen > 0)
-                    {
-                      stream_puts(start, litlen, stream);
-                    }
-                }
-
-              goto ret;
-            }
-
-          if (c == '%')
-            {
-              size_t litlen = (fmt - start) - 1;
-
-              c = fmt_char(fmt);
-              if (c != '%')
-                {
-#ifdef CONFIG_LIBC_NUMBERED_ARGS
-                  if (stream != NULL)
-#endif
-                    {
-                      if (litlen > 0)
-                        {
-                          stream_puts(start, litlen, stream);
-                        }
-                    }
-
-                  break;
-                }
-
-#ifdef CONFIG_LIBC_NUMBERED_ARGS
-              if (stream != NULL)
-#endif
-                {
-                  stream_puts(start, litlen + 1, stream);
-                }
-
-              start = fmt;
-            }
+          goto ret;
         }
-#else
-      for (; ; )
-        {
-          c = fmt_char(fmt);
-          if (c == '\0')
-            {
-              goto ret;
-            }
-
-          if (c == '%')
-            {
-              c = fmt_char(fmt);
-              if (c != '%')
-                {
-                  break;
-                }
-            }
-
-#ifdef CONFIG_LIBC_NUMBERED_ARGS
-          if (stream != NULL)
-            {
-              stream_putc(c, stream);
-            }
-#else
-          stream_putc(c, stream);
-#endif
-        }
-#endif
 
       flags = 0;
       width = 0;
@@ -697,127 +1732,33 @@ set_star:
 
       if (c == 'p')
         {
-          /* Determine size of pointer and set flags accordingly */
+          /* Select the integer width needed to print a pointer value. */
 
-          flags &= ~(FL_LONG | FL_REPD_TYPE);
-
-          if (sizeof(FAR void *) == sizeof(unsigned long long))
-            {
-              flags |= (FL_LONG | FL_REPD_TYPE);
-            }
-          else
-          if (sizeof(FAR void *) == sizeof(unsigned long))
-            {
-              flags |= FL_LONG;
-            }
+          vsprintf_pointer_flags(&flags);
         }
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
-      if ((flags & FL_ARGNUMBER) != 0 && argnumber > numargs)
+      /* Validate numbered arguments or record their type in parse mode. */
+
+      result = vsprintf_check_arg(stream, arglist, numargs, argnumber,
+                                  flags, c, &total_len);
+      if (result < 0)
         {
           goto ret;
         }
 
-      if (stream == NULL)
+      if (result > 0)
         {
-          unsigned char type; /* We do only parsing */
-
-          if (fmt_isfloat(c))
-            {
-              type = FL_IS_LDOUBLE(flags) ? TYPE_LONG_DOUBLE : TYPE_DOUBLE;
-            }
-          else if (c == 'i' || c == 'd' || c == 'u' || c == 'p' ||
-                   c == 'o' || c == 'x' || c == 'X')
-            {
-              if ((flags & FL_LONG) == 0)
-                {
-                  type = TYPE_INT;
-                }
-              else if ((flags & FL_REPD_TYPE) == 0)
-                {
-                  type = TYPE_LONG;
-                }
-              else
-                {
-                  type = TYPE_LONG_LONG;
-                }
-            }
-          else if (c == 'c')
-            {
-              type = TYPE_INT;
-            }
-          else if (c == 's' || c == 'S' || c == 'n')
-            {
-              type = TYPE_CHAR_POINTER;
-            }
-          else
-            {
-              goto ret; /* The second pass reads no argument after this */
-            }
-
-          if ((flags & FL_ARGNUMBER) != 0)
-            {
-              arglist->type[argnumber - 1] = type;
-              if (argnumber > total_len)
-                {
-                  total_len = argnumber;
-                }
-            }
-
           continue;
         }
 #endif
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT
-      if ((c >= 'E' && c <= 'G') || c == 'A')
-        {
-          flags |= FL_FLTUPP;
-          c += 'e' - 'E';
-          goto flt_oper;
-        }
-      else if ((c >= 'e' && c <= 'g') || c == 'a')
+      if (fmt_isfloat(c))
         {
           double value;
-          int exp;              /* Exponent of master decimal digit */
-          int n;
-          unsigned int flen;    /* Length of the conversion */
-          uint8_t sign;         /* Sign character (or 0) */
-          unsigned int ndigs;   /* Number of digits to convert */
-          int ndecimal;         /* Digits after decimal (for 'f' format), 0 if
-                                 * no limit */
 
-          flags &= ~FL_FLTUPP;
-
-flt_oper:
-          if ((flags & FL_PREC) == 0)
-            {
-              prec = 6;
-            }
-
-          flags &= ~(FL_FLTEXP | FL_FLTFIX);
-
-          ndigs = MIN(prec, DTOA_MAX_DIG);
-          ndecimal = 0;
-
-          if (c == 'e')
-            {
-              if (ndigs < DTOA_MAX_DIG)
-                {
-                  ndigs++;
-                }
-
-              flags |= FL_FLTEXP;
-            }
-          else if (c == 'f')
-            {
-              ndecimal = ndigs;
-              ndigs = DTOA_MAX_DIG;
-              flags |= FL_FLTFIX;
-            }
-          else if (ndigs == 0)
-            {
-              ndigs = 1;
-            }
+          /* Handle the full floating-point conversion outside this loop. */
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
@@ -839,298 +1780,8 @@ flt_oper:
               value = va_arg(ap, double);
             }
 
-          /* %a has no output yet */
-
-          if (c == 'a')
-            {
-              pnt  = "?";
-              size = 1;
-              goto str_lpad;
-            }
-
-          ndigs = __dtoa_engine(value, &_dtoa, ndigs,
-                                ndecimal);
-          exp = _dtoa.exp;
-
-          sign = 0;
-          if (_dtoa.flags & DTOA_MINUS)
-            {
-              sign = '-';
-            }
-          else if ((flags & FL_PLUS) != 0)
-            {
-              sign = '+';
-            }
-          else if ((flags & FL_SPACE) != 0)
-            {
-              sign = ' ';
-            }
-
-          if (_dtoa.flags & (DTOA_NAN | DTOA_INF))
-            {
-              FAR const char *p;
-
-              ndigs = sign ? 4 : 3;
-              if (width > ndigs)
-                {
-                  width -= ndigs;
-                  if ((flags & FL_LPAD) == 0)
-                    {
-                      stream_repeat(' ', width, stream);
-                      width = 0;
-                    }
-                }
-              else
-                {
-                  width = 0;
-                }
-
-              if (sign)
-                {
-                  stream_putc(sign, stream);
-                }
-
-              if (_dtoa.flags & DTOA_NAN)
-                {
-                  p = (flags & FL_FLTUPP) != 0 ? g_nan_upper : g_nan_lower;
-                }
-              else
-                {
-                  p = (flags & FL_FLTUPP) != 0 ? g_inf_upper : g_inf_lower;
-                }
-
-              stream_puts(p, 3, stream);
-
-              goto tail;
-            }
-
-          if ((flags & (FL_FLTEXP | FL_FLTFIX)) == 0)
-            {
-              /* 'g(G)' format */
-
-              prec = ndigs;
-
-              /* Remove trailing zeros */
-
-              while (ndigs > 0 && _dtoa.digits[ndigs - 1] == '0')
-                {
-                  ndigs--;
-                }
-
-              if (-4 <= exp && exp < prec)
-                {
-                  flags |= FL_FLTFIX;
-
-                  if (exp < 0 || ndigs > exp)
-                    {
-                      prec = ndigs - (exp + 1);
-                    }
-                  else
-                    {
-                      prec = 0;
-                    }
-                }
-              else
-                {
-                  /* Limit displayed precision to available precision */
-
-                  prec = ndigs - 1;
-                }
-            }
-
-          /* Conversion result length, width := free space length */
-
-          if ((flags & FL_FLTFIX) != 0)
-            {
-              flen = (exp > 0 ? exp + 1 : 1);
-            }
-          else
-            {
-              flen = 5;           /* 1e+00 */
-              if (exp >= 100 || exp <= -100)
-                {
-                  flen++;
-                }
-            }
-
-          if (sign != 0)
-            {
-              flen += 1;
-            }
-
-          if (prec != 0)
-            {
-              flen += prec + 1u;
-            }
-          else if ((flags & FL_ALT) != 0)
-            {
-              flen += 1;
-            }
-
-          if (flen > INT_MAX)
-            {
-              total_len = INT_MAX + 1u;
-              goto ret;
-            }
-
-          width = width > flen ? width - flen : 0;
-
-          /* Output before first digit */
-
-          if ((flags & (FL_LPAD | FL_ZFILL)) == 0)
-            {
-              stream_repeat(' ', width, stream);
-              width = 0;
-            }
-
-          if (sign != 0)
-            {
-              stream_putc(sign, stream);
-            }
-
-          if ((flags & FL_LPAD) == 0)
-            {
-              stream_repeat('0', width, stream);
-              width = 0;
-            }
-
-          if ((flags & FL_FLTFIX) != 0)
-            {
-              /* 'f' format */
-
-              unsigned int uexp = exp;
-              char out;
-
-              /* At this point, we should have exp exponent of leftmost digit
-               * in _dtoa.digits ndigs number of buffer digits to print prec
-               * number of digits after decimal In the loop, 'n' walks over
-               * the exponent value
-               */
-
-              n = exp > 0 ? exp : 0;    /* Exponent of left digit */
-              do
-                {
-                  /* Insert decimal point at correct place */
-
-                  if (n == -1)
-                    {
-                      stream_putc('.', stream);
-                    }
-
-                  /* Pull digits from buffer when in-range, otherwise use 0 */
-
-                  if (uexp - n < ndigs)
-                    {
-                      out = _dtoa.digits[exp - n];
-                    }
-                  else
-                    {
-                      out = '0';
-                    }
-
-                  if (--n < -prec)
-                    {
-                      break;
-                    }
-
-                  if (out == '0')
-                    {
-                      int zeroes = 1;
-
-                      while (n != -1)
-                        {
-                          int next = n - 1;
-                          unsigned int offset = uexp - n;
-
-                          if (next < -prec ||
-                              (offset < ndigs &&
-                               _dtoa.digits[offset] != '0'))
-                            {
-                              break;
-                            }
-
-                          zeroes++;
-                          n = next;
-                        }
-
-                      stream_repeat('0', zeroes, stream);
-                    }
-                  else
-                    {
-                      stream_putc(out, stream);
-                    }
-                }
-              while (1);
-
-              if (n == exp && (_dtoa.digits[0] > '5' ||
-                  (_dtoa.digits[0] == '5' && !(_dtoa.flags & DTOA_CARRY))))
-                {
-                  out = '1';
-                }
-
-              stream_putc(out, stream);
-
-              if ((flags & FL_ALT) != 0 && n == -1)
-                {
-                  stream_putc('.', stream);
-                }
-            }
-          else
-            {
-              /* 'e(E)' format
-               *
-               * Mantissa
-               */
-
-              if (_dtoa.digits[0] != '1')
-                {
-                  _dtoa.flags &= ~DTOA_CARRY;
-                }
-
-              stream_putc(_dtoa.digits[0], stream);
-              if (prec > 0)
-                {
-                  int nbytes;
-
-                  stream_putc('.', stream);
-
-                  nbytes = MIN(prec, ndigs > 1 ? ndigs - 1 : 0);
-                  if (nbytes > 0)
-                    {
-                      stream_puts(&_dtoa.digits[1], nbytes, stream);
-                    }
-
-                  if (prec > nbytes)
-                    {
-                      stream_repeat('0', prec - nbytes, stream);
-                    }
-                }
-              else if ((flags & FL_ALT) != 0)
-                {
-                  stream_putc('.', stream);
-                }
-
-              /* Exponent */
-
-              stream_putc(flags & FL_FLTUPP ? 'E' : 'e', stream);
-              ndigs = '+';
-              if (exp < 0 || (exp == 0 && (_dtoa.flags & DTOA_CARRY) != 0))
-                {
-                  exp = -exp;
-                  ndigs = '-';
-                }
-
-              stream_putc(ndigs, stream);
-              len = __ultoa_invert(exp, buf, 10) - buf;
-
-              if (exp >= 0 && exp <= 9)
-                {
-                  stream_putc('0', stream);
-                }
-
-              total_len += vsprintf_putnum(stream, buf, len);
-            }
-
+          total_len += vsprintf_put_float(stream, flags, c, &width, prec,
+                                          &_dtoa, buf, value);
           goto tail;
         }
 
@@ -1155,7 +1806,12 @@ flt_oper:
 
           pnt  = "?";
           size = 1;
-          goto str_lpad;
+
+          /* Emit the placeholder string when floating point is disabled. */
+
+          total_len += vsprintf_put_field(stream, pnt, size, &width,
+                                          flags);
+          goto tail;
         }
 #endif
 
@@ -1165,39 +1821,28 @@ flt_oper:
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
             if ((flags & FL_ARGNUMBER) != 0)
               {
-                ch = (int)arglist->value[argnumber - 1].u;
+                /* Emit a numbered character argument. */
+
+                result = vsprintf_put_char(stream, flags,
+                                           arglist->value[argnumber - 1].u,
+                                           &width, buf);
               }
             else
 #endif
               {
-                ch = va_arg(ap, int);
+                /* Emit a sequential character argument. */
+
+                result = vsprintf_put_char(stream, flags, va_arg(ap, int),
+                                           &width, buf);
               }
 
-#ifdef CONFIG_LIBC_LOCALE
-            if ((flags & FL_LONG) != 0)
+            if (result < 0)
               {
-                mbstate_t ps;
-
-                /* %lc: a wide character, written as its multibyte
-                 * sequence.
-                 */
-
-                memset(&ps, 0, sizeof(ps));
-                size = wcrtomb(buf, (wchar_t)ch, &ps);
-                if (size == (size_t)-1)
-                  {
-                    return -1;
-                  }
-              }
-            else
-#endif
-              {
-                buf[0] = ch;
-                size = 1;
+                return -1;
               }
 
-            pnt = buf;
-            goto str_lpad;
+            total_len += result;
+            goto tail;
 
           case 'n':
           case 's':
@@ -1219,7 +1864,9 @@ flt_oper:
               {
                 pnt  = "?";
                 size = 1;
-                goto str_lpad;
+                total_len += vsprintf_put_field(stream, pnt, size, &width,
+                                                flags);
+                goto tail;
               }
 
             if (pnt == NULL)
@@ -1229,56 +1876,17 @@ flt_oper:
 #ifdef CONFIG_LIBC_LOCALE
             else if (c == 's' && (flags & FL_LONG) != 0)
               {
-                FAR const wchar_t *ws = (FAR const wchar_t *)pnt;
-                char mb[MB_LEN_MAX];
-                mbstate_t ps;
-                size_t n;
-                int i;
+                /* Emit a wide string argument as multibyte output. */
 
-                /* %ls: a wide string, written as multibyte characters.  The
-                 * precision limits the bytes, and a character that does not
-                 * fit is not written in part.  First count the bytes.
-                 */
-
-                memset(&ps, 0, sizeof(ps));
-                for (size = 0, i = 0; ws[i] != L'\0'; i++)
+                result = vsprintf_put_wstring(stream,
+                                              (FAR const wchar_t *)pnt,
+                                              flags, &width, prec);
+                if (result < 0)
                   {
-                    n = wcrtomb(mb, ws[i], &ps);
-                    if (n == (size_t)-1)
-                      {
-                        return -1;
-                      }
-
-                    if ((flags & FL_PREC) != 0 && size + n > (size_t)prec)
-                      {
-                        break;
-                      }
-
-                    size += n;
+                    return -1;
                   }
 
-                if ((flags & FL_LPAD) == 0)
-                  {
-                    if (width > 0 && size < width)
-                      {
-                        int pad = width - size;
-
-                        stream_repeat(' ', pad, stream);
-                        width -= pad;
-                      }
-                  }
-
-                memset(&ps, 0, sizeof(ps));
-                for (n = 0, i = 0; n < size; i++)
-                  {
-                    size_t m = wcrtomb(mb, ws[i], &ps);
-
-                    stream_puts(mb, m, stream);
-                    n += m;
-                  }
-
-                width = width >= size ? width - size : 0;
-                size = 0;
+                total_len += result;
                 goto tail;
               }
 #endif
@@ -1292,20 +1900,10 @@ flt_oper:
                 size = strlen(pnt);
               }
 
-str_lpad:
-            if ((flags & FL_LPAD) == 0)
-              {
-                if (width > 0 && size < width)
-                  {
-                    int pad = width - size;
+            /* Emit a normal string field with any required padding. */
 
-                    stream_repeat(' ', pad, stream);
-                    width -= pad;
-                  }
-              }
-
-            stream_puts(pnt, size, stream);
-            width = width >= size ? width - size : 0;
+            total_len += vsprintf_put_field(stream, pnt, size, &width,
+                                            flags);
             size = 0;
 
             goto tail;
@@ -1328,8 +1926,7 @@ str_lpad:
                   x = va_arg(ap, long long);
                 }
             }
-          else
-          if ((flags & FL_LONG) != 0)
+          else if ((flags & FL_LONG) != 0)
             {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
@@ -1418,8 +2015,7 @@ str_lpad:
                   x = va_arg(ap, unsigned long long);
                 }
             }
-          else
-          if ((flags & FL_LONG) != 0)
+          else if ((flags & FL_LONG) != 0)
             {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
@@ -1473,66 +2069,13 @@ str_lpad:
 
               case 'p':
 #ifdef CONFIG_LIBC_PRINT_EXTENSION
-                c = fmt_char(fmt);
-                switch (c)
+                /* Try CONFIG_LIBC_PRINT_EXTENSION before normal %p output. */
+
+                result = vsprintf_pointer_extension(stream, &fmt, x,
+                                                     &total_len);
+                if (result > 0)
                   {
-                    case 'B':
-                      {
-                        FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
-
-                        total_len += lib_bsprintf(stream, vaf->fmt,
-                                                  vaf->va);
-                        continue;
-                      }
-
-                    case 'V':
-                      {
-                        FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
-#  ifdef va_copy
-                        va_list copy;
-
-                        va_copy(copy, *vaf->va);
-                        total_len += lib_vsprintf(stream, vaf->fmt, copy);
-                        va_end(copy);
-#  else
-                        total_len += lib_vsprintf(stream, vaf->fmt,
-                                                  *vaf->va);
-#  endif
-                        continue;
-                      }
-
-                    case 'S':
-                    case 's':
-                      {
-#  ifdef CONFIG_ALLSYMS
-                        FAR const struct symtab_s *symbol;
-                        FAR void *addr = (FAR void *)(uintptr_t)x;
-                        size_t symbolsize;
-
-                        symbol = allsyms_findbyvalue(addr, &symbolsize);
-                        if (symbol != NULL)
-                          {
-                            pnt = symbol->sym_name;
-                            stream_puts(pnt, strlen(pnt), stream);
-
-                            if (c == 'S')
-                              {
-                                total_len +=
-                                lib_sprintf_internal(stream,
-                                      "+%#tx/%#zx",
-                                      addr - symbol->sym_value,
-                                      symbolsize);
-                              }
-
-                            continue;
-                          }
-#  endif
-                        break;
-                      }
-
-                    default:
-                      fmt_ungetc(fmt);
-                      break;
+                    continue;
                   }
 #endif
 
@@ -1571,104 +2114,10 @@ str_lpad:
           flags &= ~FL_NEGATIVE;
         }
 
-      len = c;
+      /* Emit the converted integer digits and field decoration. */
 
-      if ((flags & FL_PREC) != 0)
-        {
-          flags &= ~FL_ZFILL;
-          if (len < prec)
-            {
-              len = prec;
-              if ((flags & FL_ALT) != 0 && (flags & FL_ALTHEX) == 0)
-                {
-                  flags &= ~FL_ALT;
-                }
-            }
-        }
-
-      if ((flags & FL_ALT) != 0)
-        {
-          /* c is 0 for a value of 0 with a precision of 0: then %#o has a
-           * "0" from the flag, and a hexadecimal value has no prefix.
-           */
-
-          if (c == 0 ? (flags & FL_ALTHEX) != 0 : buf[c - 1] == '0')
-            {
-              flags &= ~(FL_ALT | FL_ALTHEX | FL_ALTUPP);
-            }
-          else
-            {
-              len += 1;
-              if ((flags & FL_ALTHEX) != 0)
-                {
-                  len += 1;
-                }
-            }
-        }
-      else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
-        {
-          len += 1;
-        }
-
-      if (len > INT_MAX)
-        {
-          total_len = INT_MAX + 1u;
-          goto ret;
-        }
-
-      if ((flags & FL_LPAD) == 0)
-        {
-          if ((flags & FL_ZFILL) != 0)
-            {
-              prec = c;
-              if (len < width)
-                {
-                  prec += width - len;
-                  len = width;
-                }
-            }
-
-          if (len < width)
-            {
-              stream_repeat(' ', width - len, stream);
-              len = width;
-            }
-        }
-
-      width = (len < width) ? width - len : 0;
-
-      if ((flags & FL_ALT) != 0)
-        {
-          stream_putc('0', stream);
-          if ((flags & FL_ALTHEX) != 0)
-            {
-              stream_putc(flags & FL_ALTUPP ? 'X' : 'x', stream);
-            }
-        }
-      else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
-        {
-          unsigned char z = ' ';
-
-          if ((flags & FL_PLUS) != 0)
-            {
-              z = '+';
-            }
-
-          if ((flags & FL_NEGATIVE) != 0)
-            {
-              z = '-';
-            }
-
-          stream_putc(z, stream);
-        }
-
-      if (prec > c)
-        {
-          stream_repeat('0', prec - c, stream);
-          prec = c;
-        }
-
-      total_len += vsprintf_putnum(stream, buf, c);
+      total_len += vsprintf_put_integer(stream, flags, buf, c, &width,
+                                        prec);
 
 tail:
 
