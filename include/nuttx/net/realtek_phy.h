@@ -38,6 +38,14 @@ extern "C"
 {
 #endif
 
+#ifdef CONFIG_NET_PHY_REALTEK_RTL8201F
+int rtl8201f_register(void);
+#endif
+
+#ifdef CONFIG_NET_PHY_REALTEK_RTL8211F
+int rtl8211f_register(void);
+#endif
+
 /****************************************************************************
  * Name: rtl8221b_register
  *

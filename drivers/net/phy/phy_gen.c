@@ -27,21 +27,14 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <errno.h>
+#include <nuttx/arch.h>
 
 #include <nuttx/net/phy.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/ethtool.h>
 
 #include "phy.h"
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static int genphy_config_init(FAR struct phy_device_s *phydev);
-static int genphy_config_aneg(FAR struct phy_device_s *phydev);
-static int genphy_read_status(FAR struct phy_device_s *phydev);
-static int genphy_config_power(FAR struct phy_device_s *phydev, bool enable);
 
 /****************************************************************************
  * Public Data
@@ -57,7 +50,7 @@ const struct phy_driver_s g_genphy_driver =
 };
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -74,7 +67,7 @@ const struct phy_driver_s g_genphy_driver =
  *
  ****************************************************************************/
 
-static int genphy_config_init(FAR struct phy_device_s *phydev)
+int genphy_config_init(FAR struct phy_device_s *phydev)
 {
   int msr;
   int estatus;
@@ -116,17 +109,19 @@ static int genphy_config_init(FAR struct phy_device_s *phydev)
   if (msr & MII_MSR_ESTATEN)
     {
       estatus = phy_read(phydev, MII_ESTATUS);
-      if (estatus >= 0)
+      if (estatus < 0)
         {
-          if (estatus & MII_ESTATUS_1000BASETHALF)
-            {
-              supported |= SUPPORTED_1000BASET_HALF;
-            }
+          return estatus;
+        }
 
-          if (estatus & MII_ESTATUS_1000BASETFULL)
-            {
-              supported |= SUPPORTED_1000BASET_FULL;
-            }
+      if (estatus & MII_ESTATUS_1000BASETHALF)
+        {
+          supported |= SUPPORTED_1000BASET_HALF;
+        }
+
+      if (estatus & MII_ESTATUS_1000BASETFULL)
+        {
+          supported |= SUPPORTED_1000BASET_FULL;
         }
     }
 
@@ -152,11 +147,16 @@ static int genphy_config_init(FAR struct phy_device_s *phydev)
  *
  ****************************************************************************/
 
-static int genphy_config_aneg(FAR struct phy_device_s *phydev)
+int genphy_config_aneg(FAR struct phy_device_s *phydev)
 {
   uint16_t adv = MII_ADVERTISE_CSMA;
   uint16_t msctrl = 0;
   int ret;
+
+  if (!phydev->autoneg)
+    {
+      return -EOPNOTSUPP;
+    }
 
   /* Build ADVERTISE register value from advertising bitmask */
 
@@ -229,7 +229,7 @@ static int genphy_config_aneg(FAR struct phy_device_s *phydev)
  *
  ****************************************************************************/
 
-static int genphy_read_status(FAR struct phy_device_s *phydev)
+int genphy_read_status(FAR struct phy_device_s *phydev)
 {
   int msr;
   int lpa;
@@ -251,6 +251,10 @@ static int genphy_read_status(FAR struct phy_device_s *phydev)
     }
 
   phydev->link = !!(msr & MII_MSR_LINKSTATUS);
+  if (phydev->autoneg && (msr & MII_MSR_ANEGCOMPLETE) == 0)
+    {
+      phydev->link = false;
+    }
 
   if (!phydev->link)
     {
@@ -294,17 +298,19 @@ static int genphy_read_status(FAR struct phy_device_s *phydev)
                            SUPPORTED_1000BASET_FULL))
     {
       msstatus = phy_read(phydev, MII_MSSTATUS);
-      if (msstatus >= 0)
+      if (msstatus < 0)
         {
-          if (msstatus & MII_MSSTATUS_LP1000BASETHALF)
-            {
-              phydev->lp_advertising |= SUPPORTED_1000BASET_HALF;
-            }
+          return msstatus;
+        }
 
-          if (msstatus & MII_MSSTATUS_LP1000BASETFULL)
-            {
-              phydev->lp_advertising |= SUPPORTED_1000BASET_FULL;
-            }
+      if (msstatus & MII_MSSTATUS_LP1000BASETHALF)
+        {
+          phydev->lp_advertising |= SUPPORTED_1000BASET_HALF;
+        }
+
+      if (msstatus & MII_MSSTATUS_LP1000BASETFULL)
+        {
+          phydev->lp_advertising |= SUPPORTED_1000BASET_FULL;
         }
     }
 
@@ -344,6 +350,7 @@ static int genphy_read_status(FAR struct phy_device_s *phydev)
     }
   else
     {
+      phydev->link = false;
       phydev->speed = 0;
       phydev->duplex = DUPLEX_UNKNOWN;
     }
@@ -366,7 +373,7 @@ static int genphy_read_status(FAR struct phy_device_s *phydev)
  *
  ****************************************************************************/
 
-static int genphy_config_power(FAR struct phy_device_s *phydev, bool enable)
+int genphy_config_power(FAR struct phy_device_s *phydev, bool enable)
 {
   return enable ? phy_clear_bits(phydev, MII_MCR, MII_MCR_PDOWN)
                 : phy_set_bits(phydev, MII_MCR, MII_MCR_PDOWN);

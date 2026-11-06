@@ -94,13 +94,16 @@ enum phy_state_e
   PHY_ERROR
 };
 
-/* PHY interface modes */
+/* PHY interface modes. RMII uses a reference clock supplied to the PHY;
+ * RMII_PHY_CLK_OUT uses a reference clock supplied by the PHY.
+ */
 
 enum phy_interface_e
 {
   PHY_INTERFACE_MII = 0,
   PHY_INTERFACE_GMII,
   PHY_INTERFACE_RMII,
+  PHY_INTERFACE_RMII_PHY_CLK_OUT,
   PHY_INTERFACE_RGMII,
   PHY_INTERFACE_RGMII_ID,
   PHY_INTERFACE_RGMII_TXID,
@@ -279,7 +282,11 @@ int phy_device_free(FAR struct phy_device_s *phydev);
 ssize_t phy_device_scan(FAR struct mdio_bus_s *bus,
                         FAR struct phy_device_s **devs, size_t maxdevs);
 
-/* PHY connect/disconnect */
+/* PHY connect/disconnect.  lower may be NULL for a PHY whose MAC manages
+ * carrier itself (for example, an external switch port).  Such callers
+ * consume link state under phydev->lock and must use phy_disconnect()
+ * rather than phy_device_free() after a successful connection.
+ */
 
 int phy_connect(FAR struct phy_device_s *phydev,
                 FAR struct netdev_lowerhalf_s *lower);
