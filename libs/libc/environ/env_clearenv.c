@@ -24,6 +24,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <errno.h>
+
 #include <nuttx/environ.h>
 #include <nuttx/tls.h>
 
@@ -54,8 +56,14 @@
 int clearenv(void)
 {
   FAR struct task_info_s *info = task_get_info();
+  int ret;
 
-  nxrmutex_lock(&info->ta_lock);
+  ret = nxrmutex_lock(&info->ta_lock);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
 
   /* Free the array of libc if environ still names it.  The strings stay
    * until exit, as a pointer that getenv() returned can still be in use.
