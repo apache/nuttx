@@ -96,10 +96,8 @@ SDK_INCDIR += $(ILLD_DIR)/Libraries/Service/CpuGeneric
 
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Cpu/Std/IfxCpu.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxCpu_cfg.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/_Impl/TC39xB/IfxPort_cfg_TC39xB.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Pms/Std/IfxPmsEvr.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Pms/Std/IfxPmsPm.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Port/Std/IfxPort.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuCcu.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuEru.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuLbist.c
