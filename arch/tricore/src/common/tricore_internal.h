@@ -196,6 +196,10 @@ void tricore_doirq(void);
 
 void tricore_wdt_disable(void);
 
+/* Clocks *******************************************************************/
+
+int tricore_clockconfig(void);
+
 /* Signal handling **********************************************************/
 
 void tricore_sigdeliver(void);
