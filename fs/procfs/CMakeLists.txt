@@ -36,6 +36,10 @@ if(NOT CONFIG_DISABLE_MOUNTPOINT)
         fs_procfsutil.c
         fs_procfsversion.c)
 
+    if(CONFIG_COREDUMP)
+      list(APPEND SRCS fs_procfs_coredump.c)
+    endif()
+
     if(CONFIG_FS_PROCFS_INCLUDE_PRESSURE)
       list(APPEND SRCS fs_procfspressure.c)
     endif()
