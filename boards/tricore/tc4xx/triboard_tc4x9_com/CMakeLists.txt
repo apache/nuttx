@@ -21,3 +21,7 @@
 # ##############################################################################
 
 add_subdirectory(src)
+
+if(CONFIG_BUILD_PROTECTED)
+  add_subdirectory(kernel)
+endif()

@@ -25,6 +25,11 @@ CHIP_CSRCS += tc3xx_serial.c
 CHIP_CSRCS += tc3xx_wdt.c
 CHIP_CSRCS += tc3xx_clockconfig.c
 
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  CHIP_UCSRCS += tc397_userspace.c
+  VPATH += $(BOARD_DIR)/kernel
+endif
+
 VPATH += tc3xx
 
 ILLD_UNPACK = illd/tc3xx

@@ -46,6 +46,15 @@ set(SRCS
     tricore_usestack.c
     tricore_fork.c)
 
+if(CONFIG_BUILD_PROTECTED OR CONFIG_BUILD_KERNEL)
+  list(APPEND SRCS tricore_task_start.c tricore_pthread_start.c
+       tricore_signal_dispatch.c)
+
+  if(CONFIG_BUILD_PROTECTED)
+    target_sources(arch_interface PRIVATE tricore_signal_handler.c)
+  endif()
+endif()
+
 if(CONFIG_SCHED_BACKTRACE)
   list(APPEND SRCS tricore_backtrace.c)
 endif()

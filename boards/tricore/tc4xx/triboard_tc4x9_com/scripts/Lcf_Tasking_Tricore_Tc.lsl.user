@@ -185,6 +185,7 @@ derivative tc4D
             select "(.zdata|.zdata.*)";
         }
         "_sdata_pflash" = "_lc_gb_udata_rom";
+        "_eronly" = "_lc_gb_udata_rom";
     }
 #if CONFIG_CPU_COREID == 5
     /* This sections is added to reserve last 4 bytes of flash in core5's user

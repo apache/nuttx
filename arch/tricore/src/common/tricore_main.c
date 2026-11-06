@@ -59,6 +59,9 @@ static void core_main(void)
   if (IfxCpu_getCoreIndex() == 0)
     {
       tricore_earlyserialinit();
+#ifdef CONFIG_BUILD_PROTECTED
+      tricore_userspace();
+#endif
       nx_start();
     }
 
