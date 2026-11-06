@@ -196,6 +196,7 @@ Implementation Details
    
    fnmatch.rst
    popen.rst
+   printf.rst
    search.rst
    stdbit.rst
    stream.rst
