@@ -67,8 +67,9 @@ void up_irqinitialize(void)
 
   /* Colorize the interrupt stack for debug purposes */
 
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
-  size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
+#if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_ARCH_INTERRUPTSTACK)
+  size_t intstack_size = STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
+
   riscv_stack_color(g_intstackalloc, intstack_size);
 #endif
 
@@ -79,6 +80,7 @@ void up_irqinitialize(void)
   for (uint8_t i = 0; i < RP23XX_IRQ_NEXTINT; ++i)
     {
       uint8_t hardware_priority = (uint8_t)((0x80 >> 4) ^ 0xf);
+
       hazard3_irqarray_clear(RVCSR_MEIPRA_OFFSET, i / 4,
                              0xfu << (4 * (i % 4)));
       hazard3_irqarray_set(RVCSR_MEIPRA_OFFSET, i / 4,

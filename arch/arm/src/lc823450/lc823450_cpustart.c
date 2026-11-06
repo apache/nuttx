@@ -90,7 +90,7 @@ static void cpu1_boot(void)
 
   DPRINTF("cpu = %d\n", cpu);
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   /* Initializes the stack pointer */
 
   arm_initialize_stack();

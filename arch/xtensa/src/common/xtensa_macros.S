@@ -43,7 +43,7 @@
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 	.macro	setintstack tmp1 tmp2
 
 	/* Load g_intstacktop (the start of the interrupt stack) */

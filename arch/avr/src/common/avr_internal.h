@@ -86,7 +86,7 @@ typedef void (*up_vector_t)(void);
 #ifndef __ASSEMBLY__
 /* Address of the saved user stack pointer */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 extern uint8_t g_intstackalloc[];
 extern uint8_t g_intstacktop[];
 #endif
@@ -177,7 +177,7 @@ size_t avr_stack_check(uintptr_t alloc, size_t size);
 #endif
 
 #if defined(CONFIG_STACK_COLORATION) && \
-    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+    defined(CONFIG_ARCH_INTERRUPTSTACK)
 void avr_color_intstack(void);
 #else
 #  define avr_color_intstack()

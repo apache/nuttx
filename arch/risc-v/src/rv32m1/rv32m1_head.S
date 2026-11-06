@@ -148,7 +148,7 @@ exception_common:
 
   mv   a1, sp      /* context = sp */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   /* Switch to interrupt stack */
 
   lui  sp, %hi(g_intstacktop)
@@ -227,7 +227,7 @@ return_from_exception:
  *  Name: g_intstackalloc and g_intstacktop
 *******************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   .bss
   .balign 16
   .global g_intstackalloc

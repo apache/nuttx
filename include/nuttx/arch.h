@@ -2551,12 +2551,12 @@ void irq_dispatch(int irq, FAR void *context);
 #ifdef CONFIG_STACK_COLORATION
 struct tcb_s;
 size_t up_check_tcbstack(FAR struct tcb_s *tcb, size_t check_size);
-#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 size_t up_check_intstack(int cpu, size_t check_size);
 #endif
 #endif
 
-#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 uintptr_t up_get_intstackbase(int cpu);
 #endif
 

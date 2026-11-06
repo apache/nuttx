@@ -339,7 +339,7 @@
  *
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 #if !defined(CONFIG_SMP) && !defined(CONFIG_ARCH_USE_S_MODE)
 .macro  setintstack tmp0, tmp1
 
@@ -365,7 +365,7 @@
 2:
 .endm
 #endif /* !defined(CONFIG_SMP) && !defined(CONFIG_ARCH_USE_S_MODE) */
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
+#endif /* defined(CONFIG_ARCH_INTERRUPTSTACK) */
 
 /****************************************************************************
  * Name: up_cpu_index

@@ -120,7 +120,7 @@ _xtensa_panic:
 
 	/* Switch to an interrupt stack if we have one */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	setintstack a13 a14
 #endif
 

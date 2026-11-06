@@ -43,7 +43,7 @@
  * Public Data
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 /* In the SMP configuration, we will need custom IRQ and FIQ stacks.
  * These definitions provide the aligned stack allocations.
  */
@@ -142,7 +142,7 @@ void up_irqinitialize(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 uintptr_t up_get_intstackbase(int cpu)
 {
   return g_irqstack_top[cpu] - INTSTACK_SIZE;

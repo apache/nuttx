@@ -36,6 +36,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
+#include <nuttx/irq.h>
 #include <syslog.h>
 
 #include <sys/param.h>
@@ -76,7 +77,7 @@
                                 (SBRAM_SIZE_FN0+SBRAM_SIZE_FN1+ \
                                  SBRAM_SIZE_FN2))
 #define SBRAM_REAMINING       (RX65N_SBRAM_SIZE-SBRAM_USED)
-#if CONFIG_ARCH_INTERRUPTSTACK <= 3
+#ifndef CONFIG_ARCH_INTERRUPTSTACK
 #  define SBRAM_NUMBER_STACKS 1
 #else
 #  define SBRAM_NUMBER_STACKS 2
@@ -134,7 +135,7 @@ typedef struct
 typedef struct
 {
   _stack_t user;
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   _stack_t interrupt;
 #endif
 } stack_t;
@@ -206,7 +207,7 @@ struct fullcontext
    * ustack should be truncated
   */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   stack_word_t istack[CONFIG_USTACK_SIZE];
 #endif
   stack_word_t ustack[CONFIG_ISTACK_SIZE];
@@ -337,6 +338,7 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
                      const char *msg, void *regs)
 {
   struct fullcontext *pdump;
+
   pdump = (struct fullcontext *)&g_sdata;
   int rv;
 
@@ -399,11 +401,12 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
                                           tcb->adj_stack_size;
   pdump->info.stacks.user.size = (uint32_t)tcb->adj_stack_size;
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   /* Get the limits on the interrupt stack memory */
 
   pdump->info.stacks.interrupt.top = (uint32_t)&istack;
-  pdump->info.stacks.interrupt.size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+  pdump->info.stacks.interrupt.size =
+    STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
 
   /* If In interrupt Context save the interrupt stack data centered
    * about the interrupt stack pointer
@@ -412,6 +415,7 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
   if ((pdump->info.flags & INTSTACK_PRESENT) != 0)
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.interrupt.sp;
+
       copy_reverse((stack_word_t *)pdump->istack,
                         &ps[nitems(pdump->istack) / 2],
                     nitems(pdump->istack));
@@ -435,6 +439,7 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
   if ((pdump->info.flags & USERSTACK_PRESENT) != 0)
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.user.sp;
+
       copy_reverse((stack_word_t *)pdump->ustack,
                         &ps[nitems(pdump->ustack) / 2],
                     nitems(pdump->ustack));

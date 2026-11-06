@@ -70,7 +70,7 @@
  * Public Symbols
  ****************************************************************************/
 
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
  .data
  .align     16
  .global    g_intstackalloc
@@ -179,7 +179,7 @@ g_intstacktop:
 	 * signal context (ref: xtensa_schedulesigaction.c):
 	 */
 
-#if (CONFIG_ARCH_INTERRUPTSTACK < 15) && defined(CONFIG_ENABLE_ALL_SIGNALS)
+#if !defined(CONFIG_ARCH_INTERRUPTSTACK) && defined(CONFIG_ENABLE_ALL_SIGNALS)
 	addi	sp, sp, -XCPTCONTEXT_SIZE
 #endif
 
@@ -266,7 +266,7 @@ g_intstacktop:
 
 	addi	sp, sp, XCHAL_NUM_INTERRUPTS / 8
 
-#if (CONFIG_ARCH_INTERRUPTSTACK < 15) && defined(CONFIG_ENABLE_ALL_SIGNALS)
+#if !defined(CONFIG_ARCH_INTERRUPTSTACK) && defined(CONFIG_ENABLE_ALL_SIGNALS)
 	addi	sp, sp, XCPTCONTEXT_SIZE
 #endif
 	.endm
@@ -311,7 +311,7 @@ _xtensa_level1_handler:
 
 	/* Switch to an interrupt stack if we have one */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	setintstack a13 a14
 #endif
 
@@ -396,7 +396,7 @@ _xtensa_level2_handler:
 
 	/* Switch to an interrupt stack if we have one */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	setintstack a13 a14
 #endif
 
@@ -449,7 +449,7 @@ _xtensa_level3_handler:
 
 	/* Switch to an interrupt stack if we have one */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	setintstack a13 a14
 #endif
 
@@ -502,7 +502,7 @@ _xtensa_level4_handler:
 
 	/* Switch to an interrupt stack if we have one */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	setintstack a13 a14
 #endif
 
@@ -555,7 +555,7 @@ _xtensa_level5_handler:
 
 	/* Switch to an interrupt stack if we have one */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	setintstack a13 a14
 #endif
 
@@ -608,7 +608,7 @@ _xtensa_level6_handler:
 
 	/* Switch to an interrupt stack if we have one */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	setintstack a13 a14
 #endif
 
@@ -683,7 +683,7 @@ _xtensa_debug_handler:
 
 	/* Switch to an interrupt stack if we have one */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	setintstack a13 a14
 #endif
 

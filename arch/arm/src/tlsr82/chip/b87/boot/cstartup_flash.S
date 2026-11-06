@@ -39,7 +39,7 @@
 
 #ifndef __IRQ_STK_SIZE__
 #define __IRQ_STK_SIZE__				CONFIG_ARCH_INTERRUPTSTACK
-#if CONFIG_ARCH_INTERRUPTSTACK <= 128
+#ifndef CONFIG_ARCH_INTERRUPTSTACK
 #  error "Interrupt Stack must be larger than 128"
 #endif
 #endif

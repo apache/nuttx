@@ -41,7 +41,7 @@
 
 #include "hardware/cxd5602_memorymap.h"
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 #  include "cxd56_cpuindex.h"
 #endif
 

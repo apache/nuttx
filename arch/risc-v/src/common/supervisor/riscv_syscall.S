@@ -118,7 +118,7 @@ sys_call6:
 
   mv         a0, sp                    /* a0 = context */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   /* Switch to interrupt stack */
 
   setintstack t0, t1

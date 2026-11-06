@@ -214,7 +214,7 @@ trap_dispatch:
 
   mv      a1, sp                        /* a1 = regs */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   setintstack t0, t1
 #endif
 
@@ -282,7 +282,7 @@ up_saveusercontext:
  * Name: g_intstackalloc and g_intstacktop
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   .bss
   .balign 16
   .global g_intstackalloc

@@ -150,7 +150,7 @@ excpt_common:
  *  Name: g_intstackalloc
  ****************************************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	.bss
 	.align	4
 	.globl	g_intstackalloc

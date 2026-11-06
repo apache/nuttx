@@ -53,13 +53,13 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 static inline void tricore_color_intstack(void)
 {
   uint32_t *ptr = (uint32_t *)g_intstackalloc;
   ssize_t size;
 
-  for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
+  for (size = STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
        size > 0;
        size -= sizeof(uint32_t))
     {

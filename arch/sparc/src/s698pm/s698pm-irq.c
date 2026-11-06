@@ -43,7 +43,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 
 #if defined(CONFIG_SMP)
 #  define INTSTACK_ALLOC (CONFIG_SMP_NCPUS * INTSTACK_SIZE)
@@ -71,7 +71,7 @@
 
 static volatile uint8_t g_irqmap[NR_IRQS];
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 /* In the SMP configuration, we will need custom interrupt stacks.
  * These definitions provide the aligned stack allocations.
  */
@@ -97,7 +97,7 @@ uintptr_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
 
 #endif /* defined(CONFIG_SMP) */
 };
-#endif /* if CONFIG_ARCH_INTERRUPTSTACK > 7 */
+#endif /* if defined(CONFIG_ARCH_INTERRUPTSTACK) */
 
 /****************************************************************************
  * Private Functions
@@ -510,7 +510,7 @@ int up_prioritize_irq(int irq, int priority)
  *
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 uintptr_t up_get_intstackbase(int cpu)
 {
 #if defined(CONFIG_SMP)

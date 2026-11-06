@@ -47,7 +47,7 @@
  */
 
 #define CRASHLOG_SIZE 1024
-#if CONFIG_ARCH_INTERRUPTSTACK <= 3
+#ifndef CONFIG_ARCH_INTERRUPTSTACK
 #  define NUMBER_STACKS 1
 #else
 #  define NUMBER_STACKS 2
@@ -84,7 +84,7 @@ typedef struct
 typedef struct
 {
   _stack_t user;
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   _stack_t interrupt;
 #endif
 } crash_stack_t;
@@ -118,7 +118,7 @@ typedef struct
 typedef struct
 {
   info_t    info;
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   stack_word_t istack[CONFIG_ISTACK_SIZE];
 #endif
   stack_word_t ustack[CONFIG_USTACK_SIZE];
