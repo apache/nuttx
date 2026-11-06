@@ -235,6 +235,17 @@ int phy_driver_register(FAR const struct phy_driver_s *drv)
       return ret;
     }
 
+  for (i = 0; i < CONFIG_NET_PHYLIB_MAX_DRIVERS; i++)
+    {
+      if (g_phy_drivers[i] == drv)
+        {
+          /* Phy driver already registered */
+
+          nxmutex_unlock(&g_phy_lock);
+          return OK;
+        }
+    }
+
   /* Store the driver in the first free slot of the fixed-size table. */
 
   for (i = 0; i < CONFIG_NET_PHYLIB_MAX_DRIVERS; i++)
@@ -418,10 +429,10 @@ ssize_t phy_device_scan(FAR struct mdio_bus_s *bus,
  *
  * Input Parameters:
  *   phydev - Pointer to the PHY device structure
- *   lower  - Pointer to the network device lower half
+ *   lower  - Network lower half, or NULL for MAC-managed carrier
  *
  * Returned Value:
- *   OK on success; -EINVAL if arguments are NULL;
+ *   OK on success; -EINVAL if phydev is NULL;
  *   -EBUSY if the PHY is already attached.
  *
  ****************************************************************************/
@@ -431,21 +442,24 @@ int phy_connect(FAR struct phy_device_s *phydev,
 {
   int ret;
 
-  if (phydev == NULL || lower == NULL)
+  if (phydev == NULL)
     {
       return -EINVAL;
     }
 
   nxmutex_lock(&phydev->lock);
 
-  if (phydev->lower != NULL)
+  if (phydev->state != PHY_DOWN)
     {
       nxmutex_unlock(&phydev->lock);
       return -EBUSY;
     }
 
   phydev->lower = lower;
-  lower->phydev = phydev;
+  if (lower != NULL)
+    {
+      lower->phydev = phydev;
+    }
 
   /* Deassert the PHY hardware reset (release the RESET_N line) before
    * running config_init.  This is idempotent: if the MAC driver
@@ -464,7 +478,11 @@ int phy_connect(FAR struct phy_device_s *phydev,
       if (ret < 0)
         {
           phydev->lower = NULL;
-          lower->phydev = NULL;
+          if (lower != NULL)
+            {
+              lower->phydev = NULL;
+            }
+
           nxmutex_unlock(&phydev->lock);
           return ret;
         }
@@ -472,7 +490,7 @@ int phy_connect(FAR struct phy_device_s *phydev,
 
   phydev->state = PHY_READY;
   ninfo("PHY connected: addr=%d -> %s\n",
-        phydev->mdio_addr, lower->netdev.d_ifname);
+        phydev->mdio_addr, lower != NULL ? lower->netdev.d_ifname : "MAC");
   nxmutex_unlock(&phydev->lock);
   return OK;
 }
@@ -558,7 +576,7 @@ int phy_disconnect(FAR struct phy_device_s *phydev)
  *   it to free any discovered phydev it does not go on to phy_connect(),
  *   otherwise the device and its table slot leak.
  *
- *   A connected PHY (lower != NULL) must be released with
+ *   A connected PHY (state != PHY_DOWN) must be released with
  *   phy_disconnect() instead, which stops the state machine first.
  *
  * Input Parameters:
@@ -586,7 +604,7 @@ int phy_device_free(FAR struct phy_device_s *phydev)
    * handle.
    */
 
-  if (phydev->lower != NULL)
+  if (phydev->state != PHY_DOWN)
     {
       nxmutex_unlock(&phydev->lock);
       return -EBUSY;

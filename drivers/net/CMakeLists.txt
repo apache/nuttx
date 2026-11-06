@@ -133,6 +133,14 @@ if(CONFIG_NET)
       list(APPEND SRCS phy/phy_genc45.c)
     endif()
 
+    if(CONFIG_NET_PHY_REALTEK_RTL8201F)
+      list(APPEND SRCS phy/realtek/rtl8201f.c)
+    endif()
+
+    if(CONFIG_NET_PHY_REALTEK_RTL8211F)
+      list(APPEND SRCS phy/realtek/rtl8211f.c)
+    endif()
+
     if(CONFIG_NET_PHY_REALTEK_RTL8221B)
       list(APPEND SRCS phy/realtek/rtl8221b.c phy/realtek/rtl8221b_fw.c)
     endif()

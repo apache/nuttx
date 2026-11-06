@@ -875,6 +875,18 @@ config NET_PHYLIB_MAX_PHYS
 
 comment "PHY Device Drivers"
 
+config NET_PHY_REALTEK_RTL8201F
+	bool "Realtek RTL8201F 10/100Mbps PHY"
+	---help---
+		Support for the RTL8201F MII/RMII PHY, including RMII reference
+		clock direction configuration.
+
+config NET_PHY_REALTEK_RTL8211F
+	bool "Realtek RTL8211F Gigabit PHY"
+	---help---
+		Support for RTL8211F-VD and RTL8211F/FDI RGMII PHYs, including
+		the RGMII internal RX and TX delay modes.
+
 config NET_PHY_REALTEK_RTL8221B
 	bool "Realtek RTL8221B 2.5Gbps PHY"
 	default n
