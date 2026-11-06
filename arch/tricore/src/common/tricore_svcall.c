@@ -67,7 +67,7 @@ void tricore_svcall(volatile void *trap)
 
   UP_DSB();
 
-  plregs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
+  plregs = tricore_csa2addr(tricore_mfcr(TRICORE_CPU_PCXI));
   puregs = tricore_csa2addr(plregs[REG_LPCXI]);
 
   /* Set irq flag */
@@ -94,7 +94,7 @@ void tricore_svcall(volatile void *trap)
 
       case SYS_restore_context:
         *running_task = tcb;
-        tricore_mtcr(CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
+        tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
         UP_ISB();
         break;
 
@@ -107,5 +107,11 @@ void tricore_svcall(volatile void *trap)
 
   up_set_interrupt_context(false);
 
-  __jumpBackToLink();
+  /* Return to the caller, tricore_svcall is entered by a jump */
+
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
+  __asm__ volatile ("ji a11" : : : "a11");
+#else
+  __asm__ volatile ("ji %a11");
+#endif
 }

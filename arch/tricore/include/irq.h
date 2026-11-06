@@ -45,7 +45,6 @@
 
 #include <arch/chip/irq.h>
 #include <arch/arch.h>
-#include <IfxCpu_Intrinsics.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
@@ -134,9 +133,10 @@
 
 #define TRICORE_SRCNUM_PER_GPSR  8
 #define TRICORE_SRC2IRQ(src_addr) \
-  (((uintptr_t)(src_addr) - (uintptr_t)&MODULE_SRC) / 4)
+  (((uintptr_t)(src_addr) - TRICORE_SRC_BASE) / 4)
 #define TRICORE_GPSR_IRQNUM(src_cpu, dest_cpu)  \
-  TRICORE_SRC2IRQ(&SRC_GPSR00 + src_cpu * 8 + dest_cpu)
+  TRICORE_SRC2IRQ(TRICORE_SRC_GPSR_BASE + \
+                  ((src_cpu) * TRICORE_SRCNUM_PER_GPSR + (dest_cpu)) * 4)
 
 /* For use with EABI and floating point, the stack must be aligned to 8-byte
  * addresses.
@@ -242,7 +242,10 @@ noinstrument_function static inline_function uintptr_t up_getsp(void)
 
 noinstrument_function static inline_function irqstate_t up_irq_save(void)
 {
-  return __disable_and_save();
+  irqstate_t flags;
+
+  __asm__ volatile ("disable %0" : "=d"(flags) : : "memory");
+  return flags;
 }
 
 /****************************************************************************
@@ -256,7 +259,7 @@ noinstrument_function static inline_function irqstate_t up_irq_save(void)
 noinstrument_function static inline_function
 void up_irq_restore(irqstate_t flags)
 {
-  __restore(flags);
+  __asm__ volatile ("restore %0" : : "d"(flags) : "memory");
 }
 
 /****************************************************************************
