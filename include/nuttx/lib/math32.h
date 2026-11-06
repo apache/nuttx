@@ -357,7 +357,9 @@ static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
 #endif
 
 #define div_const(n, base) \
-  ((sizeof((n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
+  ((is_constexpr(base) && !is_constexpr(n) && \
+    sizeof((n)) == sizeof(uint64_t)) ? div64_const(n, base) : \
+   ((n) / (base)))
 #define div_const_roundup(n, base) \
   div_const((n) + (base) - 1u, base)
 #define div_const_roundnearest(n, base) \
