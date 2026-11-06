@@ -68,7 +68,9 @@ static void local_freectl(FAR struct local_conn_s *conn, int count)
       peer = conn;
     }
 
-  while (count-- > 0)
+  /* The receiver can take the files first */
+
+  while (count-- > 0 && peer->lc_cfpcount > 0)
     {
       file_put(peer->lc_cfps[--peer->lc_cfpcount]);
       peer->lc_cfps[peer->lc_cfpcount] = NULL;
@@ -76,7 +78,8 @@ static void local_freectl(FAR struct local_conn_s *conn, int count)
 }
 
 static int local_sendctl(FAR struct local_conn_s *conn,
-                         FAR const struct msghdr *msg)
+                         FAR const struct msghdr *msg,
+                         FAR struct local_conn_s **speer)
 {
   FAR struct local_conn_s *peer;
   FAR struct file *filep;
@@ -87,6 +90,7 @@ static int local_sendctl(FAR struct local_conn_s *conn,
   int i = 0;
 
   local_lock();
+  *speer = conn->lc_peer;
   peer = conn->lc_peer;
   if (peer == NULL)
     {
@@ -463,6 +467,7 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
 
 #ifdef CONFIG_NET_LOCAL_SCM
   FAR struct local_conn_s *conn = psock->s_conn;
+  FAR struct local_conn_s *peer = NULL;
   int count = 0;
 
   if (msg->msg_control &&
@@ -486,7 +491,7 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
             }
         }
 
-      count = local_sendctl(conn, msg);
+      count = local_sendctl(conn, msg, &peer);
       if (count < 0)
         {
           return count;
@@ -498,8 +503,14 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
 
   if (ret < 0 && count > 0)
     {
+      /* A peer that closed during the send released the files itself */
+
       local_lock();
-      local_freectl(conn, count);
+      if (conn->lc_peer == peer)
+        {
+          local_freectl(conn, count);
+        }
+
       local_unlock();
     }
 #else
