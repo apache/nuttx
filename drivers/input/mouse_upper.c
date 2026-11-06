@@ -280,15 +280,24 @@ static int mouse_poll(FAR struct file *filep,
 
   if (setup)
     {
-      if (openpriv->fds == NULL)
+      /* This is a request to set up the poll.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
+       */
+
+      if (fds->priv == NULL)
         {
-          openpriv->fds = fds;
-          fds->priv     = &openpriv->fds;
-        }
-      else
-        {
-          ret = -EBUSY;
-          goto errout;
+          if (openpriv->fds == NULL)
+            {
+              openpriv->fds = fds;
+              fds->priv     = &openpriv->fds;
+            }
+          else
+            {
+              ret = -EBUSY;
+              goto errout;
+            }
         }
 
       if (!circbuf_is_empty(&openpriv->circbuf))

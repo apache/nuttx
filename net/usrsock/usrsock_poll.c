@@ -149,6 +149,16 @@ static int usrsock_pollsetup(FAR struct socket *psock,
     }
 #endif
 
+  /* This pollfd is already registered with this socket (persistent
+   * poll consumer, e.g. epoll): refuse to register it a second time
+   * and let the caller rebuild the binding through teardown + setup.
+   */
+
+  if (fds->priv != NULL)
+    {
+      return -EBUSY;
+    }
+
   usrsock_lock();
 
   /* Find a container to hold the poll information */

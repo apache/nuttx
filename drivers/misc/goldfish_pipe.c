@@ -376,28 +376,36 @@ static int goldfish_pipe_poll(FAR struct file *filp,
       flags = spin_lock_irqsave(&dev->lock);
 
       /* This is a request to set up the poll.  Find an available
-       * slot for the poll structure reference
+       * slot for the poll structure reference.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
        */
 
-      for (i = 0; i < GOLDFISH_PIPE_MAX_POLL_WAITERS; i++)
+      if (fds->priv == NULL)
         {
-          /* Find an available slot */
-
-          if (pipe->fds[i] == NULL)
+          for (i = 0; i < GOLDFISH_PIPE_MAX_POLL_WAITERS; i++)
             {
-              /* Bind the poll structure and this slot */
+              /* Find an available slot */
 
-              pipe->fds[i] = fds;
-              fds->priv = &pipe->fds[i];
-              break;
+              if (pipe->fds[i] == NULL)
+                {
+                  /* Bind the poll structure and this slot */
+
+                  pipe->fds[i] = fds;
+                  fds->priv = &pipe->fds[i];
+                  break;
+                }
+            }
+
+          if (i >= GOLDFISH_PIPE_MAX_POLL_WAITERS)
+            {
+              spin_unlock_irqrestore(&dev->lock, flags);
+              return -EBUSY;
             }
         }
 
       spin_unlock_irqrestore(&dev->lock, flags);
-      if (i >= GOLDFISH_PIPE_MAX_POLL_WAITERS)
-        {
-          return -EBUSY;
-        }
 
       if (ret & GOLDFISH_PIPE_POLL_IN)
         {
