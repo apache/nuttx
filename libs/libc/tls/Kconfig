@@ -5,6 +5,22 @@
 
 menu "Thread Local Storage (TLS)"
 
+config TLS_EMUTLS
+	bool "Per-thread copies of emulated TLS variables"
+	default y
+	depends on (ARCH_TOOLCHAIN_GNU && !ARCH_TOOLCHAIN_ARMCLANG && !ARCH_TOOLCHAIN_GHS && !ARCH_AVR && !ARCH_SIM) || (ARCH_SIM && SIM_TOOLCHAIN_GCC && !HOST_MACOS && !WINDOWS_NATIVE)
+	---help---
+		GCC and clang call __emutls_get_address() for __thread variables
+		when the target has no native TLS, or with -femulated-tls.  libc
+		then gives one copy of each variable per thread, and the link
+		sends the calls to it with --wrap.  8-bit AVR has no atomic pointer
+		loads.  The sim has it only with GCC and the GNU linker (Linux,
+		MinGW): the macOS linker and the MSVC linker have no --wrap.
+
+		With LTO every program links this code (about 1 KiB on Cortex-M).
+		A board that has no space for it can disable it: then all threads
+		share one copy of each __thread variable, as with libgcc.
+
 config TLS_ALIGNED
 	bool "Require stack alignment"
 	default BUILD_KERNEL || BUILD_PROTECTED

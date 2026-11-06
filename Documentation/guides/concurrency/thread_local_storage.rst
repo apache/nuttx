@@ -43,3 +43,7 @@ To confirm that your compiler supports TLS, you can try this command:
 Then you can see ``--disable-tls`` in the output, which means that your compiler does not support TLS.
 
 In this case, you can still use the thread local relative keyword, but it would be implemented by libgcc's emutls.
+
+NuttX's libc provides its own version (``CONFIG_TLS_EMUTLS``, set for the GCC and clang toolchains, but not for 8-bit AVR; the sim has it with GCC and the GNU linker, as on Linux and MinGW), and the link sends the calls to ``__emutls_get_address()`` there with ``--wrap``. A libgcc built with the single thread model (``Thread model: single`` above) keeps one copy of each variable for the whole program; with the libc version, each thread gets its own copy, made on the first use and freed when the thread exits, or in every thread when the module or shared library that defines the variable is unloaded. ``CONFIG_TLS_EMUTLS`` is on by default. With LTO every program links this code (about 1 KiB on Cortex-M), so a board that has no space for it can disable it; then all threads share one copy of each variable, as with libgcc.
+
+The image, the modules and the programs of a kernel build are linked with ``--wrap``; code loaded at run time finds the libc version in the system symbol table (``CONFIG_EXECFUNCS_SYSTEM_SYMTAB``).
