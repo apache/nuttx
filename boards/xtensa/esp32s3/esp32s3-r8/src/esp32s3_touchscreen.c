@@ -16,7 +16,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/input/ft5x06.h>
 
-#include "esp32s3_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32s3_i2c.h"
 
 #include "esp32s3-r8.h"
