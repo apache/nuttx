@@ -155,17 +155,15 @@ struct tricore_trap_s
  * end of the heap is CONFIG_RAM_END
  */
 
-extern uintptr_t        __USTACK0_END[];
-extern uintptr_t        __USTACK0[];
-#define g_idle_topstack __USTACK0
+extern uintptr_t        __ustack[];
+#define g_idle_topstack __ustack
 
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-extern uintptr_t        __ISTACK0_END[];
-extern uintptr_t        __ISTACK0[];
-#define g_intstackalloc __ISTACK0_END
-#define g_intstacktop   __ISTACK0
+extern uintptr_t        __istack[];
+#define g_intstackalloc ((uintptr_t)__istack - CONFIG_ARCH_INTERRUPTSTACK)
+#define g_intstacktop   __istack
 #endif
 
 /* These symbols are setup by the linker script. */
@@ -195,12 +193,14 @@ void tricore_doirq(void);
 /* Startup ******************************************************************/
 
 /* tricore_head calls these on CPU0 in this order, and copies .data and
- * clears .bss itself between tricore_wdt_disable and tricore_clockconfig.
- * tricore_wdt_disable runs with the stack and the CSAs set up, but before
- * .data and .bss: it may only use registers and constants.
+ * clears .bss itself before tricore_clockconfig.  tricore_wdt_disable and
+ * tricore_ram_init (TC4xx only) run before .data and .bss, on TC4xx on the
+ * boot stack and CSAs in the PSPR: they may only use registers and
+ * constants.
  */
 
 void tricore_wdt_disable(void);    /* Chip: CPU and safety watchdogs off */
+void tricore_ram_init(void);       /* Chip: RAMs the boot firmware skips */
 int tricore_clockconfig(void);     /* Chip: oscillator, PLLs and dividers */
 void tricore_start(void);          /* Start the other cores, enter NuttX */
 void tricore_main(void);           /* Per core entry into NuttX */

@@ -47,6 +47,7 @@
 /* Core configuration (TC1.8 only) */
 
 #define TRICORE_CPU_CORECON         0xfe14  /* Core Control */
+#define TRICORE_CPU_VCON0           0xb000  /* Virtualization Control 0 */
 
 /* Performance counters */
 
