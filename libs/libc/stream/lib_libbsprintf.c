@@ -26,9 +26,15 @@
 
 #include <nuttx/streams.h>
 
+#include <inttypes.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+
+#ifdef CONFIG_LIBC_BFORMAT_B16
+#  include <fixedmath.h>
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -49,6 +55,9 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
     size_t sz;
     ptrdiff_t pd;
     uintptr_t p;
+#ifdef CONFIG_LIBC_BFORMAT_B16
+    b16_t b16;
+#endif
 #ifdef CONFIG_HAVE_DOUBLE
     float f;
     double d;
@@ -142,6 +151,41 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
 
           infmt = false;
         }
+#ifdef CONFIG_LIBC_BFORMAT_B16
+      else if (strchr("aAeEfFgG", c) != NULL && *(fmt - 2) == 'h')
+        {
+          /* %hf is a b16_t (16.16 fixed-point) value */
+
+          offset += sizeof(var->b16);
+
+#  ifdef CONFIG_LIBC_FLOATINGPOINT
+          ret += lib_sprintf(s, fmtstr, b16tod(var->b16));
+#  else
+          /* No floating point printf: print as integer.fraction with four
+           * decimal digits. The width and precision are ignored.
+           */
+
+          {
+            uint32_t uv = var->b16 < 0 ? -(uint32_t)var->b16 :
+                                         (uint32_t)var->b16;
+            uint32_t ip = uv >> 16;
+            uint32_t fp = (uint32_t)((((uint64_t)(uv & 0xffff)) * 10000 +
+                                      0x8000) >> 16);
+
+            if (fp >= 10000)
+              {
+                ip++;
+                fp -= 10000;
+              }
+
+            ret += lib_sprintf(s, "%s%" PRIu32 ".%04" PRIu32,
+                               var->b16 < 0 ? "-" : "", ip, fp);
+          }
+#  endif
+
+          infmt = false;
+        }
+#endif
       else if (c == 'e' || c == 'f' || c == 'g' || c == 'a' ||
                c == 'A' || c == 'E' || c == 'F' || c == 'G')
         {
