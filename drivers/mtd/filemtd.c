@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mount.h>
+#include <limits.h>
 #include <stdint.h>
 #include <fcntl.h>
 #include <string.h>
@@ -690,6 +691,30 @@ static ssize_t mtd_loop_write(FAR struct file *filep,
 #endif /* CONFIG_MTD_LOOP */
 
 /****************************************************************************
+ * Name: mtd_loop_copyname
+ *
+ * Description:
+ *   Read a name in user memory once, into copy (PATH_MAX + 1 bytes): the
+ *   inode tree lock is held when the name is used.  NULL stays NULL.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_MTD_LOOP) && defined(CONFIG_BUILD_KERNEL)
+static FAR const char *mtd_loop_copyname(FAR char *copy,
+                                         FAR const char *name)
+{
+  if (name == NULL)
+    {
+      return NULL;
+    }
+
+  memccpy(copy, name, '\0', PATH_MAX);
+  copy[PATH_MAX] = '\0';
+  return copy;
+}
+#endif
+
+/****************************************************************************
  * Name: mtd_loop_ioctl
  ****************************************************************************/
 
@@ -718,12 +743,22 @@ static int mtd_loop_ioctl(FAR struct file *filep, int cmd,
             }
           else
             {
+              FAR const char *devname = setup->devname;
+              FAR const char *filename = setup->filename;
+#ifdef CONFIG_BUILD_KERNEL
+              char name[PATH_MAX + 1];
+              char file[PATH_MAX + 1];
+
+              devname = mtd_loop_copyname(name, devname);
+              filename = mtd_loop_copyname(file, filename);
+#endif
+
 #  ifndef CONFIG_MTD_CONFIG_NONE
-              ret = mtd_loop_setup(setup->devname, setup->filename,
+              ret = mtd_loop_setup(devname, filename,
                                    setup->sectsize, setup->erasesize,
                                    setup->offset, setup->configdata);
 #  else
-              ret = mtd_loop_setup(setup->devname, setup->filename,
+              ret = mtd_loop_setup(devname, filename,
                                    setup->sectsize, setup->erasesize,
                                    setup->offset);
 #  endif
@@ -749,6 +784,12 @@ static int mtd_loop_ioctl(FAR struct file *filep, int cmd,
             }
           else
             {
+#ifdef CONFIG_BUILD_KERNEL
+              char name[PATH_MAX + 1];
+
+              devname = mtd_loop_copyname(name, devname);
+#endif
+
               ret = mtd_loop_teardown(devname);
             }
         }
