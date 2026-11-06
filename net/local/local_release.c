@@ -75,17 +75,21 @@ int local_release(FAR struct local_conn_s *conn)
     {
       FAR struct local_conn_s *accept;
       FAR dq_entry_t *waiter;
-      FAR dq_entry_t *tmp;
 
       DEBUGASSERT(conn->lc_proto == SOCK_STREAM);
 
-      /* Are there still clients waiting for a connection to the server? */
+      /* Are there still clients waiting for a connection to the server?
+       * local_subref() can come back to this function for the accept
+       * connection, and that call takes the lock.
+       */
 
-      dq_for_every_safe(&conn->u.server.lc_waiters, waiter, tmp)
+      while ((waiter = dq_remfirst(&conn->u.server.lc_waiters)) != NULL)
         {
           accept = container_of(waiter, struct local_conn_s,
                                 u.accept.lc_waiter);
+          local_unlock();
           local_subref(accept);
+          local_lock();
         }
 
       conn->u.server.lc_pending = 0;
