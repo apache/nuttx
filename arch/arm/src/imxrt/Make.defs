@@ -171,7 +171,9 @@ CHIP_CSRCS += imxrt_usbdev.c
 endif
 
 ifeq ($(CONFIG_IMXRT_ADC),y)
-ifeq ($(CONFIG_IMXRT_ADC_VER2),y)
+ifeq ($(CONFIG_IMXRT_ADC_VER3),y)
+CHIP_CSRCS += imxrt_adc_ver3.c
+else ifeq ($(CONFIG_IMXRT_ADC_VER2),y)
 CHIP_CSRCS += imxrt_adc_ver2.c
 else
 CHIP_CSRCS += imxrt_adc_ver1.c
