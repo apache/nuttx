@@ -143,13 +143,11 @@ set_property(
 set(SDK_CSRCS
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxAp_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxDma_cfg.c"
-    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/TC4Dx/IfxPort_cfg_TC4Dx.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Ap/Std/IfxApApu.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Ap/Std/IfxApProt.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Clock/Std/IfxClock.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Dma/Dma/IfxDma_Dma.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Dma/Std/IfxDma.c"
-    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Port/Std/IfxPort.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxCpu_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Cpu/Std/IfxCpu.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Scu/Std/IfxScuEru.c"
