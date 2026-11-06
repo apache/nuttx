@@ -205,6 +205,10 @@ int tricore_clockconfig(void);     /* Chip: oscillator, PLLs and dividers */
 void tricore_start(void);          /* Start the other cores, enter NuttX */
 void tricore_main(void);           /* Per core entry into NuttX */
 
+/* Clocks *******************************************************************/
+
+uint32_t tricore_clock_asclinf(void);
+
 /* Signal handling **********************************************************/
 
 void tricore_sigdeliver(void);
