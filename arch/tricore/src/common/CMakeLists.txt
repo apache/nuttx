@@ -39,6 +39,7 @@ set(SRCS
     tricore_releasestack.c
     tricore_saveusercontext.c
     tricore_stackframe.c
+    tricore_start.c
     tricore_svcall.c
     tricore_tcbinfo.c
     tricore_trapcall.c
@@ -53,10 +54,6 @@ if(CONFIG_BUILD_PROTECTED OR CONFIG_BUILD_KERNEL)
   if(CONFIG_BUILD_PROTECTED)
     target_sources(arch_interface PRIVATE tricore_signal_handler.c)
   endif()
-endif()
-
-if(CONFIG_ARCH_CHIP_TC3XX)
-  list(APPEND SRCS tricore_start.c)
 endif()
 
 if(CONFIG_SCHED_BACKTRACE)
@@ -89,14 +86,10 @@ target_sources(nuttx PRIVATE tricore_doirq.c)
 
 if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
   target_sources(nuttx PRIVATE tasking/tricore_vectors.${ASMEXT})
-  if(CONFIG_ARCH_CHIP_TC3XX)
-    target_sources(nuttx PRIVATE tasking/tricore_head.${ASMEXT})
-  endif()
+  target_sources(nuttx PRIVATE tasking/tricore_head.${ASMEXT})
 else()
   target_sources(nuttx PRIVATE gnu/tricore_vectors.${ASMEXT})
-  if(CONFIG_ARCH_CHIP_TC3XX)
-    target_sources(nuttx PRIVATE gnu/tricore_head.${ASMEXT})
-  endif()
+  target_sources(nuttx PRIVATE gnu/tricore_head.${ASMEXT})
 endif()
 target_compile_options(arch PRIVATE ${IFXFLAGS})
 target_compile_options(nuttx PRIVATE ${IFXFLAGS})

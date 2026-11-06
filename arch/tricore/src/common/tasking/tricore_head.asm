@@ -24,7 +24,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <arch/csfr.h>
+#ifdef CONFIG_ARCH_CHIP_TC4XX
+#  include "hardware/tc4xx_vmt.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -33,7 +37,13 @@
 #define TRICORE_PSW_RESET  0x980   /* Supervisor, call depth counting on */
 #define TRICORE_BIV_VECTOR 0x1fe0  /* Single interrupt vector at INTTAB + 0x1fe0 */
 
-#define TC3XX_WDTCPU0_CON0 0xf003624c  /* CPU0 watchdog CON0, 0xc apart per CPU */
+#ifdef CONFIG_ARCH_CHIP_TC3XX
+#  define TC3XX_WDTCPU0_CON0 0xf003624c  /* CPU0 watchdog CON0, 0xc apart per CPU */
+#endif
+#ifdef CONFIG_ARCH_CHIP_TC4XX
+#  define TC4XX_PSW_VIRT     0xb00       /* PSW for disabling the virtualization */
+#  define TC4XX_UCB0_RAMINIT 0xae408814  /* SRAMs that the boot firmware initializes */
+#endif
 
 /* Make the CSA link word of the CSA address in addr: the segment in bits
  * 19:16 and the offset in bits 15:0.
@@ -64,6 +74,9 @@ tricore_csa_link .macro addr, tmp1, tmp2
 	.extern	__TRAPTAB_CPU0
 	.extern	__INTTAB_CPU0
 	.extern	__psram_ustack
+#ifdef CONFIG_ARCH_CHIP_TC4XX
+	.extern	__psram_boot_csa
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -83,12 +96,38 @@ tricore_csa_link .macro addr, tmp1, tmp2
  *   On TC3xx BTV, BIV, ISP, PCON0 and DCON0 are CPU ENDINIT protected,
  *   so the ENDINIT of the CPU watchdog is cleared around them.
  *
+ *   TC4xx first disables the virtualization with a call to
+ *   tricore_virt_off, on the boot stack and the single boot CSA in the
+ *   PSPR that the linker script gives, as the iLLD startup code does.
+ *   Then, before anything is stored there, it initializes the DSPR (CSA
+ *   list, stacks) and the DLMU (.data, .bss) of CPU0 if the boot firmware
+ *   does not, and before .data and .bss the LMU and MCAN RAMs, which the
+ *   boot firmware never initializes.
+ *
  ****************************************************************************/
 
 	.sdecl	".text.tricore_head",code
 	.sect	".text.tricore_head"
 tricore_head:
+#ifdef CONFIG_ARCH_CHIP_TC3XX
 	jl	tc3xx_endinit_clear
+
+#endif
+	movh.a	a15, #@HIS(__TRAPTAB_CPU0)
+	lea	a15, [a15]@LOS(__TRAPTAB_CPU0)
+	mov.d	d15, a15
+	mtcr	#TRICORE_CPU_BTV, d15
+	isync
+
+#ifdef CONFIG_ARCH_CHIP_TC4XX
+	movh.a	a15, #@HIS(__psram_boot_csa)
+	lea	a15, [a15]@LOS(__psram_boot_csa)
+	mov.d	d15, a15
+	tricore_csa_link d15, d14, d13
+	mtcr	#TRICORE_CPU_FCX, d15
+	isync
+
+	call	tricore_virt_off
 
 	movh.a	a15, #@HIS(__TRAPTAB_CPU0)
 	lea	a15, [a15]@LOS(__TRAPTAB_CPU0)
@@ -96,6 +135,24 @@ tricore_head:
 	mtcr	#TRICORE_CPU_BTV, d15
 	isync
 
+	; The DSPR and the DLMU of CPU0, unless UCB0_RAMINIT has the boot
+	; firmware initialize them after every power-on reset: RAMIN 0 and the
+	; CPU0 bits of RAMINSEL and LMUINSEL 0
+
+	movh.a	a15, #@HIS(TC4XX_UCB0_RAMINIT)
+	ld.w	d15, [a15]@LOS(TC4XX_UCB0_RAMINIT)
+	mov	d5, #0x11
+	extr.u	d0, d15, #0, #2
+	jnz	d0, 1n
+	extr.u	d0, d15, #16, #1
+	extr.u	d1, d15, #24, #1
+	sh	d1, d1, #4
+	or	d5, d0, d1
+1:
+	mov	d4, #0
+	jl	tc4xx_sram_clear
+
+#endif
 	; Caches on, interrupt vector, interrupt stack
 
 	mov	d15, #0
@@ -139,8 +196,10 @@ tricore_head:
 	mtcr	#TRICORE_CPU_LCX, d15
 	isync
 
+#ifdef CONFIG_ARCH_CHIP_TC3XX
 	jl	tc3xx_endinit_set
 
+#endif
 	movh.a	a10, #@HIS(__ustack)
 	lea	a10, [a10]@LOS(__ustack)
 	dsync
@@ -160,6 +219,21 @@ tricore_head:
 
 	call	tricore_wdt_disable
 
+#ifdef CONFIG_ARCH_CHIP_TC4XX
+	; The LMU and MCAN RAMs, which the boot firmware never initializes:
+	; LMU0, 1 and 4 to 6, LMU2, 3 and 7 to 9, and MCAN0 to 4
+
+	mov	d4, #0
+	movh	d5, #0x0f80
+	jl	tc4xx_sram_clear
+	mov	d4, #1
+	mov	d5, #0x1f
+	jl	tc4xx_sram_clear
+	mov	d4, #5
+	mov	d5, #0x7c
+	jl	tc4xx_sram_clear
+
+#endif
 	; Copy .data from its image in flash and clear .bss, a word at a time
 	; up to the word aligned ends that the linker script gives
 
@@ -197,6 +271,7 @@ tricore_head:
 	lea	a15, [a15]@LOS(tricore_start)
 	ji	a15
 
+#ifdef CONFIG_ARCH_CHIP_TC3XX
 /****************************************************************************
  * Name: tc3xx_endinit_clear, tc3xx_endinit_set
  *
@@ -241,6 +316,118 @@ tc3xx_endinit_set:
 	extr.u	d15, d15, #0, #1
 	jne	d15, d5, 4p
 	ji	a11
+#endif
+
+#ifdef CONFIG_ARCH_CHIP_TC4XX
+/****************************************************************************
+ * Name: tricore_virt_off
+ *
+ * Description:
+ *   Disable the virtualization and return with rfh.
+ *
+ ****************************************************************************/
+
+tricore_virt_off:
+	mov	d0, #0
+	mtcr	#TRICORE_CPU_VCON0, d0
+	isync
+	mov	d0, #TC4XX_PSW_VIRT
+	mtcr	#TRICORE_CPU_PSW, d0
+	isync
+	rfh
+
+/****************************************************************************
+ * Name: tc4xx_sram_clear
+ *
+ * Description:
+ *   Fill the SRAMs of the SSHs in the mask d5 of the VMT group d4, the SSH
+ *   selectors 32 * d4 to 32 * d4 + 31, one after the other with ECC
+ *   correct zeros through MCONTROL.SRAM_CLR, as IfxVmt_clearSram does.
+ *   Called with jl, as it runs before the CSA list exists; it uses d0 to
+ *   d3, d5, d15, a14 and a15.
+ *
+ ****************************************************************************/
+
+tc4xx_sram_clear:
+	movh	d15, #@HIS(TC4XX_VMT_BASE)
+	sh	d0, d4, #17
+	add	d15, d15, d0
+	mov.a	a15, d15
+	ld.w	d15, [a15]TC4XX_VMT_CLC
+	jz.t	d15, #1, 1n
+	mov	d15, #0
+	st.w	[a15]TC4XX_VMT_CLC, d15
+1:
+	mov	d1, #0
+2:
+	jeq	d5, #0, 8n
+	jz.t	d5, #0, 7n
+	mov	d2, #1
+	sh	d2, d2, d1
+	sh	d3, d1, #9
+	mov.a	a14, d3
+	add.a	a14, a14, a15
+	lea	a14, [a14]TC4XX_VMT_MC(0)
+
+	; Enable the MBIST shell and start the clear
+
+	ld.w	d15, [a14]TC4XX_VMT_MC_ALMSRCS
+	andn	d15, d15, #TC4XX_ALMSRCS_ALARMS
+	st.w	[a14]TC4XX_VMT_MC_ALMSRCS, d15
+	ld.w	d15, [a15]TC4XX_VMT_MEMTEST
+	or	d15, d15, d2
+	st.w	[a15]TC4XX_VMT_MEMTEST, d15
+3:
+	ld.w	d15, [a15]TC4XX_VMT_MEMSTAT
+	and	d15, d15, d2
+	jnz	d15, 3p
+
+	mov.u	d15, #0x8001
+	st.w	[a14]TC4XX_VMT_MC_MCONTROL, d15
+	ld.w	d15, [a14]TC4XX_VMT_MC_MCONTROL
+	andn	d15, d15, #1
+	st.w	[a14]TC4XX_VMT_MC_MCONTROL, d15
+4:
+	ld.w	d15, [a15]TC4XX_VMT_MEMDONE
+	and	d15, d15, d2
+	jz	d15, 4p
+
+	; Read address 0 once, then disable the MBIST shell again
+
+	mov	d15, #0x8
+	st.w	[a14]TC4XX_VMT_MC_MCONTROL, d15
+	mov	d15, #0x1001
+	st.w	[a14]TC4XX_VMT_MC_CONFIG0, d15
+	mov	d15, #0
+	st.w	[a14]TC4XX_VMT_MC_CONFIG1, d15
+	st.w	[a14]TC4XX_VMT_MC_RANGE, d15
+	mov	d15, #0x9
+	st.w	[a14]TC4XX_VMT_MC_MCONTROL, d15
+	mov	d15, #0x8
+	st.w	[a14]TC4XX_VMT_MC_MCONTROL, d15
+5:
+	ld.w	d15, [a15]TC4XX_VMT_MEMDONE
+	and	d15, d15, d2
+	jz	d15, 5p
+
+	ld.w	d15, [a15]TC4XX_VMT_MEMTEST
+	andn	d15, d15, d2
+	st.w	[a15]TC4XX_VMT_MEMTEST, d15
+6:
+	ld.w	d15, [a15]TC4XX_VMT_MEMSTAT
+	and	d15, d15, d2
+	jnz	d15, 6p
+
+	ld.w	d15, [a14]TC4XX_VMT_MC_ALMSRCS
+	or	d15, d15, #TC4XX_ALMSRCS_ALARMS
+	st.w	[a14]TC4XX_VMT_MC_ALMSRCS, d15
+7:
+	sh	d5, d5, #-1
+	add	d1, d1, #1
+	j	2p
+8:
+	ji	a11
+#endif
 
 /****************************************************************************
  * Public Functions

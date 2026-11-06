@@ -36,10 +36,17 @@
 OUTPUT_FORMAT("elf32-tricore")
 OUTPUT_ARCH("tricore")
 #if CONFIG_CPU_COREID == 0
-ENTRY(_START)
+ENTRY(__start)
 #endif
 
 __TRICORE_DERIVATE_MEMORY_MAP__ = 0x490;
+
+/* Boot stack and single boot CSA in the PSPR, which the startup code uses
+ * to disable the virtualization before it links the CSAs
+ */
+
+__psram_ustack   = 0x7010eb00;
+__psram_boot_csa = 0x7010ec00;
 
 LCF_PFLASH_KERNEL_START = GENERATE_CORE_PFLASH_KERNEL_START(CONFIG_CPU_COREID);
 LCF_PFLASH_KERNEL_SIZE  = GENERATE_CORE_PFLASH_KERNEL_SIZE(CONFIG_CPU_COREID);
@@ -116,7 +123,7 @@ SECTIONS
         PROVIDE(__USTACK_END = .);
         PROVIDE(COREID_MID(__USTACK, _END) = .);
         . = . + LCF_USTACK_SIZE;
-        PROVIDE(__USTACK = .);
+        PROVIDE(__ustack = .);
         PROVIDE(COREID_LST(__USTACK) = .);
     }
 
@@ -126,17 +133,20 @@ SECTIONS
         PROVIDE(COREID_MID(__ISTACK, _END) = .);
         . = . + LCF_ISTACK_SIZE;
         PROVIDE(__ISTACK = .);
+        PROVIDE(__istack = .);
         PROVIDE(COREID_LST(__ISTACK) = .);
     }
     CORE_SEC(.csa) (LCF_DSPR_KERNEL_START + LCF_CSA_OFFSET):
     {
         PROVIDE(COREID_LST(__CSA) = .);
+        PROVIDE(__csa_begin = .);
         . = . + LCF_CSA_SIZE;
         PROVIDE(COREID_MID(__CSA, _END) = .);
+        PROVIDE(__csa_end = .);
     }
 }
 
-/*Fixed memory Allocations for _START*/
+/*Fixed memory Allocations for __start*/
 CORE_ID = GLOBAL ;
 SECTIONS
 {
@@ -172,15 +182,15 @@ SECTIONS
     } > pfls
 }
 
-/*Fixed memory Allocations for _START1 to 5 */
+/*Fixed memory Allocations for __start1 to 5 */
 CORE_ID = GLOBAL ;
 SECTIONS
 {
-    PROVIDE(__START1 = CORE1_PFLASH_KERNEL_START);
-    PROVIDE(__START2 = CORE2_PFLASH_KERNEL_START);
-    PROVIDE(__START3 = CORE3_PFLASH_KERNEL_START);
-    PROVIDE(__START4 = CORE4_PFLASH_KERNEL_START);
-    PROVIDE(__START5 = CORE5_PFLASH_KERNEL_START);
+    PROVIDE(__start1 = CORE1_PFLASH_KERNEL_START);
+    PROVIDE(__start2 = CORE2_PFLASH_KERNEL_START);
+    PROVIDE(__start3 = CORE3_PFLASH_KERNEL_START);
+    PROVIDE(__start4 = CORE4_PFLASH_KERNEL_START);
+    PROVIDE(__start5 = CORE5_PFLASH_KERNEL_START);
 }
 
 /*Fixed memory Allocations for Interrupt Vector Table*/
@@ -227,7 +237,7 @@ SECTIONS
         *(.sbss.*)
     } > cpu_dlmu
     _SMALL_DATA_ = SIZEOF(CORE_SEC(.sdata)) ? ADDR(CORE_SEC(.sdata)) : (ADDR(CORE_SEC(.sdata)) & 0xF0000000) + 32k ;
-    __A0_MEM = _SMALL_DATA_;
+    __a0_mem = _SMALL_DATA_;
 }
 
 CORE_ID = GLOBAL;
@@ -242,7 +252,7 @@ SECTIONS
         *(.srodata.*)
     } > pfls
     _SMALL_DATA2_ = SIZEOF(CORE_SEC(.sdata2)) ? ADDR(CORE_SEC(.sdata2)) : (ADDR(CORE_SEC(.sdata2)) & 0xF0000000) + 32k ;
-    __A1_MEM = _SMALL_DATA2_;
+    __a1_mem = _SMALL_DATA2_;
 }
 
 CORE_ID = GLOBAL;
@@ -263,7 +273,7 @@ SECTIONS
     } > cpu_dlmu
 
     _SMALL_DATA4_ = SIZEOF(CORE_SEC(.sdata4)) ? ADDR(CORE_SEC(.sdata4)) : (ADDR(CORE_SEC(.sdata4)) & 0xF0000000) + 32k ;
-    __A9_MEM = _SMALL_DATA4_;
+    __a9_mem = _SMALL_DATA4_;
 
     /*Relative A8 Addressable Const, selectable with patterns and user defined sections*/
     CORE_SEC(.sdata3) : FLAGS(arsl)
@@ -273,7 +283,7 @@ SECTIONS
     } > pfls
 
     _SMALL_DATA3_ = SIZEOF(CORE_SEC(.sdata3)) ? ADDR(CORE_SEC(.sdata3)) : (ADDR(CORE_SEC(.sdata3)) & 0xF0000000) + 32k ;
-    __A8_MEM = _SMALL_DATA3_;
+    __a8_mem = _SMALL_DATA3_;
 }
 
 /*kstack*/
@@ -340,7 +350,27 @@ SECTIONS
         *(.lmubss_cpu?.*)
         *(.gnu.linkonce.b.*)
     } > cpu_dlmu
+
+    /* .data and .bss for the startup code in tricore_head, which copies and
+     * clears them as one block each, so the other data sections of this
+     * script have to stay empty
+     */
+
+    _data_flash = LOADADDR(.data);
+    _sdata = ADDR(.data);
+    _edata = ADDR(.data) + SIZEOF(.data);
+    _sbss = ADDR(.bss);
+    _ebss = ALIGN(ADDR(.bss) + SIZEOF(.bss), 4);
 }
+
+ASSERT(SIZEOF(.dspr_data) + SIZEOF(.zdata) + SIZEOF(.sdata) +
+       SIZEOF(.sdata4) + SIZEOF(.psram_text) == 0,
+       "initialized data outside .data, the startup does not copy it")
+ASSERT(SIZEOF(.dspr_bss) + SIZEOF(.zbss) + SIZEOF(.sbss) +
+       SIZEOF(.sbss4) == 0,
+       "zeroed data outside .bss, the startup does not clear it")
+ASSERT(_sdata % 4 == 0 && _sbss % 4 == 0 && _data_flash % 4 == 0,
+       ".data and .bss have to be word aligned")
 
 /*Heap*/
 CORE_ID = GLOBAL;

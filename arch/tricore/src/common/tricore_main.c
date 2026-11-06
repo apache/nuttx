@@ -79,6 +79,19 @@ static void tricore_core_sync(volatile uint32_t *sync)
     }
 }
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tricore_main
+ *
+ * Description:
+ *   Entry into NuttX, called by tricore_start on CPU0: initialize the FPU
+ *   and the MPU, wait for the other cores and start NuttX.
+ *
+ ****************************************************************************/
+
 void tricore_main(void)
 {
   static volatile uint32_t g_sync_event;
@@ -109,50 +122,4 @@ void tricore_main(void)
     }
 
   while (1);
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-void core0_main(void)
-{
-  /* All WDTs except WDTCPU0 and system watchdog WDTSYS are in
-   * disabled mode after Boot-FW execution. Disable the watchdog
-   * to ensure the normal startup of the system.
-   */
-
-  tricore_wdt_disable();
-
-  tricore_main();
-}
-
-void core1_main(void)
-{
-  tricore_main();
-}
-
-void core2_main(void)
-{
-  tricore_main();
-}
-
-void core3_main(void)
-{
-  tricore_main();
-}
-
-void core4_main(void)
-{
-  tricore_main();
-}
-
-void core5_main(void)
-{
-  tricore_main();
-}
-
-void core6_main(void)
-{
-  tricore_main();
 }

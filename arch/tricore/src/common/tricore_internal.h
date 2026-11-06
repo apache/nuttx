@@ -155,17 +155,15 @@ struct tricore_trap_s
  * end of the heap is CONFIG_RAM_END
  */
 
-extern uintptr_t        __USTACK0_END[];
-extern uintptr_t        __USTACK0[];
-#define g_idle_topstack __USTACK0
+extern uintptr_t        __ustack[];
+#define g_idle_topstack __ustack
 
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-extern uintptr_t        __ISTACK0_END[];
-extern uintptr_t        __ISTACK0[];
-#define g_intstackalloc __ISTACK0_END
-#define g_intstacktop   __ISTACK0
+extern uintptr_t        __istack[];
+#define g_intstackalloc ((uintptr_t)__istack - CONFIG_ARCH_INTERRUPTSTACK)
+#define g_intstacktop   __istack
 #endif
 
 /* These symbols are setup by the linker script. */

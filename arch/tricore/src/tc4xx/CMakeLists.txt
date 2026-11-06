@@ -141,7 +141,6 @@ set_property(
   PROPERTY NUTTX_INCLUDE_DIRECTORIES ${SDK_INCDIR})
 
 set(SDK_CSRCS
-    "${CONFIG_DIR}/Ifx_Cfg_Ssw.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxAp_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxDma_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxAsclin_cfg.c"
@@ -162,9 +161,7 @@ set(SDK_CSRCS
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Smu/Std/IfxSmu.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Vmt/Std/IfxVmt.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Wtu/Std/IfxWtu.c"
-    "${ILLD_DIR}/Libraries/Infra/Platform/Compilers/CompilerTasking.c"
-    "${ILLD_DIR}/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c"
-    "${ILLD_DIR}/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Tc0.c")
+    "${ILLD_DIR}/Libraries/Infra/Platform/Compilers/CompilerTasking.c")
 
 target_sources(nuttx PRIVATE ${SDK_CSRCS})
 

@@ -33,7 +33,7 @@ CMN_CSRCS += tricore_idle.c
 CMN_CSRCS += tricore_initialize.c
 CMN_CSRCS += tricore_initialstate.c
 CMN_CSRCS += tricore_irq.c
-CMN_CSRCS += tricore_main.c
+CMN_CSRCS += tricore_main.c tricore_start.c
 CMN_CSRCS += tricore_nputs.c
 CMN_CSRCS += tricore_perf.c
 CMN_CSRCS += tricore_registerdump.c
@@ -55,10 +55,7 @@ endif
 
 HEAD_ASRC += tricore_vectors$(ASMEXT)
 
-ifeq ($(CONFIG_ARCH_CHIP_TC3XX),y)
 HEAD_ASRC += tricore_head$(ASMEXT)
-CMN_CSRCS += tricore_start.c
-endif
 VPATH += common$(DELIM)$(TRICORE_SUBDIR)
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
