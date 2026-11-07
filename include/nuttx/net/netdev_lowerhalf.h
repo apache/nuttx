@@ -180,6 +180,12 @@ struct netdev_ops_s
   /* reclaim - try to reclaim packets sent by netdev. */
 
   CODE void (*reclaim)(FAR struct netdev_lowerhalf_s *dev);
+
+#ifdef CONFIG_NET_NETPOLL
+  /* txpoll - Wait for transmission done. */
+
+  CODE void (*txpoll)(FAR struct netdev_lowerhalf_s *dev);
+#endif
 };
 
 /* This structure is a set of wireless handlers, leave unsupported operations
