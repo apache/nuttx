@@ -52,9 +52,17 @@ static bool is_union(const char *type)
   return strncmp(type, "union ", 6) == 0;
 }
 
+static bool is_path(const char *type)
+{
+  size_t len = strlen(type);
+
+  return len > 5 && strcmp(type + len - 5, "|path") == 0;
+}
+
 static const char *check_funcptr(const char *type)
 {
   const char *str = strstr(type, "(*)");
+
   if (str)
     {
       return str + 2;
@@ -66,6 +74,7 @@ static const char *check_funcptr(const char *type)
 static const char *check_array(const char *type)
 {
   const char *str = strchr(type, '[');
+
   if (str)
     {
       return str;
@@ -113,6 +122,7 @@ static void get_formalparmtype(const char *arg, char *formal)
 static void get_actualparmtype(const char *arg, char *actual)
 {
   const char *pstart = strchr(arg, '|');
+
   if (pstart)
     {
       /* The actual parameter type starts after the '|' */
@@ -352,7 +362,7 @@ static void generate_proxy(int nfixed, int nparms)
   fprintf(stream, ");\n");
   if (strcmp(g_parm[RETTYPE_INDEX], "noreturn") == 0)
     {
-        fprintf(stream, "  while(1);\n");
+      fprintf(stream, "  while(1);\n");
     }
 
   fprintf(stream, "}\n");
@@ -432,6 +442,18 @@ static void generate_stub(int nfixed, int nparms)
   fprintf(stream, "#include <string.h>\n");
   fprintf(stream, "#endif\n");
 
+  for (i = 0; i < nparms; i++)
+    {
+      if (is_path(g_parm[PARM1_INDEX + i]))
+        {
+          fprintf(stream, "#ifdef CONFIG_BUILD_KERNEL\n");
+          fprintf(stream, "#include <limits.h>\n");
+          fprintf(stream, "#include <string.h>\n");
+          fprintf(stream, "#endif\n");
+          break;
+        }
+    }
+
   if (strlen(g_parm[HEADER_INDEX]) > 0)
     {
       fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
@@ -463,6 +485,51 @@ static void generate_stub(int nfixed, int nparms)
     }
 
   fprintf(stream, ")\n{\n");
+
+  /* In a kernel build another thread of the caller can change or unmap a
+   * path at any time.  Read it from user memory once, here, where no lock is
+   * held.  The function called below only sees the copy.
+   */
+
+  for (i = 0; i < nparms; i++)
+    {
+      if (is_path(g_parm[PARM1_INDEX + i]))
+        {
+          break;
+        }
+    }
+
+  if (i < nparms)
+    {
+      int j;
+
+      fprintf(stream, "#ifdef CONFIG_BUILD_KERNEL\n");
+
+      for (j = i; j < nparms; j++)
+        {
+          if (is_path(g_parm[PARM1_INDEX + j]))
+            {
+              fprintf(stream, "  char _path%d[PATH_MAX + 1];\n", j + 1);
+            }
+        }
+
+      for (j = i; j < nparms; j++)
+        {
+          if (is_path(g_parm[PARM1_INDEX + j]))
+            {
+              fprintf(stream, "\n  if (parm%d != 0)\n    {\n", j + 1);
+              fprintf(stream, "      strncpy(_path%d, "
+                              "(FAR const char *)parm%d, PATH_MAX);\n",
+                              j + 1, j + 1);
+              fprintf(stream, "      _path%d[PATH_MAX] = '\\0';\n", j + 1);
+              fprintf(stream, "      parm%d = (uintptr_t)_path%d;\n",
+                              j + 1, j + 1);
+              fprintf(stream, "    }\n");
+            }
+        }
+
+      fprintf(stream, "#endif\n\n");
+    }
 
   /* Fixed union illegal type for cast */
 
@@ -514,8 +581,8 @@ static void generate_stub(int nfixed, int nparms)
        * -- Yech.
        */
 
-     get_formalparmtype(g_parm[PARM1_INDEX + i], formal);
-     get_actualparmtype(g_parm[PARM1_INDEX + i], actual);
+      get_formalparmtype(g_parm[PARM1_INDEX + i], formal);
+      get_actualparmtype(g_parm[PARM1_INDEX + i], actual);
 
       /* Treat the first argument in the list differently from the others..
        * It does not need a comma before it.
@@ -673,7 +740,7 @@ static void generate_wrapper(int nfixed, int nparms)
 
   if (i < nparms)
     {
-       fprintf(stream, ", ...)\n{\n");
+      fprintf(stream, ", ...)\n{\n");
     }
   else
     {
@@ -940,15 +1007,15 @@ int main(int argc, char **argv, char **envp)
 
   if (optind >= argc)
     {
-       fprintf(stderr, "Missing <CSV file>\n");
-       show_usage(argv[0]);
+      fprintf(stderr, "Missing <CSV file>\n");
+      show_usage(argv[0]);
     }
 
   csvpath = argv[optind];
   if (++optind < argc)
     {
-       fprintf(stderr, "Unexpected garbage at the end of the line\n");
-       show_usage(argv[0]);
+      fprintf(stderr, "Unexpected garbage at the end of the line\n");
+      show_usage(argv[0]);
     }
 
   /* Open the CSV file */
@@ -969,6 +1036,7 @@ int main(int argc, char **argv, char **envp)
       /* Parse the line from the CVS file */
 
       int nargs = parse_csvline(ptr);
+
       if (nargs < PARM1_INDEX)
         {
           fprintf(stderr, "Only %d arguments found: %s\n", nargs, g_line);
