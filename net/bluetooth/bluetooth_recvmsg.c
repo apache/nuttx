@@ -351,7 +351,15 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Get the device driver that will service this transfer */
 
-  radio = bluetooth_find_device(conn, &conn->bc_laddr);
+  if (psock->s_proto == BTPROTO_HCI)
+    {
+      radio = bluetooth_find_device_byindex(conn->bc_ldev);
+    }
+  else
+    {
+      radio = bluetooth_find_device(conn, &conn->bc_laddr);
+    }
+
   if (radio == NULL)
     {
       ret = -ENODEV;
