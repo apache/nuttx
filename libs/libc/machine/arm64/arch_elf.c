@@ -701,6 +701,11 @@ int up_relocateadd(const Elf64_Rela *rel, const Elf64_Sym *sym,
 
         /* fallthrough */
 
+      /* For the GOT relocations, the loader gives the address of the GOT
+       * slot as the value of the symbol.
+       */
+
+      case R_AARCH64_ADR_GOT_PAGE:
       case R_AARCH64_ADR_PREL_PG_HI21:
         {
           if (((uint64_t)addr & 0xfff) < 0xff8)
@@ -760,6 +765,7 @@ int up_relocateadd(const Elf64_Rela *rel, const Elf64_Sym *sym,
         }
         break;
 
+      case R_AARCH64_LD64_GOT_LO12_NC:
       case R_AARCH64_LDST64_ABS_LO12_NC:
         {
           overflow_check = false;
