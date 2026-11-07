@@ -93,5 +93,6 @@ kwarning
 SAVEMake.defs
 SAVEconfig
 .aider*
+.mcp.json
 imx9-norimage.img
 config.txt
