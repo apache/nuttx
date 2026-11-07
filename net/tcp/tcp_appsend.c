@@ -277,6 +277,7 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                 uint16_t result)
 {
   uint8_t hdrlen;
+  uint16_t sendflags = TCP_ACK | TCP_PSH;
 
   ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %" PRId32 "\n",
         result, dev->d_sndlen, (uint32_t)conn->tx_unacked);
@@ -290,6 +291,13 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   /* If the application has data to be sent, or if the incoming packet had
    * new data in it, we must send out a packet.
    */
+
+#ifdef CONFIG_NET_TCPURGDATA
+  if (conn->urg_offset > 0)
+    {
+      sendflags |= TCP_URG;
+    }
+#endif
 
 #if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_NET_SENDFILE)
   if (conn->sendfile)
@@ -309,7 +317,7 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
           saveseq = tcp_getsequence(conn->sndseq);
           tcp_setsequence(conn->sndseq, conn->rexmit_seq);
 
-          tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + hdrlen);
+          tcp_send(dev, conn, sendflags, dev->d_sndlen + hdrlen);
 
           tcp_setsequence(conn->sndseq, saveseq);
 
@@ -330,7 +338,7 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
        * the IP and TCP headers.
        */
 
-      tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + hdrlen);
+      tcp_send(dev, conn, sendflags, dev->d_sndlen + hdrlen);
 
       /* Advance sndseq */
 

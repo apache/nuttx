@@ -175,8 +175,24 @@ void tcp_fill_header(FAR struct net_driver_s *dev,
       tcp->wnd[1] = recvwndo & 0xff;
     }
 
+#ifdef CONFIG_NET_TCPURGDATA
+  /* If caller explicitly asked for URG, set the urgent pointer from conn */
+
+  if ((tcp->flags & TCP_URG) != 0 && conn->urg_offset > 0)
+    {
+      tcp->urgp[0] = (uint8_t)(conn->urg_offset >> 8);
+      tcp->urgp[1] = (uint8_t)(conn->urg_offset & 0xff);
+      conn->urg_offset = 0;
+    }
+  else
+    {
+      tcp->urgp[0] = 0;
+      tcp->urgp[1] = 0;
+    }
+#else
   tcp->urgp[0] = 0;
   tcp->urgp[1] = 0;
+#endif
 }
 
 /****************************************************************************
