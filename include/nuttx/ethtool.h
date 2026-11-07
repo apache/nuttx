@@ -127,6 +127,11 @@
 #define ETHTOOL_PHY_STUNABLE  0x0000004f /* Set PHY tunable configuration */
 #define ETHTOOL_GFECPARAM     0x00000050 /* Get FEC settings */
 #define ETHTOOL_SFECPARAM     0x00000051 /* Set FEC settings */
+#define ETHTOOL_GCHANNELS2    0x00000052 /* Get status information of \
+                                          * channels and return it in the \
+                                          * form of bitmap
+                                          **/
+#define ETHTOOL_SCHANNELS2    0x00000053 /* Turn on/off channels */
 
 /* Duplex, half or full. */
 
@@ -212,17 +217,17 @@ struct ethtool_cmd
   uint32_t supported;
   uint32_t advertising;
   uint16_t speed;
-  uint8_t duplex;
-  uint8_t port;
-  uint8_t phy_address;
-  uint8_t transceiver;
-  uint8_t autoneg;
-  uint8_t mdio_support;
+  uint8_t  duplex;
+  uint8_t  port;
+  uint8_t  phy_address;
+  uint8_t  transceiver;
+  uint8_t  autoneg;
+  uint8_t  mdio_support;
   uint32_t maxtxpkt;
   uint32_t maxrxpkt;
   uint16_t speed_hi;
-  uint8_t eth_tp_mdix;
-  uint8_t eth_tp_mdix_ctrl;
+  uint8_t  eth_tp_mdix;
+  uint8_t  eth_tp_mdix_ctrl;
   uint32_t lp_advertising;
   uint32_t reserved[2];
 };
@@ -252,4 +257,52 @@ struct ethtool_ts_info
   uint32_t rx_reserved[3];
 };
 
-#endif
+/* struct ethtool_chns - configuring number of network channel
+ * cmd: ETHTOOL_{G,S}CHANNELS
+ * max_rx: Read only. Maximum number of receive channel the driver support.
+ * max_tx: Read only. Maximum number of transmit channel the driver support.
+ * max_other: Read only. Maximum number of other channel the driver support.
+ * max_combined: Read only. Maximum number of combined channel the driver
+ *    support. Set of queues RX, TX or other.
+ * rx_count: Valid values are in the range 1 to the max_rx.
+ * tx_count: Valid values are in the range 1 to the max_tx.
+ * other_count: Valid values are in the range 1 to the max_other.
+ * combined_count: Valid values are in the range 1 to the max_combined.
+ *
+ * This can be used to configure RX, TX and other channels.
+ */
+
+struct ethtool_chns
+{
+  uint32_t cmd;
+  uint32_t max_rx;
+  uint32_t max_tx;
+  uint32_t max_other;
+  uint32_t max_combined;
+  uint32_t rx_count;
+  uint32_t tx_count;
+  uint32_t other_count;
+  uint32_t combined_count;
+};
+
+/* struct ethtool_chns2 - Configure the network channels in the form of
+ *      bitmask.
+ * cmd: ETHTOOL_{G,S}CHANNELS2
+ * rx_chns_map: Bitmask of receive channels. For example: 0x05 means channel
+ *      0 and channel 2 is enabled for receiving, other channels are disabled
+ *      for receiving.
+ * tx_chns_map: Bitmask of transmit channels.
+ * combined_chns_map: Bitmask of combined channels.
+ *
+ * This can be used to configure RX, TX and other channels.
+ */
+
+struct ethtool_chns2
+{
+  uint32_t cmd;
+  uint32_t rx_chns_map;
+  uint32_t tx_chns_map;
+  uint32_t combined_chns_map;
+};
+
+#endif /* __INCLUDE_NUTTX_ETHTOOL_H */
