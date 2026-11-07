@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/hardware/stm32_exti_m33_v1.h
+ * arch/arm/src/common/stm32/hardware/stm32_exti_m33m55_v1.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_EXTI_M33_V1_H
-#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_EXTI_M33_V1_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_EXTI_M33M55_V1_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_EXTI_M33M55_V1_H
 
 /****************************************************************************
  * Included Files
@@ -52,6 +52,8 @@
 #  define STM32_EXTI_NLINES  59
 #elif defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_EXTI_NLINES  58
+#elif defined(CONFIG_STM32_STM32N6XXXX)
+#  define STM32_EXTI_NLINES  78
 #else
 #  error "Unsupported STM32 M33 EXTI line inventory"
 #endif
@@ -827,4 +829,4 @@
 
 #define EXTI_LOCKR_LOCK           (1 << 0)
 
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_EXTI_M33_V1_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_EXTI_M33M55_V1_H */

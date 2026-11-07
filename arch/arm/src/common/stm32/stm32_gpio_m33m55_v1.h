@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32n6/stm32_gpio.h
+ * arch/arm/src/common/stm32/stm32_gpio_m33m55_v1.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32N6_STM32_GPIO_H
-#define __ARCH_ARM_SRC_STM32N6_STM32_GPIO_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33M55_V1_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33M55_V1_H
 
 /****************************************************************************
  * Included Files
@@ -35,11 +35,10 @@
 #endif
 
 #include <nuttx/irq.h>
-#include <arch/stm32n6/chip.h>
+#include <arch/chip/chip.h>
 
 #include "chip.h"
-#include "hardware/stm32n6xxx_pinmap.h"
-#include "hardware/stm32n6xxx_gpio.h"
+#include "hardware/stm32_gpio_m33m55_v1.h"
 
 /****************************************************************************
  * Pre-Processor Declarations
@@ -180,8 +179,6 @@
  * 9876 5432 1098 7654 3210
  * ---- ---- ---- ---- ----
  * .... .... .... PPPP ....
- *
- * STM32N6 has ports A-H (0-7) and N, O, P, Q (8-11).
  */
 
 #define GPIO_PORT_SHIFT               (4)                        /* Bit 4-7:  Port number */
@@ -194,10 +191,18 @@
 #  define GPIO_PORTF                  (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
 #  define GPIO_PORTG                  (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
 #  define GPIO_PORTH                  (7 << GPIO_PORT_SHIFT)     /*   GPIOH */
+#  define GPIO_PORTI                  (8 << GPIO_PORT_SHIFT)     /*   GPIOI */
+#  define GPIO_PORTJ                  (9 << GPIO_PORT_SHIFT)     /*   GPIOJ */
+#  define GPIO_PORTK                  (10 << GPIO_PORT_SHIFT)    /*   GPIOK */
+
+/* STM32N6 names the ports above H as N, O, P and Q */
+
+#ifdef STM32_GPION_BASE
 #  define GPIO_PORTN                  (8 << GPIO_PORT_SHIFT)     /*   GPION */
 #  define GPIO_PORTO                  (9 << GPIO_PORT_SHIFT)     /*   GPIOO */
 #  define GPIO_PORTP                  (10 << GPIO_PORT_SHIFT)    /*   GPIOP */
 #  define GPIO_PORTQ                  (11 << GPIO_PORT_SHIFT)    /*   GPIOQ */
+#endif
 
 /* This identifies the bit in the port:
  *
@@ -304,9 +309,59 @@ void stm32_gpiowrite(uint32_t pinset, bool value);
 
 bool stm32_gpioread(uint32_t pinset);
 
+/****************************************************************************
+ * Name: stm32_gpiosetevent
+ *
+ * Description:
+ *   Sets/clears GPIO based event and interrupt triggers.
+ *
+ * Input Parameters:
+ *  pinset      - GPIO pin configuration
+ *  risingedge  - Enables interrupt on rising edges
+ *  fallingedge - Enables interrupt on falling edges
+ *  event       - Generate event when set
+ *  func        - When non-NULL, generate interrupt
+ *  arg         - Argument passed to the interrupt callback
+ *
+ * Returned Value:
+ *  Zero (OK) is returned on success, otherwise a negated errno value is
+ *  returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                         bool event, xcpt_t func, void *arg);
+
+/****************************************************************************
+ * Function:  stm32_dumpgpio
+ *
+ * Description:
+ *   Dump all GPIO registers associated with the provided base address
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_FEATURES
+int stm32_dumpgpio(uint32_t pinset, const char *msg);
+#else
+#  define stm32_dumpgpio(p,m)
+#endif
+
+/****************************************************************************
+ * Function:  stm32_gpioinit
+ *
+ * Description:
+ *   Based on configuration within the .config file, it does:
+ *    - Remaps positions of alternative functions.
+ *
+ *   Typically called from stm32_start().
+ *
+ ****************************************************************************/
+
+void stm32_gpioinit(void);
+
 #if defined(__cplusplus)
 }
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32N6_STM32_GPIO_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33M55_V1_H */

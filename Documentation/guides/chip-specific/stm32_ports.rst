@@ -283,10 +283,10 @@ CRC           to be done    not supported
 CRS           to be done    not supported
 DAC           to be done    not supported
 DBGMCU        v5            not supported
-EXTI          M33 v1        arch/arm/src/common/stm32/stm32_exti_gpio_m33_v1.c
+EXTI          M33M55 v1     arch/arm/src/common/stm32/stm32_exti_gpio_m33m55_v1.c
 FDCAN         FDCAN         not supported
 FLASH         to be done    not supported
-GPIO          M33 v1        arch/arm/src/common/stm32/stm32_gpio_m33_v1.c
+GPIO          M33M55 v1     arch/arm/src/common/stm32/stm32_gpio_m33m55_v1.c
 HASH          to be done    not supported
 I2C           to be done    not supported
 I3C           to be done    not supported
@@ -766,28 +766,28 @@ WWDG          v2            arch/arm/src/common/stm32/stm32_wwdg.c
 STM32N6
 -------
 
-============  ============  ===================================
-Peripheral    Core version  Driver                             
-============  ============  ===================================
-ADC           to be done    not supported                      
-CAN/FDCAN     to be done    not supported                      
-DAC           to be done    not supported                      
-ETH           to be done    not supported                      
-EXTI          to be done    not supported                      
-GPIO          to be done    arch/arm/src/stm32n6/stm32_gpio.c  
-GPDMA         to be done    not supported                      
-I2C           to be done    not supported                      
+============  ============  ==================================================
+Peripheral    Core version  Driver
+============  ============  ==================================================
+ADC           to be done    not supported
+CAN/FDCAN     to be done    not supported
+DAC           to be done    not supported
+ETH           to be done    not supported
+EXTI          M33M55 v1     arch/arm/src/common/stm32/stm32_exti_gpio_m33m55_v1.c
+GPIO          M33M55 v1     arch/arm/src/common/stm32/stm32_gpio_m33m55_v1.c
+GPDMA         v1            arch/arm/src/common/stm32/stm32_dma_gpdma.c
+I2C           to be done    not supported
 IWDG          v3            arch/arm/src/common/stm32/stm32_iwdg.c
 LPTIM         v2            arch/arm/src/common/stm32/stm32_lptim.c
-PWR           to be done    arch/arm/src/stm32n6/stm32_pwr.c   
-RCC           to be done    arch/arm/src/stm32n6/stm32_rcc.c   
-SPI/I2S       to be done    not supported                      
+PWR           n6            arch/arm/src/stm32n6/stm32_pwr.c
+RCC           n6            arch/arm/src/stm32n6/stm32n6xx_rcc.c
+SPI/I2S       to be done    not supported
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  v4            arch/arm/src/stm32n6/stm32_serial.c
 USB           device        not supported
 WWDG          v3            arch/arm/src/common/stm32/stm32_wwdg.c
 XSPI          to be done    not supported
-============  ============  ===================================
+============  ============  ==================================================
 
 STM32U0
 -------
@@ -837,11 +837,11 @@ CRS           to be done    not supported
 DAC           to be done    not supported
 DBGMCU        v5            not supported
 DLYB          to be done    not supported
-EXTI          M33 v1        arch/arm/src/common/stm32/stm32_exti_gpio_m33_v1.c
+EXTI          M33M55 v1     arch/arm/src/common/stm32/stm32_exti_gpio_m33m55_v1.c
 FDCAN         to be done    not supported
 FLASH         to be done    not supported
 GPDMA         GPDMA         arch/arm/src/common/stm32/stm32_dma_gpdma.c
-GPIO          M33 v1        arch/arm/src/common/stm32/stm32_gpio_m33_v1.c
+GPIO          M33M55 v1     arch/arm/src/common/stm32/stm32_gpio_m33m55_v1.c
 GTZC          to be done    not supported
 HASH          to be done    not supported
 HSP           to be done    not supported
@@ -1041,12 +1041,13 @@ of a peripheral on a given core is ``V1``.
 - M0-core variants: ``stm32_<periph>_m0_v1.h``
 - M3/M4-core variants: ``stm32_<periph>_m3m4_v1.h``, ``stm32_<periph>_m3m4_v2.h``
 - M33-core variants: ``stm32_<periph>_m33_v1.h``, ``stm32_<periph>_m33_v3.h``
+- M33 and M55 (STM32N6) variants: ``stm32_<periph>_m33m55_v1.h``
 - Combined variants: ``stm32_<periph>_m3m4_v1v2.h``, ``stm32_<periph>_m3m4_v1v2v3.h``
 
 **Source file naming** (``.c`` files):
 
 - Follow the same convention as headers: ``stm32_gpio_m3m4_v1v2.c``,
-  ``stm32_adc_m0_v1.c``, ``stm32_gpio_m33_v1.c``,
+  ``stm32_adc_m0_v1.c``, ``stm32_gpio_m33m55_v1.c``,
   ``stm32_serial_m33_v3.c``, ``stm32_spi_m0_v1.c``, and
   ``stm32_pwm_m3m4_v1v2v3.c``
 
@@ -1055,8 +1056,8 @@ of a peripheral on a given core is ``V1``.
 - M0: ``CONFIG_STM32_HAVE_IP_GPIO_M0_V1``, ``CONFIG_STM32_HAVE_IP_ADC_M0_V1``
 - M3/M4: ``CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1``,
   ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V1``, ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V2``
-- M33: ``CONFIG_STM32_HAVE_IP_GPIO_M33_V1``,
-  ``CONFIG_STM32_HAVE_IP_EXTI_M33_V1``,
+- M33: ``CONFIG_STM32_HAVE_IP_GPIO_M33M55_V1``,
+  ``CONFIG_STM32_HAVE_IP_EXTI_M33M55_V1``,
   ``CONFIG_STM32_HAVE_IP_USART_M33_V3``, and
   ``CONFIG_STM32_HAVE_IP_DMA_GPDMA``
 - No core prefix (used by several core classes):

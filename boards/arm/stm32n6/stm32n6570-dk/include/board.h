@@ -38,38 +38,126 @@
 
 /* Clocking *****************************************************************/
 
-/* Clock tree (single PLL1 fed from the internal HSI):
- *
- *   HSI 64 MHz / M=4 * N=50 = 800 MHz VCO
- *     IC1  /4 = 200 MHz  -> CPU clock (CPUSW)
- *     IC2  /8 = 100 MHz  \
- *     IC6 /12 = 66.7 MHz  > SYSCLK components (SYSSW IC2_IC6_IC11)
- *     IC11 /8 = 100 MHz  /
- *   HPRE /2  = 50 MHz   -> HCLK
- *   PPRE1 /1 = 50 MHz   -> PCLK1
- *   PPRE2 /1 = 50 MHz   -> PCLK2
- *
- * Works with the default VOS SCALE1, no SMPS overdrive required.  Higher
- * CPU frequencies (600/800 MHz) are deferred to a follow-up.
+/* Two clock trees are provided.  The default runs the CPU at 800 MHz from
+ * the 48 MHz HSE crystal with VDDCORE overdrive, matching the ST reference
+ * configuration.  CONFIG_STM32N6570_DK_CLOCK_HSI selects a conservative
+ * 200 MHz tree from the internal HSI that needs neither the HSE nor
+ * overdrive.  See arch/arm/src/stm32n6/stm32n6xx_rcc.c for the macros.
  */
 
 #define STM32_HSI_FREQUENCY     64000000ul
 #define STM32_LSI_FREQUENCY     32000
+#define STM32_LSE_FREQUENCY     32768
 
+#ifndef CONFIG_STM32N6570_DK_CLOCK_HSI
+
+/* HSE 48 MHz (X3)
+ *   PLL1 = HSE / 3 * 150 = 2400 MHz   (CPU and system buses)
+ *     IC1  /3 = 800 MHz  -> CPU clock (CPUSW)
+ *     IC2  /6 = 400 MHz  \
+ *     IC6  /8 = 300 MHz   > SYSCLK components (SYSSW IC2_IC6_IC11)
+ *     IC11 /6 = 400 MHz  /
+ *   PLL2 = HSI / 2 * 48  = 1536 MHz   (audio and SDMMC kernel clocks)
+ *   PLL3 = HSE / 3 * 125 = 2000 MHz   (LTDC)
+ *   PLL4 = HSI / 4 * 75  = 1200 MHz   (I2C, LTDC)
+ *   HPRE /2   = 200 MHz -> HCLK
+ *   PPREx /1  = 200 MHz -> PCLK1/2/4/5
+ *   TIMPRE /2 = 200 MHz -> timer kernel clock
+ *
+ * 800 MHz needs VOS high and the board SMPS in overdrive: PF4 high selects
+ * the higher VDDCORE voltage before the voltage range is switched.
+ */
+
+#define STM32_BOARD_USEHSE
+#define STM32_HSE_FREQUENCY     48000000ul
+#define STM32_BOARD_VOS_HIGH
+#define BOARD_VDDCORE_OVERDRIVE_GPIO (GPIO_OUTPUT | GPIO_PUSHPULL | \
+                                      GPIO_SPEED_2MHZ | GPIO_OUTPUT_SET | \
+                                      GPIO_PORTF | GPIO_PIN4)
+
+#define STM32_PLL1_SRC          RCC_PLL1CFGR1_SEL_HSE
+#define STM32_PLL1_M            3
+#define STM32_PLL1_N            150
+#define STM32_PLL1_FREQUENCY    2400000000ul
+
+#define STM32_PLL2_SRC          RCC_PLL1CFGR1_SEL_HSI
+#define STM32_PLL2_M            2
+#define STM32_PLL2_N            48
+#define STM32_PLL2_FREQUENCY    1536000000ul
+
+#define STM32_PLL3_SRC          RCC_PLL1CFGR1_SEL_HSE
+#define STM32_PLL3_M            3
+#define STM32_PLL3_N            125
+#define STM32_PLL3_FREQUENCY    2000000000ul
+
+#define STM32_PLL4_SRC          RCC_PLL1CFGR1_SEL_HSI
+#define STM32_PLL4_M            4
+#define STM32_PLL4_N            75
+#define STM32_PLL4_FREQUENCY    1200000000ul
+
+#define STM32_IC1_SRC           RCC_ICCFGR_SEL_PLL1
+#define STM32_IC1_DIV           3
+#define STM32_IC2_SRC           RCC_ICCFGR_SEL_PLL1
+#define STM32_IC2_DIV           6
+#define STM32_IC6_SRC           RCC_ICCFGR_SEL_PLL1
+#define STM32_IC6_DIV           8
+#define STM32_IC11_SRC          RCC_ICCFGR_SEL_PLL1
+#define STM32_IC11_DIV          6
+
+#define STM32_CPUCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC1_DIV)
+#define STM32_SYSCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC2_DIV)
+#define STM32_RCC_CFGR2_HPRE    RCC_CFGR2_HPRE_SYSCLKd2
+#define STM32_RCC_CFGR2_TIMPRE  RCC_CFGR2_TIMPRE_SYSCLKd2
+#define STM32_HCLK_FREQUENCY    (STM32_SYSCLK_FREQUENCY / 2)
+#define STM32_TIMCLK_FREQUENCY  (STM32_SYSCLK_FREQUENCY / 2)
+
+#else /* CONFIG_STM32N6570_DK_CLOCK_HSI */
+
+/* HSI 64 MHz
+ *   PLL1 = HSI / 4 * 50 = 800 MHz
+ *     IC1  /4  = 200 MHz  -> CPU clock (CPUSW)
+ *     IC2  /8  = 100 MHz  \
+ *     IC6  /12 = 66.7 MHz  > SYSCLK components (SYSSW IC2_IC6_IC11)
+ *     IC11 /8  = 100 MHz  /
+ *   HPRE /2   = 50 MHz   -> HCLK
+ *   PPREx /1  = 50 MHz   -> PCLK1/2/4/5
+ *   TIMPRE /1 = 100 MHz  -> timer kernel clock
+ *
+ * Works with VOS low, no VDDCORE overdrive required.
+ */
+
+#define STM32_PLL1_SRC          RCC_PLL1CFGR1_SEL_HSI
 #define STM32_PLL1_M            4
 #define STM32_PLL1_N            50
-#define STM32_PLL1_IC1_DIV      4
+#define STM32_PLL1_FREQUENCY    800000000ul
 
-#define STM32_CPUCLK_FREQUENCY  200000000ul
-#define STM32_SYSCLK_FREQUENCY  (STM32_CPUCLK_FREQUENCY / 2)
-#define STM32_HCLK_FREQUENCY    (STM32_CPUCLK_FREQUENCY / 4)
+#define STM32_IC1_SRC           RCC_ICCFGR_SEL_PLL1
+#define STM32_IC1_DIV           4
+#define STM32_IC2_SRC           RCC_ICCFGR_SEL_PLL1
+#define STM32_IC2_DIV           8
+#define STM32_IC6_SRC           RCC_ICCFGR_SEL_PLL1
+#define STM32_IC6_DIV           12
+#define STM32_IC11_SRC          RCC_ICCFGR_SEL_PLL1
+#define STM32_IC11_DIV          8
+
+#define STM32_CPUCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC1_DIV)
+#define STM32_SYSCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC2_DIV)
+#define STM32_RCC_CFGR2_HPRE    RCC_CFGR2_HPRE_SYSCLKd2
+#define STM32_RCC_CFGR2_TIMPRE  RCC_CFGR2_TIMPRE_SYSCLK
+#define STM32_HCLK_FREQUENCY    (STM32_SYSCLK_FREQUENCY / 2)
+#define STM32_TIMCLK_FREQUENCY  STM32_SYSCLK_FREQUENCY
+
+#endif /* CONFIG_STM32N6570_DK_CLOCK_HSI */
+
 #define STM32_PCLK1_FREQUENCY   STM32_HCLK_FREQUENCY
 #define STM32_PCLK2_FREQUENCY   STM32_HCLK_FREQUENCY
+#define STM32_PCLK4_FREQUENCY   STM32_HCLK_FREQUENCY
+#define STM32_PCLK5_FREQUENCY   STM32_HCLK_FREQUENCY
 
-/* Timer input clock = SYSCLK (TIMPRE=0 default) */
+/* Timer kernel clock (TIMG = SYSCLK / TIMPRE) */
 
-#define STM32_APB1_TIM_FREQUENCY STM32_SYSCLK_FREQUENCY
-#define STM32_APB2_TIM_FREQUENCY STM32_SYSCLK_FREQUENCY
+#define STM32_APB1_TIM_FREQUENCY STM32_TIMCLK_FREQUENCY
+#define STM32_APB2_TIM_FREQUENCY STM32_TIMCLK_FREQUENCY
 
 #define STM32_TIM1_CLKIN         STM32_APB2_TIM_FREQUENCY
 #define STM32_TIM8_CLKIN         STM32_APB2_TIM_FREQUENCY
@@ -88,6 +176,11 @@
 #define STM32_TIM12_CLKIN        STM32_APB1_TIM_FREQUENCY
 #define STM32_TIM13_CLKIN        STM32_APB1_TIM_FREQUENCY
 #define STM32_TIM14_CLKIN        STM32_APB1_TIM_FREQUENCY
+
+/* USART1 kernel clock: HSI, independent of the system clock tree */
+
+#define STM32_RCC_CCIPR13_USART1SEL RCC_CCIPR13_USART1SEL_HSI
+#define STM32_USART1_FREQUENCY      STM32_HSI_FREQUENCY
 
 /* I/O voltage domains ******************************************************/
 
@@ -131,6 +224,18 @@
 #define LED_SIGNAL         2 /* In a signal handler   N/C    N/C   */
 #define LED_ASSERTION      2 /* An assertion failed   N/C    N/C   */
 #define LED_PANIC          3 /* The system crashed    OFF    Blink */
+
+/* Button definitions *******************************************************/
+
+/* The STM32N6570-DK has two user buttons: USER1 (B2) on PC13 and TAMP (B4)
+ * on PE0.  Both read high when pressed.  The RESET button (B3) drives NRST.
+ */
+
+#define BUTTON_USER        0
+#define BUTTON_TAMP        1
+#define NUM_BUTTONS        2
+#define BUTTON_USER_BIT    (1 << BUTTON_USER)
+#define BUTTON_TAMP_BIT    (1 << BUTTON_TAMP)
 
 /* Alternate function pin selections ****************************************/
 

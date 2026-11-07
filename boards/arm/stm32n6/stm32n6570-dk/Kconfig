@@ -5,4 +5,12 @@
 
 if ARCH_BOARD_STM32N6570_DK
 
+config STM32N6570_DK_CLOCK_HSI
+	bool "Run the CPU at 200 MHz from HSI"
+	default n
+	---help---
+		Use the conservative clock tree: PLL1 from the internal 64 MHz HSI,
+		CPU 200 MHz, SYSCLK 100 MHz, VOS low.  The default tree runs the CPU
+		at 800 MHz from the 48 MHz HSE crystal with VDDCORE overdrive.
+
 endif
