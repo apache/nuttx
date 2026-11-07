@@ -342,6 +342,23 @@ FAR struct radio_driver_s *
                         FAR const bt_addr_t *addr);
 
 /****************************************************************************
+ * Name: bluetooth_find_device_byindex
+ *
+ * Description:
+ *   Select a Bluetooth network driver by its zero-based index among
+ *   Bluetooth devices.
+ *
+ * Input Parameters:
+ *   index - The Bluetooth device index.
+ *
+ * Returned Value:
+ *   A pointer to the network driver to use.  NULL is returned on failure.
+ *
+ ****************************************************************************/
+
+FAR struct radio_driver_s *bluetooth_find_device_byindex(uint8_t index);
+
+/****************************************************************************
  * Name: bluetooth_poll
  *
  * Description:

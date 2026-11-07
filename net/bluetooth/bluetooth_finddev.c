@@ -48,6 +48,13 @@ struct bluetooth_finddev_s
   FAR struct radio_driver_s *bf_radio;
 };
 
+struct bluetooth_findbyidx_s
+{
+  uint8_t                    bf_tgt;
+  uint8_t                    bf_cur;
+  FAR struct radio_driver_s *bf_radio;
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -100,6 +107,33 @@ static int bluetooth_dev_callback(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
+ * Name: bluetooth_dev_byidx_callback
+ *
+ * Description:
+ *   Find the target device by its zero-based index among Bluetooth devices.
+ *
+ ****************************************************************************/
+
+static int bluetooth_dev_byidx_callback(FAR struct net_driver_s *dev,
+                                        FAR void *arg)
+{
+  FAR struct bluetooth_findbyidx_s *match = arg;
+
+  if (dev->d_lltype == NET_LL_BLUETOOTH)
+    {
+      if (match->bf_cur == match->bf_tgt)
+        {
+          match->bf_radio = (FAR struct radio_driver_s *)dev;
+          return 1;
+        }
+
+      match->bf_cur++;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -142,6 +176,33 @@ FAR struct radio_driver_s *
     }
 
   return NULL;
+}
+
+/****************************************************************************
+ * Name: bluetooth_find_device_byindex
+ *
+ * Description:
+ *   Select a Bluetooth network driver by its zero-based index among
+ *   Bluetooth devices.
+ *
+ * Input Parameters:
+ *   index - The Bluetooth device index.
+ *
+ * Returned Value:
+ *   A pointer to the network driver to use.  NULL is returned on failure.
+ *
+ ****************************************************************************/
+
+FAR struct radio_driver_s *bluetooth_find_device_byindex(uint8_t index)
+{
+  struct bluetooth_findbyidx_s match;
+
+  match.bf_tgt   = index;
+  match.bf_cur   = 0;
+  match.bf_radio = NULL;
+
+  netdev_foreach(bluetooth_dev_byidx_callback, &match);
+  return match.bf_radio;
 }
 
 #endif /* CONFIG_NET_BLUETOOTH */
