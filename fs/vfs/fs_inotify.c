@@ -426,21 +426,31 @@ static int inotify_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
       goto out;
     }
 
-  for (i = 0; i < CONFIG_FS_NOTIFY_FD_POLLWAITERS; i++)
-    {
-      if (dev->fds[i] == 0)
-        {
-          dev->fds[i] = fds;
-          fds->priv = &dev->fds[i];
-          break;
-        }
-    }
+  /* This is a request to set up the poll. Find an available slot for the
+   * poll structure reference.  If the poll is already bound (fds->priv !=
+   * NULL) this is a refresh request from a persistent poll consumer (e.g.
+   * epoll): skip the re-binding and just re-query the current readiness
+   * below.
+   */
 
-  if (i >= CONFIG_FS_NOTIFY_FD_POLLWAITERS)
+  if (fds->priv == NULL)
     {
-      fds->priv = NULL;
-      ret = -EBUSY;
-      goto out;
+      for (i = 0; i < CONFIG_FS_NOTIFY_FD_POLLWAITERS; i++)
+        {
+          if (dev->fds[i] == 0)
+            {
+              dev->fds[i] = fds;
+              fds->priv = &dev->fds[i];
+              break;
+            }
+        }
+
+      if (i >= CONFIG_FS_NOTIFY_FD_POLLWAITERS)
+        {
+          fds->priv = NULL;
+          ret = -EBUSY;
+          goto out;
+        }
     }
 
   if (!list_is_empty(&dev->events))

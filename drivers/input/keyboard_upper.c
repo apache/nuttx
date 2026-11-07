@@ -278,15 +278,24 @@ static int keyboard_poll(FAR struct file *filep,
 
   if (setup)
     {
-      if (opriv->fds == NULL)
+      /* This is a request to set up the poll.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
+       */
+
+      if (fds->priv == NULL)
         {
-          opriv->fds = fds;
-          fds->priv  = &opriv->fds;
-        }
-      else
-        {
-          ret = -EBUSY;
-          goto errout;
+          if (opriv->fds == NULL)
+            {
+              opriv->fds = fds;
+              fds->priv  = &opriv->fds;
+            }
+          else
+            {
+              ret = -EBUSY;
+              goto errout;
+            }
         }
 
       if (!circbuf_is_empty(&opriv->circ))

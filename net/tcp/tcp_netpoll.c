@@ -216,6 +216,16 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
       return -EINVAL;
     }
 
+  /* This pollfd is already registered with this socket (persistent
+   * poll consumer, e.g. epoll): refuse to register it a second time
+   * and let the caller rebuild the binding through teardown + setup.
+   */
+
+  if (fds->priv != NULL)
+    {
+      return -EBUSY;
+    }
+
   conn_dev_lock(&conn->sconn, conn->dev);
 
   /* Non-blocking connection ? */

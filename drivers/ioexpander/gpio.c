@@ -1082,37 +1082,44 @@ static int gpio_poll(FAR struct file *filep,
     {
 #if CONFIG_DEV_GPIO_NPOLLWAITERS > 0
       /* This is a request to set up the poll.  Find an available
-       * slot for the poll structure reference
+       * slot for the poll structure reference.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
        */
 
-      for (i = 0; i < CONFIG_DEV_GPIO_NPOLLWAITERS; i++)
+      if (fds->priv == NULL)
         {
-          /* Find an available slot */
-
-          if (dev->fds[i] == NULL)
+          for (i = 0; i < CONFIG_DEV_GPIO_NPOLLWAITERS; i++)
             {
-              /* Bind the poll structure and this slot */
+              /* Find an available slot */
 
-              dev->fds[i] = fds;
-              fds->priv   = &dev->fds[i];
-
-              /* Report if a event is pending */
-
-              if (dev->int_count != (uintptr_t)(filep->f_priv))
+              if (dev->fds[i] == NULL)
                 {
-                  poll_notify(&fds, 1, POLLIN);
+                  /* Bind the poll structure and this slot */
+
+                  dev->fds[i] = fds;
+                  fds->priv   = &dev->fds[i];
+                  break;
                 }
-
-              break;
             }
+
+          if (i >= CONFIG_DEV_GPIO_NPOLLWAITERS)
+#endif
+            {
+              fds->priv = NULL;
+              ret       = -EBUSY;
+            }
+#if CONFIG_DEV_GPIO_NPOLLWAITERS > 0
         }
 
-      if (i >= CONFIG_DEV_GPIO_NPOLLWAITERS)
-#endif
+      /* Report if a event is pending */
+
+      if (dev->int_count != (uintptr_t)(filep->f_priv))
         {
-          fds->priv = NULL;
-          ret       = -EBUSY;
+          poll_notify(&fds, 1, POLLIN);
         }
+#endif
     }
   else if (fds->priv != NULL)
     {

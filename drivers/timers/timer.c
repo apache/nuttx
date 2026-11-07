@@ -478,17 +478,28 @@ static int timer_poll(FAR struct file *filep,
 
   if (setup)
     {
-      if (upper->fds)
-        {
-          ret = -EBUSY;
-          goto errout;
-        }
+      /* This is a request to set up the poll.  Bind the poll structure and
+       * this slot.  If the poll is already bound (fds->priv != NULL) this
+       * is a refresh request from a persistent poll consumer (e.g. epoll):
+       * skip the re-binding and just re-query the current readiness below.
+       */
 
-      upper->fds = fds;
+      if (fds->priv == NULL)
+        {
+          if (upper->fds)
+            {
+              ret = -EBUSY;
+              goto errout;
+            }
+
+          upper->fds = fds;
+          fds->priv  = &upper->fds;
+        }
     }
   else
     {
       upper->fds = NULL;
+      fds->priv  = NULL;
     }
 
 errout:

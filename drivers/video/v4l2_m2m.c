@@ -1331,36 +1331,45 @@ static int codec_poll(FAR struct file *filep,
 
   if (setup)
     {
-      if (cfile->fds == NULL)
+      /* This is a request to set up the poll.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
+       */
+
+      if (fds->priv == NULL)
         {
-          cfile->fds = fds;
-          fds->priv  = &cfile->fds;
-
-          if (!video_framebuff_is_empty(&cfile->output_inf.bufinf))
+          if (cfile->fds == NULL)
             {
-              eventset |= POLLOUT;
+              cfile->fds = fds;
+              fds->priv  = &cfile->fds;
             }
-
-          if (cfile->capture_inf.buflast ||
-              !video_framebuff_is_empty(&cfile->capture_inf.bufinf))
+          else
             {
-              eventset |= POLLIN;
-            }
-
-          if (!sq_empty(&cfile->event_avail))
-            {
-              eventset |= POLLPRI;
-            }
-
-          if (eventset > 0)
-            {
-              poll_notify(&cfile->fds, 1, eventset);
+              spin_unlock_irqrestore_nopreempt(&cfile->lock, flags);
+              return -EBUSY;
             }
         }
-      else
+
+      if (!video_framebuff_is_empty(&cfile->output_inf.bufinf))
         {
-          spin_unlock_irqrestore_nopreempt(&cfile->lock, flags);
-          return -EBUSY;
+          eventset |= POLLOUT;
+        }
+
+      if (cfile->capture_inf.buflast ||
+          !video_framebuff_is_empty(&cfile->capture_inf.bufinf))
+        {
+          eventset |= POLLIN;
+        }
+
+      if (!sq_empty(&cfile->event_avail))
+        {
+          eventset |= POLLPRI;
+        }
+
+      if (eventset > 0)
+        {
+          poll_notify(&cfile->fds, 1, eventset);
         }
     }
   else if (fds->priv)
