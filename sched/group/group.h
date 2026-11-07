@@ -118,6 +118,6 @@ bool group_has_child(FAR struct task_group_s *group, pid_t pid);
 int  group_setupidlefiles(void);
 int  group_setuptaskfiles(FAR struct tcb_s *tcb,
                           FAR const posix_spawn_file_actions_t *actions,
-                          bool cloexec);
+                          bool exec);
 
 #endif /* __SCHED_GROUP_GROUP_H */

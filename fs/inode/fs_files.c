@@ -720,6 +720,14 @@ int file_allocate_from_inode(FAR struct inode *inode, int oflags, off_t pos,
  * Description:
  *   Copy parent task's file descriptors to child task.
  *
+ * Input Parameters:
+ *   plist   - The descriptor list of the parent
+ *   clist   - The descriptor list of the child
+ *   actions - The spawn file actions, or NULL
+ *   exec    - True when the child is a new program (exec(), posix_spawn(),
+ *             task_create()): leave out the close-on-exec descriptors.
+ *             False for fork() and vfork(): keep them, with their flag.
+ *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
  *   any failure.
@@ -728,7 +736,7 @@ int file_allocate_from_inode(FAR struct inode *inode, int oflags, off_t pos,
 
 int fdlist_copy(FAR struct fdlist *plist, FAR struct fdlist *clist,
                 FAR const posix_spawn_file_actions_t *actions,
-                bool cloexec)
+                bool exec)
 {
   bool fcloexec;
   int ret;
@@ -765,7 +773,7 @@ int fdlist_copy(FAR struct fdlist *plist, FAR struct fdlist *clist,
               continue;
             }
 
-          fcloexec = cloexec && fdp->f_cloexec;
+          fcloexec = exec && fdp->f_cloexec;
 
           /* Skip file dup if file action is unnecessary to duplicate */
 
@@ -797,9 +805,13 @@ int fdlist_copy(FAR struct fdlist *plist, FAR struct fdlist *clist,
               return ret;
             }
 
-          /* Assign filep to the child's descriptor list. Omit the flags */
+          /* Assign filep to the child's descriptor list.  A fork() child
+           * keeps the close-on-exec flag of each descriptor (POSIX); the
+           * descriptors that a new program keeps have none.
+           */
 
-          fdlist_install(clist, fd, filep, fdp, 0, true);
+          fdlist_install(clist, fd, filep, fdp,
+                         !exec && fdp->f_cloexec ? O_CLOEXEC : 0, true);
           file_put(filep);
         }
     }

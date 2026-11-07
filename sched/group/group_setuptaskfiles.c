@@ -49,7 +49,8 @@
  * Input Parameters:
  *   tcb     - tcb of the new task.
  *   actions - The spawn file actions
- *   cloexec - Perform O_CLOEXEC on setup task files
+ *   exec    - True when the task is a new program: leave out the
+ *             close-on-exec descriptors (see fdlist_copy())
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
@@ -61,7 +62,7 @@
 
 int group_setuptaskfiles(FAR struct tcb_s *tcb,
                          FAR const posix_spawn_file_actions_t *actions,
-                         bool cloexec)
+                         bool exec)
 {
   FAR struct task_group_s *group = tcb->group;
   int ret = OK;
@@ -87,7 +88,7 @@ int group_setuptaskfiles(FAR struct tcb_s *tcb,
       (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       ret = fdlist_copy(&rtcb->group->tg_fdlist,
-                        &group->tg_fdlist, actions, cloexec);
+                        &group->tg_fdlist, actions, exec);
     }
 
   if (ret >= 0 && actions != NULL &&
