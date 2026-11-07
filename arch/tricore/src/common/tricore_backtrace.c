@@ -117,7 +117,8 @@ int up_backtrace(struct tcb_s *tcb,
     }
   else
     {
-      ret = backtrace(tricore_addr2csa(tcb->xcp.regs), buffer, size, &skip);
+      ret = backtrace(tricore_addr2csa(tcb->xcp.regs + TC_CONTEXT_REGS),
+                      buffer, size, &skip);
     }
 
   return ret;

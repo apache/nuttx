@@ -70,6 +70,13 @@ void tricore_svcall(volatile void *trap)
   plregs = tricore_csa2addr(tricore_mfcr(TRICORE_CPU_PCXI));
   puregs = tricore_csa2addr(plregs[REG_LPCXI]);
 
+  /* set registers related to csa */
+
+  tricore_mtcr(TRICORE_CPU_FCX, tricore_addr2csa(g_intstackalloc));
+  tricore_mtcr(TRICORE_CPU_LCX, tricore_addr2csa((uintptr_t)g_intstacktop -
+                                         FCD_RESERVE_SIZE));
+  UP_ISB();
+
   /* Set irq flag */
 
   up_set_interrupt_context(true);
@@ -78,7 +85,7 @@ void tricore_svcall(volatile void *trap)
 
   if (cmd != SYS_restore_context)
     {
-      (*running_task)->xcp.regs = plregs;
+      (*running_task)->xcp.regs = puregs;
     }
   else
     {
@@ -94,8 +101,6 @@ void tricore_svcall(volatile void *trap)
 
       case SYS_restore_context:
         *running_task = tcb;
-        tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
-        UP_ISB();
         break;
 
       default:
@@ -106,6 +111,24 @@ void tricore_svcall(volatile void *trap)
   /* Set irq flag */
 
   up_set_interrupt_context(false);
+
+  /* Reserve CSAs for FCD depletion threshold */
+
+  tricore_mtcr(TRICORE_CPU_PCXI,
+               tricore_addr2csa(tcb->xcp.regs + TC_CONTEXT_REGS));
+  tricore_mtcr(TRICORE_CPU_FCX,
+               tricore_addr2csa(tcb->xcp.regs + XCPTCONTEXT_REGS));
+  tricore_mtcr(TRICORE_CPU_LCX,
+               tricore_addr2csa((uintptr_t)tcb->stack_base_ptr +
+                                         tcb->adj_stack_size -
+                                         FCD_RESERVE_SIZE));
+  UP_ISB();
+
+  /* (*running_task)->xcp.regs is about to become invalid and will be marked
+   * as NULL to avoid misusage.
+   */
+
+  (*running_task)->xcp.regs = NULL;
 
   /* Return to the caller, tricore_svcall is entered by a jump */
 

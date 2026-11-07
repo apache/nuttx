@@ -48,30 +48,27 @@
  *
  ****************************************************************************/
 
-int up_saveusercontext(void *saveregs)
+int up_saveusercontext(void *saveregs_)
 {
+  uintptr_t *saveregs = (uintptr_t *)saveregs_;
   uintptr_t *regs;
   uintptr_t pcxi;
-  int csa_size = TC_CONTEXT_REGS * sizeof(uintptr_t);
 
-  pcxi = tricore_mfcr(TRICORE_CPU_PCXI);
-  regs = tricore_csa2addr(pcxi);
-  memcpy((char *)saveregs + csa_size, regs, csa_size);
-
-  /* to unify the trap processing, extra save lowcsa */
+  /* Save and copy the current lower csa */
 
   __asm("svlcx");
 
-  regs = tricore_csa2addr(tricore_mfcr(TRICORE_CPU_PCXI));
-  memcpy(saveregs, regs, csa_size);
+  pcxi = tricore_mfcr(TRICORE_CPU_PCXI);
+  regs = tricore_csa2addr(pcxi);
+  memcpy(saveregs + TC_CONTEXT_REGS, regs, TC_CONTEXT_SIZE);
+  (saveregs + TC_CONTEXT_REGS)[REG_LPCXI] = tricore_addr2csa(saveregs)
+                                            | (pcxi & ~FCX_FREE);
 
-  /* lowcsa[REG_LPCXI] saves the upcsa's pcxi, but if lowcsa and upcsa is
-   * stored at continuous addresses, pcxi has no meaning. Use PCXI_UL
-   * without marking whether it is lowcsa or upcsa, but to mark whether
-   * lowcsa and upcsa is stored at continuous addresses.
-   */
+  /* Copy the current upper csa */
 
-  ((uintptr_t *)saveregs)[REG_LPCXI] = pcxi & (~PCXI_UL);
+  regs = tricore_csa2addr(regs[REG_LPCXI]);
+  regs[REG_PSW] &= ~PSW_STATUS_BITS;
+  memcpy(saveregs, regs, TC_CONTEXT_SIZE);
 
   __asm("rslcx");
 

@@ -37,6 +37,7 @@
 #define TRICORE_CPU_PSW             0xfe04  /* Program Status Word */
 #define TRICORE_CPU_ICR             0xfe2c  /* Interrupt Control Register */
 #define TRICORE_CPU_FCX             0xfe38  /* Free CSA List Head Pointer */
+#define TRICORE_CPU_LCX             0xfe3c  /* Free CSA List Limit Pointer */
 
 /* Core configuration (TC1.8 only) */
 

@@ -33,6 +33,7 @@
 #include <syscall.h>
 
 #include <arch/irq.h>
+#include <arch/barriers.h>
 #include <sched/sched.h>
 #include <nuttx/coredump.h>
 #include <nuttx/sched.h>
@@ -387,8 +388,8 @@ void tricore_trapcall(volatile void *trap)
   IfxCpu_Trap *ctrap = (IfxCpu_Trap *)trap;
   IfxCpu_Trap_Class tclass = (IfxCpu_Trap_Class)ctrap->tClass;
   unsigned int tid = ctrap->tId;
-
-  tricore_trapinfo(trap);
+  uint32_t saved_fcx;
+  uint32_t saved_lcx;
 
   regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
 
@@ -399,8 +400,18 @@ void tricore_trapcall(volatile void *trap)
 
       /* Update the current task's regs */
 
-      g_running_tasks[this_cpu()]->xcp.regs = regs;
+      g_running_tasks[this_cpu()]->xcp.regs = regs - TC_CONTEXT_REGS;
+
+      saved_fcx = tricore_mfcr(CPU_FCX);
+      saved_lcx = tricore_mfcr(CPU_LCX);
+
+      tricore_mtcr(CPU_FCX, tricore_addr2csa(g_intstackalloc));
+      tricore_mtcr(CPU_LCX, tricore_addr2csa((uintptr_t)g_intstacktop -
+                                             FCD_RESERVE_SIZE));
+      UP_ISB();
     }
+
+  tricore_trapinfo(trap);
 
   if (tclass == IfxCpu_Trap_Class_nonMaskableInterrupt)
     {
@@ -442,6 +453,10 @@ void tricore_trapcall(volatile void *trap)
           if (!was_interrupt_context)
             {
               up_set_interrupt_context(false);
+
+              tricore_mtcr(CPU_FCX, saved_fcx);
+              tricore_mtcr(CPU_LCX, saved_lcx);
+              UP_ISB();
 
               /* g_running_tasks[]->xcp.regs is about to become invalid
                * and will be marked as NULL to avoid misusage.

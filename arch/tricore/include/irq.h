@@ -103,6 +103,10 @@
 
 #define TC_CONTEXT_REGS  (16)
 #define TC_CONTEXT_SIZE  (sizeof(void *) * TC_CONTEXT_REGS)
+#define TC_CONTEXT_ALIGNED(addr) \
+  (((uintptr_t)(addr) & (TC_CONTEXT_SIZE - 1)) == 0)
+
+#define FCD_RESERVE_SIZE (TC_CONTEXT_SIZE * 4)
 
 #define XCPTCONTEXT_REGS (TC_CONTEXT_REGS * 2)
 #define XCPTCONTEXT_SIZE (sizeof(void *) * XCPTCONTEXT_REGS)
@@ -117,6 +121,7 @@
 #  define PSW_IO_USER0      (0 << PSW_IO)
 #  define PSW_IO_USER1      (1 << PSW_IO)
 #  define PSW_IO_SUPERVISOR (2 << PSW_IO)
+#define PSW_STATUS_BITS     (31 << 27) /* Bits 27-31: Execution Effect Status Bits */
 
 /* PCXI: Previous Context Information and Pointer Register */
 
@@ -141,7 +146,7 @@
  * addresses.
  */
 
-#define STACKFRAME_ALIGN 8
+#define STACKFRAME_ALIGN  TC_CONTEXT_SIZE
 
 /* FPU registers */
 
@@ -313,18 +318,7 @@ static inline_function bool up_interrupt_context(void)
 
 static inline_function uintptr_t up_getusrsp(void *regs)
 {
-  uintptr_t *csaregs = (uintptr_t *)regs;
-
-  if (csaregs[REG_LPCXI] & PCXI_UL)
-    {
-      csaregs = tricore_csa2addr(csaregs[REG_LPCXI]);
-    }
-  else
-    {
-       csaregs += TC_CONTEXT_REGS;
-    }
-
-  return csaregs[REG_SP];
+  return ((uintptr_t *)regs)[REG_SP];
 }
 
 #endif /* __ASSEMBLY__ */

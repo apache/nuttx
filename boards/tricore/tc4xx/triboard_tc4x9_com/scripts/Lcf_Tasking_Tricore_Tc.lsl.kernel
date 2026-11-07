@@ -55,7 +55,6 @@
 #define LCF_SYSLOG_SIZE             JOIN3(AURIX_RPTUN_CORE0CORE, CONFIG_CPU_COREID, _SYSLOG_SIZE)
 #endif
 
-#define LCF_CSA_SIZE     40k
 #define LCF_USTACK_SIZE  CONFIG_IDLETHREAD_STACKSIZE
 #define LCF_ISTACK_SIZE  CONFIG_ARCH_INTERRUPTSTACK
 
@@ -71,8 +70,7 @@
 /*Un comment one of the below statements to enable CpuX DMI RAM to hold global variables*/
 #define LCF_DEFAULT_HOST LCF_CPU0
 
-#define LCF_CSA_OFFSET     (LCF_DSPR_KERNEL_SIZE - 1k - LCF_CSA_SIZE)
-#define LCF_ISTACK_OFFSET  (LCF_CSA_OFFSET - 256 - LCF_ISTACK_SIZE)
+#define LCF_ISTACK_OFFSET  (LCF_DSPR_KERNEL_SIZE - 256 - LCF_ISTACK_SIZE)
 #define LCF_USTACK_OFFSET  (LCF_ISTACK_OFFSET - 256 - LCF_USTACK_SIZE)
 #define LCF_HEAP_OFFSET    (LCF_USTACK_OFFSET - LCF_HEAP_SIZE)
 
@@ -259,6 +257,8 @@ derivative tc4D
             "__USTACK3":= "__USTACK";
             "__USTACK4":= "__USTACK";
             "__USTACK5":= "__USTACK";
+            "__CSA0":= "__USTACK_END";
+            "__CSA0_END":= "__USTACK";
 
             group istack(align = 8, run_addr = mem:dsram[LCF_ISTACK_OFFSET])
             {
@@ -273,15 +273,6 @@ derivative tc4D
             "__ISTACK3":="__ISTACK";
             "__ISTACK4":="__ISTACK";
             "__ISTACK5":="__ISTACK";
-
-            group csa_tc(align = 64, attributes=rw, run_addr=mem:dsram[LCF_CSA_OFFSET])
-            {
-                reserved "csa_tc" (size = LCF_CSA_SIZE);
-            }
-            "__CSA"= "_lc_ub_csa_tc";
-            "__CSA_END"= "_lc_ue_csa_tc";
-            "__CSA0":= "__CSA";
-            "__CSA0_END":= "__CSA_END";
         }
 
         /*Fixed memory Allocations for _START*/

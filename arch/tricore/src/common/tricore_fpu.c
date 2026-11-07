@@ -52,19 +52,5 @@ void tricore_fpuinit(void)
 
 bool up_fpucmp(const void *saveregs1, const void *saveregs2)
 {
-  const uintptr_t *regs1 = (const uintptr_t *)saveregs1 + TC_CONTEXT_REGS;
-  const uintptr_t *regs2 = (const uintptr_t *)saveregs2 + TC_CONTEXT_REGS;
-
-  /* TriCore uses D8-D15 in upper CSA as FPU data registers.
-   * Skip A12-A15 (offsets 8-11) which naturally differ between saves.
-   */
-
-  if (memcmp(&regs1[REG_D8], &regs2[REG_D8],
-             4 * sizeof(uintptr_t)) != 0)
-    {
-      return false;
-    }
-
-  return memcmp(&regs1[REG_D12], &regs2[REG_D12],
-                4 * sizeof(uintptr_t)) == 0;
+  return memcmp(saveregs1, saveregs2, TC_CONTEXT_SIZE) == 0;
 }

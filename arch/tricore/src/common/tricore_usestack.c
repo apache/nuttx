@@ -109,6 +109,8 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
   size_of_stack = top_of_stack - (uintptr_t)tcb->stack_base_ptr;
   tcb->adj_stack_size  = size_of_stack;
 
+  tricore_region_csainit(tcb->stack_base_ptr, tcb->adj_stack_size);
+
 #if defined(CONFIG_STACK_COLORATION)
   /* If stack debug is enabled, then fill the stack with a
    * recognizable value that we can use later to test for high
