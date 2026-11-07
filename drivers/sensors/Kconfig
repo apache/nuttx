@@ -1712,6 +1712,8 @@ config SENSORS_MPU6050
 	depends on I2C
 	---help---
 		Enable uORB driver support for Invensense MPU6050 6-axis MotionTracker device over I2C.
+		The register compatible TDK MPU6886 is detected by its WHO_AM_I value and
+		supported as well.
 
 if SENSORS_MPU6050
 

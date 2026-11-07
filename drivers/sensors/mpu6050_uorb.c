@@ -86,6 +86,14 @@
 #define MPU6050_GYRO_FS_1000DPS 2
 #define MPU6050_GYRO_FS_2000DPS 3
 
+/* WHO_AM_I values of the supported parts.  The MPU6886 shares the
+ * MPU6050 configuration and data register layout; only the temperature
+ * sensor transfer function differs.
+ */
+
+#define MPU6050_WHO_AM_I_MPU6050 0x68
+#define MPU6050_WHO_AM_I_MPU6886 0x19
+
 #define MPU6050_I2C_FREQUENCY   400000 /* 400 kHz */
 #define CONSTANTS_ONE_G         9.80665f
 
@@ -99,6 +107,8 @@ struct mpu6050_dev_s
   uint8_t addr;
   int freq;
   mutex_t dev_lock;
+  float temp_sens;            /* Temperature sensitivity, LSB per degC */
+  float temp_offset;          /* Temperature at a raw reading of 0, degC */
 };
 
 struct mpu6050_sensor_s
@@ -333,7 +343,8 @@ static void mpu6050_worker(FAR void *arg)
       return;
     }
 
-  temp_c = ((float)(int16_t)((buf[6] << 8) | buf[7]) / 340.0f) + 36.53f;
+  temp_c = ((float)(int16_t)((buf[6] << 8) | buf[7]) /
+            dev->base.temp_sens) + dev->base.temp_offset;
 
   if (dev->accel.enabled)
     {
@@ -400,7 +411,8 @@ static int mpu6050_fetch(FAR struct sensor_lowerhalf_s *lower,
       return ret;
     }
 
-  temp_c = ((float)(int16_t)((buf[6] << 8) | buf[7]) / 340.0f) + 36.53f;
+  temp_c = ((float)(int16_t)((buf[6] << 8) | buf[7]) / dev->temp_sens) +
+           dev->temp_offset;
 
   if (lower->type == SENSOR_TYPE_ACCELEROMETER)
     {
@@ -584,13 +596,24 @@ int mpu6050_register(int devno, FAR struct i2c_master_s *i2c, uint8_t addr,
 
   nxmutex_init(&dev->base.dev_lock);
 
-  /* Verify MPU6050 is present */
+  /* Verify a supported part is present */
 
   ret = mpu6050_read_reg(&dev->base, MPU6050_WHO_AM_I, &whoami);
-  if (ret < 0 || whoami != 0x68)
+  if (ret >= 0 && whoami == MPU6050_WHO_AM_I_MPU6050)
     {
-      syslog(LOG_ERR, "MPU6050: WHO_AM_I = 0x%02x (expected 0x68)\n",
-             whoami);
+      dev->base.temp_sens   = 340.0f;
+      dev->base.temp_offset = 36.53f;
+    }
+  else if (ret >= 0 && whoami == MPU6050_WHO_AM_I_MPU6886)
+    {
+      dev->base.temp_sens   = 326.8f;
+      dev->base.temp_offset = 25.0f;
+    }
+  else
+    {
+      syslog(LOG_ERR, "MPU6050: WHO_AM_I = 0x%02x (expected 0x%02x or "
+             "0x%02x)\n", whoami, MPU6050_WHO_AM_I_MPU6050,
+             MPU6050_WHO_AM_I_MPU6886);
       nxmutex_destroy(&dev->base.dev_lock);
       kmm_free(dev);
       return -ENODEV;
