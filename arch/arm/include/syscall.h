@@ -55,12 +55,12 @@
 /* This logic uses three system calls {0,1,2} for context switching and one
  * for the syscall return.
  * So a minimum of four syscall values must be reserved.
- * If CONFIG_BUILD_FLAT isn't defined, then four more syscall values must
+ * If CONFIG_BUILD_FLAT isn't defined, then three more syscall values must
  * be reserved.
  */
 
 #ifndef CONFIG_BUILD_FLAT
-#  define CONFIG_SYS_RESERVED 8
+#  define CONFIG_SYS_RESERVED 7
 #else
 #  define CONFIG_SYS_RESERVED 4
 #endif
@@ -122,7 +122,9 @@
  * void signal_handler_return(void);
  */
 
-#define SYS_signal_handler_return (7)
+#ifdef __ASSEMBLY__
+#  define SYS_signal_handler_return CONFIG_SYS_RESERVED
+#endif
 #endif /* !CONFIG_BUILD_FLAT */
 
 /****************************************************************************
