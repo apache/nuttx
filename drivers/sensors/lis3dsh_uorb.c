@@ -43,6 +43,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #define LIS3DSH_WHO_AM_I_VALUE  0x3f
 
 /* Full-scale is configured to +/-2 g.  The nominal sensitivity is

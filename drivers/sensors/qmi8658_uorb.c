@@ -43,6 +43,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 /* QMI8658 Register Addresses */
 #define QMI8658_REG_WHOAMI        (0x00)  /* Chip ID register */
 #define QMI8658_REG_REVISION      (0x01)  /* Revision register */
