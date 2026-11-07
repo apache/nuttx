@@ -370,6 +370,18 @@ config ARCH_BOARD_ESP32_PICO_KIT
 		and RF matching links.
 
 
+config ARCH_BOARD_ESP32_M5_STICKC_PLUS
+	bool "M5Stack M5StickC Plus"
+	depends on ARCH_CHIP_ESP32PICOD4
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	---help---
+		M5StickC Plus is a compact ESP32-PICO-D4 based development kit from
+		M5Stack. It features a 1.14 inch 135x240 ST7789V2 LCD, an AXP192 power
+		management IC, a BM8563 RTC, an MPU6886 IMU, an SPM1423 PDM
+		microphone, a passive buzzer, a red LED and two user buttons.
+
 config ARCH_BOARD_ESP32_SPARROWKIT
 	bool "Espressif ESP-SPARROW-KIT"
 	depends on ARCH_CHIP_ESP32WROVER
@@ -4152,6 +4164,7 @@ config ARCH_BOARD
 	default "esp32-ethernet-kit"           if ARCH_BOARD_ESP32_ETHERNETKIT
 	default "esp32-lyrat"                  if ARCH_BOARD_ESP32_LYRAT
 	default "esp32-pico-kit"               if ARCH_BOARD_ESP32_PICO_KIT
+	default "esp32-m5-stickc-plus"         if ARCH_BOARD_ESP32_M5_STICKC_PLUS
 	default "esp32-sparrow-kit"            if ARCH_BOARD_ESP32_SPARROWKIT
 	default "esp32-wrover-kit"             if ARCH_BOARD_ESP32_WROVERKIT
 	default "esp32-2432S028"               if ARCH_BOARD_ESP32_2432S028
@@ -5703,6 +5716,9 @@ source "boards/xtensa/esp32/esp32-ethernet-kit/Kconfig"
 endif
 if ARCH_BOARD_ESP32_PICO_KIT
 source "boards/xtensa/esp32/esp32-pico-kit/Kconfig"
+endif
+if ARCH_BOARD_ESP32_M5_STICKC_PLUS
+source "boards/xtensa/esp32/esp32-m5-stickc-plus/Kconfig"
 endif
 if ARCH_BOARD_ESP32_LYRAT
 source "boards/xtensa/esp32/esp32-lyrat/Kconfig"
