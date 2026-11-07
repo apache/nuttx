@@ -28,6 +28,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
@@ -76,9 +77,28 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   FAR void *msg_control;
   int ret;
 
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (psock == NULL || psock->s_conn == NULL)
+    {
+      return -EBADF;
+    }
+
   /* Verify that non-NULL pointers were passed */
 
-  if (msg == NULL || msg->msg_iov == NULL || msg->msg_iov->iov_base == NULL)
+  if (msg == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* POSIX: fail with EMSGSIZE if msg_iovlen <= 0 or > IOV_MAX */
+
+  if (msg->msg_iovlen == 0 || msg->msg_iovlen > IOV_MAX)
+    {
+      return -EMSGSIZE;
+    }
+
+  if (msg->msg_iov == NULL || msg->msg_iov->iov_base == NULL)
     {
       return -EINVAL;
     }
@@ -86,13 +106,6 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   if (msg->msg_name != NULL && msg->msg_namelen <= 0)
     {
       return -EINVAL;
-    }
-
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (psock == NULL || psock->s_conn == NULL)
-    {
-      return -EBADF;
     }
 
   /* Let logic specific to this address family handle the recvmsg()
