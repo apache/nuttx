@@ -40,7 +40,10 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
+#include <limits.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -52,11 +55,25 @@
 #define XTOA_UPPER   0x0200    /* Use upper case letters */
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* The integer that printf() can print */
+
+#if defined(CONFIG_LIBC_PRINTF_LONG_LONG) || ULLONG_MAX == ULONG_MAX
+typedef long long ultoa_int_t;
+typedef unsigned long long ultoa_uint_t;
+#else
+typedef long ultoa_int_t;
+typedef unsigned long ultoa_uint_t;
+#endif
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /* Internal function for use from `printf'. */
 
-FAR char *__ultoa_invert(unsigned long long val, FAR char *str, int base);
+FAR char *__ultoa_invert(ultoa_uint_t val, FAR char *str, int base);
 
 #endif /* __LIBS_LIBC_STREAM_LIB_ULTOA_INVERT_H */

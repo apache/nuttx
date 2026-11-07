@@ -54,6 +54,9 @@
 #include <sys/param.h>
 
 #include "lib_dtoa_engine.h"
+#ifdef CONFIG_LIBC_PRINTF_HEXFLOAT
+#  include "lib_hexfloat.h"
+#endif
 #include "lib_ultoa_invert.h"
 
 /****************************************************************************
@@ -73,7 +76,11 @@
 #define FL_ZFILL           0x0001
 #define FL_PLUS            0x0002
 #define FL_SPACE           0x0004
-#define FL_LPAD            0x0008
+#ifdef CONFIG_LIBC_PRINTF_LEFT_JUSTIFY
+#  define FL_LPAD          0x0008
+#else
+#  define FL_LPAD          0      /* The compiler removes its code */
+#endif
 #define FL_ALT             0x0010
 
 #define FL_ARGNUMBER       0x0020
@@ -96,6 +103,75 @@
 #define FL_FLTUPP          0x2000
 #define FL_FLTEXP          0x4000
 #define FL_FLTFIX          0x8000
+
+/* %b and %B: only an integer conversion has this bit.  A flag that is 0 lets
+ * the compiler remove the code of its feature.
+ */
+
+#ifdef CONFIG_LIBC_PRINTF_C23
+#  define FL_ALTBIN        0x8000
+#  define fmt_isbinary(c)  (((c) | 0x20) == 'b')
+#else
+#  define FL_ALTBIN        0
+#  define fmt_isbinary(c)  0
+#endif
+
+/* The # flag.  FL_ALT stays for the prefix of %p.  A flag that is 0 lets the
+ * compiler remove the code of its feature.
+ */
+
+#ifdef CONFIG_LIBC_PRINTF_ALT_FORM
+#  define FL_ALT_FORM      FL_ALT
+#  define FL_POINTER       FL_ALT
+#else
+#  define FL_ALT_FORM      0
+#  define FL_POINTER       (FL_ALT | FL_ALTHEX)
+#endif
+
+#ifdef CONFIG_LIBC_PRINTF_OCTAL
+#  define HAVE_OCTAL_OUTPUT 1
+#else
+#  define HAVE_OCTAL_OUTPUT 0
+#endif
+
+/* Only %x, %X and %p have FL_ALT: then FL_ALTHEX needs no test */
+
+#define FL_ALT_IS_HEX(f)   (FL_ALT_FORM == 0 || !HAVE_OCTAL_OUTPUT || \
+                            ((f) & FL_ALTHEX) != 0)
+
+/* An integer conversion with a feature that is off prints a question mark.
+ * A flag that is 0 lets the compiler remove the code of its feature.
+ */
+
+#ifdef CONFIG_LIBC_PRINTF_INT_PRECISION
+#  define FL_INT_PREC          FL_PREC
+#  define FL_INT_PREC_UNAVAIL  0
+#else
+#  define FL_INT_PREC          0
+#  define FL_INT_PREC_UNAVAIL  FL_PREC
+#endif
+
+#ifdef CONFIG_LIBC_PRINTF_SHORT
+#  define FL_INT_SHORT         FL_SHORT
+#  define FL_INT_SHORT_UNAVAIL 0
+#else
+#  define FL_INT_SHORT         0
+#  define FL_INT_SHORT_UNAVAIL FL_SHORT
+#endif
+
+#define FL_INT_UNAVAIL       (FL_INT_PREC_UNAVAIL | FL_INT_SHORT_UNAVAIL)
+
+/* Where long has the size of int, read it as an int: the code is smaller */
+
+#define FL_LONG_READ       (sizeof(long) != sizeof(int) ? FL_LONG : 0)
+
+/* A value longer than long has output only with this option */
+
+#if defined(CONFIG_LIBC_PRINTF_LONG_LONG) || ULLONG_MAX == ULONG_MAX
+#  define HAVE_LONG_LONG_OUTPUT 1
+#else
+#  define HAVE_LONG_LONG_OUTPUT 0
+#endif
 
 /* L, as ll, means a long double in a floating point conversion */
 
@@ -157,6 +233,9 @@ union arg_u
   unsigned long long ull;
   double d;
   FAR char *cp;
+#ifdef HAVE_HEXFLOAT_LDOUBLE
+  long double ld;
+#endif
 };
 struct arg_s
 {
@@ -171,7 +250,7 @@ struct arg_s
  ****************************************************************************/
 
 static const char g_nullstring[] = "(null)";
-#ifdef CONFIG_LIBC_FLOATINGPOINT
+#if defined(CONFIG_LIBC_FLOATINGPOINT) || defined(CONFIG_LIBC_PRINTF_HEXFLOAT)
 static const char g_inf_lower[] = "inf";
 static const char g_nan_lower[] = "nan";
 static const char g_inf_upper[] = "INF";
@@ -314,6 +393,241 @@ static int vsprintf_putnum(FAR struct lib_outstream_s *stream,
   return len;
 }
 
+#ifdef CONFIG_LIBC_PRINTF_PERCENT_N
+/* Store the count of %n at the size of its length modifier */
+
+static void vsprintf_store(FAR void *ptr, uint16_t flags, size_t count)
+{
+  if (ptr == NULL)
+    {
+      return;
+    }
+
+  if ((flags & FL_LONG) != 0)
+    {
+      if ((flags & FL_REPD_TYPE) != 0)
+        {
+          *(FAR long long *)ptr = count;
+        }
+      else
+        {
+          *(FAR long *)ptr = count;
+        }
+    }
+  else if ((flags & FL_SHORT) != 0)
+    {
+      if ((flags & FL_REPD_TYPE) != 0)
+        {
+          *(FAR signed char *)ptr = count;
+        }
+      else
+        {
+          *(FAR short *)ptr = count;
+        }
+    }
+  else
+    {
+      *(FAR int *)ptr = count;
+    }
+}
+#endif
+
+#ifdef CONFIG_LIBC_PRINTF_C23
+/* Parse the rest of wN or wfN, and set the flags of the length that has this
+ * size.  Return false for any other N, with fmt after the w.
+ */
+
+static bool vsprintf_wnlength(FAR const IPTR char **fmtp,
+                              FAR uint16_t *flags)
+{
+  FAR const IPTR char *fmt = *fmtp;
+  size_t size;
+  int bits = 0;
+  bool fast;
+  int ch;
+
+  ch = fmt_char(fmt);
+  fast = ch == 'f';
+  if (fast)
+    {
+      ch = fmt_char(fmt);
+    }
+
+  while (ch >= '0' && ch <= '9' && bits < 100)
+    {
+      bits = 10 * bits + (ch - '0');
+      ch = fmt_char(fmt);
+    }
+
+  fmt_ungetc(fmt);
+
+  switch (bits)
+    {
+      case 8:
+        size = fast ? sizeof(int_fast8_t) : sizeof(int8_t);
+        break;
+
+      case 16:
+        size = fast ? sizeof(int_fast16_t) : sizeof(int16_t);
+        break;
+
+      case 32:
+        size = fast ? sizeof(int_fast32_t) : sizeof(int32_t);
+        break;
+
+      case 64:
+        size = sizeof(int64_t);
+        break;
+
+      default:
+        return false;
+    }
+
+  *fmtp = fmt;
+
+  if (size == sizeof(signed char))
+    {
+      *flags |= FL_SHORT | FL_REPD_TYPE;
+    }
+  else if (size == sizeof(short) && size != sizeof(int))
+    {
+      *flags |= FL_SHORT;
+    }
+  else if (size == sizeof(long) && size != sizeof(int))
+    {
+      *flags |= FL_LONG;
+    }
+  else if (size != sizeof(int))
+    {
+      *flags |= FL_LONG | FL_REPD_TYPE;
+    }
+
+  return true;
+}
+#endif
+
+#ifdef CONFIG_LIBC_PRINTF_HEXFLOAT
+static size_t vsprintf_puthex(FAR struct lib_outstream_s *stream,
+                              FAR struct hexfloat_s *hex, uint16_t flags,
+                              int width, int prec, bool upper)
+{
+  size_t total_len = 0;
+  size_t flen = 3;
+  int nzero = 0;
+  int exp;
+  int nexp = 0;
+  bool finite = (hex->flags & (HEXFLOAT_INF | HEXFLOAT_NAN)) == 0;
+  char sign = 0;
+  char buf[6];
+
+  if ((hex->flags & HEXFLOAT_MINUS) != 0)
+    {
+      sign = '-';
+    }
+  else if ((flags & FL_PLUS) != 0)
+    {
+      sign = '+';
+    }
+  else if ((flags & FL_SPACE) != 0)
+    {
+      sign = ' ';
+    }
+
+  if (finite)
+    {
+      /* 0x1p+0: the digits of the exponent come below */
+
+      if (prec > hex->ndigs)
+        {
+          nzero = prec - hex->ndigs;
+        }
+
+      flen = 5u + (size_t)hex->ndigs + nzero;
+      if (hex->ndigs + nzero != 0 || (flags & FL_ALT_FORM) != 0)
+        {
+          flen++;
+        }
+
+      exp = hex->exp < 0 ? -hex->exp : hex->exp;
+      nexp = __ultoa_invert(exp, buf, 10) - buf;
+      flen += nexp;
+    }
+  else
+    {
+      flags &= ~FL_ZFILL;
+    }
+
+  if (sign != 0)
+    {
+      flen++;
+    }
+
+  if (flen > INT_MAX)
+    {
+      return INT_MAX + 1u;
+    }
+
+  width = width > flen ? width - flen : 0;
+
+  if ((flags & (FL_LPAD | FL_ZFILL)) == 0)
+    {
+      stream_repeat(' ', width, stream);
+      width = 0;
+    }
+
+  if (sign != 0)
+    {
+      stream_putc(sign, stream);
+    }
+
+  if (finite)
+    {
+      stream_putc('0', stream);
+      stream_putc(upper ? 'X' : 'x', stream);
+    }
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      stream_repeat('0', width, stream);
+      width = 0;
+    }
+
+  if (finite)
+    {
+      stream_putc(hex->digits[0], stream);
+      if (hex->ndigs + nzero != 0 || (flags & FL_ALT_FORM) != 0)
+        {
+          stream_putc('.', stream);
+        }
+
+      if (hex->ndigs != 0)
+        {
+          stream_puts(&hex->digits[1], hex->ndigs, stream);
+        }
+
+      stream_repeat('0', nzero, stream);
+      stream_putc(upper ? 'P' : 'p', stream);
+      stream_putc(hex->exp < 0 ? '-' : '+', stream);
+      total_len += vsprintf_putnum(stream, buf, nexp);
+    }
+  else if ((hex->flags & HEXFLOAT_NAN) != 0)
+    {
+      stream_puts(upper ? g_nan_upper : g_nan_lower, 3, stream);
+    }
+  else
+    {
+      stream_puts(upper ? g_inf_upper : g_inf_lower, 3, stream);
+    }
+
+  if (FL_LPAD != 0 && width > 0)
+    {
+      stream_repeat(' ', width, stream);
+    }
+
+  return total_len;
+}
+#endif
+
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                              FAR struct arg_s *arglist, int numargs,
                              FAR const IPTR char *fmt, va_list ap)
@@ -324,14 +638,22 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   int prec;
   union
   {
+#ifdef CONFIG_LIBC_PRINTF_C23
+    char __buf[sizeof(ultoa_uint_t) * CHAR_BIT]; /* -1 in binary */
+#else
     char __buf[22]; /* Size for -1 in octal, without '\0' */
+#endif
 #ifdef CONFIG_LIBC_FLOATINGPOINT
     struct dtoa_s __dtoa;
+#endif
+#ifdef CONFIG_LIBC_PRINTF_HEXFLOAT
+    struct hexfloat_s __hex;
 #endif
   } u;
 
 #define buf     (u.__buf)
 #define _dtoa   (u.__dtoa)
+#define _hex    (u.__hex)
 
   FAR const char *pnt;
   size_t size;
@@ -459,7 +781,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                     continue;
 
                   case '#':
-                    flags |= FL_ALT;
+                    flags |= FL_ALT_FORM;
                     continue;
 
                   /* XSI thousands grouping: the C locale has no
@@ -638,6 +960,18 @@ set_star:
                 }
             }
 
+#ifdef CONFIG_LIBC_PRINTF_C23
+          if (c == 'w')
+            {
+              if (vsprintf_wnlength(&fmt, &flags))
+                {
+                  continue;
+                }
+
+              break; /* An unknown size: the rest of the format is text */
+            }
+#endif
+
           if (c == 'j')
             {
               /* Same as long long if available. Otherwise, long. */
@@ -727,7 +1061,7 @@ set_star:
               type = FL_IS_LDOUBLE(flags) ? TYPE_LONG_DOUBLE : TYPE_DOUBLE;
             }
           else if (c == 'i' || c == 'd' || c == 'u' || c == 'p' ||
-                   c == 'o' || c == 'x' || c == 'X')
+                   c == 'o' || c == 'x' || c == 'X' || fmt_isbinary(c))
             {
               if ((flags & FL_LONG) == 0)
                 {
@@ -768,6 +1102,54 @@ set_star:
         }
 #endif
 
+#ifdef CONFIG_LIBC_PRINTF_HEXFLOAT
+      if ((c | 0x20) == 'a')
+        {
+          /* A negative precision means none */
+
+          star = (flags & FL_PREC) != 0 ? prec : -1;
+
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+          if ((flags & FL_ARGNUMBER) != 0)
+            {
+#    ifdef HAVE_HEXFLOAT_LDOUBLE
+              if (FL_IS_LDOUBLE(flags))
+                {
+                  __hexfloat_engine_ld(arglist->value[argnumber - 1].ld,
+                                       &_hex, star, c == 'A');
+                }
+              else
+#    endif
+                {
+                  __hexfloat_engine(arglist->value[argnumber - 1].d,
+                                    &_hex, star, c == 'A');
+                }
+            }
+          else
+#  endif
+#  ifdef CONFIG_HAVE_LONG_DOUBLE
+          if (FL_IS_LDOUBLE(flags))
+            {
+#    ifdef HAVE_HEXFLOAT_LDOUBLE
+              __hexfloat_engine_ld(va_arg(ap, long double), &_hex, star,
+                                   c == 'A');
+#    else
+              __hexfloat_engine(vsprintf_ldtod(va_arg(ap, long double)),
+                                &_hex, star, c == 'A');
+#    endif
+            }
+          else
+#  endif
+            {
+              __hexfloat_engine(va_arg(ap, double), &_hex, star, c == 'A');
+            }
+
+          total_len += vsprintf_puthex(stream, &_hex, flags, width, star,
+                                       c == 'A');
+          continue;
+        }
+
+#endif
 #ifdef CONFIG_LIBC_FLOATINGPOINT
       if ((c >= 'E' && c <= 'G') || c == 'A')
         {
@@ -822,7 +1204,16 @@ flt_oper:
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
             {
-              value = arglist->value[argnumber - 1].d;
+#  ifdef HAVE_HEXFLOAT_LDOUBLE
+              if (FL_IS_LDOUBLE(flags))
+                {
+                  value = vsprintf_ldtod(arglist->value[argnumber - 1].ld);
+                }
+              else
+#  endif
+                {
+                  value = arglist->value[argnumber - 1].d;
+                }
             }
           else
 #endif
@@ -843,6 +1234,7 @@ flt_oper:
 
           if (c == 'a')
             {
+put_unavailable:
               pnt  = "?";
               size = 1;
               goto str_lpad;
@@ -962,7 +1354,7 @@ flt_oper:
             {
               flen += prec + 1u;
             }
-          else if ((flags & FL_ALT) != 0)
+          else if ((flags & FL_ALT_FORM) != 0)
             {
               flen += 1;
             }
@@ -1070,7 +1462,7 @@ flt_oper:
 
               stream_putc(out, stream);
 
-              if ((flags & FL_ALT) != 0 && n == -1)
+              if ((flags & FL_ALT_FORM) != 0 && n == -1)
                 {
                   stream_putc('.', stream);
                 }
@@ -1105,7 +1497,7 @@ flt_oper:
                       stream_repeat('0', prec - nbytes, stream);
                     }
                 }
-              else if ((flags & FL_ALT) != 0)
+              else if ((flags & FL_ALT_FORM) != 0)
                 {
                   stream_putc('.', stream);
                 }
@@ -1153,6 +1545,7 @@ flt_oper:
                 }
             }
 
+put_unavailable:
           pnt  = "?";
           size = 1;
           goto str_lpad;
@@ -1213,10 +1606,16 @@ flt_oper:
                 pnt = va_arg(ap, FAR char *);
               }
 
-            /* %n only takes its pointer: a format never writes to memory */
+            /* %n only takes its pointer: a format never writes to memory,
+             * unless the option says so.
+             */
 
             if (c == 'n')
               {
+#ifdef CONFIG_LIBC_PRINTF_PERCENT_N
+                vsprintf_store((FAR void *)pnt, flags, total_len);
+                continue;
+#endif
                 pnt  = "?";
                 size = 1;
                 goto str_lpad;
@@ -1313,7 +1712,7 @@ str_lpad:
 
       if (c == 'd' || c == 'i')
         {
-          long long x;
+          ultoa_int_t x;
 
           if ((flags & FL_LONG) != 0 && (flags & FL_REPD_TYPE) != 0)
             {
@@ -1327,9 +1726,14 @@ str_lpad:
                 {
                   x = va_arg(ap, long long);
                 }
+
+              if (!HAVE_LONG_LONG_OUTPUT)
+                {
+                  goto put_unavailable;
+                }
             }
           else
-          if ((flags & FL_LONG) != 0)
+          if ((flags & FL_LONG_READ) != 0)
             {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
@@ -1355,7 +1759,7 @@ str_lpad:
                   x = va_arg(ap, int);
                 }
 
-              if ((flags & FL_SHORT) != 0)
+              if ((flags & FL_INT_SHORT) != 0)
                 {
                   if ((flags & FL_REPD_TYPE) == 0)
                     {
@@ -1368,14 +1772,14 @@ str_lpad:
                 }
             }
 
-          flags &= ~(FL_NEGATIVE | FL_ALT);
+          flags &= ~(FL_NEGATIVE | FL_ALT_FORM);
           if (x < 0)
             {
-              x = -(unsigned long long)x;
+              x = -(ultoa_uint_t)x;
               flags |= FL_NEGATIVE;
             }
 
-          if ((flags & FL_PREC) != 0 && prec == 0 && x == 0)
+          if ((flags & FL_INT_PREC) != 0 && prec == 0 && x == 0)
             {
               c = 0;
             }
@@ -1384,7 +1788,8 @@ str_lpad:
               c = __ultoa_invert(x, buf, 10) - buf;
             }
         }
-      else if (c != 'u' && c != 'o' && c != 'p' && (c | 0x20) != 'x')
+      else if (c != 'u' && c != 'o' && c != 'p' && (c | 0x20) != 'x' &&
+               !fmt_isbinary(c))
         {
           /* An unknown conversion, or the end of the format.  The size of
            * the argument is not known, so read no more arguments.  Print the
@@ -1403,7 +1808,7 @@ str_lpad:
       else
         {
           int base;
-          unsigned long long x;
+          ultoa_uint_t x;
 
           if ((flags & FL_LONG) != 0 && (flags & FL_REPD_TYPE) != 0)
             {
@@ -1417,9 +1822,14 @@ str_lpad:
                 {
                   x = va_arg(ap, unsigned long long);
                 }
+
+              if (!HAVE_LONG_LONG_OUTPUT)
+                {
+                  goto put_unavailable;
+                }
             }
           else
-          if ((flags & FL_LONG) != 0)
+          if ((flags & FL_LONG_READ) != 0)
             {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
@@ -1445,7 +1855,7 @@ str_lpad:
                   x = va_arg(ap, unsigned int);
                 }
 
-              if ((flags & FL_SHORT) != 0)
+              if ((flags & FL_INT_SHORT) != 0)
                 {
                   if ((flags & FL_REPD_TYPE) == 0)
                     {
@@ -1463,11 +1873,16 @@ str_lpad:
           switch (c)
             {
               case 'u':
-                flags &= ~FL_ALT;
+                flags &= ~FL_ALT_FORM;
                 base = 10;
                 break;
 
               case 'o':
+                if (!HAVE_OCTAL_OUTPUT)
+                  {
+                    goto put_unavailable;
+                  }
+
                 base = 8;
                 break;
 
@@ -1536,12 +1951,12 @@ str_lpad:
                   }
 #endif
 
-                flags |= FL_ALT;
+                flags |= FL_POINTER;
 
                 /* no break */
 
               case 'x':
-                if ((flags & FL_ALT) != 0)
+                if ((flags & FL_ALT_FORM) != 0)
                   {
                     flags |= FL_ALTHEX;
                   }
@@ -1549,8 +1964,27 @@ str_lpad:
                 base = 16;
                 break;
 
+#ifdef CONFIG_LIBC_PRINTF_C23
+              case 'B':
+                if ((flags & FL_ALT_FORM) != 0)
+                  {
+                    flags |= FL_ALTUPP;
+                  }
+
+                /* FALLTHROUGH */
+
+              case 'b':
+                if ((flags & FL_ALT_FORM) != 0)
+                  {
+                    flags |= FL_ALTHEX | FL_ALTBIN;
+                  }
+
+                base = 2;
+                break;
+#endif
+
               default: /* 'X' */
-                if ((flags & FL_ALT) != 0)
+                if ((flags & FL_ALT_FORM) != 0)
                   {
                     flags |= (FL_ALTHEX | FL_ALTUPP);
                   }
@@ -1559,7 +1993,7 @@ str_lpad:
                 break;
             }
 
-          if ((flags & FL_PREC) != 0 && prec == 0 && x == 0)
+          if ((flags & FL_INT_PREC) != 0 && prec == 0 && x == 0)
             {
               c = 0;
             }
@@ -1571,15 +2005,20 @@ str_lpad:
           flags &= ~FL_NEGATIVE;
         }
 
+      if ((flags & FL_INT_UNAVAIL) != 0)
+        {
+          goto put_unavailable;
+        }
+
       len = c;
 
-      if ((flags & FL_PREC) != 0)
+      if ((flags & FL_INT_PREC) != 0)
         {
           flags &= ~FL_ZFILL;
           if (len < prec)
             {
               len = prec;
-              if ((flags & FL_ALT) != 0 && (flags & FL_ALTHEX) == 0)
+              if ((flags & FL_ALT_FORM) != 0 && !FL_ALT_IS_HEX(flags))
                 {
                   flags &= ~FL_ALT;
                 }
@@ -1592,14 +2031,14 @@ str_lpad:
            * "0" from the flag, and a hexadecimal value has no prefix.
            */
 
-          if (c == 0 ? (flags & FL_ALTHEX) != 0 : buf[c - 1] == '0')
+          if (c == 0 ? FL_ALT_IS_HEX(flags) : buf[c - 1] == '0')
             {
               flags &= ~(FL_ALT | FL_ALTHEX | FL_ALTUPP);
             }
           else
             {
               len += 1;
-              if ((flags & FL_ALTHEX) != 0)
+              if (FL_ALT_IS_HEX(flags))
                 {
                   len += 1;
                 }
@@ -1640,9 +2079,11 @@ str_lpad:
       if ((flags & FL_ALT) != 0)
         {
           stream_putc('0', stream);
-          if ((flags & FL_ALTHEX) != 0)
+          if (FL_ALT_IS_HEX(flags))
             {
-              stream_putc(flags & FL_ALTUPP ? 'X' : 'x', stream);
+              ch = (flags & FL_ALTBIN) != 0 ? 'b' : 'x';
+              stream_putc(FL_ALT_FORM != 0 && (flags & FL_ALTUPP) != 0 ?
+                          ch - 0x20 : ch, stream);
             }
         }
       else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
@@ -1674,7 +2115,7 @@ tail:
 
       /* Tail is possible.  */
 
-      if (width > 0)
+      if (FL_LPAD != 0 && width > 0)
         {
           stream_repeat(' ', width, stream);
         }
@@ -1735,7 +2176,10 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
 
 #ifdef CONFIG_HAVE_LONG_DOUBLE
           case TYPE_LONG_DOUBLE:
-#  ifdef CONFIG_LIBC_FLOATINGPOINT
+#  ifdef HAVE_HEXFLOAT_LDOUBLE
+            arglist.value[i].ld = va_arg(ap, long double);
+#  elif defined(CONFIG_LIBC_FLOATINGPOINT) || \
+        defined(CONFIG_LIBC_PRINTF_HEXFLOAT)
             arglist.value[i].d = vsprintf_ldtod(va_arg(ap, long double));
 #  else
             va_arg(ap, long double);

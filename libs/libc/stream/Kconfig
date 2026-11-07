@@ -23,7 +23,12 @@ endif
 
 config STREAM_OUT_BUFFER_SIZE
 	int "Output stream buffer size"
+	default 0 if LIBC_PRINTF_MINIMAL
 	default 64
+	---help---
+		The size of the buffer that vdprintf() and dprintf() keep on the
+		stack.  With 0 they have no buffer: each write of printf() is one
+		write() to the file descriptor.
 
 config STREAM_HEXDUMP_BUFFER_SIZE
 	int "Output hexdump stream buffer size"

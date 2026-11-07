@@ -40,7 +40,6 @@ list(
   lib_libsnoflush.c
   lib_syslogstream.c
   lib_syslograwstream.c
-  lib_bufferedoutstream.c
   lib_hexdumpstream.c
   lib_base64outstream.c
   lib_fileinstream.c
@@ -50,8 +49,16 @@ list(
   lib_libvsprintf.c
   lib_ultoa_invert.c)
 
+if(NOT CONFIG_STREAM_OUT_BUFFER_SIZE EQUAL 0)
+  list(APPEND SRCS lib_bufferedoutstream.c)
+endif()
+
 if(CONFIG_LIBC_FLOATINGPOINT)
   list(APPEND SRCS lib_dtoa_engine.c lib_dtoa_data.c)
+endif()
+
+if(CONFIG_LIBC_PRINTF_HEXFLOAT)
+  list(APPEND SRCS lib_hexfloat.c)
 endif()
 
 if(CONFIG_FILE_STREAM)
