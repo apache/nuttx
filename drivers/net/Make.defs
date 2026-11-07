@@ -125,6 +125,28 @@ endif
 
 include net/oa_tc6/Make.defs
 
+ifeq ($(CONFIG_NET_PHYLIB),y)
+  CSRCS += phy_core.c phy_access.c phy_device.c
+  CSRCS += phy_gen.c
+  DEPPATH += --dep-path net/phy
+  VPATH += :net/phy
+  CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)net$(DELIM)phy
+
+ifeq ($(CONFIG_MDIO_CLAUSE_45),y)
+  CSRCS += phy_genc45.c
+endif
+
+ifeq ($(CONFIG_NET_PHY_REALTEK_RTL8221B),y)
+  CSRCS += realtek/rtl8221b.c realtek/rtl8221b_fw.c
+  DEPPATH += --dep-path net/phy/realtek
+  VPATH += :net/phy/realtek
+endif
+
+ifeq ($(CONFIG_NET_PHY_REALTEK_RTL9000B),y)
+  CSRCS += realtek/rtl9000b.c realtek/rtl9000b_fw.c
+endif
+endif
+
 # Include network build support
 
 DEPPATH += --dep-path net

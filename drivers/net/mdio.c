@@ -26,6 +26,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/net/mdio.h>
+#include <nuttx/net/mii.h>
 #include <nuttx/debug.h>
 
 /****************************************************************************
@@ -36,7 +37,7 @@
 
 #define MDIO_WRITE(d,a,r,v) d->lower->ops->write(d->lower, a, r, v);
 
-#define MDIO_RESET(d,a) d->lower->ops->reset(d->lower, a);
+#define MDIO_RESET(d,a,v) d->lower->ops->reset(d->lower, a, v);
 
 /****************************************************************************
  * Private Types
@@ -55,6 +56,12 @@ struct mdio_bus_s
   /* For exclusive access to the bus */
 
   mutex_t lock;
+
+  /* Last requested PHY reset line state:
+   * -1 = unknown, 0 = deasserted, 1 = asserted.
+   */
+
+  int8_t reset_state;
 };
 
 /****************************************************************************
@@ -89,6 +96,7 @@ FAR struct mdio_bus_s *mdio_register(FAR struct mdio_lowerhalf_s *lower)
 
       nxmutex_init(&dev->lock);
       dev->lower = lower;
+      dev->reset_state = -1;
     }
   else
     {
@@ -119,6 +127,110 @@ int mdio_unregister(FAR struct mdio_bus_s *dev)
   nxmutex_destroy(&dev->lock);
   kmm_free(dev);
   return 0;
+}
+
+/****************************************************************************
+ * Name: mdio_lock
+ *
+ * Description:
+ *   Acquire the MDIO bus mutex explicitly.  Used by callers that need to
+ *   perform a multi-transaction atomic sequence on the bus (e.g. paged
+ *   register access: select page -> read/write -> restore page) that must
+ *   not be interleaved with other bus users such as MII ioctl.
+ *
+ *   Between mdio_lock() and mdio_unlock() the caller must use the lockless
+ *   primitives mdio_read_nolock() / mdio_write_nolock(); calling the locking
+ *   mdio_read()/mdio_write() while holding the lock would deadlock.
+ *
+ * Input Parameters:
+ *   dev - The MDIO bus handle.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int mdio_lock(FAR struct mdio_bus_s *dev)
+{
+  DEBUGASSERT(dev != NULL);
+  return nxmutex_lock(&dev->lock);
+}
+
+/****************************************************************************
+ * Name: mdio_unlock
+ *
+ * Description:
+ *   Release the MDIO bus mutex previously acquired with mdio_lock().  Must
+ *   balance a successful mdio_lock().
+ *
+ * Input Parameters:
+ *   dev - The MDIO bus handle.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void mdio_unlock(FAR struct mdio_bus_s *dev)
+{
+  DEBUGASSERT(dev != NULL);
+  nxmutex_unlock(&dev->lock);
+}
+
+/****************************************************************************
+ * Name: mdio_read_nolock
+ *
+ * Description:
+ *   Clause 22 read WITHOUT taking the bus mutex.  The caller must already
+ *   hold the bus lock via mdio_lock().  Intended for composing atomic
+ *   multi-transaction sequences (see mdio_lock()).
+ *
+ * Input Parameters:
+ *   dev     - The MDIO bus handle.
+ *   phyaddr - The PHY address (0-31).
+ *   regaddr - The PHY register address (0-31).
+ *   value   - Pointer to store the value read.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int mdio_read_nolock(FAR struct mdio_bus_s *dev, uint8_t phyaddr,
+                     uint8_t regaddr, FAR uint16_t *value)
+{
+  DEBUGASSERT(dev != NULL && dev->lower != NULL);
+  DEBUGASSERT(dev->lower->ops->read != NULL);
+
+  return MDIO_READ(dev, phyaddr, regaddr, value);
+}
+
+/****************************************************************************
+ * Name: mdio_write_nolock
+ *
+ * Description:
+ *   Clause 22 write WITHOUT taking the bus mutex.  The caller must already
+ *   hold the bus lock via mdio_lock().  Intended for composing atomic
+ *   multi-transaction sequences (see mdio_lock()).
+ *
+ * Input Parameters:
+ *   dev     - The MDIO bus handle.
+ *   phyaddr - The PHY address (0-31).
+ *   regaddr - The PHY register address (0-31).
+ *   value   - The value to write.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int mdio_write_nolock(FAR struct mdio_bus_s *dev, uint8_t phyaddr,
+                      uint8_t regaddr, uint16_t value)
+{
+  DEBUGASSERT(dev != NULL && dev->lower != NULL);
+  DEBUGASSERT(dev->lower->ops->write != NULL);
+
+  return MDIO_WRITE(dev, phyaddr, regaddr, value);
 }
 
 /****************************************************************************
@@ -211,43 +323,204 @@ int mdio_write(FAR struct mdio_bus_s *dev, uint8_t phyaddr, uint8_t regaddr,
  * Name: mdio_reset
  *
  * Description:
- *   Reset a PHY on the MDIO bus.
+ *   Control the hardware reset line of a PHY on the MDIO bus.
  *
  * Input Parameters:
  *   dev     - The MDIO bus handle.
  *   phyaddr - The PHY address (0-31) to reset.
+ *   value   - Non-zero to assert reset, zero to deassert.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; -ENOSYS if no reset op is provided; a negated
+ *   errno value on failure.
+ *
+ ****************************************************************************/
+
+int mdio_reset(FAR struct mdio_bus_s *dev, uint8_t phyaddr, int value)
+{
+  int ret;
+
+  DEBUGASSERT(dev != NULL && dev->lower != NULL);
+
+  /* No reset line wired / no lower-half op: nothing to do. */
+
+  if (dev->lower->ops->reset == NULL)
+    {
+      return -ENOSYS;
+    }
+
+  ret = nxmutex_lock(&dev->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Idempotency: skip if the requested state is already in effect. */
+
+  if (dev->reset_state == value)
+    {
+      nxmutex_unlock(&dev->lock);
+      return OK;
+    }
+
+  /* Call the lowerhalf driver's reset method (it performs the
+   * datasheet-mandated assert/deassert settle delay internally).
+   */
+
+  ret = MDIO_RESET(dev, phyaddr, value);
+  if (ret >= 0)
+    {
+      dev->reset_state = (int8_t)value;
+    }
+
+  nxmutex_unlock(&dev->lock);
+  return ret;
+}
+
+#ifdef CONFIG_MDIO_CLAUSE_45
+
+/****************************************************************************
+ * Name: mdio_c45_read
+ *
+ * Description:
+ *   Read a Clause 45 MMD register.  Uses the lower-half native C45 read
+ *   when available; otherwise performs indirect access over Clause 22
+ *   registers 13 (MMD control) and 14 (MMD address/data).
+ *
+ * Input Parameters:
+ *   dev     - The MDIO bus handle.
+ *   phyaddr - The PHY address (0-31).
+ *   devad   - The MMD device address.
+ *   regaddr - The 16-bit MMD register address.
+ *   value   - A pointer to the location to store the read value.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int mdio_reset(FAR struct mdio_bus_s *dev, uint8_t phyaddr)
+int mdio_c45_read(FAR struct mdio_bus_s *dev, uint8_t phyaddr,
+                  uint8_t devad, uint16_t regaddr, FAR uint16_t *value)
 {
-  int ret = -ENOSYS;
+  int ret;
+
+  DEBUGASSERT(dev != NULL && dev->lower != NULL && value != NULL);
+
+  ret = nxmutex_lock(&dev->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Native C45 path (single set of transactions in the lower half) */
+
+  if (dev->lower->ops->read_c45 != NULL)
+    {
+      ret = dev->lower->ops->read_c45(dev->lower, phyaddr, devad,
+                                      regaddr, value);
+      nxmutex_unlock(&dev->lock);
+      return ret;
+    }
+
+  /* Fallback: indirect access over Clause 22 (reg 13/14) */
+
+  ret = dev->lower->ops->write(dev->lower, phyaddr, MII_MMDCONTROL, devad);
+  if (ret < 0)
+    {
+      goto out;
+    }
+
+  ret = dev->lower->ops->write(dev->lower, phyaddr, MII_MMDADDRDATA,
+                               regaddr);
+  if (ret < 0)
+    {
+      goto out;
+    }
+
+  ret = dev->lower->ops->write(dev->lower, phyaddr, MII_MMDCONTROL,
+                               devad | MII_MMDCONTROL_FUNC_NOINCR);
+  if (ret < 0)
+    {
+      goto out;
+    }
+
+  ret = dev->lower->ops->read(dev->lower, phyaddr, MII_MMDADDRDATA, value);
+
+out:
+  nxmutex_unlock(&dev->lock);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mdio_c45_write
+ *
+ * Description:
+ *   Write a Clause 45 MMD register.  Uses the lower-half native C45 write
+ *   when available; otherwise performs indirect access over Clause 22
+ *   registers 13 (MMD control) and 14 (MMD address/data).
+ *
+ * Input Parameters:
+ *   dev     - The MDIO bus handle.
+ *   phyaddr - The PHY address (0-31).
+ *   devad   - The MMD device address.
+ *   regaddr - The 16-bit MMD register address.
+ *   value   - The value to write.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int mdio_c45_write(FAR struct mdio_bus_s *dev, uint8_t phyaddr,
+                   uint8_t devad, uint16_t regaddr, uint16_t value)
+{
+  int ret;
 
   DEBUGASSERT(dev != NULL && dev->lower != NULL);
 
-  /* Check if the reset method is provided by the lower-half */
-
-  if (dev->lower->ops->reset)
+  ret = nxmutex_lock(&dev->lock);
+  if (ret < 0)
     {
-      /* Take the mutex */
-
-      ret = nxmutex_lock(&dev->lock);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      /* Call the lowerhalf driver's reset method */
-
-      ret = MDIO_RESET(dev, phyaddr);
-
-      /* Release the mutex */
-
-      nxmutex_unlock(&dev->lock);
+      return ret;
     }
 
+  /* Native C45 path */
+
+  if (dev->lower->ops->write_c45 != NULL)
+    {
+      ret = dev->lower->ops->write_c45(dev->lower, phyaddr, devad,
+                                       regaddr, value);
+      nxmutex_unlock(&dev->lock);
+      return ret;
+    }
+
+  /* Fallback: indirect access over Clause 22 (reg 13/14) */
+
+  ret = dev->lower->ops->write(dev->lower, phyaddr, MII_MMDCONTROL, devad);
+  if (ret < 0)
+    {
+      goto out;
+    }
+
+  ret = dev->lower->ops->write(dev->lower, phyaddr, MII_MMDADDRDATA,
+                               regaddr);
+  if (ret < 0)
+    {
+      goto out;
+    }
+
+  ret = dev->lower->ops->write(dev->lower, phyaddr, MII_MMDCONTROL,
+                               devad | MII_MMDCONTROL_FUNC_NOINCR);
+  if (ret < 0)
+    {
+      goto out;
+    }
+
+  ret = dev->lower->ops->write(dev->lower, phyaddr, MII_MMDADDRDATA, value);
+
+out:
+  nxmutex_unlock(&dev->lock);
   return ret;
 }
+
+#endif /* CONFIG_MDIO_CLAUSE_45 */

@@ -120,6 +120,25 @@ if(CONFIG_NET)
     list(APPEND SRCS wifi_sim.c)
   endif()
 
+  if(CONFIG_NET_PHYLIB)
+    list(APPEND SRCS phy/phy_core.c phy/phy_access.c phy/phy_device.c
+         phy/phy_gen.c)
+
+    target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/phy)
+
+    if(CONFIG_MDIO_CLAUSE_45)
+      list(APPEND SRCS phy/phy_genc45.c)
+    endif()
+
+    if(CONFIG_NET_PHY_REALTEK_RTL8221B)
+      list(APPEND SRCS phy/realtek/rtl8221b.c phy/realtek/rtl8221b_fw.c)
+    endif()
+
+    if(CONFIG_NET_PHY_REALTEK_RTL9000B)
+      list(APPEND SRCS phy/realtek/rtl9000b.c phy/realtek/rtl9000b_fw.c)
+    endif()
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 
   nuttx_add_subdirectory()
