@@ -105,8 +105,12 @@ int video_framebuff_realloc_container(video_framebuff_t *fbuf, int sz)
   vbuf_container_t *vbuf;
 
   nxmutex_lock(&fbuf->lock_empty);
-  if (fbuf->container_size == sz)
+  if (fbuf->container_size == sz && sz > 0)
     {
+      /* Same count — reinitialize chain but skip realloc */
+
+      memset(fbuf->vbuf_alloced, 0, sizeof(vbuf_container_t) * sz);
+      init_buf_chain(fbuf);
       nxmutex_unlock(&fbuf->lock_empty);
       return OK;
     }
@@ -200,6 +204,91 @@ void video_framebuff_queue_container(video_framebuff_t *fbuf,
     }
 
   spin_unlock_irqrestore(&fbuf->lock_queue, flags);
+}
+
+bool video_framebuff_cancel_container(video_framebuff_t *fbuf,
+                                      vbuf_container_t *tgt)
+{
+  vbuf_container_t *prev;
+  vbuf_container_t *curr;
+  vbuf_container_t *next;
+  irqstate_t flags;
+  bool found = false;
+
+  flags = spin_lock_irqsave(&fbuf->lock_queue);
+  curr = fbuf->vbuf_top;
+  prev = fbuf->mode == V4L2_BUF_MODE_RING ? fbuf->vbuf_tail : NULL;
+
+  while (curr != NULL)
+    {
+      if (curr == tgt)
+        {
+          found = true;
+          break;
+        }
+
+      prev = curr;
+      curr = curr->next;
+      if (curr == fbuf->vbuf_top)
+        {
+          break;
+        }
+    }
+
+  if (found)
+    {
+      next = curr->next;
+      if (curr == fbuf->vbuf_top && curr == fbuf->vbuf_tail)
+        {
+          fbuf->vbuf_top = NULL;
+          fbuf->vbuf_tail = NULL;
+          fbuf->vbuf_next = NULL;
+        }
+      else
+        {
+          if (curr == fbuf->vbuf_next)
+            {
+              if (fbuf->mode == V4L2_BUF_MODE_RING &&
+                  curr != fbuf->vbuf_top && next == fbuf->vbuf_top)
+                {
+                  fbuf->vbuf_next = NULL;
+                }
+              else
+                {
+                  fbuf->vbuf_next = next;
+                }
+            }
+
+          if (prev != NULL)
+            {
+              prev->next = next;
+            }
+
+          if (curr == fbuf->vbuf_top)
+            {
+              fbuf->vbuf_top = next;
+            }
+
+          if (curr == fbuf->vbuf_tail)
+            {
+              fbuf->vbuf_tail = prev;
+            }
+
+          if (fbuf->mode == V4L2_BUF_MODE_RING)
+            {
+              fbuf->vbuf_tail->next = fbuf->vbuf_top;
+            }
+          else
+            {
+              fbuf->vbuf_tail->next = NULL;
+            }
+        }
+
+      curr->next = NULL;
+    }
+
+  spin_unlock_irqrestore(&fbuf->lock_queue, flags);
+  return found;
 }
 
 vbuf_container_t *video_framebuff_dq_valid_container(video_framebuff_t *fbuf)

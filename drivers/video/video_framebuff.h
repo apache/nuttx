@@ -27,6 +27,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdbool.h>
 #include <sys/videoio.h>
 
 #include <nuttx/mutex.h>
@@ -79,6 +80,8 @@ void              video_framebuff_free_container
 int               video_framebuff_is_empty
                        (video_framebuff_t *fbuf);
 void              video_framebuff_queue_container
+                       (video_framebuff_t *fbuf, vbuf_container_t *tgt);
+bool              video_framebuff_cancel_container
                        (video_framebuff_t *fbuf, vbuf_container_t *tgt);
 vbuf_container_t *video_framebuff_dq_valid_container
                        (video_framebuff_t *fbuf);
