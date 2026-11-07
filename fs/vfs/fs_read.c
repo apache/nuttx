@@ -90,18 +90,6 @@ static ssize_t file_readv_compat(FAR struct file *filep,
           continue;
         }
 
-      /* Sanity check to avoid total length overflow */
-
-      if (SSIZE_MAX - ntotal < iov[i].iov_len)
-        {
-          if (ntotal > 0)
-            {
-              break;
-            }
-
-          return -EINVAL;
-        }
-
       nread = inode->u.i_ops->read(filep, iov[i].iov_base,
                                    iov[i].iov_len);
 
@@ -160,16 +148,18 @@ ssize_t file_readv(FAR struct file *filep,
                    FAR const struct iovec *iov, int iovcnt)
 {
   FAR struct inode *inode;
-  ssize_t ret;
+  size_t len = 0;
+  ssize_t ret = -EBADF;
+  int i;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
   /* Check buffer count and pointer for iovec */
 
-  if (iovcnt == 0)
+  if (iovcnt <= 0 || iovcnt > IOV_MAX)
     {
-      return 0;
+      return -EINVAL;
     }
 
   if (iov == NULL)
@@ -183,20 +173,24 @@ ssize_t file_readv(FAR struct file *filep,
    * kernel builds will fail to load elf binaries found at 0.
    */
 
-#if !defined(CONFIG_BUILD_KERNEL) || CONFIG_ARCH_TEXT_VBASE != 0
-
-  /* Are all iov_base accessible? */
-
-  for (ret = 0; ret < iovcnt; ret++)
+  for (i = 0; i < iovcnt; i++)
     {
-      if (iov[ret].iov_base == NULL)
+      if (SSIZE_MAX - len < iov[i].iov_len)
+        {
+          return -EINVAL;
+        }
+
+      len += iov[i].iov_len;
+
+#if !defined(CONFIG_BUILD_KERNEL) || CONFIG_ARCH_TEXT_VBASE != 0
+      /* Are all iov_base accessible? */
+
+      if (iov[i].iov_base == NULL && iov[i].iov_len != 0)
         {
           return -EFAULT;
         }
-    }
 #endif
-
-  ret = -EBADF;
+    }
 
   /* Was this file opened for read access? */
 
@@ -204,7 +198,7 @@ ssize_t file_readv(FAR struct file *filep,
     {
       /* No.. File is not read-able */
 
-      ret = -EBADF;
+      return -EBADF;
     }
 
   /* Is a driver or mountpoint registered? If so, does it support the read
@@ -214,7 +208,7 @@ ssize_t file_readv(FAR struct file *filep,
    * signature and position in the operations vtable.
    */
 
-  else if (inode != NULL && inode->u.i_ops)
+  if (inode != NULL && inode->u.i_ops)
     {
       clock_t start_time;
 

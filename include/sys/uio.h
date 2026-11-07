@@ -105,7 +105,7 @@ extern "C"
  *    EINVAL.
  *      The sum of the iov_len values in the iov array overflowed an ssize_t
  *      or The 'iovcnt' argument was less than or equal to 0, or greater than
- *      IOV_MAX (Not implemented).
+ *      IOV_MAX.
  *
  ****************************************************************************/
 
@@ -129,9 +129,6 @@ ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt);
  *   the array pointed to by iov are 0, writev() will return 0 and have no
  *   other effect. For other file types, the behavior is unspecified.
  *
- *   TODO: If the sum of the iov_len values is greater than SSIZE_MAX, the
- *   operation will fail and no data will be transferred.
- *
  * Input Parameters:
  *   filedes - The open file descriptor for the file to be read
  *   iov     - Array of read buffer descriptors
@@ -142,12 +139,12 @@ ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt);
  *   actually written. Otherwise, it shall return a value of -1, the file-
  *   pointer shall remain unchanged, and errno shall be set to indicate an
  *   error. See write for the list of returned errno values. In addition,
- *   the readv() function will fail if:
+ *   the writev() function will fail if:
  *
  *    EINVAL.
  *      The sum of the iov_len values in the iov array overflowed an ssize_t
  *      or The 'iovcnt' argument was less than or equal to 0, or greater than
- *      IOV_MAX (Not implemented).
+ *      IOV_MAX.
  *
  ****************************************************************************/
 

@@ -72,23 +72,6 @@ static ssize_t file_writev_compat(FAR struct file *filep,
           continue;
         }
 
-      if (iov[i].iov_base == NULL)
-        {
-          return -EINVAL;
-        }
-
-      /* Sanity check to avoid total length overflow */
-
-      if (SSIZE_MAX - ntotal < iov[i].iov_len)
-        {
-          if (ntotal > 0)
-            {
-              break;
-            }
-
-          return -EINVAL;
-        }
-
       nwritten = inode->u.i_ops->write(filep, iov[i].iov_base,
                                        iov[i].iov_len);
 
@@ -150,7 +133,9 @@ ssize_t file_writev(FAR struct file *filep,
                     FAR const struct iovec *iov, int iovcnt)
 {
   FAR struct inode *inode;
-  ssize_t ret;
+  size_t len = 0;
+  ssize_t ret = -EBADF;
+  int i;
 
   /* Was this file opened for write access? */
 
@@ -161,9 +146,9 @@ ssize_t file_writev(FAR struct file *filep,
 
   /* Check buffer count and pointer for iovec */
 
-  if (iovcnt == 0)
+  if (iovcnt <= 0 || iovcnt > IOV_MAX)
     {
-      return 0;
+      return -EINVAL;
     }
 
   if (iov == NULL)
@@ -171,11 +156,20 @@ ssize_t file_writev(FAR struct file *filep,
       return -EFAULT;
     }
 
-  /* Are all iov_base accessible? */
+  /* Verify each iovec entry and check for total length overflow */
 
-  for (ret = 0; ret < iovcnt; ret++)
+  for (i = 0; i < iovcnt; i++)
     {
-      if (iov[ret].iov_base == NULL && iov[ret].iov_len != 0)
+      if (SSIZE_MAX - len < iov[i].iov_len)
+        {
+          return -EINVAL;
+        }
+
+      len += iov[i].iov_len;
+
+      /* Are all iov_base accessible? */
+
+      if (iov[i].iov_base == NULL && iov[i].iov_len != 0)
         {
           return -EFAULT;
         }
@@ -185,7 +179,6 @@ ssize_t file_writev(FAR struct file *filep,
    * If yes, then let the driver perform the write.
    */
 
-  ret = -EBADF;
   inode = filep->f_inode;
   if (inode != NULL && inode->u.i_ops)
     {
