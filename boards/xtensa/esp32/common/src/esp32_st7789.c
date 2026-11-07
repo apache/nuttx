@@ -97,10 +97,14 @@ int board_lcd_initialize(void)
   esp_gpiowrite(DISPLAY_RST, true);
   up_mdelay(10);
 
-  /* Set full brightness */
+#ifdef DISPLAY_BCKL
+  /* Set full brightness.  Boards whose backlight is not GPIO driven (e.g.
+   * powered from a PMIC rail) leave DISPLAY_BCKL undefined.
+   */
 
   esp_configgpio(DISPLAY_BCKL, OUTPUT);
   esp_gpiowrite(DISPLAY_BCKL, true);
+#endif
 
   lcdinfo("LCD successfully initialized");
 
