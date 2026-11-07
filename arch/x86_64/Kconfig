@@ -8,6 +8,7 @@ comment "x86_64 Configuration Options"
 
 config ARCH_INTEL64
 	bool "Intel x86_64"
+	select SPINLOCK_WFESEV_DEFAULT if SMP
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
 	select ARCH_HAVE_ADDRENV

@@ -157,7 +157,22 @@ static inline void up_fdpic_invoke(uintptr_t arg, uintptr_t entry,
 
 #ifdef CONFIG_ARM_HAVE_WFE_SEV
 #  define UP_WFE() __asm__ __volatile__ ("wfe" : : : "memory")
-#  define UP_SEV() __asm__ __volatile__ ("sev" : : : "memory")
+
+/* SEV is not a memory access and is not subject to memory ordering,
+ * so a waiter may observe the event before the lock release store
+ * becomes visible.  The waiter then re-reads the stale lock and sleeps
+ * again with the event already consumed (missed wakeup).  DSB makes
+ * the store visible before SEV.  From ARM Reference Manual DDI 0406C,
+ * "Use of WFE and SEV with Locks".
+ */
+
+#  define UP_SEV()                                       \
+  do                                                     \
+    {                                                    \
+      UP_DSB();                                          \
+      __asm__ __volatile__ ("sev" : : : "memory");       \
+    }                                                    \
+  while (0)
 #endif
 
 /****************************************************************************

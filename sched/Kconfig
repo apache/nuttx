@@ -298,6 +298,54 @@ config RW_SPINLOCK
 		Reader can take read lock simultaneously and only one writer
 		can take write lock.
 
+config SPINLOCK_INLINE
+	bool "Inline spinlock helpers"
+	default !DEFAULT_SMALL
+	---help---
+		Inline spinlock helper functions to improve performance.  Disable
+		this option to emit callable non-inline versions and reduce
+		header-inline code growth.
+
+config SPINLOCK_WFESEV_DEFAULT
+	bool
+
+choice
+	prompt "Spinlock wait policy"
+	default SPINLOCK_WFESEV if SPINLOCK_WFESEV_DEFAULT
+	default SPINLOCK_NOPWAIT
+
+config SPINLOCK_NOPWAIT
+	bool "Busy wait (throughput)"
+	---help---
+		Spinlock waiters busy-wait on the lock without executing any
+		wait instruction, and unlocking sends no wake event; an unlock
+		is just the release store.  This generally gives the best
+		lock/unlock throughput and the most predictable latency.
+
+config SPINLOCK_WFESEV
+	bool "WFE/SEV wait (power)"
+	---help---
+		Spinlock waiters may sleep in the spin loop (WFE on Arm) and
+		unlocking sends a wake event (SEV).  Waiting CPUs can enter a
+		low-power state instead of hammering the interconnect while a
+		lock is held.  This generally gives the best energy efficiency
+		under contention, at the cost of a more expensive unlock.
+
+		On Arm, SEV is not ordered with memory accesses, so unlock
+		needs a DSB before SEV to make the release store visible
+		before the event (ARM DDI 0406C, "Use of WFE and SEV with
+		Locks"); expect lower lock/unlock throughput than NOPWAIT.
+
+		On Intel 64 this is only PAUSE in the wait loop and no wake
+		event is sent: PAUSE reduces bus and cache-coherency
+		contention without slowing unlock, so the performance cost is
+		negligible.
+
+		On architectures without WFE/SEV semantics this policy
+		degrades to busy wait.
+
+endchoice
+
 endif # SPINLOCK
 
 config IRQCHAIN
