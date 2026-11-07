@@ -73,7 +73,11 @@
 #define FL_ZFILL           0x0001
 #define FL_PLUS            0x0002
 #define FL_SPACE           0x0004
-#define FL_LPAD            0x0008
+#ifdef CONFIG_LIBC_PRINTF_LEFT_JUSTIFY
+#  define FL_LPAD          0x0008
+#else
+#  define FL_LPAD          0      /* The compiler removes its code */
+#endif
 #define FL_ALT             0x0010
 
 #define FL_ARGNUMBER       0x0020
@@ -96,6 +100,63 @@
 #define FL_FLTUPP          0x2000
 #define FL_FLTEXP          0x4000
 #define FL_FLTFIX          0x8000
+
+/* The # flag.  FL_ALT stays for the prefix of %p.  A flag that is 0 lets the
+ * compiler remove the code of its feature.
+ */
+
+#ifdef CONFIG_LIBC_PRINTF_ALT_FORM
+#  define FL_ALT_FORM      FL_ALT
+#  define FL_POINTER       FL_ALT
+#else
+#  define FL_ALT_FORM      0
+#  define FL_POINTER       (FL_ALT | FL_ALTHEX)
+#endif
+
+#ifdef CONFIG_LIBC_PRINTF_OCTAL
+#  define HAVE_OCTAL_OUTPUT 1
+#else
+#  define HAVE_OCTAL_OUTPUT 0
+#endif
+
+/* Only %x, %X and %p have FL_ALT: then FL_ALTHEX needs no test */
+
+#define FL_ALT_IS_HEX(f)   (FL_ALT_FORM == 0 || !HAVE_OCTAL_OUTPUT || \
+                            ((f) & FL_ALTHEX) != 0)
+
+/* An integer conversion with a feature that is off prints a question mark.
+ * A flag that is 0 lets the compiler remove the code of its feature.
+ */
+
+#ifdef CONFIG_LIBC_PRINTF_INT_PRECISION
+#  define FL_INT_PREC          FL_PREC
+#  define FL_INT_PREC_UNAVAIL  0
+#else
+#  define FL_INT_PREC          0
+#  define FL_INT_PREC_UNAVAIL  FL_PREC
+#endif
+
+#ifdef CONFIG_LIBC_PRINTF_SHORT
+#  define FL_INT_SHORT         FL_SHORT
+#  define FL_INT_SHORT_UNAVAIL 0
+#else
+#  define FL_INT_SHORT         0
+#  define FL_INT_SHORT_UNAVAIL FL_SHORT
+#endif
+
+#define FL_INT_UNAVAIL       (FL_INT_PREC_UNAVAIL | FL_INT_SHORT_UNAVAIL)
+
+/* Where long has the size of int, read it as an int: the code is smaller */
+
+#define FL_LONG_READ       (sizeof(long) != sizeof(int) ? FL_LONG : 0)
+
+/* A value longer than long has output only with this option */
+
+#if defined(CONFIG_LIBC_PRINTF_LONG_LONG) || ULLONG_MAX == ULONG_MAX
+#  define HAVE_LONG_LONG_OUTPUT 1
+#else
+#  define HAVE_LONG_LONG_OUTPUT 0
+#endif
 
 /* L, as ll, means a long double in a floating point conversion */
 
@@ -459,7 +520,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                     continue;
 
                   case '#':
-                    flags |= FL_ALT;
+                    flags |= FL_ALT_FORM;
                     continue;
 
                   /* XSI thousands grouping: the C locale has no
@@ -843,6 +904,7 @@ flt_oper:
 
           if (c == 'a')
             {
+put_unavailable:
               pnt  = "?";
               size = 1;
               goto str_lpad;
@@ -962,7 +1024,7 @@ flt_oper:
             {
               flen += prec + 1u;
             }
-          else if ((flags & FL_ALT) != 0)
+          else if ((flags & FL_ALT_FORM) != 0)
             {
               flen += 1;
             }
@@ -1070,7 +1132,7 @@ flt_oper:
 
               stream_putc(out, stream);
 
-              if ((flags & FL_ALT) != 0 && n == -1)
+              if ((flags & FL_ALT_FORM) != 0 && n == -1)
                 {
                   stream_putc('.', stream);
                 }
@@ -1105,7 +1167,7 @@ flt_oper:
                       stream_repeat('0', prec - nbytes, stream);
                     }
                 }
-              else if ((flags & FL_ALT) != 0)
+              else if ((flags & FL_ALT_FORM) != 0)
                 {
                   stream_putc('.', stream);
                 }
@@ -1153,6 +1215,7 @@ flt_oper:
                 }
             }
 
+put_unavailable:
           pnt  = "?";
           size = 1;
           goto str_lpad;
@@ -1313,7 +1376,7 @@ str_lpad:
 
       if (c == 'd' || c == 'i')
         {
-          long long x;
+          ultoa_int_t x;
 
           if ((flags & FL_LONG) != 0 && (flags & FL_REPD_TYPE) != 0)
             {
@@ -1327,9 +1390,14 @@ str_lpad:
                 {
                   x = va_arg(ap, long long);
                 }
+
+              if (!HAVE_LONG_LONG_OUTPUT)
+                {
+                  goto put_unavailable;
+                }
             }
           else
-          if ((flags & FL_LONG) != 0)
+          if ((flags & FL_LONG_READ) != 0)
             {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
@@ -1355,7 +1423,7 @@ str_lpad:
                   x = va_arg(ap, int);
                 }
 
-              if ((flags & FL_SHORT) != 0)
+              if ((flags & FL_INT_SHORT) != 0)
                 {
                   if ((flags & FL_REPD_TYPE) == 0)
                     {
@@ -1368,14 +1436,14 @@ str_lpad:
                 }
             }
 
-          flags &= ~(FL_NEGATIVE | FL_ALT);
+          flags &= ~(FL_NEGATIVE | FL_ALT_FORM);
           if (x < 0)
             {
-              x = -(unsigned long long)x;
+              x = -(ultoa_uint_t)x;
               flags |= FL_NEGATIVE;
             }
 
-          if ((flags & FL_PREC) != 0 && prec == 0 && x == 0)
+          if ((flags & FL_INT_PREC) != 0 && prec == 0 && x == 0)
             {
               c = 0;
             }
@@ -1403,7 +1471,7 @@ str_lpad:
       else
         {
           int base;
-          unsigned long long x;
+          ultoa_uint_t x;
 
           if ((flags & FL_LONG) != 0 && (flags & FL_REPD_TYPE) != 0)
             {
@@ -1417,9 +1485,14 @@ str_lpad:
                 {
                   x = va_arg(ap, unsigned long long);
                 }
+
+              if (!HAVE_LONG_LONG_OUTPUT)
+                {
+                  goto put_unavailable;
+                }
             }
           else
-          if ((flags & FL_LONG) != 0)
+          if ((flags & FL_LONG_READ) != 0)
             {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
@@ -1445,7 +1518,7 @@ str_lpad:
                   x = va_arg(ap, unsigned int);
                 }
 
-              if ((flags & FL_SHORT) != 0)
+              if ((flags & FL_INT_SHORT) != 0)
                 {
                   if ((flags & FL_REPD_TYPE) == 0)
                     {
@@ -1463,11 +1536,16 @@ str_lpad:
           switch (c)
             {
               case 'u':
-                flags &= ~FL_ALT;
+                flags &= ~FL_ALT_FORM;
                 base = 10;
                 break;
 
               case 'o':
+                if (!HAVE_OCTAL_OUTPUT)
+                  {
+                    goto put_unavailable;
+                  }
+
                 base = 8;
                 break;
 
@@ -1536,12 +1614,12 @@ str_lpad:
                   }
 #endif
 
-                flags |= FL_ALT;
+                flags |= FL_POINTER;
 
                 /* no break */
 
               case 'x':
-                if ((flags & FL_ALT) != 0)
+                if ((flags & FL_ALT_FORM) != 0)
                   {
                     flags |= FL_ALTHEX;
                   }
@@ -1550,7 +1628,7 @@ str_lpad:
                 break;
 
               default: /* 'X' */
-                if ((flags & FL_ALT) != 0)
+                if ((flags & FL_ALT_FORM) != 0)
                   {
                     flags |= (FL_ALTHEX | FL_ALTUPP);
                   }
@@ -1559,7 +1637,7 @@ str_lpad:
                 break;
             }
 
-          if ((flags & FL_PREC) != 0 && prec == 0 && x == 0)
+          if ((flags & FL_INT_PREC) != 0 && prec == 0 && x == 0)
             {
               c = 0;
             }
@@ -1571,15 +1649,20 @@ str_lpad:
           flags &= ~FL_NEGATIVE;
         }
 
+      if ((flags & FL_INT_UNAVAIL) != 0)
+        {
+          goto put_unavailable;
+        }
+
       len = c;
 
-      if ((flags & FL_PREC) != 0)
+      if ((flags & FL_INT_PREC) != 0)
         {
           flags &= ~FL_ZFILL;
           if (len < prec)
             {
               len = prec;
-              if ((flags & FL_ALT) != 0 && (flags & FL_ALTHEX) == 0)
+              if ((flags & FL_ALT_FORM) != 0 && !FL_ALT_IS_HEX(flags))
                 {
                   flags &= ~FL_ALT;
                 }
@@ -1592,14 +1675,14 @@ str_lpad:
            * "0" from the flag, and a hexadecimal value has no prefix.
            */
 
-          if (c == 0 ? (flags & FL_ALTHEX) != 0 : buf[c - 1] == '0')
+          if (c == 0 ? FL_ALT_IS_HEX(flags) : buf[c - 1] == '0')
             {
               flags &= ~(FL_ALT | FL_ALTHEX | FL_ALTUPP);
             }
           else
             {
               len += 1;
-              if ((flags & FL_ALTHEX) != 0)
+              if (FL_ALT_IS_HEX(flags))
                 {
                   len += 1;
                 }
@@ -1640,9 +1723,10 @@ str_lpad:
       if ((flags & FL_ALT) != 0)
         {
           stream_putc('0', stream);
-          if ((flags & FL_ALTHEX) != 0)
+          if (FL_ALT_IS_HEX(flags))
             {
-              stream_putc(flags & FL_ALTUPP ? 'X' : 'x', stream);
+              stream_putc(FL_ALT_FORM != 0 && (flags & FL_ALTUPP) != 0 ?
+                          'X' : 'x', stream);
             }
         }
       else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
@@ -1674,7 +1758,7 @@ tail:
 
       /* Tail is possible.  */
 
-      if (width > 0)
+      if (FL_LPAD != 0 && width > 0)
         {
           stream_repeat(' ', width, stream);
         }
