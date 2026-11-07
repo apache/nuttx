@@ -140,6 +140,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
   if (priv->master)
     {
       struct sim_rptun_rsc_s *rsc = &priv->shmem->rsc;
+
       memset(rsc, 0, sizeof(struct sim_rptun_rsc_s));
 
       rsc->hdr.ver                    = 1;
@@ -295,6 +296,7 @@ static bool sim_rptun_is_master(struct rptun_dev_s *dev)
 {
   struct sim_rptun_dev_s *priv = container_of(dev,
                                  struct sim_rptun_dev_s, rptun);
+
   return priv->master;
 }
 

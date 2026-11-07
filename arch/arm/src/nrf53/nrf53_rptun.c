@@ -265,6 +265,7 @@ static bool nrf53_rptun_is_master(struct rptun_dev_s *dev)
 {
   struct nrf53_rptun_dev_s *priv = container_of(dev,
                                  struct nrf53_rptun_dev_s, rptun);
+
   return priv->master;
 }
 
