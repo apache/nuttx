@@ -1288,6 +1288,13 @@ int bt_netdev_register(FAR struct bt_driver_s *btdev)
   ret = netdev_register(&priv->bd_dev.r_dev, NET_LL_BLUETOOTH);
   if (ret >= 0)
     {
+#ifndef CONFIG_WIRELESS_BLUETOOTH_HOST
+      /* A raw HCI interface is ready as soon as it is registered.  It has
+       * no network configuration step that would invoke btnet_ifup().
+       */
+
+      netdev_carrier_on(&priv->bd_dev.r_dev);
+#endif
       return OK;
     }
 
