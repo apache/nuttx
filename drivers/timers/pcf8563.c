@@ -28,6 +28,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 #include <time.h>
 #include <errno.h>
 
@@ -103,6 +104,10 @@
  */
 
 #define PCF8563_CTRL1_STOP   0x20
+
+/* The longest register write is the seven time registers at once */
+
+#define PCF8563_MAX_WRITE    7
 
 #ifndef CONFIG_PCF8563_I2C_FREQUENCY
 #  define CONFIG_PCF8563_I2C_FREQUENCY 100000
@@ -200,6 +205,7 @@ static uint8_t rtc_bin2bcd(int value)
 static int rtc_bcd2bin(uint8_t value)
 {
   int tens = ((int)value >> 4) * 10;
+
   return tens + (value & 0x0f);
 }
 
@@ -262,25 +268,30 @@ static int pcf8563_getreg(FAR struct pcf8563_dev_s *priv, uint8_t regaddr,
 static int pcf8563_putreg(FAR struct pcf8563_dev_s *priv, uint8_t regaddr,
                           FAR const uint8_t *buffer, size_t buflen)
 {
-  struct i2c_msg_s msg[2];
+  struct i2c_msg_s msg;
+  uint8_t txbuffer[PCF8563_MAX_WRITE + 1];
 
-  msg[0].frequency = CONFIG_PCF8563_I2C_FREQUENCY;
-  msg[0].addr      = PCF8563_I2C_ADDRESS;
-  msg[0].flags     = 0;
-  msg[0].buffer    = &regaddr;
-  msg[0].length    = 1;
-
-  /* The second message runs on from the first without a stop, which is
-   * what makes the pair one write rather than two.
+  /* The register address and the data go out as a single message.  Not
+   * every I2C controller can continue a message with I2C_M_NOSTART (the
+   * ESP32 one ends the first message with a STOP), so the write is not
+   * split in two.
    */
 
-  msg[1].frequency = CONFIG_PCF8563_I2C_FREQUENCY;
-  msg[1].addr      = PCF8563_I2C_ADDRESS;
-  msg[1].flags     = I2C_M_NOSTART;
-  msg[1].buffer    = (FAR uint8_t *)buffer;
-  msg[1].length    = buflen;
+  if (buflen > PCF8563_MAX_WRITE)
+    {
+      return -EINVAL;
+    }
 
-  return I2C_TRANSFER(priv->i2c, msg, 2);
+  txbuffer[0] = regaddr;
+  memcpy(&txbuffer[1], buffer, buflen);
+
+  msg.frequency = CONFIG_PCF8563_I2C_FREQUENCY;
+  msg.addr      = PCF8563_I2C_ADDRESS;
+  msg.flags     = 0;
+  msg.buffer    = txbuffer;
+  msg.length    = buflen + 1;
+
+  return I2C_TRANSFER(priv->i2c, &msg, 1);
 }
 
 /****************************************************************************
