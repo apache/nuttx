@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <limits.h>
 #include <nuttx/debug.h>
 #include <poll.h>
 #include <stdio.h>
@@ -989,14 +990,20 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
   return OK;
 }
 
-static uint32_t rpmsg_socket_get_iovlen(FAR const struct iovec *buf,
-                                        size_t iovcnt)
+static ssize_t rpmsg_socket_get_iovlen(FAR const struct iovec *buf,
+                                       size_t iovcnt)
 {
-  uint32_t len = 0;
+  size_t len = 0;
 
   while (iovcnt--)
     {
-      len += (buf++)->iov_len;
+      if (buf->iov_len > MIN(SSIZE_MAX, UINT32_MAX) - len)
+        {
+          return -EINVAL;
+        }
+
+      len += buf->iov_len;
+      buf++;
     }
 
   return len;
@@ -1007,10 +1014,19 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
                                             size_t iovcnt, bool nonblock)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
-  uint32_t len = rpmsg_socket_get_iovlen(buf, iovcnt);
+  ssize_t ret;
+  uint32_t len;
   uint32_t written = 0;
   uint32_t offset = 0;
-  int ret = 0;
+
+  ret = rpmsg_socket_get_iovlen(buf, iovcnt);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  len = ret;
+  ret = 0;
 
   while (written < len)
     {
@@ -1100,18 +1116,28 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
   FAR struct rpmsg_socket_data_s *msg;
-  uint32_t len = rpmsg_socket_get_iovlen(buf, iovcnt);
-  uint32_t total = len + sizeof(uint32_t);
+  FAR uint8_t *msgpos;
+  ssize_t ret;
+  uint32_t len;
+  uint32_t total;
   uint32_t written = 0;
   uint32_t ipcsize;
   uint32_t space;
-  FAR uint8_t *msgpos;
-  int ret;
 
-  if (total > conn->sendsize)
+  ret = rpmsg_socket_get_iovlen(buf, iovcnt);
+  if (ret < 0)
     {
-      return -EFBIG;
+      return ret;
     }
+
+  len = ret;
+  if (conn->sendsize < sizeof(uint32_t) ||
+      len > conn->sendsize - sizeof(uint32_t))
+    {
+      return -EMSGSIZE;
+    }
+
+  total = len + sizeof(uint32_t);
 
   while (1)
     {
@@ -1119,39 +1145,55 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
       space = rpmsg_socket_get_space(conn);
       nxmutex_unlock(&conn->sendlock);
 
-      if (space >= total)
+      if (space < total)
         {
-          break;
+          if (nonblock)
+            {
+              return -EAGAIN;
+            }
+
+          ret = net_sem_timedwait(&conn->sendsem,
+                                  _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+          if (!conn->ept.rdev || conn->unbind)
+            {
+              ret = -ECONNRESET;
+            }
+
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          continue;
         }
 
-      if (nonblock)
+      msg = rpmsg_get_tx_payload_buffer(&conn->ept, &ipcsize, true);
+      if (!msg)
         {
-          return -EAGAIN;
+          return -EINVAL;
         }
 
-      ret = net_sem_timedwait(&conn->sendsem,
-                              _SO_TIMEOUT(conn->sconn.s_sndtimeo));
-      if (!conn->ept.rdev || conn->unbind)
+      if (ipcsize < sizeof(*msg) || total > ipcsize - sizeof(*msg))
         {
-          ret = -ECONNRESET;
+          rpmsg_release_tx_buffer(&conn->ept, msg);
+          return -EMSGSIZE;
         }
 
-      if (ret < 0)
+      nxmutex_lock(&conn->sendlock);
+      if (total > rpmsg_socket_get_space(conn))
         {
-          return ret;
+          nxmutex_unlock(&conn->sendlock);
+          rpmsg_release_tx_buffer(&conn->ept, msg);
+          if (nonblock)
+            {
+              return -EAGAIN;
+            }
+
+          continue;
         }
+
+      break;
     }
-
-  msg = rpmsg_get_tx_payload_buffer(&conn->ept, &ipcsize, true);
-  if (!msg)
-    {
-      return -EINVAL;
-    }
-
-  nxmutex_lock(&conn->sendlock);
-  total = MIN(total, rpmsg_socket_get_space(conn));
-  total = MIN(total, ipcsize - sizeof(*msg));
-  len = total - sizeof(uint32_t);
 
   /* SOCK_DGRAM need write len to buffer */
 
