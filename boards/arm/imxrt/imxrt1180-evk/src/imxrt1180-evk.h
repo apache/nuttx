@@ -38,6 +38,10 @@
 
 int imxrt_bringup(void);
 
+#ifdef CONFIG_IMXRT_NETC
+int imxrt_netc_boardinitialize(void);
+#endif
+
 #if defined(CONFIG_USBDEV_DMAMEMORY) || defined(CONFIG_FAT_DMAMEMORY)
 int imxrt_dma_alloc_init(void);
 #endif

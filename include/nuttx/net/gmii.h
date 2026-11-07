@@ -303,7 +303,8 @@
 /* RTL8211F MII ID1/2 register bits */
 
 #define GMII_PHYID1_RTL8211F           0x001c   /* ID1 value for Realtek RTL8211F */
-#define GMII_PHYID2_RTL8211F           0xc878   /* ID2 value for Realtek RTL8211F */
+#define GMII_PHYID2_RTL8211F           0xc878   /* ID2 value for Realtek RTL8211F-VD */
+#define GMII_PHYID2_RTL8211F_STD       0xc916   /* ID2 of standard RTL8211F / FDI */
 #define GMII_RTL8211F_PHYSR_SPEED_MASK 0x30
 #define GMII_RTL8211F_PHYSR_10MBPS     0x00
 #define GMII_RTL8211F_PHYSR_100MBPS    0x10

@@ -107,6 +107,18 @@ endif
 
 endif
 
+ifeq ($(CONFIG_NET_PHY_RTL8201F),y)
+  CSRCS += rtl8201f.c
+  DEPPATH += --dep-path net/phy
+  VPATH += :net/phy
+endif
+
+ifeq ($(CONFIG_NET_PHY_RTL8211F),y)
+  CSRCS += rtl8211f.c
+  DEPPATH += --dep-path net/phy
+  VPATH += :net/phy
+endif
+
 ifeq ($(CONFIG_NET_E1000),y)
   CSRCS += e1000.c
 endif

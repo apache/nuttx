@@ -24,6 +24,10 @@ include $(TOPDIR)/Make.defs
 
 CSRCS  = imxrt_boot.c imxrt_bringup.c imxrt_appinit.c
 
+ifeq ($(CONFIG_IMXRT_NETC),y)
+CSRCS += imxrt_netc.c
+endif
+
 ifeq ($(CONFIG_ARCH_CORTEXM33),y)
 CSRCS += imxrt_clockconfig_m33.c
 else
