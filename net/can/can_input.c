@@ -39,6 +39,10 @@
 #include "utils/utils.h"
 #include "can/can.h"
 
+#ifdef CONFIG_NET_CANFORWARD
+#include "netforward/netforward.h"
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -218,9 +222,19 @@ static int can_input_conn(FAR struct net_driver_s *dev,
 
 static int can_in(FAR struct net_driver_s *dev)
 {
-  FAR struct can_conn_s *conn = can_active(dev, NULL);
+  FAR struct can_conn_s *conn;
   FAR struct can_conn_s *nextconn;
   int ret;
+
+#ifdef CONFIG_NET_CANFORWARD
+  /* Forward the packet if needed. */
+
+  can_forward(dev);
+#endif
+
+  /* Do we have upper listener on the dev. */
+
+  conn = can_active(dev, NULL);
 
   if (conn == NULL)
     {

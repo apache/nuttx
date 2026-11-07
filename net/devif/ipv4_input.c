@@ -105,7 +105,7 @@
 #include "icmp/icmp.h"
 #include "igmp/igmp.h"
 
-#include "ipforward/ipforward.h"
+#include "netforward/netforward.h"
 #include "devif/devif.h"
 #include "nat/nat.h"
 #include "ipfilter/ipfilter.h"
@@ -407,9 +407,10 @@ static int ipv4_in(FAR struct net_driver_s *dev)
   else
     {
 #ifdef CONFIG_NET_IPFORWARD
-      /* Try to forward the unicast packet. */
+      /* Try to forward the packet if device has a configured IP */
 
-      if (ipv4_forward(dev, ipv4) >= 0)
+      if (!net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY) &&
+          ipv4_forward(dev, ipv4) >= 0)
         {
           /* The packet was forwarded.  Return success; d_len will
            * be set appropriately by the forwarding logic:  Cleared

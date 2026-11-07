@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/ipforward/ipfwd_dropstats.c
+ * net/netforward/netfwd_dropstats.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -32,9 +32,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netstats.h>
 
-#include "ipforward/ipforward.h"
-
-#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_STATISTICS)
+#include "netforward/netforward.h"
 
 /****************************************************************************
  * Private Functions
@@ -55,34 +53,36 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPFORWARD
 static int proto_dropstats(int proto)
 {
   switch (proto)
     {
 #ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      g_netstats.tcp.drop++;
-      break;
+      case IP_PROTO_TCP:
+        g_netstats.tcp.drop++;
+        break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      g_netstats.udp.drop++;
-      break;
+      case IP_PROTO_UDP:
+        g_netstats.udp.drop++;
+        break;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
-    case IP_PROTO_ICMP6:
-      g_netstats.icmpv6.drop++;
-      break;
+      case IP_PROTO_ICMP6:
+        g_netstats.icmpv6.drop++;
+        break;
 #endif
 
-    default:
-      return -EPROTONOSUPPORT;
+      default:
+        return -EPROTONOSUPPORT;
     }
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -149,7 +149,7 @@ void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
 #endif
 
 /****************************************************************************
- * Name: ipfwd_dropstats
+ * Name: netfwd_dropstats
  *
  * Description:
  *   Update statistics for a dropped packet.
@@ -162,24 +162,32 @@ void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
  *
  ****************************************************************************/
 
-void ipfwd_dropstats(FAR struct forward_s *fwd)
+void netfwd_dropstats(FAR struct forward_s *fwd)
 {
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  if (fwd->f_domain == PF_INET)
-#endif
+  switch (fwd->f_domain)
     {
-      ipv4_dropstats((FAR struct ipv4_hdr_s *)IOB_DATA(fwd->f_iob));
-    }
+#ifdef CONFIG_NET_IPv4
+      case PF_INET:
+        {
+          ipv4_dropstats((FAR struct ipv4_hdr_s *)IOB_DATA(fwd->f_iob));
+        }
+        break;
 #endif
 #ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else
+      case PF_INET6:
+        {
+          ipv6_dropstats((FAR struct ipv6_hdr_s *)IOB_DATA(fwd->f_iob));
+        }
+        break;
 #endif
-    {
-      ipv6_dropstats((FAR struct ipv6_hdr_s *)IOB_DATA(fwd->f_iob));
+#ifdef CONFIG_NET_CANFORWARD
+      case PF_CAN:
+        {
+          g_netstats.cangw.drop++;
+        }
+        break;
+#endif
+      default:
+        break;
     }
-#endif
 }
-
-#endif /* CONFIG_NET_IPFORWARD && CONFIG_NET_STATISTICS */

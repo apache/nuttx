@@ -42,7 +42,7 @@ ifeq ($(CONFIG_MM_IOB),y)
 
   # IP forwarding
 
-  ifeq ($(CONFIG_NET_IPFORWARD),y)
+  ifeq ($(CONFIG_NET_FORWARD),y)
     NET_CSRCS += devif_forward.c
   endif
 
