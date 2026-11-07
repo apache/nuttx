@@ -72,6 +72,12 @@
 #define MIN_MANT_INT  ((uint64_t)MIN_MANT)
 #define MIN_MANT_EXP  DBL_DIG
 
+#ifdef CONFIG_ENDIAN_BIG
+#  define DTOA_SIGN_BYTE 0
+#else
+#  define DTOA_SIGN_BYTE (sizeof(double) - 1)
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -79,11 +85,20 @@
 int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
                   int max_decimals)
 {
+  union
+  {
+    double d;
+    uint8_t b[sizeof(double)];
+  } sign;
+
   int32_t exp = 0;
   uint8_t flags = 0;
   int i;
 
-  if (x < 0)
+  /* The sign bit, because -0.0 < 0 is false */
+
+  sign.d = x;
+  if ((sign.b[DTOA_SIGN_BYTE] & 0x80) != 0)
     {
       flags |= DTOA_MINUS;
       x = -x;
@@ -93,7 +108,9 @@ int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
     {
       flags |= DTOA_ZERO;
       for (i = 0; i < max_digits; i++)
-        dtoa->digits[i] = '0';
+        {
+          dtoa->digits[i] = '0';
+        }
     }
   else if (isnan(x))
     {

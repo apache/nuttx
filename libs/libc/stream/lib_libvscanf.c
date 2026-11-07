@@ -27,6 +27,7 @@
 #include <nuttx/streams.h>
 
 #include <errno.h>
+#include <float.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -46,6 +47,12 @@
 #  define FLOATINGPOINT_MODS "aAfFeEgG"
 #else
 #  define FLOATINGPOINT_MODS
+#endif
+
+/* Where a long double is a double, it uses the code of the double */
+
+#if defined(CONFIG_HAVE_LONG_DOUBLE) && LDBL_MANT_DIG != DBL_MANT_DIG
+#  define HAVE_SCANF_LDOUBLE
 #endif
 
 #define MAXLN   128
@@ -148,49 +155,49 @@ doswitch:
       n = fmt_char(fmt++);       /* Examine the next */
       switch (n)
         {
-        case 0:                /* Format ended too soon */
-        case ']':              /* End of scanset */
-          goto doexit;
+          case 0:                /* Format ended too soon */
+          case ']':              /* End of scanset */
+            goto doexit;
 
-        case '-':
-          /* A scanset of the form [01+-] is defined as "the digit 0, the
-           * digit 1, the character +, the character -", but the effect of a
-           * scanset such as [a-zA-Z0-9] is implementation defined.  The V7
-           * Unix scanf treats "a-z" as "the letters a through z", but treats
-           * "a-a" as "the letter a, the character -, and the letter a". For
-           * compatibility, the `-' is not considered to define a range if
-           * the character following it is either a close bracket (required
-           * by ANSI) or is not numerically greater than the character* we
-           * just stored in the table (c).
-           */
+          case '-':
+            /* A scanset of the form [01+-] is defined as "the digit 0, the
+             * digit 1, the character +, the character -", but the effect of
+             * a scanset such as [a-zA-Z0-9] is implementation defined.  The
+             * V7 Unix scanf treats "a-z" as "the letters a through z", but
+             * treats "a-a" as "the letter a, the character -, and the letter
+             * a". For compatibility, the `-' is not considered to define a
+             * range if the character following it is either a close bracket
+             * (required by ANSI) or is not numerically greater than the
+             * character* we just stored in the table (c).
+             */
 
-          n = fmt_char(fmt);
-          if (n == ']' || n < c)
-            {
-              c = '-';
-              break;            /* Resume the for (; ; ) */
-            }
+            n = fmt_char(fmt);
+            if (n == ']' || n < c)
+              {
+                c = '-';
+                break;            /* Resume the for (; ; ) */
+              }
 
-          fmt++;
-          do
-            {
-              /* Fill in the range */
+            fmt++;
+            do
+              {
+                /* Fill in the range */
 
-              c++;
-              set[c / 8] |= (1 << (c % 8));     /* Take character c */
-            }
-          while (c < n);
+                c++;
+                set[c / 8] |= (1 << (c % 8));     /* Take character c */
+              }
+            while (c < n);
 
-          /* Alas, the V7 Unix scanf also treats formats such as [a-c-e] as
-           * "the letters a through e".  This too is permitted by the
-           * standard.
-           */
+            /* Alas, the V7 Unix scanf also treats formats such as [a-c-e] as
+             * "the letters a through e".  This too is permitted by the
+             * standard.
+             */
 
-          goto doswitch;
+            goto doswitch;
 
-        default:                /* Just another character */
-          c = n;
-          break;
+          default:                /* Just another character */
+            c = n;
+            break;
         }
     }
 
@@ -315,11 +322,19 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                 {
                   noassign = true;
                 }
-              else if (fmt_char(fmt) == 'l' || fmt_char(fmt) == 'L')
+              else if (fmt_char(fmt) == 'L')
+                {
+                  /* A long double; a GNU extension makes it a long long for
+                   * an integer conversion.
+                   */
+
+                  modifier = LL_MOD;
+                }
+              else if (fmt_char(fmt) == 'l')
                 {
                   modifier = L_MOD;
 
-                  if (*(fmt + 1) == 'l' || *(fmt + 1) == 'L')
+                  if (*(fmt + 1) == 'l')
                     {
                       modifier = LL_MOD;
                       fmt++;
@@ -371,7 +386,9 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
               else if (fmt_char(fmt) >= '1' && fmt_char(fmt) <= '9')
                 {
                   for (tc = fmt; isdigit(fmt_char(fmt)); fmt++)
-                    ;
+                    {
+                    }
+
                   strlcpy(tmp, tc, fmt - tc + 1);
                   width = atoi(tmp);
                   fmt--;
@@ -574,32 +591,32 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
 
                   switch (modifier)
                     {
-                    case HH_MOD:
-                      pchar = next_arg(varg, vabuf, FAR unsigned char *);
-                      *pchar = 0;
-                      break;
+                      case HH_MOD:
+                        pchar = next_arg(varg, vabuf, FAR unsigned char *);
+                        *pchar = 0;
+                        break;
 
-                    case H_MOD:
-                      pshort = next_arg(varg, vabuf, FAR unsigned short *);
-                      *pshort = 0;
-                      break;
+                      case H_MOD:
+                        pshort = next_arg(varg, vabuf, FAR unsigned short *);
+                        *pshort = 0;
+                        break;
 
-                    case NO_MOD:
-                      pint = next_arg(varg, vabuf, FAR unsigned int *);
-                      *pint = 0;
-                      break;
+                      case NO_MOD:
+                        pint = next_arg(varg, vabuf, FAR unsigned int *);
+                        *pint = 0;
+                        break;
 
-                    default:
-                    case L_MOD:
-                      plong = next_arg(varg, vabuf, FAR unsigned long *);
-                      *plong = 0;
-                      break;
+                      default:
+                      case L_MOD:
+                        plong = next_arg(varg, vabuf, FAR unsigned long *);
+                        *plong = 0;
+                        break;
 
-                    case LL_MOD:
-                      plonglong = next_arg(varg, vabuf,
-                                           FAR unsigned long long *);
-                      *plonglong = 0;
-                      break;
+                      case LL_MOD:
+                        plonglong = next_arg(varg, vabuf,
+                                             FAR unsigned long long *);
+                        *plonglong = 0;
+                        break;
                     }
                 }
 
@@ -641,190 +658,193 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
 
                   switch (fmt_char(fmt))
                     {
-                    default:
-                    case 'd':
-                      sign = true;
+                      default:
+                      case 'd':
+                        sign = true;
 
-                      /* FALLTHROUGH */
+                        /* FALLTHROUGH */
 
-                    case 'u':
-                      while (fwidth < width && !stopconv)
-                        {
-                          if (c == '-' || c == '+')
-                            {
-                              if (fwidth != 0)
-                                {
-                                  stopconv = true;
-                                }
-                            }
-                          else if (!(c >= '0' && c <= '9'))
-                            {
-                              stopconv = true;
-                            }
+                      case 'u':
+                        while (fwidth < width && !stopconv)
+                          {
+                            if (c == '-' || c == '+')
+                              {
+                                if (fwidth != 0)
+                                  {
+                                    stopconv = true;
+                                  }
+                              }
+                            else if (!(c >= '0' && c <= '9'))
+                              {
+                                stopconv = true;
+                              }
 
-                          if (!stopconv)
-                            {
-                              tmp[fwidth++] = c;
-                              c = lib_stream_getc(stream);
-                            }
-                        }
+                            if (!stopconv)
+                              {
+                                tmp[fwidth++] = c;
+                                c = lib_stream_getc(stream);
+                              }
+                          }
 
-                      base = 10;
-                      break;
+                        base = 10;
+                        break;
 
-                    case 'p':
-                    case 'x':
-                    case 'X':
-                      while (fwidth < width && !stopconv)
-                        {
-                          if (c == '-' || c == '+')
-                            {
-                              if (fwidth != 0)
-                                {
-                                  stopconv = true;
-                                }
-                            }
-                          else if (c == '0')
-                            {
-                              if (prefix == 0)
-                                {
-                                  prefix = 1;
-                                }
-                            }
-                          else if (c == 'x' || c == 'X')
-                            {
-                              if (prefix == 1)
-                                {
-                                  prefix = 2;
-                                }
-                              else
-                                {
-                                  stopconv = true;
-                                }
-                            }
-                          else if (!((c >= '0' && c <= '9') ||
-                                     (c >= 'a' && c <= 'f') ||
-                                     (c >= 'A' && c <= 'F')))
-                            {
-                              stopconv = true;
-                            }
-                          else
-                            {
-                              prefix = 2;
-                            }
+                      case 'p':
+                      case 'x':
+                      case 'X':
+                        while (fwidth < width && !stopconv)
+                          {
+                            if (c == '-' || c == '+')
+                              {
+                                if (fwidth != 0)
+                                  {
+                                    stopconv = true;
+                                  }
+                              }
+                            else if (c == '0')
+                              {
+                                if (prefix == 0)
+                                  {
+                                    prefix = 1;
+                                  }
+                              }
+                            else if (c == 'x' || c == 'X')
+                              {
+                                if (prefix == 1)
+                                  {
+                                    prefix = 2;
+                                  }
+                                else
+                                  {
+                                    stopconv = true;
+                                  }
+                              }
+                            else if (!((c >= '0' && c <= '9') ||
+                                       (c >= 'a' && c <= 'f') ||
+                                       (c >= 'A' && c <= 'F')))
+                              {
+                                stopconv = true;
+                              }
+                            else
+                              {
+                                prefix = 2;
+                              }
 
-                          if (!stopconv)
-                            {
-                              tmp[fwidth++] = c;
-                              c = lib_stream_getc(stream);
-                            }
-                        }
+                            if (!stopconv)
+                              {
+                                tmp[fwidth++] = c;
+                                c = lib_stream_getc(stream);
+                              }
+                          }
 
-                      base = 16;
-                      break;
+                        base = 16;
+                        break;
 
-                    case 'o':
-                      while (fwidth < width && !stopconv)
-                        {
-                          if (c == '-' || c == '+')
-                            {
-                              if (fwidth != 0)
-                                {
-                                  stopconv = true;
-                                }
-                            }
-                          else if (!(c >= '0' && c <= '7'))
-                            {
-                              stopconv = true;
-                            }
+                      case 'o':
+                        while (fwidth < width && !stopconv)
+                          {
+                            if (c == '-' || c == '+')
+                              {
+                                if (fwidth != 0)
+                                  {
+                                    stopconv = true;
+                                  }
+                              }
+                            else if (!(c >= '0' && c <= '7'))
+                              {
+                                stopconv = true;
+                              }
 
-                          if (!stopconv)
-                            {
-                              tmp[fwidth++] = c;
-                              c = lib_stream_getc(stream);
-                            }
-                        }
+                            if (!stopconv)
+                              {
+                                tmp[fwidth++] = c;
+                                c = lib_stream_getc(stream);
+                              }
+                          }
 
-                      base = 8;
-                      break;
+                        base = 8;
+                        break;
 
-                    case 'b':  /* not official? */
-                      while (fwidth < width && !stopconv)
-                        {
-                          if (c == '-' || c == '+')
-                            {
-                              if (fwidth != 0)
-                                {
-                                  stopconv = true;
-                                }
-                            }
-                          else if (!(c >= '0' && c <= '1'))
-                            {
-                              stopconv = true;
-                            }
+                      case 'b':  /* not official? */
+                        while (fwidth < width && !stopconv)
+                          {
+                            if (c == '-' || c == '+')
+                              {
+                                if (fwidth != 0)
+                                  {
+                                    stopconv = true;
+                                  }
+                              }
+                            else if (!(c >= '0' && c <= '1'))
+                              {
+                                stopconv = true;
+                              }
 
-                          if (!stopconv)
-                            {
-                              tmp[fwidth++] = c;
-                              c = lib_stream_getc(stream);
-                            }
-                        }
+                            if (!stopconv)
+                              {
+                                tmp[fwidth++] = c;
+                                c = lib_stream_getc(stream);
+                              }
+                          }
 
-                      base = 2;
-                      break;
+                        base = 2;
+                        break;
 
-                    case 'i':
-                      sign = true;
-                      base = 10;
+                      case 'i':
+                        sign = true;
+                        base = 10;
 
-                      while (fwidth < width && !stopconv)
-                        {
-                          if (c == '-' || c == '+')
-                            {
-                              if (fwidth != 0)
-                                {
-                                  stopconv = true;
-                                }
-                            }
-                          else if (c == '0')
-                            {
-                              if (prefix == 0)
-                                {
-                                  prefix = 1;
-                                  base = 8;
-                                }
-                            }
-                          else if (c == 'x' || c == 'X')
-                            {
-                              if (prefix == 1)
-                                {
-                                  prefix = 2;
-                                  base = 16;
-                                }
-                              else
-                                {
-                                  stopconv = true;
-                                }
-                            }
-                          else if (!((c >= '0' && c <= '7' && base >= 8) ||
-                                     (c >= '8' && c <= '9' && base >= 10) ||
-                                     (c >= 'a' && c <= 'f' && base == 16) ||
-                                     (c >= 'A' && c <= 'F' && base == 16)))
-                            {
-                              stopconv = true;
-                            }
-                          else
-                            {
-                              prefix = 2;
-                            }
+                        while (fwidth < width && !stopconv)
+                          {
+                            if (c == '-' || c == '+')
+                              {
+                                if (fwidth != 0)
+                                  {
+                                    stopconv = true;
+                                  }
+                              }
+                            else if (c == '0')
+                              {
+                                if (prefix == 0)
+                                  {
+                                    prefix = 1;
+                                    base = 8;
+                                  }
+                              }
+                            else if (c == 'x' || c == 'X')
+                              {
+                                if (prefix == 1)
+                                  {
+                                    prefix = 2;
+                                    base = 16;
+                                  }
+                                else
+                                  {
+                                    stopconv = true;
+                                  }
+                              }
+                            else if (!((c >= '0' && c <= '7' && base >= 8) ||
+                                       (c >= '8' && c <= '9' &&
+                                        base >= 10) ||
+                                       (c >= 'a' && c <= 'f' &&
+                                        base == 16) ||
+                                       (c >= 'A' && c <= 'F' &&
+                                        base == 16)))
+                              {
+                                stopconv = true;
+                              }
+                            else
+                              {
+                                prefix = 2;
+                              }
 
-                          if (!stopconv)
-                            {
-                              tmp[fwidth++] = c;
-                              c = lib_stream_getc(stream);
-                            }
-                        }
-                      break;
+                            if (!stopconv)
+                              {
+                                tmp[fwidth++] = c;
+                                c = lib_stream_getc(stream);
+                              }
+                          }
+                        break;
                     }
 
                   tmp[fwidth] = 0;
@@ -838,30 +858,30 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
 
                   switch (modifier)
                     {
-                    case HH_MOD:
-                    case H_MOD:
-                    case NO_MOD:
-                    default:
-                      if (sign)
-                        {
-                          tmplong = strtol(tmp, &endptr, base);
-                        }
-                      else
-                        {
-                          tmplong = strtoul(tmp, &endptr, base);
-                        }
-                      break;
+                      case HH_MOD:
+                      case H_MOD:
+                      case NO_MOD:
+                      default:
+                        if (sign)
+                          {
+                            tmplong = strtol(tmp, &endptr, base);
+                          }
+                        else
+                          {
+                            tmplong = strtoul(tmp, &endptr, base);
+                          }
+                        break;
 
-                    case LL_MOD:
-                      if (sign)
-                        {
-                          tmplonglong = strtoll(tmp, &endptr, base);
-                        }
-                      else
-                        {
-                          tmplonglong = strtoull(tmp, &endptr, base);
-                        }
-                      break;
+                      case LL_MOD:
+                        if (sign)
+                          {
+                            tmplonglong = strtoll(tmp, &endptr, base);
+                          }
+                        else
+                          {
+                            tmplonglong = strtoull(tmp, &endptr, base);
+                          }
+                        break;
                     }
 
                   /* Check if the number was successfully converted */
@@ -881,25 +901,25 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
 
                       switch (modifier)
                         {
-                        case HH_MOD:
-                          *pchar = (unsigned char)tmplong;
-                          break;
+                          case HH_MOD:
+                            *pchar = (unsigned char)tmplong;
+                            break;
 
-                        case H_MOD:
-                          *pshort = (unsigned short)tmplong;
-                          break;
+                          case H_MOD:
+                            *pshort = (unsigned short)tmplong;
+                            break;
 
-                        case NO_MOD:
-                          *pint = (unsigned int)tmplong;
-                          break;
+                          case NO_MOD:
+                            *pint = (unsigned int)tmplong;
+                            break;
 
-                        default:
-                          *plong = tmplong;
-                          break;
+                          default:
+                            *plong = tmplong;
+                            break;
 
-                        case LL_MOD:
-                          *plonglong = tmplonglong;
-                          break;
+                          case LL_MOD:
+                            *plonglong = tmplonglong;
+                            break;
                         }
 
                       assigncount++;
@@ -916,6 +936,10 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
 
           else if (strchr("aAfFeEgG", fmt_char(fmt)) != NULL)
             {
+#ifdef HAVE_SCANF_LDOUBLE
+              FAR long double *pld = NULL;
+#endif
+
 #ifdef CONFIG_HAVE_DOUBLE
               FAR double *pd = NULL;
 #endif
@@ -935,6 +959,14 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                    * double.
                    */
 
+#ifdef HAVE_SCANF_LDOUBLE
+                  if (modifier == LL_MOD)
+                    {
+                      pld = next_arg(varg, vabuf, FAR long double *);
+                      *pld = 0.0;
+                    }
+                  else
+#endif
 #ifdef CONFIG_HAVE_DOUBLE
                   if (modifier >= L_MOD)
                     {
@@ -972,6 +1004,9 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                   bool sign;
                   bool stopconv;
                   int errsave;
+#  ifdef HAVE_SCANF_LDOUBLE
+                  long double ldvalue;
+#  endif
 #  ifdef CONFIG_HAVE_DOUBLE
                   double dvalue;
 #  endif
@@ -1055,6 +1090,15 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                   errsave = get_errno();
                   set_errno(0);
 
+#  ifdef HAVE_SCANF_LDOUBLE
+                  if (modifier == LL_MOD)
+                    {
+                      /* Get the converted long double value */
+
+                      ldvalue = strtold(tmp, &endptr);
+                    }
+                  else
+#  endif
 #  ifdef CONFIG_HAVE_DOUBLE
                   if (modifier >= L_MOD)
                     {
@@ -1088,6 +1132,15 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                        * or a double.
                        */
 
+#  ifdef HAVE_SCANF_LDOUBLE
+                      if (modifier == LL_MOD)
+                        {
+                          /* Return the long double value */
+
+                          *pld = ldvalue;
+                        }
+                      else
+#  endif
 #  ifdef CONFIG_HAVE_DOUBLE
                       if (modifier >= L_MOD)
                         {
@@ -1132,32 +1185,32 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
 
                   switch (modifier)
                     {
-                    case HH_MOD:
-                      pchar = next_arg(varg, vabuf, FAR unsigned char *);
-                      *pchar = (unsigned char)nchars;
-                      break;
+                      case HH_MOD:
+                        pchar = next_arg(varg, vabuf, FAR unsigned char *);
+                        *pchar = (unsigned char)nchars;
+                        break;
 
-                    case H_MOD:
-                      pshort = next_arg(varg, vabuf, FAR unsigned short *);
-                      *pshort = (unsigned short)nchars;
-                      break;
+                      case H_MOD:
+                        pshort = next_arg(varg, vabuf, FAR unsigned short *);
+                        *pshort = (unsigned short)nchars;
+                        break;
 
-                    case NO_MOD:
-                      pint = next_arg(varg, vabuf, FAR unsigned int *);
-                      *pint = (unsigned int)nchars;
-                      break;
+                      case NO_MOD:
+                        pint = next_arg(varg, vabuf, FAR unsigned int *);
+                        *pint = (unsigned int)nchars;
+                        break;
 
-                    default:
-                    case L_MOD:
-                      plong = next_arg(varg, vabuf, FAR unsigned long *);
-                      *plong = (unsigned long)nchars;
-                      break;
+                      default:
+                      case L_MOD:
+                        plong = next_arg(varg, vabuf, FAR unsigned long *);
+                        *plong = (unsigned long)nchars;
+                        break;
 
-                    case LL_MOD:
-                      plonglong = next_arg(varg, vabuf,
-                                           FAR unsigned long long *);
-                      *plonglong = (unsigned long long)nchars;
-                      break;
+                      case LL_MOD:
+                        plonglong = next_arg(varg, vabuf,
+                                             FAR unsigned long long *);
+                        *plonglong = (unsigned long long)nchars;
+                        break;
                     }
                 }
 
