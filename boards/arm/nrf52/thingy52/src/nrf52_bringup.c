@@ -161,6 +161,41 @@ int nrf52_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_RGBLED) && defined(CONFIG_IOEXPANDER_SX1509) && \
+    defined(CONFIG_IOEXPANDER_PWM)
+  /* Register the lightwell RGB LED (behind the SX1509 LED driver) */
+
+  ret = nrf52_rgbled_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf52_rgbled_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_NRF52_I2C0_MASTER
+  /* Initialize on-board sensors */
+
+  ret = nrf52_sensors_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize sensors: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Register the ADC driver used for battery voltage measurement */
+
+  ret = nrf52_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize ADC: %d\n",
+             ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
 #include <errno.h>
@@ -82,6 +83,13 @@ struct sx1509_config_s g_sx1509_cfg =
   .led_pre        = 2,
 #endif
 };
+
+/* Saved io-expander handle, used by nrf52_ccs811_wake() to drive the
+ * CCS811 nWAKE line (SX1509 pin 12) around each I2C transaction and by
+ * nrf52_sx1509_get() to expose the device to other board logic.
+ */
+
+static FAR struct ioexpander_dev_s *g_sx1509_ioe;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -153,12 +161,12 @@ static void nrf52_sx1509_pinscfg(struct ioexpander_dev_s *ioe)
   IOEXP_WRITEPIN(ioe, 3, false);
   gpio_lower_half(ioe, 3, GPIO_INPUT_PIN, 3);
 
-  /* Pin 4: BAT_MON_EN */
+  /* Pin 4: BAT_MON_EN - drive high to enable the battery voltage divider */
 
   IOEXP_SETDIRECTION(ioe, 4, IOEXPANDER_DIRECTION_OUT);
   IOEXP_SETOPTION(ioe, 4, IOEXPANDER_OPTION_INVERT,
                   (void *)IOEXPANDER_VAL_NORMAL);
-  IOEXP_WRITEPIN(ioe, 4, false);
+  IOEXP_WRITEPIN(ioe, 4, true);
   gpio_lower_half(ioe, 4, GPIO_OUTPUT_PIN, 4);
 
 #ifdef CONFIG_SX1509_LED_ENABLE
@@ -206,29 +214,47 @@ static void nrf52_sx1509_pinscfg(struct ioexpander_dev_s *ioe)
   IOEXP_WRITEPIN(ioe, 9, false);
   gpio_lower_half(ioe, 9, GPIO_OUTPUT_PIN, 9);
 
-  /* Pin 10: CSS_PWR_CTRL */
+  /* Pin 10: CSS_PWR_CTRL - drive high to power the CCS811 */
 
   IOEXP_SETDIRECTION(ioe, 10, IOEXPANDER_DIRECTION_OUT);
   IOEXP_SETOPTION(ioe, 10, IOEXPANDER_OPTION_INVERT,
                   (void *)IOEXPANDER_VAL_NORMAL);
-  IOEXP_WRITEPIN(ioe, 10, false);
+  IOEXP_WRITEPIN(ioe, 10, true);
   gpio_lower_half(ioe, 10, GPIO_OUTPUT_PIN, 10);
 
-  /* Pin 11: CSS_RESET */
+  /* Pin 11: CSS_RESET - active low, drive high to release the reset */
 
   IOEXP_SETDIRECTION(ioe, 11, IOEXPANDER_DIRECTION_OUT);
   IOEXP_SETOPTION(ioe, 11, IOEXPANDER_OPTION_INVERT,
                   (void *)IOEXPANDER_VAL_NORMAL);
-  IOEXP_WRITEPIN(ioe, 11, false);
+  IOEXP_WRITEPIN(ioe, 11, true);
   gpio_lower_half(ioe, 11, GPIO_OUTPUT_PIN, 11);
 
-  /* Pin 12: CSS_WAKE */
+  /* Pin 12: CSS_WAKE - active low nWAKE */
 
   IOEXP_SETDIRECTION(ioe, 12, IOEXPANDER_DIRECTION_OUT);
   IOEXP_SETOPTION(ioe, 12, IOEXPANDER_OPTION_INVERT,
                   (void *)IOEXPANDER_VAL_NORMAL);
-  IOEXP_WRITEPIN(ioe, 12, false);
+  IOEXP_WRITEPIN(ioe, 12, true);
   gpio_lower_half(ioe, 12, GPIO_OUTPUT_PIN, 12);
+
+  /* Bring up the CCS811 following its datasheet / the Thingy:52 firmware.
+   * Power-cycle it (its supply is held up by the SX1509 across a SoC reset,
+   * so a warm reset would otherwise leave it running in application mode);
+   * hold it in reset with nWAKE idle-high, re-power it, release the reset
+   * and wait for it to boot.  nWAKE is left idle-high; the driver pulses it
+   * low (a falling edge) around each I2C transaction - a static low does not
+   * keep this part awake.
+   */
+
+  IOEXP_WRITEPIN(ioe, 11, false);   /* CSS_RESET  - assert nRESET       */
+  IOEXP_WRITEPIN(ioe, 12, true);    /* CSS_WAKE   - nWAKE idle (high)   */
+  IOEXP_WRITEPIN(ioe, 10, false);   /* CSS_PWR_CTRL - power off          */
+  up_mdelay(50);                    /* let the supply discharge         */
+  IOEXP_WRITEPIN(ioe, 10, true);    /* CSS_PWR_CTRL - power on           */
+  up_mdelay(5);
+  IOEXP_WRITEPIN(ioe, 11, true);    /* release nRESET                   */
+  up_mdelay(30);                    /* boot time                        */
 
 #ifdef CONFIG_SX1509_LED_ENABLE
   /* Pin 13: SENSE_LED_R */
@@ -263,6 +289,40 @@ static void nrf52_sx1509_pinscfg(struct ioexpander_dev_s *ioe)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nrf52_ccs811_wake
+ *
+ * Description:
+ *   Drive the CCS811 nWAKE line (SX1509 pin 12, active low).  Passed to the
+ *   CCS811 driver so it can wake the sensor around each I2C transaction.
+ *
+ * Input Parameters:
+ *   on - true asserts nWAKE (drives it low), false releases it (drives it
+ *        high).
+ *
+ ****************************************************************************/
+
+void nrf52_ccs811_wake(bool on)
+{
+  if (g_sx1509_ioe != NULL)
+    {
+      IOEXP_WRITEPIN(g_sx1509_ioe, 12, !on);
+    }
+}
+
+/****************************************************************************
+ * Name: nrf52_sx1509_get
+ *
+ * Description:
+ *   Return the io-expander device, or NULL if not yet initialized.
+ *
+ ****************************************************************************/
+
+FAR struct ioexpander_dev_s *nrf52_sx1509_get(void)
+{
+  return g_sx1509_ioe;
+}
 
 /****************************************************************************
  * Name: nrf52_sx1509_initialize
@@ -303,6 +363,10 @@ int nrf52_sx1509_initialize(void)
   /* Register pins */
 
   nrf52_sx1509_pinscfg(ioe);
+
+  /* Remember the io-expander so the CCS811 driver can pulse nWAKE. */
+
+  g_sx1509_ioe = ioe;
 
 #ifdef CONFIG_SX1509_LED_ENABLE
   /* Initialize sx1509 LED driver */
