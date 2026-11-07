@@ -126,6 +126,7 @@ size_t arm64_stack_check(void *stackbase, size_t nbytes)
           for (j = 0; j < 64; j++)
             {
               int ch;
+
               if (*ptr++ == STACK_COLOR)
                 {
                   ch = '.';
@@ -235,7 +236,7 @@ size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
   return size;
 }
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 size_t up_check_intstack(int cpu, size_t check_size)
 {
   if (check_size == 0)

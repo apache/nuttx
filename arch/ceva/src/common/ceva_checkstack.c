@@ -53,7 +53,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 void ceva_color_intstack(void)
 {
   uint32_t *ptr = (uint32_t *)g_intstackalloc;
@@ -125,6 +125,7 @@ size_t ceva_stack_check(uintptr_t alloc, size_t size)
           for (j = 0; j < 64; j++)
             {
               int ch;
+
               if (*ptr++ == STACK_COLOR)
                 {
                   ch = '.';

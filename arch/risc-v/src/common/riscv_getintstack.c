@@ -38,7 +38,7 @@
  * Name: up_get_intstackbase
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 uintptr_t up_get_intstackbase(int cpu)
 {
   return (uintptr_t)g_intstacktop - ((cpu + 1) * INT_STACK_SIZE);

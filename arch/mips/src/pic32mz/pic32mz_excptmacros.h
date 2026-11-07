@@ -42,7 +42,7 @@
  * Public Symbols
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   .global g_intstackalloc
   .global g_intstacktop
 #ifdef CONFIG_PIC32MZ_NESTED_INTERRUPTS
@@ -377,7 +377,7 @@
 
   .macro USE_INTSTACK, tmp1, tmp2, tmp3, tmp4
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 #ifdef CONFIG_PIC32MZ_NESTED_INTERRUPTS
 
   /* Check the nesting level.  If there are no nested interrupts, then we can
@@ -430,7 +430,7 @@
 
   .macro RESTORE_STACK, tmp1, tmp2
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 #ifdef CONFIG_PIC32MZ_NESTED_INTERRUPTS
 
   /* Decrement the nesting level */

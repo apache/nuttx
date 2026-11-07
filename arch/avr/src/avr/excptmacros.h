@@ -48,7 +48,7 @@
  * Public Symbols
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   .global g_intstackalloc
   .global g_intstacktop
   .global g_nestlevel
@@ -789,7 +789,7 @@ go_reti:
  ****************************************************************************/
 
   .macro USE_INTSTACK, tmp1, tmp2, tmp3
-#if CONFIG_ARCH_INTERRUPTSTACK > 0
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 # warning "Not implemented"
 #endif
   .endm
@@ -813,7 +813,7 @@ go_reti:
  ****************************************************************************/
 
   .macro RESTORE_STACK, tmp1, tmp2
-#if CONFIG_ARCH_INTERRUPTSTACK > 0
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 #  warning "Not implemented"
 #endif
   .endm

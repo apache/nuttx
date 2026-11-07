@@ -23,12 +23,13 @@
  ****************************************************************************/
 
 #ifdef __ASSEMBLY__
-#if CONFIG_ARCH_INTERRUPTSTACK > 15 && !defined(CONFIG_SMP) && \
-    defined(CONFIG_ARCH_USE_S_MODE)
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
+#  if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE)
 .macro setintstack tmp0, tmp1
   csrr    \tmp0, CSR_SCRATCH
   REGLOAD sp, RISCV_PERCPU_IRQSTACK(\tmp0)
 .endm
+#  endif
 #endif
 #endif
 

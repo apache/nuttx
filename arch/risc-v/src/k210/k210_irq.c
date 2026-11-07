@@ -60,13 +60,16 @@ void up_irqinitialize(void)
   /* Clear pendings in PLIC */
 
   uint32_t val = getreg32(K210_PLIC_CLAIM);
+
   putreg32(val, K210_PLIC_CLAIM);
 
   /* Colorize the interrupt stack for debug purposes */
 
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_ARCH_INTERRUPTSTACK)
   size_t intstack_size = 0;
-  intstack_size = ((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) & ~15);
+
+  intstack_size = STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK *
+                                   CONFIG_SMP_NCPUS);
   riscv_stack_color(g_intstackalloc, intstack_size);
 #endif
 

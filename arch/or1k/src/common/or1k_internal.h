@@ -128,7 +128,7 @@ extern const uint32_t g_idle_topstack;
 
 /* Address of the saved user stack pointer */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 extern uint8_t g_intstackalloc[]; /* Allocated stack base */
 extern uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
 #endif
@@ -311,7 +311,7 @@ void or1k_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #if defined(CONFIG_STACK_COLORATION) && \
-    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+    defined(CONFIG_ARCH_INTERRUPTSTACK)
 void or1k_color_intstack(void);
 #else
 #  define or1k_color_intstack()

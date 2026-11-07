@@ -154,7 +154,7 @@ void up_initial_state(struct tcb_s *tcb)
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 }
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 /****************************************************************************
  * Name: arm_initialize_stack
  *

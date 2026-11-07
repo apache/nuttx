@@ -1460,12 +1460,11 @@ config ARCH_HAVE_INTERRUPTSTACK
 config ARCH_INTERRUPTSTACK
 	int "Interrupt Stack Size"
 	depends on ARCH_HAVE_INTERRUPTSTACK
-	default 0
+	range 128 2147483647
 	---help---
 		This architecture supports an interrupt stack. If defined, this symbol
-		will be the size of the interrupt stack in bytes.  If not defined (or
-		defined to be zero), the user task stacks will be used during interrupt
-		handling.
+		will be the size of the interrupt stack in bytes.  If not defined, the
+		user task stacks will be used during interrupt handling.
 
 config ARCH_HAVE_HIPRI_INTERRUPT
 	bool

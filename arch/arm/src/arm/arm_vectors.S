@@ -178,7 +178,7 @@ arm_vectorirq:
 	mov	r0, sp			/* Get r0=xcp */
 	mov	r4, sp			/* Save the SP in a preserved register */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	/* Call arm_decodeirq() on the interrupt stack */
 
 	ldr	sp, .Lirqstacktop	/* SP = interrupt stack top */
@@ -229,7 +229,7 @@ arm_vectorirq:
 	add	r14, r14, #(4*2)	/* (IRQ) r14=address of r15 storage */
 	ldmia	r14, {r15}^		/* Return */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 .Lirqstacktop:
 	.word	g_intstacktop
 #endif
@@ -656,7 +656,7 @@ arm_vectoraddrexcptn:
  *  Name: g_intstackalloc/g_intstacktop
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	.bss
 	.balign	4
 

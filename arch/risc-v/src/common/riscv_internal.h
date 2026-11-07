@@ -356,7 +356,7 @@ void riscv_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #if defined(CONFIG_STACK_COLORATION) && \
-    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 15
+    defined(CONFIG_ARCH_INTERRUPTSTACK)
 void riscv_color_intstack(void);
 #else
 #  define riscv_color_intstack()

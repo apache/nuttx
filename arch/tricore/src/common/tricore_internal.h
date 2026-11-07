@@ -32,6 +32,7 @@
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
 #  include <nuttx/arch.h>
+#  include <nuttx/irq.h>
 #  include <sys/types.h>
 #  include <stdint.h>
 #  include <syscall.h>
@@ -89,7 +90,7 @@
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
-#define INTSTACK_SIZE (CONFIG_ARCH_INTERRUPTSTACK & ~STACKFRAME_ALIGN_MASK)
+#define INTSTACK_SIZE STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
 
 /* This is the value used to mark the stack for subsequent stack monitoring
  * logic.
@@ -148,7 +149,7 @@ extern uintptr_t        __USTACK0[];
 
 /* Address of the saved user stack pointer */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 extern uintptr_t        __ISTACK0_END[];
 extern uintptr_t        __ISTACK0[];
 #define g_intstackalloc __ISTACK0_END

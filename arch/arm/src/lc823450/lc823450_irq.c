@@ -75,7 +75,7 @@
  * Public Data
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 /* In the SMP configuration, we will need two custom interrupt stacks.
  * These definitions provide the aligned stack allocations.
  */
@@ -364,18 +364,18 @@ static int lc823450_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
     {
       if (irq < LC823450_IRQ_INTERRUPTS + 32)
         {
-           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << (irq - LC823450_IRQ_INTERRUPTS);
+          *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
+          *bit     = 1 << (irq - LC823450_IRQ_INTERRUPTS);
         }
       else if (irq < LC823450_IRQ_INTERRUPTS + 64)
         {
-           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (irq - LC823450_IRQ_INTERRUPTS - 32);
+          *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
+          *bit     = 1 << (irq - LC823450_IRQ_INTERRUPTS - 32);
         }
       else if (irq < NR_IRQS)
         {
-           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-           *bit     = 1 << (irq - LC823450_IRQ_INTERRUPTS - 64);
+          *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
+          *bit     = 1 << (irq - LC823450_IRQ_INTERRUPTS - 64);
         }
       else
         {
@@ -390,7 +390,7 @@ static int lc823450_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
       *regaddr = NVIC_SYSHCON;
       if (irq == LC823450_IRQ_MEMFAULT)
         {
-         *bit = NVIC_SYSHCON_MEMFAULTENA;
+          *bit = NVIC_SYSHCON_MEMFAULTENA;
         }
       else if (irq == LC823450_IRQ_BUSFAULT)
         {
@@ -806,6 +806,7 @@ int lc823450_irq_register(int irq, struct lc823450_irq_ops *ops)
       irq < LC823450_IRQ_VIRTUAL + LC823450_IRQ_NVIRTUALIRQS)
     {
       irqstate_t flags;
+
       flags = irqsave();
       virq_ops[irq - LC823450_IRQ_VIRTUAL] = ops;
       irqrestore(flags);
@@ -828,7 +829,7 @@ int lc823450_irq_register(int irq, struct lc823450_irq_ops *ops)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 uintptr_t up_get_intstackbase(int cpu)
 {
   return g_cpu_intstack_top[cpu] - INTSTACK_SIZE;

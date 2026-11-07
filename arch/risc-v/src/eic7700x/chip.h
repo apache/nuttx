@@ -68,7 +68,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 .macro  setintstack tmp0, tmp1
   up_cpu_index \tmp0
   li    \tmp1, STACKFRAME_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
@@ -76,16 +76,16 @@
   la    \tmp0, g_intstacktop
   sub   sp, \tmp0, \tmp1
 .endm
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 15 */
+#endif /* CONFIG_SMP && defined(CONFIG_ARCH_INTERRUPTSTACK) */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 #if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE)
 .macro  setintstack tmp0, tmp1
   csrr    \tmp0, CSR_SCRATCH
   REGLOAD sp, RISCV_PERCPU_IRQSTACK(\tmp0)
 .endm
 #endif /* !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE) */
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
+#endif /* defined(CONFIG_ARCH_INTERRUPTSTACK) */
 
 #endif /* __ASSEMBLY__  */
 #endif /* __ARCH_RISCV_SRC_EIC7700X_CHIP_H */

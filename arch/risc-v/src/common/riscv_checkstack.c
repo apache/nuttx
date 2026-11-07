@@ -34,6 +34,7 @@
 
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
+#include <nuttx/irq.h>
 
 #include "sched/sched.h"
 #include "riscv_internal.h"
@@ -57,13 +58,13 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 void riscv_color_intstack(void)
 {
   uint32_t *ptr = (uint32_t *)g_intstackalloc;
   ssize_t size;
 
-  for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
+  for (size = STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
        size > 0;
        size -= sizeof(uint32_t))
     {
@@ -142,6 +143,7 @@ size_t riscv_stack_check(uintptr_t alloc, size_t size)
           for (j = 0; j < 64; j++)
             {
               int ch;
+
               if (*ptr++ == STACK_COLOR)
                 {
                   ch = '.';
@@ -205,12 +207,12 @@ size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
   return size;
 }
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 size_t up_check_intstack(int cpu, size_t check_size)
 {
   if (check_size == 0)
     {
-      check_size = CONFIG_ARCH_INTERRUPTSTACK & ~15;
+      check_size = STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
     }
 
   return riscv_stack_check((uintptr_t)g_intstackalloc, check_size);

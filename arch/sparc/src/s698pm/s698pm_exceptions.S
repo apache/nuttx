@@ -48,9 +48,9 @@
  ****************************************************************************/
 
 	.global         _ISR_Handler
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
         .global	        g_cpu_intstack_top
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
+#endif /* CONFIG_SMP && defined(CONFIG_ARCH_INTERRUPTSTACK) */
 	.global		sparc_doirq	/* Dispatch an IRQ                  */
 	.align	8
 /*
@@ -166,7 +166,7 @@ save_isf:
          *  REGISTERS SAME AS AT _ISR_Handler
          */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 
 #ifdef CONFIG_SMP
         rd      %asr17 , %g5
