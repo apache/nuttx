@@ -147,7 +147,7 @@ void nrf91_uicr_recover(void)
 
 void nrf91_errata_secure(void)
 {
-#ifdef NRF91_DCDC_ERRATA15_WORKAROUND
+#ifdef CONFIG_NRF91_DCDC_ERRATA15_WORKAROUND
   /* Workaround for 3.7 [15] REGULATORS: Supply regulators default to
    * LDO mode after reset
    */
@@ -155,7 +155,7 @@ void nrf91_errata_secure(void)
   putreg32(REGULATORS_DCDCEN_ENABLE, NRF91_REGULATORS_DCDCEN);
 #endif
 
-#ifdef NRF91_LFXO_ERRATA31_WORKAROUND
+#ifdef CONFIG_NRF91_LFXO_ERRATA31_WORKAROUND
   /* Workaround for 3.15 [31] LFXO: LFXO startup fails */
 
   *((volatile uint32_t *)0x5000470c) = 0x0;
