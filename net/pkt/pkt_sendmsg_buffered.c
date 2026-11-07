@@ -264,13 +264,12 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
     }
 #endif
 
-  if (nonblock)
+  iob = iob_tryalloc(true);
+  if (iob == NULL && !nonblock)
     {
-      iob = iob_tryalloc(false);
-    }
-  else
-    {
+      conn_dev_unlock(&conn->sconn, dev);
       iob = net_iobtimedalloc(true, _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+      conn_dev_lock(&conn->sconn, dev);
     }
 
   if (iob == NULL)
@@ -292,7 +291,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
     }
 
   iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
-  iob_update_pktlen(iob, 0, false);
+  iob_update_pktlen(iob, 0, true);
 
 #ifdef CONFIG_NET_TIMESTAMP
   if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPING))
@@ -310,11 +309,8 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       offset = -NET_LL_HDRLEN(dev);
     }
 
-  if (nonblock)
-    {
-      ret = iob_trycopyin(iob, buf, len, offset, false);
-    }
-  else
+  ret = iob_trycopyin(iob, buf, len, offset, true);
+  if (ret < 0 && !nonblock)
     {
       /* iob_copyin might wait for buffers to be freed, but if
        * network is locked this might never happen, since network
@@ -322,7 +318,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
        */
 
       conn_dev_unlock(&conn->sconn, dev);
-      ret = iob_copyin(iob, buf, len, offset, false);
+      ret = iob_copyin(iob, buf, len, offset, true);
       conn_dev_lock(&conn->sconn, dev);
     }
 
@@ -332,7 +328,9 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       goto errout_with_iob;
     }
 
-  if (psock->s_type == SOCK_DGRAM)
+  if (psock->s_type == SOCK_DGRAM &&
+      (dev->d_lltype == NET_LL_ETHERNET ||
+       dev->d_lltype == NET_LL_IEEE80211))
     {
       FAR struct eth_hdr_s *ethhdr =
           (FAR struct eth_hdr_s *)(IOB_DATA(iob) - NET_LL_HDRLEN(dev));
@@ -362,13 +360,12 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       goto errout_with_iob;
     }
 
-  if (nonblock)
+  ret = iob_tryadd_queue(iob, &conn->write_q);
+  if (ret < 0 && !nonblock)
     {
-      ret = iob_tryadd_queue(iob, &conn->write_q);
-    }
-  else
-    {
+      conn_dev_unlock(&conn->sconn, dev);
       ret = iob_add_queue(iob, &conn->write_q);
+      conn_dev_lock(&conn->sconn, dev);
     }
 
   if (ret < 0)

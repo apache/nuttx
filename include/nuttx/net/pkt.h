@@ -70,4 +70,28 @@
 struct net_driver_s; /* Forward reference */
 int pkt_input(FAR struct net_driver_s *dev);
 
+/****************************************************************************
+ * Name: pkt_loopback
+ *
+ * Description:
+ *   Handle loopback packet input.
+ *   This function is quite similar to pkt_inpt, and we made a distinction
+ *   to ensure compatibility with old code
+ *
+ * Input Parameters:
+ *   dev - The device driver structure containing the received packet
+ *
+ * Returned Value:
+ *   OK     The packet has been processed  and can be deleted
+ *  -EAGAIN There is a matching connection, but could not dispatch the
+ *          packet yet.  Useful when a packet arrives before a recv call
+ *          is in place.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+int pkt_loopback(FAR struct net_driver_s *dev);
+
 #endif /* __INCLUDE_NUTTX_NET_PKT_H */
