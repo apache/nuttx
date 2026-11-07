@@ -43,7 +43,12 @@ if(NOT CONFIG_BUILD_KERNEL)
   list(APPEND SRCS task_startup.c)
 endif()
 
-if(CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS)
+# The libc copy is used by flat builds with overflow correction and by
+# architectures that explicitly expose the hardware counter to user space.
+
+if(CONFIG_BUILD_FLAT AND CONFIG_PERF_OVERFLOW_CORRECTION)
+  list(APPEND SRCS clock_perf.c)
+elseif(CONFIG_ARCH_PERF_EVENTS_USER_ACCESS)
   list(APPEND SRCS clock_perf.c)
 endif()
 
