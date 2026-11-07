@@ -95,6 +95,10 @@ belonging to a unified interface:
   Opens a file. Files are required to be opened before any other file
   operations are performed on it.
 
+  For a directory, return ``-EISDIR``. The VFS then opens the directory with
+  ``opendir()`` for ``O_RDONLY``, and fails with ``-EISDIR`` for the other
+  access modes.
+
   :param FAR struct file * filep: Open file's file structure pointer. The
     ``filep->f_priv`` member needs to be set here with the file system
     specific data that represents an open file.
@@ -324,6 +328,10 @@ belonging to a unified interface:
   operations can be used after this to do various directory related operations
   . We say the directory stream points to the first entry, but you need
   ``readdir()`` to read the first entry.
+
+  For an ``open()`` with ``O_DIRECTORY``, the VFS first checks the path with
+  ``stat()``: a path that is not a directory fails with ``-ENOTDIR``. A file
+  system without ``stat()`` must do this check in ``opendir()``.
 
   :param FAR struct inode * mountpt: Mount point inode of the file system.
   :param FAR const char * relpath: Relative path from the root of the point
