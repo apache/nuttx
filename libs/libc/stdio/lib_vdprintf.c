@@ -49,13 +49,19 @@ int vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
 {
   int ret;
   struct lib_rawoutstream_s rawoutstream;
+#if CONFIG_STREAM_OUT_BUFFER_SIZE > 0
   struct lib_bufferedoutstream_s outstream;
+#endif
 
   /* Wrap the fd in a stream object and let lib_vsprintf do the work. */
 
   lib_rawoutstream(&rawoutstream, fd);
+#if CONFIG_STREAM_OUT_BUFFER_SIZE > 0
   lib_bufferedoutstream(&outstream, &rawoutstream.common);
   ret = lib_vsprintf(&outstream.common, fmt, ap);
   lib_stream_flush(&outstream.common);
+#else
+  ret = lib_vsprintf(&rawoutstream.common, fmt, ap);
+#endif
   return ret;
 }

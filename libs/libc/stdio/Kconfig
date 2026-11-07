@@ -52,9 +52,116 @@ config NUNGET_CHARS
 		Number of characters that can be buffered by ungetc() (Only if
 		FILE_STREAM equals y)
 
+choice
+	prompt "printf profile"
+	default LIBC_PRINTF_DEFAULT
+	---help---
+		A profile only sets the defaults of the printf feature options.
+		Each option keeps its own prompt, so any feature can be added to
+		or removed from any profile.
+
+		printf() is safe with a correct call in every profile.  A feature
+		that is off still reads its argument at the right size, so the
+		arguments after it stay correct.
+
+config LIBC_PRINTF_MINIMAL
+	bool "Minimal"
+	---help---
+		The smallest printf.  It has less than the Default profile.
+
+config LIBC_PRINTF_DEFAULT
+	bool "Default"
+	---help---
+		The features that printf has always had by default.
+
+config LIBC_PRINTF_FULL
+	bool "Full"
+	---help---
+		All features.
+
+endchoice # printf profile
+
+config LIBC_PRINTF_LONG_LONG
+	bool "Enable 64-bit integers in printf on a 32-bit CPU"
+	default !LIBC_PRINTF_MINIMAL || SYSLOG_TIMESTAMP || FS_PROCFS
+	---help---
+		Enables the output of %lld, %llu, %llx, %jd and the others where
+		long long is longer than long.  Without it, printf() needs no 64-bit
+		division.  It reads the argument and prints "?".  This option has
+		no effect on a CPU where long has 64 bits.
+
+		The Minimal profile leaves it on with SYSLOG_TIMESTAMP or FS_PROCFS,
+		because the timestamps of syslog and the times in /proc print with
+		%jd.
+
+config LIBC_PRINTF_ALT_FORM
+	bool "Enable the # flag in printf"
+	default !LIBC_PRINTF_MINIMAL
+	---help---
+		Enables the alternative form: 0x for %#x, 0 for %#o, and the point
+		for %#.0f.  Without it, printf() ignores the flag, so %#x of 255
+		prints "ff".  %p keeps its 0x.
+
+config LIBC_PRINTF_OCTAL
+	bool "Enable %o in printf"
+	default y
+	---help---
+		Without it, printf() reads the argument of %o and prints "?".
+
+config LIBC_PRINTF_LEFT_JUSTIFY
+	bool "Enable the - flag in printf"
+	default y
+	---help---
+		Enables left-justified output, as in %-5d.  Without it, printf()
+		ignores the flag and pads on the left.
+
+config LIBC_PRINTF_INT_PRECISION
+	bool "Enable the precision of an integer in printf"
+	default !LIBC_PRINTF_MINIMAL
+	---help---
+		Enables a precision such as %.3d.  Without it, printf() reads the
+		argument and prints "?".  The precision of %s and of a floating
+		point conversion stays.
+
+config LIBC_PRINTF_SHORT
+	bool "Enable the h and hh length modifiers in printf"
+	default y
+	---help---
+		Enables the conversion of the value to short or char, as in %hd and
+		%hhx.  Without it, printf() reads the argument and prints "?".
+
+config LIBC_PRINTF_HEXFLOAT
+	bool "Enable %a and %A in printf"
+	default LIBC_PRINTF_FULL
+	---help---
+		Enables the output of %a and %A: the exact value in hexadecimal, such
+		as 0x1.8p+0 for 1.5.  It needs no floating point operation, so it
+		does not need LIBC_FLOATINGPOINT and it pulls in no soft-float code.
+		Without it, printf() reads the argument and prints "?".
+
+config LIBC_PRINTF_C23
+	bool "Enable the C23 conversions in printf"
+	default LIBC_PRINTF_FULL
+	---help---
+		Enables %b and %B, the binary output of an integer, and the wN and
+		wfN length modifiers, as in %w64d and %wf32x.  Without it, they are
+		unknown conversions: printf() prints the rest of the format as text
+		and reads no more arguments.
+
+config LIBC_PRINTF_PERCENT_N
+	bool "Enable %n in printf (dangerous)"
+	default n
+	---help---
+		Dangerous.  With this option, %n stores the count of the bytes so far
+		through its pointer, so a format string can write to memory.  A format
+		that an attacker can change then gives a write to any address.  Keep it
+		off unless a program needs it.  No profile turns it on.
+
+		Without it, printf() reads the pointer, stores nothing and prints "?".
+
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
-	default !DEFAULT_SMALL && ARCH_FPU
+	default LIBC_PRINTF_FULL || (!DEFAULT_SMALL && ARCH_FPU && !LIBC_PRINTF_MINIMAL)
 	depends on !LIBM_NONE
 	---help---
 		By default, floating point support in printf, sscanf, etc. is
@@ -62,9 +169,37 @@ config LIBC_FLOATINGPOINT
 		Without it, printf() takes the argument of %e, %f and %g and
 		prints "?".
 
+config LIBC_PRINTF_EXACT
+	bool "Enable exact floating point in printf"
+	default LIBC_PRINTF_FULL
+	depends on LIBC_FLOATINGPOINT
+	---help---
+		Without it, %e, %f and %g have at most 17 correct significant digits,
+		the digits after them print as 0, and a value very near a tie can
+		round the wrong way.
+
+		With it, all digits of a double are exact and correctly rounded, also
+		%.1074f.  The fast path stays for the usual values, and it proves its
+		digits.  Only the other values use big numbers: about 300 bytes of
+		more stack, and a longer time, on these calls only.
+
+config LIBC_PRINTF_EXACT_LDOUBLE
+	bool "Enable exact long double in printf"
+	default LIBC_PRINTF_FULL
+	depends on LIBC_PRINTF_EXACT
+	---help---
+		Without it, %Le, %Lf and %Lg have the precision and the range of a
+		double.  With it, all digits are exact, on a CPU where long double has
+		more bits than a double: binary128 and the 80-bit format of x86.
+
+		It adds about 300 bytes of flash on such a CPU, and nothing on another
+		one.  A call with %L needs about 2.7 KB more stack, in a function that
+		only %L calls, so a call without %L has no cost in stack.  Check the
+		stack of a task that prints with %L.
+
 config LIBC_NUMBERED_ARGS
 	bool "Enable numbered arguments in printf"
-	default n
+	default LIBC_PRINTF_FULL
 	---help---
 		Enables support for numbered arguments in printf.
 

@@ -7,7 +7,7 @@ menu "Locale Support"
 
 config LIBC_LOCALE
 	bool "Enable I18N (LOCALE) support"
-	default n
+	default LIBC_PRINTF_FULL
 	---help---
 		By default, i18n (locale) support is disabled.
 
