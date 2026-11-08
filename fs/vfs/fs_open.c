@@ -324,6 +324,12 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
           ret = inode->u.i_ops->open(filep);
         }
     }
+  else if (INODE_IS_PSEUDODIR(inode))
+    {
+      /* A directory: open it below with the directory operations */
+
+      ret = -EISDIR;
+    }
   else
     {
       ret = -ENXIO;
