@@ -143,9 +143,16 @@
 #define NOTE_PRINTF_GET_TYPE(tag, index) (((tag) >> (index) * 2) & 0x03)
 #define NOTE_PRINTF_GET_COUNT(tag)       (((tag) >> 28) & 0x0f)
 
+/* Promote an argument as "arg + 0" does, but also accept a pointer to an
+ * incomplete type, which "arg + 0" rejects.
+ */
+
+#define NOTE_PRINTF_PROMOTE(arg) (0 ? 0 : (arg))
+
 /* Check if a variable is 32-bit or 64-bit */
 
-#define NOTE_PRINTF_INT_TYPE(arg) (sizeof((arg) + 0) <= sizeof(uint32_t) ? \
+#define NOTE_PRINTF_INT_TYPE(arg) (sizeof(NOTE_PRINTF_PROMOTE(arg)) <= \
+                                   sizeof(uint32_t) ? \
                                    NOTE_PRINTF_UINT32 : NOTE_PRINTF_UINT64)
 
 /* Use the object size to mark strings of known size.  This is the builtin:
@@ -159,7 +166,7 @@
 /* Use _Generic to determine the type of the parameter */
 
 #define NOTE_PRINTF_ARG_TYPE(__arg__) \
-        _Generic((__arg__) + 0, \
+        _Generic(NOTE_PRINTF_PROMOTE(__arg__), \
                  float : NOTE_PRINTF_DOUBLE, \
                  double: NOTE_PRINTF_DOUBLE, \
                  char *: ({NOTE_PRINTF_OBJECT_SIZE(__arg__) > 0 ? \
