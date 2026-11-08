@@ -815,11 +815,11 @@ static int devif_poll_queue(FAR struct iob_queue_s *iobq,
 
       devif_out(dev);
 
-      /* Call back into the driver */
+      /* Call back into the driver, or loop back if there is no callback */
 
       if (dev->d_len > 0)
         {
-          bstop = callback(dev);
+          bstop = callback != NULL ? callback(dev) : devif_loopback(dev);
         }
     }
 
