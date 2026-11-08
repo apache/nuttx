@@ -284,24 +284,28 @@ static void ioctl_get_ipv4addr(FAR struct sockaddr *outaddr,
  * Name: ioctl_get_ipv4broadcast
  *
  * Description:
- *   Return the sub-net broadcast address to user memory.
+ *   Return the sub-net broadcast address to user memory.  A device without
+ *   IFF_BROADCAST has no broadcast address: return 0.0.0.0.
  *
  * Input Parameters:
  *   outaddr - Pointer to the user-provided memory to receive the address.
  *   inaddr  - The source IP address in the device structure.
  *   netmask  - The netmask address mask in the device structure.
+ *   flags   - The interface flags in the device structure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
 static void ioctl_get_ipv4broadcast(FAR struct sockaddr *outaddr,
-                                    in_addr_t inaddr, in_addr_t netmask)
+                                    in_addr_t inaddr, in_addr_t netmask,
+                                    uint32_t flags)
 {
   FAR struct sockaddr_in *dest  = (FAR struct sockaddr_in *)outaddr;
 
   dest->sin_family              = AF_INET;
   dest->sin_port                = 0;
-  dest->sin_addr.s_addr         = net_ipv4addr_broadcast(inaddr, netmask);
+  dest->sin_addr.s_addr         = IFF_IS_BROADCAST(flags) ?
+                                  inaddr | ~netmask : 0;
   memset(dest->sin_zero, 0, sizeof(dest->sin_zero));
 }
 #endif
@@ -1024,7 +1028,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCGIFBRDADDR:  /* Get broadcast IP address */
         ioctl_get_ipv4broadcast(&req->ifr_broadaddr, dev->d_ipaddr,
-                                dev->d_netmask);
+                                dev->d_netmask, dev->d_flags);
         break;
 
       case SIOCSIFBRDADDR:  /* Set broadcast IP address */
