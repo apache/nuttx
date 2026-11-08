@@ -1,0 +1,159 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Mon, 25 Nov 2024 23:07:10 +0800
+Subject: [PATCH 3/3] mutex: make the libmetal nuttx mutex a recursive spinlock
+
+metal_mutex protects rdev->lock and rproc->lock. rdev->lock is taken
+from the transport rx path, which may run in interrupt context, so it
+must not be a sleeping lock.
+
+Make metal_mutex a recursive spinlock (irqsave, nopreempt) by default.
+Recursion is kept because the rpmsg paths may take rdev->lock again
+from a callback. A user that sleeps while holding the lock, such as
+rproc->lock across the remoteproc ops, sets is_mutex to switch that
+instance to an rmutex.
+
+The nesting depth is kept in metal_mutex itself: without
+CONFIG_SPINLOCK, rspinlock_t does not count. The irq state is saved on
+the outermost acquire and restored on the outermost release.
+
+Also fix try_acquire to return non-zero on success, as libmetal
+expects; nxrmutex_trylock() returns 0 on success.
+
+Squashed from:
+  mutex: change the libmetal nuttx mutex to recursive mutex
+  libmetal/mutex: use spinlock as the mutex
+  lib/system/nuttx/mutex.h: support both the rspinlock and rmutex
+  lib/system/nuttx/mutex.h: change the default mode to spinlock
+  libmetal/nuttx: fix spinlock irq restore for recursive mutex release
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
+---
+ lib/system/nuttx/mutex.h | 73 ++++++++++++++++++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 64 insertions(+), 9 deletions(-)
+
+diff --git a/lib/system/nuttx/mutex.h libmetal/lib/system/nuttx/mutex.h
+--- a/lib/system/nuttx/mutex.h
++++ libmetal/lib/system/nuttx/mutex.h
+@@ -16,53 +16,108 @@
+ #ifndef __METAL_NUTTX_MUTEX__H__
+ #define __METAL_NUTTX_MUTEX__H__
+ 
++#include <stdbool.h>
++
+ #include <nuttx/mutex.h>
++#include <nuttx/spinlock.h>
+ 
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+ 
+-typedef mutex_t metal_mutex_t;
++/*
++ * The default is a recursive spinlock, so the lock can be taken from
++ * interrupt context. Set is_mutex before first use to make it an rmutex
++ * instead, for a user that sleeps while holding the lock.
++ *
++ * depth counts the nesting on the owner. It is only changed with the lock
++ * held, and the irq state is saved on the outermost acquire and restored
++ * on the outermost release.
++ */
++typedef struct metal_mutex {
++	bool is_mutex;
++	unsigned int depth;
++	rspinlock_t lock;
++	irqstate_t flags;
++	rmutex_t mutex;
++} metal_mutex_t;
+ 
+ /*
+  * METAL_MUTEX_INIT - used for initializing an mutex element in a static struct
+  * or global
+  */
+-#define METAL_MUTEX_INIT(m) NXMUTEX_INITIALIZER
++#define METAL_MUTEX_INIT(m) \
++	{.is_mutex = false, .depth = 0, .lock = RSPINLOCK_INITIALIZER, \
++	 .flags = 0, .mutex = NXRMUTEX_INITIALIZER}
+ /*
+  * METAL_MUTEX_DEFINE - used for defining and initializing a global or
+  * static singleton mutex
+  */
+-#define METAL_MUTEX_DEFINE(m) metal_mutex_t m = NXMUTEX_INITIALIZER
++#define METAL_MUTEX_DEFINE(m) metal_mutex_t m = METAL_MUTEX_INIT(m)
+ 
+ static inline void __metal_mutex_init(metal_mutex_t *mutex)
+ {
+-	nxmutex_init(mutex);
++	mutex->is_mutex = false;
++	mutex->depth = 0;
++	rspin_lock_init(&mutex->lock);
++	nxrmutex_init(&mutex->mutex);
+ }
+ 
+ static inline void __metal_mutex_deinit(metal_mutex_t *mutex)
+ {
+-	nxmutex_destroy(mutex);
++	nxrmutex_destroy(&mutex->mutex);
+ }
+ 
+ static inline int __metal_mutex_try_acquire(metal_mutex_t *mutex)
+ {
+-	return nxmutex_trylock(mutex);
++	irqstate_t flags;
++
++	if (mutex->is_mutex)
++		return nxrmutex_trylock(&mutex->mutex) == OK;
++
++	if (!rspin_trylock_irqsave_nopreempt(&mutex->lock, flags))
++		return 0;
++
++	if (mutex->depth++ == 0)
++		mutex->flags = flags;
++
++	return 1;
+ }
+ 
+ static inline void __metal_mutex_acquire(metal_mutex_t *mutex)
+ {
+-	nxmutex_lock(mutex);
++	irqstate_t flags;
++
++	if (mutex->is_mutex) {
++		nxrmutex_lock(&mutex->mutex);
++		return;
++	}
++
++	flags = rspin_lock_irqsave_nopreempt(&mutex->lock);
++	if (mutex->depth++ == 0)
++		mutex->flags = flags;
+ }
+ 
+ static inline void __metal_mutex_release(metal_mutex_t *mutex)
+ {
+-	nxmutex_unlock(mutex);
++	irqstate_t flags;
++
++	if (mutex->is_mutex) {
++		nxrmutex_unlock(&mutex->mutex);
++		return;
++	}
++
++	/* An inner release must leave the irqs disabled. */
++	flags = --mutex->depth == 0 ? mutex->flags : up_irq_save();
++	rspin_unlock_irqrestore_nopreempt(&mutex->lock, flags);
+ }
+ 
+ static inline int __metal_mutex_is_acquired(metal_mutex_t *mutex)
+ {
+-	return nxmutex_is_locked(mutex);
++	if (mutex->is_mutex)
++		return nxrmutex_is_locked(&mutex->mutex);
++
++	return mutex->depth > 0;
+ }
+ 
+ #ifdef __cplusplus
+-- 
+2.34.1
+

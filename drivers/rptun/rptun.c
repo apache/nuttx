@@ -196,6 +196,7 @@ rptun_init(FAR struct remoteproc *rproc,
            FAR const struct remoteproc_ops *ops,
            FAR void *arg)
 {
+  rproc->lock.is_mutex = true;
   rproc->ops = ops;
   rproc->priv = arg;
 
