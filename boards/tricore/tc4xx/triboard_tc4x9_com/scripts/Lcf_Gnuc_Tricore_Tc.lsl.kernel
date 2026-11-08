@@ -293,14 +293,12 @@ SECTIONS
 {
     CORE_SEC(.dspr_data) : FLAGS(awzl)
     {
-        *Ifx_Ssw_Tc?.* (.data)
         *Cpu?_Main.* (.data.*)
         . = ALIGN(4);
     } > dspr AT> pfls
 
     CORE_SEC(.dspr_bss) (NOLOAD) : FLAGS(awz)
     {
-        *Ifx_Ssw_Tc?.* (.bss)
         *Cpu?_Main.* (.bss.*)
         *os_scheduletable_misc.* (.bss.*)
         *iob_initialize.* (.bss.*)
@@ -420,7 +418,6 @@ SECTIONS
 {
     CORE_SEC(.zrodata) : FLAGS(arzl)
     {
-        *Ifx_Ssw_Tc?.* (.zrodata)
         *Cpu?_Main.* (.zrodata)
         *(.zrodata_cpu?)
         *(.zrodata)
@@ -467,9 +464,7 @@ SECTIONS
     CORE_SEC(.text) : FLAGS(axl)
     {
         . = ALIGN(4);
-        *Ifx_Ssw_Tc?.*(.text)
         *Cpu?_Main.*(.text)
-        *Ifx_Ssw_Tc?.*(.text.*)
         *Cpu?_Main.*(.text.*)
         *(.text)
         *(.text.*)
