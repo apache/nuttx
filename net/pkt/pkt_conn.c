@@ -129,6 +129,16 @@ void pkt_free(FAR struct pkt_conn_s *conn)
   dq_rem(&conn->sconn.s_node, &g_active_pkt_connections);
   nxrmutex_destroy(&conn->sconn.s_lock);
 
+  /* Free the read-ahead data.  pkt_in_() queues frames with the list
+   * locked, so no new frame can come in after dq_rem().
+   */
+
+  iob_free_queue(&conn->readahead);
+
+#ifdef CONFIG_NET_TIMESTAMP
+  iob_free_queue(&conn->errahead);
+#endif
+
 #ifdef CONFIG_NET_PKT_WRITE_BUFFERS
   /* Free the write queue */
 
