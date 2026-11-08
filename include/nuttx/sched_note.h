@@ -187,9 +187,10 @@
 #define sched_note_vprintf(tag, fmt, va) \
         sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, 0, &(va))
 
-#ifdef CONFIG_DRIVERS_NOTE_STRIP_FORMAT
+#if defined(CONFIG_DRIVERS_NOTE_STRIP_FORMAT) && !defined(__cplusplus)
 /* The type tag describes at most 14 arguments.  A call with more arguments
- * keeps its format string and gives type 0.
+ * keeps its format string and gives type 0.  C++ has no _Generic, so C++
+ * calls keep their format string too.
  */
 
 #  define sched_note_printf(tag, fmt, ...) \
