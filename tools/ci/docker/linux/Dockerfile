@@ -300,6 +300,101 @@ RUN mkdir -p sparc-gaisler-elf-gcc && \
   | tar -C sparc-gaisler-elf-gcc --strip-components 1 -xJ
 
 ###############################################################################
+# Build image for tool required by TriCore builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-tricore
+# Build TriCore GCC 11.3.1 from the EEESlab sources, using the revisions
+# pinned by https://github.com/EEESlab/tricore-gcc-toolchain-11.3.0
+RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
+  bison \
+  flex \
+  g++ \
+  gcc \
+  libgmp-dev \
+  libmpc-dev \
+  libmpfr-dev \
+  make \
+  texinfo \
+  zlib1g-dev
+
+ARG TRICORE_BINUTILS_REV=c068019c17eeeefdbec9210cb46baefe2f78c383
+ARG TRICORE_GCC_REV=df3095ae5b71df917e4fe2ff3be39620bbd4d213
+ARG TRICORE_NEWLIB_REV=240a8f676ea923c703824e996fbe88ac4a302e17
+
+RUN mkdir -p tricore-tools/source/binutils tricore-tools/source/gcc tricore-tools/source/newlib && \
+  curl -fsSL "https://github.com/EEESlab/tricore-binutils-gdb/archive/${TRICORE_BINUTILS_REV}.tar.gz" \
+  | tar -C tricore-tools/source/binutils --strip-components=1 -xz && \
+  curl -fsSL "https://github.com/EEESlab/tricore-gcc/archive/${TRICORE_GCC_REV}.tar.gz" \
+  | tar -C tricore-tools/source/gcc --strip-components=1 -xz && \
+  curl -fsSL "https://github.com/EEESlab/tricore-newlib-cygwin/archive/${TRICORE_NEWLIB_REV}.tar.gz" \
+  | tar -C tricore-tools/source/newlib --strip-components=1 -xz
+
+ENV PATH="/tools/gcc-tricore/bin:$PATH"
+
+# MAKEINFO=true because the info pages are of no use here.
+
+RUN mkdir -p /tools/tricore-tools/build/binutils && cd /tools/tricore-tools/build/binutils && \
+  /tools/tricore-tools/source/binutils/configure \
+  --target=tricore-elf \
+  --enable-targets=mcs-elf \
+  --prefix=/tools/gcc-tricore \
+  --disable-gdb \
+  --disable-gdbserver \
+  --disable-sim \
+  --disable-nls \
+  --disable-werror && \
+  make -j$(nproc) MAKEINFO=true && make install-strip MAKEINFO=true
+
+RUN mkdir -p /tools/tricore-tools/build/gcc-stage1 && cd /tools/tricore-tools/build/gcc-stage1 && \
+  /tools/tricore-tools/source/gcc/configure \
+  CFLAGS_FOR_TARGET='-g -O2 -gdwarf-3' \
+  CXXFLAGS_FOR_TARGET='-g -O2 -gdwarf-3' \
+  --target=tricore-elf \
+  --prefix=/tools/gcc-tricore \
+  --enable-languages=c,c++ \
+  --enable-lib32 \
+  --disable-lib64 \
+  --enable-checking=release \
+  --disable-nls \
+  --disable-shared \
+  --disable-threads \
+  --disable-libssp \
+  --with-newlib \
+  --with-headers=yes && \
+  make -j$(nproc) all-gcc MAKEINFO=true && make install-strip-gcc MAKEINFO=true
+
+RUN mkdir -p /tools/tricore-tools/build/newlib && cd /tools/tricore-tools/build/newlib && \
+  CFLAGS_FOR_TARGET='-g -gdwarf-3 -O2 -ffunction-sections -mfast-div -fno-common' \
+  /tools/tricore-tools/source/newlib/configure \
+  --target=tricore-elf \
+  --prefix=/tools/gcc-tricore && \
+  make -j$(nproc) MAKEINFO=true && make install MAKEINFO=true
+
+RUN mkdir -p /tools/tricore-tools/build/gcc-stage2 && cd /tools/tricore-tools/build/gcc-stage2 && \
+  /tools/tricore-tools/source/gcc/configure \
+  CFLAGS_FOR_TARGET='-g -gdwarf-3 -O2 -ffast-math -ffunction-sections -mfast-div -fno-common -mno-eabi-bitfield-limit' \
+  CXXFLAGS_FOR_TARGET='-g -O2 -gdwarf-3 -ffast-math -ffunction-sections -mfast-div -fno-common -mno-eabi-bitfield-limit' \
+  --target=tricore-elf \
+  --prefix=/tools/gcc-tricore \
+  --enable-languages=c,c++ \
+  --enable-lib32 \
+  --disable-lib64 \
+  --enable-checking=release \
+  --enable-libatomic \
+  --disable-nls \
+  --disable-shared \
+  --disable-threads \
+  --disable-libssp \
+  --disable-libstdcxx-pch \
+  --with-newlib \
+  --with-headers=yes \
+  --with-gnu-as \
+  --with-gnu-ld && \
+  make -j$(nproc) all MAKEINFO=true && make install-strip MAKEINFO=true && \
+  rm -rf /tools/gcc-tricore/share && \
+  cd /tools && rm -rf tricore-tools
+
+###############################################################################
 # Build image for tool required by ESP32 builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-esp32
@@ -526,6 +621,10 @@ ENV PATH="/tools/riscv-none-elf-gcc/bin:$PATH"
 COPY --from=nuttx-toolchain-sparc /tools/sparc-gaisler-elf-gcc/ sparc-gaisler-elf-gcc/
 ENV PATH="/tools/sparc-gaisler-elf-gcc/bin:$PATH"
 
+# TriCore toolchain
+COPY --from=nuttx-toolchain-tricore /tools/gcc-tricore/ gcc-tricore/
+ENV PATH="/tools/gcc-tricore/bin:$PATH"
+
 # ESP32, ESP32-S2, ESP32-S3 toolchain
 COPY --from=nuttx-toolchain-esp32 /tools/xtensa-esp-elf-gcc/ xtensa-esp-elf-gcc/
 ENV PATH="/tools/xtensa-esp-elf-gcc/bin:$PATH"
@@ -583,6 +682,8 @@ RUN mkdir -p /ccache && \
   ln -sf `which ccache` /tools/ccache/bin/riscv-none-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/sparc-gaisler-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/sparc-gaisler-elf-g++ && \
+  ln -sf `which ccache` /tools/ccache/bin/tricore-elf-gcc && \
+  ln -sf `which ccache` /tools/ccache/bin/tricore-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s2-elf-gcc && \
