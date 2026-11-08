@@ -1377,7 +1377,7 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct inode *inode;
   FAR struct fat_mountpt_s *fs;
   FAR struct fat_file_s *ff;
-  unsigned int byteswritten;
+  unsigned int byteswritten = 0;
   unsigned int writesize;
   FAR uint8_t *userbuffer = (FAR uint8_t *)buffer;
   int sectorindex;
@@ -1448,7 +1448,6 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
    * cache (ff_currentsector)
    */
 
-  byteswritten = 0;
   sectorindex = filep->f_pos & SEC_NDXMASK(fs);
 
   while (buflen > 0)
@@ -1619,6 +1618,16 @@ fat_write_restart:
 
 errout_with_lock:
   nxmutex_unlock(&fs->fs_lock);
+
+  /* Return the bytes that were written before the error, if any.  The
+   * next write then reports the error.
+   */
+
+  if (byteswritten > 0)
+    {
+      return byteswritten;
+    }
+
   return ret;
 }
 
