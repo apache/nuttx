@@ -407,10 +407,21 @@ int getopt_common(int argc, FAR char * const argv[],
            * the first character must be '-'
            */
 
-          if (*go->go_optptr != '-')
+          if (*go->go_optptr != '-' || go->go_optptr[1] == '\0')
             {
-              /* The argument does not start with '-', we are finished */
+              /* The argument does not start with '-' or it is "-" (an
+               * operand), we are finished
+               */
 
+              go->go_binitialized = false;
+              return ERROR;
+            }
+
+          /* "--" ends the options: skip over it and stop */
+
+          if (strcmp(go->go_optptr, "--") == 0)
+            {
+              go->go_optind++;
               go->go_binitialized = false;
               return ERROR;
             }
@@ -418,16 +429,6 @@ int getopt_common(int argc, FAR char * const argv[],
           /* Skip over the '-' */
 
           go->go_optptr++;
-        }
-
-      /* Special case handling of "-" and "-:" */
-
-      if (!*go->go_optptr)
-        {
-          /* We'll fix up optptr the next time we are called */
-
-          go->go_optopt = '\0';
-          return '?';
         }
 
       /* Handle the case of "-:" */
