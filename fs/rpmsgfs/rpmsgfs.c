@@ -335,7 +335,7 @@ static int rpmsgfs_open(FAR struct file *filep, FAR const char *relpath,
         }
       else
         {
-          goto errout_with_buffer;
+          goto errout_with_fd;
         }
     }
 
@@ -356,6 +356,9 @@ static int rpmsgfs_open(FAR struct file *filep, FAR const char *relpath,
 
   ret = OK;
   goto errout_with_lock;
+
+errout_with_fd:
+  rpmsgfs_client_close(fs->handle, hf->fd);
 
 errout_with_buffer:
   fs_heap_free(hf);
