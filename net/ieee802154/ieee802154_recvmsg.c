@@ -354,8 +354,7 @@ ssize_t ieee802154_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   radio = ieee802154_find_device(conn, &conn->laddr);
   if (radio == NULL)
     {
-      ret = -ENODEV;
-      goto errout_with_lock;
+      return -ENODEV;
     }
 
   conn_dev_lock(&conn->sconn, &radio->r_dev);
@@ -406,7 +405,6 @@ ssize_t ieee802154_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   nxsem_destroy(&state.ir_sem);
 
-errout_with_lock:
   conn_dev_unlock(&conn->sconn, &radio->r_dev);
   return ret;
 }
