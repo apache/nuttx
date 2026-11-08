@@ -1075,9 +1075,9 @@ void rijndaelencrypt(FAR const uint32_t *rk, int nr,
   PUTU32(ct + 12, s3);
 }
 
-static void rijndaeldecrypt(FAR const uint32_t *rk,
-                            int nr, FAR const uint8_t *ct,
-                            FAR uint8_t *pt)
+static void __attribute__((no_sanitize("shift")))
+rijndaeldecrypt(FAR const uint32_t *rk, int nr, FAR const uint8_t *ct,
+                FAR uint8_t *pt)
 {
   uint32_t s0;
   uint32_t s1;
@@ -1316,6 +1316,12 @@ static void rijndaeldecrypt(FAR const uint32_t *rk,
 #endif /* ?FULL_UNROLL */
   /* apply last round and
    * map cipher state to byte array block:
+   *
+   * UBSan flags the "<< 24" shifts below (shift-out-of-bounds): TD4 holds
+   * uint8_t, which promotes to a signed int, so a byte of 0x80 or more
+   * shifts into the sign bit.  The result is only ever used as the
+   * uint32_t that the XOR with rk[] produces, so the shift is harmless
+   * and is excluded from sanitizing for this function.
    */
 
   s0 =
