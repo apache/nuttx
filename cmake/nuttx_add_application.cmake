@@ -67,6 +67,9 @@ endif()
 #   NO_MAIN_ALIAS       : do not add a main=<app>_main alias(*)
 #   DYNLIB              : if "y", build as dynamic loadable library
 #   LINK_FLAGS          : link flags only for elf or loadable link
+#   UID                 : file owner user ID (CONFIG_SCHED_USER_IDENTITY)
+#   GID                 : file owner group ID (CONFIG_SCHED_USER_IDENTITY)
+#   MODE                : file mode (CONFIG_SCHED_USER_IDENTITY)
 #
 # (*) This is only really needed in convoluted cases where a single .c file
 # contains differently named <app>_main() entries for different <app>. This
@@ -321,6 +324,21 @@ function(nuttx_add_application)
   else()
     set_target_properties(${TARGET} PROPERTIES APP_STACK
                                                ${CONFIG_DEFAULT_TASK_STACKSIZE})
+  endif()
+
+  # The builtin list of apps gives the file owner and mode of the application
+  # from these, and 0, 0 and 0555 without them.
+
+  if(UID)
+    set_target_properties(${TARGET} PROPERTIES APP_UID ${UID})
+  endif()
+
+  if(GID)
+    set_target_properties(${TARGET} PROPERTIES APP_GID ${GID})
+  endif()
+
+  if(MODE)
+    set_target_properties(${TARGET} PROPERTIES APP_MODE ${MODE})
   endif()
 
   # call target_ options only target is compilable
