@@ -395,6 +395,16 @@ udp_ipv6_active(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
        * REVISIT: SO_BROADCAST flag is currently ignored.
        */
 
+#ifdef CONFIG_NET_IPv4
+      /* An IPv4 socket takes no IPv6 datagram */
+
+      if (conn->domain == PF_INET)
+        {
+          conn = udp_nextconn(conn);
+          continue;
+        }
+#endif
+
       /* Check that there is a local port number and this matches
        * the port number in the destination address.
        */
