@@ -327,3 +327,32 @@ for an empty tree.  The first member of a node is the pointer to its key.
 
 Insertion and deletion do not recurse.  ``twalk()`` and ``tdestroy()``
 recurse to the height of the tree.
+
+Linear Search and Queue Functions
+=================================
+
+``search.h`` also declares the XSI linear search and queue functions.
+
+.. code-block:: c
+
+   FAR void *lfind(FAR const void *key, FAR const void *base,
+                   FAR size_t *nelp, size_t width,
+                   CODE int (*compar)(FAR const void *, FAR const void *));
+   FAR void *lsearch(FAR const void *key, FAR void *base, FAR size_t *nelp,
+                     size_t width,
+                     CODE int (*compar)(FAR const void *, FAR const void *));
+   void insque(FAR void *element, FAR void *pred);
+   void remque(FAR void *element);
+
+- ``lfind()`` compares ``key`` with each of the ``*nelp`` elements of
+  ``width`` bytes at ``base``, in order.  ``compar`` returns 0 for a
+  match.  It returns the first element that matches, or ``NULL``.
+- ``lsearch()`` is the same, but it copies a missing key to the end of the
+  table and increments ``*nelp``.  The table must have space for one more
+  element.
+- ``insque()`` inserts ``element`` after ``pred`` in a doubly linked
+  queue.  Each element starts with a forward pointer and a backward pointer.
+  If ``pred`` is ``NULL``, ``element`` starts a new linear queue: both
+  of its pointers become ``NULL``.
+- ``remque()`` removes ``element`` from its queue.  The pointers in
+  ``element`` do not change.
