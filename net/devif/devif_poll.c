@@ -254,11 +254,13 @@ devif_poll_pkt_connections(FAR struct net_driver_s *dev,
 
           devif_packet_conversion(dev, DEVIF_PKT);
 
-          /* Call back into the driver */
+          /* Call back into the driver.  The loopback driver has no callback:
+           * loop the frame back as devif_poll_out() does.
+           */
 
           if (dev->d_len > 0)
             {
-              bstop = callback(dev);
+              bstop = callback != NULL ? callback(dev) : devif_loopback(dev);
             }
 
           /* pkt_poll() records the outgoing IOB in pkt_conn->pendiob so that
