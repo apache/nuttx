@@ -49,8 +49,13 @@
 
 #if defined(CONFIG_SIG_SIGUSR1_ACTION) || defined(CONFIG_SIG_SIGUSR2_ACTION) || \
     defined(CONFIG_SIG_SIGALRM_ACTION) || defined(CONFIG_SIG_SIGPOLL_ACTION) || \
-    defined(CONFIG_SIG_SIGKILL_ACTION) || defined(CONFIG_SIG_SIGPIPE_ACTION)
+    defined(CONFIG_SIG_SIGKILL_ACTION) || defined(CONFIG_SIG_SIGPIPE_ACTION) || \
+    defined(CONFIG_SIG_SIGPROF_ACTION)
 #  define HAVE_NXSIG_ABNORMAL_TERMINANTION 1
+#endif
+
+#if defined(CONFIG_SIG_SIGSTOP_ACTION) || defined(CONFIG_SIG_SIGURG_ACTION)
+#  define HAVE_NXSIG_NULL_ACTION 1
 #endif
 
 /* Bit definitions for the struct nxsig_defaction_s 'flags' field */
@@ -79,8 +84,10 @@ struct nxsig_defaction_s
 #ifdef HAVE_NXSIG_ABNORMAL_TERMINANTION
 static void nxsig_abnormal_termination(int signo);
 #endif
-#ifdef CONFIG_SIG_SIGSTOP_ACTION
+#ifdef HAVE_NXSIG_NULL_ACTION
 static void nxsig_null_action(int signo);
+#endif
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
 static void nxsig_stop_task(int signo);
 #endif
 
@@ -190,7 +197,7 @@ static const struct nxsig_defaction_s g_defactions[] =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SIG_SIGSTOP_ACTION
+#ifdef HAVE_NXSIG_NULL_ACTION
 static void nxsig_null_action(int signo)
 {
 }
