@@ -1099,7 +1099,7 @@ struct sensor_cap           /* Type: Capacitance */
 struct sensor_eng           /* Type: ENG */
 {
   uint64_t timestamp;       /* Unit is microseconds */
-  float voltage[4];         /* Voltage unit in mV */
+  sensor_data_t voltage[4]; /* Voltage unit in mV */
   uint32_t stat;            /* Status. bit3:0 - value 3:0 is valid or not */
 };
 
