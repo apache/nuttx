@@ -390,6 +390,19 @@ static int rpmsgfs_open_handler(FAR struct rpmsg_endpoint *ept,
     }
 
   ret = file_open(filep, msg->pathname, msg->flags, msg->mode);
+  if (ret >= 0 && (msg->flags & O_ACCMODE) == O_RDONLY)
+    {
+      struct stat buf;
+
+      /* A directory: the client opens it with the directory messages */
+
+      if (file_fstat(filep, &buf) >= 0 && S_ISDIR(buf.st_mode))
+        {
+          file_close(filep);
+          ret = -EISDIR;
+        }
+    }
+
   if (ret < 0)
     {
       filep->f_inode = NULL;
