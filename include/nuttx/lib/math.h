@@ -75,16 +75,27 @@
 #endif
 
 #define INFINITY   ((double)(_HUGE_ENUF * _HUGE_ENUF))
-#define NAN        ((double)(INFINITY * 0.0F))
 #define HUGE_VAL   INFINITY
 
 #define INFINITY_F ((float)INFINITY)
-#define NAN_F      ((float)(INFINITY * 0.0F))
 #define HUGE_VALF  ((float)INFINITY)
 
 #define INFINITY_L ((long double)INFINITY)
-#define NAN_L      ((long double)(INFINITY * 0.0F))
 #define HUGE_VALL  ((long double)INFINITY)
+
+/* A quiet NaN with the sign bit clear.  INFINITY * 0 gives the default NaN
+ * of the FPU, and on x86 that NaN has the sign bit set.
+ */
+
+#ifdef CONFIG_HAVE_BUILTIN_NAN
+#  define NAN      __builtin_nan("")
+#  define NAN_F    __builtin_nanf("")
+#  define NAN_L    __builtin_nanl("")
+#else
+#  define NAN      ((double)(INFINITY * 0.0F))
+#  define NAN_F    ((float)(INFINITY * 0.0F))
+#  define NAN_L    ((long double)(INFINITY * 0.0F))
+#endif
 
 #define isnan(x)   ((x) != (x))
 #define isnanf(x)  ((x) != (x))

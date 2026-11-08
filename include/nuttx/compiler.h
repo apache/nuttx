@@ -197,6 +197,7 @@
 #    define CONFIG_HAVE_BUILTIN_FFS 1
 #    define CONFIG_HAVE_BUILTIN_FFSL 1
 #    define CONFIG_HAVE_BUILTIN_FFSLL 1
+#    define CONFIG_HAVE_BUILTIN_NAN 1
 #  endif
 
   /* An __asm__ label carries __USER_LABEL_PREFIX__ ("_" on RH850 and RX) */
