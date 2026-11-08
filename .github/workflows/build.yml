@@ -319,7 +319,7 @@ jobs:
       os: Linux
       boards: |
         [
-          "arm-imx", "risc-v-01", "sim-01", "xtensa-01", "arm64-01", "x86_64-01", "other",
+          "arm-imx", "risc-v-01", "sim-01", "xtensa-01", "arm64-01", "x86_64-01", "tricore-01", "other",
           "arm-nrf", "risc-v-02", "sim-02", "xtensa-02",
           "arm-nxp", "risc-v-03", "sim-03", "xtensa-03",
           "arm-rp2xxx", "risc-v-04",
