@@ -724,9 +724,19 @@ retry:
 
               bucket->nwaiter++;
               nxmutex_unlock(&g_protect_lock);
-              nxsem_wait(&bucket->wait);
+              ret = nxsem_wait(&bucket->wait);
               nxmutex_lock(&g_protect_lock);
               bucket->nwaiter--;
+
+              /* A signal ends the wait with -EINTR, a cancel with
+               * -ECANCELED.
+               */
+
+              if (ret < 0)
+                {
+                  goto out;
+                }
+
               goto retry;
             }
         }
