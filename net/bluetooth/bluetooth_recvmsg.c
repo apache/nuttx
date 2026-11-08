@@ -399,8 +399,7 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   if (radio == NULL)
     {
-      ret = -ENODEV;
-      goto errout_with_lock;
+      return -ENODEV;
     }
 
   conn_dev_lock(&conn->bc_conn, &radio->r_dev);
@@ -451,7 +450,6 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   nxsem_destroy(&state.ir_sem);
 
-errout_with_lock:
   conn_dev_unlock(&conn->bc_conn, &radio->r_dev);
   return ret;
 }
