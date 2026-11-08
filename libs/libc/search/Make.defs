@@ -24,6 +24,7 @@
 
 CSRCS += hcreate_r.c hcreate.c hash_func.c
 CSRCS += lib_tsearch.c lib_tfind.c lib_tdelete.c lib_twalk.c lib_tdestroy.c
+CSRCS += lib_lsearch.c lib_insque.c
 
 # Add the search directory to the build
 

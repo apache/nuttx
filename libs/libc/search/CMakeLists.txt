@@ -28,6 +28,8 @@ set(SRCS
     lib_tfind.c
     lib_tdelete.c
     lib_twalk.c
-    lib_tdestroy.c)
+    lib_tdestroy.c
+    lib_lsearch.c
+    lib_insque.c)
 
 target_sources(c PRIVATE ${SRCS})
