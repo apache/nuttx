@@ -24,10 +24,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <errno.h>
+#include <limits.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
-#include <errno.h>
 
 /****************************************************************************
  * Public Functions
@@ -48,8 +49,48 @@ ssize_t pwritev(int fildes, FAR const struct iovec *iov, int iovcnt,
   ssize_t ntotal;
   ssize_t nwritten;
   size_t remaining;
+  size_t len = 0;
   FAR uint8_t *buffer;
   int i;
+
+  /* Check buffer count and pointer for iovec */
+
+  if (iovcnt <= 0 || iovcnt > IOV_MAX)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  if (iov == NULL)
+    {
+      set_errno(EFAULT);
+      return ERROR;
+    }
+
+  if (offset < 0)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  /* Verify each iovec entry and check for total length overflow */
+
+  for (i = 0; i < iovcnt; i++)
+    {
+      if (SSIZE_MAX - len < iov[i].iov_len)
+        {
+          set_errno(EINVAL);
+          return ERROR;
+        }
+
+      len += iov[i].iov_len;
+
+      if (iov[i].iov_base == NULL && iov[i].iov_len != 0)
+        {
+          set_errno(EFAULT);
+          return ERROR;
+        }
+    }
 
   /* Process each entry in the struct iovec array */
 
@@ -74,7 +115,7 @@ ssize_t pwritev(int fildes, FAR const struct iovec *iov, int iovcnt,
 
               if (nwritten < 0)
                 {
-                  return ntotal ? ntotal : ERROR;
+                  return ntotal > 0 ? ntotal : ERROR;
                 }
 
               /* Update pointers and counts in order to handle partial
