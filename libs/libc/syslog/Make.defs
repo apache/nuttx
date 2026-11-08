@@ -32,6 +32,10 @@ ifeq ($(CONFIG_SYSLOG_NONE),y)
 CSRCS += lib_syslog_none.c
 endif
 
+ifeq ($(CONFIG_SYSLOG_TO_SCHED_NOTE),y)
+CSRCS += lib_syslog_note.c
+endif
+
 # Add the syslog directory to the build
 
 DEPPATH += --dep-path syslog
