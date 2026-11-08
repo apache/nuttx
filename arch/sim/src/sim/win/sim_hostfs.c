@@ -144,6 +144,21 @@ int host_open(const char *pathname, int flags, int mode)
   if (ret == -1)
     {
       ret = -errno;
+
+      /* _open() of a directory fails with EACCES.  Return EISDIR: the
+       * caller opens a directory with the directory operations.
+       */
+
+      if (ret == -EACCES && (flags & NUTTX_O_ACCMODE) == NUTTX_O_RDONLY)
+        {
+          struct _stat hostbuf;
+
+          if (_stat(pathname, &hostbuf) == 0 &&
+              (hostbuf.st_mode & _S_IFDIR) != 0)
+            {
+              ret = -EISDIR;
+            }
+        }
     }
 
   return ret;

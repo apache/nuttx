@@ -312,12 +312,21 @@ static void host_stat_convert(struct stat *hostbuf, struct nuttx_stat_s *buf)
 int host_open(const char *pathname, int flags, int mode)
 {
   int mapflags = host_oflags_convert(flags);
+  struct stat hostbuf;
 
   int ret = open(pathname, mapflags, mode);
 
   if (ret == -1)
     {
       ret = host_errno_convert(-errno);
+    }
+  else if ((mapflags & (O_ACCMODE | O_DIRECTORY)) == O_RDONLY &&
+           fstat(ret, &hostbuf) == 0 && S_ISDIR(hostbuf.st_mode))
+    {
+      /* A directory: the caller opens it with the directory operations */
+
+      close(ret);
+      ret = host_errno_convert(-EISDIR);
     }
 
   return ret;
