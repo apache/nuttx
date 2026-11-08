@@ -188,17 +188,26 @@
         sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, 0, &(va))
 
 #ifdef CONFIG_DRIVERS_NOTE_STRIP_FORMAT
+/* The type tag describes at most 14 arguments.  A call with more arguments
+ * keeps its format string and gives type 0.
+ */
+
 #  define sched_note_printf(tag, fmt, ...) \
           do \
             { \
-              static const locate_data(".printf_format") \
-              char __fmt__[] = fmt; \
-              uint32_t __type__ = NOTE_PRINTF_TAG(__VA_ARGS__); \
-              static_assert(GET_ARG_COUNT(__VA_ARGS__) <= 14, \
-                            "The number of sched_note_nprintf " \
-                            "parameters needs to be less than 14"); \
-              sched_note_printf_ip(tag, SCHED_NOTE_IP, __fmt__, \
-                                   __type__, ##__VA_ARGS__); \
+              if (GET_ARG_COUNT(__VA_ARGS__) > 14) \
+                { \
+                  sched_note_printf_ip(tag, SCHED_NOTE_IP, fmt, 0, \
+                                       ##__VA_ARGS__); \
+                } \
+              else \
+                { \
+                  static const locate_data(".printf_format") \
+                  char __fmt__[] = fmt; \
+                  uint32_t __type__ = NOTE_PRINTF_TAG(__VA_ARGS__); \
+                  sched_note_printf_ip(tag, SCHED_NOTE_IP, __fmt__, \
+                                       __type__, ##__VA_ARGS__); \
+                } \
             } \
           while (0)
 #else
