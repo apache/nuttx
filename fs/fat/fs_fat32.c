@@ -1436,6 +1436,13 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
       goto errout_with_lock;
     }
 
+  /* With O_APPEND, each write starts at the end of the file */
+
+  if ((filep->f_oflags & O_APPEND) != 0)
+    {
+      filep->f_pos = ff->ff_shared->s_size;
+    }
+
   /* Loop until either (1) all data has been transferred, or (2) an
    * error occurs.  We assume we start with the current sector in
    * cache (ff_currentsector)
