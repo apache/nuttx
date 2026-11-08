@@ -523,9 +523,10 @@ void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg)
 
   up_read(&g_rpmsg_lock);
 
-  /* Release all ept attached to current rpmsg device */
+  /* Release all ept attached to current rpmsg device.  rdev->lock is not
+   * held: rpmsg_destroy_ept() sends NS_DESTROY and may wait for a tx buffer.
+   */
 
-  metal_mutex_acquire(&rdev->lock);
   metal_list_for_each_safe(&rdev->endpoints, tmp, node)
     {
       ept = metal_container_of(node, struct rpmsg_endpoint, node);
@@ -538,8 +539,6 @@ void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg)
           rpmsg_destroy_ept(ept);
         }
     }
-
-  metal_mutex_release(&rdev->lock);
 }
 
 int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
