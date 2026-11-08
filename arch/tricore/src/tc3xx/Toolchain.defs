@@ -29,11 +29,6 @@ ifeq ($(CONFIG_ARCH_CHIP_TC39X),y)
     ARCHCPUFLAGS += -mcpu=tc39xx
     ARCHCPUFLAGS += -mtc162
   endif
-
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/iLLD/TC3xx/Tricore/Cpu/Std
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Platform
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Sfr/TC39xB
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Configurations
 endif
 
 include $(TOPDIR)/arch/tricore/src/common/Toolchain.defs
