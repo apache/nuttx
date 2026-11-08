@@ -232,4 +232,23 @@ void twalk(FAR const void *root,
                                int depth));
 void tdestroy(FAR void *root, CODE void (*free_node)(FAR void *key));
 
+/****************************************************************************
+ * Name: lfind, lsearch, insque, remque
+ *
+ * Description:
+ *   Linear search of a table (lsearch() adds a missing key at its end) and
+ *   doubly linked queues of elements that start with a forward and a
+ *   backward pointer (XSI).
+ *
+ ****************************************************************************/
+
+FAR void *lfind(FAR const void *key, FAR const void *base,
+                FAR size_t *nelp, size_t width,
+                CODE int (*compar)(FAR const void *, FAR const void *));
+FAR void *lsearch(FAR const void *key, FAR void *base, FAR size_t *nelp,
+                  size_t width,
+                  CODE int (*compar)(FAR const void *, FAR const void *));
+void insque(FAR void *element, FAR void *pred);
+void remque(FAR void *element);
+
 #endif /* __INCLUDE_SEARCH_H */
