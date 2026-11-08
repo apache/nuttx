@@ -85,7 +85,8 @@ static int32_t hardware_chksum_start(FAR struct iob_s *iob,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
+#if defined(CONFIG_MM_IOB) && \
+    (defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP))
 static uint8_t hardware_chksum_get_proto(FAR struct net_driver_s *dev)
 {
   uint8_t proto = 0;
@@ -201,22 +202,23 @@ int netdev_checksum_start(FAR struct net_driver_s *dev)
 
 int netdev_checksum_offset(FAR struct net_driver_s *dev)
 {
-#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
+#if defined(CONFIG_MM_IOB) && \
+    (defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP))
   uint8_t proto = hardware_chksum_get_proto(dev);
-#endif
 
-#ifdef CONFIG_NET_UDP
+#  ifdef CONFIG_NET_UDP
   if (proto == IP_PROTO_UDP)
     {
       return offsetof(struct udp_hdr_s, udpchksum);
     }
-#endif
+#  endif
 
-#ifdef CONFIG_NET_TCP
+#  ifdef CONFIG_NET_TCP
   if (proto == IP_PROTO_TCP)
     {
       return offsetof(struct tcp_hdr_s, tcpchksum);
     }
+#  endif
 #endif
 
   return -EINVAL;
@@ -238,7 +240,7 @@ int netdev_checksum_offset(FAR struct net_driver_s *dev)
 
 uint16_t netdev_upperlayer_header_checksum(FAR struct net_driver_s *dev)
 {
-#ifdef CONFIG_NET_IPv6
+#if defined(CONFIG_MM_IOB) && defined(CONFIG_NET_IPv6)
 #  ifdef CONFIG_NET_IPv4
   if (IFF_IS_IPv6(dev->d_flags))
 #  endif
@@ -250,7 +252,7 @@ uint16_t netdev_upperlayer_header_checksum(FAR struct net_driver_s *dev)
                                                  IPv6_HDRLEN));
     }
 #endif
-#ifdef CONFIG_NET_IPv4
+#if defined(CONFIG_MM_IOB) && defined(CONFIG_NET_IPv4)
 #  ifdef CONFIG_NET_IPv6
   else
 #  endif
