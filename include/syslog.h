@@ -215,11 +215,15 @@ void closelog(void);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SYSLOG_TO_SCHED_NOTE
 void syslog(int priority, FAR const IPTR char *fmt, ...) syslog_like(2, 3);
 void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
      syslog_like(2, 0);
-#else
+
+/* With CONFIG_SYSLOG_TO_SCHED_NOTE, these macros replace the calls.  The
+ * functions remain for code that takes their address.
+ */
+
+#ifdef CONFIG_SYSLOG_TO_SCHED_NOTE
 #  define syslog(priority, fmt, ...) \
           sched_note_printf(NOTE_TAG_LOG + priority, fmt, ##__VA_ARGS__)
 #  define vsyslog(priority, fmt, ap) \
