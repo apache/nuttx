@@ -101,10 +101,59 @@ static dq_queue_t g_active_udp_connections;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: udp_dualstack_inuse
+ *
+ * Description:
+ *   Check if 'conn' of the other domain holds the port of 'ipaddr'.  A UDP
+ *   socket of AF_INET6 without IPV6_V6ONLY bound to [::] or to an
+ *   IPv4-mapped address also takes the IPv4 traffic of its port.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+static bool udp_dualstack_inuse(FAR struct udp_conn_s *conn, uint8_t domain,
+                                FAR union ip_binding_u *ipaddr,
+                                sockopt_t opt)
+{
+  FAR const uint16_t *ipv6 = domain == PF_INET ? conn->u.ipv6.laddr :
+                                                 ipaddr->ipv6.laddr;
+  in_addr_t ipv4 = domain == PF_INET ? ipaddr->ipv4.laddr :
+                                       conn->u.ipv4.laddr;
+  in_addr_t mapped;
+
+#ifdef CONFIG_NET_SOCKOPTS
+  if (_SO_GETOPT(domain == PF_INET ? conn->sconn.s_options : opt,
+                 IPV6_V6ONLY))
+    {
+      return false;
+    }
+#endif
+
+  /* [::] takes every IPv4 address of the port */
+
+  if (net_ipv6addr_cmp(ipv6, g_ipv6_unspecaddr))
+    {
+      return true;
+    }
+
+  /* ::ffff:a.b.c.d takes a.b.c.d; another IPv6 address takes none */
+
+  if (!ip6_is_ipv4addr((FAR const struct in6_addr *)ipv6))
+    {
+      return false;
+    }
+
+  mapped = ip6_get_ipv4addr(ipv6);
+  return mapped == INADDR_ANY || ipv4 == INADDR_ANY || mapped == ipv4;
+}
+#endif
+
+/****************************************************************************
  * Name: udp_find_conn()
  *
  * Description:
- *   Find the UDP connection that uses this local port number.
+ *   Find the UDP connection that uses this local port number.  A dual-stack
+ *   socket of the other domain counts too.
  *
  * Input Parameters:
  *   domain - IP domain (PF_INET or PF_INET6)
@@ -175,6 +224,14 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
               break;
             }
         }
+
+#ifdef CONFIG_NET_IPv4
+      if (conn->lport == portno && conn->domain != domain &&
+          udp_dualstack_inuse(conn, domain, ipaddr, opt))
+        {
+          break;
+        }
+#endif
 #endif /* CONFIG_NET_IPv6 */
     }
 
