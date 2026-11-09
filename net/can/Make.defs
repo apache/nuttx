@@ -49,7 +49,7 @@ SOCK_CSRCS += can_bufpool.c
 endif
 endif
 
-NET_CSRCS += can_conn.c
+NET_CSRCS += can.c
 NET_CSRCS += can_input.c
 NET_CSRCS += can_callback.c
 NET_CSRCS += can_poll.c
