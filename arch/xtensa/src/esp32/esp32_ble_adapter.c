@@ -1121,7 +1121,7 @@ static int32_t semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 
   if (ret)
     {
-      wlerr("ERROR: Failed to wait sem in %" PRIu32 " ticks. Error=%d\n",
+      wlerr("ERROR: Failed to wait sem in %" PRIu64 " ticks. Error=%d\n",
             MSEC2TICK(block_time_ms), ret);
     }
 
