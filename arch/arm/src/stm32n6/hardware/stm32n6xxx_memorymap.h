@@ -95,12 +95,17 @@
 #define STM32_I2C1_BASE       0x50005400
 #define STM32_I2C2_BASE       0x50005800
 #define STM32_I2C3_BASE       0x50005c00
+#define STM32_UART7_BASE      0x50007800
+#define STM32_UART8_BASE      0x50007c00
 
 /* APB2 peripherals *********************************************************/
 
 #define STM32_TIM1_BASE       0x52000000
 #define STM32_TIM8_BASE       0x52000400
 #define STM32_USART1_BASE     0x52001000
+#define STM32_USART6_BASE     0x52001400
+#define STM32_UART9_BASE      0x52001800
+#define STM32_USART10_BASE    0x52001c00
 #define STM32_SPI1_BASE       0x52003000
 #define STM32_SPI4_BASE       0x52003400
 #define STM32_TIM18_BASE      0x52003c00
@@ -116,6 +121,7 @@
 
 /* APB4 peripherals *********************************************************/
 
+#define STM32_LPUART1_BASE    0x56000c00
 #define STM32_SPI6_BASE       0x56001400
 #define STM32_I2C4_BASE       0x56001c00
 #define STM32_LPTIM2_BASE     0x56002400
