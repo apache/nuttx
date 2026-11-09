@@ -27,8 +27,6 @@ if(CONFIG_NET_CAN)
 
   if(CONFIG_NET_CAN_WRITE_BUFFERS)
     list(APPEND SRCS can_sendmsg_buffered.c)
-  else()
-    list(APPEND SRCS can_sendmsg.c)
   endif()
 
   if(CONFIG_NET_CANPROTO_OPTIONS)
