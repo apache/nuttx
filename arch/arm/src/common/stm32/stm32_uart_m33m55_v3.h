@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_uart_m33_v3.h
+ * arch/arm/src/common/stm32/stm32_uart_m33m55_v3.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_UART_M33_V3_H
-#define __ARCH_ARM_SRC_COMMON_STM32_STM32_UART_M33_V3_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_UART_M33M55_V3_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_UART_M33M55_V3_H
 
 /****************************************************************************
  * Included Files
@@ -32,7 +32,7 @@
 
 #include "chip.h"
 
-#include "hardware/stm32_uart_m33_v3.h"
+#include "hardware/stm32_uart_m33m55_v3.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -571,4 +571,4 @@ void stm32_serial_dma_poll(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_UART_M33_V3_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_UART_M33M55_V3_H */

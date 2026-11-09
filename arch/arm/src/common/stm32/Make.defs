@@ -70,9 +70,9 @@ CHIP_CSRCS += stm32_pminitialize_default.c
 endif
 endif
 
-ifeq ($(CONFIG_STM32_HAVE_IP_USART_M33_V3),y)
-CHIP_CSRCS += stm32_lowputc_usart_m33_v3.c
-CHIP_CSRCS += stm32_serial_m33_v3.c
+ifeq ($(CONFIG_STM32_HAVE_IP_USART_M33M55_V3),y)
+CHIP_CSRCS += stm32_lowputc_usart_m33m55_v3.c
+CHIP_CSRCS += stm32_serial_m33m55_v3.c
 endif
 
 ifeq ($(CONFIG_STM32_HAVE_IP_GPIO_M33M55_V1),y)
