@@ -309,6 +309,14 @@ config STM32_HAVE_DMA2
 config STM32_HAVE_DMA2D
 	bool
 
+config STM32_HAVE_GPDMA_SECURE
+	bool
+	---help---
+		The CPU runs secure and privileged, and the memory it uses accepts
+		only secure, privileged bus accesses (STM32N6).  GPDMA channels are
+		then made secure and privileged, with secure source and
+		destination.  Other accesses read as zero and writes are lost.
+
 config STM32_HAVE_DMAMUX
 	bool
 

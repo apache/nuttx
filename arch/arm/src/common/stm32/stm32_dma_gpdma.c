@@ -65,6 +65,14 @@
 #define CH_CXBR2_OFFSET      0xA8
 #define CH_CXLLR_OFFSET      0xCC
 
+/* Security attributes of the source and destination transfers */
+
+#ifdef CONFIG_STM32_HAVE_GPDMA_SECURE
+#  define GPDMA_CXTR1_SECATTR  (GPDMA_CXTR1_SSEC | GPDMA_CXTR1_DSEC)
+#else
+#  define GPDMA_CXTR1_SECATTR  0
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -399,7 +407,7 @@ static int gpdma_setup(struct gpdma_ch_s *chan,
 
   /* Set channels TR1 register based on configuration provided. */
 
-  gpdmach_putreg(chan, CH_CXTR1_OFFSET, cfg->tr1);
+  gpdmach_putreg(chan, CH_CXTR1_OFFSET, cfg->tr1 | GPDMA_CXTR1_SECATTR);
 
   /* Assemble the required config for TR2 */
 
@@ -431,7 +439,7 @@ static int gpdma_setup_circular(struct gpdma_ch_s *chan,
 {
   struct stm32_gpdma_lli_s *lli = chan->lli;
 
-  lli[0].tr1 = cfg->tr1;
+  lli[0].tr1 = cfg->tr1 | GPDMA_CXTR1_SECATTR;
   lli[0].tr2 = (2U << GPDMA_CXTR2_TCEM_SHIFT)
              | (cfg->request & GPDMA_CXTR2_REQSEL_MASK);
   lli[0].br1 = cfg->ntransfers;
@@ -547,6 +555,18 @@ DMA_HANDLE stm32_dmachannel(enum gpdma_ttype_e type)
               chan->free = false;
               chan->type = type;
               handle = (DMA_HANDLE)chan;
+
+#ifdef CONFIG_STM32_HAVE_GPDMA_SECURE
+              /* Give the channel the security and privilege of the CPU,
+               * while it is disabled.
+               */
+
+              modifyreg32(chan->base - CH_BASE_OFFSET(chan->channel) +
+                          STM32_GPDMA_SECCFGR_OFFSET, 0, 1 << chan->channel);
+              modifyreg32(chan->base - CH_BASE_OFFSET(chan->channel) +
+                          STM32_GPDMA_PRIVCFGR_OFFSET, 0,
+                          1 << chan->channel);
+#endif
               break;
             }
         }
