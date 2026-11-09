@@ -1129,16 +1129,32 @@ static int n32_sdma_interrupt(int irq, void *context, void *arg)
 
   /* Clear fetched channel interrupts */
 
-  regval  = DMA_INT_CH(channel);
-  dmabase_putreg(dmachan, N32_DMA_TCINTCLR_OFFSET, regval);
-  regval  = DMA_INT_CH(channel);
-  dmabase_putreg(dmachan, N32_DMA_BTCINTCLR_OFFSET, regval);
-  regval  = DMA_INT_CH(channel);
-  dmabase_putreg(dmachan, N32_DMA_STCINTCLR_OFFSET, regval);
-  regval  = DMA_INT_CH(channel);
-  dmabase_putreg(dmachan, N32_DMA_DTCINTCLR_OFFSET, regval);
-  regval  = DMA_INT_CH(channel);
-  dmabase_putreg(dmachan, N32_DMA_ERRINTCLR_OFFSET, regval);
+  regval = DMA_INT_CH(channel);
+
+  if ((status & DMA_INT_TFR) != 0)
+    {
+      dmabase_putreg(dmachan, N32_DMA_TCINTCLR_OFFSET, regval);
+    }
+
+  if ((status & DMA_INT_BLOCK) != 0)
+    {
+      dmabase_putreg(dmachan, N32_DMA_BTCINTCLR_OFFSET, regval);
+    }
+
+  if ((status & DMA_INT_SRCT) != 0)
+    {
+      dmabase_putreg(dmachan, N32_DMA_STCINTCLR_OFFSET, regval);
+    }
+
+  if ((status & DMA_INT_DSTT) != 0)
+    {
+      dmabase_putreg(dmachan, N32_DMA_DTCINTCLR_OFFSET, regval);
+    }
+
+  if ((status & DMA_INT_ERROR) != 0)
+    {
+      dmabase_putreg(dmachan, N32_DMA_ERRINTCLR_OFFSET, regval);
+    }
 
   /* Invoke the callback */
 
@@ -1284,9 +1300,6 @@ static void n32_sdma_start(DMA_HANDLE handle, dma_callback_t callback,
   regval  = DMA_CHEN_CHWEN(dmachan->chan) | DMA_CHEN_CH(dmachan->chan);
   dmabase_putreg(dmachan, N32_DMA_TCINTMSK_OFFSET, regval);
   dmabase_putreg(dmachan, N32_DMA_ERRINTMSK_OFFSET, regval);
-  dmabase_putreg(dmachan, N32_DMA_BTCINTMSK_OFFSET, regval);
-  dmabase_putreg(dmachan, N32_DMA_STCINTMSK_OFFSET, regval);
-  dmabase_putreg(dmachan, N32_DMA_DTCINTMSK_OFFSET, regval);
 
   /* Enable all interrupts at the DMA controller */
 
