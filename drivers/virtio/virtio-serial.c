@@ -94,7 +94,6 @@ static void virtio_serial_remove(FAR struct virtio_device *vdev);
 
 static struct virtio_driver g_virtio_serial_driver =
 {
-  LIST_INITIAL_VALUE(g_virtio_serial_driver.node), /* node */
   VIRTIO_ID_CONSOLE,                               /* device id */
   virtio_serial_probe,                             /* probe */
   virtio_serial_remove,                            /* remove */
@@ -102,7 +101,6 @@ static struct virtio_driver g_virtio_serial_driver =
 
 static struct virtio_driver g_virtio_rprocserial_driver =
 {
-  LIST_INITIAL_VALUE(g_virtio_rprocserial_driver.node), /* node */
   VIRTIO_ID_RPROC_SERIAL,                               /* device id */
   virtio_serial_probe,                                  /* probe */
   virtio_serial_remove,                                 /* remove */

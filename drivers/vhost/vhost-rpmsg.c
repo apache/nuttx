@@ -33,7 +33,6 @@
 
 static struct vhost_driver g_vhost_rpmsg_driver =
 {
-  LIST_INITIAL_VALUE(g_vhost_rpmsg_driver.node),  /* Node */
   VIRTIO_ID_RPMSG,                                /* Device id */
   rpmsg_virtio_probe,                             /* Probe */
   rpmsg_virtio_remove,                            /* Remove */

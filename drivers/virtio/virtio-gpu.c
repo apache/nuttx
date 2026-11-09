@@ -151,7 +151,6 @@ static int virtio_gpu_flush_output(FAR struct fb_vtable_s *vtable,
 
 static struct virtio_driver g_virtio_gpu_driver =
 {
-  .node   = LIST_INITIAL_VALUE(g_virtio_gpu_driver.node), /* node */
   .device = VIRTIO_ID_GPU,                                /* device id */
   .probe  = virtio_gpu_probe,                             /* probe */
   .remove = virtio_gpu_remove,                            /* remove */

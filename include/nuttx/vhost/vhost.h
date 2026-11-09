@@ -31,7 +31,7 @@
 #ifdef CONFIG_DRIVERS_VHOST
 
 #include <nuttx/compiler.h>
-#include <nuttx/list.h>
+#include <nuttx/queue.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio-config.h>
 #include <openamp/open_amp.h>
@@ -67,10 +67,10 @@
 
 struct vhost_driver
 {
-  struct list_node   node;
   uint32_t           device;   /* device id */
   CODE int         (*probe)(FAR struct vhost_device *hdev);
   CODE void        (*remove)(FAR struct vhost_device *hdev);
+  struct dq_entry_s  node;
 };
 
 /* Peer buffer described by its full 64-bit guest physical address.  On

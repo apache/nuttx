@@ -64,7 +64,6 @@ static void vhost_i2c_remove(FAR struct vhost_device *hdev);
 
 static struct vhost_driver g_vhost_i2c_driver =
 {
-  LIST_INITIAL_VALUE(g_vhost_i2c_driver.node),
   VIRTIO_ID_I2C_ADAPTER, /* Device id */
   vhost_i2c_probe,       /* Probe */
   vhost_i2c_remove,      /* Remove */

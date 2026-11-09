@@ -67,7 +67,6 @@ static void vhost_rng_handler(FAR struct virtqueue *vq);
 
 static struct vhost_driver g_vhost_rng_driver =
 {
-  LIST_INITIAL_VALUE(g_vhost_rng_driver.node), /* Node */
   VIRTIO_ID_ENTROPY,                           /* Device id */
   vhost_rng_probe,                             /* Probe */
   vhost_rng_remove,                            /* Remove */

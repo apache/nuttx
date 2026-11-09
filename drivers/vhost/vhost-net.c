@@ -181,7 +181,6 @@ static const struct netdev_ops_s g_vhost_net_ops =
 
 static struct vhost_driver g_vhost_net_driver =
 {
-  LIST_INITIAL_VALUE(g_vhost_net_driver.node),  /* node */
   VIRTIO_ID_NETWORK,                            /* device id */
   vhost_net_probe,                              /* probe */
   vhost_net_remove,                             /* remove */

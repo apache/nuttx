@@ -28,6 +28,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/queue.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/vhost/vhost.h>
 
@@ -55,16 +56,16 @@
 
 struct vhost_bus_s
 {
-  mutex_t          lock;           /* Lock for the list */
-  struct list_node device;         /* Wait match vhost device list */
-  struct list_node defered_device; /* Deferred vhost device list */
-  struct list_node driver;         /* Vhost driver list */
-  struct work_s    defered_work;   /* Deferred probe work */
+  mutex_t           lock;           /* Lock for the list */
+  struct dq_queue_s device;         /* Wait match vhost device list */
+  struct dq_queue_s defered_device; /* Deferred vhost device list */
+  struct dq_queue_s driver;         /* Vhost driver list */
+  struct work_s     defered_work;   /* Deferred probe work */
 };
 
 struct vhost_device_item_s
 {
-  struct list_node     node;    /* List node */
+  struct dq_entry_s    node;    /* List node */
   struct vhost_device *device;  /* Pointer to the vhost device */
   struct vhost_driver *driver;  /* Pointer to the vhost driver that
                                  * matched with current vhost device
@@ -77,10 +78,7 @@ struct vhost_device_item_s
 
 static struct vhost_bus_s g_vhost_bus =
 {
-  NXMUTEX_INITIALIZER,
-  LIST_INITIAL_VALUE(g_vhost_bus.device),
-  LIST_INITIAL_VALUE(g_vhost_bus.defered_device),
-  LIST_INITIAL_VALUE(g_vhost_bus.driver),
+  .lock = NXMUTEX_INITIALIZER,
 };
 
 /****************************************************************************
@@ -129,8 +127,8 @@ static void vhost_defered_probe_work(FAR void *arg)
 
   nxmutex_lock(&g_vhost_bus.lock);
 
-  list_for_every_entry_safe(&g_vhost_bus.defered_device, item, tmp,
-                            struct vhost_device_item_s, node)
+  dq_for_every_entry_safe(&g_vhost_bus.defered_device, item, tmp,
+                          struct vhost_device_item_s, node)
     {
       if (!vhost_status_driver_ok(item->device))
         {
@@ -142,10 +140,10 @@ static void vhost_defered_probe_work(FAR void *arg)
        * normal device list
        */
 
-      list_delete(&item->node);
-      list_add_tail(&g_vhost_bus.device, &item->node);
-      list_for_every_entry(&g_vhost_bus.driver, driver,
-                           struct vhost_driver, node)
+      dq_rem(&item->node, &g_vhost_bus.defered_device);
+      dq_addlast(&item->node, &g_vhost_bus.device);
+      dq_for_every_entry(&g_vhost_bus.driver, driver,
+                         struct vhost_driver, node)
         {
           if (item->device->id.device == driver->device)
             {
@@ -160,7 +158,7 @@ static void vhost_defered_probe_work(FAR void *arg)
         }
     }
 
-  if (!list_is_empty(&g_vhost_bus.defered_device))
+  if (!dq_empty(&g_vhost_bus.defered_device))
     {
       work_queue(LPWORK, &g_vhost_bus.defered_work, vhost_defered_probe_work,
                  NULL, VHOST_DEFERED_PROBE_PERIOD);
@@ -310,12 +308,12 @@ int vhost_register_driver(FAR struct vhost_driver *driver)
 
   /* Add the driver to the vhost_bus driver list */
 
-  list_add_tail(&g_vhost_bus.driver, &driver->node);
+  dq_addlast(&driver->node, &g_vhost_bus.driver);
 
   /* Match all the devices has registered in the vhost_bus */
 
-  list_for_every_entry(&g_vhost_bus.device, item, struct vhost_device_item_s,
-                       node)
+  dq_for_every_entry(&g_vhost_bus.device, item, struct vhost_device_item_s,
+                     node)
     {
       if (item->driver == NULL && driver->device == item->device->id.device)
         {
@@ -355,8 +353,8 @@ int vhost_unregister_driver(FAR struct vhost_driver *driver)
 
   /* Find all the devices matched with driver in device list */
 
-  list_for_every_entry(&g_vhost_bus.device, item, struct vhost_device_item_s,
-                       node)
+  dq_for_every_entry(&g_vhost_bus.device, item, struct vhost_device_item_s,
+                     node)
     {
       if (item->driver == driver)
         {
@@ -371,7 +369,7 @@ int vhost_unregister_driver(FAR struct vhost_driver *driver)
 
   /* Remove the driver from the driver list */
 
-  list_delete(&driver->node);
+  dq_rem(&driver->node, &g_vhost_bus.driver);
 
   nxmutex_unlock(&g_vhost_bus.lock);
   return ret;
@@ -409,8 +407,8 @@ int vhost_register_device(FAR struct vhost_device *device)
 
   if (!vhost_status_driver_ok(device))
     {
-      list_add_tail(&g_vhost_bus.defered_device, &item->node);
-      if (list_is_singular(&g_vhost_bus.defered_device))
+      dq_addlast(&item->node, &g_vhost_bus.defered_device);
+      if (dq_is_singular(&g_vhost_bus.defered_device))
         {
           work_queue(LPWORK, &g_vhost_bus.defered_work,
                       vhost_defered_probe_work, NULL,
@@ -419,12 +417,12 @@ int vhost_register_device(FAR struct vhost_device *device)
     }
   else
     {
-      list_add_tail(&g_vhost_bus.device, &item->node);
+      dq_addlast(&item->node, &g_vhost_bus.device);
 
       /* Match the driver has registered in the vhost_bus */
 
-      list_for_every_entry(&g_vhost_bus.driver, driver, struct vhost_driver,
-                           node)
+      dq_for_every_entry(&g_vhost_bus.driver, driver, struct vhost_driver,
+                         node)
         {
           if (driver->device == device->id.device)
             {
@@ -465,8 +463,8 @@ int vhost_unregister_device(FAR struct vhost_device *device)
 
   /* Find the device in device list */
 
-  list_for_every_entry(&g_vhost_bus.device, item,
-                       struct vhost_device_item_s, node)
+  dq_for_every_entry(&g_vhost_bus.device, item, struct vhost_device_item_s,
+                     node)
     {
       if (item->device == device)
         {
@@ -479,18 +477,18 @@ int vhost_unregister_device(FAR struct vhost_device *device)
 
           /* Remove the device from the device list and free memory */
 
-          list_delete(&item->node);
+          dq_rem(&item->node, &g_vhost_bus.device);
           kmm_free(item);
           goto out;
         }
     }
 
-  list_for_every_entry(&g_vhost_bus.defered_device, item,
-                       struct vhost_device_item_s, node)
+  dq_for_every_entry(&g_vhost_bus.defered_device, item,
+                     struct vhost_device_item_s, node)
     {
       if (item->device == device)
         {
-          list_delete(&item->node);
+          dq_rem(&item->node, &g_vhost_bus.defered_device);
           kmm_free(item);
           goto out;
         }

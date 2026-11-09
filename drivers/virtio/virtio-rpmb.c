@@ -77,7 +77,6 @@ static int virtio_rpmb_ioctl(FAR struct file *, int, unsigned long);
 
 static struct virtio_driver g_virtio_rpmb_driver =
 {
-  LIST_INITIAL_VALUE(g_virtio_rpmb_driver.node), /* node */
   VIRTIO_ID_RPMB,                                /* device id */
   virtio_rpmb_probe,                             /* probe */
   virtio_rpmb_remove,                            /* remove */

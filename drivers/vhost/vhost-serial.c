@@ -67,7 +67,6 @@ static void vhost_serial_remove(FAR struct vhost_device *hdev);
 
 static struct vhost_driver g_vhost_serial_driver =
 {
-  LIST_INITIAL_VALUE(g_vhost_serial_driver.node),      /* node */
   VIRTIO_ID_CONSOLE,                                   /* device id */
   vhost_serial_probe,                                  /* probe */
   vhost_serial_remove,                                 /* remove */
@@ -75,7 +74,6 @@ static struct vhost_driver g_vhost_serial_driver =
 
 static struct vhost_driver g_vhost_rprocserial_driver =
 {
-  LIST_INITIAL_VALUE(g_vhost_rprocserial_driver.node), /* node */
   VIRTIO_ID_RPROC_SERIAL,                              /* device id */
   vhost_serial_probe,                                  /* probe */
   vhost_serial_remove,                                 /* remove */
