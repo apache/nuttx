@@ -257,18 +257,39 @@ int tcp_start_monitor(FAR struct socket *psock)
 
   conn = psock->s_conn;
 
+  /* The check of the state and the start of the monitor are one step under
+   * the lock of the device: an event of the peer that came between them
+   * (TCP_RXCLOSE of a FIN, handled on another CPU) would be seen by no
+   * monitor, and a read would then wait for ever.
+   */
+
+  conn_dev_lock(&conn->sconn, conn->dev);
+
   /* Non-blocking connection ? */
 
   nonblock_conn = (conn->tcpstateflags == TCP_SYN_SENT &&
                    _SS_ISNONBLOCK(conn->sconn.s_flags));
+
+  /* The peer can close its half of the connection (FIN: TCP_CLOSE_WAIT)
+   * before the monitor is started: a server that accepts and closes at
+   * once, before the connect() of the client returns, or a client that
+   * closes before accept().  The connection is still connected: data can
+   * go to the peer.  Only the TCP_RXCLOSE event of the FIN came before the
+   * monitor, so do what the monitor does for it: reads give end-of-file.
+   */
+
+  if (conn->tcpstateflags == TCP_CLOSE_WAIT)
+    {
+      conn->shutdown |= SHUT_RD;
+    }
 
   /* Check if the connection has already been closed before any callbacks
    * have been registered. (Maybe the connection is lost before accept has
    * registered the monitoring callback.)
    */
 
-  if (!(conn->tcpstateflags == TCP_ESTABLISHED ||
-        conn->tcpstateflags == TCP_SYN_RCVD || nonblock_conn))
+  else if (!(conn->tcpstateflags == TCP_ESTABLISHED ||
+             conn->tcpstateflags == TCP_SYN_RCVD || nonblock_conn))
     {
       /* Invoke the TCP_ABORT connection event now */
 
@@ -294,6 +315,7 @@ int tcp_start_monitor(FAR struct socket *psock)
            conn->tcpstateflags == TCP_LAST_ACK) &&
           conn->readahead != NULL)
         {
+          conn_dev_unlock(&conn->sconn, conn->dev);
           return OK;
         }
 
@@ -301,6 +323,7 @@ int tcp_start_monitor(FAR struct socket *psock)
        * because the socket was already disconnected.
        */
 
+      conn_dev_unlock(&conn->sconn, conn->dev);
       return -ENOTCONN;
     }
 
@@ -308,7 +331,6 @@ int tcp_start_monitor(FAR struct socket *psock)
    * the network goes down.
    */
 
-  conn_dev_lock(&conn->sconn, conn->dev);
   cb = devif_callback_alloc(conn->dev,
                             &conn->connevents,
                             &conn->connevents_tail);
