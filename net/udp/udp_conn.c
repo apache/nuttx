@@ -183,6 +183,50 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
 }
 
 /****************************************************************************
+ * Name: udp_ipv4_dualstack
+ *
+ * Description:
+ *   Check if an IPv4 datagram is for the UDP socket 'conn' of AF_INET6.  Its
+ *   IPv6 addresses take the IPv4 address only as [::] or in the IPv4-mapped
+ *   form.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+static bool udp_ipv4_dualstack(FAR struct udp_conn_s *conn,
+                               FAR struct ipv4_hdr_s *ip,
+                               FAR struct udp_hdr_s *udp)
+{
+  net_ipv6addr_t mapped;
+  in_addr_t addr;
+
+  if (conn->lport == 0 || udp->destport != conn->lport)
+    {
+      return false;
+    }
+
+  addr = net_ip4addr_conv32(ip->destipaddr);
+  ip6_map_ipv4addr(addr, mapped);
+  if (!net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr) &&
+      !net_ipv6addr_cmp(conn->u.ipv6.laddr, mapped))
+    {
+      return false;
+    }
+
+  if (!_UDP_ISCONNECTMODE(conn->flags))
+    {
+      return true;
+    }
+
+  addr = net_ip4addr_conv32(ip->srcipaddr);
+  ip6_map_ipv4addr(addr, mapped);
+  return (conn->rport == 0 || udp->srcport == conn->rport) &&
+         (net_ipv6addr_cmp(conn->u.ipv6.raddr, g_ipv6_unspecaddr) ||
+          net_ipv6addr_cmp(conn->u.ipv6.raddr, mapped));
+}
+#endif
+
+/****************************************************************************
  * Name: udp_ipv4_active
  *
  * Description:
@@ -255,6 +299,21 @@ udp_ipv4_active(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
        *
        * REVISIT: SO_BROADCAST flag is currently ignored.
        */
+
+#ifdef CONFIG_NET_IPv6
+      /* A socket of AF_INET6 matches by its IPv6 addresses */
+
+      if (conn->domain == PF_INET6)
+        {
+          if (udp_ipv4_dualstack(conn, ip, udp))
+            {
+              break;
+            }
+
+          conn = udp_nextconn(conn);
+          continue;
+        }
+#endif
 
       /* Check that there is a local port number and this matches
        * the port number in the destination address.
