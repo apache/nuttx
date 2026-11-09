@@ -29,7 +29,7 @@ A *correct call* is a call that GCC and Clang accept with
   never the parser.
 - Each argument is read at its right size, also when its conversion is off.
 - A conversion that is off prints one ``?``, padded to the width, so the rest
-  of the line stays correct.
+  of the line stays correct.  ``%n`` always prints nothing.
 - Width and precision counters cannot wrap.  No read or write goes outside a
   buffer.  ``NULL`` for ``%s`` prints ``(null)``.  The stack use is bounded.
 
@@ -55,9 +55,10 @@ Conversion        Output
                   stay.
 ``%a``, ``%A``    A float, exactly, in hexadecimal
                   (``LIBC_PRINTF_HEXFLOAT``).
-``%n``            Reads its pointer, stores nothing and prints ``?``, so a
-                  format never writes to memory.  ``LIBC_PRINTF_PERCENT_N``
-                  stores the count: it is dangerous, and no profile has it.
+``%n``            Reads its pointer and prints nothing.  It stores nothing,
+                  so a format never writes to memory.
+                  ``LIBC_PRINTF_PERCENT_N`` stores the count: it is
+                  dangerous, and no profile has it.
 ================  =========================================================
 
 .. code-block:: text
@@ -82,7 +83,7 @@ Conversion        Output
    printf("%A", 1.5)             "0X1.8P+0"
    printf("%b", 5)               "101"
    printf("%B", 5)               "101"
-   printf("ab%n|", &n)           "ab?|"
+   printf("ab%n|", &n)           "ab|"
 
 Flags
 =====
@@ -347,7 +348,7 @@ arguments off have the same result.
 .. code-block:: text
 
    Call                                      Full            All off
-   printf("ab%n|", &n)                       "ab?|"          "ab?|"
+   printf("ab%n|", &n)                       "ab|"           "ab|"
    printf("%f", 3.14159)                     "3.141590"      "?"
    printf("%e", 3.14159)                     "3.141590e+00"  "?"
    printf("%g", 3.14159)                     "3.14159"       "?"
