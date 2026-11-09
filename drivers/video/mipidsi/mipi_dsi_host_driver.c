@@ -137,16 +137,16 @@ static int dsi_host_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       case MIPIDSI_TRANSFER:
 
-          /* Get the reference to the mipi_dsi_msg structure */
+        /* Get the reference to the mipi_dsi_msg structure */
 
-          msg = (FAR struct mipi_dsi_msg *)((uintptr_t)arg);
+        msg = (FAR struct mipi_dsi_msg *)((uintptr_t)arg);
 
-          /* Get the reference to the mipi_dsi_host structure */
+        /* Get the reference to the mipi_dsi_host structure */
 
-          host = priv->host;
-          DEBUGASSERT(host != NULL && msg != NULL);
+        host = priv->host;
+        DEBUGASSERT(host != NULL && msg != NULL);
 
-          ret = host->ops->transfer(host, msg);
+        ret = host->ops->transfer(host, msg);
         break;
       default:
         ret = -ENOTTY;
