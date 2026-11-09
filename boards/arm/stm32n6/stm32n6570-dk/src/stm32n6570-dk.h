@@ -54,16 +54,12 @@
  * Public Data
  ****************************************************************************/
 
-/* USER1 button (B2) on PC13: active high, no external pull resistor */
+/* USER1 (B2) on PC13 and TAMP (B4) on PE0, high when pressed */
 
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_PULLDOWN | GPIO_EXTI | \
                         GPIO_PORTC | GPIO_PIN13)
 #define GPIO_BTN_TAMP  (GPIO_INPUT | GPIO_PULLDOWN | GPIO_EXTI | \
                         GPIO_PORTE | GPIO_PIN0)
-
-#define MIN_IRQBUTTON  BUTTON_USER
-#define MAX_IRQBUTTON  BUTTON_USER
-#define NUM_IRQBUTTONS 1
 
 #ifndef __ASSEMBLY__
 
