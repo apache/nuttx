@@ -237,6 +237,30 @@ static bool rcc_waitflag(uint32_t addr, uint32_t mask, bool set)
 }
 
 /****************************************************************************
+ * Name: rcc_waitfield
+ *
+ * Description:
+ *   Spin until the bits in mask of the register at addr equal value.
+ *   Returns false on timeout.
+ *
+ ****************************************************************************/
+
+static bool rcc_waitfield(uint32_t addr, uint32_t mask, uint32_t value)
+{
+  volatile int32_t timeout;
+
+  for (timeout = CLKRDY_TIMEOUT; timeout > 0; timeout--)
+    {
+      if ((getreg32(addr) & mask) == value)
+        {
+          return true;
+        }
+    }
+
+  return false;
+}
+
+/****************************************************************************
  * Name: rcc_enableahb1
  *
  * Description:
@@ -876,7 +900,7 @@ void stm32_stdclockconfig(void)
   putreg32(RCC_MEMENR_ALLAXISRAM | RCC_MEMENR_CACHEAXIRAMEN,
            STM32_RCC_MEMENSR);
 
-  rcc_waitflag(STM32_RCC_CFGR1,
-               RCC_CFGR1_SW2SWS(STM32_RCC_CFGR1_CPUSW |
-                                STM32_RCC_CFGR1_SYSSW), true);
+  rcc_waitfield(STM32_RCC_CFGR1, RCC_CFGR1_SWS_MASK,
+                RCC_CFGR1_SW2SWS(STM32_RCC_CFGR1_CPUSW |
+                                 STM32_RCC_CFGR1_SYSSW));
 }
