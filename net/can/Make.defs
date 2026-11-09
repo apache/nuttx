@@ -50,7 +50,6 @@ endif
 endif
 
 NET_CSRCS += can.c
-NET_CSRCS += can_input.c
 NET_CSRCS += can_poll.c
 
 # Include can build support
