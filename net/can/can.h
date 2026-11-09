@@ -126,13 +126,17 @@ struct can_conn_s
 
   struct can_poll_s pollinfo[CONFIG_NET_CAN_NPOLLWAITERS];
 
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
-  struct can_filter filters[CONFIG_NET_CAN_RAW_FILTER_MAX];
-  int32_t filter_count;
-#  ifdef CONFIG_NET_CAN_ERRORS
-  can_err_mask_t err_mask;
-#  endif
-#endif
+  /* Protocol hooks used by can_input():
+   *
+   *   match - Return true if the received frame in dev is for conn.
+   *   input - Deliver the received frame in dev to conn and return the
+   *           remaining event flags.
+   */
+
+  CODE bool (*match)(FAR struct can_conn_s *conn,
+                     FAR struct net_driver_s *dev);
+  CODE uint32_t (*input)(FAR struct can_conn_s *conn,
+                         FAR struct net_driver_s *dev);
 };
 
 /****************************************************************************
@@ -166,7 +170,8 @@ can_sockif(sa_family_t family, int type, int protocol);
  *
  * Description:
  *   Initialize the state shared by all CAN protocols in a newly allocated
- *   connection and add it to the list of active connections.
+ *   connection and add it to the list of active connections.  The caller
+ *   sets the match() and input() hooks first.
  *
  ****************************************************************************/
 
@@ -235,25 +240,6 @@ FAR struct can_conn_s *can_conn_next(FAR struct can_conn_s *conn);
 
 void can_conn_list_lock(void);
 void can_conn_list_unlock(void);
-
-/****************************************************************************
- * Name: can_active()
- *
- * Description:
- *   Traverse the list of NetLink connections that match dev
- *
- * Input Parameters:
- *   dev  - The device to search for.
- *   conn - The current connection; may be NULL to start the search at the
- *          beginning
- *
- * Assumptions:
- *   This function is called from NetLink device logic.
- *
- ****************************************************************************/
-
-FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
-                                  FAR struct can_conn_s *conn);
 
 /****************************************************************************
  * Name: can_callback
