@@ -151,6 +151,17 @@ extern const struct sock_intf_s g_can_raw_sockif;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: can_sockif
+ *
+ * Description:
+ *   Return the socket interface of the requested CAN protocol.
+ *
+ ****************************************************************************/
+
+FAR const struct sock_intf_s *
+can_sockif(sa_family_t family, int type, int protocol);
+
+/****************************************************************************
  * Name: can_alloc()
  *
  * Description:
