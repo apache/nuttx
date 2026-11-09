@@ -2200,6 +2200,8 @@ static void can_raw_addref(FAR struct socket *psock)
  *     The given address is already in use.
  *   EINVAL
  *     The socket is already bound to an address.
+ *   ENODEV
+ *     The interface does not exist or is not a CAN device.
  *   ENOTSOCK
  *     psock is a descriptor for a file, not a socket.
  *

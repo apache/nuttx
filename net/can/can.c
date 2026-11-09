@@ -893,7 +893,7 @@ int can_get_ifindex(FAR struct can_conn_s *conn)
  *
  * Returned Value:
  *   OK on success, -ENODEV if a non-zero interface index does not match a
- *   CAN device.
+ *   device, or if the device is not a CAN device.
  *
  ****************************************************************************/
 
@@ -919,6 +919,14 @@ int can_conn_bind(FAR struct can_conn_s *conn,
   netdev_name[3] += canaddr->can_ifindex;
   conn->dev = netdev_findbyname((const char *)&netdev_name);
 #endif
+
+  /* Only a CAN device can send and receive CAN frames */
+
+  if (conn->dev != NULL && conn->dev->d_lltype != NET_LL_CAN)
+    {
+      conn->dev = NULL;
+      return -ENODEV;
+    }
 
   return conn->dev == NULL && canaddr->can_ifindex != 0 ? -ENODEV : OK;
 }
