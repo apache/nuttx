@@ -35,10 +35,6 @@ endif
 
 SOCK_CSRCS += can_recvmsg.c
 
-ifeq ($(CONFIG_NET_CAN_NOTIFIER),y)
-SOCK_CSRCS += can_notifier.c
-endif
-
 ifeq ($(CONFIG_NET_CANPROTO_OPTIONS),y)
 SOCK_CSRCS += can_setsockopt.c can_getsockopt.c
 endif
