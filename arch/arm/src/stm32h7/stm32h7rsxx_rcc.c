@@ -532,8 +532,8 @@ void stm32_stdclockconfig(void)
       return;
     }
 
-#ifdef CONFIG_STM32_HSI48
-  /* Enable HSI48 */
+#if defined(CONFIG_STM32_HSI48) || defined(CONFIG_STM32_RNG)
+  /* Enable HSI48, also the RNG kernel clock (reset value) */
 
   modifyreg32(STM32_RCC_CR, 0, RCC_CR_HSI48ON);
   while ((getreg32(STM32_RCC_CR) & RCC_CR_HSI48RDY) == 0)
