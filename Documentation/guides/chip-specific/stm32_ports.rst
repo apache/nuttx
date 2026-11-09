@@ -294,7 +294,7 @@ ICACHE        to be done    not supported
 IWDG          v3            arch/arm/src/common/stm32/stm32_iwdg.c
 LPDMA         GPDMA         arch/arm/src/common/stm32/stm32_dma_gpdma.c
 LPTIM         v2            arch/arm/src/common/stm32/stm32_lptim.c
-LPUART        M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
+LPUART        M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 PWR           to be done    not supported
 RAMCFG        to be done    not supported
 RCC           C5            arch/arm/src/stm32c5/stm32c5xx_rcc.c
@@ -304,7 +304,7 @@ SBS           to be done    not supported
 SPI/I2S       to be done    not supported
 TAMP          to be done    not supported
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
-USART/UART    M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
+USART/UART    M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 USB_FS        FS            not supported
 WWDG          v3            arch/arm/src/common/stm32/stm32_wwdg.c
 ============  ============  ==============================================================
@@ -625,7 +625,7 @@ RCC           to be done    arch/arm/src/stm32h5/stm32_rcc.c
 RTC           M33M55 v1     arch/arm/src/common/stm32/stm32_rtcc_m33m55_v1.c
 SPI/I2S       to be done    arch/arm/src/stm32h5/stm32_spi.c       
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c  
-USART/LPUART  v3            arch/arm/src/stm32h5/stm32_serial.c    
+USART/LPUART  M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 USB           FS            arch/arm/src/stm32h5/stm32_usbfs.c     
 WWDG          v3            arch/arm/src/common/stm32/stm32_wwdg.c
 LPTIM         v2            arch/arm/src/common/stm32/stm32_lptim.c
@@ -759,7 +759,7 @@ RTC           to be done    not supported
 SDMMC         to be done    not supported                           
 SPI/I2S       to be done    arch/arm/src/stm32l5/stm32l5_spi.c      
 TIM           v2            arch/arm/src/common/stm32/stm32_tim.c
-USART/LPUART  v3            arch/arm/src/stm32l5/stm32l5_serial.c   
+USART/LPUART  M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 USB           device        not supported                           
 WWDG          v2            arch/arm/src/common/stm32/stm32_wwdg.c
 ============  ============  ========================================
@@ -853,7 +853,7 @@ I3C           to be done    not supported
 ICACHE        to be done    not supported
 IWDG          v3            arch/arm/src/common/stm32/stm32_iwdg.c
 LPTIM         v2            arch/arm/src/common/stm32/stm32_lptim.c
-LPUART        M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
+LPUART        M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 OCTOSPI       to be done    not supported
 OPAMP         to be done    not supported
 PKA           to be done    not supported
@@ -870,7 +870,7 @@ SYSCFG        to be done    not supported
 TAMP          to be done    not supported
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 TSC           to be done    not supported
-USART/UART    M33 v3        arch/arm/src/common/stm32/stm32_serial_m33_v3.c
+USART/UART    M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 USB_DRD_FS    to be done    not supported
 VREFBUF       to be done    not supported
 WWDG          v3            arch/arm/src/common/stm32/stm32_wwdg.c
@@ -903,7 +903,7 @@ SDMMC         to be done    not supported
 SPI/I2S       to be done    arch/arm/src/stm32u5/stm32_spi.c      
 TAMP          to be done    not supported                         
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
-USART/LPUART  v3            arch/arm/src/stm32u5/stm32_serial.c   
+USART/LPUART  M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 USB           device        not supported                         
 ============  ============  ===========================================
 
@@ -1043,15 +1043,16 @@ of a peripheral on a given core is ``V1``.
 - Facade headers: ``stm32_<periph>.h`` — dispatch on Kconfig IP symbols
 - M0-core variants: ``stm32_<periph>_m0_v1.h``
 - M3/M4-core variants: ``stm32_<periph>_m3m4_v1.h``, ``stm32_<periph>_m3m4_v2.h``
-- M33-core variants: ``stm32_<periph>_m33_v1.h``, ``stm32_<periph>_m33_v3.h``
-- M33 and M55 (STM32N6) variants: ``stm32_<periph>_m33m55_v1.h``
+- M33-core variants: ``stm32_<periph>_m33_v1.h``
+- M33 and M55 (STM32N6) variants: ``stm32_<periph>_m33m55_v1.h``,
+  ``stm32_<periph>_m33m55_v3.h``
 - Combined variants: ``stm32_<periph>_m3m4_v1v2.h``, ``stm32_<periph>_m3m4_v1v2v3.h``
 
 **Source file naming** (``.c`` files):
 
 - Follow the same convention as headers: ``stm32_gpio_m3m4_v1v2.c``,
   ``stm32_adc_m0_v1.c``, ``stm32_gpio_m33m55_v1.c``,
-  ``stm32_serial_m33_v3.c``, ``stm32_spi_m0_v1.c``, and
+  ``stm32_serial_m33m55_v3.c``, ``stm32_spi_m0_v1.c``, and
   ``stm32_pwm_m3m4_v1v2v3.c``
 
 **Kconfig symbol naming** (``CONFIG_STM32_HAVE_IP_<PERIPH>_<CORE>_<VERSION>``):
@@ -1059,9 +1060,9 @@ of a peripheral on a given core is ``V1``.
 - M0: ``CONFIG_STM32_HAVE_IP_GPIO_M0_V1``, ``CONFIG_STM32_HAVE_IP_ADC_M0_V1``
 - M3/M4: ``CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1``,
   ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V1``, ``CONFIG_STM32_HAVE_IP_ADC_M3M4_V2``
-- M33: ``CONFIG_STM32_HAVE_IP_GPIO_M33M55_V1``,
+- M33 and M55: ``CONFIG_STM32_HAVE_IP_GPIO_M33M55_V1``,
   ``CONFIG_STM32_HAVE_IP_EXTI_M33M55_V1``,
-  ``CONFIG_STM32_HAVE_IP_USART_M33_V3``, and
+  ``CONFIG_STM32_HAVE_IP_USART_M33M55_V3``, and
   ``CONFIG_STM32_HAVE_IP_DMA_GPDMA``
 - No core prefix (used by several core classes):
   ``CONFIG_STM32_HAVE_IP_TIMERS_V1``, ``CONFIG_STM32_HAVE_IP_TIMERS_V2``,

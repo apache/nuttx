@@ -60,8 +60,8 @@ if(NOT CONFIG_ARCH_CUSTOM_PMINIT AND (CONFIG_STM32_COMMON_LEGACY
   list(APPEND SRCS stm32_pminitialize_default.c)
 endif()
 
-if(CONFIG_STM32_HAVE_IP_USART_M33_V3)
-  list(APPEND SRCS stm32_lowputc_usart_m33_v3.c stm32_serial_m33_v3.c)
+if(CONFIG_STM32_HAVE_IP_USART_M33M55_V3)
+  list(APPEND SRCS stm32_lowputc_usart_m33m55_v3.c stm32_serial_m33m55_v3.c)
 endif()
 
 if(CONFIG_STM32_HAVE_IP_GPIO_M33M55_V1)
