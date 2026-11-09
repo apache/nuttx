@@ -320,9 +320,9 @@ struct arm64_mpu_config
 
 #define MPU_REGION_ENTRY(_name, _base, _size, _attr)  \
   {                                                   \
-    .name   = _name,                                  \
-    .base   = _base,                                  \
-    .size   = _size,                                  \
+    .name   = (_name),                                \
+    .base   = (_base),                                \
+    .size   = (_size),                                \
     .attr   = _attr,                                  \
   }
 
