@@ -1533,6 +1533,8 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
   FAR struct swcr_data **swd;
   FAR const struct auth_hash *axf;
   FAR const struct enc_xform *txf;
+  uint8_t hmackey[HMAC_MAX_BLOCK_LEN];
+  int keylen;
   uint32_t i;
   int k;
 
@@ -1726,45 +1728,46 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
                 return -ENOBUFS;
               }
 
-            /* If the key is too long, hash it first using ictx */
+            /* Work on a local copy of the key so the caller's key buffer
+             * (which may be read-only) is never modified.  If the key is
+             * too long, hash it into the local copy first using ictx.
+             */
 
-            if (cri->cri_klen / 8 > axf->keysize)
+            keylen = cri->cri_klen / 8;
+            if (keylen > axf->keysize)
               {
                 axf->init((*swd)->sw_ictx);
                 axf->update((*swd)->sw_ictx,
-                            (FAR uint8_t *)cri->cri_key,
-                            cri->cri_klen / 8);
-                axf->final((unsigned char *)cri->cri_key,
-                           (*swd)->sw_ictx);
-                cri->cri_klen = axf->hashsize * 8;
+                            (FAR uint8_t *)cri->cri_key, keylen);
+                axf->final(hmackey, (*swd)->sw_ictx);
+                keylen = axf->hashsize;
+              }
+            else
+              {
+                bcopy(cri->cri_key, hmackey, keylen);
               }
 
-            for (k = 0; k < cri->cri_klen / 8; k++)
+            for (k = 0; k < keylen; k++)
               {
-                cri->cri_key[k] ^= HMAC_IPAD_VAL;
+                hmackey[k] ^= HMAC_IPAD_VAL;
               }
 
             axf->init((*swd)->sw_ictx);
-            axf->update((*swd)->sw_ictx, (FAR uint8_t *)cri->cri_key,
-                        cri->cri_klen / 8);
+            axf->update((*swd)->sw_ictx, hmackey, keylen);
             axf->update((*swd)->sw_ictx, hmac_ipad_buffer,
-                        axf->blocksize - (cri->cri_klen / 8));
+                        axf->blocksize - keylen);
 
-            for (k = 0; k < cri->cri_klen / 8; k++)
+            for (k = 0; k < keylen; k++)
               {
-                cri->cri_key[k] ^= (HMAC_IPAD_VAL ^ HMAC_OPAD_VAL);
+                hmackey[k] ^= (HMAC_IPAD_VAL ^ HMAC_OPAD_VAL);
               }
 
             axf->init((*swd)->sw_octx);
-            axf->update((*swd)->sw_octx, (FAR uint8_t *)cri->cri_key,
-                        cri->cri_klen / 8);
+            axf->update((*swd)->sw_octx, hmackey, keylen);
             axf->update((*swd)->sw_octx, hmac_opad_buffer,
-                        axf->blocksize - (cri->cri_klen / 8));
+                        axf->blocksize - keylen);
 
-            for (k = 0; k < cri->cri_klen / 8; k++)
-              {
-                cri->cri_key[k] ^= HMAC_OPAD_VAL;
-              }
+            explicit_bzero(hmackey, sizeof(hmackey));
 
             (*swd)->sw_axf = axf;
             bcopy((*swd)->sw_ictx, &(*swd)->sw_ctx, axf->ctxsize);
