@@ -1399,6 +1399,121 @@ static int vsprintf_pointer_extension(FAR struct lib_outstream_s *stream,
 }
 #endif
 
+static size_t vsprintf_put_integer(FAR struct lib_outstream_s *stream,
+                                   uint16_t flags, FAR char *buf,
+                                   int digits, FAR int *width, int prec)
+{
+  unsigned int len = digits;
+  size_t total_len = 0;
+  int w = *width;
+
+  if ((flags & FL_INT_PREC) != 0)
+    {
+      flags &= ~FL_ZFILL;
+      if (len < prec)
+        {
+          len = prec;
+          if ((flags & FL_ALT_FORM) != 0 && !FL_ALT_IS_HEX(flags))
+            {
+              flags &= ~FL_ALT;
+            }
+        }
+    }
+
+  if ((flags & FL_ALT) != 0)
+    {
+      /* digits is 0 for a value of 0 with a precision of 0: then %#o has
+       * a "0" from the flag, and a hexadecimal value has no prefix.
+       */
+
+      if (digits == 0 ? FL_ALT_IS_HEX(flags) : buf[digits - 1] == '0')
+        {
+          flags &= ~(FL_ALT | FL_ALTHEX | FL_ALTUPP);
+        }
+      else
+        {
+          len += 1;
+          if (FL_ALT_IS_HEX(flags))
+            {
+              len += 1;
+            }
+        }
+    }
+  else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
+    {
+      len += 1;
+    }
+
+  if (len > INT_MAX)
+    {
+      *width = 0;
+      return INT_MAX + 1u;
+    }
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      if ((flags & FL_ZFILL) != 0)
+        {
+          prec = digits;
+          if (len < w)
+            {
+              prec += w - len;
+              len = w;
+            }
+        }
+
+      if (len < w)
+        {
+          total_len += vsprintf_repeat(stream, ' ', w - len);
+          len = w;
+        }
+    }
+
+  *width = len < w ? w - len : 0;
+
+  if ((flags & FL_ALT) != 0)
+    {
+      total_len++;
+      lib_stream_putc(stream, '0');
+      if (FL_ALT_IS_HEX(flags))
+        {
+          int ch = (flags & FL_ALTBIN) != 0 ? 'b' : 'x';
+
+          total_len++;
+          lib_stream_putc(stream,
+                          FL_ALT_FORM != 0 && (flags & FL_ALTUPP) != 0 ?
+                          ch - 0x20 : ch);
+        }
+    }
+  else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
+    {
+      unsigned char z = ' ';
+
+      if ((flags & FL_PLUS) != 0)
+        {
+          z = '+';
+        }
+
+      if ((flags & FL_NEGATIVE) != 0)
+        {
+          z = '-';
+        }
+
+      total_len++;
+      lib_stream_putc(stream, z);
+    }
+
+  if (prec > digits)
+    {
+      total_len += vsprintf_repeat(stream, '0', prec - digits);
+      prec = digits;
+    }
+
+  total_len += vsprintf_putnum(stream, buf, digits);
+
+  return total_len;
+}
+
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                              FAR struct arg_s *arglist, int numargs,
                              FAR const IPTR char *fmt, va_list ap)
@@ -1424,10 +1539,8 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
   FAR const char *pnt;
   size_t size;
-  int ch;
   int star;
   int result;
-  unsigned int len;
   size_t total_len = 0;
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
@@ -2293,106 +2406,8 @@ str_lpad:
           goto put_unavailable;
         }
 
-      len = c;
-
-      if ((flags & FL_INT_PREC) != 0)
-        {
-          flags &= ~FL_ZFILL;
-          if (len < prec)
-            {
-              len = prec;
-              if ((flags & FL_ALT_FORM) != 0 && !FL_ALT_IS_HEX(flags))
-                {
-                  flags &= ~FL_ALT;
-                }
-            }
-        }
-
-      if ((flags & FL_ALT) != 0)
-        {
-          /* c is 0 for a value of 0 with a precision of 0: then %#o has a
-           * "0" from the flag, and a hexadecimal value has no prefix.
-           */
-
-          if (c == 0 ? FL_ALT_IS_HEX(flags) : buf[c - 1] == '0')
-            {
-              flags &= ~(FL_ALT | FL_ALTHEX | FL_ALTUPP);
-            }
-          else
-            {
-              len += 1;
-              if (FL_ALT_IS_HEX(flags))
-                {
-                  len += 1;
-                }
-            }
-        }
-      else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
-        {
-          len += 1;
-        }
-
-      if (len > INT_MAX)
-        {
-          total_len = INT_MAX + 1u;
-          goto ret;
-        }
-
-      if ((flags & FL_LPAD) == 0)
-        {
-          if ((flags & FL_ZFILL) != 0)
-            {
-              prec = c;
-              if (len < width)
-                {
-                  prec += width - len;
-                  len = width;
-                }
-            }
-
-          if (len < width)
-            {
-              stream_repeat(' ', width - len, stream);
-              len = width;
-            }
-        }
-
-      width = (len < width) ? width - len : 0;
-
-      if ((flags & FL_ALT) != 0)
-        {
-          stream_putc('0', stream);
-          if (FL_ALT_IS_HEX(flags))
-            {
-              ch = (flags & FL_ALTBIN) != 0 ? 'b' : 'x';
-              stream_putc(FL_ALT_FORM != 0 && (flags & FL_ALTUPP) != 0 ?
-                          ch - 0x20 : ch, stream);
-            }
-        }
-      else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
-        {
-          unsigned char z = ' ';
-
-          if ((flags & FL_PLUS) != 0)
-            {
-              z = '+';
-            }
-
-          if ((flags & FL_NEGATIVE) != 0)
-            {
-              z = '-';
-            }
-
-          stream_putc(z, stream);
-        }
-
-      if (prec > c)
-        {
-          stream_repeat('0', prec - c, stream);
-          prec = c;
-        }
-
-      total_len += vsprintf_putnum(stream, buf, c);
+      total_len += vsprintf_put_integer(stream, flags, buf, c, &width,
+                                        prec);
 
 tail:
 
