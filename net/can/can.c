@@ -878,4 +878,80 @@ FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
   return conn;
 }
 
+/****************************************************************************
+ * Name: can_get_ifindex
+ *
+ * Description:
+ *   Return the interface index of the device a CAN connection is bound to,
+ *   or 0 if it is not bound to a device.
+ *
+ * Input Parameters:
+ *   conn - The CAN connection
+ *
+ ****************************************************************************/
+
+int can_get_ifindex(FAR struct can_conn_s *conn)
+{
+  if (conn->dev != NULL)
+    {
+#ifdef CONFIG_NETDEV_IFINDEX
+      return conn->dev->d_ifindex;
+#else
+      /* Reverse mapping: extract ifindex from device name "can<N>".
+       * This mirrors the bind logic which maps ifindex -> "can<N>".
+       */
+
+      return conn->dev->d_ifname[3] - '0';
+#endif
+    }
+  else
+    {
+      return 0;
+    }
+}
+
+/****************************************************************************
+ * Name: can_conn_bind
+ *
+ * Description:
+ *   Bind a CAN connection to the network device selected by the
+ *   can_ifindex field of a struct sockaddr_can.
+ *
+ * Input Parameters:
+ *   conn    - The connection to bind
+ *   addr    - The struct sockaddr_can address
+ *   addrlen - The length of addr
+ *
+ * Returned Value:
+ *   OK on success, -ENODEV if a non-zero interface index does not match a
+ *   CAN device.
+ *
+ ****************************************************************************/
+
+int can_conn_bind(FAR struct can_conn_s *conn,
+                  FAR const struct sockaddr *addr, socklen_t addrlen)
+{
+  FAR struct sockaddr_can *canaddr;
+
+  DEBUGASSERT(addr != NULL &&
+              addrlen >= sizeof(struct sockaddr_can));
+
+  /* Save the address information in the connection structure */
+
+  canaddr = (FAR struct sockaddr_can *)addr;
+
+  /* Bind CAN device to socket */
+
+#ifdef CONFIG_NETDEV_IFINDEX
+  conn->dev = netdev_findbyindex(canaddr->can_ifindex);
+#else
+  char netdev_name[5] = "can0";
+
+  netdev_name[3] += canaddr->can_ifindex;
+  conn->dev = netdev_findbyname((const char *)&netdev_name);
+#endif
+
+  return conn->dev == NULL && canaddr->can_ifindex != 0 ? -ENODEV : OK;
+}
+
 #endif /* CONFIG_NET_CAN */
