@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -136,6 +137,7 @@ struct stm32_serial_s
   const uint8_t     irq;       /* IRQ associated with this USART */
   const uint32_t    apbclock;  /* PCLK 1 or 2 frequency */
   const uint32_t    usartbase; /* Base address of USART registers */
+  const bool        islpuart;  /* True: This device is an LPUART */
   const uint32_t    tx_gpio;   /* U[S]ART TX GPIO pin configuration */
   const uint32_t    rx_gpio;   /* U[S]ART RX GPIO pin configuration */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -208,7 +210,79 @@ static const struct uart_ops_s g_uart_ops =
   .txempty        = stm32serial_txready,
 };
 
+/* LPUART kernel clock dividers, indexed by the PRESC register value */
+
+#if defined(CONFIG_STM32_LPUART1_SERIALDRIVER) && \
+    !defined(CONFIG_SUPPRESS_UART_CONFIG)
+static const uint16_t g_lpuart_presc[] =
+{
+  1, 2, 4, 6, 8, 10, 12, 16, 32, 64, 128, 256
+};
+#endif
+
 /* I/O buffers */
+
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+static char g_lpuart1rxbuffer[CONFIG_LPUART1_RXBUFSIZE];
+static char g_lpuart1txbuffer[CONFIG_LPUART1_TXBUFSIZE];
+#endif
+
+/* This describes the state of the STM32N6 LPUART1 port. */
+
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+static struct stm32_serial_s g_lpuart1priv =
+{
+  .dev =
+    {
+#  if CONSOLE_UART == 1
+      .isconsole = true,
+#  endif
+      .recv      =
+      {
+        .size    = CONFIG_LPUART1_RXBUFSIZE,
+        .buffer  = g_lpuart1rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_LPUART1_TXBUFSIZE,
+        .buffer  = g_lpuart1txbuffer,
+      },
+      .ops       = &g_uart_ops,
+      .priv      = &g_lpuart1priv,
+    },
+
+  .irq           = STM32_IRQ_LPUART1,
+  .parity        = CONFIG_LPUART1_PARITY,
+  .bits          = CONFIG_LPUART1_BITS,
+  .stopbits2     = CONFIG_LPUART1_2STOP,
+  .baud          = CONFIG_LPUART1_BAUD,
+  .apbclock      = STM32_LPUART1_FREQUENCY,
+  .usartbase     = STM32_LPUART1_BASE,
+  .islpuart      = true,
+  .tx_gpio       = GPIO_LPUART1_TX,
+  .rx_gpio       = GPIO_LPUART1_RX,
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART1_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_LPUART1_CTS,
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_LPUART1_RTS,
+#  endif
+
+  .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_LPUART1_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_LPUART1_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+      ,
+};
+#endif
 
 #ifdef CONFIG_STM32_USART1_SERIALDRIVER
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
@@ -222,7 +296,7 @@ static struct stm32_serial_s g_usart1priv =
 {
   .dev =
     {
-#  if CONSOLE_UART == 1
+#  if CONSOLE_UART == 2
       .isconsole = true,
 #  endif
       .recv      =
@@ -246,6 +320,7 @@ static struct stm32_serial_s g_usart1priv =
   .baud          = CONFIG_USART1_BAUD,
   .apbclock      = STM32_USART1_FREQUENCY,
   .usartbase     = STM32_USART1_BASE,
+  .islpuart      = false,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
 #  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART1_OFLOWCONTROL)
@@ -271,13 +346,605 @@ static struct stm32_serial_s g_usart1priv =
 };
 #endif
 
-/* This table lets us iterate over the configured USARTs */
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
+static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
+static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
+#endif
+
+/* This describes the state of the STM32N6 USART2 port. */
+
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
+static struct stm32_serial_s g_usart2priv =
+{
+  .dev =
+    {
+#  if CONSOLE_UART == 3
+      .isconsole = true,
+#  endif
+      .recv      =
+      {
+        .size    = CONFIG_USART2_RXBUFSIZE,
+        .buffer  = g_usart2rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_USART2_TXBUFSIZE,
+        .buffer  = g_usart2txbuffer,
+      },
+      .ops       = &g_uart_ops,
+      .priv      = &g_usart2priv,
+    },
+
+  .irq           = STM32_IRQ_USART2,
+  .parity        = CONFIG_USART2_PARITY,
+  .bits          = CONFIG_USART2_BITS,
+  .stopbits2     = CONFIG_USART2_2STOP,
+  .baud          = CONFIG_USART2_BAUD,
+  .apbclock      = STM32_USART2_FREQUENCY,
+  .usartbase     = STM32_USART2_BASE,
+  .islpuart      = false,
+  .tx_gpio       = GPIO_USART2_TX,
+  .rx_gpio       = GPIO_USART2_RX,
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART2_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_USART2_CTS,
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART2_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_USART2_RTS,
+#  endif
+
+  .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_USART2_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_USART2_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+      ,
+};
+#endif
+
+#ifdef CONFIG_STM32_USART3_SERIALDRIVER
+static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
+static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
+#endif
+
+/* This describes the state of the STM32N6 USART3 port. */
+
+#ifdef CONFIG_STM32_USART3_SERIALDRIVER
+static struct stm32_serial_s g_usart3priv =
+{
+  .dev =
+    {
+#  if CONSOLE_UART == 4
+      .isconsole = true,
+#  endif
+      .recv      =
+      {
+        .size    = CONFIG_USART3_RXBUFSIZE,
+        .buffer  = g_usart3rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_USART3_TXBUFSIZE,
+        .buffer  = g_usart3txbuffer,
+      },
+      .ops       = &g_uart_ops,
+      .priv      = &g_usart3priv,
+    },
+
+  .irq           = STM32_IRQ_USART3,
+  .parity        = CONFIG_USART3_PARITY,
+  .bits          = CONFIG_USART3_BITS,
+  .stopbits2     = CONFIG_USART3_2STOP,
+  .baud          = CONFIG_USART3_BAUD,
+  .apbclock      = STM32_USART3_FREQUENCY,
+  .usartbase     = STM32_USART3_BASE,
+  .islpuart      = false,
+  .tx_gpio       = GPIO_USART3_TX,
+  .rx_gpio       = GPIO_USART3_RX,
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART3_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_USART3_CTS,
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART3_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_USART3_RTS,
+#  endif
+
+  .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_USART3_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_USART3_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+      ,
+};
+#endif
+
+#ifdef CONFIG_STM32_UART4_SERIALDRIVER
+static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
+static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
+#endif
+
+/* This describes the state of the STM32N6 UART4 port. */
+
+#ifdef CONFIG_STM32_UART4_SERIALDRIVER
+static struct stm32_serial_s g_uart4priv =
+{
+  .dev =
+    {
+#  if CONSOLE_UART == 5
+      .isconsole = true,
+#  endif
+      .recv      =
+      {
+        .size    = CONFIG_UART4_RXBUFSIZE,
+        .buffer  = g_uart4rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_UART4_TXBUFSIZE,
+        .buffer  = g_uart4txbuffer,
+      },
+      .ops       = &g_uart_ops,
+      .priv      = &g_uart4priv,
+    },
+
+  .irq           = STM32_IRQ_UART4,
+  .parity        = CONFIG_UART4_PARITY,
+  .bits          = CONFIG_UART4_BITS,
+  .stopbits2     = CONFIG_UART4_2STOP,
+  .baud          = CONFIG_UART4_BAUD,
+  .apbclock      = STM32_UART4_FREQUENCY,
+  .usartbase     = STM32_UART4_BASE,
+  .islpuart      = false,
+  .tx_gpio       = GPIO_UART4_TX,
+  .rx_gpio       = GPIO_UART4_RX,
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART4_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_UART4_CTS,
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART4_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_UART4_RTS,
+#  endif
+
+  .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_UART4_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_UART4_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+      ,
+};
+#endif
+
+#ifdef CONFIG_STM32_UART5_SERIALDRIVER
+static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
+static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
+#endif
+
+/* This describes the state of the STM32N6 UART5 port. */
+
+#ifdef CONFIG_STM32_UART5_SERIALDRIVER
+static struct stm32_serial_s g_uart5priv =
+{
+  .dev =
+    {
+#  if CONSOLE_UART == 6
+      .isconsole = true,
+#  endif
+      .recv      =
+      {
+        .size    = CONFIG_UART5_RXBUFSIZE,
+        .buffer  = g_uart5rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_UART5_TXBUFSIZE,
+        .buffer  = g_uart5txbuffer,
+      },
+      .ops       = &g_uart_ops,
+      .priv      = &g_uart5priv,
+    },
+
+  .irq           = STM32_IRQ_UART5,
+  .parity        = CONFIG_UART5_PARITY,
+  .bits          = CONFIG_UART5_BITS,
+  .stopbits2     = CONFIG_UART5_2STOP,
+  .baud          = CONFIG_UART5_BAUD,
+  .apbclock      = STM32_UART5_FREQUENCY,
+  .usartbase     = STM32_UART5_BASE,
+  .islpuart      = false,
+  .tx_gpio       = GPIO_UART5_TX,
+  .rx_gpio       = GPIO_UART5_RX,
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART5_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_UART5_CTS,
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART5_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_UART5_RTS,
+#  endif
+
+  .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_UART5_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_UART5_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+      ,
+};
+#endif
+
+#ifdef CONFIG_STM32_USART6_SERIALDRIVER
+static char g_usart6rxbuffer[CONFIG_USART6_RXBUFSIZE];
+static char g_usart6txbuffer[CONFIG_USART6_TXBUFSIZE];
+#endif
+
+/* This describes the state of the STM32N6 USART6 port. */
+
+#ifdef CONFIG_STM32_USART6_SERIALDRIVER
+static struct stm32_serial_s g_usart6priv =
+{
+  .dev =
+    {
+#  if CONSOLE_UART == 7
+      .isconsole = true,
+#  endif
+      .recv      =
+      {
+        .size    = CONFIG_USART6_RXBUFSIZE,
+        .buffer  = g_usart6rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_USART6_TXBUFSIZE,
+        .buffer  = g_usart6txbuffer,
+      },
+      .ops       = &g_uart_ops,
+      .priv      = &g_usart6priv,
+    },
+
+  .irq           = STM32_IRQ_USART6,
+  .parity        = CONFIG_USART6_PARITY,
+  .bits          = CONFIG_USART6_BITS,
+  .stopbits2     = CONFIG_USART6_2STOP,
+  .baud          = CONFIG_USART6_BAUD,
+  .apbclock      = STM32_USART6_FREQUENCY,
+  .usartbase     = STM32_USART6_BASE,
+  .islpuart      = false,
+  .tx_gpio       = GPIO_USART6_TX,
+  .rx_gpio       = GPIO_USART6_RX,
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART6_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_USART6_CTS,
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART6_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_USART6_RTS,
+#  endif
+
+  .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_USART6_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_USART6_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+      ,
+};
+#endif
+
+#ifdef CONFIG_STM32_UART7_SERIALDRIVER
+static char g_uart7rxbuffer[CONFIG_UART7_RXBUFSIZE];
+static char g_uart7txbuffer[CONFIG_UART7_TXBUFSIZE];
+#endif
+
+/* This describes the state of the STM32N6 UART7 port. */
+
+#ifdef CONFIG_STM32_UART7_SERIALDRIVER
+static struct stm32_serial_s g_uart7priv =
+{
+  .dev =
+    {
+#  if CONSOLE_UART == 8
+      .isconsole = true,
+#  endif
+      .recv      =
+      {
+        .size    = CONFIG_UART7_RXBUFSIZE,
+        .buffer  = g_uart7rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_UART7_TXBUFSIZE,
+        .buffer  = g_uart7txbuffer,
+      },
+      .ops       = &g_uart_ops,
+      .priv      = &g_uart7priv,
+    },
+
+  .irq           = STM32_IRQ_UART7,
+  .parity        = CONFIG_UART7_PARITY,
+  .bits          = CONFIG_UART7_BITS,
+  .stopbits2     = CONFIG_UART7_2STOP,
+  .baud          = CONFIG_UART7_BAUD,
+  .apbclock      = STM32_UART7_FREQUENCY,
+  .usartbase     = STM32_UART7_BASE,
+  .islpuart      = false,
+  .tx_gpio       = GPIO_UART7_TX,
+  .rx_gpio       = GPIO_UART7_RX,
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART7_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_UART7_CTS,
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART7_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_UART7_RTS,
+#  endif
+
+  .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_UART7_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_UART7_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+      ,
+};
+#endif
+
+#ifdef CONFIG_STM32_UART8_SERIALDRIVER
+static char g_uart8rxbuffer[CONFIG_UART8_RXBUFSIZE];
+static char g_uart8txbuffer[CONFIG_UART8_TXBUFSIZE];
+#endif
+
+/* This describes the state of the STM32N6 UART8 port. */
+
+#ifdef CONFIG_STM32_UART8_SERIALDRIVER
+static struct stm32_serial_s g_uart8priv =
+{
+  .dev =
+    {
+#  if CONSOLE_UART == 9
+      .isconsole = true,
+#  endif
+      .recv      =
+      {
+        .size    = CONFIG_UART8_RXBUFSIZE,
+        .buffer  = g_uart8rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_UART8_TXBUFSIZE,
+        .buffer  = g_uart8txbuffer,
+      },
+      .ops       = &g_uart_ops,
+      .priv      = &g_uart8priv,
+    },
+
+  .irq           = STM32_IRQ_UART8,
+  .parity        = CONFIG_UART8_PARITY,
+  .bits          = CONFIG_UART8_BITS,
+  .stopbits2     = CONFIG_UART8_2STOP,
+  .baud          = CONFIG_UART8_BAUD,
+  .apbclock      = STM32_UART8_FREQUENCY,
+  .usartbase     = STM32_UART8_BASE,
+  .islpuart      = false,
+  .tx_gpio       = GPIO_UART8_TX,
+  .rx_gpio       = GPIO_UART8_RX,
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART8_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_UART8_CTS,
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART8_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_UART8_RTS,
+#  endif
+
+  .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_UART8_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_UART8_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+      ,
+};
+#endif
+
+#ifdef CONFIG_STM32_UART9_SERIALDRIVER
+static char g_uart9rxbuffer[CONFIG_UART9_RXBUFSIZE];
+static char g_uart9txbuffer[CONFIG_UART9_TXBUFSIZE];
+#endif
+
+/* This describes the state of the STM32N6 UART9 port. */
+
+#ifdef CONFIG_STM32_UART9_SERIALDRIVER
+static struct stm32_serial_s g_uart9priv =
+{
+  .dev =
+    {
+#  if CONSOLE_UART == 10
+      .isconsole = true,
+#  endif
+      .recv      =
+      {
+        .size    = CONFIG_UART9_RXBUFSIZE,
+        .buffer  = g_uart9rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_UART9_TXBUFSIZE,
+        .buffer  = g_uart9txbuffer,
+      },
+      .ops       = &g_uart_ops,
+      .priv      = &g_uart9priv,
+    },
+
+  .irq           = STM32_IRQ_UART9,
+  .parity        = CONFIG_UART9_PARITY,
+  .bits          = CONFIG_UART9_BITS,
+  .stopbits2     = CONFIG_UART9_2STOP,
+  .baud          = CONFIG_UART9_BAUD,
+  .apbclock      = STM32_UART9_FREQUENCY,
+  .usartbase     = STM32_UART9_BASE,
+  .islpuart      = false,
+  .tx_gpio       = GPIO_UART9_TX,
+  .rx_gpio       = GPIO_UART9_RX,
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART9_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_UART9_CTS,
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART9_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_UART9_RTS,
+#  endif
+
+  .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_UART9_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_UART9_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+      ,
+};
+#endif
+
+#ifdef CONFIG_STM32_USART10_SERIALDRIVER
+static char g_usart10rxbuffer[CONFIG_USART10_RXBUFSIZE];
+static char g_usart10txbuffer[CONFIG_USART10_TXBUFSIZE];
+#endif
+
+/* This describes the state of the STM32N6 USART10 port. */
+
+#ifdef CONFIG_STM32_USART10_SERIALDRIVER
+static struct stm32_serial_s g_usart10priv =
+{
+  .dev =
+    {
+#  if CONSOLE_UART == 11
+      .isconsole = true,
+#  endif
+      .recv      =
+      {
+        .size    = CONFIG_USART10_RXBUFSIZE,
+        .buffer  = g_usart10rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_USART10_TXBUFSIZE,
+        .buffer  = g_usart10txbuffer,
+      },
+      .ops       = &g_uart_ops,
+      .priv      = &g_usart10priv,
+    },
+
+  .irq           = STM32_IRQ_USART10,
+  .parity        = CONFIG_USART10_PARITY,
+  .bits          = CONFIG_USART10_BITS,
+  .stopbits2     = CONFIG_USART10_2STOP,
+  .baud          = CONFIG_USART10_BAUD,
+  .apbclock      = STM32_USART10_FREQUENCY,
+  .usartbase     = STM32_USART10_BASE,
+  .islpuart      = false,
+  .tx_gpio       = GPIO_USART10_TX,
+  .rx_gpio       = GPIO_USART10_RX,
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART10_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_USART10_CTS,
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART10_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_USART10_RTS,
+#  endif
+
+  .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_USART10_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_USART10_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+      ,
+};
+#endif
+
+/* This table lets us iterate over the configured U[S]ARTs, indexed by
+ * CONSOLE_UART - 1.
+ */
+
+#define STM32_NSERIAL (STM32_NLPUART + STM32_NUSART + STM32_NUART)
 
 static struct stm32_serial_s * const
-  g_uart_devs[STM32_NUSART] =
+  g_uart_devs[STM32_NSERIAL] =
 {
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+  [0] = &g_lpuart1priv,
+#endif
 #ifdef CONFIG_STM32_USART1_SERIALDRIVER
-  [0] = &g_usart1priv,
+  [1] = &g_usart1priv,
+#endif
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
+  [2] = &g_usart2priv,
+#endif
+#ifdef CONFIG_STM32_USART3_SERIALDRIVER
+  [3] = &g_usart3priv,
+#endif
+#ifdef CONFIG_STM32_UART4_SERIALDRIVER
+  [4] = &g_uart4priv,
+#endif
+#ifdef CONFIG_STM32_UART5_SERIALDRIVER
+  [5] = &g_uart5priv,
+#endif
+#ifdef CONFIG_STM32_USART6_SERIALDRIVER
+  [6] = &g_usart6priv,
+#endif
+#ifdef CONFIG_STM32_UART7_SERIALDRIVER
+  [7] = &g_uart7priv,
+#endif
+#ifdef CONFIG_STM32_UART8_SERIALDRIVER
+  [8] = &g_uart8priv,
+#endif
+#ifdef CONFIG_STM32_UART9_SERIALDRIVER
+  [9] = &g_uart9priv,
+#endif
+#ifdef CONFIG_STM32_USART10_SERIALDRIVER
+  [10] = &g_usart10priv,
 #endif
 };
 
@@ -452,50 +1119,80 @@ static void stm32serial_setformat(struct uart_dev_s *dev)
   stm32serial_putreg(priv, STM32_USART_CR1_OFFSET,
                      regval & ~USART_CR1_UE);
 
-  /* In case of oversampling by 8, the equation is:
-   *
-   *   baud      = 2 * fCK / usartdiv8
-   *   usartdiv8 = 2 * fCK / baud
-   */
-
-  usartdiv8 = ((priv->apbclock << 1) + (priv->baud >> 1)) / priv->baud;
-
-  /* Baud rate for standard USART (SPI mode included):
-   *
-   * In case of oversampling by 16, the equation is:
-   *   baud       = fCK / usartdiv16
-   *   usartdiv16 = fCK / baud
-   *              = 2 * usartdiv8
-   */
-
-  /* Use oversampling by 8 only if divisor is small. But what is small? */
-
-  cr1 = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
-  if (usartdiv8 > 2000)
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+  if (priv->islpuart)
     {
-      /* Use usartdiv16 */
+      /* LPUART: BRR = 256 * fCK / baud with 0x300 <= BRR <= 0xfffff.
+       * Use the smallest PRESC divider that keeps BRR in range.
+       */
 
-      brr  = (usartdiv8 + 1) >> 1;
+      unsigned int presc;
+      uint32_t clk;
 
-      /* Clear oversampling by 8 to enable oversampling by 16 */
+      for (presc = 0; presc < nitems(g_lpuart_presc) - 1; presc++)
+        {
+          clk = priv->apbclock / g_lpuart_presc[presc];
+          if (clk / priv->baud < 4096)
+            {
+              break;
+            }
+        }
 
-      cr1 &= ~USART_CR1_OVER8;
+      clk = priv->apbclock / g_lpuart_presc[presc];
+      brr = (((uint64_t)clk << 8) + (priv->baud >> 1)) / priv->baud;
+      DEBUGASSERT(brr >= 0x300 && brr <= 0xfffff);
+
+      stm32serial_putreg(priv, STM32_USART_PRESC_OFFSET, presc);
+      stm32serial_putreg(priv, STM32_USART_BRR_OFFSET, brr);
     }
   else
+#endif
     {
-      DEBUGASSERT(usartdiv8 >= 8);
+      /* In case of oversampling by 8, the equation is:
+       *
+       *   baud      = 2 * fCK / usartdiv8
+       *   usartdiv8 = 2 * fCK / baud
+       */
 
-      /* Perform mysterious operations on bits 0-3 */
+      usartdiv8 = ((priv->apbclock << 1) + (priv->baud >> 1)) / priv->baud;
 
-      brr  = ((usartdiv8 & 0xfff0) | ((usartdiv8 & 0x000f) >> 1));
+      /* Baud rate for standard USART (SPI mode included):
+       *
+       * In case of oversampling by 16, the equation is:
+       *   baud       = fCK / usartdiv16
+       *   usartdiv16 = fCK / baud
+       *              = 2 * usartdiv8
+       */
 
-      /* Set oversampling by 8 */
+      /* Use oversampling by 8 only if divisor is small. But what is small? */
 
-      cr1 |= USART_CR1_OVER8;
+      cr1 = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
+      if (usartdiv8 > 2000)
+        {
+          /* Use usartdiv16 */
+
+          brr  = (usartdiv8 + 1) >> 1;
+
+          /* Clear oversampling by 8 to enable oversampling by 16 */
+
+          cr1 &= ~USART_CR1_OVER8;
+        }
+      else
+        {
+          DEBUGASSERT(usartdiv8 >= 8);
+
+          /* Perform mysterious operations on bits 0-3 */
+
+          brr  = ((usartdiv8 & 0xfff0) | ((usartdiv8 & 0x000f) >> 1));
+
+          /* Set oversampling by 8 */
+
+          cr1 |= USART_CR1_OVER8;
+        }
+
+      stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
+      stm32serial_putreg(priv, STM32_USART_BRR_OFFSET, brr);
     }
-
-  stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
-  stm32serial_putreg(priv, STM32_USART_BRR_OFFSET, brr);
 
   /* Configure parity mode */
 
@@ -661,7 +1358,7 @@ static void stm32serial_pm_setsuspend(bool suspend)
 
   g_serialpm.serial_suspended = suspend;
 
-  for (n = 0; n < STM32_NUSART; n++)
+  for (n = 0; n < STM32_NSERIAL; n++)
     {
       struct stm32_serial_s *priv = g_uart_devs[n];
 
@@ -701,6 +1398,13 @@ static void stm32serial_setapbclock(struct uart_dev_s *dev, bool on)
     {
       default:
         return;
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+      case STM32_LPUART1_BASE:
+        rcc_en = RCC_APB4LENR_LPUART1EN;
+        regaddr_set = STM32_RCC_APB4LENSR;
+        regaddr_clr = STM32_RCC_APB4LENCR;
+        break;
+#endif
 #ifdef CONFIG_STM32_USART1_SERIALDRIVER
       case STM32_USART1_BASE:
         rcc_en = RCC_APB2ENR_USART1EN;
@@ -708,9 +1412,72 @@ static void stm32serial_setapbclock(struct uart_dev_s *dev, bool on)
         regaddr_clr = STM32_RCC_APB2ENCR;
         break;
 #endif
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
+      case STM32_USART2_BASE:
+        rcc_en = RCC_APB1LENR_USART2EN;
+        regaddr_set = STM32_RCC_APB1LENSR;
+        regaddr_clr = STM32_RCC_APB1LENCR;
+        break;
+#endif
+#ifdef CONFIG_STM32_USART3_SERIALDRIVER
+      case STM32_USART3_BASE:
+        rcc_en = RCC_APB1LENR_USART3EN;
+        regaddr_set = STM32_RCC_APB1LENSR;
+        regaddr_clr = STM32_RCC_APB1LENCR;
+        break;
+#endif
+#ifdef CONFIG_STM32_UART4_SERIALDRIVER
+      case STM32_UART4_BASE:
+        rcc_en = RCC_APB1LENR_UART4EN;
+        regaddr_set = STM32_RCC_APB1LENSR;
+        regaddr_clr = STM32_RCC_APB1LENCR;
+        break;
+#endif
+#ifdef CONFIG_STM32_UART5_SERIALDRIVER
+      case STM32_UART5_BASE:
+        rcc_en = RCC_APB1LENR_UART5EN;
+        regaddr_set = STM32_RCC_APB1LENSR;
+        regaddr_clr = STM32_RCC_APB1LENCR;
+        break;
+#endif
+#ifdef CONFIG_STM32_USART6_SERIALDRIVER
+      case STM32_USART6_BASE:
+        rcc_en = RCC_APB2ENR_USART6EN;
+        regaddr_set = STM32_RCC_APB2ENSR;
+        regaddr_clr = STM32_RCC_APB2ENCR;
+        break;
+#endif
+#ifdef CONFIG_STM32_UART7_SERIALDRIVER
+      case STM32_UART7_BASE:
+        rcc_en = RCC_APB1LENR_UART7EN;
+        regaddr_set = STM32_RCC_APB1LENSR;
+        regaddr_clr = STM32_RCC_APB1LENCR;
+        break;
+#endif
+#ifdef CONFIG_STM32_UART8_SERIALDRIVER
+      case STM32_UART8_BASE:
+        rcc_en = RCC_APB1LENR_UART8EN;
+        regaddr_set = STM32_RCC_APB1LENSR;
+        regaddr_clr = STM32_RCC_APB1LENCR;
+        break;
+#endif
+#ifdef CONFIG_STM32_UART9_SERIALDRIVER
+      case STM32_UART9_BASE:
+        rcc_en = RCC_APB2ENR_UART9EN;
+        regaddr_set = STM32_RCC_APB2ENSR;
+        regaddr_clr = STM32_RCC_APB2ENCR;
+        break;
+#endif
+#ifdef CONFIG_STM32_USART10_SERIALDRIVER
+      case STM32_USART10_BASE:
+        rcc_en = RCC_APB2ENR_USART10EN;
+        regaddr_set = STM32_RCC_APB2ENSR;
+        regaddr_clr = STM32_RCC_APB2ENCR;
+        break;
+#endif
     }
 
-  /* Enable/disable APB 1/2 clock for USART.
+  /* Enable/disable the APB clock of the U[S]ART.
    * Use atomic SET/CLEAR registers (ENSR/ENCR) instead of read-modify-write
    * on ENR because the RCC's internal RIF security may block ENR access.
    */
@@ -1582,7 +2349,7 @@ static int stm32serial_pmprepare(struct pm_callback_s *cb, int domain,
          * buffers.
          */
 
-        for (n = 0; n < STM32_NUSART; n++)
+        for (n = 0; n < STM32_NSERIAL; n++)
           {
             struct stm32_serial_s *priv = g_uart_devs[n];
 
@@ -1652,7 +2419,7 @@ void arm_earlyserialinit(void)
 
   /* Disable all USART interrupts */
 
-  for (i = 0; i < STM32_NUSART; i++)
+  for (i = 0; i < STM32_NSERIAL; i++)
     {
       if (g_uart_devs[i])
         {
@@ -1717,7 +2484,7 @@ void arm_serialinit(void)
 
   strlcpy(devname, "/dev/ttySx", sizeof(devname));
 
-  for (i = 0; i < STM32_NUSART; i++)
+  for (i = 0; i < STM32_NSERIAL; i++)
     {
       /* Don't create a device for non-configured ports. */
 

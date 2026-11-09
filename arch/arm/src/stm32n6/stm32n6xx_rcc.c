@@ -372,6 +372,30 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1LENR_WWDGEN;
 #endif
 
+#ifdef CONFIG_STM32_USART2
+  regval |= RCC_APB1LENR_USART2EN;
+#endif
+
+#ifdef CONFIG_STM32_USART3
+  regval |= RCC_APB1LENR_USART3EN;
+#endif
+
+#ifdef CONFIG_STM32_UART4
+  regval |= RCC_APB1LENR_UART4EN;
+#endif
+
+#ifdef CONFIG_STM32_UART5
+  regval |= RCC_APB1LENR_UART5EN;
+#endif
+
+#ifdef CONFIG_STM32_UART7
+  regval |= RCC_APB1LENR_UART7EN;
+#endif
+
+#ifdef CONFIG_STM32_UART8
+  regval |= RCC_APB1LENR_UART8EN;
+#endif
+
   if (regval != 0)
     {
       putreg32(regval, STM32_RCC_APB1LENSR);
@@ -394,9 +418,43 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_USART1EN;
 #endif
 
+#ifdef CONFIG_STM32_USART6
+  regval |= RCC_APB2ENR_USART6EN;
+#endif
+
+#ifdef CONFIG_STM32_UART9
+  regval |= RCC_APB2ENR_UART9EN;
+#endif
+
+#ifdef CONFIG_STM32_USART10
+  regval |= RCC_APB2ENR_USART10EN;
+#endif
+
   if (regval != 0)
     {
       putreg32(regval, STM32_RCC_APB2ENSR);
+    }
+}
+
+/****************************************************************************
+ * Name: rcc_enableapb4
+ *
+ * Description:
+ *   Enable selected APB4 peripherals.
+ *
+ ****************************************************************************/
+
+static inline void rcc_enableapb4(void)
+{
+  uint32_t regval = 0;
+
+#ifdef CONFIG_STM32_LPUART1
+  regval |= RCC_APB4LENR_LPUART1EN;
+#endif
+
+  if (regval != 0)
+    {
+      putreg32(regval, STM32_RCC_APB4LENSR);
     }
 }
 
@@ -821,6 +879,7 @@ void stm32_rcc_enableperipherals(void)
   rcc_enableahb5();
   rcc_enableapb1();
   rcc_enableapb2();
+  rcc_enableapb4();
   rcc_enableccip();
 }
 
