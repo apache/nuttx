@@ -41,16 +41,14 @@ void tls_cleanup_push(FAR struct tls_info_s *tls,
                       tls_cleanup_t routine, FAR void *arg)
 {
   DEBUGASSERT(tls != NULL);
-  DEBUGASSERT(tls->tl_tos < CONFIG_TLS_NCLEANUP);
 
   if (tls->tl_tos < CONFIG_TLS_NCLEANUP)
     {
-      unsigned int ndx = tls->tl_tos;
-
-      tls->tl_tos++;
-      tls->tl_stack[ndx].tc_cleaner = routine;
-      tls->tl_stack[ndx].tc_arg = arg;
+      tls->tl_stack[tls->tl_tos].tc_cleaner = routine;
+      tls->tl_stack[tls->tl_tos].tc_arg = arg;
     }
+
+  tls->tl_tos++;
 }
 
 void tls_cleanup_pop(FAR struct tls_info_s *tls, int execute)
@@ -59,26 +57,20 @@ void tls_cleanup_pop(FAR struct tls_info_s *tls, int execute)
 
   if (tls->tl_tos > 0)
     {
-      unsigned int ndx;
+      tls->tl_tos--;
 
-      /* Get the index to the last cleaner function pushed onto the stack */
+      /* Only access the stack array when the index is within bounds.
+       * Entries that overflowed during push were silently dropped,
+       * so there is nothing to execute for those slots.
+       */
 
-      ndx = tls->tl_tos - 1;
-      DEBUGASSERT(ndx < CONFIG_TLS_NCLEANUP);
-
-      /* Should we execute the cleanup routine at the top of the stack? */
-
-      if (execute != 0)
+      if (tls->tl_tos < CONFIG_TLS_NCLEANUP && execute != 0)
         {
           FAR struct tls_cleanup_s *cb;
 
-          /* Yes..  Execute the clean-up routine. */
-
-          cb  = &tls->tl_stack[ndx];
+          cb = &tls->tl_stack[tls->tl_tos];
           cb->tc_cleaner(cb->tc_arg);
         }
-
-      tls->tl_tos = ndx;
     }
 }
 
