@@ -93,7 +93,6 @@ static void virtio_blk_remove(FAR struct virtio_device *vdev);
 
 static struct virtio_driver g_virtio_blk_driver =
 {
-  LIST_INITIAL_VALUE(g_virtio_blk_driver.node), /* node */
   VIRTIO_ID_BLOCK,                              /* device id */
   virtio_blk_probe,                             /* probe */
   virtio_blk_remove,                            /* remove */

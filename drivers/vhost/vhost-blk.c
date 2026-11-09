@@ -75,7 +75,6 @@ static void vhost_blk_remove(FAR struct vhost_device *vdev);
 
 static struct vhost_driver g_vhost_blk_driver =
 {
-  LIST_INITIAL_VALUE(g_vhost_blk_driver.node),  /* node */
   VIRTIO_ID_BLOCK,                              /* device id */
   vhost_blk_probe,                              /* probe */
   vhost_blk_remove,                             /* remove */

@@ -95,7 +95,6 @@ static void virtio_input_remove(FAR struct virtio_device *vdev);
 
 static struct virtio_driver g_virtio_input_driver =
 {
-  .node   = LIST_INITIAL_VALUE(g_virtio_input_driver.node), /* node */
   .device = VIRTIO_ID_INPUT,                                /* device id */
   .probe  = virtio_input_probe,                             /* probe */
   .remove = virtio_input_remove,                            /* remove */

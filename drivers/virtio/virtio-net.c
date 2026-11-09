@@ -186,7 +186,6 @@ static void virtio_net_remove(FAR struct virtio_device *vdev);
 
 static struct virtio_driver g_virtio_net_driver =
 {
-  LIST_INITIAL_VALUE(g_virtio_net_driver.node), /* node */
   VIRTIO_ID_NETWORK,                            /* device id */
   virtio_net_probe,                             /* probe */
   virtio_net_remove,                            /* remove */

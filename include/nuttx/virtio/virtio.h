@@ -29,7 +29,7 @@
 
 #include <stdint.h>
 
-#include <nuttx/list.h>
+#include <nuttx/queue.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio-config.h>
 
@@ -44,10 +44,10 @@
 #ifdef CONFIG_DRIVERS_VIRTIO
 struct virtio_driver
 {
-  struct list_node   node;
   uint32_t           device;   /* device id */
   CODE int         (*probe)(FAR struct virtio_device *vdev);
   CODE void        (*remove)(FAR struct virtio_device *vdev);
+  struct dq_entry_s  node;
 };
 #endif
 

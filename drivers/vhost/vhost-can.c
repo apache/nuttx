@@ -107,7 +107,6 @@ static void vhost_can_remove(FAR struct vhost_device *hdev);
 
 static struct vhost_driver g_vhost_can_driver =
 {
-  LIST_INITIAL_VALUE(g_vhost_can_driver.node),
   VIRTIO_ID_CAN,    /* Device id */
   vhost_can_probe,  /* Probe */
   vhost_can_remove, /* Remove */

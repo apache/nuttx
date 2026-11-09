@@ -245,7 +245,6 @@ static const struct virtio_snd_format_map_s g_format_map[] =
 
 static struct virtio_driver g_virtio_snd_driver =
 {
-  LIST_INITIAL_VALUE(g_virtio_snd_driver.node), /* node */
   VIRTIO_ID_SOUND,                              /* device id */
   virtio_snd_probe,                             /* probe */
   virtio_snd_remove,                            /* remove */

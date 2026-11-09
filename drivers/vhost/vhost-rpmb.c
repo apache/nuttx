@@ -103,7 +103,6 @@ static void vhost_rpmb_remove(FAR struct vhost_device *hdev);
 
 static struct vhost_driver g_vhost_rpmb_driver =
 {
-  LIST_INITIAL_VALUE(g_vhost_rpmb_driver.node), /* node */
   VIRTIO_ID_RPMB,                               /* device id */
   vhost_rpmb_probe,                             /* probe */
   vhost_rpmb_remove,                            /* remove */
