@@ -538,7 +538,7 @@ endchoice # USART8 Driver Configuration
 
 choice
 	prompt "UART7 Driver Configuration"
-	depends on (STM32_HAVE_IP_USART || STM32_HAVE_USART_H5) && STM32_UART7
+	depends on STM32_UART7
 	default STM32_UART7_SERIALDRIVER
 
 config STM32_UART7_SERIALDRIVER
@@ -560,7 +560,7 @@ endchoice # UART7 Driver Configuration
 
 choice
 	prompt "UART8 Driver Configuration"
-	depends on (STM32_HAVE_IP_USART || STM32_HAVE_USART_H5) && STM32_UART8
+	depends on STM32_UART8
 	default STM32_UART8_SERIALDRIVER
 
 config STM32_UART8_SERIALDRIVER
@@ -579,6 +579,40 @@ config STM32_UART8_HCIUART
 	depends on WIRELESS_BLUETOOTH
 
 endchoice # UART8 Driver Configuration
+
+choice
+	prompt "UART9 Driver Configuration"
+	depends on STM32_UART9
+	default STM32_UART9_SERIALDRIVER
+
+config STM32_UART9_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART9_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_UART9_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # UART9 Driver Configuration
+
+choice
+	prompt "USART10 Driver Configuration"
+	depends on STM32_USART10
+	default STM32_USART10_SERIALDRIVER
+
+config STM32_USART10_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART10_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART10_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # USART10 Driver Configuration
 
 config USART1_RS485
 	bool "RS-485 on USART1"
