@@ -107,6 +107,11 @@ struct cdcacm_dev_s
 #endif
   bool rxenabled;                      /* true: UART RX "interrupts" enabled */
   bool ispolling;
+  size_t wrreqlen;                     /* Per-request TX buffer capacity as
+                                        * sized by cdcacm_bind(); the send
+                                        * paths use this instead of
+                                        * re-deriving it from
+                                        * ep->maxpacket. */
   spinlock_t lock;
 
   struct cdc_linecoding_s linecoding;  /* Buffered line status */
@@ -371,9 +376,13 @@ static ssize_t cdcuart_sendbuf(FAR struct uart_dev_s *dev,
   size_t nbytes;
   int ret;
 
-  /* Get the maximum number of bytes that will fit into one bulk IN request */
+  /* Use the full per-request buffer capacity.  Capping to ep->maxpacket
+   * was wrong: the lower half splits an oversized submission into
+   * maxpacket-sized packets itself, so the cap wasted most of the
+   * BULKIN_REQLEN buffer.
+   */
 
-  reqlen = MIN(CONFIG_CDCACM_BULKIN_REQLEN, ep->maxpacket);
+  reqlen = priv->wrreqlen;
 
   /* Peek at the request in the container at the head of the list */
 
@@ -1385,6 +1394,10 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
     {
       reqlen = CONFIG_CDCACM_BULKIN_REQLEN;
     }
+
+  /* Record the actual per-request capacity for the send paths. */
+
+  priv->wrreqlen = reqlen;
 
   for (i = 0; i < CONFIG_CDCACM_NWRREQS; i++)
     {
@@ -3044,9 +3057,9 @@ static void cdcuart_dmasend(FAR struct uart_dev_s *dev)
   size_t reqlen;
   int ret;
 
-  /* Get the maximum number of bytes that will fit into one bulk IN request */
+  /* Use the full per-request buffer capacity (see cdcuart_sendbuf). */
 
-  reqlen = MIN(CONFIG_CDCACM_BULKIN_REQLEN, ep->maxpacket);
+  reqlen = priv->wrreqlen;
 
   /* Peek at the request in the container at the head of the list */
 
