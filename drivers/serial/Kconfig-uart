@@ -53,6 +53,11 @@ config UART8_SERIALDRIVER
 	default n
 	select MCU_SERIAL
 
+config UART9_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
 menu "UART0 Configuration"
 	depends on UART0_SERIALDRIVER
 
@@ -698,5 +703,77 @@ config UART8_TXDMA
 	select SERIAL_TXDMA
 	---help---
 		Enable Tx DMA transfers on UART8
+
+endmenu
+
+menu "UART9 Configuration"
+	depends on UART9_SERIALDRIVER
+
+config UART9_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config UART9_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config UART9_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the UART.
+
+config UART9_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config UART9_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config UART9_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config UART9_IFLOWCONTROL
+	bool "UART9 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART9 RTS flow control
+
+config UART9_OFLOWCONTROL
+	bool "UART9 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART9 CTS flow control
+
+config UART9_RXDMA
+	bool "UART9 Rx DMA support"
+	default n
+	select SERIAL_RXDMA
+	---help---
+		Enable Rx DMA transfers on UART9
+
+config UART9_TXDMA
+	bool "UART9 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on UART9
 
 endmenu

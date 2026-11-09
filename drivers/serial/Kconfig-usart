@@ -53,6 +53,11 @@ config USART9_SERIALDRIVER
 	default n
 	select MCU_SERIAL
 
+config USART10_SERIALDRIVER
+	bool
+	default n
+	select MCU_SERIAL
+
 menu "USART0 Configuration"
 	depends on USART0_SERIALDRIVER
 
@@ -849,5 +854,85 @@ config USART9_TXDMA
 	select SERIAL_TXDMA
 	---help---
 		Enable Tx DMA transfers on USART9
+
+endmenu
+
+menu "USART10 Configuration"
+	depends on USART10_SERIALDRIVER
+
+config USART10_RXBUFSIZE
+	int "Receive buffer size"
+	default 252
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
+
+config USART10_TXBUFSIZE
+	int "Transmit buffer size"
+	default 252
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+		Note that on architectures that are unable to load 16-bit
+		values atomically without eg. disabling interrupts, the size
+		of the buffer is stored in uint8_t variable.
+
+config USART10_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the USART.
+
+config USART10_BITS
+	int "Character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config USART10_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config USART10_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+config USART10_IFLOWCONTROL
+	bool "USART10 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable USART10 RTS flow control
+
+config USART10_OFLOWCONTROL
+	bool "USART10 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable USART10 CTS flow control
+
+config USART10_RXDMA
+	bool "USART10 Rx DMA support"
+	default n
+	select SERIAL_RXDMA
+	---help---
+		Enable Rx DMA transfers on USART10
+
+config USART10_TXDMA
+	bool "USART10 Tx DMA support"
+	default n
+	select SERIAL_TXDMA
+	---help---
+		Enable Tx DMA transfers on USART10
 
 endmenu
