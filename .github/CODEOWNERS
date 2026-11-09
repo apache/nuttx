@@ -3872,7 +3872,6 @@ arch/arm/src/stm32f4/hardware/stm32f40xxx_syscfg.h paul-a.patience@polymtl.ca al
 arch/arm/src/stm32f4/hardware/stm32f412xx_pinmap.h David.Sidrane@NscDg.com alin.jerpelea@sony.com raiden00@railab.me gustavo.nihei@espressif.com
 arch/arm/src/stm32f4/stm32.h alin.jerpelea@sony.com raiden00@railab.me abdelatif.guettouche@gmail.com raiden00pl@gmail.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32f4/stm32_rcc.c 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com f.panag@amco.gr
-arch/arm/src/stm32f4/stm32f40xxx_alarm.h NeilH20@biomonitors.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com juha.niskanen@haltian.com raiden00@railab.me
 arch/arm/src/stm32f4/stm32f40xxx_rcc.c f.panag@amco.gr paul-a.patience@polymtl.ca david_s5@nscdg.com david_s5@usa.net alin.jerpelea@sony.com
 arch/arm/src/stm32f7/Kconfig david_s5@nscdg.com raiden00@railab.me david_s5@usa.net titus@elbe-informatik.de
 arch/arm/src/stm32f7/chip.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com Lok Tep  1 file changed, 1 insertion(+)
@@ -4290,7 +4289,6 @@ arch/arm/src/stm32l1/hardware/stm32l15xxx_pinmap.h David.Sidrane@NscDg.com alin.
 arch/arm/src/stm32l1/hardware/stm32l15xxx_syscfg.h alin.jerpelea@sony.com raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com
 arch/arm/src/stm32l1/stm32.h alin.jerpelea@sony.com raiden00@railab.me abdelatif.guettouche@gmail.com raiden00pl@gmail.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l1/stm32_rcc.c 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com f.panag@amco.gr
-arch/arm/src/stm32l1/stm32l15xxx_alarm.h NeilH20@biomonitors.com juha.niskanen@haltian.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com 59230071+hartmannathan@users.noreply.github.com
 arch/arm/src/stm32l1/stm32l15xxx_rcc.c 59230071+hartmannathan@users.noreply.github.com juha.niskanen@haltian.com alin.jerpelea@sony.com raiden00pl@gmail.com matteo.golin@gmail.com
 arch/arm/src/stm32l4/Kconfig dev@ziggurat29.com danieloak@gmail.com juha.niskanen@haltian.com sebastien@lorquet.fr
 arch/arm/src/stm32l4/chip.h sebastien@lorquet.fr alin.jerpelea@sony.com juha.niskanen@haltian.com

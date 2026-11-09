@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
+#ifdef STM32_RTC_HAVE_ALARMB
 #  define STM32_NALARMS 2
 #else
 #  define STM32_NALARMS 1
@@ -61,7 +61,7 @@ struct stm32_cbinfo_s
 {
   volatile rtc_alarm_callback_t cb; /* Callback when the alarm expires */
   volatile void *priv;              /* Private argument to accompany callback */
-#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
+#ifdef STM32_RTC_HAVE_ALARMB
   uint8_t id;                       /* Identifies the alarm */
 #endif
 };
@@ -178,7 +178,7 @@ static struct stm32_lowerhalf_s g_rtc_lowerhalf =
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
+#ifdef STM32_RTC_HAVE_ALARMB
 static void stm32_alarm_callback(void *arg, unsigned int alarmid)
 {
   struct stm32_lowerhalf_s *lower;
@@ -233,7 +233,7 @@ static void stm32_alarm_callback(void)
     }
 }
 
-#endif /* CONFIG_STM32_STM32F4XXX || CONFIG_STM32_STM32L15XX */
+#endif /* STM32_RTC_HAVE_ALARMB */
 #endif /* CONFIG_RTC_ALARM */
 
 /****************************************************************************
@@ -303,6 +303,7 @@ errout:
   if (!gmtime_r(&timer, (struct tm *)rtctime))
     {
       int errcode = get_errno();
+
       DEBUGASSERT(errcode > 0);
       return -errcode;
     }
@@ -397,7 +398,7 @@ static bool stm32_havesettime(struct rtc_lowerhalf_s *lower)
 static int stm32_setalarm(struct rtc_lowerhalf_s *lower,
                           const struct lower_setalarm_s *alarminfo)
 {
-#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
+#ifdef STM32_RTC_HAVE_ALARMB
   struct stm32_lowerhalf_s *priv;
   struct stm32_cbinfo_s *cbinfo;
   struct alm_setalarm_s lowerinfo;
@@ -512,7 +513,7 @@ static int stm32_setalarm(struct rtc_lowerhalf_s *lower,
 static int stm32_setrelative(struct rtc_lowerhalf_s *lower,
                              const struct lower_setrelative_s *alarminfo)
 {
-#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
+#ifdef STM32_RTC_HAVE_ALARMB
   struct lower_setalarm_s setalarm;
   struct tm time;
   time_t seconds;
@@ -665,7 +666,7 @@ static int stm32_setrelative(struct rtc_lowerhalf_s *lower,
 #ifdef CONFIG_RTC_ALARM
 static int stm32_cancelalarm(struct rtc_lowerhalf_s *lower, int alarmid)
 {
-#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
+#ifdef STM32_RTC_HAVE_ALARMB
   struct stm32_lowerhalf_s *priv;
   struct stm32_cbinfo_s *cbinfo;
   int ret;
@@ -745,7 +746,7 @@ static int stm32_rdalarm(struct rtc_lowerhalf_s *lower,
   irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->time != NULL);
-#if defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
+#ifdef STM32_RTC_HAVE_ALARMB
   DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
 
   if (alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB)
