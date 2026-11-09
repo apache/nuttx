@@ -1262,7 +1262,6 @@ static void stm32serial_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct stm32_serial_s *priv =
     (struct stm32_serial_s *)dev->priv;
-
   irqstate_t flags;
   uint16_t ie;
 
@@ -1439,7 +1438,6 @@ static void stm32serial_txint(struct uart_dev_s *dev, bool enable)
 {
   struct stm32_serial_s *priv =
     (struct stm32_serial_s *)dev->priv;
-
   irqstate_t flags;
 
   /* USART transmit interrupts:
