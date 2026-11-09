@@ -37,10 +37,9 @@
 #include "mld/mld.h"
 #include "netfilter/iptables.h"
 #include "inet/inet.h"
+#include "socket/socket.h"
 #include "udp/udp.h"
 #include "utils/utils.h"
-
-#ifdef CONFIG_NET_IPv6
 
 /****************************************************************************
  * Public Functions
@@ -96,6 +95,26 @@ int ipv6_getsockopt(FAR struct socket *psock, int option,
         }
         break;
 
+      case IPV6_V6ONLY:
+        {
+          FAR struct socket_conn_s *conn = psock->s_conn;
+          FAR int *v6only = value;
+
+          if (*value_len < sizeof(int))
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          /* A TCP socket is always IPv6-only */
+
+          *v6only = psock->s_type == SOCK_STREAM ||
+                    _SO_GETOPT(conn->s_options, option);
+          *value_len = sizeof(int);
+          ret = OK;
+        }
+        break;
+
       default:
         nerr("ERROR: Unrecognized IPv6 option: %d\n", option);
         ret = -ENOPROTOOPT;
@@ -105,5 +124,3 @@ int ipv6_getsockopt(FAR struct socket *psock, int option,
   conn_unlock(psock->s_conn);
   return ret;
 }
-
-#endif /* CONFIG_NET_IPv6 */

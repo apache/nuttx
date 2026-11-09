@@ -188,7 +188,7 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
  * Description:
  *   Check if an IPv4 datagram is for the UDP socket 'conn' of AF_INET6.  Its
  *   IPv6 addresses take the IPv4 address only as [::] or in the IPv4-mapped
- *   form.
+ *   form, and an IPV6_V6ONLY socket takes none.
  *
  ****************************************************************************/
 
@@ -199,6 +199,13 @@ static bool udp_ipv4_dualstack(FAR struct udp_conn_s *conn,
 {
   net_ipv6addr_t mapped;
   in_addr_t addr;
+
+#ifdef CONFIG_NET_SOCKOPTS
+  if (_SO_GETOPT(conn->sconn.s_options, IPV6_V6ONLY))
+    {
+      return false;
+    }
+#endif
 
   if (conn->lport == 0 || udp->destport != conn->lport)
     {
@@ -1014,6 +1021,18 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 
 int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 {
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6) && \
+    defined(CONFIG_NET_SOCKOPTS)
+  /* An IPv6-only socket cannot send to an IPv4-mapped address */
+
+  if (addr != NULL && addr->sa_family == AF_INET6 &&
+      _SO_GETOPT(conn->sconn.s_options, IPV6_V6ONLY) &&
+      ip6_is_ipv4addr(&((FAR const struct sockaddr_in6 *)addr)->sin6_addr))
+    {
+      return -ENETUNREACH;
+    }
+#endif
+
   /* Has this address already been bound to a local port (lport)? */
 
   if (!conn->lport)
