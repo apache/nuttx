@@ -306,6 +306,39 @@ config SPINLOCK_INLINE
 		this option to emit callable non-inline versions and reduce
 		header-inline code growth.
 
+choice
+	prompt "Spinlock wait policy"
+	default SPINWAIT_PM if PM
+	default SPINWAIT_RELAX
+
+config SPINWAIT_RELAX
+	bool "Relax hint wait"
+	---help---
+		Spinlock waiters poll the lock with the architecture relax
+		hint (PAUSE on x86_64, YIELD on aarch64) and unlocking sends
+		no wake event.  The hint reduces bus and pipeline
+		contention without sleeping, and the unlock stays a plain
+		release store.
+
+config SPINWAIT_PM
+	bool "WFE/SEV wait (power saving)"
+	---help---
+		Spinlock waiters may sleep in the spin loop (WFE on Arm)
+		and unlocking sends a wake event (DSB+SEV).  Waiting CPUs
+		can enter a low-power state instead of hammering the
+		interconnect while a lock is held, at the cost of a more
+		expensive unlock.
+
+		On Arm, SEV is not ordered with memory accesses, so the
+		unlock needs a DSB before SEV to make the release store
+		visible before the event (ARM DDI 0406C, "Use of WFE and
+		SEV with Locks"); expect lower lock/unlock throughput.
+
+		On architectures without WFE/SEV semantics this policy
+		degrades to busy wait.
+
+endchoice
+
 endif # SPINLOCK
 
 config IRQCHAIN
