@@ -622,6 +622,7 @@ ICACHE        to be done    arch/arm/src/stm32h5/stm32_icache.c
 OCTOSPI       to be done    arch/arm/src/stm32h5/stm32_qspi.c      
 PWR           to be done    arch/arm/src/stm32h5/stm32_pwr.c       
 RCC           to be done    arch/arm/src/stm32h5/stm32_rcc.c       
+RTC           M33M55 v1     arch/arm/src/common/stm32/stm32_rtcc_m33m55_v1.c
 SPI/I2S       to be done    arch/arm/src/stm32h5/stm32_spi.c       
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c  
 USART/LPUART  v3            arch/arm/src/stm32h5/stm32_serial.c    

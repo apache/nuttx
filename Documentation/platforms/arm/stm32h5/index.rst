@@ -74,7 +74,7 @@ RAMCFG      No
 SBS         No
 SDMMC       No
 RNG         No
-RTC         No
+RTC         Yes
 SAES        No
 SAI         No
 TAMP        No

@@ -52,7 +52,7 @@
 
 /* Configuration ************************************************************/
 
-/* This RTC implementation supports the RTC of the STM32N6:
+/* This RTC implementation supports the RTC of the STM32N6 and STM32H5:
  *  - date/time RTC hardware with sub-seconds
  *  - Alarm A and Alarm B sharing one RTC interrupt with the wakeup timer
  *  - the periodic wakeup timer
@@ -77,18 +77,34 @@
 #define SYNCHRO_TIMEOUT      (0x00020000)
 #define INITMODE_TIMEOUT     (0x00010000)
 
-/* RCC glue: the RTC is on APB4 and its clock source in CCIPR7.  CCIPR7 is
- * reset with the system, so the clock selection is not retained.
+/* RCC glue: the RTC kernel clock enable and source selection, and the RTC
+ * APB clock enable.
+ *
+ * STM32N6: all in APB4LENR and CCIPR7.  CCIPR7 is reset with the system,
+ * so the clock selection is not retained.
+ * STM32H5: kernel clock in the backup domain BDCR, APB clock in APB3ENR.
  */
 
 #if defined(RCC_APB4LENR_RTCEN)
 #  define STM32_RCC_RTCENR        STM32_RCC_APB4LENR
-#  define RCC_RTCENR_RTCEN        (RCC_APB4LENR_RTCEN | RCC_APB4LENR_RTCAPBEN)
+#  define RCC_RTCENR_RTCEN        RCC_APB4LENR_RTCEN
+#  define STM32_RCC_RTCAPBENR     STM32_RCC_APB4LENR
+#  define RCC_RTCAPBENR_RTCAPBEN  RCC_APB4LENR_RTCAPBEN
 #  define STM32_RCC_RTCSELR       STM32_RCC_CCIPR7
 #  define RCC_RTCSELR_RTCSEL_MASK RCC_CCIPR7_RTCSEL_MASK
 #  define RCC_RTCSELR_RTCSEL_LSE  RCC_CCIPR7_RTCSEL_LSE
 #  define RCC_RTCSELR_RTCSEL_LSI  RCC_CCIPR7_RTCSEL_LSI
 #  define RCC_RTCSELR_RTCSEL_HSE  RCC_CCIPR7_RTCSEL_HSE
+#elif defined(RCC_BDCR_RTCEN)
+#  define STM32_RCC_RTCENR        STM32_RCC_BDCR
+#  define RCC_RTCENR_RTCEN        RCC_BDCR_RTCEN
+#  define STM32_RCC_RTCAPBENR     STM32_RCC_APB3ENR
+#  define RCC_RTCAPBENR_RTCAPBEN  RCC_APB3ENR_RTCAPBEN
+#  define STM32_RCC_RTCSELR       STM32_RCC_BDCR
+#  define RCC_RTCSELR_RTCSEL_MASK RCC_BDCR_RTCSEL_MASK
+#  define RCC_RTCSELR_RTCSEL_LSE  RCC_BDCR_RTCSEL_LSE
+#  define RCC_RTCSELR_RTCSEL_LSI  RCC_BDCR_RTCSEL_LSI
+#  define RCC_RTCSELR_RTCSEL_HSE  RCC_BDCR_RTCSEL_HSE
 #else
 #  error "Unknown RTC clock enable register"
 #endif
@@ -761,6 +777,7 @@ int up_rtc_initialize(void)
    */
 
   stm32_pwr_enablebkp(true);
+  modifyreg32(STM32_RCC_RTCAPBENR, 0, RCC_RTCAPBENR_RTCAPBEN);
   modifyreg32(STM32_RCC_RTCENR, 0, RCC_RTCENR_RTCEN);
 
   /* Save the token before losing it when resetting */
