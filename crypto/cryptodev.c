@@ -706,6 +706,10 @@ static int cryptodev_key(FAR struct fcrypt *fcr, FAR struct crypt_kop *kop)
   krp->krp_op = kop->crk_op;
   krp->krp_iparams = kop->crk_iparams;
   krp->krp_oparams = kop->crk_oparams;
+  krp->krp_keytype = kop->crk_keytype;
+  krp->krp_optype = kop->crk_optype;
+  krp->krp_padding = kop->crk_padding;
+  krp->krp_hash = kop->crk_hash;
   krp->krp_status = 0;
   krp->krp_flags = kop->crk_flags;
   krp->krp_reqid = kop->crk_reqid;
