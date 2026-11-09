@@ -54,27 +54,18 @@
 #include "utils/utils.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_NET_CAN_MAX_CONNS
-#  define CONFIG_NET_CAN_MAX_CONNS 0
-#endif
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* The array containing all NetLink connections. */
-
-NET_BUFPOOL_DECLARE(g_can_connections, sizeof(struct can_conn_s),
-                    CONFIG_NET_CAN_PREALLOC_CONNS,
-                    CONFIG_NET_CAN_ALLOC_CONNS,
-                    CONFIG_NET_CAN_MAX_CONNS);
-
-/* A list of all allocated NetLink connections */
+/* A list of all allocated CAN connections */
 
 static dq_queue_t g_active_can_connections;
+
+/* Protects g_active_can_connections.  Recursive because can_input() holds
+ * it while it looks up the destination connections.
+ */
+
+static rmutex_t g_can_conn_lock = NXRMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Public Data
@@ -616,68 +607,66 @@ void can_readahead_signal(FAR struct can_conn_s *conn)
 #endif
 
 /****************************************************************************
- * Name: can_alloc()
+ * Name: can_conn_init
  *
  * Description:
- *   Allocate a new, uninitialized NetLink connection structure.  This is
- *   normally something done by the implementation of the socket() API
+ *   Initialize the state shared by all CAN protocols in a newly allocated
+ *   connection and add it to the list of active connections.
+ *
+ * Input Parameters:
+ *   conn - The connection to initialize
  *
  ****************************************************************************/
 
-FAR struct can_conn_s *can_alloc(void)
+void can_conn_init(FAR struct can_conn_s *conn)
 {
-  FAR struct can_conn_s *conn;
+  /* Set the reference count on the connection structure.  This
+   * reference count will be incremented only if the socket is
+   * dup'ed
+   */
 
-  /* The free list is protected by a a mutex. */
+  conn->crefs = 1;
 
-  NET_BUFPOOL_LOCK(g_can_connections);
+  /* If Can Socket Stack receive can frame and pending on the readahead,
+   * but the application layer did not read the frame. This will cause
+   * a memory leak, and it is necessary to limit the readahead.
+   */
 
-  conn = NET_BUFPOOL_TRYALLOC(g_can_connections);
-  if (conn != NULL)
-    {
-      /* FIXME SocketCAN default behavior enables loopback */
-
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
-      /* By default the filter is configured to catch all,
-       * this is done in commented filter code below:
-       *
-       * struct can_filter_t catchall_filter;
-       * filter.can_id = 0;
-       * filter.can_mask = 0;
-       * conn->filters[0] = catchall_filter;
-       *
-       * However memset already sets the filter to 0
-       * therefore we only have to set the filter count to 1
-       */
-
-      conn->filter_count = 1;
+#if CONFIG_NET_RECV_BUFSIZE > 0
+  conn->rcvbufs = CONFIG_NET_RECV_BUFSIZE;
 #endif
 
-      /* Enqueue the connection into the active list */
+#if CONFIG_NET_SEND_BUFSIZE > 0
+  conn->sndbufs = CONFIG_NET_SEND_BUFSIZE;
+  nxsem_init(&conn->sndsem, 0, 0);
+#endif
+  nxrmutex_init(&conn->sconn.s_lock);
 
-      dq_addlast(&conn->sconn.node, &g_active_can_connections);
-    }
+  /* Enqueue the connection into the active list */
 
-  NET_BUFPOOL_UNLOCK(g_can_connections);
-  return conn;
+  can_conn_list_lock();
+  dq_addlast(&conn->sconn.node, &g_active_can_connections);
+  can_conn_list_unlock();
 }
 
 /****************************************************************************
- * Name: can_free()
+ * Name: can_conn_uninit
  *
  * Description:
- *   Free a NetLink connection structure that is no longer in use. This
- *   should be done by the implementation of close().
+ *   Remove a connection from the list of active connections and release
+ *   the state shared by all CAN protocols.  The caller frees the
+ *   connection itself.
+ *
+ * Input Parameters:
+ *   conn - The connection to uninitialize
  *
  ****************************************************************************/
 
-void can_free(FAR struct can_conn_s *conn)
+void can_conn_uninit(FAR struct can_conn_s *conn)
 {
-  /* The free list is protected by a mutex. */
-
   DEBUGASSERT(conn->crefs == 0);
 
-  NET_BUFPOOL_LOCK(g_can_connections);
+  can_conn_list_lock();
 
   /* Remove the connection from the active list */
 
@@ -705,11 +694,7 @@ void can_free(FAR struct can_conn_s *conn)
 
   iob_free_queue(&conn->readahead);
 
-  /* Free the connection. */
-
-  NET_BUFPOOL_FREE(g_can_connections, conn);
-
-  NET_BUFPOOL_UNLOCK(g_can_connections);
+  can_conn_list_unlock();
 }
 
 /****************************************************************************
@@ -803,12 +788,12 @@ FAR struct can_conn_s *can_conn_next(FAR struct can_conn_s *conn)
 
 void can_conn_list_lock(void)
 {
-  NET_BUFPOOL_LOCK(g_can_connections);
+  nxrmutex_lock(&g_can_conn_lock);
 }
 
 void can_conn_list_unlock(void)
 {
-  NET_BUFPOOL_UNLOCK(g_can_connections);
+  nxrmutex_unlock(&g_can_conn_lock);
 }
 
 /****************************************************************************

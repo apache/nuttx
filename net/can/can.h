@@ -162,26 +162,27 @@ FAR const struct sock_intf_s *
 can_sockif(sa_family_t family, int type, int protocol);
 
 /****************************************************************************
- * Name: can_alloc()
+ * Name: can_conn_init
  *
  * Description:
- *   Allocate a new, uninitialized NetLink connection structure.  This is
- *   normally something done by the implementation of the socket() API
+ *   Initialize the state shared by all CAN protocols in a newly allocated
+ *   connection and add it to the list of active connections.
  *
  ****************************************************************************/
 
-FAR struct can_conn_s *can_alloc(void);
+void can_conn_init(FAR struct can_conn_s *conn);
 
 /****************************************************************************
- * Name: can_free()
+ * Name: can_conn_uninit
  *
  * Description:
- *   Free a NetLink connection structure that is no longer in use. This
- *   should be done by the implementation of close().
+ *   Remove a connection from the list of active connections and release
+ *   the state shared by all CAN protocols.  The caller frees the
+ *   connection itself.
  *
  ****************************************************************************/
 
-void can_free(FAR struct can_conn_s *conn);
+void can_conn_uninit(FAR struct can_conn_s *conn);
 
 /****************************************************************************
  * Name: can_conn_bind
