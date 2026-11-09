@@ -136,6 +136,7 @@ static int goldfish_gpu_fb_read_pipe(FAR struct file *pipe,
   while (size > 0)
     {
       ssize_t n = file_read(pipe, p, size);
+
       if (n < 0)
         {
           return n;
@@ -161,6 +162,7 @@ static int goldfish_gpu_fb_write_pipe(FAR struct file *pipe,
   while (size > 0)
     {
       ssize_t n = file_write(pipe, p, size);
+
       if (n < 0)
         {
           return n;
