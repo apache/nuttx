@@ -40,14 +40,10 @@ if(CONFIG_NET_IPv4)
 endif()
 
 if(CONFIG_NET_IPv6)
-  list(
-    APPEND
-    SRCS
-    ipv6_setsockopt.c
-    ipv6_getsockname.c
-    ipv6_getpeername.c
-    ipv6_build_header.c
-    ipv6_getsockopt.c)
+  list(APPEND SRCS ipv6_getsockname.c ipv6_getpeername.c ipv6_build_header.c)
+  if(CONFIG_NET_SOCKOPTS)
+    list(APPEND SRCS ipv6_setsockopt.c ipv6_getsockopt.c)
+  endif()
 endif()
 
 target_sources(net PRIVATE ${SRCS})

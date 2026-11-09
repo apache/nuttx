@@ -42,8 +42,6 @@
 #include "udp/udp.h"
 #include "utils/utils.h"
 
-#if defined(CONFIG_NET_IPv6) && defined(CONFIG_NET_SOCKOPTS)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -183,11 +181,40 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
       case MCAST_UNBLOCK_SOURCE:
       case MCAST_JOIN_SOURCE_GROUP:
       case MCAST_LEAVE_SOURCE_GROUP:
-#endif /* CONFIG_NET_MLD */
-      case IPV6_V6ONLY:           /* Restrict AF_INET6 socket to IPv6
-                                   * communications only */
         nwarn("WARNING: Unimplemented IPv6 option: %d\n", option);
         ret = -ENOSYS;
+        break;
+#endif /* CONFIG_NET_MLD */
+
+      case IPV6_V6ONLY:           /* Restrict AF_INET6 socket to IPv6
+                                   * communications only */
+        {
+          FAR struct socket_conn_s *conn = psock->s_conn;
+          FAR const int *enable = value;
+
+          /* As Linux: an int, set before bind().  Only UDP takes IPv4
+           * traffic; a TCP socket is always IPv6-only.
+           */
+
+          if (value_len < sizeof(int) || _SS_ISBOUND(conn->s_flags))
+            {
+              ret = -EINVAL;
+            }
+          else if (*enable)
+            {
+              _SO_SETOPT(conn->s_options, option);
+              ret = OK;
+            }
+          else if (psock->s_type != SOCK_STREAM)
+            {
+              _SO_CLROPT(conn->s_options, option);
+              ret = OK;
+            }
+          else
+            {
+              ret = -ENOPROTOOPT;
+            }
+        }
         break;
 
       case IPV6_UNICAST_HOPS:     /* Unicast hop limit */
@@ -273,5 +300,3 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
   conn_unlock(psock->s_conn);
   return ret;
 }
-
-#endif /* CONFIG_NET_IPv6 */
