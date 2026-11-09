@@ -1777,6 +1777,16 @@ int fat_dirextend(FAR struct fat_mountpt_s *fs, FAR struct fat_file_s *ff,
       sectndx    = pos & SEC_NDXMASK(fs);
     }
 
+  /* Write the last sector back.  The other handles of the file read it
+   * from the volume, and must see the zeros.
+   */
+
+  ret = fat_ffcacheflush(fs, ff);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* The truncation has completed without error.  Update the file size */
 
   ff->ff_shared->s_size = length;
