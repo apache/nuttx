@@ -157,7 +157,8 @@ config LIBC_PRINTF_PERCENT_N
 		that an attacker can change then gives a write to any address.  Keep it
 		off unless a program needs it.  No profile turns it on.
 
-		Without it, printf() reads the pointer, stores nothing and prints "?".
+		Without it, printf() reads the pointer, stores nothing and prints
+		nothing.
 
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
