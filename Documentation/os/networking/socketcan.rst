@@ -93,7 +93,7 @@ Files supporting SocketCAN can be found in the following locations:
 -  **Main Modules**:
 
    - ``can.c`` - Connection management, input, callbacks and polling
-   - ``can_sockif.c`` - Socket interface implementation
+   - ``can_raw.c`` - Socket interface implementation
    - ``can_sendmsg.c`` - Message transmission
    - ``can_sendmsg_buffered.c`` - Message transmission with buffering
    - ``can_recvmsg.c`` - Message reception
