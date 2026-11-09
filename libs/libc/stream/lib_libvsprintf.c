@@ -1781,19 +1781,16 @@ put_unavailable:
                 pnt = va_arg(ap, FAR char *);
               }
 
-            /* %n only takes its pointer: a format never writes to memory,
-             * unless the option says so.
+            /* %n prints nothing.  Only the option lets it store the count:
+             * else a format never writes to memory.
              */
 
             if (c == 'n')
               {
 #ifdef CONFIG_LIBC_PRINTF_PERCENT_N
                 vsprintf_store((FAR void *)pnt, flags, total_len);
-                continue;
 #endif
-                pnt  = "?";
-                size = 1;
-                goto str_lpad;
+                continue;
               }
 
             if (pnt == NULL)
