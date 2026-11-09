@@ -26,21 +26,10 @@ set(SRCS)
 
 # Required STM32N6 files
 
-list(
-  APPEND
-  SRCS
-  stm32_irq.c
-  stm32_lowputc.c
-  stm32_rcc.c
-  stm32_start.c
-  stm32_pwr.c)
+list(APPEND SRCS stm32_irq.c stm32_rcc.c stm32_start.c stm32_pwr.c)
 
 if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32_idle.c)
-endif()
-
-if(CONFIG_STM32_USART)
-  list(APPEND SRCS stm32_serial.c)
 endif()
 
 # Chip-specific RCC

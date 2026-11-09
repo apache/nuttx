@@ -35,7 +35,7 @@ RNG         Yes      Through the common driver.
 RTC         Yes      Calendar, sub-seconds, Alarm A/B and wakeup timer
                      through the common RTC driver.
 USART       Yes      USART1-3, UART4-5, USART6, UART7-9, USART10 and
-                     LPUART1.
+                     LPUART1 through the common U(S)ART driver.
 
 ADC         No
 DCACHE      No

@@ -786,7 +786,7 @@ RNG           v1            arch/arm/src/common/stm32/stm32_rng_v1.c
 RTC           M33M55 v1     arch/arm/src/common/stm32/stm32_rtcc_m33m55_v1.c
 SPI/I2S       to be done    not supported
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
-USART/LPUART  v4            arch/arm/src/stm32n6/stm32_serial.c
+USART/LPUART  M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 USB           device        not supported
 WWDG          v3            arch/arm/src/common/stm32/stm32_wwdg.c
 XSPI          to be done    not supported

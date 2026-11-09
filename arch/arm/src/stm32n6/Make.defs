@@ -32,15 +32,11 @@ include common/stm32/Make.defs
 
 # Required STM32N6 files
 
-CHIP_CSRCS += stm32_irq.c stm32_lowputc.c stm32_rcc.c
+CHIP_CSRCS += stm32_irq.c stm32_rcc.c
 CHIP_CSRCS += stm32_start.c stm32_pwr.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32_idle.c
-endif
-
-ifeq ($(CONFIG_STM32_USART),y)
-CHIP_CSRCS += stm32_serial.c
 endif
 
 # Chip-specific RCC
