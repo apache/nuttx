@@ -441,6 +441,99 @@ static int vsprintf_put_field(FAR struct lib_outstream_s *stream,
   return total_len;
 }
 
+static int vsprintf_put_char(FAR struct lib_outstream_s *stream,
+                             uint16_t flags, int ch, FAR int *width,
+                             FAR char *buf)
+{
+  FAR const char *pnt;
+  size_t size;
+
+#ifdef CONFIG_LIBC_LOCALE
+  if ((flags & FL_LONG) != 0)
+    {
+      mbstate_t ps;
+
+      /* %lc: a wide character, written as its multibyte sequence. */
+
+      memset(&ps, 0, sizeof(ps));
+      size = wcrtomb(buf, (wchar_t)ch, &ps);
+      if (size == (size_t)-1)
+        {
+          return -1;
+        }
+    }
+  else
+#endif
+    {
+      buf[0] = ch;
+      size = 1;
+    }
+
+  pnt = buf;
+  return vsprintf_put_field(stream, pnt, size, width, flags);
+}
+
+#ifdef CONFIG_LIBC_LOCALE
+static int vsprintf_put_wstring(FAR struct lib_outstream_s *stream,
+                                FAR const wchar_t *ws, uint16_t flags,
+                                FAR int *width, int prec)
+{
+  char mb[MB_LEN_MAX];
+  mbstate_t ps;
+  size_t size;
+  size_t n;
+  int total_len = 0;
+  int i;
+
+  /* %ls: a wide string, written as multibyte characters.  The precision
+   * limits the bytes, and a character that does not fit is not written in
+   * part.  First count the bytes.
+   */
+
+  memset(&ps, 0, sizeof(ps));
+  for (size = 0, i = 0; ws[i] != L'\0'; i++)
+    {
+      n = wcrtomb(mb, ws[i], &ps);
+      if (n == (size_t)-1)
+        {
+          return -1;
+        }
+
+      if ((flags & FL_PREC) != 0 && size + n > (size_t)prec)
+        {
+          break;
+        }
+
+      size += n;
+    }
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      if (*width > 0 && size < *width)
+        {
+          int pad = *width - size;
+
+          total_len += vsprintf_repeat(stream, ' ', pad);
+          *width -= pad;
+        }
+    }
+
+  memset(&ps, 0, sizeof(ps));
+  for (n = 0, i = 0; n < size; i++)
+    {
+      size_t m = wcrtomb(mb, ws[i], &ps);
+
+      total_len += m;
+      lib_stream_puts(stream, mb, m);
+      n += m;
+    }
+
+  *width = *width >= size ? *width - size : 0;
+
+  return total_len;
+}
+#endif
+
 #ifdef CONFIG_LIBC_PRINTF_PERCENT_N
 /* Store the count of %n at the size of its length modifier */
 
@@ -1143,6 +1236,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   size_t size;
   int ch;
   int star;
+  int result;
   unsigned int len;
   size_t total_len = 0;
 
@@ -1773,39 +1867,24 @@ put_unavailable:
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
             if ((flags & FL_ARGNUMBER) != 0)
               {
-                ch = (int)arglist->value[argnumber - 1].u;
+                result = vsprintf_put_char(stream, flags,
+                                           arglist->value[argnumber - 1].u,
+                                           &width, buf);
               }
             else
 #endif
               {
-                ch = va_arg(ap, int);
+                result = vsprintf_put_char(stream, flags, va_arg(ap, int),
+                                           &width, buf);
               }
 
-#ifdef CONFIG_LIBC_LOCALE
-            if ((flags & FL_LONG) != 0)
+            if (result < 0)
               {
-                mbstate_t ps;
-
-                /* %lc: a wide character, written as its multibyte
-                 * sequence.
-                 */
-
-                memset(&ps, 0, sizeof(ps));
-                size = wcrtomb(buf, (wchar_t)ch, &ps);
-                if (size == (size_t)-1)
-                  {
-                    return -1;
-                  }
-              }
-            else
-#endif
-              {
-                buf[0] = ch;
-                size = 1;
+                return -1;
               }
 
-            pnt = buf;
-            goto str_lpad;
+            total_len += result;
+            goto tail;
 
           case 'n':
           case 's':
@@ -1840,56 +1919,15 @@ put_unavailable:
 #ifdef CONFIG_LIBC_LOCALE
             else if (c == 's' && (flags & FL_LONG) != 0)
               {
-                FAR const wchar_t *ws = (FAR const wchar_t *)pnt;
-                char mb[MB_LEN_MAX];
-                mbstate_t ps;
-                size_t n;
-                int i;
-
-                /* %ls: a wide string, written as multibyte characters.  The
-                 * precision limits the bytes, and a character that does not
-                 * fit is not written in part.  First count the bytes.
-                 */
-
-                memset(&ps, 0, sizeof(ps));
-                for (size = 0, i = 0; ws[i] != L'\0'; i++)
+                result = vsprintf_put_wstring(stream,
+                                              (FAR const wchar_t *)pnt,
+                                              flags, &width, prec);
+                if (result < 0)
                   {
-                    n = wcrtomb(mb, ws[i], &ps);
-                    if (n == (size_t)-1)
-                      {
-                        return -1;
-                      }
-
-                    if ((flags & FL_PREC) != 0 && size + n > (size_t)prec)
-                      {
-                        break;
-                      }
-
-                    size += n;
+                    return -1;
                   }
 
-                if ((flags & FL_LPAD) == 0)
-                  {
-                    if (width > 0 && size < width)
-                      {
-                        int pad = width - size;
-
-                        stream_repeat(' ', pad, stream);
-                        width -= pad;
-                      }
-                  }
-
-                memset(&ps, 0, sizeof(ps));
-                for (n = 0, i = 0; n < size; i++)
-                  {
-                    size_t m = wcrtomb(mb, ws[i], &ps);
-
-                    stream_puts(mb, m, stream);
-                    n += m;
-                  }
-
-                width = width >= size ? width - size : 0;
-                size = 0;
+                total_len += result;
                 goto tail;
               }
 #endif
