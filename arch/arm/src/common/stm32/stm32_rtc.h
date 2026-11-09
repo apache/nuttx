@@ -52,15 +52,7 @@
 #  include "hardware/stm32_rtcc.h"
 #endif
 
-/* Alarm function differs from part to part */
-
-#if defined(CONFIG_STM32_STM32F4XXX)
-#  include "stm32f40xxx_alarm.h"
-#elif defined(CONFIG_STM32_STM32L15XX)
-#  include "stm32l15xxx_alarm.h"
-#else
-#  include "stm32_alarm.h"
-#endif
+#include "stm32_alarm.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -29,19 +29,60 @@
 
 #include <nuttx/config.h>
 
+#include <time.h>
+
 #include "chip.h"
 
-#ifdef CONFIG_RTC_ALARM
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* RTC with two alarms (A and B) and the alarm API that selects one of them.
+ * The others have a single alarm.
+ */
+
+#if defined(CONFIG_STM32_HAVE_IP_RTCC_M3M4_F4) || \
+    defined(CONFIG_STM32_HAVE_IP_RTCC_M3M4_L1)
+#  define STM32_RTC_HAVE_ALARMB 1
+#endif
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+#ifdef CONFIG_RTC_ALARM
+#ifdef STM32_RTC_HAVE_ALARMB
+
+/* The form of an alarm callback */
+
+typedef void (*alm_callback_t)(FAR void *arg, unsigned int alarmid);
+
+enum alm_id_e
+{
+  RTC_ALARMA = 0,               /* RTC ALARM A */
+  RTC_ALARMB,                   /* RTC ALARM B */
+  RTC_ALARM_LAST
+};
+
+/* Structure used to pass parameters to set an alarm */
+
+struct alm_setalarm_s
+{
+  int as_id;                    /* enum alm_id_e */
+  struct tm as_time;            /* Alarm expiration time */
+  alm_callback_t as_cb;         /* Callback (if non-NULL) */
+  FAR void *as_arg;             /* Argument for callback */
+};
+
+#else
 
 /* The form of an alarm callback */
 
 typedef void (*alarmcb_t)(void);
+
+#endif /* STM32_RTC_HAVE_ALARMB */
 
 /* Structure used to pass parameters to query an alarm */
 
@@ -50,6 +91,14 @@ struct alm_rdalarm_s
   int ar_id;                    /* enum alm_id_e */
   FAR struct rtc_time *ar_time; /* Argument for storing ALARM RTC time */
 };
+#endif /* CONFIG_RTC_ALARM */
+
+#ifdef CONFIG_RTC_PERIODIC
+
+/* The form of a periodic wakeup callback */
+
+typedef int (*wakeupcb_t)(void);
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -59,6 +108,43 @@ struct alm_rdalarm_s
 extern "C"
 {
 #endif
+
+#ifdef CONFIG_RTC_ALARM
+#ifdef STM32_RTC_HAVE_ALARMB
+
+/****************************************************************************
+ * Name: stm32_rtc_setalarm
+ *
+ * Description:
+ *   Set an alarm to an absolute time using associated hardware.
+ *
+ * Input Parameters:
+ *  alminfo - Information about the alarm configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
+
+/****************************************************************************
+ * Name: stm32_rtc_cancelalarm
+ *
+ * Description:
+ *   Cancel an alarm.
+ *
+ * Input Parameters:
+ *  alarmid - Identifies the alarm to be cancelled
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int stm32_rtc_cancelalarm(enum alm_id_e alarmid);
+
+#else
 
 /****************************************************************************
  * Name: stm32_rtc_setalarm
@@ -75,8 +161,7 @@ extern "C"
  *
  ****************************************************************************/
 
-struct timespec;
-int stm32_rtc_setalarm(const struct timespec *tp, alarmcb_t callback);
+int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
 
 /****************************************************************************
  * Name: stm32_rtc_cancelalarm
@@ -94,6 +179,8 @@ int stm32_rtc_setalarm(const struct timespec *tp, alarmcb_t callback);
 
 int stm32_rtc_cancelalarm(void);
 
+#endif /* STM32_RTC_HAVE_ALARMB */
+
 /****************************************************************************
  * Name: stm32_rtc_rdalarm
  *
@@ -109,11 +196,47 @@ int stm32_rtc_cancelalarm(void);
  ****************************************************************************/
 
 int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
+#endif /* CONFIG_RTC_ALARM */
+
+#ifdef CONFIG_RTC_PERIODIC
+
+/****************************************************************************
+ * Name: stm32_rtc_setperiodic
+ *
+ * Description:
+ *   Set a periodic RTC wakeup
+ *
+ * Input Parameters:
+ *  period   - Time to sleep between wakeups
+ *  callback - Function to call when the period expires.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int stm32_rtc_setperiodic(FAR const struct timespec *period,
+                          wakeupcb_t callback);
+
+/****************************************************************************
+ * Name: stm32_rtc_cancelperiodic
+ *
+ * Description:
+ *   Cancel a periodic wakeup
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int stm32_rtc_cancelperiodic(void);
+#endif /* CONFIG_RTC_PERIODIC */
 
 #if defined(__cplusplus)
 }
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_RTC_ALARM */
 #endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_ALARM_H */
