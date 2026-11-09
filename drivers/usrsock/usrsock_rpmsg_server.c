@@ -32,6 +32,7 @@
 #include <poll.h>
 #include <string.h>
 
+#include <net/if.h>
 #include <sys/ioctl.h>
 
 #include <nuttx/kmalloc.h>
@@ -928,6 +929,19 @@ static void usrsock_rpmsg_worker(FAR void *arg)
   if (req.usockid >= 0 &&
       req.usockid < CONFIG_NET_USRSOCK_RPMSG_SERVER_NSOCKS)
     {
+      FAR struct ifconf *ifc = (FAR struct ifconf *)(ack + 1);
+      FAR void *ifcu_buf = ifc->ifc_buf;
+      size_t ifc_len = ifc->ifc_len;
+
+      if (req.cmd == SIOCGIFCONF && ifcu_buf)
+        {
+          /* The list is returned behind the ifconf, in the space left in
+           * this TX buffer before the work struct at its tail.
+           */
+
+          ifc->ifc_buf = (FAR char *)(ifc + 1);
+        }
+
 #ifdef CONFIG_NETDEV_WIRELESS_IOCTL
       FAR struct iwreq *wlack = (FAR struct iwreq *)(ack + 1);
       FAR void *pointer = wlack->u.data.pointer;
@@ -941,8 +955,21 @@ static void usrsock_rpmsg_worker(FAR void *arg)
       ret = psock_ioctl(&priv->socks[req.usockid],
               req.cmd, (unsigned long)(ack + 1));
 
+      if (req.cmd == SIOCGIFCONF && ifcu_buf)
+        {
+          /* netdev_ipv4_ifconf() keeps counting entries that did not fit,
+           * and the client rejects a result larger than its buffer.
+           */
+
+          if (ret >= 0)
+            {
+              ret = MIN(ifc->ifc_len, ifc_len);
+            }
+
+          ifc->ifc_buf = ifcu_buf;
+        }
 #ifdef CONFIG_NETDEV_WIRELESS_IOCTL
-      if (WL_IS80211POINTERCMD(req.cmd) && pointer)
+      else if (WL_IS80211POINTERCMD(req.cmd) && pointer)
         {
           if (ret >= 0)
             {
