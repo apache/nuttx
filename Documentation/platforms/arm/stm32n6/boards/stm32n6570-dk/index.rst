@@ -111,7 +111,7 @@ USER1 PC13  Button B2, EXTI13, high when pressed
 TAMP  PE0   Button B4, EXTI0, high when pressed
 ===== ===== ======================================
 
-The LEDs are available through ``/dev/userleds`` and the button through
+The LEDs are available through ``/dev/userleds`` and the buttons through
 ``/dev/buttons`` in the nsh configuration.
 
 Clocking
@@ -121,8 +121,8 @@ By default the CPU runs at 800 MHz and the system buses at 400 MHz.  PLL1 is
 fed from the 48 MHz HSE crystal, HCLK and the APB clocks run at 200 MHz and
 the timer kernel clock is 200 MHz.  800 MHz requires the VOS high voltage
 range, so the board SMPS is switched to its overdrive output through PF4
-before the PLL is started.  PLL2, PLL3 and PLL4 are started with the ST
-reference settings for the peripheral kernel clocks.
+before the PLL is started.  PLL2, PLL3 and PLL4 are started for the
+peripheral kernel clocks.
 
 ``CONFIG_STM32N6570_DK_CLOCK_HSI`` selects a conservative tree instead: PLL1
 from the internal 64 MHz HSI, CPU 200 MHz, SYSCLK 100 MHz and VOS low.  The
