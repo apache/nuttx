@@ -766,7 +766,7 @@ static int can_recv_filter(FAR struct can_conn_s *conn, canid_t id)
 #endif
 
 /****************************************************************************
- * Name: can_nextconn()
+ * Name: can_conn_next
  *
  * Description:
  *   Traverse the list of allocated NetLink connections
@@ -776,7 +776,7 @@ static int can_recv_filter(FAR struct can_conn_s *conn, canid_t id)
  *
  ****************************************************************************/
 
-FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn)
+FAR struct can_conn_s *can_conn_next(FAR struct can_conn_s *conn)
 {
   if (conn == NULL)
     {
@@ -837,7 +837,7 @@ FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
 #endif
 
   can_conn_list_lock();
-  while ((conn = can_nextconn(conn)) != NULL)
+  while ((conn = can_conn_next(conn)) != NULL)
     {
       if ((conn->dev == NULL && _SS_ISBOUND(conn->sconn.s_flags)) ||
           conn->dev == dev)
