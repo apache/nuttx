@@ -59,10 +59,7 @@ struct epoll_node_s
   struct list_node         rnode;  /* Used to link in the ready list. */
   epoll_data_t             data;
   bool                     queued; /* Whether the node is in the ready list. */
-
-  /* Suppress synchronous rearm notify. */
-
-  bool                     suppress;
+  bool                     armed;  /* Whether the driver poll is set up. */
   struct pollfd_s          pfd;
   FAR struct file         *filep;
   FAR struct epoll_head_s *eph;
@@ -84,6 +81,11 @@ struct epoll_head_s
   struct list_node      ready;   /* The ready list, store all the epoll node
                                   * notified by the driver, pending to be
                                   * delivered by epoll_wait().
+                                  */
+  struct list_node      refresh; /* The refresh list, store level-triggered
+                                  * epoll nodes delivered by the previous
+                                  * epoll_wait(), pending to be re-queried at
+                                  * the beginning of the next epoll_wait().
                                   */
   struct list_node      oneshot; /* The oneshot list, store all the epoll node
                                   * notified after epoll_wait and with
@@ -110,7 +112,7 @@ static int epoll_do_open(FAR struct file *filep);
 static int epoll_do_close(FAR struct file *filep);
 static int epoll_do_poll(FAR struct file *filep,
                          FAR struct pollfd_s *fds, bool setup);
-static void epoll_refresh_node(FAR epoll_head_t *eph, FAR epoll_node_t *epn);
+static void epoll_refresh(FAR epoll_head_t *eph);
 static int epoll_collect(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
                          int maxevents);
 static void epoll_node_dequeue(FAR epoll_head_t *eph, FAR epoll_node_t *epn);
@@ -213,7 +215,21 @@ static int epoll_do_close(FAR struct file *filep)
       nxmutex_destroy(&eph->lock);
       list_for_every_entry(&eph->setup, epn, epoll_node_t, node)
         {
-          file_poll(epn->filep, &epn->pfd, false);
+          if (epn->armed)
+            {
+              file_poll(epn->filep, &epn->pfd, false);
+            }
+
+          file_put(epn->filep);
+        }
+
+      list_for_every_entry(&eph->refresh, epn, epoll_node_t, node)
+        {
+          if (epn->armed)
+            {
+              file_poll(epn->filep, &epn->pfd, false);
+            }
+
           file_put(epn->filep);
         }
 
@@ -278,6 +294,7 @@ static int epoll_do_create(int size, int flags)
 
   list_initialize(&eph->setup);
   list_initialize(&eph->ready);
+  list_initialize(&eph->refresh);
   list_initialize(&eph->oneshot);
   list_initialize(&eph->extend);
   list_initialize(&eph->free);
@@ -303,36 +320,51 @@ static int epoll_do_create(int size, int flags)
 }
 
 /****************************************************************************
- * Name: epoll_refresh_node
+ * Name: epoll_refresh
  *
  * Description:
- *   Re-query the current readiness of a level-triggered node.  The driver
- *   poll is torn down before revents is cleared so an asynchronous
- *   poll_notify() cannot race with the core-side revents reset while the
- *   driver still owns this pollfd.
+ *   Re-query level-triggered nodes that were delivered by the previous
+ *   epoll_wait().  They are refreshed at the beginning of the next wait so
+ *   fd state that remains ready (pipe/eventfd/socket/listener data still
+ *   pending) is reported again, without suppressing real notifications that
+ *   arrive between waits.
  *
  ****************************************************************************/
 
-static void epoll_refresh_node(FAR epoll_head_t *eph, FAR epoll_node_t *epn)
+static void epoll_refresh(FAR epoll_head_t *eph)
 {
+  FAR epoll_node_t *epn;
+  FAR epoll_node_t *tmp;
   irqstate_t flags;
+  int ret;
 
-  /* Drop the driver reference before clearing revents. */
+  nxmutex_lock(&eph->lock);
 
-  file_poll(epn->filep, &epn->pfd, false);
+  list_for_every_entry_safe(&eph->refresh, epn, tmp, epoll_node_t, node)
+    {
+      if (!epn->queued)
+        {
+          flags = spin_lock_irqsave(&eph->ready_lock);
+          epn->pfd.revents = 0;
+          spin_unlock_irqrestore(&eph->ready_lock, flags);
 
-  /* Clear the accumulated revents and ready state, ask the driver to
-   * report whether the state is still ready.
-   */
+          ret = file_poll(epn->filep, &epn->pfd, true);
+          if (ret < 0)
+            {
+              ferr("epoll refresh failed, filep=%p, events=%08" PRIx32 ", "
+                   "ret=%d\n", epn->filep, epn->pfd.events, ret);
 
-  flags = spin_lock_irqsave(&eph->ready_lock);
-  epn->queued      = false;
-  epn->pfd.revents = 0;
-  spin_unlock_irqrestore(&eph->ready_lock, flags);
+              epn->armed       = epn->pfd.priv != NULL;
+              epn->pfd.revents = POLLERR;
+              epoll_node_ready(eph, epn);
+            }
+        }
 
-  epn->suppress = true;
-  file_poll(epn->filep, &epn->pfd, true);
-  epn->suppress = false;
+      list_delete(&epn->node);
+      list_add_tail(&eph->setup, &epn->node);
+    }
+
+  nxmutex_unlock(&eph->lock);
 }
 
 /****************************************************************************
@@ -342,8 +374,8 @@ static void epoll_refresh_node(FAR epoll_head_t *eph, FAR epoll_node_t *epn)
  *   Deliver all the events currently pending in the ready list.  For each
  *   EPOLLONESHOT node, drop its driver poll registration and park it into
  *   the oneshot list until it is re-armed by epoll_ctl().  For every other
- *   (level-triggered) node, keep the registration and re-query whether it
- *   is still ready so that it is reported again by the next epoll_wait().
+ *   (level-triggered) node, keep the registration and park it into the
+ *   refresh list so it can be re-queried by the next epoll_wait().
  *
  * Input Parameters:
  *   eph       - The epoll head pointer
@@ -360,12 +392,10 @@ static int epoll_collect(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
 {
   FAR epoll_node_t *epn;
   struct list_node  deliver;
-  struct list_node  refresh;
   irqstate_t        flags;
   int               i = 0;
 
   list_initialize(&deliver);
-  list_initialize(&refresh);
 
   nxmutex_lock(&eph->lock);
 
@@ -373,11 +403,11 @@ static int epoll_collect(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
    * ready list into a private queue, so nodes not delivered to userspace
    * stay queued for the next epoll_wait().
    *
-   * Keep epn->queued true while a node is on the private deliver/refresh
-   * queues.  The same rnode link is still in use there, so a concurrent
+   * Keep epn->queued true while a node is on the private deliver queue.
+   * The same rnode link is still in use there, so a concurrent
    * driver notification must not enqueue it into eph->ready again.  The
    * epoll mutex also prevents epoll_ctl() from trying to dequeue a node
-   * from these private queues.
+   * from this private queue.
    */
 
   flags = spin_lock_irqsave(&eph->ready_lock);
@@ -420,7 +450,12 @@ static int epoll_collect(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
            * it is re-armed by epoll_ctl(EPOLL_CTL_MOD).
            */
 
-          file_poll(epn->filep, &epn->pfd, false);
+          if (epn->armed)
+            {
+              file_poll(epn->filep, &epn->pfd, false);
+              epn->armed = false;
+            }
+
           flags = spin_lock_irqsave(&eph->ready_lock);
           epn->queued = false;
           spin_unlock_irqrestore(&eph->ready_lock, flags);
@@ -430,25 +465,18 @@ static int epoll_collect(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
         }
       else
         {
-          /* Level-triggered: keep ownership stable and re-query readiness
-           * below while still holding eph->lock.  The driver may notify this
-           * node again during refresh, but the callback only takes the ready
-           * spinlock, so it cannot deadlock with the epoll mutex.
+          /* Level-triggered: keep ownership stable, allow new asynchronous
+           * notifications to queue again, and re-query readiness at the
+           * beginning of the next epoll_wait().
            */
 
-          list_add_tail(&refresh, &epn->rnode);
+          flags = spin_lock_irqsave(&eph->ready_lock);
+          epn->queued = false;
+          spin_unlock_irqrestore(&eph->ready_lock, flags);
+
+          list_delete(&epn->node);
+          list_add_tail(&eph->refresh, &epn->node);
         }
-    }
-
-  /* Phase 3: re-query the level-triggered nodes while holding eph->lock so
-   * epoll_ctl(DEL) or close cannot recycle a node that is still linked in
-   * the private refresh list.
-   */
-
-  while (!list_is_empty(&refresh))
-    {
-      epn = container_of(list_remove_head(&refresh), epoll_node_t, rnode);
-      epoll_refresh_node(eph, epn);
     }
 
   nxmutex_unlock(&eph->lock);
@@ -513,9 +541,8 @@ static void epoll_node_ready(FAR epoll_head_t *eph, FAR epoll_node_t *epn)
  *
  * Description:
  *   (Re-)arm a node: clear its pending ready state, update the expected
- *   events and register (or refresh) its driver poll.  If the driver does
- *   not support the persistent model yet, fall back to the legacy teardown
- *   + set-up cycle.  Caller must hold the eph->lock mutex.
+ *   events and register its driver poll.  Caller must hold the eph->lock
+ *   mutex.
  *
  ****************************************************************************/
 
@@ -549,6 +576,8 @@ static int epoll_arm_node(FAR epoll_head_t *eph, FAR epoll_node_t *epn,
   ret = file_poll(epn->filep, &epn->pfd, true);
   if (ret < 0)
     {
+      epn->armed = false;
+
       if (was_bound)
         {
           int ret2;
@@ -563,6 +592,7 @@ static int epoll_arm_node(FAR epoll_head_t *eph, FAR epoll_node_t *epn,
           ret2 = file_poll(epn->filep, &epn->pfd, true);
           if (ret2 >= 0)
             {
+              epn->armed = true;
               epoll_node_ready(eph, epn);
             }
         }
@@ -570,6 +600,7 @@ static int epoll_arm_node(FAR epoll_head_t *eph, FAR epoll_node_t *epn,
       return ret;
     }
 
+  epn->armed = true;
   return OK;
 }
 
@@ -614,13 +645,6 @@ static void epoll_default_cb(FAR struct pollfd_s *fds)
   int semcount;
 
   flags = spin_lock_irqsave(&eph->ready_lock);
-  if (epn->suppress)
-    {
-      fds->revents = 0;
-      spin_unlock_irqrestore(&eph->ready_lock, flags);
-      return;
-    }
-
   if (fds->revents != 0)
     {
       if (!epn->queued)
@@ -739,6 +763,15 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
               }
           }
 
+        list_for_every_entry(&eph->refresh, epn, epoll_node_t, node)
+          {
+            if (epn->pfd.fd == fd)
+              {
+                ret = -EEXIST;
+                goto err;
+              }
+          }
+
         list_for_every_entry(&eph->oneshot, epn, epoll_node_t, node)
           {
             if (epn->pfd.fd == fd)
@@ -775,11 +808,14 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
         epn = container_of(list_remove_head(&eph->free), epoll_node_t, node);
         epn->eph       = eph;
         epn->queued    = false;
-        epn->suppress  = false;
+        epn->armed     = false;
         epn->data      = ev->data;
         epn->pfd.fd    = fd;
         epn->pfd.arg   = epn;
         epn->pfd.cb    = epoll_default_cb;
+        epn->pfd.priv  = NULL;
+        epn->pfd.filep = NULL;
+        epn->pfd.revents = 0;
 
         ret = file_get(fd, &epn->filep);
         if (ret < 0)
@@ -806,7 +842,28 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
             if (epn->pfd.fd == fd)
               {
                 epoll_node_dequeue(eph, epn);
-                file_poll(epn->filep, &epn->pfd, false);
+                if (epn->armed)
+                  {
+                    file_poll(epn->filep, &epn->pfd, false);
+                  }
+
+                file_put(epn->filep);
+                list_delete(&epn->node);
+                list_add_tail(&eph->free, &epn->node);
+                goto out;
+              }
+          }
+
+        list_for_every_entry(&eph->refresh, epn, epoll_node_t, node)
+          {
+            if (epn->pfd.fd == fd)
+              {
+                epoll_node_dequeue(eph, epn);
+                if (epn->armed)
+                  {
+                    file_poll(epn->filep, &epn->pfd, false);
+                  }
+
                 file_put(epn->filep);
                 list_delete(&epn->node);
                 list_add_tail(&eph->free, &epn->node);
@@ -848,6 +905,23 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
                       }
                   }
 
+                goto out;
+              }
+          }
+
+        list_for_every_entry(&eph->refresh, epn, epoll_node_t, node)
+          {
+            if (epn->pfd.fd == fd)
+              {
+                epn->data = ev->data;
+                ret = epoll_arm_node(eph, epn, ev->events);
+                if (ret < 0)
+                  {
+                    goto err;
+                  }
+
+                list_delete(&epn->node);
+                list_add_tail(&eph->setup, &epn->node);
                 goto out;
               }
           }
@@ -908,10 +982,11 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
       goto out;
     }
 
-  /* All the registered driver polls are persistently armed, so there is no
-   * need to (re)register anything before waiting.  Just wait until a driver
-   * notification wakes us up.
+  /* Refresh level-triggered nodes delivered by the previous wait before
+   * blocking, so still-ready descriptors are reported again.
    */
+
+  epoll_refresh(eph);
 
 retry:
 
@@ -997,10 +1072,11 @@ int epoll_wait(int epfd, FAR struct epoll_event *evs,
       goto out;
     }
 
-  /* All the registered driver polls are persistently armed, so there is no
-   * need to (re)register anything before waiting.  Just wait until a driver
-   * notification wakes us up.
+  /* Refresh level-triggered nodes delivered by the previous wait before
+   * blocking, so still-ready descriptors are reported again.
    */
+
+  epoll_refresh(eph);
 
 retry:
 
