@@ -25,10 +25,6 @@ if(CONFIG_NET_CAN)
   # Socket layer
   list(APPEND SRCS can_raw.c)
 
-  if(CONFIG_NET_CAN_WRITE_BUFFERS)
-    list(APPEND SRCS can_sendmsg_buffered.c)
-  endif()
-
   if(CONFIG_NET_CANPROTO_OPTIONS)
     list(APPEND SRCS can_setsockopt.c can_getsockopt.c)
   endif()
