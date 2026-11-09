@@ -296,7 +296,6 @@ static void host_libusb_isotransfer_cb(struct libusb_transfer *transfer)
   struct host_libusb_hostdev_s *dev = &g_libusb_dev;
   struct libusb_iso_packet_descriptor *packet;
   struct host_usb_datareq_s *datareq;
-  usbhost_asynch_t callback;
   size_t length;
   int i;
 
@@ -309,30 +308,41 @@ static void host_libusb_isotransfer_cb(struct libusb_transfer *transfer)
     }
 
   datareq = (struct host_usb_datareq_s *)transfer->user_data;
-  callback = datareq->callback;
 
-  for (i = 0; i < transfer->num_iso_packets; i++)
+  if (transfer->status != LIBUSB_TRANSFER_COMPLETED)
     {
-      packet = &transfer->iso_packet_desc[i];
-      length = packet->status == LIBUSB_TRANSFER_COMPLETED ?
-                                      packet->actual_length : 0;
-
-      /* If there are multiple isoc packages, only the actual length
-       * of the data in each package is returned here. Because each
-       * package has the same size, the number of packages returned
-       * needs to be recorded in class driver.
+      DEBUG("isochronous transfer failed: %d\n", transfer->status);
+      datareq->success = false;
+    }
+  else
+    {
+      /* Report the length of every packet separately: a class driver cannot
+       * recover the packet boundaries from the total, and a packet may be
+       * short or empty.
        */
 
-      callback(datareq->priv, length);
+      datareq->success = true;
+
+      for (i = 0; i < transfer->num_iso_packets; i++)
+        {
+          packet = &transfer->iso_packet_desc[i];
+          length = packet->status == LIBUSB_TRANSFER_COMPLETED ?
+                                          packet->actual_length : 0;
+
+          if (datareq->pktlen != NULL && i < datareq->npackets)
+            {
+              datareq->pktlen[i] = length;
+            }
+
+          datareq->xfer += length;
+        }
     }
 
-  /* The class driver has been told about every packet already.  Hand the
-   * request back to the host thread, which owns its lifetime: freeing it
-   * here would release NuttX heap memory from the libusb event thread.
+  /* Completion is reported through the same queue as every other transfer
+   * type, so that the class driver's callback runs on a NuttX thread rather
+   * than on the libusb event thread.
    */
 
-  datareq->callback = NULL;
-  datareq->success  = true;
   host_libusb_fifopush(&dev->completed, datareq);
 
   host_uninterruptible_no_return(libusb_free_transfer, transfer);

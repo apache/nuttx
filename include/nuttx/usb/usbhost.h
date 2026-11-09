@@ -558,6 +558,52 @@
 #endif
 
 /****************************************************************************
+ * Name: DRVR_ISOCASYNCH
+ *
+ * Description:
+ *   Queue an isochronous transfer covering several packets and return
+ *   immediately.  When the transfer completes the callback is invoked with
+ *   the provided argument and, as the result, the total number of bytes
+ *   received or a negated errno value.
+ *
+ *   The packet boundaries carry meaning to the class driver and cannot be
+ *   recovered from a single byte count: a packet may be short or empty, and
+ *   the protocols layered on isochronous endpoints put a header at the start
+ *   of every packet.  The transfer therefore reports the length of each
+ *   packet separately in isoc->pktlen[].  Packet i starts at
+ *   isoc->buffer[i * isoc->pktsize] and is isoc->pktlen[i] bytes long.
+ *
+ *   This method is optional.  A host controller driver that does not
+ *   implement it leaves the pointer NULL, and this macro fails cleanly with
+ *   -ENOSYS.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *      call to the class create() method.
+ *   ep - The isochronous endpoint on which to perform the transfer.
+ *   isoc - Describes the transfer.  It must remain valid, together with the
+ *      buffer and the packet length array it refers to, until the callback
+ *      runs.
+ *   callback - This function will be called when the transfer completes.
+ *   arg - The arbitrary parameter that will be passed to the callback
+ *      function when the transfer completes.
+ *
+ * Returned Value:
+ *   On success, zero (OK) is returned.  On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+#  define DRVR_ISOCASYNCH(drvr,ep,isoc,callback,arg) \
+     ((drvr)->isocasynch ? \
+      (drvr)->isocasynch(drvr,ep,isoc,callback,arg) : -ENOSYS)
+#endif
+
+/****************************************************************************
  * Name: DRVR_CANCEL
  *
  * Description:
@@ -805,6 +851,26 @@ struct usbhost_epdesc_s
   uint16_t mxpacketsize;               /* Max packetsize */
 };
 
+/****************************************************************************
+ * Name: struct usbhost_isoc_s
+ *
+ * Description:
+ *   Describes an isochronous transfer covering several packets.  The buffer
+ *   holds isoc->npackets packets of isoc->pktsize bytes each, and the length
+ *   actually received in every one of them is reported in isoc->pktlen[].
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+struct usbhost_isoc_s
+{
+  FAR uint8_t *buffer;                 /* Transfer buffer, npackets*pktsize */
+  FAR uint16_t *pktlen;                /* Length received in each packet */
+  uint16_t pktsize;                    /* Size of one packet in the buffer */
+  uint16_t npackets;                   /* Number of packets in the transfer */
+};
+#endif
+
 /* struct usbhost_connection_s provides as interface between
  * platform-specific connection monitoring and the USB host driver
  * connection and enumeration logic.
@@ -938,6 +1004,20 @@ struct usbhost_driver_s
   CODE int (*asynch)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                      FAR uint8_t *buffer, size_t buflen,
                      usbhost_asynch_t callback, FAR void *arg);
+
+  /* Queue an isochronous transfer covering several packets and return
+   * immediately, reporting the length of each packet separately when it
+   * completes.  See DRVR_ISOCASYNCH().
+   *
+   * This method is optional.  Leave it NULL if the controller cannot do
+   * isochronous transfers or cannot expose packet boundaries.
+   */
+
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+  CODE int (*isocasynch)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                         FAR struct usbhost_isoc_s *isoc,
+                         usbhost_asynch_t callback, FAR void *arg);
+#endif
 #endif
 
   /* Cancel any pending synchronous or asynchronous transfer on an

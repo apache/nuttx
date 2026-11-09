@@ -640,6 +640,73 @@ static int sim_usbhost_asynch(struct usbhost_driver_s *drvr,
 }
 
 /****************************************************************************
+ * Name: sim_usbhost_isocasynch
+ *
+ * Description:
+ *   Queue an isochronous transfer covering several packets and return
+ *   immediately.  The length of every packet is reported on completion, see
+ *   DRVR_ISOCASYNCH().
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+static int sim_usbhost_isocasynch(struct usbhost_driver_s *drvr,
+                                  usbhost_ep_t ep,
+                                  FAR struct usbhost_isoc_s *isoc,
+                                  usbhost_asynch_t callback, void *arg)
+{
+  struct sim_usbhost_s *priv = (struct sim_usbhost_s *)drvr;
+  struct sim_epinfo_s *epinfo = (struct sim_epinfo_s *)ep;
+  struct host_usb_datareq_s *datareq;
+  int ret;
+
+  DEBUGASSERT(epinfo != NULL && isoc != NULL);
+
+  if (isoc->buffer == NULL || isoc->pktlen == NULL ||
+      isoc->npackets == 0 || isoc->pktsize == 0)
+    {
+      return -EINVAL;
+    }
+
+  if (epinfo->xfrtype != USB_EP_ATTR_XFER_ISOC)
+    {
+      return -EINVAL;
+    }
+
+  datareq = sim_usbhost_allocrq();
+  if (!datareq)
+    {
+      uerr("sim_usbhost_allocrq fail\n");
+      return -ENOMEM;
+    }
+
+  datareq->addr = (epinfo->dirin << 7) + epinfo->epno;
+  datareq->len = isoc->pktsize * isoc->npackets;
+  datareq->xfrtype = epinfo->xfrtype;
+  datareq->maxpacketsize = isoc->pktsize;
+  datareq->callback = callback;
+  datareq->data = isoc->buffer;
+  datareq->priv = arg;
+  datareq->npackets = isoc->npackets;
+  datareq->pktlen = isoc->pktlen;
+
+  nxmutex_lock(&priv->lock);
+
+  ret = host_usbhost_eptrans(datareq);
+
+  nxmutex_unlock(&priv->lock);
+
+  if (ret < 0)
+    {
+      uerr("host_usbhost_eptrans fail: %d\n", ret);
+      sim_usbhost_freerq(datareq);
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: sim_usbhost_transfer
  ****************************************************************************/
 
@@ -826,6 +893,9 @@ int sim_usbhost_initialize(void)
   priv->drvr.disconnect     = sim_usbhost_disconnect;
 #ifdef CONFIG_USBHOST_ASYNCH
   priv->drvr.asynch         = sim_usbhost_asynch;
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+  priv->drvr.isocasynch     = sim_usbhost_isocasynch;
+#endif
 #endif
 
   /* Initialize the public port representation */
