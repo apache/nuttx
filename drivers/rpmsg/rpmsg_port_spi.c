@@ -349,23 +349,32 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
     {
       txhdr->cmd = RPMSG_PORT_SPI_CMD_SHUTDOWN;
     }
-#ifdef CONFIG_RPMSG_PORT_RETX
-  else if (rpmsg_port_retx_is_pending(&rpspi->port))
+  else if (rpspi->txavail > 0)
     {
-      node = rpmsg_port_retx_get(&rpspi->port);
-      node->retry_count++;
-      txhdr = RPMSG_PORT_NODE_TO_BUF(&rpspi->port.txq, node);
-    }
-#endif
-  else if (rpspi->txavail > 0 &&
-           rpmsg_port_queue_nused(&rpspi->port.txq) > 0)
-    {
-      txhdr = rpmsg_port_queue_get_buffer(&rpspi->port.txq, false);
-      DEBUGASSERT(txhdr != NULL);
+      /* A retransmitted frame occupies a peer rx buffer as well */
 
-      txhdr->cmd = RPMSG_PORT_SPI_CMD_DATA;
-      rpspi->txhdr = txhdr;
-      rpmsg_port_retx_add(&rpspi->port, txhdr);
+#ifdef CONFIG_RPMSG_PORT_RETX
+      if (rpmsg_port_retx_is_pending(&rpspi->port))
+        {
+          node = rpmsg_port_retx_get(&rpspi->port);
+          node->retry_count++;
+          txhdr = RPMSG_PORT_NODE_TO_BUF(&rpspi->port.txq, node);
+        }
+      else
+#endif
+      if (rpmsg_port_queue_nused(&rpspi->port.txq) > 0)
+        {
+          txhdr = rpmsg_port_queue_get_buffer(&rpspi->port.txq, false);
+          DEBUGASSERT(txhdr != NULL);
+
+          txhdr->cmd = RPMSG_PORT_SPI_CMD_DATA;
+          rpspi->txhdr = txhdr;
+          rpmsg_port_retx_add(&rpspi->port, txhdr);
+        }
+      else
+        {
+          txhdr->cmd = RPMSG_PORT_SPI_CMD_AVAIL;
+        }
     }
   else
     {
@@ -575,9 +584,10 @@ out:
     {
       rpmsg_port_spi_exchange(rpspi);
     }
-  else if (!rpmsg_port_retx_is_empty(&rpspi->port) ||
-      (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTED &&
-      rpspi->txavail > 0 && rpmsg_port_queue_nused(&rpspi->port.txq) > 0))
+  else if (rpspi->txavail > 0 &&
+           (!rpmsg_port_retx_is_empty(&rpspi->port) ||
+            (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTED &&
+             rpmsg_port_queue_nused(&rpspi->port.txq) > 0)))
     {
       IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
     }
