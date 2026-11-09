@@ -1168,6 +1168,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                         {
                           stream_puts(start, litlen, stream);
                         }
+
+                      if (c == '\0')
+                        {
+                          stream_putc('%', stream);
+                        }
                     }
 
                   break;
@@ -1197,6 +1202,16 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
               c = fmt_char(fmt);
               if (c != '%')
                 {
+                  if (c == '\0')
+                    {
+#ifdef CONFIG_LIBC_NUMBERED_ARGS
+                      if (stream != NULL)
+#endif
+                        {
+                          stream_putc('%', stream);
+                        }
+                    }
+
                   break;
                 }
             }
