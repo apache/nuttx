@@ -221,14 +221,23 @@ static int lirc_poll(FAR struct file *filep,
   flags = enter_critical_section();
   if (setup)
     {
-      if (fh->fds)
-        {
-          ret = -EBUSY;
-          goto errout;
-        }
+      /* This is a request to set up the poll.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
+       */
 
-      fh->fds = fds;
-      fds->priv = &fh->fds;
+      if (fds->priv == NULL)
+        {
+          if (fh->fds)
+            {
+              ret = -EBUSY;
+              goto errout;
+            }
+
+          fh->fds = fds;
+          fds->priv = &fh->fds;
+        }
 
       if (!circbuf_is_empty(&fh->buffer))
         {

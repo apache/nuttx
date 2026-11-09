@@ -1605,28 +1605,34 @@ static int cxd5602pwbimu_poll(FAR struct file *filep,
         }
 
       /* This is a request to set up the poll.  Find an available slot for
-       * the poll structure reference.
+       * the poll structure reference.  If the poll is already bound
+       * (fds->priv != NULL) this is a refresh request from a persistent
+       * poll consumer (e.g. epoll): skip the re-binding and just re-query
+       * the current readiness below.
        */
 
-      for (i = 0; i < CONFIG_SENSORS_CXD5602PWBIMU_NPOLLWAITERS; i++)
+      if (fds->priv == NULL)
         {
-          /* Find an available slot */
-
-          if (!priv->fds[i])
+          for (i = 0; i < CONFIG_SENSORS_CXD5602PWBIMU_NPOLLWAITERS; i++)
             {
-              /* Bind the poll structure and this slot */
+              /* Find an available slot */
 
-              priv->fds[i] = fds;
-              fds->priv = &priv->fds[i];
-              break;
+              if (!priv->fds[i])
+                {
+                  /* Bind the poll structure and this slot */
+
+                  priv->fds[i] = fds;
+                  fds->priv = &priv->fds[i];
+                  break;
+                }
             }
-        }
 
-      if (i >= CONFIG_SENSORS_CXD5602PWBIMU_NPOLLWAITERS)
-        {
-          fds->priv = NULL;
-          ret = -EBUSY;
-          goto out;
+          if (i >= CONFIG_SENSORS_CXD5602PWBIMU_NPOLLWAITERS)
+            {
+              fds->priv = NULL;
+              ret = -EBUSY;
+              goto out;
+            }
         }
 
       flags = enter_critical_section();

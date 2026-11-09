@@ -1272,26 +1272,43 @@ static int uvc_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
       return OK;
     }
 
-  /* Setup — find an available slot */
+  /* Setup — find an available slot.  If the poll is already bound
+   * (fds->priv != NULL) this is a refresh request from a persistent
+   * poll consumer (e.g. epoll): skip the re-binding and just re-query
+   * the current readiness below.
+   */
 
   nxmutex_lock(&priv->lock);
   flags = enter_critical_section();
 
-  for (i = 0; i < CONFIG_USBUVC_NPOLLWAITERS; i++)
+  if (fds->priv == NULL)
     {
-      if (!priv->fds[i])
+      for (i = 0; i < CONFIG_USBUVC_NPOLLWAITERS; i++)
         {
-          priv->fds[i] = fds;
-          fds->priv     = &priv->fds[i];
-          break;
+          if (!priv->fds[i])
+            {
+              priv->fds[i] = fds;
+              fds->priv     = &priv->fds[i];
+              break;
+            }
+        }
+
+      if (i >= CONFIG_USBUVC_NPOLLWAITERS)
+        {
+          ret = -EBUSY;
         }
     }
-
-  if (i >= CONFIG_USBUVC_NPOLLWAITERS)
+  else
     {
-      ret = -EBUSY;
+      /* The poll slot this fds is bound to */
+
+      FAR struct pollfd_s **slot =
+        (FAR struct pollfd_s **)fds->priv;
+
+      i = slot - priv->fds;
     }
-  else if (priv->config && priv->streaming)
+
+  if (ret == OK && priv->config && priv->streaming)
     {
       poll_notify(&priv->fds[i], 1, POLLOUT);
     }

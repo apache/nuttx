@@ -1178,13 +1178,23 @@ static int tun_poll(FAR struct file *filep,
 
   if (setup)
     {
-      if (priv->poll_fds)
-        {
-          ret = -EBUSY;
-          goto errout;
-        }
+      /* This is a request to set up the poll.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
+       */
 
-      priv->poll_fds = fds;
+      if (fds->priv == NULL)
+        {
+          if (priv->poll_fds)
+            {
+              ret = -EBUSY;
+              goto errout;
+            }
+
+          priv->poll_fds = fds;
+          fds->priv      = &priv->poll_fds;
+        }
 
       eventset = 0;
 
@@ -1208,7 +1218,13 @@ static int tun_poll(FAR struct file *filep,
     }
   else
     {
-      priv->poll_fds = NULL;
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
+
+      if (slot != NULL)
+        {
+          *slot     = NULL;
+          fds->priv = NULL;
+        }
     }
 
 errout:

@@ -899,6 +899,16 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
 
   if (setup)
     {
+      /* This pollfd is already registered with this socket (persistent
+       * poll consumer, e.g. epoll): refuse to register it a second time
+       * and let the caller rebuild the binding through teardown + setup.
+       */
+
+      if (fds->priv != NULL)
+        {
+          return -EBUSY;
+        }
+
       nxmutex_lock(&conn->polllock);
       for (i = 0; i < CONFIG_NET_RPMSG_NPOLLWAITERS; i++)
         {

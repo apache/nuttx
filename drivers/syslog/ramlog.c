@@ -693,14 +693,19 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
 
   if (setup)
     {
-      /* This is a request to set up the poll.  Find an available
-       * slot for the poll structure reference.
+      /* This is a request to set up the poll.  Bind the poll structure and
+       * this slot.  If the poll is already bound (fds->priv != NULL) this
+       * is a refresh request from a persistent poll consumer (e.g. epoll):
+       * skip the re-binding and just re-query the current readiness below.
        */
 
-      if (!upriv->rl_fds)
+      if (fds->priv == NULL)
         {
-          upriv->rl_fds = fds;
-          fds->priv     = &upriv->rl_fds;
+          if (!upriv->rl_fds)
+            {
+              upriv->rl_fds = fds;
+              fds->priv     = &upriv->rl_fds;
+            }
         }
 
       /* Should immediately notify on any of the requested events? */

@@ -2148,29 +2148,35 @@ static int apds9922_als_poll(FAR struct file *filep,
           goto out;
         }
 
-      /* This is a request to set up the poll. Find an available
-       * slot for the poll structure reference.
+      /* This is a request to set up the poll.  Find an available
+       * slot for the poll structure reference.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
        */
 
-      for (i = 0; i < CONFIG_APDS9922_ALS_NPOLLWAITERS; i++)
+      if (fds->priv == NULL)
         {
-          /* Find an available slot */
-
-          if (!priv->fds_als[i])
+          for (i = 0; i < CONFIG_APDS9922_ALS_NPOLLWAITERS; i++)
             {
-              /* Bind the poll structure and this slot */
+              /* Find an available slot */
 
-              priv->fds_als[i] = fds;
-              fds->priv = &priv->fds_als[i];
-              break;
+              if (!priv->fds_als[i])
+                {
+                  /* Bind the poll structure and this slot */
+
+                  priv->fds_als[i] = fds;
+                  fds->priv = &priv->fds_als[i];
+                  break;
+                }
             }
-        }
 
-      if (i >= CONFIG_APDS9922_ALS_NPOLLWAITERS)
-        {
-          fds->priv = NULL;
-          ret = -EBUSY;
-          goto out;
+          if (i >= CONFIG_APDS9922_ALS_NPOLLWAITERS)
+            {
+              fds->priv = NULL;
+              ret = -EBUSY;
+              goto out;
+            }
         }
     }
   else if (fds->priv)
@@ -2374,29 +2380,35 @@ static int apds9922_ps_poll(FAR struct file *filep,
           goto out;
         }
 
-      /* This is a request to set up the poll. Find an available
-       * slot for the poll structure reference.
+      /* This is a request to set up the poll.  Find an available
+       * slot for the poll structure reference.  If the poll is already
+       * bound (fds->priv != NULL) this is a refresh request from a
+       * persistent poll consumer (e.g. epoll): skip the re-binding and
+       * just re-query the current readiness below.
        */
 
-      for (i = 0; i < CONFIG_APDS9922_PS_NPOLLWAITERS; i++)
+      if (fds->priv == NULL)
         {
-          /* Find an available slot */
-
-          if (!priv->fds_ps[i])
+          for (i = 0; i < CONFIG_APDS9922_PS_NPOLLWAITERS; i++)
             {
-              /* Bind the poll structure and this slot */
+              /* Find an available slot */
 
-              priv->fds_ps[i] = fds;
-              fds->priv = &priv->fds_ps[i];
-              break;
+              if (!priv->fds_ps[i])
+                {
+                  /* Bind the poll structure and this slot */
+
+                  priv->fds_ps[i] = fds;
+                  fds->priv = &priv->fds_ps[i];
+                  break;
+                }
             }
-        }
 
-      if (i >= CONFIG_APDS9922_PS_NPOLLWAITERS)
-        {
-          fds->priv = NULL;
-          ret = -EBUSY;
-          goto out;
+          if (i >= CONFIG_APDS9922_PS_NPOLLWAITERS)
+            {
+              fds->priv = NULL;
+              ret = -EBUSY;
+              goto out;
+            }
         }
     }
   else if (fds->priv)

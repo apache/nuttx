@@ -1198,16 +1198,26 @@ static int sensor_poll(FAR struct file *filep,
   nxrmutex_lock(&upper->lock);
   if (setup)
     {
-      /* Don't have enough space to store fds */
+      /* This is a request to set up the poll.  Bind the poll structure and
+       * this slot.  If the poll is already bound (fds->priv != NULL) this
+       * is a refresh request from a persistent poll consumer (e.g. epoll):
+       * skip the re-binding and just re-query the current readiness below.
+       */
 
-      if (user->fds)
+      if (fds->priv == NULL)
         {
-          ret = -ENOSPC;
-          goto errout;
+          /* Don't have enough space to store fds */
+
+          if (user->fds)
+            {
+              ret = -ENOSPC;
+              goto errout;
+            }
+
+          user->fds = fds;
+          fds->priv = filep;
         }
 
-      user->fds = fds;
-      fds->priv = filep;
       if (lower->ops->fetch)
         {
           /* Always ready, unless a rate was requested: then once per
