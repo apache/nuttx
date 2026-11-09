@@ -123,6 +123,16 @@ alarms with the ``alarm`` example, e.g. ``alarm 5`` or ``alarm -a 1 5``.
 The time survives a reset; without a backup battery it is lost on power
 off.
 
+Serial ports
+============
+
+====== ====== ======================================== ====================
+Port   Device Pins                                     Connection
+====== ====== ======================================== ====================
+USART1 ttyS0  PE5 TX, PE6 RX                           ST-LINK VCP, console
+USART2 ttyS1  PD5 TX, PF6 RX, PG5 CTS, PG14 RTS        STMod+ connector
+====== ====== ======================================== ====================
+
 Clocking
 ========
 

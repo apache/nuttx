@@ -182,6 +182,11 @@
 #define STM32_RCC_CCIPR13_USART1SEL RCC_CCIPR13_USART1SEL_HSI
 #define STM32_USART1_FREQUENCY      STM32_HSI_FREQUENCY
 
+/* USART2 kernel clock: HSI as well */
+
+#define STM32_RCC_CCIPR13_USART2SEL RCC_CCIPR13_USART2SEL_HSI
+#define STM32_USART2_FREQUENCY      STM32_HSI_FREQUENCY
+
 /* I/O voltage domains ******************************************************/
 
 /* VDDIO2 and VDDIO3 are supplied at 1.8 V on the Discovery kit.
@@ -247,6 +252,13 @@
 
 #define GPIO_USART1_TX   (GPIO_USART1_TX_3 | GPIO_SPEED_50MHZ)
 #define GPIO_USART1_RX   (GPIO_USART1_RX_3 | GPIO_SPEED_50MHZ)
+
+/* USART2 (STMod+ connector): PD5=TX, PF6=RX, PG5=CTS, PG14=RTS */
+
+#define GPIO_USART2_TX   (GPIO_USART2_TX_3 | GPIO_SPEED_50MHZ)
+#define GPIO_USART2_RX   (GPIO_USART2_RX_2 | GPIO_SPEED_50MHZ)
+#define GPIO_USART2_CTS  (GPIO_USART2_CTS_3 | GPIO_SPEED_50MHZ)
+#define GPIO_USART2_RTS  (GPIO_USART2_RTS_3 | GPIO_SPEED_50MHZ)
 
 /****************************************************************************
  * Public Data
