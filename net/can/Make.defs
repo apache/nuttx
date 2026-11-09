@@ -26,6 +26,7 @@ ifeq ($(CONFIG_NET_CAN),y)
 
 # Socket layer
 
+SOCK_CSRCS += can_sockif.c
 SOCK_CSRCS += can_raw.c
 
 ifdef CONFIG_NET_CAN_NBUFFERS
