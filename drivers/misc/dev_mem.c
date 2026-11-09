@@ -66,6 +66,7 @@ static ssize_t devmem_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen);
 static ssize_t devmem_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
+static off_t   devmem_seek(FAR struct file *filep, off_t offset, int whence);
 static int     devmem_mmap(FAR struct file *filep,
                            FAR struct mm_map_entry_s *map);
 
@@ -79,7 +80,7 @@ static const struct file_operations g_devmem_fops =
   NULL,                  /* close */
   devmem_read,           /* read */
   devmem_write,          /* write */
-  NULL,                  /* seek */
+  devmem_seek,           /* seek */
   NULL,                  /* ioctl */
   devmem_mmap,           /* mmap */
 };
@@ -96,7 +97,6 @@ static ssize_t devmem_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen)
 {
   FAR struct memory_region_s *region = filep->f_inode->i_private;
-  uintptr_t src = filep->f_pos;
   uintptr_t start;
   uintptr_t end;
   ssize_t len;
@@ -104,13 +104,13 @@ static ssize_t devmem_read(FAR struct file *filep, FAR char *buffer,
 
   for (i = 0; region[i].start != 0 && region[i].end != 0; i++)
     {
-      start = MAX(src, region[i].start);
+      start = region[i].start + filep->f_pos;
       end = MIN(start + buflen, region[i].end);
       len = end - start;
       if (len > 0 && (region[i].flags & PROT_READ))
         {
           memcpy(buffer, (FAR const void *)start, len);
-          filep->f_pos = end;
+          filep->f_pos += len;
           return len;
         }
     }
@@ -126,7 +126,6 @@ static ssize_t devmem_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen)
 {
   FAR struct memory_region_s *region = filep->f_inode->i_private;
-  uintptr_t dest = filep->f_pos;
   uintptr_t start;
   uintptr_t end;
   ssize_t len;
@@ -134,18 +133,57 @@ static ssize_t devmem_write(FAR struct file *filep, FAR const char *buffer,
 
   for (i = 0; region[i].start != 0 && region[i].end != 0; i++)
     {
-      start = MAX(dest, region[i].start);
+      start = region[i].start + filep->f_pos;
       end = MIN(start + buflen, region[i].end);
       len = end - start;
       if (len > 0 && (region[i].flags & PROT_WRITE))
         {
           memcpy((FAR void *)start, buffer, len);
-          filep->f_pos = end;
+          filep->f_pos += len;
           return len;
         }
     }
 
   return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: devmem_seek
+ ****************************************************************************/
+
+static off_t devmem_seek(FAR struct file *filep, off_t offset, int whence)
+{
+  FAR struct memory_region_s *region = filep->f_inode->i_private;
+  int i;
+
+  switch (whence)
+    {
+      case SEEK_CUR:
+        offset += filep->f_pos;
+        break;
+
+      case SEEK_SET:
+        break;
+
+      case SEEK_END:
+        for (i = 0; region[i].start != 0 && region[i].end != 0; i++)
+          {
+            offset += region[i].end - region[i].start;
+          }
+
+        break;
+
+      default:
+        return -EINVAL;
+    }
+
+  if (offset < 0)
+    {
+      return -EINVAL;
+    }
+
+  filep->f_pos = offset;
+  return filep->f_pos;
 }
 
 /****************************************************************************
