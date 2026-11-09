@@ -31,7 +31,9 @@
 #include <nuttx/board.h>
 #include <nuttx/input/buttons.h>
 #include <nuttx/leds/userled.h>
+#include <nuttx/timers/rtc.h>
 
+#include "stm32_rtc.h"
 #include "stm32h573i-dk.h"
 
 /****************************************************************************
@@ -71,6 +73,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to register buttons: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_RTC_DRIVER) && defined(CONFIG_STM32_RTC)
+  /* Register the RTC driver as /dev/rtc0 */
+
+  ret = rtc_initialize(0, stm32_rtc_lowerhalf());
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rtc_initialize() failed: %d\n", ret);
     }
 #endif
 
