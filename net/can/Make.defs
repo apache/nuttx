@@ -33,8 +33,6 @@ else
 SOCK_CSRCS += can_sendmsg.c
 endif
 
-SOCK_CSRCS += can_recvmsg.c
-
 ifeq ($(CONFIG_NET_CANPROTO_OPTIONS),y)
 SOCK_CSRCS += can_setsockopt.c can_getsockopt.c
 endif
