@@ -22,7 +22,7 @@
 
 set(PLATFORM_FLAGS)
 
-if(CONFIG_ARCH_CHIP_TC3XX)
+if(CONFIG_ARCH_CHIP_FAMILY_TC3X)
   if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
     add_compile_options(--default-near-size=0)
     add_compile_options(--cpu=tc39xb)
@@ -30,7 +30,7 @@ if(CONFIG_ARCH_CHIP_TC3XX)
   else()
     list(APPEND PLATFORM_FLAGS -mcpu=tc39xx -mtc162)
   endif()
-elseif(CONFIG_ARCH_CHIP_TC4XX)
+elseif(CONFIG_ARCH_CHIP_FAMILY_TC4X)
   if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
     add_compile_options(--misrac-version=2004 --user-mode=hypervisor)
     add_compile_options(--default-near-size=0)

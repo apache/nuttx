@@ -29,9 +29,9 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_ARCH_CHIP_TC3XX)
+#if defined(CONFIG_ARCH_CHIP_FAMILY_TC3X)
 #  include "hardware/tc3xx_asclin.h"
-#elif defined(CONFIG_ARCH_CHIP_TC4XX)
+#elif defined(CONFIG_ARCH_CHIP_FAMILY_TC4X)
 #  include "hardware/tc4xx_asclin.h"
 #endif
 

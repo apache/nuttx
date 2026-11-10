@@ -46,10 +46,10 @@
 #include "tricore_internal.h"
 #include "tricore_asclin.h"
 
-#if defined(CONFIG_ARCH_CHIP_TC3XX)
+#if defined(CONFIG_ARCH_CHIP_FAMILY_TC3X)
 #  include "hardware/tc3xx_port.h"
 #  include "tc3xx_wdt.h"
-#elif defined(CONFIG_ARCH_CHIP_TC4XX)
+#elif defined(CONFIG_ARCH_CHIP_FAMILY_TC4X)
 #  include "hardware/tc4xx_port.h"
 #endif
 
@@ -240,7 +240,7 @@ static void asclin_modify(uintptr_t reg, uint32_t clear, uint32_t set)
 
 static void asclin_pin_config(uintptr_t port, int pin, bool tx)
 {
-#if defined(CONFIG_ARCH_CHIP_TC3XX)
+#if defined(CONFIG_ARCH_CHIP_FAMILY_TC3X)
   int shift = TC3XX_PORT_IOCR_SHIFT(pin);
 
   asclin_modify(TC3XX_PORT_IOCR(port, pin), TC3XX_PORT_IOCR_MASK << shift,
@@ -251,7 +251,7 @@ static void asclin_pin_config(uintptr_t port, int pin, bool tx)
   asclin_modify(TC3XX_PORT_PDR(port, pin), TC3XX_PORT_PDR_MASK << shift,
                 TC3XX_PORT_PAD_SPEED1 << shift);
   tc3xx_wdt_cpu_endinit(true);
-#elif defined(CONFIG_ARCH_CHIP_TC4XX)
+#elif defined(CONFIG_ARCH_CHIP_FAMILY_TC4X)
   uintptr_t drvcfg = TC4XX_PORT_DRVCFG(port, pin);
 
   asclin_modify(drvcfg, TC4XX_PORT_DRVCFG_MODE_MASK,
@@ -359,11 +359,11 @@ static void asclin_init(struct up_dev_s *priv)
 {
   /* Enable the module, under the CPU ENDINIT on TC3xx */
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
   tc3xx_wdt_cpu_endinit(false);
 #endif
   asclin_modify(ASCLIN_REG(priv, CLC), ASCLIN_CLC_DISR, 0);
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
   tc3xx_wdt_cpu_endinit(true);
 #endif
 

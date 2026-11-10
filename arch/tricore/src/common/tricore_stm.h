@@ -37,7 +37,7 @@
  * of the CPU0 SFR space and has a single 64-bit timer register.
  */
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
 #  define TRICORE_STM0_BASE        0xf8800000  /* MODULE_CPU0 */
 #  define TRICORE_STM0_IRQ         10          /* SRC_STMCPU0_SR2 */
 

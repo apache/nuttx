@@ -33,7 +33,7 @@
 
 #define TRICORE_PSW_RESET  0x980   /* Supervisor, call depth counting on */
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
 #  define TC4XX_BOOT_SP    0x7010eb00
 #  define TC4XX_BOOT_FCX   0x000743b0  /* Boot CSA 0x7010ec00 */
 #  define TC4XX_PSW_VIRT   0xb00       /* PSW for disabling the virtualization */
@@ -59,7 +59,7 @@
 	.text
 	.type	tricore_head, %function
 tricore_head:
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
 	movh.a	%a15, hi:__TRAPTAB_CPU0
 	lea	%a15, [%a15]lo:__TRAPTAB_CPU0
 	mov.d	%d0, %a15
@@ -101,7 +101,7 @@ tricore_head:
 	lea	%a15, [%a15]lo:tricore_start
 	ji	%a15
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
 /****************************************************************************
  * Name: tricore_virt_off
  *
@@ -141,7 +141,7 @@ tricore_virt_off:
 	.global	__start
 	.type	__start, %function
 __start:
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
 	movh.a	%sp, hi:TC4XX_BOOT_SP
 	lea	%sp, [%sp]lo:TC4XX_BOOT_SP
 #else
