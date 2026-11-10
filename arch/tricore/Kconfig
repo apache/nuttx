@@ -119,8 +119,8 @@ endchoice # AURIX family
 
 config ARCH_CHIP
 	string
-	default "tc3xx"		if ARCH_CHIP_TC3X
-	default "tc4xx"		if ARCH_CHIP_TC4X
+	default "tc3x"		if ARCH_CHIP_TC3X
+	default "tc4x"		if ARCH_CHIP_TC4X
 
 config ARCH_IRQ_DISABLE_PRIORITY
 	int "IRQ disable priority threshold"
@@ -165,7 +165,7 @@ config ARCH_HAVE_PPRS
 config HAVE_SECURITY_CORE
 	bool
 	---help---
-		In addition to the 6 cores, tc4xx also has one more security core.
+		In addition to the 6 cores, tc4x also has one more security core.
 
 config CPU_COREID
 	int "TRICORE CPU CORE ID"
@@ -183,11 +183,11 @@ config TRICORE_TRAP_ALERT
 source "arch/tricore/src/common/aurix/Kconfig"
 
 if ARCH_CHIP_TC3X
-source "arch/tricore/src/tc3xx/Kconfig"
+source "arch/tricore/src/tc3x/Kconfig"
 endif
 
 if ARCH_CHIP_TC4X
-source "arch/tricore/src/tc4xx/Kconfig"
+source "arch/tricore/src/tc4x/Kconfig"
 endif
 
 endif # ARCH_TRICORE
