@@ -180,9 +180,9 @@ static int authcompute(struct cryptop *crp, struct cryptodesc *crd,
             return -EINVAL;
           }
 
-          axf->final(aalg, data->hw_ictx);
-          axf->update(data->hw_octx, aalg, axf->hashsize);
-          axf->final(aalg, data->hw_octx);
+        axf->final(aalg, data->hw_ictx);
+        axf->update(data->hw_octx, aalg, axf->hashsize);
+        axf->final(aalg, data->hw_octx);
 
         break;
     }
@@ -267,7 +267,7 @@ static int esp32c3_newsession(uint32_t *sid, struct cryptoini *cri)
       switch (cri->cri_alg)
         {
           case CRYPTO_AES_CBC:
-              break;
+            break;
           case CRYPTO_AES_CTR:
             if ((cri->cri_klen / 8 - 4) != 16 &&
                 (cri->cri_klen / 8 -4) != 32)
@@ -286,7 +286,7 @@ static int esp32c3_newsession(uint32_t *sid, struct cryptoini *cri)
           case CRYPTO_SHA2_256_HMAC:
             axf = &g_auth_hash_hmac_sha256_esp32c3;
             goto common;
-          common:
+            common:
             data->hw_ictx = kmm_malloc(axf->ctxsize);
             if (data->hw_ictx == NULL)
               {

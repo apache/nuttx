@@ -74,6 +74,7 @@ void gd32_syscfg_bootmode_config(uint8_t syscfg_bootmode)
 void gd32_syscfg_fmc_swap_config(uint32_t syscfg_fmc_swap)
 {
   uint32_t regval;
+
   regval = getreg32(GD32_SYSCFG_CFG0);
   regval &= ~SYSCFG_CFG0_FMC_SWP_MASK;
   regval |= syscfg_fmc_swap;
@@ -113,32 +114,32 @@ void gd32_syscfg_exti_line_config(uint8_t exti_port, uint8_t exti_pin)
 
   switch (exti_pin / SYSCFG_EXTI_SS_JSTEP)
     {
-    /* EXTI source line(0..3) */
+      /* EXTI source line(0..3) */
 
-    case SYSCFG_EXTISS0:
-      regaddr = GD32_SYSCFG_EXTISS0;
-      break;
+      case SYSCFG_EXTISS0:
+        regaddr = GD32_SYSCFG_EXTISS0;
+        break;
 
-    /* EXTI source line(4..7) */
+      /* EXTI source line(4..7) */
 
-    case SYSCFG_EXTISS1:
-      regaddr = GD32_SYSCFG_EXTISS1;
-      break;
+      case SYSCFG_EXTISS1:
+        regaddr = GD32_SYSCFG_EXTISS1;
+        break;
 
-    /* EXTI source line(8..11) */
+      /* EXTI source line(8..11) */
 
-    case SYSCFG_EXTISS2:
-      regaddr = GD32_SYSCFG_EXTISS2;
-      break;
+      case SYSCFG_EXTISS2:
+        regaddr = GD32_SYSCFG_EXTISS2;
+        break;
 
-    /* EXTI source line(12..15) */
+      /* EXTI source line(12..15) */
 
-    case SYSCFG_EXTISS3:
-      regaddr = GD32_SYSCFG_EXTISS3;
-      break;
-    default:
-      DEBUGASSERT(false);
-      break;
+      case SYSCFG_EXTISS3:
+        regaddr = GD32_SYSCFG_EXTISS3;
+        break;
+      default:
+        DEBUGASSERT(false);
+        break;
     }
 
   regval = getreg32(regaddr);

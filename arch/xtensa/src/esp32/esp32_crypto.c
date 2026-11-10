@@ -343,21 +343,21 @@ static int authcompute(struct cryptop *crp, struct cryptodesc *crd,
             return -EINVAL;
           }
 
-          axf->final(aalg, data->hw_ictx);
+        axf->final(aalg, data->hw_ictx);
 
-          for (int k = 0; k < crd->crd_klen / 8; k++)
+        for (int k = 0; k < crd->crd_klen / 8; k++)
           {
             crd->crd_key[k] ^= HMAC_OPAD_VAL;
           }
 
-          axf->update(data->hw_octx, (uint8_t *)crd->crd_key,
-                      crd->crd_klen / 8);
+        axf->update(data->hw_octx, (uint8_t *)crd->crd_key,
+                    crd->crd_klen / 8);
 
-          axf->update(data->hw_octx, hmac_opad_buffer,
-                      axf->blocksize - (crd->crd_klen / 8));
+        axf->update(data->hw_octx, hmac_opad_buffer,
+                    axf->blocksize - (crd->crd_klen / 8));
 
-          axf->update(data->hw_octx, aalg, axf->hashsize);
-          axf->final(aalg, data->hw_octx);
+        axf->update(data->hw_octx, aalg, axf->hashsize);
+        axf->final(aalg, data->hw_octx);
 
         break;
     }
@@ -377,7 +377,9 @@ static void esp32_pbkdf2_rekey(struct esp32_crypto_data *data,
 
   memcpy(keybuf, key, klen);
   for (k = 0; k < klen; k++)
-    keybuf[k] ^= HMAC_IPAD_VAL;
+    {
+      keybuf[k] ^= HMAC_IPAD_VAL;
+    }
 
   axf->init(data->hw_ictx);
   axf->update(data->hw_ictx, keybuf, klen);
@@ -439,10 +441,13 @@ int esp32_pbkdf2(struct cryptop *crp,
           memcpy(U, macbuf, axf->hashsize);
 
           for (j = 0; j < axf->hashsize; j++)
-            T[j] ^= U[j];
+            {
+              T[j] ^= U[j];
+            }
         }
 
       size_t tocopy = MIN(crp->crp_olen - generated, axf->hashsize);
+
       memcpy(crp->crp_mac + generated, T, tocopy);
       generated += tocopy;
     }
@@ -549,15 +554,15 @@ static int esp32_newsession(uint32_t *sid, struct cryptoini *cri)
             axf = &g_auth_hash_sha2_512_esp32;
             goto common;
             common:
-              data->hw_ictx = kmm_malloc(axf->ctxsize);
-              if (data->hw_ictx == NULL)
-                {
-                  kmm_free(data);
-                  return -ENOBUFS;
-                }
+            data->hw_ictx = kmm_malloc(axf->ctxsize);
+            if (data->hw_ictx == NULL)
+              {
+                kmm_free(data);
+                return -ENOBUFS;
+              }
 
-              axf->init(data->hw_ictx);
-              data->hw_axf = axf;
+            axf->init(data->hw_ictx);
+            data->hw_axf = axf;
             break;
           case CRYPTO_SHA1_HMAC:
           case CRYPTO_PBKDF2_HMAC_SHA1:
@@ -567,7 +572,7 @@ static int esp32_newsession(uint32_t *sid, struct cryptoini *cri)
           case CRYPTO_PBKDF2_HMAC_SHA256:
             axf = &g_auth_hash_hmac_sha256_esp32;
             goto common__hmac;
-          common__hmac:
+            common__hmac:
             data->hw_ictx = kmm_malloc(axf->ctxsize);
             if (data->hw_ictx == NULL)
               {
@@ -721,6 +726,7 @@ static int esp32_process(struct cryptop *crp)
   uint8_t iv[AESCTR_BLOCKSIZE];
   uint32_t lid;
   int err = 0;
+
   lid = crp->crp_sid & 0xffffffff;
 
   /* Go through crypto descriptors, processing as we go */
@@ -791,7 +797,7 @@ static int esp32_process(struct cryptop *crp)
           case CRYPTO_PBKDF2_HMAC_SHA256:
             esp32_pbkdf2(crp, crd, data, crp->crp_buf);
 
-          break;
+            break;
           default:
             return -EINVAL;
         }

@@ -1726,20 +1726,20 @@ static void rndis_rdcomplete(FAR struct usbdev_ep_s *ep,
 
   switch (req->result)
     {
-    case 0: /* Normal completion */
-      ret = rndis_recvpacket(priv, req->buf, req->xfrd);
-      DEBUGASSERT(ret != -ENOMEM);
-      break;
+      case 0: /* Normal completion */
+        ret = rndis_recvpacket(priv, req->buf, req->xfrd);
+        DEBUGASSERT(ret != -ENOMEM);
+        break;
 
-    case -ESHUTDOWN: /* Disconnection */
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
-      leave_critical_section(flags);
-      return;
+      case -ESHUTDOWN: /* Disconnection */
+        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
+        leave_critical_section(flags);
+        return;
 
-    default: /* Some other error occurred */
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDUNEXPECTED),
-               (uint16_t)-req->result);
-      break;
+      default: /* Some other error occurred */
+        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDUNEXPECTED),
+                 (uint16_t)-req->result);
+        break;
     };
 
   if (ret == OK)
@@ -1792,17 +1792,17 @@ static void rndis_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   switch (req->result)
     {
-    case OK: /* Normal completion */
-      priv->rndis_host_rx_count++;
-      break;
+      case OK: /* Normal completion */
+        priv->rndis_host_rx_count++;
+        break;
 
-    case -ESHUTDOWN: /* Disconnection */
-      break;
+      case -ESHUTDOWN: /* Disconnection */
+        break;
 
-    default: /* Some other error occurred */
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRUNEXPECTED),
-               (uint16_t)-req->result);
-      break;
+      default: /* Some other error occurred */
+        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRUNEXPECTED),
+                 (uint16_t)-req->result);
+        break;
     }
 
   leave_critical_section(flags);
@@ -2489,158 +2489,164 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
   switch (ctrl->type & USB_REQ_TYPE_MASK)
     {
-     /***********************************************************************
-      * Standard Requests
-      ***********************************************************************/
+      /**********************************************************************
+       * Standard Requests
+       **********************************************************************/
 
-    case USB_REQ_TYPE_STANDARD:
-      {
-        switch (ctrl->req)
-          {
-          case USB_REQ_GETDESCRIPTOR:
+      case USB_REQ_TYPE_STANDARD:
+        {
+          switch (ctrl->req)
             {
-              /* The value field specifies the descriptor type in the MS byte
-               * and the descriptor index in the LS byte (order is little
-               * endian)
-               */
-
-              switch (ctrl->value[1])
+              case USB_REQ_GETDESCRIPTOR:
                 {
+                  /* The value field specifies the descriptor type in the MS
+                   * byte and the descriptor index in the LS byte (order is
+                   * little endian)
+                   */
+
+                  switch (ctrl->value[1])
+                    {
 #ifndef CONFIG_RNDIS_COMPOSITE
-                case USB_DESC_TYPE_DEVICE:
-                  {
-                    ret = usbdev_copy_devdesc(ctrlreq->buf,
-                                              &g_devdesc,
-                                              dev->speed);
-                  }
-                  break;
+                      case USB_DESC_TYPE_DEVICE:
+                        {
+                          ret = usbdev_copy_devdesc(ctrlreq->buf,
+                                                    &g_devdesc,
+                                                    dev->speed);
+                        }
+                        break;
 #endif
 
-                /* If the serial device is used in as part of a composite
-                 * device, then the configuration descriptor is provided by
-                 * logic in the composite device implementation.
-                 */
+                      /* If the serial device is used in as part of a
+                       * composite device, then the configuration descriptor
+                       * is provided by logic in the composite device
+                       * implementation.
+                       */
 
 #ifndef CONFIG_RNDIS_COMPOSITE
 #  ifdef CONFIG_USBDEV_DUALSPEED
-                case USB_DESC_TYPE_OTHERSPEEDCONFIG:
+                      case USB_DESC_TYPE_OTHERSPEEDCONFIG:
 #  endif /* CONFIG_USBDEV_DUALSPEED */
-                case USB_DESC_TYPE_CONFIG:
-                  {
-                    ret = usbclass_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
-                                             dev->speed, ctrl->value[1]);
-                  }
-                  break;
+                      case USB_DESC_TYPE_CONFIG:
+                        {
+                          ret = usbclass_mkcfgdesc(ctrlreq->buf,
+                                                   &priv->devinfo,
+                                                   dev->speed,
+                                                   ctrl->value[1]);
+                        }
+                        break;
 #endif
 
 #ifndef CONFIG_RNDIS_COMPOSITE
-                case USB_DESC_TYPE_STRING:
-                  {
-                    /* index == language code. */
+                      case USB_DESC_TYPE_STRING:
+                        {
+                          /* index == language code. */
 
-                    ret = usbclass_mkstrdesc(ctrl->value[0],
+                          ret = usbclass_mkstrdesc(ctrl->value[0],
                                   (FAR struct usb_strdesc_s *)ctrlreq->buf);
-                  }
-                  break;
+                        }
+                        break;
 #endif
 
-                default:
-                  {
-                    usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_GETUNKNOWNDESC),
-                             value);
-                  }
-                  break;
+                      default:
+                        {
+                          usbtrace(TRACE_CLSERROR(
+                                     USBSER_TRACEERR_GETUNKNOWNDESC),
+                                   value);
+                        }
+                        break;
+                    }
                 }
-            }
-            break;
+                break;
 
-          case USB_REQ_SETCONFIGURATION:
-            {
-              if (ctrl->type == 0)
+              case USB_REQ_SETCONFIGURATION:
                 {
-                  ret = usbclass_setconfig(priv, value);
+                  if (ctrl->type == 0)
+                    {
+                      ret = usbclass_setconfig(priv, value);
+                    }
                 }
-            }
-            break;
+                break;
 
-          /* If the serial device is used in as part of a composite device,
-           * then the overall composite class configuration is managed by
-           * logic in the composite device implementation.
-           */
+              /* If the serial device is used in as part of a composite
+               * device, then the overall composite class configuration is
+               * managed by logic in the composite device implementation.
+               */
 
 #ifndef CONFIG_RNDIS_COMPOSITE
-          case USB_REQ_GETCONFIGURATION:
-            {
-              if (ctrl->type == USB_DIR_IN)
+              case USB_REQ_GETCONFIGURATION:
                 {
-                  *(FAR uint8_t *)ctrlreq->buf = priv->config;
-                  ret = 1;
+                  if (ctrl->type == USB_DIR_IN)
+                    {
+                      *(FAR uint8_t *)ctrlreq->buf = priv->config;
+                      ret = 1;
+                    }
                 }
-            }
-            break;
+                break;
 #endif
 
-          default:
-            usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDSTDREQ),
-                     ctrl->req);
-            break;
-          }
-      }
-      break;
+              default:
+                usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDSTDREQ),
+                         ctrl->req);
+                break;
+            }
+        }
+        break;
 
-    /* Class requests */
+      /* Class requests */
 
-    case USB_REQ_TYPE_CLASS:
-      {
-        if ((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
-            USB_REQ_RECIPIENT_INTERFACE)
-          {
-            if (ctrl->req == RNDIS_SEND_ENCAPSULATED_COMMAND)
-              {
-                ret = rndis_handle_control_message(priv, dataout, outlen);
-              }
-            else if (ctrl->req == RNDIS_GET_ENCAPSULATED_RESPONSE)
-              {
-                if (priv->response_queue_words == 0)
-                  {
-                    /* No reply available is indicated with a single
-                     * 0x00 byte.
-                     */
+      case USB_REQ_TYPE_CLASS:
+        {
+          if ((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
+              USB_REQ_RECIPIENT_INTERFACE)
+            {
+              if (ctrl->req == RNDIS_SEND_ENCAPSULATED_COMMAND)
+                {
+                  ret = rndis_handle_control_message(priv, dataout, outlen);
+                }
+              else if (ctrl->req == RNDIS_GET_ENCAPSULATED_RESPONSE)
+                {
+                  if (priv->response_queue_words == 0)
+                    {
+                      /* No reply available is indicated with a single
+                       * 0x00 byte.
+                       */
 
-                    ret = 1;
-                    ctrlreq->buf[0] = 0;
-                  }
-                else
-                  {
-                    /* Reply info as many as possible, if host read less than
-                     * cached, just send one msg to avoid msg truncation
-                     */
+                      ret = 1;
+                      ctrlreq->buf[0] = 0;
+                    }
+                  else
+                    {
+                      /* Reply info as many as possible, if host read less
+                       * than cached, just send one msg to avoid msg
+                       * truncation
+                       */
 
-                    FAR struct rndis_response_header *hdr =
-                      (struct rndis_response_header *)priv->response_queue;
-                    ret = priv->response_queue_words * sizeof(uint32_t);
-                    if (ret > len)
-                      {
-                        if (hdr->msglen > len)
-                          {
-                            ret = -EMSGSIZE;
-                            break;
-                          }
+                      FAR struct rndis_response_header *hdr =
+                        (struct rndis_response_header *)priv->response_queue;
+                      ret = priv->response_queue_words * sizeof(uint32_t);
+                      if (ret > len)
+                        {
+                          if (hdr->msglen > len)
+                            {
+                              ret = -EMSGSIZE;
+                              break;
+                            }
 
-                        ret = hdr->msglen;
-                      }
+                          ret = hdr->msglen;
+                        }
 
-                    memcpy(ctrlreq->buf, hdr, ret);
-                    ctrlreq->priv = priv;
-                  }
-              }
-          }
-      }
-      break;
+                      memcpy(ctrlreq->buf, hdr, ret);
+                      ctrlreq->priv = priv;
+                    }
+                }
+            }
+        }
+        break;
 
-    default:
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDTYPE), ctrl->type);
-      break;
+      default:
+        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDTYPE),
+                 ctrl->type);
+        break;
     }
 
   /* Respond to the setup command if data was returned.  On an error return
