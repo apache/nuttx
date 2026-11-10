@@ -246,6 +246,7 @@ mm_initialize_heap(FAR const struct mm_heap_config_s *config)
       /* First ensure the memory to be used is aligned */
 
       uintptr_t heap_adj = MM_ALIGN_UP((uintptr_t)heapstart);
+
       heapsize -= heap_adj - (uintptr_t)heapstart;
 
       /* Reserve a block space for mm_heap_s context */
