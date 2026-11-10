@@ -1087,6 +1087,7 @@ int up_copy_section(FAR void *dest, FAR const void *src, size_t n);
  *                         address environment
  *   up_addrenv_heapsize - Returns the size of the initial heap allocation.
  *   up_addrenv_select   - Instantiate an address environment
+ *   up_addrenv_select_kernel - Select the page tables of the kernel alone
  *   up_addrenv_clone    - Copy an address environment from one location to
  *                         another.
  *
@@ -1311,6 +1312,26 @@ ssize_t up_addrenv_heapsize(FAR const arch_addrenv_t *addrenv);
 
 #ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_select(FAR const arch_addrenv_t *addrenv);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_select_kernel
+ *
+ * Description:
+ *   Select the page tables of the kernel alone on this CPU, so that the
+ *   address environment that the CPU used before can be destroyed.  Each
+ *   architecture that supports CONFIG_BUILD_KERNEL must provide it.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+int up_addrenv_select_kernel(void);
 #endif
 
 /****************************************************************************

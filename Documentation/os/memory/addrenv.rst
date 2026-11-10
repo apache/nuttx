@@ -34,6 +34,8 @@ The CPU-specific logic must provide two categories in interfaces:
    - :c:func:`up_addrenv_vdata()`: Returns the virtual base address of the ``.bss``/``.data`` address environment.
    - :c:func:`up_addrenv_heapsize()`: Return the initial heap size.
    - :c:func:`up_addrenv_select()`: Instantiate an address environment.
+   - :c:func:`up_addrenv_select_kernel()`: Select the page tables of the
+     kernel alone (``CONFIG_BUILD_KERNEL``).
    - :c:func:`up_addrenv_clone()`: Copy an address environment from one location to another.
 
 #. **Tasking Support**. Other interfaces must be provided to
@@ -171,6 +173,17 @@ The CPU-specific logic must provide two categories in interfaces:
 
   :param addrenv: The representation of the task address environment
     previously returned by ``up_addrenv_create()``.
+
+  :return: Zero (OK) on success; a negated errno value on failure.
+
+.. c:function:: int up_addrenv_select_kernel(void)
+
+  Select the page tables of the kernel alone on this CPU: after the call
+  the CPU uses no address environment of a process.  The kernel calls it
+  when a CPU goes on with a kernel thread and no task owns the address
+  environment of the CPU any more (its process has ended).  The address
+  environment can then be destroyed although the CPU ran it last.  Each
+  architecture that supports ``CONFIG_BUILD_KERNEL`` must provide it.
 
   :return: Zero (OK) on success; a negated errno value on failure.
 

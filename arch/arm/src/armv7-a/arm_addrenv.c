@@ -579,6 +579,33 @@ int up_addrenv_select(const arch_addrenv_t *addrenv)
 }
 
 /****************************************************************************
+ * Name: up_addrenv_select_kernel
+ *
+ * Description:
+ *   Select the page tables of the kernel alone on this CPU: after the call
+ *   the CPU uses no address environment of a process, and the address
+ *   environment that it used before can be destroyed.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+int up_addrenv_select_kernel(void)
+{
+  /* Each CPU has its own copy of the boot L1 page table */
+
+  mmu_l1_setpgtable((uintptr_t *)(PGTABLE_BASE_PADDR +
+                                  PGTABLE_SIZE * this_cpu()));
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: up_addrenv_coherent
  *
  * Description:

@@ -420,6 +420,43 @@ int up_addrenv_select(const arch_addrenv_t *addrenv)
 }
 
 /****************************************************************************
+ * Name: up_addrenv_select_kernel
+ *
+ * Description:
+ *   Leave the address environment of this CPU: invalidate the user windows,
+ *   so that the address environment that was resident can be destroyed.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_addrenv_select_kernel(void)
+{
+  irqstate_t flags;
+  uint32_t   cache_state;
+
+  flags = enter_critical_section();
+
+  cache_state = esp32s3_dcache_suspend(false);
+
+  esp32s3_mmu_unmap(ESP32S3_TEXT_VBASE, CONFIG_ARCH_TEXT_NPAGES);
+  esp32s3_mmu_unmap(ESP32S3_DATA_VBASE, CONFIG_ARCH_DATA_NPAGES);
+  esp32s3_mmu_unmap(ESP32S3_HEAP_VBASE, CONFIG_ARCH_HEAP_NPAGES);
+
+  esp32s3_icache_invalidate_all();
+  esp32s3_dcache_resume(cache_state);
+
+  g_current_addrenv = NULL;
+
+  leave_critical_section(flags);
+  return OK;
+}
+
+/****************************************************************************
  * Name: esp32s3_addrenv_coherent
  *
  * Description:
