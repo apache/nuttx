@@ -257,7 +257,7 @@ and preemption operations. Only have instructions when scheduler triggers contex
 
 **Critical section entered time**::
 
-  CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION=-1
+  CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE=-1
 
 * Default -1 to disable critical section entered time statistic.
 * >= 0 to enable critical section entered time statistic, data will be in critmon procfs.
