@@ -142,13 +142,17 @@ pid_t sim_fork(bool vfork, const xcpt_reg_t *context)
   newsp = newtop - stackutil;
   pout = (unsigned char *)newsp;
   pin  = (unsigned char *)context[JB_SP];
-  while (stackutil-- > 0) *pout++ = *pin++;
+  while (stackutil-- > 0)
+    {
+      *pout++ = *pin++;
+    }
 
   /* Was there a frame pointer in place before? */
 
   if (context[JB_FP] >= context[JB_SP] && context[JB_FP] < stacktop)
     {
       xcpt_reg_t frameutil = stacktop - context[JB_FP];
+
       newfp = newtop - frameutil;
     }
   else

@@ -212,6 +212,7 @@ size_t mm_heapfree_largest(FAR struct mm_heap_s *heap)
        node = node->blink)
     {
       size_t nodesize = MM_SIZEOF_NODE(node);
+
       if (nodesize != 0)
         {
           return nodesize;
