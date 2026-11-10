@@ -92,7 +92,8 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IPv4) || defined(CONFIG_LIBC_IPv4_ADDRCONV)
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_LIBC_IPv4_ADDRCONV) || \
+    defined(CONFIG_NET_IPv6) || defined(CONFIG_LIBC_IPv6_ADDRCONV)
 static int inet_ipv4_pton(FAR const char *src, FAR void *dest)
 {
   size_t srcoffset;
@@ -205,6 +206,7 @@ static int inet_ipv4_pton(FAR const char *src, FAR void *dest)
 #if defined(CONFIG_NET_IPv6) || defined(CONFIG_LIBC_IPv6_ADDRCONV)
 static int inet_ipv6_pton(FAR const char *src, FAR void *dest)
 {
+  FAR const char *field;
   FAR uint8_t *addr = dest;
   uint8_t ip[sizeof(struct in6_addr)];
   unsigned int value;
@@ -227,6 +229,7 @@ static int inet_ipv6_pton(FAR const char *src, FAR void *dest)
       src++;
     }
 
+  field   = src;
   value   = 0;
   nbytes  = 0;
   ndigits = 0;
@@ -280,6 +283,23 @@ static int inet_ipv6_pton(FAR const char *src, FAR void *dest)
             {
               break;
             }
+
+          field = src;
+        }
+      else if (ch == '.')
+        {
+          /* The last 32 bits in the IPv4 dotted-decimal form: the field is
+           * the start of it, and it must end the string.
+           */
+
+          if (nbytes + 4 > sizeof(ip) ||
+              inet_ipv4_pton(field, &ip[nbytes]) != 1)
+            {
+              return 0;
+            }
+
+          nbytes += 4;
+          break;
         }
       else
         {
