@@ -35,7 +35,7 @@
 
 /* System timer hardware registers. */
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_TC4X
 #  define TRICORE_STM_BASE(n)      (0xf8800000 + ((n) << 18)) /* STMn */
 #  define TRICORE_STM_SRC(n)       (0xf4432028 + (n) * 0x40)  /* SR2 */
 
@@ -69,7 +69,7 @@
 
 /* OCS can only be written with OCDS enabled */
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_TC4X
 #  define TRICORE_CBS_OSTATE       0xfa18006c
 #else
 #  define TRICORE_CBS_OSTATE       0xf0000480

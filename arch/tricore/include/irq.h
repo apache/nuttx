@@ -266,7 +266,7 @@ static inline_function int up_cpu_index(void)
 
   uint8_t id = tricore_mfcr(TRICORE_CPU_CORE_ID) & 0x7;
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_TC3X
   id = id > 5 ? 5 : id;
 #endif
 
