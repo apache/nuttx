@@ -27,8 +27,10 @@
 #include <nuttx/config.h>
 #include <nuttx/debug.h>
 #include <sys/param.h>
+#include <assert.h>
 #include <errno.h>
 #include <stdint.h>
+#include <strings.h>
 
 #include <crypto/cryptodev.h>
 #include <crypto/xform.h>

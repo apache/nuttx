@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <syslog.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
