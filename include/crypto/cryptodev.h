@@ -456,7 +456,8 @@ struct crypt_op
   unsigned olen;
   unsigned ivlen;
   unsigned aadlen;
-  caddr_t src, dst;   /* become iov[] inside kernel */
+  caddr_t src;        /* become iov[] inside kernel */
+  caddr_t dst;
   caddr_t mac;        /* must be big enough for chosen MAC */
   caddr_t iv;
   caddr_t aad;
