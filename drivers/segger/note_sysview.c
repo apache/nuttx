@@ -313,6 +313,7 @@ static void note_sysview_syscall_enter(FAR struct note_driver_s *drv, int nr,
 {
   FAR struct note_sysview_driver_s *driver =
       (FAR struct note_sysview_driver_s *)drv;
+
   nr -= CONFIG_SYS_RESERVED;
 
   /* Set the name marker if the current syscall nr is not active */
@@ -349,6 +350,7 @@ static void note_sysview_syscall_leave(FAR struct note_driver_s *drv,
 {
   FAR struct note_sysview_driver_s *driver =
       (FAR struct note_sysview_driver_s *)drv;
+
   nr -= CONFIG_SYS_RESERVED;
 
   if (NOTE_FILTER_SYSCALLMASK_ISSET(nr, &driver->driver.filter.syscall_mask))
@@ -392,16 +394,16 @@ static void note_sysview_heap(FAR struct note_driver_s *drv,
         {
           char name[32];
           SEGGER_SYSVIEW_DATA_REGISTER data =
-            {
-              .ID = (U32)(uintptr_t)heap,
-              .DataType = SEGGER_SYSVIEW_TYPE_U32,
-              .Offset = 0,
-              .RangeMin = 0,
-              .RangeMax = 0,
-              .ScalingFactor = 1.f,
-              .sUnit = "B",
-              .sName = name,
-            };
+          {
+            .ID = (U32)(uintptr_t)heap,
+            .DataType = SEGGER_SYSVIEW_TYPE_U32,
+            .Offset = 0,
+            .RangeMin = 0,
+            .RangeMax = 0,
+            .ScalingFactor = 1.f,
+            .sUnit = "B",
+            .sName = name,
+          };
 
           snprintf(name, sizeof(name), "Heap%p", heap);
 

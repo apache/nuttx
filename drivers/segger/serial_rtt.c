@@ -238,6 +238,7 @@ static void serial_rtt_shutdown(FAR struct uart_dev_s *dev)
 static int serial_rtt_attach(FAR struct uart_dev_s *dev)
 {
   FAR struct serial_rtt_s *rtt = dev->priv;
+
   wd_start(&rtt->wdog, USEC2TICK(CONFIG_SERIAL_RTT_POLLING_INTERVAL),
            serial_rtt_timeout, (wdparm_t)dev);
   return OK;
@@ -250,6 +251,7 @@ static int serial_rtt_attach(FAR struct uart_dev_s *dev)
 static void serial_rtt_detach(FAR struct uart_dev_s *dev)
 {
   FAR struct serial_rtt_s *rtt = dev->priv;
+
   wd_cancel(&rtt->wdog);
 }
 
@@ -271,6 +273,7 @@ static int serial_rtt_receive(FAR struct uart_dev_s *dev,
                               FAR unsigned int *status)
 {
   FAR struct serial_rtt_s *rtt = dev->priv;
+
   int ret;
   int ch;
 
@@ -294,6 +297,7 @@ static void serial_rtt_rxint(FAR struct uart_dev_s *dev, bool enable)
 static bool serial_rtt_rxavailable(FAR struct uart_dev_s *dev)
 {
   FAR struct serial_rtt_s *rtt = dev->priv;
+
   return SEGGER_RTT_HasData(rtt->channel) != 0;
 }
 
@@ -304,6 +308,7 @@ static bool serial_rtt_rxavailable(FAR struct uart_dev_s *dev)
 static void serial_rtt_dmasend(FAR struct uart_dev_s *dev)
 {
   FAR struct serial_rtt_s *rtt = dev->priv;
+
   FAR struct uart_dmaxfer_s *xfer = &dev->dmatx;
   size_t len;
 
@@ -326,6 +331,7 @@ static void serial_rtt_dmasend(FAR struct uart_dev_s *dev)
 static void serial_rtt_dmareceive(FAR struct uart_dev_s *dev)
 {
   FAR struct serial_rtt_s *rtt = dev->priv;
+
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
   size_t len;
 
@@ -394,6 +400,7 @@ static void serial_rtt_txint(FAR struct uart_dev_s *dev, bool enable)
 static bool serial_rtt_txready(FAR struct uart_dev_s *dev)
 {
   FAR struct serial_rtt_s *rtt = dev->priv;
+
   return SEGGER_RTT_GetAvailWriteSpace(rtt->channel) != 0;
 }
 
@@ -404,6 +411,7 @@ static bool serial_rtt_txready(FAR struct uart_dev_s *dev)
 static bool serial_rtt_txempty(FAR struct uart_dev_s *dev)
 {
   FAR struct serial_rtt_s *rtt = dev->priv;
+
   return SEGGER_RTT_GetBytesInBuffer(rtt->channel) == 0;
 }
 
