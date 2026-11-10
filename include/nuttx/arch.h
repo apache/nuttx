@@ -135,6 +135,10 @@
 #  define UP_SEV()
 #endif
 
+#if !defined(UP_RELAX)
+#  define UP_RELAX()
+#endif
+
 #ifdef CONFIG_SMP
 #  define SMP_MB()  UP_DMB()
 #  define SMP_RMB() UP_RMB()
