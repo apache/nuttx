@@ -46,6 +46,8 @@
 locale_t newlocale(int category_mask, FAR const char *locale, locale_t base)
 {
   return !locale || !strcmp(locale, "POSIX") ||
-         !strcmp(locale, "C") || !strcmp(locale, "") ? localeconv() : NULL;
+         !strcmp(locale, "C") || !strcmp(locale, "") ||
+         !strcmp(locale, "C.UTF-8") || !strcmp(locale, "C.utf8") ?
+         localeconv() : NULL;
 }
 #endif
