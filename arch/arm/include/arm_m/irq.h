@@ -33,7 +33,6 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/irq.h>
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
 #  include <arch/arm_m/nvicpri.h>

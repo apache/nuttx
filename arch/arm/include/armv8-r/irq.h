@@ -32,7 +32,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
