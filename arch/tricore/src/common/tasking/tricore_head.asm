@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 #include <arch/csfr.h>
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
 #  include "hardware/tc4xx_vmt.h"
 #endif
 
@@ -37,10 +37,10 @@
 #define TRICORE_PSW_RESET  0x980   /* Supervisor, call depth counting on */
 #define TRICORE_BIV_VECTOR 0x1fe0  /* Single interrupt vector at INTTAB + 0x1fe0 */
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
 #  define TC3XX_WDTCPU0_CON0 0xf003624c  /* CPU0 watchdog CON0, 0xc apart per CPU */
 #endif
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
 #  define TC4XX_PSW_VIRT     0xb00       /* PSW for disabling the virtualization */
 #  define TC4XX_UCB0_RAMINIT 0xae408814  /* SRAMs that the boot firmware initializes */
 #endif
@@ -74,7 +74,7 @@ tricore_csa_link .macro addr, tmp1, tmp2
 	.extern	__TRAPTAB_CPU0
 	.extern	__INTTAB_CPU0
 	.extern	__psram_ustack
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
 	.extern	__psram_boot_csa
 #endif
 
@@ -109,7 +109,7 @@ tricore_csa_link .macro addr, tmp1, tmp2
 	.sdecl	".text.tricore_head",code
 	.sect	".text.tricore_head"
 tricore_head:
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
 	jl	tc3xx_endinit_clear
 
 #endif
@@ -119,7 +119,7 @@ tricore_head:
 	mtcr	#TRICORE_CPU_BTV, d15
 	isync
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
 	movh.a	a15, #@HIS(__psram_boot_csa)
 	lea	a15, [a15]@LOS(__psram_boot_csa)
 	mov.d	d15, a15
@@ -196,7 +196,7 @@ tricore_head:
 	mtcr	#TRICORE_CPU_LCX, d15
 	isync
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
 	jl	tc3xx_endinit_set
 
 #endif
@@ -219,7 +219,7 @@ tricore_head:
 
 	call	tricore_wdt_disable
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
 	; The LMU and MCAN RAMs, which the boot firmware never initializes:
 	; LMU0, 1 and 4 to 6, LMU2, 3 and 7 to 9, and MCAN0 to 4
 
@@ -271,7 +271,7 @@ tricore_head:
 	lea	a15, [a15]@LOS(tricore_start)
 	ji	a15
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
 /****************************************************************************
  * Name: tc3xx_endinit_clear, tc3xx_endinit_set
  *
@@ -318,7 +318,7 @@ tc3xx_endinit_set:
 	ji	a11
 #endif
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
 /****************************************************************************
  * Name: tricore_virt_off
  *

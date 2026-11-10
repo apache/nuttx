@@ -127,7 +127,7 @@ static void tricore_gpsrinitialize(void)
 
   /* Cpucs gpsr init */
 
-#ifndef CONFIG_ARCH_CHIP_TC3XX
+#ifndef CONFIG_ARCH_CHIP_FAMILY_TC3X
   tricore_src_init(TRICORE_IRQ2SRC(TRICORE_GPSR_IRQNUM(6, cpu)), tos,
                    IRQ_TO_NDX(TRICORE_GPSR_IRQNUM(6, cpu)));
 #endif
