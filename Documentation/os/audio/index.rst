@@ -249,6 +249,17 @@ Status and Notification
   Register, respectively remove, the message queue on which the driver reports
   ``AUDIO_MSG_DEQUEUE``, ``AUDIO_MSG_COMPLETE`` and error events.
 
+Debugging
+---------
+
+* ``AUDIOIOC_DUMP``
+  Record the data passing through the device.  The argument is a file path;
+  the upper half creates the file and writes every buffer the lower half
+  returns into it: the samples a playback buffer carried, or the samples a
+  capture buffer received.  A ``NULL`` argument stops the recording.  Buffers
+  returned in interrupt context are not recorded, since writing a file may
+  block.
+
 Multiple Applications
 =====================
 
