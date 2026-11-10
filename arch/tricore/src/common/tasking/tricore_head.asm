@@ -34,10 +34,10 @@
 #define TRICORE_PSW_RESET  0x980   /* Supervisor, call depth counting on */
 #define TRICORE_BIV_VECTOR 0x1fe0  /* Single interrupt vector at INTTAB + 0x1fe0 */
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_TC3X
 #  define TC3XX_WDTCPU0_CON0 0xf003624c  /* CPU0 watchdog CON0, 0xc apart per CPU */
 #endif
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_TC4X
 #  define TC4XX_PSW_VIRT   0xb00       /* PSW for disabling the virtualization */
 #endif
 
@@ -70,7 +70,7 @@ tricore_csa_link .macro addr, tmp1, tmp2
 	.extern	__TRAPTAB_CPU0
 	.extern	__INTTAB_CPU0
 	.extern	__psram_ustack
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_TC4X
 	.extern	__psram_boot_csa
 	.extern	__psram_boot_csa_end
 	.extern	tricore_ram_init
@@ -116,7 +116,7 @@ tricore_head:
 	movh.a	a9, #@HIS(__a9_mem)
 	lea	a9, [a9]@LOS(__a9_mem)
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_TC3X
 	jl	tc3xx_endinit_clear
 
 #endif
@@ -126,7 +126,7 @@ tricore_head:
 	mtcr	#TRICORE_CPU_BTV, d15
 	isync
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_TC4X
 	movh.a	a15, #@HIS(__psram_boot_csa)
 	lea	a15, [a15]@LOS(__psram_boot_csa)
 	mov.d	d15, a15
@@ -213,7 +213,7 @@ tricore_head:
 	mtcr	#TRICORE_CPU_LCX, d15
 	isync
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_TC3X
 	jl	tc3xx_endinit_set
 
 #endif
@@ -225,7 +225,7 @@ tricore_head:
 	mtcr	#TRICORE_CPU_PSW, d0
 	isync
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_TC3X
 	call	tricore_wdt_disable
 
 #endif
@@ -266,7 +266,7 @@ tricore_head:
 	lea	a15, [a15]@LOS(tricore_start)
 	ji	a15
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_TC3X
 /****************************************************************************
  * Name: tc3xx_endinit_clear, tc3xx_endinit_set
  *
@@ -313,7 +313,7 @@ tc3xx_endinit_set:
 	ji	a11
 #endif
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_TC4X
 /****************************************************************************
  * Name: tricore_virt_off
  *
