@@ -34,6 +34,17 @@ Related Header Files
 ``include/nuttx/audio/audio.h`` - Top level include file defining the audio interface
 ``include/nuttx/audio/vs1053.h`` - Specific driver initialization prototypes
 
+Driver Registration
+===================
+
+A lower-half driver is bound to an upper half with ``audio_register()``, which
+creates the device node (``/dev/audio/<name>`` unless
+``CONFIG_AUDIO_CUSTOM_DEV_PATH`` selects another location).
+``audio_unregister()`` removes the node and frees the upper half again, for a
+driver whose device can go away at run time.  It fails with ``-EBUSY`` while
+the device is still open.  The caller must also make sure that no ``open()``
+of the device is in progress.
+
 Playback and Capture Flow
 =========================
 
