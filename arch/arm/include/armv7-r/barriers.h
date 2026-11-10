@@ -39,6 +39,7 @@
 #define arm_wmb()  __asm__ __volatile__ ("dmb ishst" : : : "memory")
 #define arm_isb()  __asm__ __volatile__ ("isb " : : : "memory")
 #define arm_nop()  __asm__ __volatile__ ("nop\n")
+#define arm_yield()  __asm__ __volatile__ ("yield")
 
 #define UP_DSB()  arm_dsb(15)
 
@@ -48,5 +49,12 @@
 
 #define UP_ISB()  arm_isb()
 #define UP_NOP()  arm_nop()
+
+/* Relax hint for spin waiting: YIELD reduces pipeline contention while
+ * polling the lock.  It does not sleep and needs no wake event.  From
+ * ARM Reference Manual DDI 0406, YIELD.
+ */
+
+#define UP_RELAX()  arm_yield()
 
 #endif /* __ARCH_ARM_INCLUDE_ARMV7_R_BARRIERS_H */
