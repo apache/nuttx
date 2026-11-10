@@ -95,6 +95,7 @@ static void notertt_add(FAR struct note_driver_s *drv,
                         FAR const void *buf, size_t notelen)
 {
   FAR struct notertt_s *note = (FAR struct notertt_s *)drv;
+
   lib_stream_puts(&note->stream, buf, notelen);
 }
 
