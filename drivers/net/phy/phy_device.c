@@ -448,10 +448,10 @@ int phy_connect(FAR struct phy_device_s *phydev,
   lower->phydev = phydev;
 
   /* Deassert the PHY hardware reset (release the RESET_N line) before
-   * running config_init.  This is idempotent: if the MAC driver
-   * already released the reset before reading the PHY ID, the underlying
-   * mdio_reset() recognizes the state is unchanged and returns without
-   * re-toggling.  A PHY with no controllable reset line is a quiet no-op.
+   * running config_init.  The request is forwarded to the lower-half
+   * mdio_reset(); the lower half owns any idempotency and the
+   * datasheet-mandated settle delay.  A PHY with no controllable reset
+   * line is a quiet no-op.
    */
 
   phy_reset(phydev, 0);
