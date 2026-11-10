@@ -533,25 +533,22 @@ static int vsprintf_scan_literal(FAR struct lib_outstream_s *stream,
 
 static int vsprintf_put_field(FAR struct lib_outstream_s *stream,
                               FAR const char *pnt, size_t size,
-                              FAR int *width, uint16_t flags)
+                              int width, uint16_t flags)
 {
   int total_len = 0;
-  int w = *width;
 
   if ((flags & FL_LPAD) == 0)
     {
-      if (w > 0 && size < w)
+      if (width > 0 && size < (size_t)width)
         {
-          int pad = w - size;
+          int pad = width - size;
 
           total_len += vsprintf_repeat(stream, ' ', pad);
-          w -= pad;
         }
     }
 
   total_len += size;
   lib_stream_puts(stream, pnt, size);
-  *width = w >= size ? w - size : 0;
 
   return total_len;
 }
@@ -585,7 +582,11 @@ static int vsprintf_put_char(FAR struct lib_outstream_s *stream,
     }
 
   pnt = buf;
-  return vsprintf_put_field(stream, pnt, size, width, flags);
+  ch = vsprintf_put_field(stream, pnt, size, *width, flags);
+  *width = FL_LPAD != 0 && *width > 0 && size < (size_t)*width ?
+           *width - size : 0;
+
+  return ch;
 }
 
 #ifdef CONFIG_LIBC_LOCALE
@@ -2154,8 +2155,10 @@ put_unavailable:
               }
 
 str_lpad:
-            total_len += vsprintf_put_field(stream, pnt, size, &width,
+            total_len += vsprintf_put_field(stream, pnt, size, width,
                                             flags);
+            width = FL_LPAD != 0 && width > 0 && size < (size_t)width ?
+                    width - size : 0;
             size = 0;
 
             goto tail;
