@@ -1110,6 +1110,8 @@ void read_lock(FAR volatile rwlock_t *lock);
 #  ifdef CONFIG_SPINLOCK_INLINE
 SPINLOCK_INLINE bool read_trylock(FAR volatile rwlock_t *lock)
 {
+  bool ret = false;
+
   for (; ; )
     {
       int32_t old = atomic_read(lock);
@@ -1117,16 +1119,17 @@ SPINLOCK_INLINE bool read_trylock(FAR volatile rwlock_t *lock)
       if (old <= RW_SP_WRITE_LOCKED)
         {
           DEBUGASSERT(old == RW_SP_WRITE_LOCKED);
-          return false;
+          break;
         }
       else if (atomic_cmpxchg_acquire(lock, &old, old + 1))
         {
+          ret = true;
+          UP_DMB();
           break;
         }
     }
 
-  UP_DMB();
-  return true;
+  return ret;
 }
 #  else
 bool read_trylock(FAR volatile rwlock_t *lock);
