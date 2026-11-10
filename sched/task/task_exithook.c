@@ -362,18 +362,24 @@ static inline void nxtask_signalparent(FAR struct tcb_s *ctcb, int status)
 #endif
 
 /****************************************************************************
- * Name: nxtask_exitwakeup
+ * Name: nxtask_saveexitstatus
  *
  * Description:
- *   Wakeup any tasks waiting for this task to exit
+ *   Record the exit status for a task waiting in waitpid()
+ *
+ * Input Parameters:
+ *   tcb    - The TCB of the exiting task.
+ *   status - The exit status of the exiting task.
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
-static inline void nxtask_exitwakeup(FAR struct tcb_s *tcb, int status)
+static inline void nxtask_saveexitstatus(FAR struct tcb_s *tcb, int status)
 {
   FAR struct task_group_s *group = tcb->group;
-  int semvalue;
 
   /* Have we already left the group? */
 
@@ -388,50 +394,49 @@ static inline void nxtask_exitwakeup(FAR struct tcb_s *tcb, int status)
       if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
 #endif
         {
-          /* Report the exit status.  We do not nullify tg_statloc here
-           * because we want to prevent other tasks from registering for
-           * the return status.  There is only one task per task group,
-           * there for, this logic should execute exactly once in the
-           * lifetime of the task group.
-           *
-           * "If more than one thread is suspended in waitpid() awaiting
-           *  termination of the same process, exactly one thread will
-           *  return the process status at the time of the target process
-           *  termination."
-           *
-           *  Hmmm.. what do we return to the others?
-           */
-
           if (group->tg_statloc != NULL)
             {
               *group->tg_statloc = status << 8;
             }
         }
+    }
+}
 
-      /* Is this the last thread in the group? */
+/****************************************************************************
+ * Name: nxtask_exitwakeup
+ *
+ * Description:
+ *   Wakeup any tasks waiting for this task group to exit
+ *
+ * Input Parameters:
+ *   group - The task group that the last member just left.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PTHREAD
-      if (sq_is_singular(&group->tg_members))
-#endif
-        {
-          /* Yes.. Wakeup any tasks waiting for this task to exit */
+static inline void nxtask_exitwakeup(FAR struct task_group_s *group)
+{
+  int semvalue;
 
-          group->tg_statloc   = NULL;
-          group->tg_waitflags = 0;
+  /* Wakeup any tasks waiting for this task to exit */
 
-          nxsem_get_value(&group->tg_exitsem, &semvalue);
-          while (semvalue < 0)
-            {
-              /* Wake up the thread */
+  group->tg_statloc   = NULL;
+  group->tg_waitflags = 0;
 
-              nxsem_post(&group->tg_exitsem);
-              nxsem_get_value(&group->tg_exitsem, &semvalue);
-            }
-        }
+  nxsem_get_value(&group->tg_exitsem, &semvalue);
+  while (semvalue < 0)
+    {
+      /* Wake up the thread */
+
+      nxsem_post(&group->tg_exitsem);
+      nxsem_get_value(&group->tg_exitsem, &semvalue);
     }
 }
 #else
-#  define nxtask_exitwakeup(tcb, status)
+#  define nxtask_saveexitstatus(tcb, status)
+#  define nxtask_exitwakeup(group)
 #endif
 
 /****************************************************************************
@@ -467,6 +472,8 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
   pid_t ppid = INVALID_PROCESS_ID;
   pid_t chpid = INVALID_PROCESS_ID;
   uid_t chuid = 0;
+#elif defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+  FAR struct task_group_s *group;
 #endif
 #ifdef CONFIG_SCHED_DUMP_LEAK
   struct mm_memdump_s dump =
@@ -504,9 +511,11 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
 
   nxtask_signalparent(tcb, status);
 
-  /* Wakeup any tasks waiting for this task to exit */
+  /* Record the exit status for waitpid(); the waiters are woken only
+   * after the group has been left and its files closed.
+   */
 
-  nxtask_exitwakeup(tcb, status);
+  nxtask_saveexitstatus(tcb, status);
 
   sched_unlock();
 
@@ -541,6 +550,26 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
   if (group_leave(tcb))
     {
       nxtask_groupexit_notify(ppid, chpid, chuid);
+    }
+#elif defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+  group = tcb->group;
+  if (group != NULL)
+    {
+      /* Hold the group: group_leave() releases it when this is the last
+       * member and nobody else waits for the exit status.
+       */
+
+      group_add_waiter(group);
+    }
+
+  if (group_leave(tcb))
+    {
+      nxtask_exitwakeup(group);
+    }
+
+  if (group != NULL)
+    {
+      group_del_waiter(group);
     }
 #else
   group_leave(tcb);
