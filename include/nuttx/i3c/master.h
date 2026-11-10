@@ -528,7 +528,12 @@ struct i3c_master_controller_ops
 };
 
 /* struct i3c_master_controller - I3C master controller object
- * @i3c_bus_id: the master id registered to the i3c bus
+ * @i3c_bus_id: the master id registered to the i3c bus (/dev/i3cN).
+ *    A negative value means the controller is used as an I2C-only
+ *    controller: no CCC broadcast and no DAA is done on the bus, and
+ *    neither /dev/i3cN nor any I3C device is registered. Only
+ *    /dev/i2cN (N = @i2c_bus_id) is exposed. The board must make sure
+ *    that no I3C target is connected to such a bus.
  * @i2c_bus_id: the i2c driver id registered to this master
  * @mode: mode selection by i2c device feature.
  * @max_i2c_scl_rate: max i2c scl rate in all i2c device

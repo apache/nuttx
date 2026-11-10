@@ -2304,10 +2304,15 @@ void i3c_master_unregister(FAR struct i3c_master_controller *master)
 {
   i2c_unregister_driver(master);
 
+  /* bus_init() and set_info() ran for every controller, so always clean
+   * up the bus. Only the /dev/i3cN node depends on i3c_bus_id.
+   */
+
+  i3c_master_unregister_i3c_devs(master);
+  i3c_master_bus_cleanup(master);
+
   if (master->i3c_bus_id >= 0)
     {
-      i3c_master_unregister_i3c_devs(master);
-      i3c_master_bus_cleanup(master);
       i3c_unregister_driver(master);
     }
 }
