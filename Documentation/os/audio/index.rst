@@ -166,7 +166,10 @@ Polling and Memory Mapping
 
 ``poll()`` reports ``POLLIN | POLLOUT`` while the shared ring has room for more
 data, and adds ``POLLERR`` when the application has fallen behind the hardware
-read pointer, that is, on an under-run.
+read pointer, that is, on an under-run.  On a device without a shared ring
+there is no buffer level to report, so ``poll()`` instead reports
+``POLLIN | POLLOUT`` while the queue registered with ``AUDIO_MQ_KERNEL``
+holds a message, and never ``POLLERR``.
 
 ``mmap()`` is available when ``CONFIG_FS_FILEMAP`` is enabled, and the
 requested length selects what gets mapped:
@@ -216,6 +219,10 @@ Configuration
   ``AUDIOIOC_CONFIGURE`` is returned instead.
 * ``AUDIOIOC_GETLATENCY``, ``AUDIOIOC_GETPOSITION``
   Query the current latency, respectively playback position.
+* ``AUDIOIOC_SETPARAMTER`` / ``AUDIOIOC_GETPARAMTER``
+  Set, respectively query, a driver-specific parameter given as a
+  ``key=value`` string.  The upper half passes both to the lower half
+  unchanged.
 
 Buffer Management
 -----------------
@@ -258,7 +265,15 @@ Status and Notification
   the backlog.  Used to recover from an under-run.
 * ``AUDIOIOC_REGISTERMQ`` / ``AUDIOIOC_UNREGISTERMQ``
   Register, respectively remove, the message queue on which the driver reports
-  ``AUDIO_MSG_DEQUEUE``, ``AUDIO_MSG_COMPLETE`` and error events.
+  ``AUDIO_MSG_DEQUEUE``, ``AUDIO_MSG_COMPLETE`` and error events.  The
+  argument is the application's ``mqd_t``, or ``AUDIO_MQ_KERNEL`` to have the
+  upper half create a queue for this open file.  That queue is removed on
+  ``AUDIOIOC_UNREGISTERMQ`` or ``close()``.
+* ``AUDIOIOC_RECEIVEMSG``
+  Wait for the next message on the registered queue.  The argument is a
+  ``struct audio_msg_timeout_s``: ``ticks`` is the timeout in clock ticks, or
+  ``-1`` to wait forever, and ``msg`` receives the message.  Fails with
+  ``-EINVAL`` if no queue is registered.
 
 Debugging
 ---------
