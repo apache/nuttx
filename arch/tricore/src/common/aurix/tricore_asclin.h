@@ -30,9 +30,9 @@
 #include <nuttx/config.h>
 
 #if defined(CONFIG_ARCH_CHIP_TC3X)
-#  include "hardware/tc3xx_asclin.h"
+#  include "hardware/tc3x_asclin.h"
 #elif defined(CONFIG_ARCH_CHIP_TC4X)
-#  include "hardware/tc4xx_asclin.h"
+#  include "hardware/tc4x_asclin.h"
 #endif
 
 /****************************************************************************
