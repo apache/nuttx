@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include <nuttx/debug.h>
 #include <assert.h>
 
@@ -61,6 +62,7 @@ struct bluetooth_recvfrom_s
   FAR struct socket *ir_sock;          /* Points to the parent socket structure */
   FAR struct devif_callback_s *ir_cb;  /* Reference to callback instance */
   FAR struct sockaddr *ir_from;        /* Location to return the from address */
+  FAR struct msghdr *ir_msg;           /* Points to message header */
   FAR uint8_t *ir_buffer;              /* Pointer to receive buffer */
   size_t ir_buflen;                    /* Length of receive buffer */
   sem_t ir_sem;                        /* Semaphore signals recv completion */
@@ -167,7 +169,19 @@ static ssize_t
       /* Copy the new packet data into the user buffer */
 
       copylen = iob->io_len - iob->io_offset;
-      memcpy(pstate->ir_buffer, &iob->io_data[iob->io_offset], copylen);
+      if (copylen > pstate->ir_buflen)
+        {
+          copylen = pstate->ir_buflen;
+          if (pstate->ir_msg != NULL)
+            {
+              pstate->ir_msg->msg_flags |= MSG_TRUNC;
+            }
+        }
+
+      if (copylen > 0)
+        {
+          memcpy(pstate->ir_buffer, &iob->io_data[iob->io_offset], copylen);
+        }
 
       ninfo("Received %d bytes\n", (int)copylen);
       ret = copylen;
@@ -244,7 +258,7 @@ static uint32_t bluetooth_recvfrom_eventhandler(FAR struct net_driver_s *dev,
           /* Attempt to receive the frame */
 
           ret = bluetooth_recvfrom_rxqueue(radio, pstate);
-          if (ret > 0)
+          if (ret >= 0)
             {
               /* Don't allow any further call backs. */
 
@@ -307,12 +321,12 @@ static uint32_t bluetooth_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                           int flags)
 {
-  FAR void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
-  FAR struct sockaddr *from = msg->msg_name;
-  FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct bluetooth_conn_s *conn = psock->s_conn;
   FAR struct radio_driver_s *radio;
+  FAR struct sockaddr *from = msg->msg_name;
+  FAR socklen_t *fromlen = &msg->msg_namelen;
+  FAR void *buf;
+  size_t len;
   struct bluetooth_recvfrom_s state;
   ssize_t ret;
 
@@ -331,9 +345,29 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -EPROTONOSUPPORT;
     }
 
+  /* POSIX: fail with EMSGSIZE if msg_iovlen <= 0 or > IOV_MAX */
+
+  if (msg->msg_iovlen == 0 || msg->msg_iovlen > IOV_MAX)
+    {
+      return -EMSGSIZE;
+    }
+
   if (msg->msg_iovlen != 1)
     {
       return -ENOTSUP;
+    }
+
+  if (msg->msg_iov == NULL)
+    {
+      return -EINVAL;
+    }
+
+  buf = msg->msg_iov[0].iov_base;
+  len = msg->msg_iov[0].iov_len;
+
+  if (len > 0 && buf == NULL)
+    {
+      return -EINVAL;
     }
 
   /* Perform the packet recvmsg() operation */
@@ -348,6 +382,9 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   state.ir_buffer = buf;
   state.ir_sock   = psock;
   state.ir_from   = from;
+  state.ir_msg    = msg;
+
+  msg->msg_flags  = 0;
 
   /* Get the device driver that will service this transfer */
 
@@ -373,9 +410,9 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
    */
 
   ret = bluetooth_recvfrom_rxqueue(radio, &state);
-  if (ret > 0)
+  if (ret >= 0)
     {
-      /* Good newe!  We have a frame and we are done. */
+      /* Good news!  We have a frame and we are done. */
 
       conn_dev_unlock(&conn->bc_conn, &radio->r_dev);
       return ret;
