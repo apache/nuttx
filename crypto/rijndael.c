@@ -728,7 +728,7 @@ int rijndael_key_setup_enc(FAR uint32_t *rk,
             (TE1[(temp) & 0xff] & 0x000000ff);
           rk[13] = rk[5] ^ rk[12];
           rk[14] = rk[6] ^ rk[13];
-              rk[15] = rk[7] ^ rk[14];
+          rk[15] = rk[7] ^ rk[14];
           rk += 8;
         }
     }
@@ -1011,7 +1011,7 @@ void rijndaelencrypt(FAR const uint32_t *rk, int nr,
       rk += 8;
       if (--r == 0)
         {
-            break;
+          break;
         }
 
       s0 =
@@ -1095,10 +1095,10 @@ static void rijndaeldecrypt(FAR const uint32_t *rk,
    * and add initial round key:
    */
 
-    s0 = GETU32(ct) ^ rk[0];
-    s1 = GETU32(ct + 4) ^ rk[1];
-    s2 = GETU32(ct + 8) ^ rk[2];
-    s3 = GETU32(ct + 12) ^ rk[3];
+  s0 = GETU32(ct) ^ rk[0];
+  s1 = GETU32(ct + 4) ^ rk[1];
+  s2 = GETU32(ct + 8) ^ rk[2];
+  s3 = GETU32(ct + 12) ^ rk[3];
 #ifdef FULL_UNROLL
 
   /* round 1: */

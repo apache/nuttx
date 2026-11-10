@@ -1072,7 +1072,9 @@ int swcr_encdec(FAR struct cryptop *crp, FAR struct cryptodesc *crd,
           /* XOR with previous block */
 
           for (j = 0; j < blks; j++)
-            blk[j] ^= ivp[j];
+            {
+              blk[j] ^= ivp[j];
+            }
 
           exf->encrypt((caddr_t)sw->sw_kschedule, blk, buflen);
 
@@ -1254,27 +1256,27 @@ int swcr_authenc(FAR struct cryptop *crp)
           case CRYPTO_AES_GMAC:
           case CRYPTO_AES_CMAC:
           case CRYPTO_CHACHA20_POLY1305:
-          swe = sw;
-          crde = crd;
-          exf = swe->sw_exf;
-          ivlen = exf->ivsize;
-          break;
+            swe = sw;
+            crde = crd;
+            exf = swe->sw_exf;
+            ivlen = exf->ivsize;
+            break;
           case CRYPTO_AES_128_GMAC:
           case CRYPTO_AES_192_GMAC:
           case CRYPTO_AES_256_GMAC:
           case CRYPTO_AES_128_CMAC:
           case CRYPTO_CHACHA20_POLY1305_MAC:
-          swa = sw;
-          crda = crd;
-          axf = swa->sw_axf;
-          if (swa->sw_ictx == 0)
-            {
-              return -EINVAL;
-            }
+            swa = sw;
+            crda = crd;
+            axf = swa->sw_axf;
+            if (swa->sw_ictx == 0)
+              {
+                return -EINVAL;
+              }
 
-          bcopy(swa->sw_ictx, &ctx, axf->ctxsize);
-          blksz = axf->blocksize;
-          break;
+            bcopy(swa->sw_ictx, &ctx, axf->ctxsize);
+            blksz = axf->blocksize;
+            break;
           default:
             return -EINVAL;
         }
@@ -1323,9 +1325,9 @@ int swcr_authenc(FAR struct cryptop *crp)
     }
   else
     {
-        /* Decryption */
+      /* Decryption */
 
-        /* IV explicitly provided ? */
+      /* IV explicitly provided ? */
 
       if (crde->crd_flags & CRD_F_IV_EXPLICIT)
         {
@@ -1352,13 +1354,13 @@ int swcr_authenc(FAR struct cryptop *crp)
     {
       aadlen = crp->crp_aadlen;
       /* Section 5 of RFC 4106 specifies that AAD construction consists of
-      * {SPI, ESN, SN} whereas the real packet contains only {SPI, SN}.
-      * Unfortunately it doesn't follow a good example set in the Section
-      * 3.3.2.1 of RFC 4303 where upper part of the ESN, located in the
-      * external (to the packet) memory buffer, is processed by the hash
-      * function in the end thus allowing to retain simple programming
-      * interfaces and avoid kludges like the one below.
-      */
+       * {SPI, ESN, SN} whereas the real packet contains only {SPI, SN}.
+       * Unfortunately it doesn't follow a good example set in the Section
+       * 3.3.2.1 of RFC 4303 where upper part of the ESN, located in the
+       * external (to the packet) memory buffer, is processed by the hash
+       * function in the end thus allowing to retain simple programming
+       * interfaces and avoid kludges like the one below.
+       */
 
       if (crda->crd_flags & CRD_F_ESN)
         {
@@ -1662,7 +1664,7 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
           case CRYPTO_NULL:
             txf = &enc_xform_null;
             goto enccommon;
-          enccommon:
+            enccommon:
             if (txf->ctxsize > 0)
               {
                 (*swd)->sw_kschedule = kmm_zalloc(txf->ctxsize);
@@ -1713,7 +1715,7 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
             goto authcommon;
           case CRYPTO_SHA2_512_HMAC:
             axf = &auth_hash_hmac_sha2_512_256;
-          authcommon:
+            authcommon:
             (*swd)->sw_ictx = kmm_malloc(axf->ctxsize);
             if ((*swd)->sw_ictx == NULL)
               {
@@ -1794,7 +1796,7 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
           case CRYPTO_SHA2_512:
             axf = &auth_hash_sha2_512;
 
-          auth3common:
+            auth3common:
             (*swd)->sw_ictx = kmm_zalloc(axf->ctxsize);
             if ((*swd)->sw_ictx == NULL)
               {
@@ -1846,7 +1848,7 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
           case CRYPTO_CHACHA20_POLY1305_MAC:
             axf = &auth_hash_chacha20_poly1305;
 
-          auth4common:
+            auth4common:
             (*swd)->sw_ictx = kmm_malloc(axf->ctxsize);
             if ((*swd)->sw_ictx == NULL)
               {
@@ -1927,10 +1929,10 @@ int swcr_freesession(uint64_t tid)
             txf = swd->sw_exf;
 
             if (swd->sw_kschedule)
-            {
-              explicit_bzero(swd->sw_kschedule, txf->ctxsize);
-              kmm_free(swd->sw_kschedule);
-            }
+              {
+                explicit_bzero(swd->sw_kschedule, txf->ctxsize);
+                kmm_free(swd->sw_kschedule);
+              }
 
             break;
 
@@ -1982,7 +1984,7 @@ int swcr_freesession(uint64_t tid)
               }
 
             break;
-          }
+        }
 
       kmm_free(swd);
     }
@@ -2272,6 +2274,7 @@ static int swcr_dh_make_common(FAR struct cryptkop *krp)
   uint8_t *public = (uint8_t *)krp->krp_param[0].crp_p;
   uint8_t *secret = (uint8_t *)krp->krp_param[1].crp_p;
   uint8_t *shared = (uint8_t *)krp->krp_param[3].crp_p;
+
   return curve25519(shared, secret, public);
 }
 
