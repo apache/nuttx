@@ -91,6 +91,7 @@
 	.global    g_cpu_count
 
 	/* These are the page tables */
+	.global    g_pml4_low
 	.global    g_pdpt_low
 	.global    g_pd_low
 	.global    g_pt_low
@@ -336,7 +337,7 @@ start64_init:
 	 * 4KiB page table is used.
 	 * Kernel mapped to 1GB HiMem
 	 */
-	lea     pml4,   %eax
+	lea     g_pml4_low, %eax
 	mov     %eax,   %cr3
 
 	movl    $MSR_MTRR_DEF_TYPE, %ecx
@@ -758,7 +759,7 @@ mxcsr_mem:
 	.long   0x00001f80
 
 	.align(PAGE_SIZE)
-pml4:
+g_pml4_low:
 	.quad   g_pdpt_low + X86_PAGE_PRESENT + X86_PAGE_WR
 
 	.align(PAGE_SIZE)

@@ -553,6 +553,7 @@ begin_packed_struct struct tss_s
 
 /* These are defined in intel64_head.S */
 
+extern volatile uint8_t g_pml4_low;
 extern volatile uint8_t g_pdpt_low;
 extern volatile uint8_t g_pd_low;
 extern volatile uint8_t g_pt_low;
