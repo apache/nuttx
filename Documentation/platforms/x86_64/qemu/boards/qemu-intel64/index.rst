@@ -335,3 +335,12 @@ eth_console
 -----------
 
 Configuration demonstrates Console over e1000 network device.
+
+can_console
+-----------
+
+Configuration demonstrates Console over CAN ISO-TP on the Kvaser PCI CAN
+device. Run QEMU with ``-object can-bus,id=canbus0 -object
+can-host-socketcan,id=canhost0,if=can0,canbus=canbus0 -device
+kvaser_pci,canbus=canbus0`` and connect to the console from the host with
+``tools/isotp_pty.py can0 7d0 7d1``.
