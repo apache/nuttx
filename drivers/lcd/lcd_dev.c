@@ -171,223 +171,226 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    case LCDDEVIO_GETRUN:
-      {
-        FAR struct lcddev_run_s *lcd_run =
-            (FAR struct lcddev_run_s *)arg;
+      case LCDDEVIO_GETRUN:
+        {
+          FAR struct lcddev_run_s *lcd_run =
+              (FAR struct lcddev_run_s *)arg;
 
-        ret = priv->planeinfo.getrun(priv->lcd_ptr, lcd_run->row,
-                                     lcd_run->col, lcd_run->data,
-                                     lcd_run->npixels);
-      }
-      break;
-    case LCDDEVIO_PUTRUN:
-      {
-        FAR const struct lcddev_run_s *lcd_run =
-            (FAR const struct lcddev_run_s *)arg;
+          ret = priv->planeinfo.getrun(priv->lcd_ptr, lcd_run->row,
+                                       lcd_run->col, lcd_run->data,
+                                       lcd_run->npixels);
+        }
+        break;
+      case LCDDEVIO_PUTRUN:
+        {
+          FAR const struct lcddev_run_s *lcd_run =
+              (FAR const struct lcddev_run_s *)arg;
 
-        ret = priv->planeinfo.putrun(priv->lcd_ptr,
-                                     lcd_run->row, lcd_run->col,
-                                     lcd_run->data, lcd_run->npixels);
-      }
-      break;
-    case LCDDEVIO_GETAREA:
-      {
-        FAR struct lcddev_area_s *lcd_area =
-            (FAR struct lcddev_area_s *)arg;
-        size_t cols = lcd_area->col_end - lcd_area->col_start + 1;
-        size_t pixel_size = priv->planeinfo.bpp > 1 ?
-                            priv->planeinfo.bpp >> 3 : 1;
-        size_t row_size = lcd_area->stride > 0 ?
-                          lcd_area->stride : cols * pixel_size;
+          ret = priv->planeinfo.putrun(priv->lcd_ptr,
+                                       lcd_run->row, lcd_run->col,
+                                       lcd_run->data, lcd_run->npixels);
+        }
+        break;
+      case LCDDEVIO_GETAREA:
+        {
+          FAR struct lcddev_area_s *lcd_area =
+              (FAR struct lcddev_area_s *)arg;
+          size_t cols = lcd_area->col_end - lcd_area->col_start + 1;
+          size_t pixel_size = priv->planeinfo.bpp > 1 ?
+                              priv->planeinfo.bpp >> 3 : 1;
+          size_t row_size = lcd_area->stride > 0 ?
+                            lcd_area->stride : cols * pixel_size;
 
-        if (priv->planeinfo.getarea)
-          {
-            ret = priv->planeinfo.getarea(priv->lcd_ptr,
-                                          lcd_area->row_start,
-                                          lcd_area->row_end,
-                                          lcd_area->col_start,
-                                          lcd_area->col_end,
-                                          lcd_area->data,
-                                          row_size);
-          }
-        else
-          {
-            /* Emulate getarea() using getrun() */
+          if (priv->planeinfo.getarea)
+            {
+              ret = priv->planeinfo.getarea(priv->lcd_ptr,
+                                            lcd_area->row_start,
+                                            lcd_area->row_end,
+                                            lcd_area->col_start,
+                                            lcd_area->col_end,
+                                            lcd_area->data,
+                                            row_size);
+            }
+          else
+            {
+              /* Emulate getarea() using getrun() */
 
-            uint8_t *buf = lcd_area->data;
-            int row;
+              uint8_t *buf = lcd_area->data;
+              int row;
 
-            for (row = lcd_area->row_start; row <= lcd_area->row_end; row++)
-              {
-                ret = priv->planeinfo.getrun(priv->lcd_ptr, row,
-                                             lcd_area->col_start, buf,
-                                             cols);
-                if (ret < 0)
-                  {
-                    break;
-                  }
+              for (row = lcd_area->row_start; row <= lcd_area->row_end;
+                   row++)
+                {
+                  ret = priv->planeinfo.getrun(priv->lcd_ptr, row,
+                                               lcd_area->col_start, buf,
+                                               cols);
+                  if (ret < 0)
+                    {
+                      break;
+                    }
 
-                buf += row_size;
-              }
-          }
-      }
-      break;
-    case LCDDEVIO_PUTAREA:
-      {
-        FAR const struct lcddev_area_s *lcd_area =
-            (FAR const struct lcddev_area_s *)arg;
-        size_t cols = lcd_area->col_end - lcd_area->col_start + 1;
-        size_t pixel_size = priv->planeinfo.bpp > 1 ?
-                            priv->planeinfo.bpp >> 3 : 1;
-        size_t row_size = lcd_area->stride > 0 ?
-                          lcd_area->stride : cols * pixel_size;
+                  buf += row_size;
+                }
+            }
+        }
+        break;
+      case LCDDEVIO_PUTAREA:
+        {
+          FAR const struct lcddev_area_s *lcd_area =
+              (FAR const struct lcddev_area_s *)arg;
+          size_t cols = lcd_area->col_end - lcd_area->col_start + 1;
+          size_t pixel_size = priv->planeinfo.bpp > 1 ?
+                              priv->planeinfo.bpp >> 3 : 1;
+          size_t row_size = lcd_area->stride > 0 ?
+                            lcd_area->stride : cols * pixel_size;
 
-        if (priv->planeinfo.putarea)
-          {
-            ret = priv->planeinfo.putarea(priv->lcd_ptr,
-                                          lcd_area->row_start,
-                                          lcd_area->row_end,
-                                          lcd_area->col_start,
-                                          lcd_area->col_end,
-                                          lcd_area->data,
-                                          row_size);
-          }
-        else
-          {
-            /* Emulate putarea() using putrun() */
+          if (priv->planeinfo.putarea)
+            {
+              ret = priv->planeinfo.putarea(priv->lcd_ptr,
+                                            lcd_area->row_start,
+                                            lcd_area->row_end,
+                                            lcd_area->col_start,
+                                            lcd_area->col_end,
+                                            lcd_area->data,
+                                            row_size);
+            }
+          else
+            {
+              /* Emulate putarea() using putrun() */
 
-            uint8_t *buf = lcd_area->data;
-            int row;
+              uint8_t *buf = lcd_area->data;
+              int row;
 
-            for (row = lcd_area->row_start; row <= lcd_area->row_end; row++)
-              {
-                ret = priv->planeinfo.putrun(priv->lcd_ptr, row,
-                                             lcd_area->col_start, buf,
-                                             cols);
-                if (ret < 0)
-                  {
-                    break;
-                  }
+              for (row = lcd_area->row_start; row <= lcd_area->row_end;
+                   row++)
+                {
+                  ret = priv->planeinfo.putrun(priv->lcd_ptr, row,
+                                               lcd_area->col_start, buf,
+                                               cols);
+                  if (ret < 0)
+                    {
+                      break;
+                    }
 
-                buf += row_size;
-              }
-          }
-      }
-      break;
-    case LCDDEVIO_GETPOWER:
-      {
-        *((FAR int *)arg) = priv->lcd_ptr->getpower(priv->lcd_ptr);
-      }
-      break;
-    case LCDDEVIO_SETPOWER:
-      {
-        ret = priv->lcd_ptr->setpower(priv->lcd_ptr, (int)arg);
-      }
-      break;
-    case LCDDEVIO_GETCONTRAST:
-      {
-        *((FAR int *)arg) = priv->lcd_ptr->getcontrast(priv->lcd_ptr);
-      }
-      break;
-    case LCDDEVIO_SETCONTRAST:
-      {
-        ret = priv->lcd_ptr->setcontrast(priv->lcd_ptr, (unsigned int)arg);
-      }
-      break;
-    case LCDDEVIO_GETPLANEINFO:
-      {
-        *((FAR struct lcd_planeinfo_s *)arg) = priv->planeinfo;
-      }
-      break;
-    case LCDDEVIO_GETVIDEOINFO:
-      {
-        ret = priv->lcd_ptr->getvideoinfo(priv->lcd_ptr,
-                                          (FAR struct fb_videoinfo_s *)arg);
-      }
-      break;
-    case LCDDEVIO_SETPLANENO:
-      {
-        ret = priv->lcd_ptr->getplaneinfo(priv->lcd_ptr, (int)arg,
-                                          &priv->planeinfo);
-      }
-      break;
+                  buf += row_size;
+                }
+            }
+        }
+        break;
+      case LCDDEVIO_GETPOWER:
+        {
+          *((FAR int *)arg) = priv->lcd_ptr->getpower(priv->lcd_ptr);
+        }
+        break;
+      case LCDDEVIO_SETPOWER:
+        {
+          ret = priv->lcd_ptr->setpower(priv->lcd_ptr, (int)arg);
+        }
+        break;
+      case LCDDEVIO_GETCONTRAST:
+        {
+          *((FAR int *)arg) = priv->lcd_ptr->getcontrast(priv->lcd_ptr);
+        }
+        break;
+      case LCDDEVIO_SETCONTRAST:
+        {
+          ret = priv->lcd_ptr->setcontrast(priv->lcd_ptr, (unsigned int)arg);
+        }
+        break;
+      case LCDDEVIO_GETPLANEINFO:
+        {
+          *((FAR struct lcd_planeinfo_s *)arg) = priv->planeinfo;
+        }
+        break;
+      case LCDDEVIO_GETVIDEOINFO:
+        {
+          ret = priv->lcd_ptr->getvideoinfo(
+                  priv->lcd_ptr, (FAR struct fb_videoinfo_s *)arg);
+        }
+        break;
+      case LCDDEVIO_SETPLANENO:
+        {
+          ret = priv->lcd_ptr->getplaneinfo(priv->lcd_ptr, (int)arg,
+                                            &priv->planeinfo);
+        }
+        break;
 #ifdef CONFIG_FB_CMAP
-    case LCDDEVIO_GETCMAP:
-      {
-        FAR struct fb_cmap_s *cmap = (FAR struct fb_cmap_s *)arg;
+      case LCDDEVIO_GETCMAP:
+        {
+          FAR struct fb_cmap_s *cmap = (FAR struct fb_cmap_s *)arg;
 
-        ret = priv->lcd_ptr->getcmap(priv->lcd_ptr, cmap);
-      }
-      break;
-    case LCDDEVIO_PUTCMAP:
-      {
-        FAR const struct fb_cmap_s *cmap = (FAR const struct fb_cmap_s *)arg;
+          ret = priv->lcd_ptr->getcmap(priv->lcd_ptr, cmap);
+        }
+        break;
+      case LCDDEVIO_PUTCMAP:
+        {
+          FAR const struct fb_cmap_s *cmap =
+            (FAR const struct fb_cmap_s *)arg;
 
-        ret = priv->lcd_ptr->putcmap(priv->lcd_ptr, cmap);
-      }
-      break;
+          ret = priv->lcd_ptr->putcmap(priv->lcd_ptr, cmap);
+        }
+        break;
 #endif
 #ifdef CONFIG_FB_HWCURSOR
-    case LCDDEVIO_GETCURSOR:
-      {
-        FAR struct fb_cursorattrib_s *attrib =
-            (FAR struct fb_cursorattrib_s *)arg;
+      case LCDDEVIO_GETCURSOR:
+        {
+          FAR struct fb_cursorattrib_s *attrib =
+              (FAR struct fb_cursorattrib_s *)arg;
 
-        ret = priv->lcd_ptr->getcursor(priv->lcd_ptr, attrib);
-      }
-      break;
-    case LCDDEVIO_SETCURSOR:
-      {
-        FAR struct fb_setcursor_s *settings =
-            (FAR struct fb_setcursor_s *)arg;
+          ret = priv->lcd_ptr->getcursor(priv->lcd_ptr, attrib);
+        }
+        break;
+      case LCDDEVIO_SETCURSOR:
+        {
+          FAR struct fb_setcursor_s *settings =
+              (FAR struct fb_setcursor_s *)arg;
 
-        ret = priv->lcd_ptr->setcursor(priv->lcd_ptr, settings);
-      }
-      break;
+          ret = priv->lcd_ptr->setcursor(priv->lcd_ptr, settings);
+        }
+        break;
 #endif
-    case LCDDEVIO_SETFRAMERATE:
-      {
-        ret = priv->lcd_ptr->setframerate(priv->lcd_ptr, (int)arg);
-      }
-      break;
-    case LCDDEVIO_GETFRAMERATE:
-      {
-        *((FAR int *)arg) = priv->lcd_ptr->getframerate(priv->lcd_ptr);
-      }
-      break;
-    case LCDDEVIO_GETAREAALIGN:
-      {
-        FAR struct lcddev_area_align_s *area_align =
-            (FAR struct lcddev_area_align_s *)arg;
+      case LCDDEVIO_SETFRAMERATE:
+        {
+          ret = priv->lcd_ptr->setframerate(priv->lcd_ptr, (int)arg);
+        }
+        break;
+      case LCDDEVIO_GETFRAMERATE:
+        {
+          *((FAR int *)arg) = priv->lcd_ptr->getframerate(priv->lcd_ptr);
+        }
+        break;
+      case LCDDEVIO_GETAREAALIGN:
+        {
+          FAR struct lcddev_area_align_s *area_align =
+              (FAR struct lcddev_area_align_s *)arg;
 
-        if (priv->lcd_ptr->getareaalign == NULL)
-          {
-            area_align->row_start_align = 1;
-            area_align->height_align    = 1;
-            area_align->col_start_align = 1;
-            area_align->width_align     = 1;
-            area_align->buf_align       = sizeof(uintptr_t);
-          }
-        else
-          {
-            ret = priv->lcd_ptr->getareaalign(priv->lcd_ptr, area_align);
-          }
-      }
-      break;
-    default:
-      {
-        if (priv->lcd_ptr->ioctl)
-          {
-            ret = priv->lcd_ptr->ioctl(priv->lcd_ptr, cmd, arg);
-          }
-        else
-          {
-            gerr("ERROR: Unsupported IOCTL command: %d\n", cmd);
-            ret = -ENOTTY;
-          }
-      }
-      break;
+          if (priv->lcd_ptr->getareaalign == NULL)
+            {
+              area_align->row_start_align = 1;
+              area_align->height_align    = 1;
+              area_align->col_start_align = 1;
+              area_align->width_align     = 1;
+              area_align->buf_align       = sizeof(uintptr_t);
+            }
+          else
+            {
+              ret = priv->lcd_ptr->getareaalign(priv->lcd_ptr, area_align);
+            }
+        }
+        break;
+      default:
+        {
+          if (priv->lcd_ptr->ioctl)
+            {
+              ret = priv->lcd_ptr->ioctl(priv->lcd_ptr, cmd, arg);
+            }
+          else
+            {
+              gerr("ERROR: Unsupported IOCTL command: %d\n", cmd);
+              ret = -ENOTTY;
+            }
+        }
+        break;
     }
 
   return ret;

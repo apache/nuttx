@@ -156,84 +156,84 @@ static int efuse_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    /* cmd:         EFUSEIOC_READ_FIELD
-     * Description: Read a field
-     * Argument:    A pointer to a struct efuse_param.
-     *              Where the field is an array.
-     *              Each item in the array is a pointer to an efuse_desc_t
-     *              variable.
-     *              An efuse_desc_t variable contains an offset to a field
-     *              or subfield and its size in bits.
-     *              The size param is a redundancy, and it is the sum
-     *              of all subfields sizes from efuse_desc_t in bits.
-     *              The data is a pointer to a pre-allocated space
-     *              where the driver will load the data read from efuse.
-     */
+      /* cmd:         EFUSEIOC_READ_FIELD
+       * Description: Read a field
+       * Argument:    A pointer to a struct efuse_param.
+       *              Where the field is an array.
+       *              Each item in the array is a pointer to an efuse_desc_t
+       *              variable.
+       *              An efuse_desc_t variable contains an offset to a field
+       *              or subfield and its size in bits.
+       *              The size param is a redundancy, and it is the sum
+       *              of all subfields sizes from efuse_desc_t in bits.
+       *              The data is a pointer to a pre-allocated space
+       *              where the driver will load the data read from efuse.
+       */
 
-    case EFUSEIOC_READ_FIELD:
-      {
-        FAR struct efuse_param_s *param =
-                   (FAR struct efuse_param_s *)((uintptr_t)arg);
+      case EFUSEIOC_READ_FIELD:
+        {
+          FAR struct efuse_param_s *param =
+                     (FAR struct efuse_param_s *)((uintptr_t)arg);
 
-        /* Read the efuse */
+          /* Read the efuse */
 
-        DEBUGASSERT(lower->ops->read_field); /* Required */
-        ret = lower->ops->read_field(lower,
-                                     param->field,
-                                     param->data,
-                                     param->size);
-      }
-      break;
+          DEBUGASSERT(lower->ops->read_field); /* Required */
+          ret = lower->ops->read_field(lower,
+                                       param->field,
+                                       param->data,
+                                       param->size);
+        }
+        break;
 
-    /* cmd:         EFUSEIOC_WRITE_FIELD
-     * Description: Write a field
-     * Argument: A pointer to a struct efuse_param.
-     *           Where the field is an array.
-     *           Each item in the array is a pointer to an efuse_desc_t
-     *           variable.
-     *           An efuse_desc_t variable contains an offset to a field
-     *           or subfield and its size in bits.
-     *           The size param is a redundancy, and it is the sum
-     *           of all subfields sizes from efuse_desc_t in bits.
-     *           The data is a pointer to a pre-allocated space
-     *           where the user wrote the value that he wants
-     *           to write in a field or subfield.
-     */
+      /* cmd:         EFUSEIOC_WRITE_FIELD
+       * Description: Write a field
+       * Argument: A pointer to a struct efuse_param.
+       *           Where the field is an array.
+       *           Each item in the array is a pointer to an efuse_desc_t
+       *           variable.
+       *           An efuse_desc_t variable contains an offset to a field
+       *           or subfield and its size in bits.
+       *           The size param is a redundancy, and it is the sum
+       *           of all subfields sizes from efuse_desc_t in bits.
+       *           The data is a pointer to a pre-allocated space
+       *           where the user wrote the value that he wants
+       *           to write in a field or subfield.
+       */
 
-    case EFUSEIOC_WRITE_FIELD:
-      {
-        FAR struct efuse_param_s *param =
-                   (FAR struct efuse_param_s *)((uintptr_t)arg);
+      case EFUSEIOC_WRITE_FIELD:
+        {
+          FAR struct efuse_param_s *param =
+                     (FAR struct efuse_param_s *)((uintptr_t)arg);
 
-        /* Write the efuse */
+          /* Write the efuse */
 
-        DEBUGASSERT(lower->ops->write_field); /* Required */
-        ret = lower->ops->write_field(lower,
-                                      param->field,
-                                      param->data,
-                                      param->size);
-      }
-      break;
+          DEBUGASSERT(lower->ops->write_field); /* Required */
+          ret = lower->ops->write_field(lower,
+                                        param->field,
+                                        param->data,
+                                        param->size);
+        }
+        break;
 
-    default:
-      {
-        minfo("Forwarding unrecognized cmd: %d arg: %lu\n", cmd, arg);
+      default:
+        {
+          minfo("Forwarding unrecognized cmd: %d arg: %lu\n", cmd, arg);
 
-        /* Ioctls commands that are not recognized by the "upper-half"
-         * driver are forwarded to the lower half driver through this
-         * method.
-         */
+          /* Ioctls commands that are not recognized by the "upper-half"
+           * driver are forwarded to the lower half driver through this
+           * method.
+           */
 
-        if (lower->ops->ioctl) /* Optional */
-          {
-            ret = lower->ops->ioctl(lower, cmd, arg);
-          }
-        else
-          {
-            ret = -ENOTTY;
-          }
-      }
-      break;
+          if (lower->ops->ioctl) /* Optional */
+            {
+              ret = lower->ops->ioctl(lower, cmd, arg);
+            }
+          else
+            {
+              ret = -ENOTTY;
+            }
+        }
+        break;
     }
 
   nxmutex_unlock(&upper->lock);

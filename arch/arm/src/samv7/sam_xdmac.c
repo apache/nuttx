@@ -1630,6 +1630,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
   for (chndx = 0; chndx < SAMV7_NDMACHAN; chndx++)
     {
       struct sam_xdmach_s *candidate = &g_xdmach[chndx];
+
       if (!candidate->inuse)
         {
           xdmach        = candidate;
