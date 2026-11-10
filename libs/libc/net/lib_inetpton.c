@@ -392,17 +392,17 @@ int inet_pton(int af, FAR const char *src, FAR void *dest)
   switch (af)
     {
 #if defined(CONFIG_NET_IPv4) || defined(CONFIG_LIBC_IPv4_ADDRCONV)
-    case AF_INET:
-      return inet_ipv4_pton(src, dest);
+      case AF_INET:
+        return inet_ipv4_pton(src, dest);
 #endif
 
 #if defined(CONFIG_NET_IPv6) || defined(CONFIG_LIBC_IPv6_ADDRCONV)
-    case AF_INET6:
-      return inet_ipv6_pton(src, dest);
+      case AF_INET6:
+        return inet_ipv6_pton(src, dest);
 #endif
 
-    default:
-      set_errno(EAFNOSUPPORT);
-      return ERROR;
+      default:
+        set_errno(EAFNOSUPPORT);
+        return ERROR;
     }
 }
