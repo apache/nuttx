@@ -86,21 +86,7 @@ ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
 tricore_libc$(OBJEXT): tricore_libc.c
 	$(call COMPILE, $<, $@)
 
-# iLLD calls _c_init, the TASKING copy table init, so take cinit.o from
-# the toolchain C library.  The rest of that library clashes with NuttX.
-
-ifeq ($(CONFIG_ARCH_TC1V8),y)
-TASKING_LIBDIR = tc18$(DELIM)dpfpu
-else
-TASKING_LIBDIR = tc162
-endif
-
-TASKING_LIBC = $(C_COMPILER_DIR)..$(DELIM)lib$(DELIM)$(TASKING_LIBDIR)$(DELIM)libc_fpu$(LIBEXT)
-
-cinit$(OBJEXT): $(TASKING_LIBC)
-	$(Q) artc -x $< cinit$(OBJEXT)
-
-libc_fpu$(LIBEXT): tricore_libc$(OBJEXT) cinit$(OBJEXT)
+libc_fpu$(LIBEXT): tricore_libc$(OBJEXT)
 	$(call ARCHIVE, $@, $^)
 
 EXTRA_LIBS += libc_fpu$(LIBEXT)
