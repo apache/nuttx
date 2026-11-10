@@ -4,11 +4,11 @@
 #
 
 choice
-	prompt "TC4XX Chip Selection"
-	default ARCH_CHIP_TC4DX
+	prompt "Infineon AURIX TC4x chip selection"
+	default TC4X_CHIP_TC4DX
 
-config ARCH_CHIP_TC4DX
-	bool "TC4XX TC4DX"
+config TC4X_CHIP_TC4DX
+	bool "TC4Dx SoC"
 
 endchoice
 
