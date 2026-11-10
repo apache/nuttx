@@ -31,6 +31,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/tee.h>
 #include <nuttx/idr.h>
+#include <nuttx/mm/map.h>
 
 #include "optee_msg.h"
 
@@ -73,6 +74,7 @@ struct optee_priv_data
   uintptr_t alignment;        /* Transport-specified message alignment */
   FAR struct idr_s *shms;     /* An RB tree of process local shm entries */
   enum optee_role_e role;
+  uint32_t capabilities;
 };
 
 struct optee_shm
@@ -80,11 +82,20 @@ struct optee_shm
   FAR struct optee_priv_data *priv;
   int fd;
   int32_t id;
-  uint64_t vaddr;
-  uint64_t paddr;
+  uintptr_t vaddr;
+  uintptr_t paddr;
   uint64_t length;
   FAR void *page_list;
   uint32_t flags;
+
+  /* used to store real priv */
+
+  FAR void *p;
+
+  int (*munmap)(FAR struct task_group_s *group,
+                FAR struct mm_map_entry_s *entry,
+                FAR void *start,
+                size_t length);
 };
 
 /****************************************************************************
@@ -111,6 +122,10 @@ void optee_transport_close(FAR struct optee_priv_data *priv);
 
 int optee_transport_call(FAR struct optee_priv_data *priv,
                          FAR struct optee_msg_arg *arg);
+
+int optee_transport_mmap(FAR struct optee_priv_data *priv,
+                         FAR struct mm_map_entry_s *entry,
+                         FAR struct optee_shm *shm);
 
 int optee_from_msg_param(FAR struct tee_ioctl_param *params,
                          size_t num_params,
