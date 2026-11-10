@@ -6,6 +6,7 @@
 config FS_PROCFS
 	bool "PROCFS File System"
 	default n
+	depends on !DISABLE_MOUNTPOINT
 	---help---
 		The PROCFS file system provides access to task status and other driver
 		status through the NuttX file system.  The PROCFS may, for example, be
