@@ -396,18 +396,24 @@ static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
         switch (caps->ac_format.hw)
           {
             case AUDIO_FU_VOLUME:
-              host_uninterruptible(snd_mixer_selem_get_playback_volume,
-                                   priv->volume,
-                                   SND_MIXER_SCHN_UNKNOWN,
-                                   &val);
-              caps->ac_controls.w = val;
+              if (priv->volume)
+                {
+                  host_uninterruptible(snd_mixer_selem_get_playback_volume,
+                                       priv->volume,
+                                       SND_MIXER_SCHN_UNKNOWN,
+                                       &val);
+                  caps->ac_controls.w = val;
+                }
               break;
             case AUDIO_FU_INP_GAIN:
-              host_uninterruptible(snd_mixer_selem_get_capture_volume,
-                                   priv->volume,
-                                   SND_MIXER_SCHN_MONO,
-                                   &val);
-              caps->ac_controls.w = val;
+              if (priv->volume)
+                {
+                  host_uninterruptible(snd_mixer_selem_get_capture_volume,
+                                       priv->volume,
+                                       SND_MIXER_SCHN_MONO,
+                                       &val);
+                  caps->ac_controls.w = val;
+                }
               break;
             default:
               break;
@@ -448,11 +454,21 @@ static int sim_audio_configure(struct audio_lowerhalf_s *dev,
         switch (caps->ac_format.hw)
           {
             case AUDIO_FU_VOLUME:
+              if (!priv->volume)
+                {
+                  break;
+                }
+
               ret = host_uninterruptible(
                       snd_mixer_selem_set_playback_volume_all,
                       priv->volume, caps->ac_controls.hw[0]);
               break;
             case AUDIO_FU_INP_GAIN:
+              if (!priv->volume)
+                {
+                  break;
+                }
+
               ret = host_uninterruptible(
                         snd_mixer_selem_set_capture_volume_all,
                         priv->volume, caps->ac_controls.hw[0]);
