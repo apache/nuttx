@@ -202,6 +202,7 @@ static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
             {
               int ret = devif_send(dev, pstate->st_buffer, pstate->st_buflen,
                                    udpip_hdrsize(pstate->st_conn));
+
               if (ret <= 0)
                 {
                   pstate->st_sndlen = ret;
@@ -216,9 +217,9 @@ static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
                   goto end_wait;
                 }
 
-                iob_update_pktlen(dev->d_iob, udpip_hdrsize(pstate->st_conn),
-                                  false);
-                dev->d_sndlen = 0;
+              iob_update_pktlen(dev->d_iob, udpip_hdrsize(pstate->st_conn),
+                                false);
+              dev->d_sndlen = 0;
             }
 
           dev->d_len = dev->d_iob->io_pktlen;
