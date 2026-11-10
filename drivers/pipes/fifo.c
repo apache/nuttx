@@ -53,7 +53,7 @@ static const struct file_operations g_fifo_fops =
   NULL,                /* truncate */
   pipecommon_poll,     /* poll */
   NULL,                /* readv */
-  NULL                 /* writev */
+  pipecommon_writev    /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , pipecommon_unlink  /* unlink */
 #endif

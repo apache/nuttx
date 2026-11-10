@@ -561,6 +561,12 @@
                                                * IN: None
                                                * OUT: int */
 
+#define PIPEIOC_ATOMICWRITE _PIPEIOC(0x0007)  /* Set atomic writev mode
+                                               * IN: unsigned long (0 to
+                                               *     disable, non-zero to
+                                               *     enable)
+                                               * OUT: None */
+
 /* RTC driver ioctl definitions *********************************************/
 
 /* (see nuttx/include/rtc.h */
