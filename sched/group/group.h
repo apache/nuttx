@@ -66,7 +66,12 @@ void group_initialize(FAR struct tcb_s *tcb);
 void group_bind(FAR struct tcb_s *tcb);
 void group_join(FAR struct tcb_s *tcb);
 #endif
-void group_leave(FAR struct tcb_s *tcb);
+/* Returns true if the leaving task was the last member of the group.
+ * Decided under tg_lock, together with the removal, so exactly one
+ * member of a group sees it, even when several exit at once.
+ */
+
+bool group_leave(FAR struct tcb_s *tcb);
 void group_drop(FAR struct task_group_s *group);
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
 void group_add_waiter(FAR struct task_group_s *group);

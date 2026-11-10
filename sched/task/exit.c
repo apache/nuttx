@@ -31,6 +31,9 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 
+#include <signal.h>
+#include <nuttx/signal.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 
@@ -69,6 +72,19 @@ void _exit(int status)
 
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+      sigset_t set;
+
+      /* A signal handler that calls exit() while group_kill_children() is
+       * waiting for the siblings would re-enter _exit(), find
+       * GROUP_FLAG_EXITING already set and skip that wait.  Block signals
+       * first, as nx_pthread_exit() does.
+       */
+
+      sigfillset(&set);
+      nxsig_procmask(SIG_SETMASK, &set, NULL);
+#endif
+
       group_kill_children(tcb);
     }
 
