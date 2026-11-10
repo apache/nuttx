@@ -518,6 +518,13 @@ static inline size_t uart_putchars(FAR uart_dev_t *dev,
         }
     }
 
+#ifdef CONFIG_SERIAL_TXDMA
+  if (dev->xmit.head != dev->xmit.tail)
+    {
+      uart_dmatxavail(dev);
+    }
+#endif
+
   return len - remaining;
 }
 
