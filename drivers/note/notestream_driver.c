@@ -92,6 +92,7 @@ static void notestream_add(FAR struct note_driver_s *drv,
 {
   FAR struct notestream_driver_s *drivers =
       (FAR struct notestream_driver_s *)drv;
+
   lib_stream_puts(drivers->stream, note, len);
 }
 
