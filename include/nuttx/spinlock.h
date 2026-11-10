@@ -1220,7 +1220,6 @@ SPINLOCK_INLINE bool read_trylock(FAR volatile rwlock_t *lock)
       else if (atomic_cmpxchg_acquire(lock, &old, old + 1))
         {
           ret = true;
-          UP_DMB();
           break;
         }
     }
