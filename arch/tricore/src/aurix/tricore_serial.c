@@ -41,8 +41,6 @@
 
 #include <arch/board/board.h>
 
-#include <arch/chip/chip.h>
-
 #include "tricore_internal.h"
 #include "tricore_asclin.h"
 
