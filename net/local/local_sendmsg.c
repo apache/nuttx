@@ -295,26 +295,13 @@ static ssize_t local_sendto(FAR struct socket *psock,
       goto errout_with_halfduplex;
     }
 
-  /* Send the preamble */
+  /* Send preamble and payload as one atomic frame */
 
-  ret = local_send_preamble(conn, &conn->lc_outfile, buf, len,
-                            server->lc_rcvsize);
+  ret = local_send_frame(conn, buf, len, server->lc_rcvsize);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to send the preamble: %zd\n", ret);
-      goto errout_with_sender;
+      nerr("ERROR: Failed to send the frame: %zd\n", ret);
     }
-
-  /* Send the packet */
-
-  ret = local_send_packet(&conn->lc_outfile, buf, len);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to send the packet: %zd\n", ret);
-      goto errout_with_sender;
-    }
-
-errout_with_sender:
 
   /* Now we can close the write-only socket descriptor */
 

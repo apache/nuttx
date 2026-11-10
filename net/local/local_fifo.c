@@ -39,6 +39,9 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
+
 #include "local/local.h"
 
 /****************************************************************************
@@ -425,7 +428,7 @@ int local_set_pollthreshold(FAR struct local_conn_s *conn,
   ret = local_set_pollinthreshold(&conn->lc_infile, threshold);
   if (ret > 0)
     {
-       ret = local_set_polloutthreshold(&conn->lc_outfile, threshold);
+      ret = local_set_polloutthreshold(&conn->lc_outfile, threshold);
     }
 
   return ret;
@@ -699,16 +702,6 @@ int local_open_receiver(FAR struct local_conn_s *conn, bool nonblock)
       /* Policy: Free FIFO resources when the buffer is empty. */
 
       ret = local_set_policy(&conn->lc_infile, 1);
-      if (ret == 0)
-        {
-          /* Set POLLIN threshold bigger than preamble len.
-           * This is to avoid non-blocking read failed with -EAGAIN when
-           * only preamble len is sent and read by reader.
-           */
-
-          ret = local_set_pollinthreshold(&conn->lc_infile,
-                                          2 * sizeof(lc_size_t));
-        }
     }
 
   return ret;
@@ -751,6 +744,21 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
 
           ret = local_set_polloutthreshold(&conn->lc_outfile,
                                            2 * sizeof(lc_size_t));
+        }
+
+      if (ret == 0)
+        {
+          /* Require the FIFO to publish each writev all-or-nothing.  A
+           * datagram is a preamble plus a payload, so a reader woken
+           * between the two would consume a header whose payload does not
+           * exist yet and the FIFO would lose framing from then on.
+           */
+
+          ret = file_ioctl(&conn->lc_outfile, PIPEIOC_ATOMICWRITE, 1);
+          if (ret < 0)
+            {
+              nerr("ERROR: Failed to set FIFO atomic write mode: %d\n", ret);
+            }
         }
     }
 

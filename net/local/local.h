@@ -492,28 +492,30 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                       int flags);
 
 /****************************************************************************
- * Name: local_send_preamble
+ * Name: local_send_frame
  *
  * Description:
- *   Send a packet on the write-only FIFO.
+ *   Send one datagram on the write-only FIFO as a single atomic writev, so
+ *   that the reader is never woken on a preamble whose payload has not been
+ *   written yet.
  *
  * Input Parameters:
- * conn      A reference to local connection structure
- * filep     File structure of write-only FIFO.
- * buf       Data to send
- * len       Length of data to send
- * preamble  preamble Flag to indicate the preamble sync header assembly
+ *   conn     A reference to local connection structure
+ *   buf      Payload to send
+ *   len      Number of payload iovec segments
+ *   rcvsize  Receive buffer size the peer advertised, preamble room
+ *            included
  *
  * Returned Value:
- *   Packet length is returned on success; a negated errno value is returned
- *   on any failure.
+ *   Payload length is returned on success; a negated errno value is
+ *   returned on any failure.  -EMSGSIZE means the whole frame, preamble
+ *   included, does not fit in rcvsize.
  *
  ****************************************************************************/
 
-int local_send_preamble(FAR struct local_conn_s *conn,
-                        FAR struct file *filep,
-                        FAR const struct iovec *buf,
-                        size_t len, size_t rcvsize);
+ssize_t local_send_frame(FAR struct local_conn_s *conn,
+                         FAR const struct iovec *buf, size_t len,
+                         size_t rcvsize);
 
 /****************************************************************************
  * Name: local_send_packet
