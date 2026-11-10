@@ -97,4 +97,10 @@ if(CONFIG_RAM_UART)
   list(APPEND SRCS uart_ram.c)
 endif()
 
+# Netdev console
+
+if(CONFIG_CONSOLE_NETDEV)
+  list(APPEND SRCS netdev_console.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})

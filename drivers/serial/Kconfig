@@ -1006,4 +1006,41 @@ config UART_BTH5_NPOLLWAITERS
 
 endif # UART_BTH5
 
+config CONSOLE_NETDEV
+	bool "Console on netdev"
+	default n
+	depends on NETDEVICES && SCHED_LPWORK
+	select SERIAL_RXDMA
+	select SERIAL_TXDMA
+	---help---
+		Use the netdev as a console device
+
+if CONSOLE_NETDEV
+
+config CONSOLE_NETDEV_IPADDR
+	hex "CONSOLE netdev destination IP address"
+	default 0xffffffff
+	---help---
+		Address where where netdev sends CONSOLE data.
+
+config CONSOLE_NETDEV_PORT
+	int "CONSOLE netdev port"
+	default 55000
+	---help---
+		UDP port for CONSOLE input/output.
+
+config CONSOLE_NETDEV_RXBUFSIZE
+	int "CONSOLE netdev receive buffer size"
+	default 256
+
+config CONSOLE_NETDEV_TXBUFSIZE
+	int "CONSOLE netdev transmit buffer size"
+	default 256
+
+config CONSOLE_NETDEV_DELAY_USEC
+	int "CONSOLE netdev polling interval in microseconds"
+	default 1000
+
+endif
+
 endif # SERIAL

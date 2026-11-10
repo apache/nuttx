@@ -97,6 +97,12 @@ ifeq ($(CONFIG_16550_PCI_UART),y)
   CSRCS += uart_pci_16550.c
 endif
 
+# Netdev console
+
+ifeq ($(CONFIG_CONSOLE_NETDEV),y)
+  CSRCS += netdev_console.c
+endif
+
 # Include serial build support
 
 DEPPATH += --dep-path serial
