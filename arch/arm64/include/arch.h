@@ -56,6 +56,12 @@
 
 #define UP_WFE() __asm__ __volatile__ ("wfe" : : : "memory")
 
+/* Relax hint for spin waiting: YIELD reduces pipeline contention while
+ * polling the lock.  It does not sleep and needs no wake event.
+ */
+
+#define UP_RELAX() __asm__ __volatile__ ("yield")
+
 /* SEV is not a memory access and is not subject to memory ordering,
  * so a waiter may observe the event before the lock release store
  * becomes visible, re-read the stale lock and sleep again with the
