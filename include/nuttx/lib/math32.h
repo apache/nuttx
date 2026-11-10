@@ -358,8 +358,15 @@ static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
 }
 #endif
 
+/* The div_const*() family takes non-negative arguments only,
+ * negative values are outside the contract.
+ */
+
 #define div_const(n, base) \
-  ((sizeof((n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
+  ((is_constexpr(base) && !is_constexpr(n) && \
+    sizeof((n)) == sizeof(uint64_t) && UINTPTR_MAX == UINT32_MAX) ? \
+   div64_const(n, base) : ((n) / (base)))
+
 /* Unit constant in the essential type of x (x > 0), so MISRA C Rule 10.4
  * holds for both signed and unsigned arguments.
  */
