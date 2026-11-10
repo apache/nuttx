@@ -104,10 +104,10 @@ class Tcb(Value):
     preemp_max: Value
     preemp_caller: Value
     preemp_max_caller: Value
-    crit_start: Value
-    crit_max: Value
-    crit_caller: Value
-    crit_max_caller: Value
+    irqdis_start: Value
+    irqdis_max: Value
+    irqdis_caller: Value
+    irqdis_max_caller: Value
     perf_event_ctx: Value
     perf_event_mutex: Value
     xcp: Value
