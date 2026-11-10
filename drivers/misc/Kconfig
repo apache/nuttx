@@ -149,13 +149,95 @@ config ARCH_HAVE_RDWR_MEM_CPU_RUN
 	default n
 
 config LWL_CONSOLE
-bool "Lightweight Link Console Support"
+	bool "Lightweight Link Console Support"
 	default n
-	depends on DEV_CONSOLE && ARCH_HAVE_RDWR_MEM_CPU_RUN
+	depends on DEV_CONSOLE && ARCH_HAVE_RDWR_MEM_CPU_RUN && SERIAL
 	---help---
 		Use the lightweight link console which provides console over a
 		debug channel by means of shared memory.  A terminal application
-		for openocd as the debugger is available in tools/ocdconsole.py.
+		for openocd as the debugger is available in tools/lwl/ocdconsole.py.
+		See Documentation/guides/drivers/lwl.rst.
+
+if LWL_CONSOLE
+
+config LWL_CONSOLE_RXBUFSIZE
+	int "Receive buffer size"
+	default 64
+	---help---
+		Size of the buffer that holds the characters received from the
+		host until they are read.  While it is full the host is held off,
+		so no input is lost.
+
+config LWL_CONSOLE_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Size of the buffer that holds the characters waiting to be
+		collected by the host.  While no host is connected the most recent
+		output is kept here and shown when the host connects.
+
+config LWL_CONSOLE_RINGSIZE
+	int "Output ring buffer size"
+	default 256
+	---help---
+		Size of the ring buffer in the control block from which the host
+		collects the output, many bytes per debugger access instead of
+		three per word.  This is what makes the output fast.  It must be
+		a multiple of 4.  0 disables it: the output then only uses the
+		word protocol, as with old host tools.
+
+config LWL_CONSOLE_DOORBELL
+	bool "Doorbell interrupt"
+	default n
+	---help---
+		Let the host raise an interrupt every time it updates the link, by
+		writing a register of the interrupt controller that makes an
+		unused interrupt pending.  The console is then entirely interrupt
+		driven: the CPU does no work at all while the console is idle.
+		It requires a host that rings the doorbell, such as
+		tools/lwl/ocdconsole.py.  Without the doorbell the link is polled,
+		see LWL_CONSOLE_POLL_INTERVAL.
+
+if LWL_CONSOLE_DOORBELL
+
+config LWL_CONSOLE_DOORBELL_IRQ
+	int "Doorbell IRQ number"
+	---help---
+		The NuttX IRQ number used as the doorbell.  It must be implemented
+		by the chip but not used by any other driver.
+
+config LWL_CONSOLE_DOORBELL_ADDR
+	hex "Doorbell register address"
+	default 0x0
+	---help---
+		Address of the register the host writes to make the doorbell IRQ
+		pending.  The debugger must be able to write it while the CPU is
+		running.  On ARMv6-M/ARMv7-M/ARMv8-M this is the NVIC Interrupt
+		Set-Pending Register 0xe000e200 + 4 * ((IRQ - 16) / 32).  The
+		interrupt handler writes 0 to it, which must either clear the
+		request or have no effect.
+
+config LWL_CONSOLE_DOORBELL_VALUE
+	hex "Doorbell register value"
+	default 0x0
+	---help---
+		Value the host writes to LWL_CONSOLE_DOORBELL_ADDR.  On
+		ARMv6-M/ARMv7-M/ARMv8-M this is 1 << ((IRQ - 16) % 32).
+
+endif # LWL_CONSOLE_DOORBELL
+
+config LWL_CONSOLE_POLL_INTERVAL
+	int "Polling interval (usec)"
+	default 10000
+	range 1 1000000
+	depends on !LWL_CONSOLE_DOORBELL
+	---help---
+		Interval at which the link is polled while the console is open,
+		when the doorbell is not used.  It works with any host, but the
+		CPU wakes up at this rate and the output throughput is limited
+		by it.
+
+endif # LWL_CONSOLE
 
 menu "Buffering"
 
