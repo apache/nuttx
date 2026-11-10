@@ -254,11 +254,11 @@ static void optee_rpc_cmd_shm_free(FAR struct optee_priv_data *priv,
 #ifdef CONFIG_DEV_OPTEE_SUPPLICANT
         arg->ret = optee_supplicant_free(shm->id);
         if (arg->ret)
-            {
-              /* The supplicant either failed or isn't running. */
+          {
+            /* The supplicant either failed or isn't running. */
 
-              return;
-            }
+            return;
+          }
 #else
         arg->ret = TEE_ERROR_NOT_SUPPORTED;
         return;

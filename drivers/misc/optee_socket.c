@@ -65,6 +65,7 @@ static int optee_socket_recv(FAR struct socket *psock, FAR void *msg,
   while (size > 0)
     {
       ssize_t n = psock_recv(psock, msg, size, 0);
+
       if (n <= 0)
         {
           return n < 0 ? n : -EIO;
@@ -75,6 +76,16 @@ static int optee_socket_recv(FAR struct socket *psock, FAR void *msg,
     }
 
   return 0;
+}
+
+int optee_transport_mmap(FAR struct optee_priv_data *priv_,
+                         FAR struct mm_map_entry_s *entry,
+                         FAR struct optee_shm *shm)
+{
+  FAR struct optee_socket_priv_data *priv =
+                  (FAR struct optee_socket_priv_data *)priv_;
+
+  return psock_mmap(&priv->socket, entry);
 }
 
 /****************************************************************************
@@ -208,45 +219,21 @@ int optee_transport_call(FAR struct optee_priv_data *priv_,
                          FAR struct optee_msg_arg *arg)
 {
   /* iov[0]: struct opteee_msg_arg + struct optee_msg_param[n]
-   * iov[1 - n+1]: shm_mem
    * 0 <= n <= 6
    */
 
   FAR struct optee_socket_priv_data *priv =
                   (FAR struct optee_socket_priv_data *)priv_;
   size_t arg_size = OPTEE_MSG_GET_ARG_SIZE(arg->num_params);
-  size_t shm_size[OPTEE_MAX_PARAM_NUM];
-  size_t shm_addr[OPTEE_MAX_PARAM_NUM];
   struct iovec iov[OPTEE_SOCKET_MAX_IOVEC_NUM];
   struct msghdr msghdr;
   unsigned long iovlen = 1;
-  unsigned long i;
   int ret;
 
   memset(iov, 0, sizeof(iov));
-  memset(shm_size, 0, sizeof(shm_size));
 
   iov[0].iov_base = arg;
   iov[0].iov_len = arg_size;
-
-  for (i = 0; i < arg->num_params; i++)
-    {
-      if (arg->params[i].attr == OPTEE_MSG_ATTR_TYPE_RMEM_INPUT ||
-          arg->params[i].attr == OPTEE_MSG_ATTR_TYPE_RMEM_INOUT)
-        {
-          iov[iovlen].iov_base =
-            (FAR void *)(uintptr_t)arg->params[i].u.rmem.shm_ref;
-          iov[iovlen].iov_len = arg->params[i].u.rmem.size;
-          shm_size[i] = arg->params[i].u.rmem.size;
-          shm_addr[i] = arg->params[i].u.rmem.shm_ref;
-          iovlen++;
-        }
-      else if (arg->params[i].attr == OPTEE_MSG_ATTR_TYPE_RMEM_OUTPUT)
-        {
-          shm_size[i] = arg->params[i].u.rmem.size;
-          shm_addr[i] = arg->params[i].u.rmem.shm_ref;
-        }
-    }
 
   memset(&msghdr, 0, sizeof(struct msghdr));
   msghdr.msg_iov = iov;
@@ -262,23 +249,6 @@ int optee_transport_call(FAR struct optee_priv_data *priv_,
   if (ret < 0)
     {
       return ret;
-    }
-
-  for (i = 0; i < arg->num_params; i++)
-    {
-      if (arg->params[i].attr == OPTEE_MSG_ATTR_TYPE_RMEM_OUTPUT ||
-          arg->params[i].attr == OPTEE_MSG_ATTR_TYPE_RMEM_INOUT)
-        {
-          size_t size = MIN(arg->params[i].u.rmem.size, shm_size[i]);
-          arg->params[i].u.rmem.shm_ref = shm_addr[i];
-          ret = optee_socket_recv(&priv->socket,
-                                  (FAR void *)(uintptr_t)
-                                  arg->params[i].u.rmem.shm_ref, size);
-          if (ret < 0)
-            {
-              return ret;
-            }
-        }
     }
 
   return 0;
