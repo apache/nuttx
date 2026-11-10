@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/lib/lib.h>
 #include <nuttx/signal.h>
 
@@ -222,8 +223,10 @@ int rpmsg_ping(FAR struct rpmsg_ping_dev_s *dev,
   clock_t min = CLOCK_MAX;
   clock_t max = 0;
   uint64_t total = 0;
+  struct timespec ts;
   uint32_t buf_len = 0;
   int send_len = 0;
+  int seq;
   int i;
 
   if (!dev || !ping || ping->times <= 0)
@@ -240,6 +243,14 @@ int rpmsg_ping(FAR struct rpmsg_ping_dev_s *dev,
       ept = &dev->ept;
     }
 
+  seq = atomic_add(&dev->seq, 1) + 1;
+  clock_systime_timespec(&ts);
+  syslog(LOG_EMERG, "ping #%d start at %" PRIu64 ".%09ld: %s <-> %s, "
+         "times %d, len %d, cmd 0x%x, sleep %d ms\n", seq,
+         (uint64_t)ts.tv_sec, ts.tv_nsec,
+         rpmsg_get_local_cpuname(ept->rdev), rpmsg_get_cpuname(ept->rdev),
+         ping->times, ping->len, ping->cmd, ping->sleep);
+
   for (i = 0; i < ping->times; i++)
     {
       clock_t tm = perf_gettime();
@@ -247,7 +258,7 @@ int rpmsg_ping(FAR struct rpmsg_ping_dev_s *dev,
       send_len = rpmsg_ping_once(ept, ping->len, ping->cmd, &buf_len, i);
       if (send_len < 0)
         {
-          return send_len;
+          goto out;
         }
 
       tm     = perf_gettime() - tm;
@@ -270,7 +281,12 @@ int rpmsg_ping(FAR struct rpmsg_ping_dev_s *dev,
   rpmsg_ping_logout("max", max);
   rpmsg_ping_logout_rate(send_len, total / ping->times);
 
-  return 0;
+out:
+  clock_systime_timespec(&ts);
+  syslog(LOG_EMERG, "ping #%d end at %" PRIu64 ".%09ld: %d of %d done, "
+         "ret %d\n", seq, (uint64_t)ts.tv_sec, ts.tv_nsec, i, ping->times,
+         MIN(send_len, 0));
+  return MIN(send_len, 0);
 }
 
 int rpmsg_ping_init(FAR struct rpmsg_device *rdev,
@@ -278,6 +294,7 @@ int rpmsg_ping_init(FAR struct rpmsg_device *rdev,
 {
   int ret;
 
+  atomic_set(&dev->seq, 0);
   ret = rpmsg_create_ept(&dev->ept, rdev, RPMSG_PING_EPT_NAME,
                          RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                          rpmsg_ping_ept_cb, NULL);
