@@ -550,7 +550,9 @@ static inline_function int devif_poll_icmpv6(FAR struct net_driver_s *dev,
     {
       /* Skip ICMPv6 connections that are bound to other polling devices */
 
+#ifdef CONFIG_NET_ICMPv6_SOCKET
       if (conn == NULL || dev == conn->dev)
+#endif
         {
           /* Perform the ICMPV6 poll
            * Note: conn equal NULL in the first iteration means poll dev's

@@ -65,7 +65,20 @@
 void icmpv6_poll(FAR struct net_driver_s *dev,
                  FAR struct icmpv6_conn_s *conn)
 {
-  DEBUGASSERT(dev != NULL && (conn == NULL || dev == conn->dev));
+  FAR struct devif_callback_s *list;
+
+  DEBUGASSERT(dev != NULL);
+
+  /* Without ICMPv6 sockets, conn is always NULL */
+
+  list = dev->d_conncb;
+#ifdef CONFIG_NET_ICMPv6_SOCKET
+  if (conn != NULL)
+    {
+      DEBUGASSERT(dev == conn->dev);
+      list = conn->sconn.list;
+    }
+#endif
 
   /* Setup for the application callback */
 
@@ -74,8 +87,7 @@ void icmpv6_poll(FAR struct net_driver_s *dev,
 
   /* Perform the application callback */
 
-  devif_conn_event(dev, ICMPv6_POLL,
-                   conn ? conn->sconn.list : dev->d_conncb);
+  devif_conn_event(dev, ICMPv6_POLL, list);
 }
 
 #endif /* CONFIG_NET_ICMPv6_SOCKET || CONFIG_NET_ICMPv6_NEIGHBOR */

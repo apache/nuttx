@@ -59,10 +59,11 @@
  * Public Type Definitions
  ****************************************************************************/
 
-struct net_driver_s; /* Forward reference */
-struct socket;       /* Forward reference */
-struct sockaddr;     /* Forward reference */
-struct pollfd_s;     /* Forward reference */
+struct net_driver_s;  /* Forward reference */
+struct socket;        /* Forward reference */
+struct sockaddr;      /* Forward reference */
+struct pollfd_s;      /* Forward reference */
+struct icmpv6_conn_s; /* Forward reference */
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
 /* Representation of a IPPROTO_ICMP socket connection */
@@ -618,6 +619,8 @@ FAR struct icmpv6_conn_s *icmpv6_active(uint16_t id);
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
 FAR struct icmpv6_conn_s *icmpv6_nextconn(FAR struct icmpv6_conn_s *conn);
+#else
+#  define icmpv6_nextconn(c) NULL
 #endif
 
 /****************************************************************************
