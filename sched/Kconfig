@@ -315,7 +315,7 @@ config SPINWAIT_RELAX
 	bool "Relax hint wait"
 	---help---
 		Spinlock waiters poll the lock with the architecture relax
-		hint (PAUSE on x86_64, YIELD on aarch64) and unlocking sends
+		hint (PAUSE on x86_64, YIELD on arm64, armv7-a and armv7-r) and unlocking sends
 		no wake event.  The hint reduces bus and pipeline
 		contention without sleeping, and the unlock stays a plain
 		release store.
