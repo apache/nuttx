@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 #include <arch/csfr.h>
 #ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
-#  include "hardware/tc4xx_vmt.h"
+#  include "hardware/tc4x_vmt.h"
 #endif
 
 /****************************************************************************
@@ -38,11 +38,11 @@
 #define TRICORE_BIV_VECTOR 0x1fe0  /* Single interrupt vector at INTTAB + 0x1fe0 */
 
 #ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
-#  define TC3XX_WDTCPU0_CON0 0xf003624c  /* CPU0 watchdog CON0, 0xc apart per CPU */
+#  define TC3X_WDTCPU0_CON0 0xf003624c   /* CPU0 watchdog CON0, 0xc apart per CPU */
 #endif
 #ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
-#  define TC4XX_PSW_VIRT     0xb00       /* PSW for disabling the virtualization */
-#  define TC4XX_UCB0_RAMINIT 0xae408814  /* SRAMs that the boot firmware initializes */
+#  define TC4X_PSW_VIRT      0xb00       /* PSW for disabling the virtualization */
+#  define TC4X_UCB0_RAMINIT 0xae408814   /* SRAMs that the boot firmware initializes */
 #endif
 
 /* Make the CSA link word of the CSA address in addr: the segment in bits
@@ -87,7 +87,7 @@
 	.type	tricore_head, %function
 tricore_head:
 #ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
-	jl	tc3xx_endinit_clear
+	jl	tc3x_endinit_clear
 
 #endif
 	movh.a	%a15, hi:__TRAPTAB_CPU0
@@ -117,8 +117,8 @@ tricore_head:
 	 * CPU0 bits of RAMINSEL and LMUINSEL 0
 	 */
 
-	movh.a	%a15, hi:TC4XX_UCB0_RAMINIT
-	ld.w	%d15, [%a15]lo:TC4XX_UCB0_RAMINIT
+	movh.a	%a15, hi:TC4X_UCB0_RAMINIT
+	ld.w	%d15, [%a15]lo:TC4X_UCB0_RAMINIT
 	mov	%d5, 0x11
 	extr.u	%d0, %d15, 0, 2
 	jnz	%d0, 1f
@@ -128,7 +128,7 @@ tricore_head:
 	or	%d5, %d0, %d1
 1:
 	mov	%d4, 0
-	jl	tc4xx_sram_clear
+	jl	tc4x_sram_clear
 
 #endif
 	/* Caches on, interrupt vector, interrupt stack */
@@ -175,7 +175,7 @@ tricore_head:
 	isync
 
 #ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
-	jl	tc3xx_endinit_set
+	jl	tc3x_endinit_set
 
 #endif
 	movh.a	%sp, hi:__ustack
@@ -204,13 +204,13 @@ tricore_head:
 
 	mov	%d4, 0
 	movh	%d5, 0x0f80
-	jl	tc4xx_sram_clear
+	jl	tc4x_sram_clear
 	mov	%d4, 1
 	mov	%d5, 0x1f
-	jl	tc4xx_sram_clear
+	jl	tc4x_sram_clear
 	mov	%d4, 5
 	mov	%d5, 0x7c
-	jl	tc4xx_sram_clear
+	jl	tc4x_sram_clear
 
 #endif
 	/* Copy .data from its image in flash and clear .bss, a word at a time
@@ -253,23 +253,23 @@ tricore_head:
 
 #ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
 /****************************************************************************
- * Name: tc3xx_endinit_clear, tc3xx_endinit_set
+ * Name: tc3x_endinit_clear, tc3x_endinit_set
  *
  * Description:
- *   Clear (tc3xx_endinit_clear) or set (tc3xx_endinit_set) the ENDINIT
+ *   Clear (tc3x_endinit_clear) or set (tc3x_endinit_set) the ENDINIT
  *   of the watchdog of the calling CPU with the password and the lock
  *   sequence, and wait until it has changed.  Called with jl, before
  *   any CSA exists.  CPU5 has the core ID 6 on TC39x.
  *
  ****************************************************************************/
 
-	.type	tc3xx_endinit_clear, %function
-tc3xx_endinit_clear:
+	.type	tc3x_endinit_clear, %function
+tc3x_endinit_clear:
 	mov	%d5, 0
 	j	2f
 
-	.type	tc3xx_endinit_set, %function
-tc3xx_endinit_set:
+	.type	tc3x_endinit_set, %function
+tc3x_endinit_set:
 	mov	%d5, 1
 2:
 	mfcr	%d4, TRICORE_CPU_CORE_ID
@@ -279,8 +279,8 @@ tc3xx_endinit_set:
 3:
 	sh	%d15, %d4, 1
 	add	%d4, %d15, %d4
-	movh.a	%a15, hi:TC3XX_WDTCPU0_CON0
-	lea	%a15, [%a15]lo:TC3XX_WDTCPU0_CON0
+	movh.a	%a15, hi:TC3X_WDTCPU0_CON0
+	lea	%a15, [%a15]lo:TC3X_WDTCPU0_CON0
 	addsc.a	%a15, %a15, %d4, 2
 
 	/* Password access with the inverted password bits 7:2, then the
@@ -315,13 +315,13 @@ tricore_virt_off:
 	mov	%d0, 0
 	mtcr	TRICORE_CPU_VCON0, %d0
 	isync
-	mov	%d0, TC4XX_PSW_VIRT
+	mov	%d0, TC4X_PSW_VIRT
 	mtcr	TRICORE_CPU_PSW, %d0
 	isync
 	rfh
 
 /****************************************************************************
- * Name: tc4xx_sram_clear
+ * Name: tc4x_sram_clear
  *
  * Description:
  *   Fill the SRAMs of the SSHs in the mask d5 of the VMT group d4, the SSH
@@ -332,16 +332,16 @@ tricore_virt_off:
  *
  ****************************************************************************/
 
-	.type	tc4xx_sram_clear, %function
-tc4xx_sram_clear:
-	movh	%d15, hi:TC4XX_VMT_BASE
+	.type	tc4x_sram_clear, %function
+tc4x_sram_clear:
+	movh	%d15, hi:TC4X_VMT_BASE
 	sh	%d0, %d4, 17
 	add	%d15, %d15, %d0
 	mov.a	%a15, %d15
-	ld.w	%d15, [%a15]TC4XX_VMT_CLC
+	ld.w	%d15, [%a15]TC4X_VMT_CLC
 	jz.t	%d15, 1, 1f
 	mov	%d15, 0
-	st.w	[%a15]TC4XX_VMT_CLC, %d15
+	st.w	[%a15]TC4X_VMT_CLC, %d15
 1:
 	mov	%d1, 0
 2:
@@ -352,60 +352,60 @@ tc4xx_sram_clear:
 	sh	%d3, %d1, 9
 	mov.a	%a14, %d3
 	add.a	%a14, %a14, %a15
-	lea	%a14, [%a14]TC4XX_VMT_MC(0)
+	lea	%a14, [%a14]TC4X_VMT_MC(0)
 
 	/* Enable the MBIST shell and start the clear */
 
-	ld.w	%d15, [%a14]TC4XX_VMT_MC_ALMSRCS
-	andn	%d15, %d15, TC4XX_ALMSRCS_ALARMS
-	st.w	[%a14]TC4XX_VMT_MC_ALMSRCS, %d15
-	ld.w	%d15, [%a15]TC4XX_VMT_MEMTEST
+	ld.w	%d15, [%a14]TC4X_VMT_MC_ALMSRCS
+	andn	%d15, %d15, TC4X_ALMSRCS_ALARMS
+	st.w	[%a14]TC4X_VMT_MC_ALMSRCS, %d15
+	ld.w	%d15, [%a15]TC4X_VMT_MEMTEST
 	or	%d15, %d15, %d2
-	st.w	[%a15]TC4XX_VMT_MEMTEST, %d15
+	st.w	[%a15]TC4X_VMT_MEMTEST, %d15
 3:
-	ld.w	%d15, [%a15]TC4XX_VMT_MEMSTAT
+	ld.w	%d15, [%a15]TC4X_VMT_MEMSTAT
 	and	%d15, %d15, %d2
 	jnz	%d15, 3b
 
 	mov.u	%d15, 0x8001
-	st.w	[%a14]TC4XX_VMT_MC_MCONTROL, %d15
-	ld.w	%d15, [%a14]TC4XX_VMT_MC_MCONTROL
+	st.w	[%a14]TC4X_VMT_MC_MCONTROL, %d15
+	ld.w	%d15, [%a14]TC4X_VMT_MC_MCONTROL
 	andn	%d15, %d15, 1
-	st.w	[%a14]TC4XX_VMT_MC_MCONTROL, %d15
+	st.w	[%a14]TC4X_VMT_MC_MCONTROL, %d15
 4:
-	ld.w	%d15, [%a15]TC4XX_VMT_MEMDONE
+	ld.w	%d15, [%a15]TC4X_VMT_MEMDONE
 	and	%d15, %d15, %d2
 	jz	%d15, 4b
 
 	/* Read address 0 once, then disable the MBIST shell again */
 
 	mov	%d15, 0x8
-	st.w	[%a14]TC4XX_VMT_MC_MCONTROL, %d15
+	st.w	[%a14]TC4X_VMT_MC_MCONTROL, %d15
 	mov	%d15, 0x1001
-	st.w	[%a14]TC4XX_VMT_MC_CONFIG0, %d15
+	st.w	[%a14]TC4X_VMT_MC_CONFIG0, %d15
 	mov	%d15, 0
-	st.w	[%a14]TC4XX_VMT_MC_CONFIG1, %d15
-	st.w	[%a14]TC4XX_VMT_MC_RANGE, %d15
+	st.w	[%a14]TC4X_VMT_MC_CONFIG1, %d15
+	st.w	[%a14]TC4X_VMT_MC_RANGE, %d15
 	mov	%d15, 0x9
-	st.w	[%a14]TC4XX_VMT_MC_MCONTROL, %d15
+	st.w	[%a14]TC4X_VMT_MC_MCONTROL, %d15
 	mov	%d15, 0x8
-	st.w	[%a14]TC4XX_VMT_MC_MCONTROL, %d15
+	st.w	[%a14]TC4X_VMT_MC_MCONTROL, %d15
 5:
-	ld.w	%d15, [%a15]TC4XX_VMT_MEMDONE
+	ld.w	%d15, [%a15]TC4X_VMT_MEMDONE
 	and	%d15, %d15, %d2
 	jz	%d15, 5b
 
-	ld.w	%d15, [%a15]TC4XX_VMT_MEMTEST
+	ld.w	%d15, [%a15]TC4X_VMT_MEMTEST
 	andn	%d15, %d15, %d2
-	st.w	[%a15]TC4XX_VMT_MEMTEST, %d15
+	st.w	[%a15]TC4X_VMT_MEMTEST, %d15
 6:
-	ld.w	%d15, [%a15]TC4XX_VMT_MEMSTAT
+	ld.w	%d15, [%a15]TC4X_VMT_MEMSTAT
 	and	%d15, %d15, %d2
 	jnz	%d15, 6b
 
-	ld.w	%d15, [%a14]TC4XX_VMT_MC_ALMSRCS
-	or	%d15, %d15, TC4XX_ALMSRCS_ALARMS
-	st.w	[%a14]TC4XX_VMT_MC_ALMSRCS, %d15
+	ld.w	%d15, [%a14]TC4X_VMT_MC_ALMSRCS
+	or	%d15, %d15, TC4X_ALMSRCS_ALARMS
+	st.w	[%a14]TC4X_VMT_MC_ALMSRCS, %d15
 7:
 	sh	%d5, %d5, -1
 	add	%d1, %d1, 1

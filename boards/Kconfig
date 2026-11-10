@@ -4699,7 +4699,7 @@ if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
 endif
 if ARCH_BOARD_A2G_TC397_5V_TFT
-source "boards/tricore/tc3xx/a2g-tc397-5v-tft/Kconfig"
+source "boards/tricore/tc3x/a2g-tc397-5v-tft/Kconfig"
 endif
 if ARCH_BOARD_MPS2_AN500
 source "boards/arm/mps/mps2-an500/Kconfig"

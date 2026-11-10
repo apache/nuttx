@@ -45,10 +45,10 @@
 #include "tricore_asclin.h"
 
 #if defined(CONFIG_ARCH_CHIP_FAMILY_TC3X)
-#  include "hardware/tc3xx_port.h"
-#  include "tc3xx_wdt.h"
+#  include "hardware/tc3x_port.h"
+#  include "tc3x_wdt.h"
 #elif defined(CONFIG_ARCH_CHIP_FAMILY_TC4X)
-#  include "hardware/tc4xx_port.h"
+#  include "hardware/tc4x_port.h"
 #endif
 
 #include <chip.h>
@@ -235,22 +235,22 @@ static void asclin_modify(uintptr_t reg, uint32_t clear, uint32_t set)
 static void asclin_pin_config(uintptr_t port, int pin, bool tx)
 {
 #if defined(CONFIG_ARCH_CHIP_FAMILY_TC3X)
-  int shift = TC3XX_PORT_IOCR_SHIFT(pin);
+  int shift = TC3X_PORT_IOCR_SHIFT(pin);
 
-  asclin_modify(TC3XX_PORT_IOCR(port, pin), TC3XX_PORT_IOCR_MASK << shift,
-                (tx ? TC3XX_PORT_OUT_ALT2 : TC3XX_PORT_IN_PULLUP) << shift);
+  asclin_modify(TC3X_PORT_IOCR(port, pin), TC3X_PORT_IOCR_MASK << shift,
+                (tx ? TC3X_PORT_OUT_ALT2 : TC3X_PORT_IN_PULLUP) << shift);
 
-  shift = TC3XX_PORT_PDR_SHIFT(pin);
-  tc3xx_wdt_cpu_endinit(false);
-  asclin_modify(TC3XX_PORT_PDR(port, pin), TC3XX_PORT_PDR_MASK << shift,
-                TC3XX_PORT_PAD_SPEED1 << shift);
-  tc3xx_wdt_cpu_endinit(true);
+  shift = TC3X_PORT_PDR_SHIFT(pin);
+  tc3x_wdt_cpu_endinit(false);
+  asclin_modify(TC3X_PORT_PDR(port, pin), TC3X_PORT_PDR_MASK << shift,
+                TC3X_PORT_PAD_SPEED1 << shift);
+  tc3x_wdt_cpu_endinit(true);
 #elif defined(CONFIG_ARCH_CHIP_FAMILY_TC4X)
-  uintptr_t drvcfg = TC4XX_PORT_DRVCFG(port, pin);
+  uintptr_t drvcfg = TC4X_PORT_DRVCFG(port, pin);
 
-  asclin_modify(drvcfg, TC4XX_PORT_DRVCFG_MODE_MASK,
-                tx ? TC4XX_PORT_OUT_ALT2 : TC4XX_PORT_IN_PULLUP);
-  asclin_modify(drvcfg, TC4XX_PORT_DRVCFG_PAD_MASK, TC4XX_PORT_PAD_SPEED1);
+  asclin_modify(drvcfg, TC4X_PORT_DRVCFG_MODE_MASK,
+                tx ? TC4X_PORT_OUT_ALT2 : TC4X_PORT_IN_PULLUP);
+  asclin_modify(drvcfg, TC4X_PORT_DRVCFG_PAD_MASK, TC4X_PORT_PAD_SPEED1);
 #endif
 }
 
@@ -354,11 +354,11 @@ static void asclin_init(struct up_dev_s *priv)
   /* Enable the module, under the CPU ENDINIT on TC3xx */
 
 #ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
-  tc3xx_wdt_cpu_endinit(false);
+  tc3x_wdt_cpu_endinit(false);
 #endif
   asclin_modify(ASCLIN_REG(priv, CLC), ASCLIN_CLC_DISR, 0);
 #ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
-  tc3xx_wdt_cpu_endinit(true);
+  tc3x_wdt_cpu_endinit(true);
 #endif
 
   /* Clock off, initialise mode, bit timing and baud rate */
