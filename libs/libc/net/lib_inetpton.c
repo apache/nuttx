@@ -48,6 +48,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 #include <errno.h>
 
 #include <arpa/inet.h>
@@ -204,114 +205,79 @@ static int inet_ipv4_pton(FAR const char *src, FAR void *dest)
 #if defined(CONFIG_NET_IPv6) || defined(CONFIG_LIBC_IPv6_ADDRCONV)
 static int inet_ipv6_pton(FAR const char *src, FAR void *dest)
 {
-  size_t srcoffset;
-  size_t numoffset;
-  long value;
-  int nsep;
-  int nrsep;
-  uint8_t ch;
-  char numstr[5];
+  FAR uint8_t *addr = dest;
   uint8_t ip[sizeof(struct in6_addr)];
-  uint8_t rip[sizeof(struct in6_addr)];
-  bool rtime;
+  unsigned int value;
+  size_t nbytes;
+  int ndigits;
+  int gap;
+  uint8_t ch;
 
   memset(dest, 0, sizeof(struct in6_addr));
 
-  srcoffset = 0;
-  numoffset = 0;
-  nsep      = 0;
-  nrsep     = 0;
-  rtime     = false;
+  /* The address can start with "::", but not with one ':' */
+
+  if (src[0] == ':')
+    {
+      if (src[1] != ':')
+        {
+          return 0;
+        }
+
+      src++;
+    }
+
+  value   = 0;
+  nbytes  = 0;
+  ndigits = 0;
+  gap     = -1;
 
   for (; ; )
     {
-      ch = (uint8_t)src[srcoffset++];
+      ch = *src++;
 
-      if (ch == ':' || ch == '\0')
+      if (isxdigit(ch))
         {
-          if (ch == ':' && (nsep + nrsep) >= 8)
+          if (++ndigits > 4)
             {
-              /* Too many separators */
+              /* More than four digits in a field */
 
-              break;
+              return 0;
             }
 
-          if (ch != '\0' && numoffset < 1)
-            {
-              /* Empty numeric string */
-
-              if (rtime && nrsep > 1)
-                {
-                  /* dup simple */
-
-                  break;
-                }
-
-              numoffset = 0;
-              rtime = true;
-              continue;
-            }
-
-          numstr[numoffset] = '\0';
-          numoffset = 0;
-
-          value = strtol(numstr, NULL, 16);
-          if (value < 0 || value > 0xffff)
-            {
-              /* Out of range value */
-
-              break;
-            }
-
-          if (!rtime)
-            {
-              ip[(nsep << 1) + 0] = (uint8_t)((value >> 8) & 0xff);
-              ip[(nsep << 1) + 1] = (uint8_t)((value >> 0) & 0xff);
-              nsep++;
-            }
-          else
-            {
-              rip[(nrsep << 1) + 0] = (uint8_t)((value >> 8) & 0xff);
-              rip[(nrsep << 1) + 1] = (uint8_t)((value >> 0) & 0xff);
-              nrsep++;
-            }
-
-          if (ch == '\0' /* || ch == '/' */)
-            {
-              if ((nsep <= 1 && nrsep <= 0) ||
-                  (nsep + nrsep) < 1 ||
-                  (nsep + nrsep) > 8)
-                {
-                  /* Separator count problem */
-
-                  break;
-                }
-
-              if (nsep > 0)
-                {
-                  memcpy(dest, &ip[0], nsep << 1);
-                }
-
-              if (nrsep > 0)
-                {
-                  memcpy((FAR uint8_t *)dest +
-                         (16 - (nrsep << 1)), &rip[0], nrsep << 1);
-                }
-
-              /* Return 1 if the conversion succeeds */
-
-              return 1;
-            }
+          value <<= 4;
+          value |= isdigit(ch) ? ch - '0' : tolower(ch) - 'a' + 10;
         }
-      else if ((ch >= '0' && ch <= '9') ||
-               (ch >= 'a' && ch <= 'f') ||
-               (ch >= 'A' && ch <= 'F'))
+      else if (ch == ':' || ch == '\0')
         {
-          numstr[numoffset++] = ch;
-          if (numoffset >= 5)
+          if (ndigits > 0)
             {
-              /* Numeric string is too long */
+              if (nbytes + 2 > sizeof(ip) || (ch == ':' && *src == '\0'))
+                {
+                  /* Too many fields, or a ':' at the end */
 
+                  return 0;
+                }
+
+              ip[nbytes++] = value >> 8;
+              ip[nbytes++] = value & 0xff;
+              value        = 0;
+              ndigits      = 0;
+            }
+          else if (ch == ':')
+            {
+              if (gap >= 0)
+                {
+                  /* More than one "::" */
+
+                  return 0;
+                }
+
+              gap = nbytes;
+            }
+
+          if (ch == '\0')
+            {
               break;
             }
         }
@@ -319,13 +285,33 @@ static int inet_ipv6_pton(FAR const char *src, FAR void *dest)
         {
           /* Illegal character */
 
-          break;
+          return 0;
         }
     }
 
-  /* Return zero if there is any problem parsing the input */
+  /* Without "::" the address must have eight fields.  The "::" must stand
+   * for one zero field at least.
+   */
 
-  return 0;
+  if (gap < 0)
+    {
+      if (nbytes != sizeof(ip))
+        {
+          return 0;
+        }
+
+      gap = nbytes;
+    }
+  else if (nbytes == sizeof(ip))
+    {
+      return 0;
+    }
+
+  /* The fields after "::" go to the end of the address */
+
+  memcpy(addr, ip, gap);
+  memcpy(&addr[sizeof(ip) - (nbytes - gap)], &ip[gap], nbytes - gap);
+  return 1;
 }
 #endif
 
