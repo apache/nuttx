@@ -228,6 +228,12 @@ config SIM_LOOP_INTERVAL
 	---help---
 		Loop event sleep time
 
+config SIM_CAMERA_LOOP_INTERVAL
+	int "Simulator camera loop interval in ms"
+	default 10
+	---help---
+		Simulator camera loop event sleep time
+
 config SIM_STACKSIZE_ADJUSTMENT
 	int "The adjustment of stack size for sim"
 	default 65536

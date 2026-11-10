@@ -45,7 +45,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SIM_CAMERA_PERIOD    MSEC2TICK(CONFIG_SIM_LOOP_INTERVAL)
+#define SIM_CAMERA_PERIOD    MSEC2TICK(CONFIG_SIM_CAMERA_LOOP_INTERVAL)
 
 /****************************************************************************
  * Private Types
