@@ -100,55 +100,55 @@ static int loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    /* Command:      LOOPIOC_SETUP
-     * Description:  Setup the loop device
-     * Argument:     A pointer to a read-only instance of struct losetup_s.
-     * Dependencies: The loop device must be enabled (CONFIG_DEV_LOOP=y)
-     */
+      /* Command:      LOOPIOC_SETUP
+       * Description:  Setup the loop device
+       * Argument:     A pointer to a read-only instance of struct losetup_s.
+       * Dependencies: The loop device must be enabled (CONFIG_DEV_LOOP=y)
+       */
 
-    case LOOPIOC_SETUP:
-      {
-         FAR struct losetup_s *setup =
-           (FAR struct losetup_s *)((uintptr_t)arg);
+      case LOOPIOC_SETUP:
+        {
+           FAR struct losetup_s *setup =
+             (FAR struct losetup_s *)((uintptr_t)arg);
 
-        if (setup == NULL)
-          {
-            ret = -EINVAL;
-          }
-        else
-          {
-            ret = losetup(setup->devname, setup->filename, setup->sectsize,
-                          setup->offset, setup->readonly);
-          }
-      }
-      break;
+          if (setup == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = losetup(setup->devname, setup->filename, setup->sectsize,
+                            setup->offset, setup->readonly);
+            }
+        }
+        break;
 
-    /* Command:      LOOPIOC_TEARDOWN
-     * Description:  Teardown a loop device previously setup via
-                     LOOPIOC_SETUP
-     * Argument:     A read-able pointer to the path of the device to be
-     *               torn down
-     * Dependencies: The loop device must be enabled (CONFIG_DEV_LOOP=y)
-     */
+      /* Command:      LOOPIOC_TEARDOWN
+       * Description:  Teardown a loop device previously setup via
+       *               LOOPIOC_SETUP
+       * Argument:     A read-able pointer to the path of the device to be
+       *               torn down
+       * Dependencies: The loop device must be enabled (CONFIG_DEV_LOOP=y)
+       */
 
-    case LOOPIOC_TEARDOWN:
-      {
-        FAR const char *devname = (FAR const char *)((uintptr_t)arg);
+      case LOOPIOC_TEARDOWN:
+        {
+          FAR const char *devname = (FAR const char *)((uintptr_t)arg);
 
-        if (devname == NULL)
-          {
-            ret = -EINVAL;
-          }
-        else
-          {
-            ret = loteardown(devname);
-          }
-       }
-       break;
+          if (devname == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = loteardown(devname);
+            }
+        }
+        break;
 
-     default:
-       ret = -ENOTTY;
-       break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
