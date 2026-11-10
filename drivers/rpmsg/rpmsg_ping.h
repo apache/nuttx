@@ -27,6 +27,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/atomic.h>
 #include <nuttx/rpmsg/rpmsg.h>
 
 #ifdef CONFIG_RPMSG_PING
@@ -39,6 +40,7 @@ struct rpmsg_ping_dev_s
 {
   struct rpmsg_endpoint ept;
   struct rpmsg_endpoint ept_rt;
+  atomic_t              seq;
 };
 
 /****************************************************************************
