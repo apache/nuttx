@@ -26,6 +26,7 @@
 
 #include <sys/param.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>

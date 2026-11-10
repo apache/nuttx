@@ -28,6 +28,7 @@
 
 #include <nuttx/debug.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>

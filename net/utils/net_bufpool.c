@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 #include <nuttx/semaphore.h>

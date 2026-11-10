@@ -24,8 +24,10 @@
  * Included Files
  ****************************************************************************/
 
+#include <assert.h>
 #include <errno.h>
 #include <stddef.h>
+#include <strings.h>
 #include <sys/queue.h>
 
 #include <crypto/cryptodev.h>

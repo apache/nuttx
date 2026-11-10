@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <string.h>
 #include <syslog.h>
 #include <time.h>

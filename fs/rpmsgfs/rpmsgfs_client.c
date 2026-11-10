@@ -26,11 +26,13 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <sys/uio.h>
 #include <termios.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
