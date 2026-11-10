@@ -50,8 +50,21 @@
 
 FAR char *setlocale(int category, FAR const char *locale)
 {
-  return ((locale == NULL || strcmp(locale, "POSIX") == 0 ||
-           strcmp(locale, "C") == 0 || strcmp(locale, "") ==
-            0) ? "C" :  NULL);
+  if (locale == NULL || strcmp(locale, "POSIX") == 0 ||
+      strcmp(locale, "C") == 0 || strcmp(locale, "") == 0)
+    {
+      return "C";
+    }
+
+  /* The C locale uses UTF-8 (MB_CUR_MAX is 4), so "C.UTF-8" and
+   * "C.utf8" are names of the same locale.
+   */
+
+  if (strcmp(locale, "C.UTF-8") == 0 || strcmp(locale, "C.utf8") == 0)
+    {
+      return "C.UTF-8";
+    }
+
+  return NULL;
 }
 #endif
