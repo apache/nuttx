@@ -40,7 +40,7 @@ extern "C"
 #endif
 
 #if defined(CONFIG_RW_SPINLOCK)
-typedef uint32_t rwlock_t;
+typedef atomic_t rwlock_t;
 #  define RW_SP_UNLOCKED      0
 #  define RW_SP_READ_LOCKED   1
 #  define RW_SP_WRITE_LOCKED -1
@@ -50,13 +50,13 @@ typedef uint32_t rwlock_t;
 #  define SP_UNLOCKED 0  /* The Un-locked state */
 #  define SP_LOCKED   1  /* The Locked state */
 
-typedef uint8_t spinlock_t;
+typedef atomic_t spinlock_t;
 #elif defined(CONFIG_TICKET_SPINLOCK)
 
 typedef struct spinlock_s
 {
-  uint32_t owner;
-  uint32_t next;
+  atomic_t owner;
+  atomic_t next;
 } spinlock_t;
 
 #  define SP_UNLOCKED (spinlock_t){0, 0}
@@ -64,7 +64,7 @@ typedef struct spinlock_s
 
 #else
 
-typedef uint32_t spinlock_t;
+typedef atomic_t spinlock_t;
 
 #  define SP_UNLOCKED 0
 #  define SP_LOCKED   1
