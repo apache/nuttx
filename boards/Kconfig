@@ -2872,7 +2872,7 @@ config ARCH_BOARD_QEMU_RH850_U2C
 
 config ARCH_BOARD_A2G_TC397_5V_TFT
 	bool "Infineon's AURIX TC397 board: KIT_A2G_TC397_5V_TFT"
-	depends on ARCH_CHIP_TC39X
+	depends on ARCH_CHIP_TC397
 	---help---
 		This options selects support for NuttX on the Infineon's AURIX board
 		board featuring the TC397 6Quad CPU.
