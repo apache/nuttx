@@ -160,6 +160,8 @@ config TRICORE_FCU_CSA_NUM
 		in the trap unless the board passes its own pool to
 		tricore_fcu_register_pool.  At least 20 are needed.
 
+source "arch/tricore/src/aurix/Kconfig"
+
 if ARCH_CHIP_FAMILY_TC3X
 source "arch/tricore/src/tc3xx/Kconfig"
 endif

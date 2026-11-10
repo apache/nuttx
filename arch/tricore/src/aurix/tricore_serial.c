@@ -59,10 +59,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_TC3XX_UART0) || defined(CONFIG_TC4XX_UART0)
-#  define HAVE_UART0 1
-#endif
-
 /* Bit timing: fPD is fASCLINF, 16 times oversampling, sample point 8 */
 
 #define ASCLIN_PRESCALER           1
@@ -87,7 +83,7 @@
  * be ttyS0.  If there is no console then will use the lowest numbered UART.
  */
 
-#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(HAVE_UART0)
+#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_TRICORE_UART0)
 #  define HAVE_SERIAL_CONSOLE 1
 #else
 #  undef CONFIG_UART0_SERIAL_CONSOLE
@@ -105,7 +101,7 @@
 #else
 #  undef  CONSOLE_DEV                        /* No console */
 #  undef  CONFIG_UART0_SERIAL_CONSOLE
-#  if defined(HAVE_UART0)
+#  if defined(CONFIG_TRICORE_UART0)
 #    define TTYS0_DEV       g_uart0port     /* UART0 is ttyS0 */
 #    define SERIAL_CONSOLE  1
 #  else
@@ -114,7 +110,7 @@
 #endif
 
 #undef HAVE_UART_DEVICE
-#if defined(HAVE_UART0)
+#if defined(CONFIG_TRICORE_UART0)
 #  define HAVE_UART_DEVICE 1
 #endif
 
@@ -180,12 +176,12 @@ static const struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
-#ifdef HAVE_UART0
+#ifdef CONFIG_TRICORE_UART0
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
 #endif
 
-#ifdef HAVE_UART0
+#ifdef CONFIG_TRICORE_UART0
 
 static struct up_dev_s g_uart0priv =
 {

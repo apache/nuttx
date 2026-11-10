@@ -17,15 +17,3 @@ comment "TC4XX Configuration Options"
 config CPU_CLOCK_FREQUENCY
 	int "CPU clock frequency (Hz)"
 	default 500000000
-
-menu "TC4XX Peripheral Support"
-
-# These are the peripheral selections proper
-
-config TC4XX_UART0
-	bool "TC4XX UART0"
-	default y
-	select UART0_SERIALDRIVER
-	select ARCH_HAVE_SERIAL_TERMIOS
-
-endmenu
