@@ -67,7 +67,9 @@ static const struct file_operations g_pipe_fops =
   pipecommon_ioctl,    /* ioctl */
   pipe_mmap,           /* mmap */
   NULL,                /* truncate */
-  pipecommon_poll      /* poll */
+  pipecommon_poll,     /* poll */
+  NULL,                /* readv */
+  pipecommon_writev    /* writev */
 };
 
 static mutex_t g_pipelock = NXMUTEX_INITIALIZER;
