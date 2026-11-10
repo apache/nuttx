@@ -43,6 +43,7 @@
 #include "devif/devif.h"
 #include "arp/arp.h"
 #include "icmpv6/icmpv6.h"
+#include "inet/inet.h"
 #include "socket/socket.h"
 #include "utils/utils.h"
 #include "udp/udp.h"
@@ -360,9 +361,14 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
           destipaddr = into->sin_addr.s_addr;
         }
 
-      /* Make sure that the IP address mapping is in the ARP table */
+      /* Make sure that the IP address mapping is in the ARP table.
+       * 0.0.0.0 goes to the loopback device, which needs none.
+       */
 
-      ret = arp_send(destipaddr);
+      if (!net_ipv4addr_cmp(destipaddr, INADDR_ANY))
+        {
+          ret = arp_send(destipaddr);
+        }
     }
 #endif /* CONFIG_NET_ARP_SEND */
 
@@ -397,9 +403,14 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
           destipaddr = into->sin6_addr.s6_addr16;
         }
 
-      /* Make sure that the IP address mapping is in the Neighbor Table */
+      /* Make sure that the IP address mapping is in the Neighbor Table.
+       * :: goes to the loopback device, which needs none.
+       */
 
-      ret = icmpv6_neighbor(NULL, destipaddr);
+      if (!net_ipv6addr_cmp(destipaddr, g_ipv6_unspecaddr))
+        {
+          ret = icmpv6_neighbor(NULL, destipaddr);
+        }
     }
 #endif /* CONFIG_NET_ICMPv6_NEIGHBOR */
 
