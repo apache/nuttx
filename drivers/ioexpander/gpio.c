@@ -1067,14 +1067,13 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int gpio_poll(FAR struct file *filep,
                      FAR struct pollfd_s *fds, bool setup)
 {
-#if CONFIG_DEV_GPIO_NPOLLWAITERS > 0
   FAR struct inode *inode = filep->f_inode;
   FAR struct gpio_dev_s *dev = inode->i_private;
-  int i;
-#endif
-
   irqstate_t flags;
   int ret = OK;
+#if CONFIG_DEV_GPIO_NPOLLWAITERS > 0
+  int i;
+#endif
 
   /* Are we setting up the poll?  Or tearing it down? */
 
