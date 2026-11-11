@@ -47,10 +47,6 @@ list(
   arm_perf.c
   cp15_cacheops.c)
 
-if(CONFIG_ENABLE_ALL_SIGNALS)
-  list(APPEND SRCS arm_schedulesigaction.c arm_sigdeliver.c)
-endif()
-
 if(CONFIG_ARCH_FPU)
   list(APPEND SRCS arm_fpucmp.c arm_fpuconfig.S)
 endif()

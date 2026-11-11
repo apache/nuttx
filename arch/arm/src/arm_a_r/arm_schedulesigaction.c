@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-r/arm_schedulesigaction.c
+ * arch/arm/src/arm_a_r/arm_schedulesigaction.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include <sched.h>
+#include <assert.h>
 
 #include <nuttx/debug.h>
 #include <nuttx/irq.h>
@@ -36,6 +37,7 @@
 #include "arm.h"
 #include "sched/sched.h"
 #include "arm_internal.h"
+#include "irq/irq.h"
 
 /****************************************************************************
  * Public Functions

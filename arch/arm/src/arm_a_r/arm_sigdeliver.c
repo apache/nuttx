@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-r/arm_sigdeliver.c
+ * arch/arm/src/arm_a_r/arm_sigdeliver.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -108,6 +108,9 @@ retry:
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
    * errno that is needed by the user logic (it is probably EINTR).
+   *
+   * I would prefer that all interrupts are disabled when
+   * arm_fullcontextrestore() is called, but that may not be necessary.
    */
 
   sinfo("Resuming\n");
@@ -153,6 +156,8 @@ retry:
 
   board_autoled_off(LED_SIGNAL);
 #ifdef CONFIG_SMP
+  /* We need to keep the IRQ lock until task switching */
+
   leave_critical_section(up_irq_save());
 #endif
 

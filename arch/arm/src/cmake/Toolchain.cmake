@@ -26,13 +26,17 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 
 set(ARCH_SUBDIR)
+set(ARCH_SUBDIR_ARM)
 
 if(CONFIG_ARCH_ARMV7A) # ARMv7-A
   set(ARCH_SUBDIR armv7-a)
+  set(ARCH_SUBDIR_ARM arm_a_r)
 elseif(CONFIG_ARCH_ARMV7R) # ARMv7-R
   set(ARCH_SUBDIR armv7-r)
+  set(ARCH_SUBDIR_ARM arm_a_r)
 elseif(CONFIG_ARCH_ARMV8R) # ARMv8-R
   set(ARCH_SUBDIR armv8-r)
+  set(ARCH_SUBDIR_ARM arm_a_r)
 elseif(CONFIG_ARCH_ARMV7M) # ARMv7-M
   set(ARCH_SUBDIR armv7-m)
 elseif(CONFIG_ARCH_ARMV8M) # ARMv8-M
@@ -41,6 +45,7 @@ elseif(CONFIG_ARCH_ARMV6M) # ARMv6-M
   set(ARCH_SUBDIR armv6-m)
 else() # ARM9, ARM7TDMI, etc.
   set(ARCH_SUBDIR arm)
+  set(ARCH_SUBDIR_ARM arm_a_r)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/${ARCH_SUBDIR}.cmake)
