@@ -984,10 +984,13 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
       return;
     }
 
-  nxmutex_lock(&g_inotify.lock);
-  ret = notify_check_mask(mask);
-  nxmutex_unlock(&g_inotify.lock);
-  if (ret < 0)
+  /* Checked without g_inotify.lock so that readers and writers do not
+   * queue behind a path event holding it.  The counters are aligned
+   * uint32_t loads; racing a concurrent watch add/remove is the same
+   * race as the one between this check and the lock taken below.
+   */
+
+  if (notify_check_mask(mask) < 0)
     {
       return;
     }
