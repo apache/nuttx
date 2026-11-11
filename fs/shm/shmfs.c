@@ -412,6 +412,18 @@ static int shmfs_mmap(FAR struct file *filep,
   object = filep->f_inode->i_private;
   if (object)
     {
+#ifndef CONFIG_BUILD_KERNEL
+      /* Without an MMU mapping the object address is returned directly, so
+       * a mapping longer than the object would expose adjacent heap memory.
+       */
+
+      if (entry->length > object->length)
+        {
+          inode_release(filep->f_inode);
+          return -EINVAL;
+        }
+#endif
+
       ret = shmfs_map_object(object, &entry->vaddr);
     }
 
