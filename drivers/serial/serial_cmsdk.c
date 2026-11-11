@@ -504,42 +504,42 @@ static int uart_cmsdk_ioctl(struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    case TCGETS:
-      {
-        FAR struct termios *termiosp = (FAR struct termios *)arg;
+      case TCGETS:
+        {
+          FAR struct termios *termiosp = (FAR struct termios *)arg;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        cfsetispeed(termiosp, priv->baud);
-        termiosp->c_cflag = CS8;
-      }
-      break;
+          cfsetispeed(termiosp, priv->baud);
+          termiosp->c_cflag = CS8;
+        }
+        break;
 
-    case TCSETS:
-      {
-        FAR struct termios *termiosp = (FAR struct termios *)arg;
-        irqstate_t flags;
+      case TCSETS:
+        {
+          FAR struct termios *termiosp = (FAR struct termios *)arg;
+          irqstate_t flags;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-            break;
-          }
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-        flags = enter_critical_section();
-        priv->baud = cfgetispeed(termiosp);
-        uart_cmsdk_setup(dev);
-        leave_critical_section(flags);
-      }
-      break;
+          flags = enter_critical_section();
+          priv->baud = cfgetispeed(termiosp);
+          uart_cmsdk_setup(dev);
+          leave_critical_section(flags);
+        }
+        break;
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
