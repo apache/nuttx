@@ -134,13 +134,21 @@ The port offers three options for configuring the heaps to use
 the external PSRAM, described below. More custom configurations
 can be used with custom board initialization functions.
 
+The atomic operations of the RP2350 work across the two cores only
+in the internal SRAM (RP2350 datasheet, section 2.1.6). In the PSRAM
+they exclude only the local core. So with `SMP` only the separate
+heap is available (it is the default there), and a lock or an atomic
+variable must not be allocated from the `psram` heap: with `SMP` an
+atomic operation outside the SRAM never ends.
+
 Use PSRAM and SRAM as a single main heap
 ----------------------------------------
 
 This option is selected with `RP23XX_PSRAM_HEAP_SINGLE` and
 requires `MM_REGIONS > 1`, as the PSRAM memory region will
 be added to the heap. It is also necessary to disable
-`MM_KERNEL_HEAP`, as there will only be a single heap.
+`MM_KERNEL_HEAP`, as there will only be a single heap. It is
+not available with `SMP`.
 
 This is the simplest configuration because it will unify the
 memories into a single main heap. This way you can see the `free`
@@ -155,7 +163,8 @@ Use PSRAM as user heap, SRAM as kernel heap
 -------------------------------------------
 
 This option is selected with `RP23XX_PSRAM_HEAP_USER` and
-requires `MM_KERNEL_HEAP` to be set.
+requires `MM_KERNEL_HEAP` to be set. It is not available with
+`SMP`.
 
 The external PSRAM is allocated to the default heap, while
 the internal SRAM will be used for the kernel heap. This
