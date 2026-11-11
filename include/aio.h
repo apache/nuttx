@@ -48,6 +48,36 @@
 #  undef CONFIG_FS_AIO
 #endif
 
+/****************************************************************************
+ * Name: aio_cleanup
+ *
+ * Description:
+ *   Cancel all pending AIO operations submitted by task 'pid'.  Called
+ *   from the task exit path so a dying task does not leave pending
+ *   containers referencing its soon-to-be-freed aiocb (which usually
+ *   resides on the task's stack).  Queued operations are cancelled before
+ *   they can run; an operation already running on the worker thread is
+ *   waited for, because the worker dereferences the user aiocb until its
+ *   callback returns.  No completion signal is delivered: the owning task
+ *   is gone and signalling it would dereference the very aiocb this
+ *   cleanup protects.
+ *
+ *   When CONFIG_FS_AIO is not selected this is an empty stub.
+ *
+ * Input Parameters:
+ *   pid - ID of the exiting task
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_AIO
+void aio_cleanup(pid_t pid);
+#else
+#  define aio_cleanup(pid)
+#endif
+
 /* Work queue support is required.  The low-priority work queue is required
  * so that the asynchronous I/O does not interfere with high priority driver
  * operations.  If this pre-requisite is met, then asynchronous I/O support

@@ -128,11 +128,17 @@ errout:
  *   Remove the AIO control block from the container and free all resources
  *   used by the container.
  *
+ *   If aioc_pid is INVALID_PROCESS_ID, ownership of the container has been
+ *   transferred to aio_cleanup() and the container is left untouched:
+ *   it has already been detached from the pending list and the task exit
+ *   path releases it once the worker thread has finished.
+ *
  * Input Parameters:
  *   aioc - Pointer to the AIO control block container
  *
  * Returned Value:
- *   A pointer to the no-longer contained AIO control block.
+ *   A pointer to the no-longer contained AIO control block.  NULL if the
+ *   container is owned by the task exit path and was not de-canted.
  *
  ****************************************************************************/
 
@@ -148,15 +154,23 @@ FAR struct aiocb *aioc_decant(FAR struct aio_container_s *aioc)
   ret = aio_lock();
   if (ret >= 0)
     {
-      dq_rem(&aioc->aioc_link, &g_aio_pending);
-
-      /* De-cant the AIO control block and return the container to the
-       * free list.
+      /* An INVALID_PROCESS_ID marks a container owned by aio_cleanup():
+       * it is no longer in the pending list and freeing it here would race
+       * with (or double-free against) the task exit path.  Leave it alone.
        */
 
-      aiocbp = aioc->aioc_aiocbp;
-      file_put(aioc->aioc_filep);
-      aioc_free(aioc);
+      if (aioc->aioc_pid != INVALID_PROCESS_ID)
+        {
+          dq_rem(&aioc->aioc_link, &g_aio_pending);
+
+          /* De-cant the AIO control block and return the container to the
+           * free list.
+           */
+
+          aiocbp = aioc->aioc_aiocbp;
+          file_put(aioc->aioc_filep);
+          aioc_free(aioc);
+        }
 
       aio_unlock();
     }
