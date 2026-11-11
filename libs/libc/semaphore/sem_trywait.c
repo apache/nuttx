@@ -107,7 +107,7 @@ int sem_trywait(FAR sem_t *sem)
 
 int nxsem_trywait(FAR sem_t *sem)
 {
-  bool fastpath = true;
+  bool fastpath = NXSEM_FASTPATH;
   bool mutex;
 
   DEBUGASSERT(sem != NULL);
