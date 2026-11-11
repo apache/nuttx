@@ -527,23 +527,23 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   switch (whence)
     {
-    case SEEK_SET: /* The offset is set to offset bytes. */
+      case SEEK_SET: /* The offset is set to offset bytes. */
         position = offset;
         break;
 
-    case SEEK_CUR: /* The offset is set to its current location plus
-                    * offset bytes. */
+      case SEEK_CUR: /* The offset is set to its current location plus
+                      * offset bytes. */
 
         position = offset + filep->f_pos;
         break;
 
-    case SEEK_END: /* The offset is set to the size of the file plus
-                    * offset bytes. */
+      case SEEK_END: /* The offset is set to the size of the file plus
+                      * offset bytes. */
 
         position = offset + rf->rf_size;
         break;
 
-    default:
+      default:
         ferr("ERROR: Whence is invalid: %d\n", whence);
         return -EINVAL;
     }
@@ -559,8 +559,8 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
   ret = romfs_checkmount(rm);
   if (ret < 0)
     {
-       ferr("ERROR: romfs_checkmount failed: %d\n", ret);
-       goto errout_with_lock;
+      ferr("ERROR: romfs_checkmount failed: %d\n", ret);
+      goto errout_with_lock;
     }
 
   if (position < 0)
@@ -610,6 +610,7 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   if (cmd == FIOC_FILEPATH)
     {
       FAR char *ptr = (FAR char *)((uintptr_t)arg);
+
       inode_getpath(filep->f_inode, ptr, PATH_MAX);
       strlcat(ptr, rf->rf_path, PATH_MAX);
       return 0;
@@ -1247,6 +1248,7 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
       if (rm->rm_blkdriver)
         {
           FAR struct inode *inode = rm->rm_blkdriver;
+
           if (inode)
             {
               if (INODE_IS_BLOCK(inode) && inode->u.i_bops->close != NULL)
