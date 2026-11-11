@@ -28,6 +28,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
 
@@ -44,12 +45,6 @@
 #include "inode/inode.h"
 #include "sched/sched.h"
 #include "fs_heap.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
- #define ROUND_UP(x, y) (((x) + (y) - 1) / (y) * (y))
 
 /****************************************************************************
  * Private Types
@@ -210,7 +205,7 @@ inotify_alloc_event(int wd, uint32_t mask, uint32_t cookie,
 
   if (name != NULL)
     {
-      len = ROUND_UP(strlen(name) + 1, sizeof(struct inotify_event));
+      len = ALIGN_UP(strlen(name) + 1, sizeof(struct inotify_event));
     }
 
   event = fs_heap_malloc(sizeof(struct inotify_event_s) + len);
