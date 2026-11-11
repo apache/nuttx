@@ -824,6 +824,45 @@ static int procfs_closedir(FAR struct inode *mountpt,
 }
 
 /****************************************************************************
+ * Name: procfs_listed
+ *
+ * Description:
+ *   Return true if an entry before 'index' already yields the directory
+ *   entry 'name' ('len' bytes) under the directory 'dir' ('dirlen' bytes,
+ *   0 for the procfs root).
+ *
+ ****************************************************************************/
+
+static bool procfs_listed(unsigned int index, FAR const char *dir,
+                          size_t dirlen, FAR const char *name, size_t len)
+{
+  unsigned int x;
+
+  for (x = 0; x < index; x++)
+    {
+      FAR const char *path = g_procfs_entries[x].pathpattern;
+
+      if (dirlen > 0)
+        {
+          if (strncmp(path, dir, dirlen) != 0 || path[dirlen] != '/')
+            {
+              continue;
+            }
+
+          path += dirlen + 1;
+        }
+
+      if (strncmp(path, name, len) == 0 &&
+          (path[len] == '/' || path[len] == '*' || path[len] == '\0'))
+        {
+          return true;
+        }
+    }
+
+  return false;
+}
+
+/****************************************************************************
  * Name: procfs_readdir
  *
  * Description: Read the next directory entry
@@ -839,6 +878,7 @@ static int procfs_readdir(FAR struct inode *mountpt,
   FAR struct procfs_level0_s *level0;
   FAR const char *name = NULL;
   unsigned int index;
+  size_t len;
   int ret = -ENOENT;
 
   DEBUGASSERT(mountpt && dir);
@@ -898,8 +938,8 @@ static int procfs_readdir(FAR struct inode *mountpt,
                    */
 
                   name = g_procfs_entries[index].pathpattern;
-                  if (!level0->lastlen ||
-                      strncmp(name, level0->lastread, level0->lastlen) != 0)
+                  if (!procfs_listed(index, NULL, 0, name,
+                                     strcspn(name, "/")))
                     {
                       /* Not a duplicate, return the first segment of this
                        * entry
@@ -943,7 +983,7 @@ static int procfs_readdir(FAR struct inode *mountpt,
 
               /* Advance to next entry for the next read */
 
-              priv->index = priv->nentries + index;
+              priv->index = priv->nentries + index + 1;
               ret = OK;
             }
         }
@@ -984,37 +1024,48 @@ static int procfs_readdir(FAR struct inode *mountpt,
 
       level1 = (FAR struct procfs_level1_s *)priv;
 
-      /* Test if this entry matches.  We assume all entries of the same
-       * subdirectory are listed in order in the procfs_entry array.
+      /* procfs_register() appends to the table, so the entries of one
+       * subdirectory need not be adjacent: scan the rest of the table and
+       * skip names already reported.
        */
 
-      if (level1->base.index < g_procfs_entrycount &&
-          level1->firstindex < g_procfs_entrycount &&
-          strncmp(g_procfs_entries[level1->base.index].pathpattern,
-                  g_procfs_entries[level1->firstindex].pathpattern,
-                  level1->subdirlen) == 0)
+      while (level1->firstindex < g_procfs_entrycount &&
+             level1->base.index < g_procfs_entrycount)
         {
-          /* This entry matches.  Report the subdir entry */
+          FAR const char *subdir =
+            g_procfs_entries[level1->firstindex].pathpattern;
 
-          name = &g_procfs_entries[level1->base.index].
-                    pathpattern[level1->subdirlen + 1];
-          level1->lastlen = strcspn(name, "/");
-          level1->lastread = name;
-          strlcpy(entry->d_name, name, level1->lastlen + 1);
+          index = level1->base.index++;
+          name  = g_procfs_entries[index].pathpattern;
+          if (strncmp(name, subdir, level1->subdirlen) != 0 ||
+              name[level1->subdirlen] != '/')
+            {
+              continue;
+            }
 
           /* Some of the search entries contain '**' wildcards.  When we
            * report the entry name, we must remove this wildcard search
            * specifier.
            */
 
-          while (entry->d_name[level1->lastlen - 1] == '*')
+          name += level1->subdirlen + 1;
+          len   = strcspn(name, "/");
+          while (len > 0 && name[len - 1] == '*')
             {
-              level1->lastlen--;
+              len--;
             }
 
-          entry->d_name[level1->lastlen] = '\0';
+          if (len == 0 ||
+              procfs_listed(index, subdir, level1->subdirlen, name, len))
+            {
+              continue;
+            }
 
-          if (name[level1->lastlen] == '/')
+          level1->lastlen  = len;
+          level1->lastread = name;
+          strlcpy(entry->d_name, name, len + 1);
+
+          if (name[len] == '/')
             {
               entry->d_type = DTYPE_DIRECTORY;
             }
@@ -1023,8 +1074,8 @@ static int procfs_readdir(FAR struct inode *mountpt,
               entry->d_type = DTYPE_FILE;
             }
 
-          level1->base.index++;
           ret = OK;
+          break;
         }
     }
   else
