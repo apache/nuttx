@@ -1035,6 +1035,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   FAR char *options;
   FAR char *saveptr;
   FAR char *ptr;
+  struct stat st;
   int len;
   int ret;
 
@@ -1115,6 +1116,14 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   if (fs->fs_root[len - 1] != '/')
     {
       strlcat(fs->fs_root, "/", sizeof(fs->fs_root));
+    }
+
+  ret = host_stat(fs->fs_root, &st);
+  if (ret < 0)
+    {
+      nxmutex_unlock(&fs->fs_lock);
+      fs_heap_free(fs);
+      return ret;
     }
 
   *handle = (FAR void *)fs;
