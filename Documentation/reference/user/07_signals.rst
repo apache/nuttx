@@ -512,8 +512,8 @@ Equivalent to sigtimedwait() with a NULL timeout parameter. (see below).
     On error, -1 (``ERROR``) is returned, and
     ```errno`` <#ErrnoAccess>`__ is set appropriately.
 
-    -  ``EGAIN``. The limit of signals which may be queued has been
-       reached.
+    -  ``EAGAIN``. ``SIGQUEUE_MAX`` signals are still pending at the
+       receiving task.
     -  ``EINVAL``. signo was invalid.
     -  ``EPERM``. The task does not have permission to send the signal to
        the receiving process.
