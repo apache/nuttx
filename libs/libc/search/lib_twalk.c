@@ -24,7 +24,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <search.h>
+
+#ifdef CONFIG_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
 
 #include "search/tsearch.h"
 
@@ -76,6 +82,15 @@ void twalk(FAR const void *root,
 {
   if (root != NULL && action != NULL)
     {
+#ifdef CONFIG_FDPIC
+      /* See qsort(): an FDPIC caller passes a descriptor, not a code
+       * address.  twalk_node() gets the resolved action.
+       */
+
+      action = (CODE void (*)(FAR const void *, VISIT, int))
+               fdpic_callback((FAR void *)action);
+#endif
+
       twalk_node(root, action, 0);
     }
 }

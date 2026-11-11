@@ -24,7 +24,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <search.h>
+
+#ifdef CONFIG_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
 
 #include "search/tsearch.h"
 
@@ -53,6 +59,13 @@ FAR void *tfind(FAR const void *key, FAR void * const *rootp,
     {
       return NULL;
     }
+
+#ifdef CONFIG_FDPIC
+  /* See qsort(): an FDPIC caller passes a descriptor, not a code address */
+
+  compar = (CODE int (*)(FAR const void *, FAR const void *))
+           fdpic_callback((FAR void *)compar);
+#endif
 
   for (node = *rootp; node != NULL; node = node->child[c > 0])
     {

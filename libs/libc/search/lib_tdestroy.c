@@ -24,10 +24,38 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <search.h>
+
+#ifdef CONFIG_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
 
 #include "libc.h"
 #include "search/tsearch.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void tdestroy_node(FAR struct tnode_s *node,
+                          CODE void (*free_node)(FAR void *))
+{
+  if (node == NULL)
+    {
+      return;
+    }
+
+  tdestroy_node(node->child[0], free_node);
+  tdestroy_node(node->child[1], free_node);
+  if (free_node != NULL)
+    {
+      free_node((FAR void *)node->key);
+    }
+
+  lib_free(node);
+}
 
 /****************************************************************************
  * Public Functions
@@ -44,19 +72,14 @@
 
 void tdestroy(FAR void *root, CODE void (*free_node)(FAR void *))
 {
-  FAR struct tnode_s *node = root;
+#ifdef CONFIG_FDPIC
+  /* See qsort(): an FDPIC caller passes a descriptor, not a code address.
+   * tdestroy_node() gets the resolved free_node.
+   */
 
-  if (node == NULL)
-    {
-      return;
-    }
+  free_node = (CODE void (*)(FAR void *))
+              fdpic_callback((FAR void *)free_node);
+#endif
 
-  tdestroy(node->child[0], free_node);
-  tdestroy(node->child[1], free_node);
-  if (free_node != NULL)
-    {
-      free_node((FAR void *)node->key);
-    }
-
-  lib_free(node);
+  tdestroy_node(root, free_node);
 }
