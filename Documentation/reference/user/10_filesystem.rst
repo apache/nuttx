@@ -256,6 +256,11 @@ UNIX Standard Operations (``unistd.h``)
   int     sethostname(FAR const char *name, size_t size);
   #endif
 
+  /* NIS domain name: empty at boot, at most HOST_NAME_MAX bytes */
+
+  int     getdomainname(FAR char *name, size_t size);
+  int     setdomainname(FAR const char *name, size_t size);
+
   /* Other */
 
   int     getopt(int argc, FAR char * const argv[], FAR const char *optstring);
