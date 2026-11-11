@@ -1684,6 +1684,21 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
 
   DEBUGASSERT(fs != NULL && fs->tfs_root.tde_object != NULL);
 
+  /* Skip over any leading directory separators (shouldn't be any) */
+
+  for (; *relpath == '/'; relpath++);
+
+  /* An empty relative path refers to the mountpoint root, which is
+   * always a directory.  Report EISDIR so that the VFS open fallback
+   * can complete the open as a directory stream (e.g. for O_PATH or
+   * O_DIRECTORY opens of the mountpoint itself).
+   */
+
+  if (*relpath == '\0')
+    {
+      return -EISDIR;
+    }
+
   /* Get exclusive access to the file system */
 
   ret = tmpfs_lock(fs);
