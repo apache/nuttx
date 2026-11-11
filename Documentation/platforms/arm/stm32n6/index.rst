@@ -26,6 +26,7 @@ The following list indicates peripherals supported in NuttX:
 Peripheral  Support  Notes
 ==========  =======  ===============================================
 GPIO        Yes
+I2C         Yes      I2C1-4 through the common I2C v2 driver.
 EXTI        Yes      GPIO interrupts through the common driver.
 DMA         Yes      GPDMA1 and HPDMA1 through the common GPDMA driver.
 PWR         Yes      Supply configuration, VOS, I/O supply validity.
@@ -41,7 +42,6 @@ ADC         No
 DCACHE      No
 DCMIPP      No
 ETH         No
-I2C         No
 ICACHE      No
 IWDG        No
 LPTIM       No
