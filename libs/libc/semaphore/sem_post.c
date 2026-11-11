@@ -119,7 +119,7 @@ int sem_post(FAR sem_t *sem)
 
 int nxsem_post(FAR sem_t *sem)
 {
-  bool fastpath = true;
+  bool fastpath = NXSEM_FASTPATH;
   bool mutex;
 
   DEBUGASSERT(sem != NULL);

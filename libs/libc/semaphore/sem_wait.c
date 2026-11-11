@@ -135,7 +135,7 @@ errout_with_cancelpt:
 
 int nxsem_wait(FAR sem_t *sem)
 {
-  bool fastpath = true;
+  bool fastpath = NXSEM_FASTPATH;
   bool mutex;
 
   DEBUGASSERT(sem != NULL);
