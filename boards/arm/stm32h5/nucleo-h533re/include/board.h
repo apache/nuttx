@@ -156,6 +156,15 @@
 
 #define STM32_LPTIM1_CLKIN  (STM32_PCLK3_FREQUENCY)
 
+/* I2C kernel clocks: the reset default PCLK1 (I2C1, I2C2) and PCLK3
+ * (I2C3, I2C4).  Select another with STM32_RCC_CCIPR4_I2CnSEL.
+ */
+
+#define STM32_I2C1_FREQUENCY  STM32_PCLK1_FREQUENCY
+#define STM32_I2C2_FREQUENCY  STM32_PCLK1_FREQUENCY
+#define STM32_I2C3_FREQUENCY  STM32_PCLK3_FREQUENCY
+#define STM32_I2C4_FREQUENCY  STM32_PCLK3_FREQUENCY
+
 /* LED definitions **********************************************************/
 
 /* The Nucleo-H533RE has one user controllable LED, LD2 a Green LED
