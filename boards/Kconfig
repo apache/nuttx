@@ -3308,6 +3308,15 @@ config ARCH_BOARD_STM3240G_EVAL
 		microcontroller (ARM Cortex-M4 with FPU).  This port uses a GNU Cortex-M4
 		toolchain (such as CodeSourcery).
 
+config ARCH_BOARD_NPZERO_G1S_DK
+	bool "Nanopower nPZero G1S Development Kit (STM32L053C8 host)"
+	depends on ARCH_CHIP_STM32L053C8
+	select ARCH_HAVE_LEDS
+	---help---
+		Nanopower nPZero G1S Development Kit with its STM32L053C8U6 MCU
+		host board.  The host controls the nPZero G1S power-saving IC over
+		I2C1.
+
 config ARCH_BOARD_STM32L0538_DISCO
 	bool "STMicro STM32L0538-Disco board"
 	depends on ARCH_CHIP_STM32L053C8
@@ -4475,6 +4484,7 @@ config ARCH_BOARD
 	default "pnev5180b"                    if ARCH_BOARD_PNEV5180B
 	default "stm32butterfly2"              if ARCH_BOARD_STM32_BUTTERFLY2
 	default "stm32_tiny"                   if ARCH_BOARD_STM32_TINY
+	default "npzero-g1s-dk"                if ARCH_BOARD_NPZERO_G1S_DK
 	default "stm32l0538-disco"             if ARCH_BOARD_STM32L0538_DISCO
 	default "stm32f051-discovery"          if ARCH_BOARD_STM32F051_DISCOVERY
 	default "stm32f072-discovery"          if ARCH_BOARD_STM32F072_DISCOVERY
@@ -5107,6 +5117,9 @@ source "boards/arm/stm32l0/nucleo-l073rz/Kconfig"
 endif
 if ARCH_BOARD_STM32F051_DISCOVERY
 source "boards/arm/stm32f0/stm32f051-discovery/Kconfig"
+endif
+if ARCH_BOARD_NPZERO_G1S_DK
+source "boards/arm/stm32l0/npzero-g1s-dk/Kconfig"
 endif
 if ARCH_BOARD_STM32L0538_DISCO
 source "boards/arm/stm32l0/stm32l0538-disco/Kconfig"
