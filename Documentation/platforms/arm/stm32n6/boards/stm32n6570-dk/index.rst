@@ -123,6 +123,20 @@ alarms with the ``alarm`` example, e.g. ``alarm 5`` or ``alarm -a 1 5``.
 The time survives a reset; without a backup battery it is lost on power
 off.
 
+I2C
+===
+
+===== ============ ============================================
+Bus   Pins         Devices
+===== ============ ============================================
+I2C1  PH9, PC1     Camera module connector, Arduino D15/D14
+I2C2  PD14, PD4    WM8904 codec (0x1a), GT911 touch (0x5d), TCPP03
+I2C4  PE13, PE14   STMod+ connector
+===== ============ ============================================
+
+The buses are registered as ``/dev/i2c1``, ``/dev/i2c2`` and ``/dev/i2c4``
+and can be explored with the ``i2c`` tool.
+
 Serial ports
 ============
 
