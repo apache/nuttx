@@ -504,7 +504,12 @@ static ssize_t procfs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Call the handler's read routine */
 
-  return handler->procfsentry->ops->read(filep, buffer, buflen);
+  if (handler->procfsentry->ops->read)
+    {
+      return handler->procfsentry->ops->read(filep, buffer, buflen);
+    }
+
+  return 0;
 }
 
 /****************************************************************************
