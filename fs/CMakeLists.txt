@@ -20,12 +20,12 @@
 #
 # ##############################################################################
 
-if(NOT "${CONFIG_FS_HEAPBUF_SECTION}" STREQUAL "")
-  target_compile_definitions(
-    fs PRIVATE FS_HEAPBUF_SECTION=${CONFIG_FS_HEAPBUF_SECTION})
-endif()
-
 nuttx_add_kernel_library(fs fs_initialize.c fs_heap.c)
 nuttx_add_subdirectory()
 target_include_directories(fs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                                       ${NUTTX_DIR}/sched)
+
+if(NOT "${CONFIG_FS_HEAPBUF_SECTION}" STREQUAL "")
+  target_compile_definitions(
+    fs PRIVATE FS_HEAPBUF_SECTION=\"${CONFIG_FS_HEAPBUF_SECTION}\")
+endif()
