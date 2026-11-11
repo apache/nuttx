@@ -61,6 +61,13 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
       return -EBADF;
     }
 
+  /* A driver may return OK without filling the path buffer */
+
+  if (req == FIOC_FILEPATH && arg != 0)
+    {
+      *(FAR char *)(uintptr_t)arg = '\0';
+    }
+
   /* Does the driver support the ioctl method? */
 
   if (inode->u.i_ops != NULL && inode->u.i_ops->ioctl != NULL)
