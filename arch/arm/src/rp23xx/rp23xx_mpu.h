@@ -33,6 +33,8 @@
 
 #include "arm_internal.h"
 #include "mpu.h"
+#include "nvic.h"
+#include "hardware/rp23xx_m33.h"
 #include "hardware/rp23xx_memorymap.h"
 
 /****************************************************************************
@@ -67,6 +69,11 @@
  *   armv8-m/arm_mpu.c, and the SRAM takes MPU region 0, so that region
  *   must stay reserved should arm_mpu.c ever allocate regions here.
  *
+ *   Also send every exclusive access to the global monitor
+ *   (ACTLR.EXTEXCLALL).  Outside the SRAM, in the PSRAM for example, the
+ *   global monitor fails every exclusive access, so an atomic operation
+ *   there never ends instead of not excluding the other core.
+ *
  *   A resume from suspend to RAM does not run this; the suspend support
  *   does not handle SMP yet, but must call it once it does.
  *
@@ -96,6 +103,12 @@ static inline void rp23xx_mpu_share_sram(void)
            MPU_RLAR_ENABLE, MPU_RLAR);
 
   putreg32(MPU_CTRL_ENABLE | MPU_CTRL_PRIVDEFENA, MPU_CTRL);
+  UP_MB();
+
+  /* Fail an exclusive access outside the SRAM */
+
+  putreg32(getreg32(NVIC_ACTLR) | RP23XX_M33_ACTLR_EXTEXCLALL_BITS,
+           NVIC_ACTLR);
   UP_MB();
 }
 
