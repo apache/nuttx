@@ -342,6 +342,8 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 #ifdef CONFIG_FS_NOTIFY
   notify_open(path, filep->f_oflags);
 #endif
+
+  filep->f_oflags &= ~(O_CREAT | O_EXCL | O_NOCTTY | O_TRUNC);
   return OK;
 
 errout_with_inode:
