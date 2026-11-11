@@ -24,13 +24,20 @@ if RP23XX_PSRAM
 
 choice
 	prompt "PSRAM heap usage"
+	default RP23XX_PSRAM_HEAP_SEPARATE if SMP
 	default RP23XX_PSRAM_HEAP_SINGLE
 	---help---
 		How the detected PSRAM is exposed to the memory manager.
 
+		The atomic operations of the RP2350 work across the two cores
+		only in the internal SRAM (datasheet, section 2.1.6).  In the
+		PSRAM they exclude only the local core, so with SMP a lock or
+		an atomic variable in the PSRAM does not exclude the other core.
+		With SMP the PSRAM can only be a separate heap.
+
 config RP23XX_PSRAM_HEAP_SINGLE
 	bool "Add PSRAM to the main heap"
-	depends on !MM_KERNEL_HEAP
+	depends on !MM_KERNEL_HEAP && !SMP && MM_REGIONS > 1
 	---help---
 		Add the PSRAM region to the main heap.  Requires
 		CONFIG_MM_REGIONS greater than 1 so the extra region can be
@@ -38,7 +45,7 @@ config RP23XX_PSRAM_HEAP_SINGLE
 
 config RP23XX_PSRAM_HEAP_USER
 	bool "PSRAM as the user heap"
-	depends on MM_KERNEL_HEAP
+	depends on MM_KERNEL_HEAP && !SMP
 	---help---
 		Use the PSRAM as the (user) heap and the internal SRAM as the
 		kernel heap.
@@ -49,6 +56,7 @@ config RP23XX_PSRAM_HEAP_SEPARATE
 	---help---
 		Expose the PSRAM as a separate named heap ("psram") rather than
 		adding it to the main heap.
+		With SMP, do not allocate a lock or an atomic variable from it.
 
 endchoice
 
