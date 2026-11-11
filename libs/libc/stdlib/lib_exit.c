@@ -37,7 +37,7 @@
 #include <nuttx/pthread.h>
 #include <nuttx/lib/elf.h>
 
-#if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
+#ifndef __KERNEL__
 
 /****************************************************************************
  * Private Data
