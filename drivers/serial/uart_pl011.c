@@ -745,18 +745,18 @@ static void pl011_txint(FAR struct uart_dev_s *dev, bool enable)
 
   if (enable)
     {
-      /* Fake a TX interrupt with interrupts disabled, so that the TX
+      /* Fake a TX interrupt with the uart lock held, so that the TX
        * interrupt cannot run uart_xmitchars() during this call.
        */
 
-      flags = enter_critical_section();
+      flags = uart_spinlock(dev, true);
 
       spin_lock(&sport->lock);
       pl011_irq_tx_enable(sport);
       spin_unlock(&sport->lock);
 
       uart_xmitchars(dev);
-      leave_critical_section(flags);
+      uart_spinunlock(dev, true, flags);
     }
   else
     {
