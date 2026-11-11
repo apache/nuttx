@@ -708,7 +708,7 @@ config GD32F4_TCMEXCLUDE
 config GD32F4_TCM_PROCFS
 	bool "TCM PROCFS support"
 	default n
-	depends on !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
+	depends on FS_PROCFS && FS_PROCFS_REGISTER
 	---help---
 		Select to build in support for /proc/tcm.  Reading from /proc/tcm
 		will provide statistics about TCM memory use similar to what you

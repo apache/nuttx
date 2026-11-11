@@ -357,7 +357,7 @@ menu "S32K1xx Reset Control Module (RCM)"
 config S32K1XX_RESETCAUSE_PROCFS
 	bool "S32K1XX MCU Reset Cause PROCFS entry"
 	default n
-	depends on !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
+	depends on FS_PROCFS && FS_PROCFS_REGISTER
 
 endmenu # S32K1XX Reset Control Module (RCM)
 
