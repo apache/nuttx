@@ -193,11 +193,8 @@ static int epoll_do_close(FAR struct file *filep)
       return ret;
     }
 
-  eph->crefs--;
-  nxmutex_unlock(&eph->lock);
-  if (eph->crefs <= 0)
+  if (--eph->crefs <= 0)
     {
-      nxmutex_destroy(&eph->lock);
       list_for_every_entry(&eph->setup, epn, epoll_node_t, node)
         {
           file_poll(epn->filep, &epn->pfd, false);
@@ -220,7 +217,13 @@ static int epoll_do_close(FAR struct file *filep)
           fs_heap_free(epn);
         }
 
+      nxmutex_unlock(&eph->lock);
+      nxmutex_destroy(&eph->lock);
       fs_heap_free(eph);
+    }
+  else
+    {
+      nxmutex_unlock(&eph->lock);
     }
 
   return ret;
