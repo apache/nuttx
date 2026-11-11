@@ -62,6 +62,10 @@
  *     Device has been disconnected (revents only).
  *   POLLNVAL
  *     Invalid fd member (revents only).
+ *   POLLRDHUP
+ *     Socket: no more data comes in.  The peer closed the connection or
+ *     shut down its writing half, or shutdown(SHUT_RD) was called (Linux
+ *     extension, with the value of Linux).
  */
 
 #define POLLIN       (0x01)  /* NuttX does not make priority distinctions */
@@ -76,8 +80,8 @@
 
 #define POLLERR      (0x08)
 #define POLLHUP      (0x10)
-#define POLLRDHUP    (0x10)  /* NuttX does not support shutdown(fd, SHUT_RD) */
 #define POLLNVAL     (0x20)
+#define POLLRDHUP    (0x2000)
 
 /****************************************************************************
  * Public Type Definitions
