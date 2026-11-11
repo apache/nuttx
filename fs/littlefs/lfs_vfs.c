@@ -908,11 +908,6 @@ static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               size_t len = strlen(path);
 
-              if (path[len - 1] != '/')
-                {
-                  path[len++] = '/';
-                }
-
               ret = littlefs_convert_result(lfs_file_path(&fs->lfs,
                                                           &priv->file,
                                                           path + len,
