@@ -440,7 +440,7 @@ static inline int userfs_truncate_dispatch(FAR struct userfs_info_s *info,
 
   /* Send the response */
 
-  resp.resp = USERFS_RESP_FSTAT;
+  resp.resp = USERFS_RESP_TRUNCATE;
   nsent     = sendto(info->sockfd, &resp,
                      sizeof(struct userfs_truncate_response_s),
                      0, (FAR struct sockaddr *)&info->client,

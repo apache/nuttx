@@ -158,6 +158,7 @@ enum userfs_resp_e
   USERFS_RESP_SYNC,
   USERFS_RESP_DUP,
   USERFS_RESP_FSTAT,
+  USERFS_RESP_TRUNCATE,
   USERFS_RESP_OPENDIR,
   USERFS_RESP_CLOSEDIR,
   USERFS_RESP_READDIR,
@@ -371,7 +372,7 @@ struct userfs_truncate_request_s
 
 struct userfs_truncate_response_s
 {
-  uint8_t resp;             /* Must be USERFS_RESP_FSTAT */
+  uint8_t resp;             /* Must be USERFS_RESP_TRUNCATE */
   int ret;                  /* Result of the operation */
 };
 

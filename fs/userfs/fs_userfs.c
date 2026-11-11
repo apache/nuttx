@@ -1130,7 +1130,7 @@ static int userfs_truncate(FAR struct file *filep, off_t length)
     }
 
   resp = (FAR struct userfs_truncate_response_s *)priv->iobuffer;
-  if (resp->resp != USERFS_RESP_FSTAT)
+  if (resp->resp != USERFS_RESP_TRUNCATE)
     {
       ferr("ERROR: Incorrect response: %u\n", resp->resp);
       nxmutex_unlock(&priv->lock);
@@ -2330,7 +2330,7 @@ static int userfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
     }
 
   resp = (FAR struct userfs_chstat_response_s *)priv->iobuffer;
-  if (resp->resp != USERFS_RESP_STAT)
+  if (resp->resp != USERFS_RESP_CHSTAT)
     {
       ferr("ERROR: Incorrect response: %u\n", resp->resp);
       nxmutex_unlock(&priv->lock);
