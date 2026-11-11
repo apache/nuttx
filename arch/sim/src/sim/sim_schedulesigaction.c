@@ -75,11 +75,14 @@
 
 void up_schedule_sigaction(struct tcb_s *tcb)
 {
-  /* We don't have to anything complex for the simulated target */
-
   sinfo("tcb=%p\n", tcb);
 
-  if (tcb == this_task())
+  /* Run the handler now only in the thread context of the task.  In an
+   * interrupt handler, keep sigdeliver: sim_doirq() runs it when the task
+   * resumes, and up_switch_context() when the task is switched back in.
+   */
+
+  if (tcb == this_task() && !up_interrupt_context())
     {
       (tcb->sigdeliver)(tcb);
       tcb->sigdeliver = NULL;
