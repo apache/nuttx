@@ -358,6 +358,7 @@ static void gpt_part_set_name(FAR struct gpt_entry_s *pte,
   for (i = 0; i < len; i++)
     {
       uint8_t c = pte->partition_name[i];
+
       dest[i] = (c && !isprint(c)) ? '.' : c;
     }
 
