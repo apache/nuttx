@@ -53,15 +53,14 @@
 static struct mm_heap_s *g_psramheap;
 #endif
 
-#if defined(CONFIG_RP23XX_PSRAM_HEAP_SINGLE)
-
-#if defined(CONFIG_MM_KERNEL_HEAP)
-#error cannot use CONFIG_MM_KERNEL_HEAP with single heap
-#endif
+/* up_initialize() calls arm_addregion() whenever CONFIG_MM_REGIONS > 1.
+ * Only the single heap has a region to add: the PSRAM.
+ */
 
 #if CONFIG_MM_REGIONS > 1
 void arm_addregion(void)
 {
+#ifdef CONFIG_RP23XX_PSRAM_HEAP_SINGLE
   size_t psram_size = rp23xx_psram_size();
 
   /* Add the detected PSRAM region to the main heap */
@@ -70,7 +69,14 @@ void arm_addregion(void)
     {
       kumm_addregion(PSRAM_START, psram_size);
     }
+#endif
 }
+#endif
+
+#if defined(CONFIG_RP23XX_PSRAM_HEAP_SINGLE)
+
+#if defined(CONFIG_MM_KERNEL_HEAP)
+#error cannot use CONFIG_MM_KERNEL_HEAP with single heap
 #endif
 
 #elif defined (CONFIG_RP23XX_PSRAM_HEAP_USER)
