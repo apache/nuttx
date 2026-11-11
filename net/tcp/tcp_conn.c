@@ -71,6 +71,7 @@
 #include "icmpv6/icmpv6.h"
 #include "nat/nat.h"
 #include "netdev/netdev.h"
+#include "socket/socket.h"
 #include "utils/utils.h"
 
 /****************************************************************************
@@ -109,11 +110,14 @@ static dq_queue_t g_active_tcp_connections;
  *   Primary uses: (1) to determine if a port number is available, (2) to
  *   To identify the socket that will accept new connections on a local port.
  *
+ *   reuse: the new socket has SO_REUSEADDR.  A connection that has it too
+ *   does not count, a listener always does (as Linux).
+ *
  ****************************************************************************/
 
-static FAR struct tcp_conn_s *
-  tcp_listener(uint8_t domain, FAR const union ip_addr_u *ipaddr,
-               uint16_t portno)
+static FAR struct tcp_conn_s *tcp_listener(uint8_t domain,
+                                           FAR const union ip_addr_u *ipaddr,
+                                           uint16_t portno, bool reuse)
 {
   FAR struct tcp_conn_s *conn = NULL;
 
@@ -121,6 +125,13 @@ static FAR struct tcp_conn_s *
 
   while ((conn = tcp_nextconn(conn)) != NULL)
     {
+#ifdef CONFIG_NET_SOCKOPTS
+      if (reuse && _SO_GETOPT(conn->sconn.s_options, SO_REUSEADDR))
+        {
+          continue;
+        }
+#endif
+
       /* Check if this connection is open and the local port assignment
        * matches the requested port number.
        */
@@ -148,6 +159,42 @@ static FAR struct tcp_conn_s *
 #else
   return tcp_findlistener((FAR union ip_binding_u *)ipaddr, portno);
 #endif
+}
+
+/****************************************************************************
+ * Name: tcp_bindport
+ *
+ * Description:
+ *   Verify or select the local port of bind().  If both sockets have
+ *   SO_REUSEADDR, a connection on the port (for example in TIME_WAIT)
+ *   does not conflict.  Otherwise as tcp_selectport().
+ *
+ ****************************************************************************/
+
+static int tcp_bindport(FAR struct tcp_conn_s *conn, uint8_t domain,
+                        FAR const union ip_addr_u *ipaddr, uint16_t portno)
+{
+#ifdef CONFIG_NET_SOCKOPTS
+  int ret = portno;
+
+  if (portno != 0 && _SO_GETOPT(conn->sconn.s_options, SO_REUSEADDR))
+    {
+      tcp_conn_list_lock();
+      if (tcp_listener(domain, ipaddr, portno, true)
+#  ifdef CONFIG_NET_NAT
+          || nat_port_inuse(domain, IP_PROTO_TCP, ipaddr, portno)
+#  endif
+         )
+        {
+          ret = -EADDRINUSE;
+        }
+
+      tcp_conn_list_unlock();
+      return ret;
+    }
+#endif
+
+  return tcp_selectport(domain, ipaddr, portno);
 }
 
 /****************************************************************************
@@ -341,12 +388,12 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 
   /* Verify or select a local port (network byte order) */
 
-  port = tcp_selectport(PF_INET,
-                       (FAR const union ip_addr_u *)&addr->sin_addr.s_addr,
-                       addr->sin_port);
+  port = tcp_bindport(conn, PF_INET,
+                      (FAR const union ip_addr_u *)&addr->sin_addr.s_addr,
+                      addr->sin_port);
   if (port < 0)
     {
-      nerr("ERROR: tcp_selectport failed: %d\n", port);
+      nerr("ERROR: tcp_bindport failed: %d\n", port);
       return port;
     }
 
@@ -437,12 +484,12 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 
   /* The port number must be unique for this address binding */
 
-  port = tcp_selectport(PF_INET6,
+  port = tcp_bindport(conn, PF_INET6,
                 (FAR const union ip_addr_u *)addr->sin6_addr.in6_u.u6_addr16,
                 addr->sin6_port);
   if (port < 0)
     {
-      nerr("ERROR: tcp_selectport failed: %d\n", port);
+      nerr("ERROR: tcp_bindport failed: %d\n", port);
       return port;
     }
 
@@ -539,7 +586,7 @@ int tcp_selectport(uint8_t domain,
               return -EADDRINUSE;
             }
         }
-      while (tcp_listener(domain, ipaddr, portno)
+      while (tcp_listener(domain, ipaddr, portno, false)
 #ifdef CONFIG_NET_NAT
              || nat_port_inuse(domain, IP_PROTO_TCP, ipaddr, portno)
 #endif
@@ -551,7 +598,7 @@ int tcp_selectport(uint8_t domain,
        * connection is using this local port.
        */
 
-      if (tcp_listener(domain, ipaddr, portno)
+      if (tcp_listener(domain, ipaddr, portno, false)
 #ifdef CONFIG_NET_NAT
           || nat_port_inuse(domain, IP_PROTO_TCP, ipaddr, portno)
 #endif
@@ -1106,13 +1153,15 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
           return NULL;
         }
 
-      /* Inherits the necessary fields from listener conn for
-       * the new connection.
-       */
+      /* The new connection inherits all socket options of the listener. */
 
 #ifdef CONFIG_NET_SOCKOPTS
+      conn->sconn.s_options  = listener->sconn.s_options;
       conn->sconn.s_rcvtimeo = listener->sconn.s_rcvtimeo;
       conn->sconn.s_sndtimeo = listener->sconn.s_sndtimeo;
+#  ifdef CONFIG_NET_SOLINGER
+      conn->sconn.s_linger   = listener->sconn.s_linger;
+#  endif
 #  ifdef CONFIG_NET_BINDTODEVICE
       conn->sconn.s_boundto  = listener->sconn.s_boundto;
 #  endif
@@ -1127,6 +1176,16 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       conn->snd_bufs         = listener->snd_bufs;
 #endif
       conn->mss              = listener->mss;
+#ifdef CONFIG_NET_TCPPROTO_OPTIONS
+      conn->user_mss         = listener->user_mss;
+#endif
+#ifdef CONFIG_NET_TCP_KEEPALIVE
+      conn->keepalive        = listener->keepalive;
+      conn->keepidle         = listener->keepidle;
+      conn->keepintvl        = listener->keepintvl;
+      conn->keepcnt          = listener->keepcnt;
+      conn->keeptimer        = conn->keepalive ? conn->keepidle : 0;
+#endif
 
       /* Fill in the necessary fields for the new connection. */
 
