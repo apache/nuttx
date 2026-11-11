@@ -1593,7 +1593,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
 
           formatted = true;
           note = (FAR struct note_printf_s *)data;
-          length = sizeof(data) - SIZEOF_NOTE_PRINTF(0);
+          length = sizeof(data) - 1 - SIZEOF_NOTE_PRINTF(0);
 
           if (type)
             {
