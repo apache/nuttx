@@ -48,6 +48,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 
+#include "inode/inode.h"
 #include "mount/mount.h"
 #include "sched/sched.h"
 #include "fs_heap.h"
@@ -419,6 +420,7 @@ static void procfs_sort_pid(FAR struct procfs_level0_s *level0)
 static int procfs_open(FAR struct file *filep, FAR const char *relpath,
                        int oflags, mode_t mode)
 {
+  FAR struct procfs_file_s *attr;
   int x;
   int ret = -ENOENT;
 
@@ -447,8 +449,9 @@ static int procfs_open(FAR struct file *filep, FAR const char *relpath,
             {
               DEBUGASSERT(filep->f_priv);
 
-              ((FAR struct procfs_file_s *)filep->f_priv)->procfsentry =
-                                    &g_procfs_entries[x];
+              attr = filep->f_priv;
+              attr->procfsentry = &g_procfs_entries[x];
+              attr->ino = inode_hash(INODE_HASH_INIT, relpath);
               break;
             }
         }
@@ -623,6 +626,7 @@ static int procfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
    */
 
   memset(buf, 0, sizeof(struct stat));
+  buf->st_ino  = handler->ino;
   buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
 
   /* If the write method is provided, then let's also claim that the file is
@@ -649,9 +653,18 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                           FAR struct fs_dirent_s **dir)
 {
   FAR struct procfs_level0_s *level0;
+  uint32_t hash;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(mountpt && dir && relpath);
+
+  /* readdir() adds the name of each entry to the hash of this path */
+
+  hash = inode_hash(INODE_HASH_INIT, relpath);
+  if (relpath[0] != '\0')
+    {
+      hash = inode_hash(hash, "/");
+    }
 
   /* The relative must be either:
    *
@@ -703,6 +716,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
       level0->lastread = "";
       level0->lastlen = 0;
       level0->base.procfsentry = NULL;
+      level0->base.hash = hash;
 
       *dir = (FAR struct fs_dirent_s *)level0;
     }
@@ -743,6 +757,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
                   dirpriv = (FAR struct procfs_dir_priv_s *)(*dir);
                   dirpriv->procfsentry = &g_procfs_entries[x];
+                  dirpriv->hash = hash;
                 }
 
               return ret;
@@ -778,6 +793,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
               level1->lastread = "";
               level1->lastlen = 0;
               level1->base.procfsentry = NULL;
+              level1->base.hash = hash;
 
               *dir = (FAR struct fs_dirent_s *)level1;
               break;
@@ -1037,6 +1053,11 @@ static int procfs_readdir(FAR struct inode *mountpt,
       ret = priv->procfsentry->ops->readdir(dir, entry);
     }
 
+  if (ret >= 0)
+    {
+      entry->d_ino = inode_hash(priv->hash, entry->d_name);
+    }
+
   return ret;
 }
 
@@ -1174,7 +1195,8 @@ static int procfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
               DEBUGASSERT(g_procfs_entries[x].ops &&
                           g_procfs_entries[x].ops->stat);
 
-              return g_procfs_entries[x].ops->stat(relpath, buf);
+              ret = g_procfs_entries[x].ops->stat(relpath, buf);
+              break;
             }
 
           /* Test for an internal subdirectory stat */
@@ -1191,6 +1213,11 @@ static int procfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
               break;
             }
         }
+    }
+
+  if (ret >= 0)
+    {
+      buf->st_ino = inode_hash(INODE_HASH_INIT, relpath);
     }
 
   return ret;

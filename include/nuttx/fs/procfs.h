@@ -116,6 +116,7 @@ struct procfs_entry_s
 struct procfs_file_s
 {
   FAR const struct procfs_entry_s *procfsentry;
+  ino_t ino;                                    /* File serial number */
 };
 
 /* The generic proc/ pseudo directory structure */
@@ -126,6 +127,7 @@ struct procfs_dir_priv_s
   uint8_t level;                                /* Directory level.  Currently 0 or 1 */
   uint16_t index;                               /* Index to the next directory entry */
   uint16_t nentries;                            /* Number of directory entries */
+  uint32_t hash;                                /* Path hash, for d_ino */
   FAR const struct procfs_entry_s *procfsentry; /* Pointer to procfs handler entry */
 };
 
