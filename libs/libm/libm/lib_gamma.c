@@ -151,7 +151,7 @@ static const double g_fact[] =
 
 /* sin(pi x) with x > 0x1p-100, if sin(pi*x)==0 the sign is arbitrary */
 
-static double sinpi(double x)
+static double sin_pi(double x)
 {
   int n;
 
@@ -315,9 +315,9 @@ double tgamma(double x)
     {
       /* reflection formula for negative x */
 
-      /* sinpi(absx) is not 0, integers are already handled */
+      /* sin_pi(absx) is not 0, integers are already handled */
 
-      r = -pi / (sinpi(absx) * absx * r);
+      r = -pi / (sin_pi(absx) * absx * r);
       dy = -dy;
       z = -z;
     }
