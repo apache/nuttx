@@ -34,10 +34,13 @@ endif
 
 ifeq ($(CONFIG_ARCH_ARMV7A),y)          # ARMv7-A
 ARCH_SUBDIR = armv7-a
+ARCH_SUBDIR_ARM = arm_a_r
 else ifeq ($(CONFIG_ARCH_ARMV7R),y)     # ARMv7-R
 ARCH_SUBDIR = armv7-r
+ARCH_SUBDIR_ARM = arm_a_r
 else ifeq ($(CONFIG_ARCH_ARMV8R),y)     # ARMv8-R
 ARCH_SUBDIR = armv8-r
+ARCH_SUBDIR_ARM = arm_a_r
 else ifeq ($(CONFIG_ARCH_ARMV7M),y)     # ARMv7-M
 ARCH_SUBDIR = armv7-m
 else ifeq ($(CONFIG_ARCH_ARMV8M),y)     # ARMv8-M
@@ -46,6 +49,7 @@ else ifeq ($(CONFIG_ARCH_ARMV6M),y)     # ARMv6-M
 ARCH_SUBDIR = armv6-m
 else                                    # ARM9, ARM7TDMI, etc.
 ARCH_SUBDIR = arm
+ARCH_SUBDIR_ARM = arm_a_r
 endif
 
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
@@ -54,6 +58,7 @@ INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)$(ARCH_SUBDIR)
 INCLUDES += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
+INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)$(ARCH_SUBDIR_ARM)
 
 CPPFLAGS += $(INCLUDES)
 CFLAGS += $(INCLUDES)

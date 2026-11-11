@@ -50,10 +50,6 @@ list(
   arm_perf.c
   cp15_cacheops.c)
 
-if(CONFIG_ENABLE_ALL_SIGNALS)
-  list(APPEND SRCS arm_schedulesigaction.c arm_sigdeliver.c)
-endif()
-
 if(CONFIG_ARMV7A_GICv2M)
   list(APPEND SRCS arm_gicv2m.c)
 endif()
