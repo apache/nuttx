@@ -40,6 +40,10 @@ dependencies are enabled are included in a given NuttX image.
   ``cmocka_driver_i2c_read``, ``cmocka_driver_gpio``,
   ``cmocka_driver_relay``, ``cmocka_driver_uart``, and
   ``cmocka_driver_audio``.
+* ADC upper-half lifecycle regression: ``cmocka_driver_adc_open`` registers a
+  mock lower half and verifies that a failed setup does not retain an open
+  reference, a subsequent open retries setup, and closing it calls shutdown
+  exactly once.  It does not require physical ADC hardware.
 * Display and input tests: ``cmocka_driver_framebuffer``,
   ``cmocka_driver_lcd``, and ``cmocka_driver_touchpanel``.
 * Power-management tests: ``cmocka_driver_cpufreq``,
