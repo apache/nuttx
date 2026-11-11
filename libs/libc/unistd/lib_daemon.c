@@ -32,7 +32,7 @@
 
 /* Not appropriate for use within the OS */
 
-#if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
+#ifndef __KERNEL__
 
 /****************************************************************************
  * Public Functions
@@ -160,4 +160,4 @@ int daemon(int nochdir, int noclose)
   return OK;
 }
 
-#endif /* CONFIG_BUILD_FLAT=y || !__KERNEL__ */
+#endif /* __KERNEL__ */
