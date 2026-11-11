@@ -272,7 +272,7 @@
 
 #define SPI_STATUS_PRESENT     0x01 /* Bit 0=1: MMC/SD card present */
 #define SPI_STATUS_WRPROTECTED 0x02 /* Bit 1=1: MMC/SD card write protected */
-#define SPI_STATUS_BUSY        0x04 /* Bit 2=1: MMC/SD card busy */
+#define SPI_STATUS_DEVBUSY     0x04 /* Bit 2=1: MMC/SD card busy */
 
 /****************************************************************************
  * Name: SPI_CMDDATA
