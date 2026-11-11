@@ -619,7 +619,9 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
 {
   FAR struct fs_dirent_s *dir;
   FAR struct inode *inode = filep->f_inode;
+  FAR const char *last;
   FAR char *path_prefix;
+  size_t len;
   int ret;
 
   path_prefix = lib_get_pathbuffer();
@@ -653,8 +655,15 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
         }
     }
 
+  /* inode_getpath() already ends a mountpoint with '/', so only add the
+   * separator when the path does not end with one.
+   */
+
   inode_getpath(inode, path_prefix, PATH_MAX);
-  ret = fs_heap_asprintf(&dir->fd_path, "%s%s/", path_prefix, relpath);
+  last = *relpath != '\0' ? relpath : path_prefix;
+  len  = strlen(last);
+  ret  = fs_heap_asprintf(&dir->fd_path, "%s%s%s", path_prefix, relpath,
+                          len > 0 && last[len - 1] == '/' ? "" : "/");
   if (ret < 0)
     {
       dir->fd_path = NULL;
