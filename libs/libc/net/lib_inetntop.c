@@ -99,14 +99,8 @@
 static int inet_ipv4_ntop(FAR const void *src, FAR char *dest,
                           socklen_t size)
 {
-  FAR uint8_t *ptr;
-
-  if (size < INET_ADDRSTRLEN)
-    {
-      return -ENOSPC;
-    }
-
-  ptr = (FAR uint8_t *)src;
+  FAR const uint8_t *ptr = src;
+  size_t len;
 
   /* Data is in network order.  However, indexed access is the same in both
    * big and little endian cases:
@@ -131,8 +125,11 @@ static int inet_ipv4_ntop(FAR const void *src, FAR char *dest,
    *                +---+---+---+---+
    */
 
-  snprintf(dest, INET_ADDRSTRLEN, "%u.%u.%u.%u",
-           ptr[0], ptr[1], ptr[2], ptr[3]);
+  len = snprintf(dest, size, "%u.%u.%u.%u", ptr[0], ptr[1], ptr[2], ptr[3]);
+  if (len >= size)
+    {
+      return -ENOSPC;
+    }
 
   return OK;
 }
@@ -170,82 +167,89 @@ static int inet_ipv4_ntop(FAR const void *src, FAR char *dest,
 static int inet_ipv6_ntop(FAR const void *src, FAR char *dest,
                           socklen_t size)
 {
-  FAR const struct in6_addr *in6_addr;
+  FAR const struct in6_addr *in6_addr = src;
+  char str[INET6_ADDRSTRLEN];
   uint16_t warray[8];
-  int offset;
-  int entry;
-  int count;
-  int maxentry;
-  int maxcount;
+  int maxentry = -1;
+  int maxcount = 0;
+  int entry = -1;
+  int count = 0;
+  size_t len = 0;
+  int i;
 
-  if (size < INET6_ADDRSTRLEN)
+  /* Find the longest run of zero words, the first one on a tie */
+
+  for (i = 0; i < 8; i++)
+    {
+      warray[i] = NTOHS(in6_addr->s6_addr16[i]);
+      if (warray[i] != 0)
+        {
+          entry = -1;
+          continue;
+        }
+
+      if (entry < 0)
+        {
+          entry = i;
+          count = 0;
+        }
+
+      if (++count > maxcount)
+        {
+          maxentry = entry;
+          maxcount = count;
+        }
+    }
+
+  /* RFC 5952 4.2.2: "::" must not shorten just one 16-bit 0 field */
+
+  if (maxcount < 2)
+    {
+      maxentry = -1;
+    }
+
+  for (i = 0; i < 8; i++)
+    {
+      if (i == maxentry)
+        {
+          str[len++] = ':';
+          i += maxcount - 1;
+          if (i == 7)
+            {
+              str[len++] = ':';
+            }
+
+          continue;
+        }
+
+      if (i > 0)
+        {
+          str[len++] = ':';
+        }
+
+      /* An IPv4-compatible (::a.b.c.d) or IPv4-mapped (::ffff:a.b.c.d)
+       * address ends in the dotted IPv4 form.
+       */
+
+      if (i == 6 && maxentry == 0 &&
+          (maxcount == 6 || (maxcount == 5 && warray[5] == 0xffff)))
+        {
+          len += snprintf(&str[len], sizeof(str) - len, "%u.%u.%u.%u",
+                          in6_addr->s6_addr[12], in6_addr->s6_addr[13],
+                          in6_addr->s6_addr[14], in6_addr->s6_addr[15]);
+          break;
+        }
+
+      len += snprintf(&str[len], sizeof(str) - len, "%x", warray[i]);
+    }
+
+  str[len] = '\0';
+  if (len >= size)
     {
       return -ENOSPC;
     }
 
-  in6_addr = (FAR const struct in6_addr *)src;
-  entry    = -1;
-  maxentry = -1;
-  maxcount = 0;
-  offset   = 0;
-
-  while (offset < 8)
-    {
-      warray[offset] = NTOHS(in6_addr->s6_addr16[offset]);
-      if (warray[offset] == 0)
-        {
-          entry = offset;
-          count = 1;
-          offset++;
-
-          while (offset < 8)
-            {
-              warray[offset] = NTOHS(in6_addr->s6_addr16[offset]);
-              if (warray[offset] != 0)
-                {
-                  break;
-                }
-
-              offset++;
-              count++;
-            }
-
-          if (count > maxcount)
-            {
-              maxentry = entry;
-              maxcount = count;
-            }
-        }
-
-      offset++;
-    }
-
-  offset = 0;
-  dest[0] = '\0';
-
-  while (offset < 8)
-    {
-      if (offset == maxentry)
-        {
-          size   -= snprintf(&dest[strlen(dest)], size, ":");
-          offset += maxcount;
-          if (offset >= 8)
-            {
-              size -= snprintf(&dest[strlen(dest)], size, ":");
-            }
-        }
-      else
-        {
-          if (offset > 0)
-            {
-              size -= snprintf(&dest[strlen(dest)], size, ":");
-            }
-
-          size -= snprintf(&dest[strlen(dest)], size, "%x", warray[offset]);
-          offset++;
-        }
-    }
-
+  memcpy(dest, str, len + 1);
   return OK;
 }
 #endif
