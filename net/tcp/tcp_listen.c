@@ -168,6 +168,7 @@ int tcp_unlisten(FAR struct tcp_conn_s *conn)
 
 int tcp_listen(FAR struct tcp_conn_s *conn)
 {
+  FAR struct tcp_conn_s *listener;
   int ndx;
   int ret;
 
@@ -180,10 +181,17 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
   /* First, check if there is already a socket listening on this port */
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-  if (tcp_islistener(&conn->u, conn->lport, conn->domain))
+  listener = tcp_findlistener(&conn->u, conn->lport, conn->domain);
 #else
-  if (tcp_islistener(&conn->u, conn->lport))
+  listener = tcp_findlistener(&conn->u, conn->lport);
 #endif
+  if (listener == conn)
+    {
+      /* listen() again on a listening socket only changes the backlog */
+
+      ret = OK;
+    }
+  else if (listener != NULL)
     {
       /* Yes, then we must refuse this request */
 
@@ -217,30 +225,6 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
   tcp_conn_list_unlock();
   return ret;
 }
-
-/****************************************************************************
- * Name: tcp_islistener
- *
- * Description:
- *   Return true is there is a listener for the specified port
- *
- * Assumptions:
- *   This function is called from network logic with the network locked.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-bool tcp_islistener(FAR union ip_binding_u *uaddr, uint16_t portno,
-                    uint8_t domain)
-{
-  return tcp_findlistener(uaddr, portno, domain) != NULL;
-}
-#else
-bool tcp_islistener(FAR union ip_binding_u *uaddr, uint16_t portno)
-{
-  return tcp_findlistener(uaddr, portno) != NULL;
-}
-#endif
 
 /****************************************************************************
  * Name: tcp_accept_connection
