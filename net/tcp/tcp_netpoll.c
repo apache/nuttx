@@ -84,9 +84,22 @@ static uint32_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 
       /* Check for data or connection availability events. */
 
-      if ((flags & (TCP_NEWDATA | TCP_BACKLOG | TCP_RXCLOSE)) != 0)
+      if ((flags & (TCP_NEWDATA | TCP_BACKLOG)) != 0)
         {
           eventset |= POLLIN;
+        }
+
+      /* The peer closed or shut down its writing half: read() does not
+       * block.  POLLHUP when this socket also shut down its writing half.
+       */
+
+      if ((flags & TCP_RXCLOSE) != 0)
+        {
+          eventset |= POLLIN | POLLRDHUP;
+          if ((info->conn->shutdown & SHUT_WR) != 0)
+            {
+              eventset |= POLLHUP;
+            }
         }
 
       /* Non-blocking connection */
@@ -142,17 +155,10 @@ static uint32_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
           _SO_CONN_SETERRNO(info->conn, reason);
 #endif
 
-          /* After a reset of the peer, a receive does not block */
-
-          if ((info->conn->flags & TCP_RESET) != 0)
-            {
-              eventset |= POLLIN;
-            }
-
           /* Mark that the connection has been lost */
 
           tcp_lost_connection(info->conn, info->cb, flags);
-          eventset |= (POLLERR | POLLHUP);
+          eventset |= POLLIN | POLLRDHUP | POLLERR | POLLHUP;
         }
 
       /* A poll is a sign that we are free to send data. */
@@ -294,7 +300,9 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
    * callback processing.
    */
 
-  cb->flags = TCP_DISCONN_EVENTS;
+  /* TCP_RXCLOSE also for a caller that asks only for POLLRDHUP */
+
+  cb->flags = TCP_DISCONN_EVENTS | TCP_RXCLOSE;
   cb->priv  = info;
   cb->event = tcp_poll_eventhandler;
 
@@ -315,7 +323,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 
   if ((fds->events & POLLIN) != 0)
     {
-      cb->flags |= TCP_NEWDATA | TCP_BACKLOG | TCP_RXCLOSE;
+      cb->flags |= TCP_NEWDATA | TCP_BACKLOG;
     }
 
   /* Save the reference in the poll info structure as fds private as well
@@ -326,12 +334,26 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 
   /* Check for read data or backlogged connection availability now */
 
-  if (conn->readahead != NULL || tcp_backlogpending(conn) ||
-      (conn->shutdown & SHUT_RD) != 0)
+  if (conn->readahead != NULL || tcp_backlogpending(conn))
     {
       /* Normal data may be read without blocking. */
 
       eventset |= POLLRDNORM;
+    }
+
+  /* As on Linux: no more data comes in (the peer closed or shut down its
+   * writing half, or shutdown(SHUT_RD)): POLLIN and POLLRDHUP.  Both
+   * directions shut down: POLLHUP.
+   */
+
+  if ((conn->shutdown & SHUT_RD) != 0)
+    {
+      eventset |= POLLIN | POLLRDHUP;
+    }
+
+  if ((conn->shutdown & SHUT_RDWR) == SHUT_RDWR)
+    {
+      eventset |= POLLHUP;
     }
 
   /* Check for a loss of connection events.  We need to be careful here.
@@ -399,6 +421,13 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
           _SO_CONN_SETERRNO(conn, (_SS_ISCLOSED(conn->sconn.s_flags) ?
                                    ECONNREFUSED : ENOTCONN));
           eventset |= POLLERR | POLLHUP;
+        }
+
+      /* A connection that ended (a reset, a timeout) gets no more data */
+
+      if (conn->tcpstateflags != TCP_ALLOCATED)
+        {
+          eventset |= POLLIN | POLLRDHUP;
         }
     }
   else if (_SS_ISCONNECTED(conn->sconn.s_flags) &&
