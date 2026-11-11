@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <sched.h>
+
 #include <nuttx/spinlock.h>
 
 #include "arch_atomic.h"
@@ -40,6 +42,29 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
  * Private Functions
  ****************************************************************************/
 
+#if !defined(CONFIG_BUILD_FLAT) && !defined(__KERNEL__)
+/* User code cannot disable the interrupts.  Lock the scheduler instead:
+ * as with up_irq_save(), no other thread runs on this CPU meanwhile.  The
+ * spinlock keeps out the other CPUs of an SMP build.  spin_lock() can call
+ * kernel functions, so try the lock in a loop.
+ */
+
+static inline irqstate_t atomic_lock(void)
+{
+  sched_lock();
+  while (!spin_trylock_notrace(&g_atomic_lock))
+    {
+    }
+
+  return 0;
+}
+
+static inline void atomic_unlock(irqstate_t flags)
+{
+  spin_unlock_notrace(&g_atomic_lock);
+  sched_unlock();
+}
+#else
 static inline irqstate_t atomic_lock(void)
 {
   return spin_lock_irqsave(&g_atomic_lock);
@@ -49,6 +74,7 @@ static inline void atomic_unlock(irqstate_t flags)
 {
   spin_unlock_irqrestore(&g_atomic_lock, flags);
 }
+#endif
 
 /****************************************************************************
  * Public Functions

@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sched.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <nuttx/irq.h>
@@ -51,6 +52,21 @@ static inline irqstate_t atomic_lock(void)
 static inline void atomic_unlock(irqstate_t flags)
 {
   hwspin_unlock_restore(&g_atomic_hwspinlock, flags);
+}
+#elif !defined(CONFIG_BUILD_FLAT) && !defined(__KERNEL__)
+/* User code cannot disable the interrupts.  Lock the scheduler instead:
+ * as with up_irq_save(), no other thread runs on this CPU meanwhile.
+ */
+
+static inline irqstate_t atomic_lock(void)
+{
+  sched_lock();
+  return 0;
+}
+
+static inline void atomic_unlock(irqstate_t flags)
+{
+  sched_unlock();
 }
 #elif defined(CONFIG_LIBC_ATOMIC_IRQ)
 static inline irqstate_t atomic_lock(void)
