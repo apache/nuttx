@@ -109,6 +109,20 @@ enum local_state_s
  */
 
 struct devif_callback_s;       /* Forward reference */
+struct local_conn_s;           /* Forward reference */
+
+/* A poll of a connected stream socket.  It waits on the FIFOs of the
+ * socket, and the socket reports their events with the events of its own
+ * state (see local_netpoll.c).
+ */
+
+struct local_pollfd_s
+{
+  FAR struct local_conn_s *lp_conn; /* The socket; NULL: the entry is free */
+  FAR struct pollfd_s *lp_fds;      /* The poll of the caller */
+  struct pollfd_s lp_in;            /* The poll of lc_infile */
+  struct pollfd_s lp_out;           /* The poll of lc_outfile */
+};
 
 struct local_conn_s
 {
@@ -125,6 +139,8 @@ struct local_conn_s
   uint8_t lc_type;               /* See enum local_type_e */
   uint8_t lc_state;              /* See enum local_state_e */
   bool lc_pair;                  /* One end of a socketpair() */
+  uint8_t lc_shutdown;           /* SHUT_RD: no more data comes in, SHUT_WR:
+                                  * no more data goes out */
   struct file lc_infile;         /* File for read-only FIFO (peers) */
   struct file lc_outfile;        /* File descriptor of write-only FIFO (peers) */
   char lc_path[UNIX_PATH_MAX];   /* Path assigned by bind() */
@@ -153,11 +169,19 @@ struct local_conn_s
                                   */
 #endif
 
-  /* The poll structures for the two FIFOs of a connected stream socket or
-   * of a socket pair, for poll() of POLLIN and POLLOUT together.
+  /* The polls of the FIFOs: a socket of a datagram socket pair uses pair
+   * (for POLLIN and POLLOUT together), a connected stream socket uses
+   * stream (each poll takes a slot of its FIFOs, so as many as a FIFO
+   * has).  A socket uses only the array of its type.
    */
 
-  struct pollfd_s lc_inout_fds[2*LOCAL_NPOLLWAITERS];
+  union
+  {
+    struct pollfd_s pair[2*LOCAL_NPOLLWAITERS];
+#ifdef CONFIG_NET_LOCAL_STREAM
+    struct local_pollfd_s stream[CONFIG_DEV_PIPE_NPOLLWAITERS];
+#endif
+  } lc_pfds;
 
 #ifdef CONFIG_NET_LOCAL_STREAM
   /* SOCK_STREAM fields common to both client and server */
@@ -761,6 +785,25 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
 
 void local_event_pollnotify(FAR struct local_conn_s *conn,
                             pollevent_t eventset);
+
+/****************************************************************************
+ * Name: local_shutdown_pollnotify
+ *
+ * Description:
+ *   shutdown() changed the state of a stream socket and is about to close
+ *   one of its FIFOs.  Stop the polls of that FIFO and tell all polls of
+ *   the socket the new state.
+ *
+ * Input Parameters:
+ *   conn  - The socket
+ *   filep - lc_infile or lc_outfile, which shutdown() closes next
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOCAL_STREAM
+void local_shutdown_pollnotify(FAR struct local_conn_s *conn,
+                               FAR struct file *filep);
+#endif
 
 /****************************************************************************
  * Name: local_pollsetup

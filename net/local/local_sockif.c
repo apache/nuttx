@@ -1314,11 +1314,35 @@ static int local_shutdown(FAR struct socket *psock, int how)
       case SOCK_STREAM:
         {
           FAR struct local_conn_s *conn = psock->s_conn;
+          FAR struct local_conn_s *peer;
+
+          /* The peer sends no more data when this socket stops reading,
+           * and it gets no more data when this socket stops writing.
+           */
+
+          local_lock();
+          conn->lc_shutdown |= how & SHUT_RDWR;
+          peer = conn->lc_peer;
+          if (peer != NULL)
+            {
+              if (how & SHUT_RD)
+                {
+                  peer->lc_shutdown |= SHUT_WR;
+                }
+
+              if (how & SHUT_WR)
+                {
+                  peer->lc_shutdown |= SHUT_RD;
+                }
+            }
+
+          local_unlock();
 
           if (how & SHUT_RD)
             {
               if (conn->lc_infile.f_inode != NULL)
                 {
+                  local_shutdown_pollnotify(conn, &conn->lc_infile);
                   file_close(&conn->lc_infile);
                   conn->lc_infile.f_inode = NULL;
                 }
@@ -1328,6 +1352,7 @@ static int local_shutdown(FAR struct socket *psock, int how)
             {
               if (conn->lc_outfile.f_inode != NULL)
                 {
+                  local_shutdown_pollnotify(conn, &conn->lc_outfile);
                   file_close(&conn->lc_outfile);
                   conn->lc_outfile.f_inode = NULL;
                 }

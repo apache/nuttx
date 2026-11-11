@@ -31,6 +31,8 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 #include <poll.h>
+#include <string.h>
+#include <sys/socket.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
@@ -38,6 +40,10 @@
 
 #include "socket/socket.h"
 #include "local/local.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: local_event_pollsetup
@@ -107,6 +113,187 @@ static int local_event_pollsetup(FAR struct local_conn_s *conn,
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: local_pollstate
+ *
+ * Description:
+ *   The events of the shutdown state of a socket, as on Linux: when no more
+ *   data comes in, read() does not block (POLLIN) and the peer is gone for
+ *   reading (POLLRDHUP); when no data goes out either, POLLHUP.
+ *
+ ****************************************************************************/
+
+static pollevent_t local_pollstate(FAR struct local_conn_s *conn)
+{
+  pollevent_t eventset = 0;
+
+  if ((conn->lc_shutdown & SHUT_RD) != 0)
+    {
+      eventset |= POLLIN | POLLRDHUP;
+    }
+
+  if ((conn->lc_shutdown & SHUT_RDWR) == SHUT_RDWR)
+    {
+      eventset |= POLLHUP;
+    }
+
+  return eventset;
+}
+
+/****************************************************************************
+ * Name: local_fifo_poll_cb
+ *
+ * Description:
+ *   An event on a FIFO of the socket.  A FIFO reports POLLHUP when it has
+ *   no writer and POLLERR when it has no reader.  For the socket only its
+ *   shutdown state counts, which the peer sets before it closes a FIFO.
+ *
+ ****************************************************************************/
+
+static void local_fifo_poll_cb(FAR struct pollfd_s *fds)
+{
+  FAR struct local_pollfd_s *lp = fds->arg;
+  pollevent_t eventset = fds->revents & (POLLIN | POLLOUT);
+
+  /* The output FIFO has no reader: send() does not block, it fails */
+
+  if (fds == &lp->lp_out && (fds->revents & POLLERR) != 0)
+    {
+      eventset |= POLLOUT;
+    }
+
+  poll_notify(&lp->lp_fds, 1, eventset | local_pollstate(lp->lp_conn));
+}
+
+/****************************************************************************
+ * Name: local_fifo_pollsetup
+ *
+ * Description:
+ *   Set up the poll of one FIFO of the socket.
+ *
+ ****************************************************************************/
+
+static int local_fifo_pollsetup(FAR struct local_pollfd_s *lp,
+                                FAR struct file *filep,
+                                FAR struct pollfd_s *fds,
+                                pollevent_t events)
+{
+  fds->events = events;
+  fds->arg    = lp;
+  fds->cb     = local_fifo_poll_cb;
+
+  return file_poll(filep, fds, true);
+}
+
+/****************************************************************************
+ * Name: local_fifo_pollteardown
+ ****************************************************************************/
+
+static int local_fifo_pollteardown(FAR struct local_conn_s *conn,
+                                   FAR struct local_pollfd_s *lp)
+{
+  int ret = OK;
+  int ret2;
+
+  /* A FIFO that shutdown() closed has no poll left */
+
+  if (lp->lp_in.priv != NULL)
+    {
+      ret = file_poll(&conn->lc_infile, &lp->lp_in, false);
+    }
+
+  if (lp->lp_out.priv != NULL)
+    {
+      ret2 = file_poll(&conn->lc_outfile, &lp->lp_out, false);
+      if (ret2 < 0)
+        {
+          ret = ret2;
+        }
+    }
+
+  lp->lp_conn = NULL;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: local_stream_pollsetup
+ *
+ * Description:
+ *   Set up the poll of a connected stream socket: the poll of the FIFOs
+ *   for the events that the caller asked for, and the events of the
+ *   socket state now.
+ *
+ ****************************************************************************/
+
+static int local_stream_pollsetup(FAR struct local_conn_s *conn,
+                                  FAR struct pollfd_s *fds)
+{
+  FAR struct local_pollfd_s *lp;
+  pollevent_t eventset = 0;
+  int ret = OK;
+  int i;
+
+  nxmutex_lock(&conn->lc_polllock);
+
+  for (i = 0; i < CONFIG_DEV_PIPE_NPOLLWAITERS; i++)
+    {
+      if (conn->lc_pfds.stream[i].lp_conn == NULL)
+        {
+          break;
+        }
+    }
+
+  if (i >= CONFIG_DEV_PIPE_NPOLLWAITERS)
+    {
+      nxmutex_unlock(&conn->lc_polllock);
+      fds->priv = NULL;
+      return -EBUSY;
+    }
+
+  lp = &conn->lc_pfds.stream[i];
+  lp->lp_conn = conn;
+  lp->lp_fds  = fds;
+  memset(&lp->lp_in, 0, sizeof(lp->lp_in));
+  memset(&lp->lp_out, 0, sizeof(lp->lp_out));
+
+  /* A FIFO that shutdown() closed has nothing to wait for: the state gives
+   * POLLIN, and send() does not block (it fails).
+   */
+
+  if ((fds->events & (POLLIN | POLLRDHUP)) != 0 &&
+      conn->lc_infile.f_inode != NULL)
+    {
+      ret = local_fifo_pollsetup(lp, &conn->lc_infile, &lp->lp_in, POLLIN);
+    }
+
+  if ((fds->events & POLLOUT) != 0)
+    {
+      if (conn->lc_outfile.f_inode == NULL)
+        {
+          eventset |= POLLOUT;
+        }
+      else if (ret >= 0)
+        {
+          ret = local_fifo_pollsetup(lp, &conn->lc_outfile, &lp->lp_out,
+                                     POLLOUT);
+        }
+    }
+
+  if (ret < 0)
+    {
+      local_fifo_pollteardown(conn, lp);
+      fds->priv = NULL;
+    }
+  else
+    {
+      fds->priv = lp;
+      poll_notify(&fds, 1, eventset | local_pollstate(conn));
+    }
+
+  nxmutex_unlock(&conn->lc_polllock);
+  return ret;
+}
 #endif /* CONFIG_NET_LOCAL_STREAM */
 
 /****************************************************************************
@@ -137,6 +324,52 @@ void local_event_pollnotify(FAR struct local_conn_s *conn,
   nxmutex_unlock(&conn->lc_polllock);
 #endif
 }
+
+/****************************************************************************
+ * Name: local_shutdown_pollnotify
+ *
+ * Description:
+ *   shutdown() changed the state of a stream socket and is about to close
+ *   one of its FIFOs.  Stop the polls of that FIFO and tell all polls of
+ *   the socket the new state.
+ *
+ * Input Parameters:
+ *   conn  - The socket
+ *   filep - lc_infile or lc_outfile, which shutdown() closes next
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOCAL_STREAM
+void local_shutdown_pollnotify(FAR struct local_conn_s *conn,
+                               FAR struct file *filep)
+{
+  FAR struct local_pollfd_s *lp;
+  FAR struct pollfd_s *fds;
+  int i;
+
+  nxmutex_lock(&conn->lc_polllock);
+
+  for (i = 0; i < CONFIG_DEV_PIPE_NPOLLWAITERS; i++)
+    {
+      lp = &conn->lc_pfds.stream[i];
+      if (lp->lp_conn == NULL)
+        {
+          continue;
+        }
+
+      fds = filep == &conn->lc_infile ? &lp->lp_in : &lp->lp_out;
+      if (fds->priv != NULL)
+        {
+          file_poll(filep, fds, false);
+        }
+
+      poll_notify(&lp->lp_fds, 1, local_pollstate(conn) |
+                  (filep == &conn->lc_outfile ? POLLOUT : 0));
+    }
+
+  nxmutex_unlock(&conn->lc_polllock);
+}
+#endif
 
 /****************************************************************************
  * Name: local_pollsetup
@@ -191,11 +424,29 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
     {
       return local_event_pollsetup(conn, fds, true);
     }
+
+  if (conn->lc_proto == SOCK_STREAM)
+    {
+      if (conn->lc_state == LOCAL_STATE_CONNECTED)
+        {
+          return local_stream_pollsetup(conn, fds);
+        }
+
+      /* Not connected, or the connection was lost */
+
+      fds->priv = NULL;
+      if (conn->lc_state == LOCAL_STATE_DISCONNECTED ||
+          (fds->events & (POLLIN | POLLOUT)) != 0)
+        {
+          poll_notify(&fds, 1, POLLERR);
+        }
+
+      return OK;
+    }
 #endif
 
-  /* A connected stream socket or a socket of a socket pair (stream or
-   * datagram): POLLIN from the FIFO that it reads, POLLOUT from the FIFO
-   * that it writes.
+  /* A socket of a datagram socket pair: POLLIN from the FIFO that it
+   * reads, POLLOUT from the FIFO that it writes.
    */
 
   if (conn->lc_state == LOCAL_STATE_DISCONNECTED)
@@ -223,11 +474,11 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 
           nxmutex_lock(&conn->lc_polllock);
 
-          shadowfds = conn->lc_inout_fds;
+          shadowfds = conn->lc_pfds.pair;
           while (shadowfds->fd != 0)
             {
               shadowfds += 2;
-              if (shadowfds >= &conn->lc_inout_fds[2*LOCAL_NPOLLWAITERS])
+              if (shadowfds >= &conn->lc_pfds.pair[2*LOCAL_NPOLLWAITERS])
                 {
                   nxmutex_unlock(&conn->lc_polllock);
                   return -ENOMEM;
@@ -352,6 +603,21 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds)
   if (conn->lc_state == LOCAL_STATE_LISTENING)
     {
       return local_event_pollsetup(conn, fds, false);
+    }
+
+  if (conn->lc_proto == SOCK_STREAM)
+    {
+      /* Only a poll that the setup registered needs a teardown */
+
+      if (fds->priv != NULL)
+        {
+          nxmutex_lock(&conn->lc_polllock);
+          ret = local_fifo_pollteardown(conn, fds->priv);
+          fds->priv = NULL;
+          nxmutex_unlock(&conn->lc_polllock);
+        }
+
+      return ret;
     }
 #endif
 
