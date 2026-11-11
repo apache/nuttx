@@ -28,6 +28,8 @@ elseif(CONFIG_ARCH_CORTEXR5)
   list(APPEND PLATFORM_FLAGS -mcpu=cortex-r5)
 elseif(CONFIG_ARCH_CORTEXR7)
   list(APPEND PLATFORM_FLAGS -mcpu=cortex-r7)
+elseif(CONFIG_ARCH_CORTEXR8)
+  list(APPEND PLATFORM_FLAGS -mcpu=cortex-r8)
 endif()
 
 if(CONFIG_ARCH_FPU)
