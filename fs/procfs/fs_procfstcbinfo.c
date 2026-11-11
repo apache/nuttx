@@ -181,20 +181,6 @@ static int tcbinfo_close(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: tcbinfo_running_regs
- *
- * Description:
- *   A special version of running_regs() that is non-optimized.
- *
- ****************************************************************************/
-
-nooptimiziation_function
-FAR static void *tcbinfo_running_regs(void)
-{
-  return running_regs();
-}
-
-/****************************************************************************
  * Name: tcbinfo_read
  ****************************************************************************/
 
@@ -218,7 +204,7 @@ static ssize_t tcbinfo_read(FAR struct file *filep, FAR char *buffer,
       linesize = procfs_snprintf(attr->line, TCBINFO_LINELEN,
                                  "pointer %p size %zu current regs %p\n",
                                  &g_tcbinfo, sizeof(struct tcbinfo_s),
-                                 tcbinfo_running_regs());
+                                 running_regs());
 
       /* Save the linesize in case we are re-entered with f_pos > 0 */
 
