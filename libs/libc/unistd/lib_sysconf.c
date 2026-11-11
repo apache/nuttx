@@ -33,6 +33,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <sched.h>
+#include <signal.h>
 #include <errno.h>
 
 #ifdef CONFIG_MM_PGSIZE
@@ -87,12 +88,14 @@
  *     getpwnam_r() data buffers
  *     {MQ_OPEN_MAX}                       _SC_MQ_OPEN_MAX
  *     {MQ_PRIO_MAX}                       _SC_MQ_PRIO_MAX
+ *     Highest signal number + 1           _SC_NSIG
  *     {OPEN_MAX}                          _SC_OPEN_MAX
  *     _POSIX_ADVISORY_INFO                _SC_ADVISORY_INFO
  *     _POSIX_BARRIERS                     _SC_BARRIERS
  *     _POSIX_ASYNCHRONOUS_IO              _SC_ASYNCHRONOUS_IO
  *     _POSIX_CLOCK_SELECTION              _SC_CLOCK_SELECTION
  *     _POSIX_CPUTIME                      _SC_CPUTIME
+ *     _POSIX_DEVICE_CONTROL               _SC_DEVICE_CONTROL
  *     _POSIX_FSYNC                        _SC_FSYNC
  *     _POSIX_IPV6                         _SC_IPV6
  *     _POSIX_JOB_CONTROL                  _SC_JOB_CONTROL
@@ -124,6 +127,8 @@
  *     _POSIX_THREAD_PRIO_PROTECT          _SC_THREAD_PRIO_PROTECT
  *     _POSIX_THREAD_PRIORITY_SCHEDULING   _SC_THREAD_PRIORITY_SCHEDULING
  *     _POSIX_THREAD_PROCESS_SHARED        _SC_THREAD_PROCESS_SHARED
+ *     _POSIX_THREAD_ROBUST_PRIO_INHERIT   _SC_THREAD_ROBUST_PRIO_INHERIT
+ *     _POSIX_THREAD_ROBUST_PRIO_PROTECT   _SC_THREAD_ROBUST_PRIO_PROTECT
  *     _POSIX_THREAD_SAFE_FUNCTIONS        _SC_THREAD_SAFE_FUNCTIONS
  *     _POSIX_THREAD_SPORADIC_SERVER       _SC_THREAD_SPORADIC_SERVER
  *     _POSIX_THREADS                      _SC_THREADS
@@ -143,6 +148,14 @@
  *     _POSIX_V6_ILP32_OFFBIG              _SC_V6_ILP32_OFFBIG
  *     _POSIX_V6_LP64_OFF64                _SC_V6_LP64_OFF64
  *     _POSIX_V6_LPBIG_OFFBIG              _SC_V6_LPBIG_OFFBIG
+ *     _POSIX_V7_ILP32_OFF32               _SC_V7_ILP32_OFF32
+ *     _POSIX_V7_ILP32_OFFBIG              _SC_V7_ILP32_OFFBIG
+ *     _POSIX_V7_LP64_OFF64                _SC_V7_LP64_OFF64
+ *     _POSIX_V7_LPBIG_OFFBIG              _SC_V7_LPBIG_OFFBIG
+ *     _POSIX_V8_ILP32_OFF32               _SC_V8_ILP32_OFF32
+ *     _POSIX_V8_ILP32_OFFBIG              _SC_V8_ILP32_OFFBIG
+ *     _POSIX_V8_LP64_OFF64                _SC_V8_LP64_OFF64
+ *     _POSIX_V8_LPBIG_OFFBIG              _SC_V8_LPBIG_OFFBIG
  *     _POSIX2_C_BIND                      _SC_2_C_BIND
  *     _POSIX2_C_DEV                       _SC_2_C_DEV
  *     _POSIX2_CHAR_TERM                   _SC_2_CHAR_TERM
@@ -186,6 +199,7 @@
  *     _XOPEN_SHM                          _SC_XOPEN_SHM
  *     _XOPEN_STREAMS                      _SC_XOPEN_STREAMS
  *     _XOPEN_UNIX                         _SC_XOPEN_UNIX
+ *     _XOPEN_UUCP                         _SC_XOPEN_UUCP
  *     _XOPEN_VERSION                      _SC_XOPEN_VERSION
  *
  * Returned Value:
@@ -291,6 +305,9 @@ long sysconf(int name)
 
       case _SC_NGROUPS_MAX:
         return NGROUPS_MAX;
+
+      case _SC_NSIG:
+        return NSIG;
 
       case _SC_OPEN_MAX:
         {
@@ -507,19 +524,41 @@ long sysconf(int name)
         return -1;
 #endif
 
+      case _SC_THREAD_ROBUST_PRIO_INHERIT:
+#if defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_DISABLE_PTHREAD) && \
+    !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
+        return _POSIX_VERSION;
+#else
+        return -1;
+#endif
+
+      case _SC_THREAD_ROBUST_PRIO_PROTECT:
+#if defined(CONFIG_PRIORITY_PROTECT) && !defined(CONFIG_DISABLE_PTHREAD) && \
+    !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
+        return _POSIX_VERSION;
+#else
+        return -1;
+#endif
+
       /* The C-language compilation environment of this build */
 
       case _SC_V6_ILP32_OFF32:
+      case _SC_V7_ILP32_OFF32:
+      case _SC_V8_ILP32_OFF32:
       case _SC_XBS5_ILP32_OFF32:
         return sizeof(int) == 4 && sizeof(long) == 4 &&
                sizeof(FAR void *) == 4 && sizeof(off_t) == 4 ? 1 : -1;
 
       case _SC_V6_ILP32_OFFBIG:
+      case _SC_V7_ILP32_OFFBIG:
+      case _SC_V8_ILP32_OFFBIG:
       case _SC_XBS5_ILP32_OFFBIG:
         return sizeof(int) == 4 && sizeof(long) == 4 &&
                sizeof(FAR void *) == 4 && sizeof(off_t) == 8 ? 1 : -1;
 
       case _SC_V6_LP64_OFF64:
+      case _SC_V7_LP64_OFF64:
+      case _SC_V8_LP64_OFF64:
       case _SC_XBS5_LP64_OFF64:
         return sizeof(int) == 4 && sizeof(long) == 8 &&
                sizeof(FAR void *) == 8 && sizeof(off_t) == 8 ? 1 : -1;
@@ -544,6 +583,7 @@ long sysconf(int name)
       case _SC_2_UPE:
       case _SC_2_VERSION:
       case _SC_ADVISORY_INFO:
+      case _SC_DEVICE_CONTROL:
       case _SC_JOB_CONTROL:
       case _SC_MEMLOCK:
       case _SC_MEMLOCK_RANGE:
@@ -565,6 +605,8 @@ long sysconf(int name)
       case _SC_TRACE_USER_EVENT_MAX:
       case _SC_TYPED_MEMORY_OBJECTS:
       case _SC_V6_LPBIG_OFFBIG:
+      case _SC_V7_LPBIG_OFFBIG:
+      case _SC_V8_LPBIG_OFFBIG:
       case _SC_XBS5_LPBIG_OFFBIG:
       case _SC_XOPEN_CRYPT:
       case _SC_XOPEN_ENH_I18N:
@@ -573,6 +615,7 @@ long sysconf(int name)
       case _SC_XOPEN_REALTIME_THREADS:
       case _SC_XOPEN_SHM:
       case _SC_XOPEN_STREAMS:
+      case _SC_XOPEN_UUCP:
         return -1;
 
       default:
