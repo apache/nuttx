@@ -74,6 +74,8 @@ void nx_pthread_exit(FAR void *exit_value)
 
   DEBUGASSERT(tcb != NULL);
 
+  tcb->flags |= TCB_FLAG_EXIT_PROCESSING;
+
   /* Block any signal actions that would awaken us while were
    * are performing the JOIN handshake.
    */
@@ -112,8 +114,6 @@ void nx_pthread_exit(FAR void *exit_value)
    * list and trying to execute code that depends on this_task() crashes at
    * once, or does something very naughty.
    */
-
-  tcb->flags |= TCB_FLAG_EXIT_PROCESSING;
 
   nxtask_exithook(tcb, status);
 

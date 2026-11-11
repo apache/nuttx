@@ -237,6 +237,15 @@ static void nxsig_abnormal_termination(int signo)
   group_kill_children(rtcb);
 #endif
 
+  if ((rtcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      /* If we are already in the process of terminating, then we should
+       * not be here.  We should have already exited.
+       */
+
+      return;
+    }
+
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Check if the currently running task is actually a pthread */
 
