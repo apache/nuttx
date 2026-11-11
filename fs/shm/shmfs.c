@@ -313,7 +313,11 @@ static int shmfs_truncate(FAR struct file *filep, off_t length)
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int shmfs_unlink(FAR struct inode *inode)
 {
-  if (atomic_read(&inode->i_crefs) <= 1)
+  /* i_crefs >= 2 at this point: caller holds find ref + tree ref,
+   * both released after we return.  <= 2 means no open fd/mmap.
+   */
+
+  if (atomic_read(&inode->i_crefs) <= 2)
     {
       shmfs_free_object(inode->i_private);
       inode->i_private = NULL;
