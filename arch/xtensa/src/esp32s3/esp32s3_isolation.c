@@ -220,7 +220,7 @@ static int IRAM_ATTR pms_violation_isr(int cpuint, void *context, void *arg)
       info.si_errno           = 0;
       info.si_value.sival_ptr = NULL;
 
-      nxsig_tcbdispatch(tcb, &info, false, NULL);
+      nxsig_tcbdispatch(tcb, &info, false, NULL, false);
       return OK;
     }
 #endif

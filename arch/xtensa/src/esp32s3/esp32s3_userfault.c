@@ -110,7 +110,7 @@ uint32_t *esp32s3_userfault_abort(int exccause, uint32_t *regs)
   info.si_errno           = 0;
   info.si_value.sival_ptr = (FAR void *)regs[REG_EXCVADDR];
 
-  nxsig_tcbdispatch(tcb, &info, false, NULL);
+  nxsig_tcbdispatch(tcb, &info, false, NULL, false);
 
   regs          = tcb->xcp.regs;
   tcb->xcp.regs = NULL;

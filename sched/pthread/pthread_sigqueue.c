@@ -73,7 +73,7 @@ int pthread_sigqueue(pthread_t thread, int sig, const union sigval value)
 
   /* Send the signal */
 
-  err = nxsig_dispatch((pid_t)thread, &info, true, NULL);
+  err = nxsig_dispatch((pid_t)thread, &info, true, NULL, true);
   if (err < 0)
     {
       return -err;

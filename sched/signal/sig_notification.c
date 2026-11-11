@@ -205,7 +205,7 @@ int nxsig_notification_source(pid_t pid, FAR struct sigevent *event,
 
       /* Send the signal */
 
-      return nxsig_dispatch(pid, &info, thread, source);
+      return nxsig_dispatch(pid, &info, thread, source, false);
     }
 
 #ifdef CONFIG_SIG_EVTHREAD
