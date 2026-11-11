@@ -415,6 +415,7 @@ static int gplh_setdebounce(FAR struct gpio_dev_s *gpio,
   FAR struct gplh_dev_s *priv = (FAR struct gplh_dev_s *)gpio;
   FAR struct ioexpander_dev_s *ioe = priv->ioe;
   uint8_t pin = priv->pin;
+
   IOEXP_SETOPTION(ioe, pin, IOEXPANDER_OPTION_SETDEBOUNCE,
                  (FAR void *)duration);
   return OK;
@@ -434,6 +435,7 @@ static int gplh_setmask(FAR struct gpio_dev_s *gpio,
   FAR struct gplh_dev_s *priv = (FAR struct gplh_dev_s *)gpio;
   FAR struct ioexpander_dev_s *ioe = priv->ioe;
   uint8_t pin = priv->pin;
+
   IOEXP_SETOPTION(ioe, pin, IOEXPANDER_OPTION_SETMASK, (FAR void *)mask);
   return OK;
 }
