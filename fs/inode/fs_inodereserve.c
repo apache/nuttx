@@ -92,7 +92,7 @@ static FAR struct inode *inode_alloc(FAR const char *name, mode_t mode)
   inode   = fs_heap_zalloc(FSNODE_SIZE(namelen));
   if (inode)
     {
-      inode->i_ino   = g_ino++;
+      inode->i_ino   = ++g_ino;
       atomic_set(&inode->i_crefs, 1);
 #ifdef CONFIG_PSEUDOFS_ATTRIBUTES
       inode->i_mode  = mode;
