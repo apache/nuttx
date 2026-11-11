@@ -335,6 +335,20 @@
 #define _SC_NPROCESSORS_CONF             0x007d
 #define _SC_NPROCESSORS_ONLN             0x007e
 
+#define _SC_DEVICE_CONTROL               0x007f
+#define _SC_NSIG                         0x0080
+#define _SC_THREAD_ROBUST_PRIO_INHERIT   0x0081
+#define _SC_THREAD_ROBUST_PRIO_PROTECT   0x0082
+#define _SC_V7_ILP32_OFF32               0x0083
+#define _SC_V7_ILP32_OFFBIG              0x0084
+#define _SC_V7_LP64_OFF64                0x0085
+#define _SC_V7_LPBIG_OFFBIG              0x0086
+#define _SC_V8_ILP32_OFF32               0x0087
+#define _SC_V8_ILP32_OFFBIG              0x0088
+#define _SC_V8_LP64_OFF64                0x0089
+#define _SC_V8_LPBIG_OFFBIG              0x008a
+#define _SC_XOPEN_UUCP                   0x008b
+
 /* Constants used with POSIX confstr(). */
 
 #define _CS_PATH                           1
