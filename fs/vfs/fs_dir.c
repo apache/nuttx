@@ -481,6 +481,7 @@ static ssize_t dir_read(FAR struct file *filep, FAR char *buffer,
                         size_t buflen)
 {
   FAR struct fs_dirent_s *dir = filep->f_priv;
+  FAR struct dirent *entry = (FAR struct dirent *)buffer;
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR struct inode *inode = dir->fd_root;
 #endif
@@ -493,6 +494,10 @@ static ssize_t dir_read(FAR struct file *filep, FAR char *buffer,
       return -EINVAL;
     }
 
+  /* A file system that has no file serial numbers leaves d_ino alone */
+
+  entry->d_ino = 0;
+
   /* The way we handle the readdir depends on the type of inode
    * that we are dealing with.
    */
@@ -500,15 +505,14 @@ static ssize_t dir_read(FAR struct file *filep, FAR char *buffer,
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   if (INODE_IS_MOUNTPT(inode))
     {
-      ret = inode->u.i_mops->readdir(inode, dir,
-                                     (FAR struct dirent *)buffer);
+      ret = inode->u.i_mops->readdir(inode, dir, entry);
     }
   else
 #endif
     {
       /* The node is part of the root pseudo file system */
 
-      ret = read_pseudodir(dir, (FAR struct dirent *)buffer);
+      ret = read_pseudodir(dir, entry);
     }
 
   /* ret < 0 is an error. Special case: ret = -ENOENT is end of file */
@@ -521,6 +525,16 @@ static ssize_t dir_read(FAR struct file *filep, FAR char *buffer,
         }
 
       return ret;
+    }
+
+  /* Programs skip an entry with d_ino 0 as a deleted one.  Give it a hash
+   * of its path instead.
+   */
+
+  if (entry->d_ino == 0)
+    {
+      entry->d_ino = inode_hash(inode_hash(INODE_HASH_INIT, dir->fd_path),
+                                entry->d_name);
     }
 
   filep->f_pos++;
