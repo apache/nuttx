@@ -215,6 +215,8 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group;
   FAR sigactq_t *sigact;
+  FAR sigpendq_t *sigpend;
+  sq_queue_t sigpendq;
   _sa_handler_t handler;
   irqstate_t flags;
 
@@ -232,6 +234,10 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
     {
       return -EINVAL;
     }
+
+  /* Initialize a queue to collect pending signals that need to be released */
+
+  sq_init(&sigpendq);
 
   /* Verify the signal number */
 
@@ -367,6 +373,49 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
           /* And deallocate it */
 
           nxsig_release_action(sigact);
+        }
+
+      flags = spin_lock_irqsave(&group->tg_lock);
+
+      /* Traverse the pending signal queue
+       * to find signals with matching signo
+       */
+
+      sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
+      while (sigpend)
+        {
+          FAR sigpendq_t *next_sigpend = sigpend->flink;
+
+          if (sigpend->info.si_signo == signo)
+            {
+              /* Remove the pending signal from the group's pending queue */
+
+              sq_rem((FAR sq_entry_t *)sigpend, &group->tg_sigpendingq);
+
+              /* Add it to the temporary queue for later release
+               * We cannot call nxsig_release_pendingsignal() here: it
+               * enters a critical section and may call kmm_free(), and
+               * neither may happen while holding the group spinlock
+               * (the critical section would nest with tg_lock).
+               */
+
+              sq_addlast((FAR sq_entry_t *)sigpend, &sigpendq);
+            }
+
+          sigpend = next_sigpend;
+        }
+
+      spin_unlock_irqrestore(&group->tg_lock, flags);
+
+      /* Now release the collected pending signals outside the spinlock */
+
+      sigpend = (FAR sigpendq_t *)sigpendq.head;
+      while (sigpend)
+        {
+          FAR sigpendq_t *next_sigpend = sigpend->flink;
+
+          nxsig_release_pendingsignal(sigpend);
+          sigpend = next_sigpend;
         }
     }
 
