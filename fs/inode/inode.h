@@ -79,6 +79,8 @@
 #define INODE_GET_NLINK(i) \
   ((atomic_read(&(i)->i_crefs) >> INODE_NLINK_SHIFT) + 1)
 
+#define INODE_HASH_INIT  2166136261u /* Start of inode_hash() */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -517,6 +519,28 @@ int fs_checkopenperm(uid_t owner, gid_t group, mode_t mode, int oflags);
  ****************************************************************************/
 
 int foreach_inode(foreach_inode_t handler, FAR void *arg);
+
+/****************************************************************************
+ * Name: inode_hash
+ *
+ * Description:
+ *   Add a string to a 32-bit FNV-1a hash that starts at INODE_HASH_INIT.
+ *   A file system that has no file serial numbers makes them from the hash
+ *   of a path.  The result is never 0: programs skip a directory entry
+ *   with d_ino 0.
+ *
+ ****************************************************************************/
+
+static inline uint32_t inode_hash(uint32_t hash, FAR const char *str)
+{
+  while (*str != '\0')
+    {
+      hash ^= *str++ & 0xff;
+      hash *= 16777619u;
+    }
+
+  return hash != 0 ? hash : 1;
+}
 
 /****************************************************************************
  * Name: dir_allocate
