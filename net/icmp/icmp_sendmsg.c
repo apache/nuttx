@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdint.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
@@ -268,22 +269,44 @@ end_wait:
 ssize_t icmp_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                      int flags)
 {
-  FAR const void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
-  FAR const struct sockaddr *to = msg->msg_name;
-  socklen_t tolen = msg->msg_namelen;
+  FAR const struct sockaddr *to;
   FAR const struct sockaddr_in *inaddr;
   FAR struct net_driver_s *dev;
   FAR struct icmp_conn_s *conn;
   FAR struct icmp_hdr_s *icmp;
+  FAR const void *buf;
+  socklen_t tolen;
+  size_t len;
   struct icmp_sendto_s state;
   ssize_t ret;
+
+  /* POSIX: fail with EMSGSIZE if msg_iovlen <= 0 or > IOV_MAX */
+
+  if (msg->msg_iovlen == 0 || msg->msg_iovlen > IOV_MAX)
+    {
+      return -EMSGSIZE;
+    }
 
   /* Validity check, only single iov supported */
 
   if (msg->msg_iovlen != 1)
     {
       return -ENOTSUP;
+    }
+
+  if (msg->msg_iov == NULL)
+    {
+      return -EINVAL;
+    }
+
+  buf   = msg->msg_iov[0].iov_base;
+  len   = msg->msg_iov[0].iov_len;
+  to    = msg->msg_name;
+  tolen = msg->msg_namelen;
+
+  if (len > 0 && buf == NULL)
+    {
+      return -EINVAL;
     }
 
   if (to == NULL)
@@ -298,8 +321,6 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
     }
 
   /* Some sanity checks */
-
-  DEBUGASSERT(buf != NULL && to != NULL);
 
   if (len < ICMP_HDRLEN || tolen < sizeof(struct sockaddr_in))
     {
@@ -399,7 +420,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
           conn->id = icmp->id;
         }
 
-        conn->dev = dev;
+      conn->dev = dev;
 
       /* Notify the device driver of the availability of TX data */
 

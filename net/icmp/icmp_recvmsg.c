@@ -29,6 +29,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/semaphore.h>
@@ -54,9 +55,10 @@ struct icmp_recvfrom_s
                                          * response */
   in_addr_t recv_from;                  /* The peer we received the request
                                          * from */
+  FAR struct msghdr *recv_msg;          /* Points to message header */
   FAR uint8_t *recv_buf;                /* Location to return the response */
-  uint16_t recv_buflen;                 /* Size of the response */
-  int16_t recv_result;                  /* >=0: receive size on success;
+  size_t recv_buflen;                   /* Size of the response */
+  ssize_t recv_result;                  /* >=0: receive size on success;
                                          * <0: negated errno on fail */
 };
 
@@ -134,15 +136,21 @@ static uint32_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
           if (recvsize > pstate->recv_buflen)
             {
               recvsize = pstate->recv_buflen;
+              if (pstate->recv_msg != NULL)
+                {
+                  pstate->recv_msg->msg_flags |= MSG_TRUNC;
+                }
             }
 
           /* Copy the ICMP ECHO reply to the user provided buffer */
 
-          memcpy(pstate->recv_buf, IPBUF(offset), recvsize);
+          if (recvsize > 0)
+            {
+              iob_copyout(pstate->recv_buf, dev->d_iob, recvsize, offset);
+            }
 
           /* Return the size of the returned data */
 
-          DEBUGASSERT(recvsize <= INT16_MAX);
           pstate->recv_result = recvsize;
 
           /* Return the IPv4 address of the sender from the IPv4 header */
@@ -199,7 +207,8 @@ end_wait:
 static inline ssize_t icmp_readahead(FAR struct icmp_conn_s *conn,
                                      FAR void *buf, size_t buflen,
                                      FAR struct sockaddr_in *from,
-                                     FAR socklen_t *fromlen, bool raw)
+                                     FAR socklen_t *fromlen, bool raw,
+                                     FAR struct msghdr *msg)
 {
   FAR struct iob_s *iob;
   ssize_t ret = -ENODATA;
@@ -231,6 +240,14 @@ static inline ssize_t icmp_readahead(FAR struct icmp_conn_s *conn,
           /* Skip L3 header when not SOCK_RAW */
 
           offset = (ipv4->vhl & IPv4_HLMASK) << 2;
+        }
+
+      if ((size_t)(iob->io_pktlen - offset) > buflen)
+        {
+          if (msg != NULL)
+            {
+              msg->msg_flags |= MSG_TRUNC;
+            }
         }
 
       ret = (ssize_t)iob_copyout(buf, iob, buflen, offset);
@@ -285,26 +302,39 @@ static inline ssize_t icmp_readahead(FAR struct icmp_conn_s *conn,
 ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                      int flags)
 {
-  FAR void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
   FAR struct sockaddr *from = msg->msg_name;
   FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct sockaddr_in *inaddr;
   FAR struct icmp_conn_s *conn;
   FAR struct net_driver_s *dev = NULL;
+  FAR void *buf;
+  size_t len;
   struct icmp_recvfrom_s state;
   ssize_t ret;
 
-  /* Some sanity checks */
+  /* POSIX: fail with EMSGSIZE if msg_iovlen <= 0 or > IOV_MAX */
+
+  if (msg->msg_iovlen == 0 || msg->msg_iovlen > IOV_MAX)
+    {
+      return -EMSGSIZE;
+    }
+
+  /* Validity check, only single iov supported */
 
   if (msg->msg_iovlen != 1)
     {
       return -ENOTSUP;
     }
 
-  DEBUGASSERT(buf != NULL);
+  if (msg->msg_iov == NULL)
+    {
+      return -EINVAL;
+    }
 
-  if (len < ICMP_HDRLEN)
+  buf = msg->msg_iov[0].iov_base;
+  len = msg->msg_iov[0].iov_len;
+
+  if (len > 0 && buf == NULL)
     {
       return -EINVAL;
     }
@@ -323,6 +353,8 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   conn = psock->s_conn;
   dev = conn->dev;
+
+  msg->msg_flags = 0;
 
   conn_dev_lock(&conn->sconn, dev);
   if (psock->s_type != SOCK_RAW)
@@ -343,7 +375,7 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   if (!IOB_QEMPTY(&conn->readahead))
     {
       ret = icmp_readahead(conn, buf, len, (FAR struct sockaddr_in *)from,
-                           fromlen, psock->s_type == SOCK_RAW);
+                           fromlen, psock->s_type == SOCK_RAW, msg);
     }
   else if (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
            (flags & MSG_DONTWAIT) != 0)
@@ -361,6 +393,7 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
       state.recv_sock   = psock;    /* The IPPROTO_ICMP socket instance */
       state.recv_result = -ENOMEM;  /* Assume allocation failure */
+      state.recv_msg    = msg;      /* Points to message header */
       state.recv_buf    = buf;      /* Location to return the response */
       state.recv_buflen = len;      /* Size of the response */
 
@@ -397,7 +430,7 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
       if (state.recv_result < 0)
         {
-          nerr("ERROR: Return error=%d\n", state.recv_result);
+          nerr("ERROR: Return error=%d\n", (int)state.recv_result);
           ret = state.recv_result;
           goto errout;
         }
