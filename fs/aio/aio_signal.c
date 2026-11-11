@@ -60,7 +60,10 @@
  *   negated errno value is returned.
  *
  * Assumptions:
- *   This function runs only in the context of the worker thread.
+ *   This function runs only in the context of the worker thread.  The
+ *   aiocbp is owned by the submitter and may become invalid once the
+ *   submitter is woken, so lio_link must be unlinked before any
+ *   notification that can wake it.
  *
  ****************************************************************************/
 
@@ -69,18 +72,42 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
   union sigval value;
   int status;
   int ret;
+  bool last = false; /* This completion emptied the lio_listio batch */
 
   DEBUGASSERT(aiocbp);
 
   ret = OK; /* Assume success */
 
+  /* Unlink from the lio_listio batch before anything that can wake the
+   * submitter: aiocbp usually lives on the submitter's stack, and once
+   * woken the submitter may return and invalidate it before we get a
+   * chance to touch lio_link.  Even the in-list check needs the lock:
+   * completing a neighboring batch entry updates lio_link.prev under it.
+   * The batch-completion notification stays at its original position
+   * (after the poll signal) so the per-request -> poll -> batch
+   * notification order is unchanged.
+   */
+
+  aio_lock();
+  if (list_in_list(&aiocbp->lio_link))
+    {
+      last = list_is_empty(&aiocbp->lio_link);
+      list_delete(&aiocbp->lio_link);
+    }
+
+  aio_unlock();
+
   /* Signal the client */
 
-  ret = nxsig_notification(pid, &aiocbp->aio_sigevent,
-                           SI_ASYNCIO, &aiocbp->aio_sigwork);
-  if (ret < 0)
+  status = nxsig_notification(pid, &aiocbp->aio_sigevent,
+                              SI_ASYNCIO, &aiocbp->aio_sigwork);
+  if (status < 0)
     {
-      ferr("ERROR: nxsig_notification failed: %d\n", ret);
+      ferr("ERROR: nxsig_notification failed: %d\n", status);
+      if (ret >= OK)
+        {
+          ret = status;
+        }
     }
 
   /* Send the poll signal in any event in case the caller is waiting
@@ -98,28 +125,20 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
         }
     }
 
-  if (list_in_list(&aiocbp->lio_link))
+  /* This I/O was queued by lio_listio and emptied the batch: signal the
+   * client that all I/O of the batch has completed.
+   */
+
+  if (last)
     {
-      /* This I/O is queued by lio_listio, remove this I/O from the list,
-       * signal the client when all I/O is completed
-       */
-
-      aio_lock();
-      status = list_is_empty(&aiocbp->lio_link);
-      list_delete(&aiocbp->lio_link);
-      aio_unlock();
-
-      if (status)
+      status = nxsig_notification(pid, &aiocbp->lio_sigevent, SI_ASYNCIO,
+                                  &aiocbp->lio_sigwork);
+      if (status < 0)
         {
-          status = nxsig_notification(pid, &aiocbp->lio_sigevent, SI_ASYNCIO,
-                                      &aiocbp->lio_sigwork);
-          if (status < 0)
+          ferr("ERROR: nxsig_notification failed: %d\n", status);
+          if (ret >= OK)
             {
-              ferr("ERROR: nxsig_notification failed: %d\n", status);
-              if (ret >= OK)
-                {
-                  ret = status;
-                }
+              ret = status;
             }
         }
     }
