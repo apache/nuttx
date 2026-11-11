@@ -171,18 +171,18 @@ static double sinpi(double x)
   x *= pi;
   switch (n)
     {
-    default:                   /* case 4 */
-    case 0:
-      return __sin(x, 0, 0);
+      default:                 /* case 4 */
+      case 0:
+        return __sin(x, 0, 0);
 
-    case 1:
-      return __cos(x, 0);
+      case 1:
+        return __cos(x, 0);
 
-    case 2:
-      return __sin(-x, 0, 0);
+      case 2:
+        return __sin(-x, 0, 0);
 
-    case 3:
-      return -__cos(x, 0);
+      case 3:
+        return -__cos(x, 0);
     }
 }
 
