@@ -207,15 +207,15 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                     int flags)
 {
-  FAR const void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
-  FAR struct sockaddr_ll *addr = msg->msg_name;
+  FAR struct sockaddr_ll *addr;
   FAR struct net_driver_s *dev;
   FAR struct pkt_conn_s *conn;
+  FAR const void *buf;
   FAR struct iob_s *iob;
   bool nonblock;
+  size_t len;
   int offset = 0;
-  int ret = OK;
+  int ret;
 
   /* Validity check */
 
@@ -225,7 +225,11 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       return ret;
     }
 
-  if (len <= 0)
+  buf  = msg->msg_iov[0].iov_base;
+  len  = msg->msg_iov[0].iov_len;
+  addr = msg->msg_name;
+
+  if (len == 0)
     {
       return 0;
     }
