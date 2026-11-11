@@ -554,7 +554,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
   if (!oldpath || *oldpath == '\0' ||
       !newpath || *newpath == '\0')
     {
-      ret = -EINVAL;
+      ret = -ENOENT;
       goto errout;
     }
 
