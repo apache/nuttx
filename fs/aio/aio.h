@@ -64,7 +64,11 @@ struct aio_container_s
   FAR struct aiocb *aioc_aiocbp;   /* The contained AIO control block */
   FAR struct file *aioc_filep;     /* File structure to use with the I/O */
   struct work_s aioc_work;         /* Used to defer I/O to the work thread */
-  pid_t aioc_pid;                  /* ID of the waiting task */
+  pid_t aioc_pid;                  /* ID of the waiting task.  Set to
+                                    * INVALID_PROCESS_ID once aio_cleanup()
+                                    * has taken ownership of the container;
+                                    * aioc_decant() then leaves it alone.
+                                    */
 #ifdef CONFIG_PRIORITY_INHERITANCE
   uint8_t aioc_prio;               /* Priority of the waiting task */
 #endif

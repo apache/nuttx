@@ -32,6 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
 
 #include "aio/aio.h"
@@ -227,6 +228,84 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 
   aio_unlock();
   return ret;
+}
+
+/****************************************************************************
+ * Name: aio_cleanup
+ *
+ * Description:
+ *   Cancel all pending AIO operations submitted by task 'pid'.  Called
+ *   from the task exit path so a dying task does not leave pending
+ *   containers referencing its soon-to-be-freed aiocb (which usually
+ *   resides on the task's stack).  Queued operations are cancelled before
+ *   they can run; an operation already running on the worker thread is
+ *   waited for, because the worker dereferences the user aiocb (aio_result,
+ *   aio_signal()) until its callback returns.  Ownership of each container
+ *   is taken by setting aioc_pid to INVALID_PROCESS_ID (so aioc_decant()
+ *   will not free it) before the synchronized cancel; the container is
+ *   released here once the worker thread is done.  No completion signal is
+ *   delivered: the owning task is gone and signalling it would
+ *   dereference the very aiocb this cleanup protects.
+ *
+ * Input Parameters:
+ *   pid - ID of the exiting task
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void aio_cleanup(pid_t pid)
+{
+  FAR struct aio_container_s *aioc;
+  FAR struct aio_container_s *next;
+  dq_queue_t queue;
+
+  dq_init(&queue);
+
+  /* Take ownership of every container submitted by the exiting task: mark
+   * it so aioc_decant() will not touch it, detach it from the pending list
+   * and remember it for the synchronized cancel below.  The container must
+   * stay valid while the worker thread may still be running the operation.
+   */
+
+  aio_lock();
+
+  for (aioc = (FAR struct aio_container_s *)g_aio_pending.head;
+       aioc;
+       aioc = next)
+    {
+      next = (FAR struct aio_container_s *)aioc->aioc_link.flink;
+
+      if (aioc->aioc_pid != pid)
+        {
+          continue;
+        }
+
+      aioc->aioc_pid = INVALID_PROCESS_ID;
+      dq_rem(&aioc->aioc_link, &g_aio_pending);
+      dq_addlast(&aioc->aioc_link, &queue);
+    }
+
+  aio_unlock();
+
+  /* Cancel the operations that are still queued and wait for any operation
+   * already running on the worker thread.  This must run outside of the aio
+   * critical section: the worker takes aio_lock to release its container,
+   * so waiting here with the lock held would deadlock.  Once
+   * work_cancel_sync() returns, the worker is done touching the user aiocb
+   * and the container, so the task stack may be freed safely.  The
+   * container is released manually: aioc_decant() would refuse it because
+   * of the ownership marker.
+   */
+
+  while ((aioc = (FAR struct aio_container_s *)
+          dq_remfirst(&queue)) != NULL)
+    {
+      work_cancel_sync(LPWORK, &aioc->aioc_work);
+      file_put(aioc->aioc_filep);
+      aioc_free(aioc);
+    }
 }
 
 #endif /* CONFIG_FS_AIO */
