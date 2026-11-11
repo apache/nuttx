@@ -46,6 +46,7 @@ are supported:
  * :c:macro:`GPIOC_SETPINTYPE`
  * :c:macro:`GPIOC_SETDEBOUNCE`
  * :c:macro:`GPIOC_IRQ_SETMASK`
+ * :c:macro:`GPIOC_TOGGLE`
 
 
 .. c:macro:: GPIOC_WRITE
@@ -158,6 +159,21 @@ Typical use case:
 
   int irq_mask = /* platform-specific mask value */;
   int ret = ioctl(fd, GPIOC_IRQ_SETMASK, (unsigned long)(uintptr_t)&irq_mask);
+
+.. c:macro:: GPIOC_TOGGLE
+
+The ``GPIOC_TOGGLE`` command inverts the level of an output GPIO and returns
+the new level. The argument is a pointer to a bool value to receive the
+result. A lower half with a native toggle register can provide
+``go_toggle`` to do this atomically; otherwise the driver reads the pin and
+writes back the inverted value. Pins registered through ``gpio_lower_half``
+forward the request to the I/O expander and return ``-ENOTSUP`` if it does
+not implement ``ioe_toggle``. Typical use case is:
+
+.. code-block:: c
+
+  bool value;
+  int ret = ioctl(fd, GPIOC_TOGGLE, (unsigned long)(uintptr_t)&value);
 
 Application Example
 ~~~~~~~~~~~~~~~~~~~
