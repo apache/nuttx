@@ -1,0 +1,60 @@
+############################################################################
+# arch/arm/src/common/renesas/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+############################################################################
+# HAL Renesas for all Renesas Arm chips
+############################################################################
+
+HAL_RENESAS_REPO = hal_renesas
+
+ifndef HAL_RENESAS_URL
+	HAL_RENESAS_URL = https://github.com/renesas/hal_renesas.git
+endif
+
+ifndef HAL_RENESAS_VERSION
+	HAL_RENESAS_VERSION = cf48c5d6cdf34e1aa253626c3f7bcbdfcfe796f2
+endif
+
+HAL_RENESAS_DIR = common$(DELIM)renesas$(DELIM)$(HAL_RENESAS_REPO)
+
+# Only fetch the paths needed by NuttX and the RZ/V family
+
+HAL_RENESAS_SPARSE = /nuttx /drivers/rz/fsp/inc /drivers/rz/fsp/src/rzv
+HAL_RENESAS_SPARSE += '!/drivers/rz/fsp/inc/instances/rz[agnt]'
+HAL_RENESAS_SPARSE += '!/nuttx/rz/portable/rz[agnt]'
+HAL_RENESAS_SPARSE += '!/nuttx/rz/rz_cfg/fsp_cfg/rz[agnt]'
+HAL_RENESAS_SPARSE += '!/nuttx/rz/rz_cfg/fsp_cfg/bsp/rz[agnt]*'
+
+$(HAL_RENESAS_DIR):
+	$(Q) echo "Cloning HAL Renesas"
+	$(Q) git clone --quiet --no-checkout $(HAL_RENESAS_URL) $(HAL_RENESAS_DIR)
+	$(Q) git -C $(HAL_RENESAS_DIR) sparse-checkout set --no-cone $(HAL_RENESAS_SPARSE)
+	$(Q) git -C $(HAL_RENESAS_DIR) checkout --quiet $(HAL_RENESAS_VERSION)
+
+hal_renesas_check:
+	$(Q) $(call CHECK_COMMITSHA,$(HAL_RENESAS_DIR),$(HAL_RENESAS_VERSION))
+
+context:: hal_renesas_check
+context:: $(HAL_RENESAS_DIR)
+
+distclean::
+	$(call DELDIR, $(HAL_RENESAS_DIR))

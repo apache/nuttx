@@ -1,0 +1,219 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "RZ/V2H Configuration Options"
+
+choice
+	prompt "RZ/V2H Core Configuration"
+	default ARCH_CHIP_R9A09G057
+
+config ARCH_CHIP_R9A09G057
+	bool "RZ/V2H Processor (cortex-r8)"
+	select ARCH_CORTEXR8
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_THUMB
+	select ARCH_HAVE_DPFPU
+	select ARMV7R_HAVE_GICv2
+	select ARCH_HAVE_MPU
+	select ARCH_IRQPRIO
+	select RZV2H_HAVE_SCI_B_UART0
+	select RZV2H_HAVE_SCI_B_UART1
+	select RZV2H_HAVE_SCI_B_UART2
+	select RZV2H_HAVE_SCI_B_UART3
+	select RZV2H_HAVE_SCI_B_UART4
+	select RZV2H_HAVE_SCI_B_UART5
+	select RZV2H_HAVE_SCI_B_UART6
+	select RZV2H_HAVE_SCI_B_UART7
+	select RZV2H_HAVE_SCI_B_UART8
+	select RZV2H_HAVE_SCI_B_UART9
+	---help---
+		RZ/V2H family of Renesas MPUs cortex-r8
+
+endchoice # RZ/V2H Chip Selection
+
+config RZV2H_CORTEXR8_0
+	bool "Build for CR8_0 core"
+	---help---
+		Build for the CR8_0 core of the RZV2H.
+		This is the default core for the EVK-RZV2H board.
+
+config RZV2H_GPIO
+	bool "GPIO support"
+	default y
+	depends on DEV_GPIO
+	---help---
+		Enable support for GPIO pins.
+
+# Peripheral
+config RZV2H_SCI_B
+	bool
+	default n
+
+config RZV2H_HAVE_SCI_B_UART0
+	bool
+	default n
+
+config RZV2H_HAVE_SCI_B_UART1
+	bool
+	default n
+
+config RZV2H_HAVE_SCI_B_UART2
+	bool
+	default n
+
+config RZV2H_HAVE_SCI_B_UART3
+	bool
+	default n
+
+config RZV2H_HAVE_SCI_B_UART4
+	bool
+	default n
+
+config RZV2H_HAVE_SCI_B_UART5
+	bool
+	default n
+
+config RZV2H_HAVE_SCI_B_UART6
+	bool
+	default n
+
+config RZV2H_HAVE_SCI_B_UART7
+	bool
+	default n
+
+config RZV2H_HAVE_SCI_B_UART8
+	bool
+	default n
+
+config RZV2H_HAVE_SCI_B_UART9
+	bool
+	default n
+
+menuconfig RZV2H_UART_SCI
+	bool "SCI-B UART support"
+	default y
+	select RZV2H_SCI_B
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Enable the RZ/V2H SCI-B UART driver. Select this option to
+		configure the individual SCI-B UART channels.
+
+if RZV2H_UART_SCI
+
+config RZV2H_SCI_B_IRQ_PRIORITY
+	int "SCI-B interrupt priority"
+	range 0 15
+	default 12
+	---help---
+		Set the GIC interrupt priority used by all enabled SCI-B UART
+		channels. Zero is the highest priority and 15 is the lowest.
+
+menu "SCI-B UART optional features"
+
+config RZV2H_SCI_B_FLOW_CONTROL
+	bool "Flow control support (not implemented)"
+	default n
+	---help---
+		Configuration support for SCI-B CTS/RTS hardware flow
+		control.
+
+config RZV2H_SCI_B_DMA
+	bool "DMA transfer support (not implemented)"
+	default n
+	---help---
+		Configuration support for SCI-B DMA transfers.
+
+config RZV2H_SCI_B_FIFO
+	bool "FIFO support (not implemented)"
+	default n
+	---help---
+		Configuration support for SCI-B hardware FIFOs.
+
+endmenu # "SCI-B UART optional features"
+
+config RZV2H_SCI_B_UART0
+	bool "SCI_B UART 0"
+	default n
+	depends on RZV2H_HAVE_SCI_B_UART0
+	select SCI0_SERIALDRIVER
+
+config RZV2H_SCI_B_UART1
+	bool "SCI_B UART 1"
+	default n
+	depends on RZV2H_HAVE_SCI_B_UART1
+	select SCI1_SERIALDRIVER
+
+config RZV2H_SCI_B_UART2
+	bool "SCI_B UART 2"
+	default n
+	depends on RZV2H_HAVE_SCI_B_UART2
+	select SCI2_SERIALDRIVER
+
+config RZV2H_SCI_B_UART3
+	bool "SCI_B UART 3"
+	default n
+	depends on RZV2H_HAVE_SCI_B_UART3
+	select SCI3_SERIALDRIVER
+
+config RZV2H_SCI_B_UART4
+	bool "SCI_B UART 4"
+	default n
+	depends on RZV2H_HAVE_SCI_B_UART4
+	select SCI4_SERIALDRIVER
+
+config RZV2H_SCI_B_UART5
+	bool "SCI_B UART 5"
+	default n
+	depends on RZV2H_HAVE_SCI_B_UART5
+	select SCI5_SERIALDRIVER
+
+config RZV2H_SCI_B_UART6
+	bool "SCI_B UART 6"
+	default n
+	depends on RZV2H_HAVE_SCI_B_UART6
+	select SCI6_SERIALDRIVER
+
+config RZV2H_SCI_B_UART7
+	bool "SCI_B UART 7"
+	default n
+	depends on RZV2H_HAVE_SCI_B_UART7
+	select SCI7_SERIALDRIVER
+
+config RZV2H_SCI_B_UART8
+	bool "SCI_B UART 8"
+	default n
+	depends on RZV2H_HAVE_SCI_B_UART8
+	select SCI8_SERIALDRIVER
+
+config RZV2H_SCI_B_UART9
+	bool "SCI_B UART 9"
+	default n
+	depends on RZV2H_HAVE_SCI_B_UART9
+	select SCI9_SERIALDRIVER
+
+endif # RZV2H_UART_SCI
+
+config RZV2H_UBOOT_IMAGE
+	bool "Generate split CR8_0 U-Boot images"
+	default n
+	depends on RZV2H_CORTEXR8_0
+	---help---
+		Link the low-vector table at its ITCM run address, with its load copy
+		at the start of RCPU SRAM, and generate the raw image nuttx_uboot.bin
+		(the table's load copy, code and data) after linking.  U-Boot loads
+		it at CONFIG_RAM_START.  CR8_0 takes its reset vector from ITCM, so
+		U-Boot also writes a two-word trampoline into ITCM through its AXI
+		alias before releasing CR8_0 from reset:
+
+		  mw.l 0x12040000 0xe51ff004   (ldr pc, [pc, #-4])
+		  mw.l 0x12040004 0x08180000   (start of nuttx_uboot.bin)
+
+		NuttX replaces the trampoline with the full vector table at boot.
+
+		Leave this disabled for debugger loading.  In that layout the vector
+		table is linked into SRAM and copied to ITCM by the NuttX startup
+		code after the debugger enters the firmware at __start.
+
+endmenu # "RZ/V2H Configuration Options"
