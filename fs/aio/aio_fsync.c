@@ -194,12 +194,12 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
   FAR struct aio_container_s *aioc;
   int ret;
 
-  /* SUSv2 / POSIX Issue 5 specified that a NULL aiocbp produces no
-   * status through aiocbp and no completion signal. POSIX Issue 6 removed
-   * that special case, so reject NULL defensively.
+  /* POSIX accepts both O_SYNC and O_DSYNC; O_SYNC carries an extra bit so
+   * it is not equal to O_DSYNC and must be tested separately.  NULL aiocbp
+   * is rejected per POSIX Issue 6 (Issue 5 treated it as a no-op).
    */
 
-  if (op != O_SYNC || aiocbp == NULL)
+  if ((op != O_SYNC && op != O_DSYNC) || aiocbp == NULL)
     {
       set_errno(EINVAL);
       return ERROR;
