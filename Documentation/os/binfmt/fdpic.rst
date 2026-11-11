@@ -348,10 +348,11 @@ would jump into RAM data, so an entry point that accepts a callback from
 a module has to resolve the descriptor first.  ``CONFIG_FDPIC`` makes
 these do so:
 
-``qsort``, ``bsearch``, ``pthread_create``, ``signal``/``sigaction``,
-``task_create``/``task_create_with_stack``, ``task_spawn``,
-``pthread_once``, ``scandir``, and ``mq_notify``/``timer_create`` with
-``SIGEV_THREAD``.
+``qsort``, ``bsearch``, ``lfind``/``lsearch``, ``tsearch``, ``tfind``,
+``tdelete``, ``twalk``, ``tdestroy``, ``pthread_create``,
+``signal``/``sigaction``, ``task_create``/``task_create_with_stack``,
+``task_spawn``, ``pthread_once``, ``scandir``, and
+``mq_notify``/``timer_create`` with ``SIGEV_THREAD``.
 
 Whether a pointer is a descriptor is decided by reading the PIC base
 register: a module's task runs with its data base there, a firmware task
