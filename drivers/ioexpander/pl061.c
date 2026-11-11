@@ -177,7 +177,8 @@ static int pl061_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
             PL061_MODREG(priv, 1 << pin, 1 << pin, PL061_GPIOIE);
             break;
 
-          case IOEXPANDER_VAL_EDGE:  /* Interrupt on edge */
+          case IOEXPANDER_VAL_EDGE:    /* Interrupt on both edges */
+          case IOEXPANDER_VAL_BOTH:
             PL061_MODREG(priv, 0, 1 << pin, PL061_GPIOIS);
             PL061_MODREG(priv, 1 << pin, 1 << pin, PL061_GPIOIBE);
             PL061_MODREG(priv, 1 << pin, 1 << pin, PL061_GPIOIE);
@@ -316,6 +317,11 @@ static int pl061_interrupt(int irq, void *context, void *arg)
 FAR struct ioexpander_dev_s *pl061_ioe_initialize(uintptr_t base, int irq)
 {
   FAR struct pl061_dev_s *priv = kmm_zalloc(sizeof(struct pl061_dev_s));
+
+  if (priv == NULL)
+    {
+      return NULL;
+    }
 
   priv->dev.ops = &g_pl061_ops;
   priv->base = base;
