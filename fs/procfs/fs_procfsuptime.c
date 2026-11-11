@@ -213,7 +213,7 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
     {
       /* System time */
 
-      ticktime = clock_systime_ticks() - INITIAL_SYSTEM_TIMER_TICKS;
+      ticktime = clock_systime_ticks();
 
       /* Convert the system up time to seconds + hundredths of seconds */
 

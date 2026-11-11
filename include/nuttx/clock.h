@@ -250,18 +250,6 @@
 
 #define NSEC2MSEC(nsec)       div_const(nsec, NSEC_PER_MSEC)
 
-#if defined(CONFIG_DEBUG_SCHED) && !defined(CONFIG_SCHED_TICKLESS)
-/* Initial system timer ticks value close to maximum 32-bit value, to test
- * 64-bit system-timer after going over 32-bit value. This is to make errors
- * of casting 64-bit system-timer to 32-bit variables more visible.
- */
-
-#  define INITIAL_SYSTEM_TIMER_TICKS \
-    (UINT32_MAX - (TICK_PER_SEC * 5))
-#else
-#  define INITIAL_SYSTEM_TIMER_TICKS 0
-#endif
-
 /* If Gregorian time is not supported, then neither is Julian */
 
 #ifndef CONFIG_GREGORIAN_TIME
