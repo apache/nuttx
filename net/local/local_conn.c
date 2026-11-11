@@ -341,6 +341,15 @@ void local_free(FAR struct local_conn_s *conn)
 
   if (conn->lc_peer)
     {
+      /* A stream peer gets no more data and cannot send.  Set this before
+       * the FIFOs close: their events wake up the polls of the peer.
+       */
+
+      if (conn->lc_proto == SOCK_STREAM)
+        {
+          conn->lc_peer->lc_shutdown = SHUT_RDWR;
+        }
+
       conn->lc_peer->lc_peer = NULL;
       conn->lc_peer = NULL;
     }
