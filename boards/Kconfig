@@ -6128,12 +6128,6 @@ config BOARDCTL_USBDEVCTRL
 	---help---
 		Enables support for the BOARDIOC_USBDEV_CONTROL boardctl() command.
 
-config BOARDCTL_SPINLOCK
-	bool "spinlock specific operation"
-	default n
-	---help---
-		Enables support for the BOARDIOC_SPINLOCK boardctl() command.
-
 config BOARDCTL_IRQ_AFFINITY
 	bool "Set an IRQ affinity to CPUs by software"
 	default n

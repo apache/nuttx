@@ -44,10 +44,6 @@
 #  include <nuttx/nx/nxterm.h>
 #endif
 
-#ifdef CONFIG_BOARDCTL_SPINLOCK
-#  include <nuttx/spinlock.h>
-#endif
-
 #ifdef CONFIG_BOARDCTL_MACADDR
 #  include <net/if.h>
 #  include <nuttx/net/netdev.h>
@@ -149,13 +145,6 @@
  * CONFIGURATION: CONFIG_NXTERM
  * DEPENDENCIES:  Base NX terminal logic provides nxterm_ioctl_tap()
  *
- * CMD:           BOARDIOC_SPINLOCK
- * DESCRIPTION:   spinlock specific operation
- * ARG:           A pointer to a write-able boardioc_spinlock_s
- *
- * CONFIGURATION: CONFIG_BOARDCTL_SPINLOCK
- * DEPENDENCIES:  spinlock specific logic
- *
  * CMD:           BOARDIOC_RESET_CAUSE
  * DESCRIPTION:   Get the cause of last-time board reset
  * ARG:           A pointer to an instance of struct boardioc_reset_cause_s
@@ -177,7 +166,7 @@
 #define BOARDIOC_VNC_START         _BOARDIOC(0x000c)
 #define BOARDIOC_NXTERM            _BOARDIOC(0x000d)
 #define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x000e)
-#define BOARDIOC_SPINLOCK          _BOARDIOC(0x000f)
+                                   /* 0x000f was BOARDIOC_SPINLOCK */
 #define BOARDIOC_UNIQUEKEY         _BOARDIOC(0x0010)
 #define BOARDIOC_SWITCH_BOOT       _BOARDIOC(0x0011)
 #define BOARDIOC_BOOT_IMAGE        _BOARDIOC(0x0012)
@@ -252,22 +241,6 @@ struct boardioc_romdisk_s
   uint32_t nsectors;  /* The number of sectors in the RAM disk */
   uint16_t sectsize;  /* The size of one sector in bytes */
   FAR const uint8_t *image;
-};
-#endif
-
-#ifdef CONFIG_BOARDCTL_SPINLOCK
-enum boardioc_spinlock_e
-{
-  BOARDIOC_SPINLOCK_LOCK    = 0, /* call up_irq_save or/and spin_lock */
-  BOARDIOC_SPINLOCK_TRYLOCK = 1, /* call up_irq_save or/and spin_trylock */
-  BOARDIOC_SPINLOCK_UNLOCK  = 2, /* call up_irq_restore or/and spin_unlock */
-};
-
-struct boardioc_spinlock_s
-{
-  enum boardioc_spinlock_e action; /* see enum boardioc_spinlock_e */
-  FAR irqstate_t *flags;           /* whether we need to disable int */
-  FAR volatile spinlock_t *lock;   /* whether we need to call spinlock */
 };
 #endif
 
