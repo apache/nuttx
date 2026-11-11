@@ -26,7 +26,6 @@ menu "Exclude individual procfs entries"
 
 config FS_PROCFS_EXCLUDE_BLOCKS
 	bool "Exclude fs/blocks information"
-	depends on !DISABLE_MOUNTPOINT
 	default DEFAULT_SMALL
 	---help---
 		Causes the fs block usage information to be excluded from the procfs
@@ -95,7 +94,6 @@ config FS_PROCFS_EXCLUDE_MODULE
 
 config FS_PROCFS_EXCLUDE_MOUNT
 	bool "Exclude fs/mount information"
-	depends on !DISABLE_MOUNTPOINT
 	default DEFAULT_SMALL
 	---help---
 		Causes the mount point information to be excluded from the procfs
@@ -104,7 +102,6 @@ config FS_PROCFS_EXCLUDE_MOUNT
 
 config FS_PROCFS_EXCLUDE_MOUNTS
 	bool "Exclude mounts"
-	depends on !DISABLE_MOUNTPOINT
 	default DEFAULT_SMALL
 
 config FS_PROCFS_EXCLUDE_NET
@@ -138,7 +135,6 @@ config FS_PROCFS_EXCLUDE_UPTIME
 
 config FS_PROCFS_EXCLUDE_USAGE
 	bool "Exclude fs/usage information"
-	depends on !DISABLE_MOUNTPOINT
 	default DEFAULT_SMALL
 	---help---
 		Causes the fs usage information to be excluded from the procfs
