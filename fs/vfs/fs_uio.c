@@ -151,7 +151,6 @@ void uio_copyfrom(FAR struct uio *uio, size_t offset, FAR const void *buf,
 {
   FAR const struct iovec *iov = uio->uio_iov;
 
-  DEBUGASSERT(uio->uio_resid >= 0);
   DEBUGASSERT(uio->uio_resid <= SSIZE_MAX);
   DEBUGASSERT(len <= uio->uio_resid);
   DEBUGASSERT(offset <= uio->uio_resid - len);
@@ -196,7 +195,6 @@ void uio_copyto(FAR struct uio *uio, size_t offset, FAR void *buf,
 {
   FAR const struct iovec *iov = uio->uio_iov;
 
-  DEBUGASSERT(uio->uio_resid >= 0);
   DEBUGASSERT(uio->uio_resid <= SSIZE_MAX);
   DEBUGASSERT(len <= uio->uio_resid);
   DEBUGASSERT(offset <= uio->uio_resid - len);
