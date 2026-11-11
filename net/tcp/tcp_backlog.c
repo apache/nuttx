@@ -60,6 +60,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
 {
   FAR struct tcp_backlog_s     *bls = NULL;
   FAR struct tcp_blcontainer_s *blc;
+  FAR struct tcp_conn_s        *blconn;
   int size;
   int offset;
   int i;
@@ -117,9 +118,20 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
         }
     }
 
-  /* Destroy any existing backlog (shouldn't be any) */
+  /* listen() again changes the backlog: move the connections that wait in
+   * the old backlog to the new one, as many as it holds.  Then destroy the
+   * old backlog.
+   */
 
   conn_lock(&conn->sconn);
+  while (bls != NULL && !sq_empty(&bls->bl_free) &&
+         (blconn = tcp_backlogremove(conn)) != NULL)
+    {
+      blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&bls->bl_free);
+      blc->bc_conn = blconn;
+      sq_addlast(&blc->bc_node, &bls->bl_pending);
+    }
+
   tcp_backlogdestroy(conn);
 
   /* Now install the backlog tear-off in the connection.  NOTE that bls may

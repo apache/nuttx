@@ -1162,24 +1162,6 @@ int tcp_unlisten(FAR struct tcp_conn_s *conn);
 int tcp_listen(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
- * Name: tcp_islistener
- *
- * Description:
- *   Return true is there is a listener for the specified port
- *
- * Assumptions:
- *   Called from network stack logic with the network stack locked
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-bool tcp_islistener(FAR union ip_binding_u *uaddr, uint16_t portno,
-                    uint8_t domain);
-#else
-bool tcp_islistener(FAR union ip_binding_u *uaddr, uint16_t portno);
-#endif
-
-/****************************************************************************
  * Name: tcp_accept_connection
  *
  * Description:
