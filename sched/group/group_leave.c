@@ -290,6 +290,12 @@ void group_drop(FAR struct task_group_s *group)
 
   if (group->tg_flags & GROUP_FLAG_DELETED)
     {
+#ifdef CONFIG_SIGNAL_FD
+      /* Free the lazily-allocated signalfd poll waiter array, if any. */
+
+      kmm_free(group->tg_sigfds);
+#endif
+
       /* Release the group container itself */
 
       kmm_free(group);

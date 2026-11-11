@@ -544,6 +544,22 @@ struct task_group_s
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   sq_queue_t tg_sigpendingq;        /* List of pending signals                  */
 #endif /* !CONFIG_DISABLE_ALL_SIGNALS */
+
+#ifdef CONFIG_SIGNAL_FD
+  /* signalfd poll waiters.  Signal notification is delivered from the signal
+   * dispatch path (possibly interrupt context), which cannot take the
+   * per-device sleeping mutex.  Anchoring the poll waiters on the long-lived
+   * task group instead of the fd-scoped device removes the dangling-pointer
+   * and use-after-free hazards of the old per-device kernel-action callback.
+   *
+   * The waiter array is allocated lazily on first signalfd poll setup and
+   * freed at group teardown, so a group that never uses signalfd carries
+   * only this NULL pointer rather than a fixed-size array.
+   */
+
+  FAR struct pollfd_s **tg_sigfds;
+#endif
+
 #ifdef CONFIG_SIG_DEFAULT
   sigset_t tg_sigdefault;           /* Set of signals set to the default action */
 #endif
