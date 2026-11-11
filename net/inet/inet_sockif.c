@@ -1127,6 +1127,13 @@ static int inet_listen(FAR struct socket *psock, int backlog)
 #ifdef NET_TCP_HAVE_STACK
   conn = psock->s_conn;
 
+  /* A connected socket, or one that connects, cannot listen (as Linux) */
+
+  if (conn->tcpstateflags != TCP_ALLOCATED)
+    {
+      return -EINVAL;
+    }
+
   if (conn->lport == 0)
     {
 #ifdef CONFIG_NET_IPv4
