@@ -912,7 +912,7 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
     }
   else
     {
-      /* Try to open the file on file system 1 */
+      /* Try to open the file on file system 2 */
 
       um  = &ui->ui_fs[1];
 
@@ -923,10 +923,11 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
                             mode);
       if (ret < 0)
         {
+          fs_heap_free(uf);
           goto errout_with_lock;
         }
 
-      /* Successfully opened on file system 1 */
+      /* Successfully opened on file system 2 */
 
       uf->uf_ndx = 1;
     }
@@ -1021,6 +1022,7 @@ static ssize_t unionfs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct unionfs_file_s *uf;
   FAR struct unionfs_mountpt_s *um;
   FAR const struct mountpt_operations *ops;
+  ssize_t ret;
 
   finfo("buflen: %lu\n", (unsigned long)buflen);
 
@@ -1040,7 +1042,18 @@ static ssize_t unionfs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Perform the lower level read operation */
 
-  return ops->read ? ops->read(&uf->uf_file, buffer, buflen) : -EPERM;
+  if (ops->read == NULL)
+    {
+      return -EPERM;
+    }
+
+  ret = ops->read(&uf->uf_file, buffer, buflen);
+  if (ret > 0)
+    {
+      filep->f_pos = uf->uf_file.f_pos;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1054,6 +1067,7 @@ static ssize_t unionfs_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct unionfs_file_s *uf;
   FAR struct unionfs_mountpt_s *um;
   FAR const struct mountpt_operations *ops;
+  ssize_t ret;
 
   finfo("buflen: %lu\n", (unsigned long)buflen);
 
@@ -1073,7 +1087,18 @@ static ssize_t unionfs_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Perform the lower level write operation */
 
-  return ops->write ? ops->write(&uf->uf_file, buffer, buflen) : -EPERM;
+  if (ops->write == NULL)
+    {
+      return -EPERM;
+    }
+
+  ret = ops->write(&uf->uf_file, buffer, buflen);
+  if (ret > 0)
+    {
+      filep->f_pos = uf->uf_file.f_pos;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1108,6 +1133,10 @@ static off_t unionfs_seek(FAR struct file *filep, off_t offset, int whence)
   if (ops->seek != NULL)
     {
       offset = ops->seek(&uf->uf_file, offset, whence);
+      if (offset >= 0)
+        {
+          filep->f_pos = offset;
+        }
     }
   else
     {
@@ -1261,7 +1290,7 @@ static int unionfs_dup(FAR const struct file *oldp, FAR struct file *newp)
       memcpy(newpriv, oldpriv, sizeof(struct unionfs_file_s));
       newpriv->uf_file.f_priv = NULL;
 
-      /* Then perform the lower lowel dup operation */
+      /* Then perform the lower level dup operation */
 
       ret = OK;
       if (ops->dup != NULL)
@@ -1314,7 +1343,7 @@ static int unionfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
               um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
-  /* Perform the lower level write operation */
+  /* Perform the lower level fstat operation */
 
   return ops->fstat ? ops->fstat(&uf->uf_file, buf) : -EPERM;
 }
@@ -1388,7 +1417,7 @@ static int unionfs_truncate(FAR struct file *filep, off_t length)
               um->um_node->u.i_mops != NULL);
   ops = um->um_node->u.i_mops;
 
-  /* Perform the lower level write operation */
+  /* Perform the lower level truncate operation */
 
   return ops->truncate ? ops->truncate(&uf->uf_file, length) : -EPERM;
 }
@@ -1443,6 +1472,7 @@ static int unionfs_opendir(FAR struct inode *mountpt,
       udir->fu_relpath = fs_heap_strdup(relpath);
       if (!udir->fu_relpath)
         {
+          ret = -ENOMEM;
           goto errout_with_lock;
         }
     }
@@ -2128,16 +2158,14 @@ static int unionfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
     {
       if (buf1.f_bsize < buf2.f_bsize)
         {
-          tmp           = (((uint64_t)buf2.f_blocks *
-                            (uint64_t)buf2.f_bsize) << 16);
+          tmp           = (uint64_t)buf2.f_bsize << 16;
           ratiob16      = (uint32_t)(tmp / buf1.f_bsize);
           adj           = &buf2;
         }
       else
         {
           buf->f_bsize  = buf2.f_bsize;
-          tmp           = (((uint64_t)buf1.f_blocks *
-                            (uint64_t)buf1.f_bsize) << 16);
+          tmp           = (uint64_t)buf1.f_bsize << 16;
           ratiob16      = (uint32_t)(tmp / buf2.f_bsize);
           adj           = &buf1;
         }
@@ -2211,7 +2239,7 @@ static int unionfs_unlink(FAR struct inode *mountpt,
       ret = unionfs_trystat(um->um_node, relpath, um->um_prefix, &buf);
       if (ret >= 0)
         {
-          /* Yes.. Try to unlink the file on file system 1.  This would fail
+          /* Yes.. Try to unlink the file on file system 2.  This would fail
            * with -ENOSYS if file system 2 is a read-only only file system or
            * -EISDIR if the path is not a file.
            * */
