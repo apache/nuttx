@@ -192,13 +192,13 @@ end_wait:
 ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                     int flags)
 {
-  FAR const void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
-  FAR struct sockaddr_ll *addr = msg->msg_name;
+  FAR struct sockaddr_ll *addr;
   FAR struct net_driver_s *dev;
   FAR struct pkt_conn_s *conn;
+  FAR const void *buf;
   struct send_s state;
-  int ret = OK;
+  size_t len;
+  int ret;
 
   /* Validity check */
 
@@ -208,6 +208,9 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       return ret;
     }
 
+  buf  = msg->msg_iov[0].iov_base;
+  len  = msg->msg_iov[0].iov_len;
+  addr = msg->msg_name;
   conn = psock->s_conn;
 
   if (psock->s_type == SOCK_DGRAM)

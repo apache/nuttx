@@ -34,6 +34,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include <nuttx/debug.h>
 #include <assert.h>
 
@@ -114,15 +115,14 @@ static inline void pkt_add_recvlen(FAR struct pkt_recvfrom_s *pstate,
 static void pkt_recvfrom_newdata(FAR struct net_driver_s *dev,
                                  FAR struct pkt_recvfrom_s *pstate)
 {
-  int offset = 0;
+  size_t pktlen = dev->d_len;
   size_t recvlen;
+  int offset = 0;
 
 #ifdef CONFIG_NET_TIMESTAMP
   cmsg_store_timestamp(pstate->pr_msg, &dev->d_iob->io_time,
                        pstate->pr_conn->sconn.s_options);
 #endif
-
-  recvlen = MIN(pstate->pr_msg->msg_iov->iov_len, dev->d_len);
 
   /* Copy the new packet data into the user buffer */
 
@@ -130,11 +130,31 @@ static void pkt_recvfrom_newdata(FAR struct net_driver_s *dev,
     {
       offset = -NET_LL_HDRLEN(dev);
     }
+  else
+    {
+      /* For SOCK_DGRAM, exclude the link-layer header */
+
+      if (pktlen > NET_LL_HDRLEN(dev))
+        {
+          pktlen -= NET_LL_HDRLEN(dev);
+        }
+      else
+        {
+          pktlen = 0;
+        }
+    }
+
+  if (pstate->pr_msg->msg_iov->iov_len < pktlen)
+    {
+      pstate->pr_msg->msg_flags |= MSG_TRUNC;
+    }
+
+  recvlen = MIN(pstate->pr_msg->msg_iov->iov_len, pktlen);
 
   recvlen = iob_copyout(pstate->pr_msg->msg_iov->iov_base,
                         dev->d_iob, recvlen, offset);
 
-  ninfo("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
+  ninfo("Received %d bytes (of %d)\n", (int)recvlen, (int)pktlen);
 
   /* Update the accumulated size of the data read */
 
@@ -400,6 +420,12 @@ static inline int pkt_readdata(FAR struct pkt_recvfrom_s *pstate,
             }
         }
 
+      if (iob->io_pktlen > offset &&
+          pstate->pr_msg->msg_iov->iov_len < iob->io_pktlen - offset)
+        {
+          pstate->pr_msg->msg_flags |= MSG_TRUNC;
+        }
+
       recvlen = iob_copyout(pstate->pr_msg->msg_iov->iov_base, iob,
                             pstate->pr_msg->msg_iov->iov_len, offset);
 
@@ -470,9 +496,26 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -EINVAL;
     }
 
+  /* POSIX: fail with EMSGSIZE if msg_iovlen <= 0 or > IOV_MAX */
+
+  if (msg->msg_iovlen == 0 || msg->msg_iovlen > IOV_MAX)
+    {
+      return -EMSGSIZE;
+    }
+
   if (msg->msg_iovlen != 1)
     {
       return -ENOTSUP;
+    }
+
+  if (msg->msg_iov == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (msg->msg_iov[0].iov_len > 0 && msg->msg_iov[0].iov_base == NULL)
+    {
+      return -EINVAL;
     }
 
   if (psock->s_type != SOCK_DGRAM && psock->s_type != SOCK_RAW)
@@ -480,6 +523,10 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
       return -ENOSYS;
     }
+
+  /* Clear flags that may be returned */
+
+  msg->msg_flags = 0;
 
   /* Get the device driver that will service this transfer */
 
