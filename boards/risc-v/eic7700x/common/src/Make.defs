@@ -24,6 +24,10 @@ ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
 CSRCS += eic7700x_boot.c
 
+ifeq ($(CONFIG_EIC7700X_WDT),y)
+CSRCS += eic7700x_wdt.c
+endif
+
 RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
 
 DEPPATH += --dep-path src

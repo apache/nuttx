@@ -176,4 +176,54 @@ Peripheral               Support NOTES
 ======================== ======= =====
 UART                     Yes
 CPU clock control        Yes     400 MHz to 1.4 GHz, measured not assumed
+Watchdog                 Yes     Four, timeout resets the chip
 ======================== ======= =====
+
+Watchdog
+========
+
+Four Synopsys watchdogs whose timeout genuinely resets the chip, registered
+as ``/dev/watchdog0`` to ``3``.  With the auto-monitor configured, both
+boards ship it on, the kernel arms every one at boot and feeds them from
+a kernel timer, so a hang anywhere becomes a reboot in about eleven
+seconds.  An application may take one over at any time with ``WDIOC_START``
+(the kernel stops feeding that one permanently), poke one with
+``WDIOC_KEEPALIVE``, or disarm one by writing ``V`` before closing.
+
+Timeouts are powers of two of the 200 MHz peripheral clock: a third of a
+millisecond up to 10.74 seconds, always rounded up, and requests beyond
+the ceiling are refused with an error rather than quietly shortened.
+The auto-monitor plans its feeding schedule around the number it asked
+for, and a shorter dog under a longer schedule dies on time, every time.
+The configured 8 second timeout is therefore granted as 10.74 seconds,
+fed every 4.
+
+Why the board last reset is printed at every boot and served through
+``BOARDIOC_RESET_CAUSE``::
+
+   wdt: last reset: WATCHDOG (08)
+
+**Panic policy is a configuration choice.**  Without
+``CONFIG_WATCHDOG_PANIC_NOTIFIER``, the shipped default, a kernel
+panic starves the dogs and the board reboots itself, cause recorded.
+With it, the kernel stops all four at the moment of panic and the crash
+scene keeps forever for a debugger; the stop path is deliberately free
+of locks and allocation so it works from a dying kernel.
+
+**For JTAG sessions** two rescues exist, both one line.  Freeze every
+dog from the debugger (a halted hart cannot feed them, and a halt longer
+than the timeout otherwise reboots the board under the session)::
+
+   mww 0x51828444 0x0
+
+and release them again by writing ``0xf``.  The same register is how the
+driver itself stops a dog, since the enable bit is unclearable by
+design: held in block reset is the off state.
+
+Two hardware notes learned on silicon rather than from the manual.  The
+timeout-range register must be written and read back: the manual's own
+advice to clear the protection-level register first makes the block
+silently drop timeout writes while still accepting the enable, arming a
+third-of-a-millisecond watchdog nothing can outrun.  And all four
+instances' reset outputs genuinely reach the chip reset: starving any
+one of them reboots the machine.
