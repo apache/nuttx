@@ -276,6 +276,16 @@
 #define GIC_IRQ_SGI14               14
 #define GIC_IRQ_SGI15               15
 
+/* Private Peripheral Interrupts (PPI) */
+
+#define GIC_IRQ_VM                  25 /* Virtual Maintenance (VM) PPI(6) */
+#define GIC_IRQ_HTM                 26 /* Hypervisor Timer (HTM) PPI(5) */
+#define GIC_IRQ_VTM                 27 /* Virtual Timer (VTM) PPI(4) */
+#define GIC_IRQ_FIQ                 28 /* Fast Interrupt (nFIQ) PPI(0) */
+#define GIC_IRQ_STM                 29 /* Secure Phys. Timer (STM) PPI(1) */
+#define GIC_IRQ_PTM                 30 /* Non-secure Timer (PTM) PPI(2) */
+#define GIC_IRQ_IRQ                 31 /* Interrupt Request (nIRQ) PPI(3) */
+
 #ifdef CONFIG_ARCH_TRUSTZONE_SECURE
 #  define GIC_SMP_SCHED             GIC_IRQ_SGI9
 #  define GIC_SMP_CPUSTART          GIC_IRQ_SGI10
