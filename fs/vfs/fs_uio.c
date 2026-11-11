@@ -168,6 +168,7 @@ void uio_copyfrom(FAR struct uio *uio, size_t offset, FAR const void *buf,
   while (len > 0)
     {
       size_t blen = len;
+
       if (blen > iov->iov_len - offset)
         {
           blen = iov->iov_len - offset;
@@ -212,6 +213,7 @@ void uio_copyto(FAR struct uio *uio, size_t offset, FAR void *buf,
   while (len > 0)
     {
       size_t blen = len;
+
       if (blen > iov->iov_len - offset)
         {
           blen = iov->iov_len - offset;
