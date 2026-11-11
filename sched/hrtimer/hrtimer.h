@@ -33,6 +33,7 @@
 #include <nuttx/hrtimer.h>
 #include <nuttx/list.h>
 #include <nuttx/seqlock.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/tree.h>
 
@@ -533,11 +534,9 @@ DEFINE_HRTIMER_READ(32, uint32_t)
 static inline_function
 void hrtimer_unmark_running(int cpu)
 {
-#ifdef CONFIG_SMP
   hrtimer_mark_running(NULL, cpu);
-  UP_SEV();
-#else
-  UNUSED(cpu);
+#ifdef CONFIG_SMP
+  SPIN_KICK();
 #endif
 }
 
@@ -669,7 +668,7 @@ static inline_function void hrtimer_wait(FAR hrtimer_t *timer)
             }
           else
             {
-              UP_WFE();
+              SPIN_WAIT();
             }
         }
     }
