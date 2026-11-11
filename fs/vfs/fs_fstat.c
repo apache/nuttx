@@ -200,6 +200,16 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf)
           ret = inode->u.i_mops->fstat(filep, buf);
         }
 
+      /* A file system that gives no device number gets the serial number
+       * of its mount point: st_dev and st_ino then tell the files of two
+       * volumes apart.
+       */
+
+      if (ret >= 0 && buf->st_dev == 0)
+        {
+          buf->st_dev = inode->i_ino;
+        }
+
       /* No file on a mount with MS_NOEXEC can be executed */
 
       if (ret >= 0 && INODE_IS_NOEXEC(inode) && S_ISREG(buf->st_mode))
