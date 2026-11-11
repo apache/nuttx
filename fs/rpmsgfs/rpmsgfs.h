@@ -240,7 +240,7 @@ off_t     rpmsgfs_client_lseek(FAR void *handle, int fd,
                                off_t offset, int whence);
 int       rpmsgfs_client_ioctl(FAR void *handle, int fd,
                                int request, unsigned long arg);
-void      rpmsgfs_client_sync(FAR void *handle, int fd);
+int       rpmsgfs_client_sync(FAR void *handle, int fd);
 int       rpmsgfs_client_dup(FAR void *handle, int fd);
 int       rpmsgfs_client_fstat(FAR void *handle, int fd,
                                FAR struct stat *buf);
