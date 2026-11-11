@@ -471,6 +471,12 @@ config STM32_HAVE_IP_I2C_M3M4_V1
 config STM32_HAVE_IP_I2C_M3M4_V2
 	bool
 
+config STM32_HAVE_IP_I2C_M33M55_V2
+	bool
+	---help---
+		I2C v2 of the Cortex-M33 and Cortex-M55 families with the kernel
+		clock from board.h (STM32H5, STM32N6).
+
 config STM32_HAVE_IP_I2C_M0_V1
 	bool
 

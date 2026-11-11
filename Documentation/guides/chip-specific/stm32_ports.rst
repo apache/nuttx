@@ -616,7 +616,7 @@ EXTI          to be done    arch/arm/src/stm32h5/stm32_exti_gpio.c
 FLASH         to be done    arch/arm/src/stm32h5/stm32_flash.c     
 GPIO          to be done    arch/arm/src/stm32h5/stm32_gpio.c      
 GPDMA         GPDMA         arch/arm/src/common/stm32/stm32_dma_gpdma.c
-I2C           to be done    arch/arm/src/stm32h5/stm32_i2c.c       
+I2C           v2            arch/arm/src/common/stm32/stm32_i2c_m33m55_v2.c
 IWDG          v3            arch/arm/src/common/stm32/stm32_iwdg.c
 ICACHE        to be done    arch/arm/src/stm32h5/stm32_icache.c    
 OCTOSPI       to be done    arch/arm/src/stm32h5/stm32_qspi.c      
@@ -777,7 +777,7 @@ ETH           to be done    not supported
 EXTI          M33M55 v1     arch/arm/src/common/stm32/stm32_exti_gpio_m33m55_v1.c
 GPIO          M33M55 v1     arch/arm/src/common/stm32/stm32_gpio_m33m55_v1.c
 GPDMA         v1            arch/arm/src/common/stm32/stm32_dma_gpdma.c
-I2C           to be done    not supported
+I2C           v2            arch/arm/src/common/stm32/stm32_i2c_m33m55_v2.c
 IWDG          v3            arch/arm/src/common/stm32/stm32_iwdg.c
 LPTIM         v2            arch/arm/src/common/stm32/stm32_lptim.c
 PWR           n6            arch/arm/src/stm32n6/stm32_pwr.c

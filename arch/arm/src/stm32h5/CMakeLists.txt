@@ -36,10 +36,6 @@ endif()
 
 list(APPEND SRCS stm32_rcc.c stm32_pwr.c stm32_lse.c stm32_sdmmc.c)
 
-if(CONFIG_STM32_I2C)
-  list(APPEND SRCS stm32_i2c.c)
-endif()
-
 if(CONFIG_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()

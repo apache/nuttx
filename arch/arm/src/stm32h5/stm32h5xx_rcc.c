@@ -1318,6 +1318,42 @@ void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_CCIPR3);
 #endif
 
+      /* Configure I2C1 source clock */
+
+#if defined(STM32_RCC_CCIPR4_I2C1SEL)
+      regval = getreg32(STM32_RCC_CCIPR4);
+      regval &= ~RCC_CCIPR4_I2C1SEL_MASK;
+      regval |= STM32_RCC_CCIPR4_I2C1SEL;
+      putreg32(regval, STM32_RCC_CCIPR4);
+#endif
+
+      /* Configure I2C2 source clock */
+
+#if defined(STM32_RCC_CCIPR4_I2C2SEL)
+      regval = getreg32(STM32_RCC_CCIPR4);
+      regval &= ~RCC_CCIPR4_I2C2SEL_MASK;
+      regval |= STM32_RCC_CCIPR4_I2C2SEL;
+      putreg32(regval, STM32_RCC_CCIPR4);
+#endif
+
+      /* Configure I2C3 source clock */
+
+#if defined(STM32_RCC_CCIPR4_I2C3SEL)
+      regval = getreg32(STM32_RCC_CCIPR4);
+      regval &= ~RCC_CCIPR4_I2C3SEL_MASK;
+      regval |= STM32_RCC_CCIPR4_I2C3SEL;
+      putreg32(regval, STM32_RCC_CCIPR4);
+#endif
+
+      /* Configure I2C4 source clock */
+
+#if defined(STM32_RCC_CCIPR4_I2C4SEL)
+      regval = getreg32(STM32_RCC_CCIPR4);
+      regval &= ~RCC_CCIPR4_I2C4SEL_MASK;
+      regval |= STM32_RCC_CCIPR4_I2C4SEL;
+      putreg32(regval, STM32_RCC_CCIPR4);
+#endif
+
       /* Configure USB source clock */
 
 #if defined(STM32_CLKUSB_SEL)
