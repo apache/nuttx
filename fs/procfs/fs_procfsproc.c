@@ -279,71 +279,71 @@ const struct procfs_operations g_proc_operations =
 
 static const struct proc_node_s g_level0node =
 {
-  "",             "",        (uint8_t)PROC_LEVEL0,       DTYPE_DIRECTORY   /* Top-level directory */
+  "",             "",        PROC_LEVEL0,       DTYPE_DIRECTORY   /* Top-level directory */
 };
 
 static const struct proc_node_s g_status =
 {
-  "status",       "status",  (uint8_t)PROC_STATUS,       DTYPE_FILE        /* Task/thread status */
+  "status",       "status",  PROC_STATUS,       DTYPE_FILE        /* Task/thread status */
 };
 
 static const struct proc_node_s g_cmdline =
 {
-  "cmdline",      "cmdline", (uint8_t)PROC_CMDLINE,      DTYPE_FILE        /* Task command line */
+  "cmdline",      "cmdline", PROC_CMDLINE,      DTYPE_FILE        /* Task command line */
 };
 
 #ifndef CONFIG_SCHED_CPULOAD_NONE
 static const struct proc_node_s g_loadavg =
 {
-  "loadavg",       "loadavg", (uint8_t)PROC_LOADAVG,     DTYPE_FILE        /* Average CPU utilization */
+  "loadavg",       "loadavg", PROC_LOADAVG,     DTYPE_FILE        /* Average CPU utilization */
 };
 #endif
 
 #ifdef CONFIG_SCHED_CRITMONITOR
 static const struct proc_node_s g_critmon =
 {
-  "critmon",       "critmon", (uint8_t)PROC_CRITMON,     DTYPE_FILE        /* Critical Section Monitor */
+  "critmon",       "critmon", PROC_CRITMON,     DTYPE_FILE        /* Critical Section Monitor */
 };
 #endif
 
 #if CONFIG_MM_BACKTRACE >= 0
 static const struct proc_node_s g_heap =
 {
-  "heap",         "heap",   (uint8_t)PROC_HEAP,          DTYPE_FILE        /* Task heap info */
+  "heap",         "heap",   PROC_HEAP,          DTYPE_FILE        /* Task heap info */
 };
 #endif
 
 #ifdef CONFIG_DEBUG_MM
 static const struct proc_node_s g_heapcheck =
 {
-  "heapcheck",    "heapcheck", (uint8_t)PROC_HEAP_CHECK, DTYPE_FILE        /* Task heap info */
+  "heapcheck",    "heapcheck", PROC_HEAP_CHECK, DTYPE_FILE        /* Task heap info */
 };
 #endif
 
 static const struct proc_node_s g_stack =
 {
-  "stack",        "stack",   (uint8_t)PROC_STACK,        DTYPE_FILE        /* Task stack info */
+  "stack",        "stack",   PROC_STACK,        DTYPE_FILE        /* Task stack info */
 };
 
 static const struct proc_node_s g_group =
 {
-  "group",        "group",   (uint8_t)PROC_GROUP,        DTYPE_DIRECTORY   /* Group directory */
+  "group",        "group",   PROC_GROUP,        DTYPE_DIRECTORY   /* Group directory */
 };
 
 static const struct proc_node_s g_groupstatus =
 {
-  "group/status", "status",  (uint8_t)PROC_GROUP_STATUS, DTYPE_FILE        /* Task group status */
+  "group/status", "status",  PROC_GROUP_STATUS, DTYPE_FILE        /* Task group status */
 };
 
 static const struct proc_node_s g_groupfd =
 {
-  "group/fd",     "fd",      (uint8_t)PROC_GROUP_FD,     DTYPE_FILE        /* Group file descriptors */
+  "group/fd",     "fd",      PROC_GROUP_FD,     DTYPE_FILE        /* Group file descriptors */
 };
 
 #if !defined(CONFIG_DISABLE_ENVIRON) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ENVIRON)
 static const struct proc_node_s g_groupenv =
 {
-  "group/env",    "env",     (uint8_t)PROC_GROUP_ENV,    DTYPE_FILE        /* Group environment variables */
+  "group/env",    "env",     PROC_GROUP_ENV,    DTYPE_FILE        /* Group environment variables */
 };
 
 #endif
