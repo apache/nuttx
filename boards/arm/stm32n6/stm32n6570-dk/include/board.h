@@ -244,6 +244,29 @@
 
 /* Alternate function pin selections ****************************************/
 
+/* I2C GPIOs ****************************************************************/
+
+/* I2C1: camera connector, Arduino D15/D14 (PH9 SCL, PC1 SDA)
+ * I2C2: WM8904 codec, GT911 touch, TCPP03 (PD14 SCL, PD4 SDA)
+ * I2C4: STMod+ connector (PE13 SCL, PE14 SDA)
+ *
+ * All I2C kernel clocks run from the 64 MHz HSI.
+ */
+
+#define GPIO_I2C1_SCL     (GPIO_I2C1_SCL_2 | GPIO_SPEED_50MHZ)
+#define GPIO_I2C1_SDA     (GPIO_I2C1_SDA_1 | GPIO_SPEED_50MHZ)
+#define GPIO_I2C2_SCL     (GPIO_I2C2_SCL_2 | GPIO_SPEED_50MHZ)
+#define GPIO_I2C2_SDA     (GPIO_I2C2_SDA_2 | GPIO_SPEED_50MHZ)
+#define GPIO_I2C4_SCL     (GPIO_I2C4_SCL_2 | GPIO_SPEED_50MHZ)
+#define GPIO_I2C4_SDA     (GPIO_I2C4_SDA_3 | GPIO_SPEED_50MHZ)
+
+#define STM32_RCC_CCIPR4_I2C1SEL RCC_CCIPR4_I2C1SEL_HSI
+#define STM32_RCC_CCIPR4_I2C2SEL RCC_CCIPR4_I2C2SEL_HSI
+#define STM32_RCC_CCIPR4_I2C4SEL RCC_CCIPR4_I2C4SEL_HSI
+#define STM32_I2C1_FREQUENCY     STM32_HSI_FREQUENCY
+#define STM32_I2C2_FREQUENCY     STM32_HSI_FREQUENCY
+#define STM32_I2C4_FREQUENCY     STM32_HSI_FREQUENCY
+
 /* USART1 GPIOs *************************************************************/
 
 /* USART1 (ST-LINK Virtual COM Port): PE5=TX (AF7), PE6=RX (AF7)
