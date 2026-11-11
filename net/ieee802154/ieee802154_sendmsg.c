@@ -33,6 +33,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include <assert.h>
 #include <nuttx/debug.h>
 
@@ -630,16 +631,38 @@ static ssize_t ieee802154_send(FAR struct socket *psock, FAR const void *buf,
 ssize_t ieee802154_sendmsg(FAR struct socket *psock,
                            FAR const struct msghdr *msg, int flags)
 {
-  FAR const void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
-  FAR const struct sockaddr *to = msg->msg_name;
-  socklen_t tolen = msg->msg_namelen;
+  FAR const struct sockaddr *to;
+  FAR const void *buf;
+  socklen_t tolen;
+  size_t len;
+
+  /* POSIX: fail with EMSGSIZE if msg_iovlen <= 0 or > IOV_MAX */
+
+  if (msg->msg_iovlen == 0 || msg->msg_iovlen > IOV_MAX)
+    {
+      return -EMSGSIZE;
+    }
 
   /* Validity check, only single iov supported */
 
   if (msg->msg_iovlen != 1)
     {
       return -ENOTSUP;
+    }
+
+  if (msg->msg_iov == NULL)
+    {
+      return -EINVAL;
+    }
+
+  buf   = msg->msg_iov[0].iov_base;
+  len   = msg->msg_iov[0].iov_len;
+  to    = msg->msg_name;
+  tolen = msg->msg_namelen;
+
+  if (len > 0 && buf == NULL)
+    {
+      return -EINVAL;
     }
 
   return to ? ieee802154_sendto(psock, buf, len, flags, to, tolen) :
