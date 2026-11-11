@@ -56,6 +56,7 @@ set(SRCS
     lib_lutimes.c
     lib_gethostname.c
     lib_sethostname.c
+    lib_domainname.c
     lib_fchownat.c
     lib_linkat.c
     lib_readlinkat.c

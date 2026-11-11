@@ -438,3 +438,8 @@ SYSCALL_LOOKUP(signal,                     2)
   SYSCALL_LOOKUP(sched_note_vprintf_ip,    5)
   SYSCALL_LOOKUP(sched_note_event_ip,      5)
 #endif
+
+/* NIS domain name */
+
+SYSCALL_LOOKUP(getdomainname,              2)
+SYSCALL_LOOKUP(setdomainname,              2)
