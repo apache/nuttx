@@ -591,6 +591,8 @@ extern int       optopt;      /* Unrecognized option character */
 
 int     gethostname(FAR char *name, size_t namelen);
 int     sethostname(FAR const char *name, size_t namelen);
+int     getdomainname(FAR char *name, size_t namelen);
+int     setdomainname(FAR const char *name, size_t namelen);
 
 /* Get configurable system variables */
 
