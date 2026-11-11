@@ -110,6 +110,16 @@ void *sim_doirq(int irq, void *context)
 
       sim_fullcontextrestore(regs);
     }
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  else
+    {
+      /* The task resumes here, out of the interrupt handler.  Deliver the
+       * signals that the interrupt handler queued for it.
+       */
+
+      sim_sigdeliver();
+    }
+#endif
 
   return NULL;
 }
