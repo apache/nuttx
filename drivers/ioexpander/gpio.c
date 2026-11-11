@@ -902,10 +902,10 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               {
                 if (pid == dev->gp_signals[i].gp_pid)
                   {
-#   if CONFIG_DEV_GPIO_NSIGNALS > 1
-#     ifdef CONFIG_SIG_EVTHREAD
+#  ifdef CONFIG_SIG_EVTHREAD
                     FAR struct sigwork_s *work;
-#     endif
+#  endif
+#  if CONFIG_DEV_GPIO_NSIGNALS > 1
                     int j;
 
                     for (j = i + 1; j < CONFIG_DEV_GPIO_NSIGNALS; j++)
@@ -921,16 +921,18 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                         memcpy(&dev->gp_signals[i], &dev->gp_signals[j],
                                sizeof(dev->gp_signals[i]));
                       }
+#  else
+                    int j = i;
+#  endif
 
                     dev->gp_signals[j].gp_pid = 0;
-#     ifdef CONFIG_SIG_EVTHREAD
+#  ifdef CONFIG_SIG_EVTHREAD
                     work = &dev->gp_signals[j].gp_work;
                     spin_unlock_irqrestore(&dev->lock, flags);
                     nxsig_cancel_notification(work);
                     flags = spin_lock_irqsave(&dev->lock);
-#     endif
-                    break;
 #  endif
+                    break;
                   }
               }
 
