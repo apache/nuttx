@@ -57,6 +57,15 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
   uint8_t newattributes;
   int ret;
 
+#ifdef CONFIG_FS_FAT_READONLY
+  /* In read-only mode, reject any request that changes attributes. */
+
+  if (setbits != 0 || clearbits != 0)
+    {
+      return -EROFS;
+    }
+#endif
+
   /* Find the inode for this file */
 
   ret = inode_search_setup(&desc, path, false);
