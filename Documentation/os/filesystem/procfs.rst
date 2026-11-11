@@ -62,3 +62,12 @@ of ``<pid>``.  ``Gid:`` gives the real and the effective group ID::
 
 ``stat()`` of ``/proc/<pid>`` and of the files in it gives the effective
 user and group ID of the task group in ``st_uid`` and ``st_gid``.
+
+File serial numbers
+===================
+
+Each path of procfs has a file serial number: a hash of the path below
+the mount point.  ``stat()``, ``fstat()`` and ``readdir()`` give the same
+number for one path, in ``st_ino`` and ``d_ino``.  The number does not
+change while the path exists.  ``/proc/<pid>`` of a new task that gets an
+old PID has the number of the old ``/proc/<pid>``.

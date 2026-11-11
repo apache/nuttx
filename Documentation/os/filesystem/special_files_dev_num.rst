@@ -45,9 +45,11 @@ pseudo-file system? Reduce resource usage, reduced bring-up
 requirements. What are the disadvantages? In NuttX, special 
 files can only reside in the pseudo-file system.
 
-The only other consequence that I aware of is that NuttX cannot 
-support the POSIX requirement for the ``st_dev`` field in the 
-``struct stat`` structure.
+The only other consequence that I aware of is that the files of the
+pseudo-file system have no device number: ``stat()`` gives ``st_dev`` 0
+for them.  The files of a mounted volume get the device number that the
+file system gives, or else the file serial number of the mount point.  So
+``st_dev`` and ``st_ino`` tell the files of two volumes apart.
 
 
 Device Files and Device Numbers
