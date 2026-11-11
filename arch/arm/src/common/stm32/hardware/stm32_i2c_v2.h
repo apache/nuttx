@@ -116,6 +116,7 @@
 #define I2C_CR1_SMBDEN            (1 << 21)                  /* Bit 21: SMBus Device Default address enable */
 #define I2C_CR1_ALERTEN           (1 << 22)                  /* Bit 22: SMBus alert enable */
 #define I2C_CR1_PECEN             (1 << 23)                  /* Bit 23: PEC enable */
+#define I2C_CR1_FMP               (1 << 24)                  /* Bit 24: Fast-mode Plus enable */
 
 /* Control register 2 */
 

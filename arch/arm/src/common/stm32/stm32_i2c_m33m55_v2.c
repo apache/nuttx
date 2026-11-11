@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_i2c.c
+ * arch/arm/src/common/stm32/stm32_i2c_m33m55_v2.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2024 Kyle Wilson.  All rights reserved.
@@ -46,15 +46,16 @@
 
 /* --------------------------------------------------------------------------
  *
- * STM32 H5 I2C Driver
+ * STM32 I2C v2 Driver for the Cortex-M33 and Cortex-M55 families with a
+ * per-instance I2C kernel clock (STM32H5, STM32N6).
  *
  * Supports:
  *  - Master operation:
  *      Standard-mode (up to 100 kHz)
  *      Fast-mode (up to 400 kHz)
  *      Fast-mode Plus (up to 1 MHz)
- *      fI2CCLK clock source selection is based on
- *      STM32_RCC_CCIPR4_I2CxSRC
+ *      The I2C kernel clock frequency comes from STM32_I2Cn_FREQUENCY in
+ *      board.h
  *
  *  - Multiple instances (shared bus)
  *  - Interrupt based operation
@@ -154,13 +155,9 @@
  *
  * Configuration:
  *
- *  To use this driver, enable the following configuration variable:
- *
- *  One of:
- *
- *    CONFIG_STM32_STM32H5XXXXX
- *
- *  and one or more interfaces:
+ *  To use this driver, the chip must select
+ *  CONFIG_STM32_HAVE_IP_I2C_M33M55_V2 and the configuration must enable one
+ *  or more interfaces:
  *
  *    CONFIG_STM32_I2C1
  *    CONFIG_STM32_I2C2
@@ -220,10 +217,9 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "stm32_rcc.h"
+#include "stm32.h"
 #include "stm32_i2c.h"
-#include "stm32_gpio.h"
-#include "hardware/stm32_pinmap.h"
+#include "stm32_i2c_clk.h"
 
 /* At least one I2C peripheral must be enabled */
 
@@ -364,6 +360,21 @@ struct stm32_trace_s
   clock_t time;                /* First of event or first status */
 };
 
+/* The I2C kernel clock frequency comes from board.h */
+
+#if defined(CONFIG_STM32_I2C1) && !defined(STM32_I2C1_FREQUENCY)
+#  error "STM32_I2C1_FREQUENCY must be defined in board.h"
+#endif
+#if defined(CONFIG_STM32_I2C2) && !defined(STM32_I2C2_FREQUENCY)
+#  error "STM32_I2C2_FREQUENCY must be defined in board.h"
+#endif
+#if defined(CONFIG_STM32_I2C3) && !defined(STM32_I2C3_FREQUENCY)
+#  error "STM32_I2C3_FREQUENCY must be defined in board.h"
+#endif
+#if defined(CONFIG_STM32_I2C4) && !defined(STM32_I2C4_FREQUENCY)
+#  error "STM32_I2C4_FREQUENCY must be defined in board.h"
+#endif
+
 /* I2C Device hardware configuration */
 
 struct stm32_i2c_config_s
@@ -489,10 +500,10 @@ static int stm32_i2c_pm_prepare(struct pm_callback_s *cb, int domain,
 static const struct stm32_i2c_config_s stm32_i2c1_config =
 {
   .base          = STM32_I2C1_BASE,
-  .clk_reg       = STM32_RCC_APB1LENR,
-  .clk_bit       = RCC_APB1LENR_I2C1EN,
-  .reset_reg     = STM32_RCC_APB1LRSTR,
-  .reset_bit     = RCC_APB1LRSTR_I2C1RST,
+  .clk_reg       = STM32_RCC_I2C1_EN_REG,
+  .clk_bit       = STM32_RCC_I2C1_EN,
+  .reset_reg     = STM32_RCC_I2C1_RST_REG,
+  .reset_bit     = STM32_RCC_I2C1_RST,
   .scl_pin       = GPIO_I2C1_SCL,
   .sda_pin       = GPIO_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -527,10 +538,10 @@ static struct stm32_i2c_priv_s stm32_i2c1_priv =
 static const struct stm32_i2c_config_s stm32_i2c2_config =
 {
   .base          = STM32_I2C2_BASE,
-  .clk_reg       = STM32_RCC_APB1LENR,
-  .clk_bit       = RCC_APB1LENR_I2C2EN,
-  .reset_reg     = STM32_RCC_APB1LRSTR,
-  .reset_bit     = RCC_APB1LRSTR_I2C2RST,
+  .clk_reg       = STM32_RCC_I2C2_EN_REG,
+  .clk_bit       = STM32_RCC_I2C2_EN,
+  .reset_reg     = STM32_RCC_I2C2_RST_REG,
+  .reset_bit     = STM32_RCC_I2C2_RST,
   .scl_pin       = GPIO_I2C2_SCL,
   .sda_pin       = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -565,10 +576,10 @@ static struct stm32_i2c_priv_s stm32_i2c2_priv =
 static const struct stm32_i2c_config_s stm32_i2c3_config =
 {
   .base          = STM32_I2C3_BASE,
-  .clk_reg       = STM32_RCC_APB3ENR,
-  .clk_bit       = RCC_APB3ENR_I2C3EN,
-  .reset_reg     = STM32_RCC_APB3RSTR,
-  .reset_bit     = RCC_APB3RSTR_I2C3RST,
+  .clk_reg       = STM32_RCC_I2C3_EN_REG,
+  .clk_bit       = STM32_RCC_I2C3_EN,
+  .reset_reg     = STM32_RCC_I2C3_RST_REG,
+  .reset_bit     = STM32_RCC_I2C3_RST,
   .scl_pin       = GPIO_I2C3_SCL,
   .sda_pin       = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -603,10 +614,10 @@ static struct stm32_i2c_priv_s stm32_i2c3_priv =
 static const struct stm32_i2c_config_s stm32_i2c4_config =
 {
   .base          = STM32_I2C4_BASE,
-  .clk_reg       = STM32_RCC_APB3ENR,
-  .clk_bit       = RCC_APB3ENR_I2C4EN,
-  .reset_reg     = STM32_RCC_APB3RSTR,
-  .reset_bit     = RCC_APB3RSTR_I2C4RST,
+  .clk_reg       = STM32_RCC_I2C4_EN_REG,
+  .clk_bit       = STM32_RCC_I2C4_EN,
+  .reset_reg     = STM32_RCC_I2C4_RST_REG,
+  .reset_bit     = STM32_RCC_I2C4_RST,
   .scl_pin       = GPIO_I2C4_SCL,
   .sda_pin       = GPIO_I2C4_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -763,8 +774,8 @@ static uint32_t stm32_i2c_toticks(int msgc, struct i2c_msg_s *msgs)
 #ifndef CONFIG_I2C_POLLED
 static inline void stm32_i2c_enableinterrupts(struct stm32_i2c_priv_s *priv)
 {
-    stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0,
-                          (I2C_CR1_TXRX | I2C_CR1_NACKIE));
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0,
+                        (I2C_CR1_TXRX | I2C_CR1_NACKIE));
 }
 #endif
 
@@ -1284,87 +1295,55 @@ static void stm32_i2c_setclock(struct stm32_i2c_priv_s *priv,
       switch (priv->config->base)
         {
 #ifdef CONFIG_STM32_I2C1
-        case STM32_I2C1_BASE:
-#  if defined(CONFIG_STM32_I2C1_CLK_HSI)
-          i2c_ker_ck = STM32_HSI_FREQUENCY;
-#  elif defined(CONFIG_STM32_I2C1_CLK_CSI)
-          i2c_ker_ck = STM32_CSI_FREQUENCY;
-#  elif defined(CONFIG_STM32_I2C1_CLK_PCLK1)
-          i2c_ker_ck = STM32_PCLK1_FREQUENCY;
-#  else
-          i2c_ker_ck = STM32_PLL3R_FREQUENCY;
-#  endif
-          anfoff = CONFIG_STM32_I2C1_ANFOFF;
-          dnf = CONFIG_STM32_I2C1_DNF;
+          case STM32_I2C1_BASE:
+            i2c_ker_ck = STM32_I2C1_FREQUENCY;
+            anfoff = CONFIG_STM32_I2C1_ANFOFF;
+            dnf = CONFIG_STM32_I2C1_DNF;
 #  ifdef CONFIG_STM32_I2C1_RF_OVERRIDE
-          tr_max = CONFIG_STM32_I2C1_RISE;
-          tf_max = CONFIG_STM32_I2C1_FALL;
-          rf_override = true;
+            tr_max = CONFIG_STM32_I2C1_RISE;
+            tf_max = CONFIG_STM32_I2C1_FALL;
+            rf_override = true;
 #  endif
-          break;
+            break;
 #endif
 #ifdef CONFIG_STM32_I2C2
-        case STM32_I2C2_BASE:
-#  if defined(CONFIG_STM32_I2C2_CLK_HSI)
-          i2c_ker_ck = STM32_HSI_FREQUENCY;
-#  elif defined(CONFIG_STM32_I2C2_CLK_CSI)
-          i2c_ker_ck = STM32_CSI_FREQUENCY;
-#  elif defined(CONFIG_STM32_I2C2_CLK_PCLK1)
-          i2c_ker_ck = STM32_PCLK1_FREQUENCY;
-#  else
-          i2c_ker_ck = STM32_PLL3R_FREQUENCY;
-#  endif
-          anfoff = CONFIG_STM32_I2C2_ANFOFF;
-          dnf = CONFIG_STM32_I2C2_DNF;
+          case STM32_I2C2_BASE:
+            i2c_ker_ck = STM32_I2C2_FREQUENCY;
+            anfoff = CONFIG_STM32_I2C2_ANFOFF;
+            dnf = CONFIG_STM32_I2C2_DNF;
 #  ifdef CONFIG_STM32_I2C2_RF_OVERRIDE
-          tr_max = CONFIG_STM32_I2C2_RISE;
-          tf_max = CONFIG_STM32_I2C2_FALL;
-          rf_override = true;
+            tr_max = CONFIG_STM32_I2C2_RISE;
+            tf_max = CONFIG_STM32_I2C2_FALL;
+            rf_override = true;
 #  endif
-          break;
+            break;
 #endif
 #ifdef CONFIG_STM32_I2C3
-        case STM32_I2C3_BASE:
-#  if defined(CONFIG_STM32_I2C3_CLK_HSI)
-          i2c_ker_ck = STM32_HSI_FREQUENCY;
-#  elif defined(CONFIG_STM32_I2C3_CLK_CSI)
-          i2c_ker_ck = STM32_CSI_FREQUENCY;
-#  elif defined(CONFIG_STM32_I2C3_CLK_PCLK3)
-          i2c_ker_ck = STM32_PCLK3_FREQUENCY;
-#  else
-          i2c_ker_ck = STM32_PLL3R_FREQUENCY;
-#  endif
-          anfoff = CONFIG_STM32_I2C3_ANFOFF;
-          dnf = CONFIG_STM32_I2C3_DNF;
+          case STM32_I2C3_BASE:
+            i2c_ker_ck = STM32_I2C3_FREQUENCY;
+            anfoff = CONFIG_STM32_I2C3_ANFOFF;
+            dnf = CONFIG_STM32_I2C3_DNF;
 #  ifdef CONFIG_STM32_I2C3_RF_OVERRIDE
-          tr_max = CONFIG_STM32_I2C3_RISE;
-          tf_max = CONFIG_STM32_I2C3_FALL;
-          rf_override = true;
+            tr_max = CONFIG_STM32_I2C3_RISE;
+            tf_max = CONFIG_STM32_I2C3_FALL;
+            rf_override = true;
 #  endif
-          break;
+            break;
 #endif
 #ifdef CONFIG_STM32_I2C4
-        case STM32_I2C4_BASE:
-#  if defined(CONFIG_STM32_I2C4_CLK_HSI)
-          i2c_ker_ck = STM32_HSI_FREQUENCY;
-#  elif defined(CONFIG_STM32_I2C4_CLK_CSI)
-          i2c_ker_ck = STM32_CSI_FREQUENCY;
-#  elif defined(CONFIG_STM32_I2C4_CLK_PCLK3)
-          i2c_ker_ck = STM32_PCLK3_FREQUENCY;
-#  else
-          i2c_ker_ck = STM32_PLL3R_FREQUENCY;
-#  endif
-          anfoff = CONFIG_STM32_I2C4_ANFOFF;
-          dnf = CONFIG_STM32_I2C4_DNF;
+          case STM32_I2C4_BASE:
+            i2c_ker_ck = STM32_I2C4_FREQUENCY;
+            anfoff = CONFIG_STM32_I2C4_ANFOFF;
+            dnf = CONFIG_STM32_I2C4_DNF;
 #  ifdef CONFIG_STM32_I2C4_RF_OVERRIDE
-          tr_max = CONFIG_STM32_I2C4_RISE;
-          tf_max = CONFIG_STM32_I2C4_FALL;
-          rf_override = true;
+            tr_max = CONFIG_STM32_I2C4_RISE;
+            tf_max = CONFIG_STM32_I2C4_FALL;
+            rf_override = true;
 #  endif
-          break;
+            break;
 #endif
-        default:
-          break;
+          default:
+            break;
         }
 
       /* Set i2c_ker_ck period ti2cclk in nanoseconds */
@@ -2383,98 +2362,6 @@ static int stm32_i2c_init(struct stm32_i2c_priv_s *priv)
   up_enable_irq(priv->config->er_irq);
 #endif
 
-  /* - Provide means to set peripheral clock source via RCC_CCIPR4_I2CxSEL */
-
-  switch (priv->config->base)
-    {
-#ifdef CONFIG_STM32_I2C1
-    case STM32_I2C1_BASE:
-#  if defined(CONFIG_STM32_I2C1_CLK_HSI)
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C1SEL_MASK,
-                  RCC_CCIPR4_I2C1SEL_HSIKERCK);
-#  elif defined(CONFIG_STM32_I2C1_CLK_CSI)
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C1SEL_MASK,
-                  RCC_CCIPR4_I2C1SEL_CSIKERCK);
-#  elif defined(CONFIG_STM32_I2C1_CLK_PCLK1)
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C1SEL_MASK,
-                  RCC_CCIPR4_I2C1SEL_RCCPCLK1);
-#  else
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C1SEL_MASK,
-                  RCC_CCIPR4_I2C1SEL_PLL3RCK);
-#  endif
-      break;
-#endif
-#ifdef CONFIG_STM32_I2C2
-    case STM32_I2C2_BASE:
-#  if defined(CONFIG_STM32_I2C2_CLK_HSI)
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C2SEL_MASK,
-                  RCC_CCIPR4_I2C2SEL_HSIKERCK);
-#  elif defined(CONFIG_STM32_I2C2_CLK_CSI)
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C2SEL_MASK,
-                  RCC_CCIPR4_I2C2SEL_CSIKERCK);
-#  elif defined(CONFIG_STM32_I2C2_CLK_PCLK1)
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C2SEL_MASK,
-                  RCC_CCIPR4_I2C2SEL_RCCPCLK1);
-#  else
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C2SEL_MASK,
-                  RCC_CCIPR4_I2C2SEL_PLL3RCK);
-#  endif
-      break;
-#endif
-#ifdef CONFIG_STM32_I2C3
-    case STM32_I2C3_BASE:
-#  if defined(CONFIG_STM32_I2C3_CLK_HSI)
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C3SEL_MASK,
-                  RCC_CCIPR4_I2C3SEL_HSIKERCK);
-#  elif defined(CONFIG_STM32_I2C3_CLK_CSI)
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C3SEL_MASK,
-                  RCC_CCIPR4_I2C3SEL_CSIKERCK);
-#  elif defined(CONFIG_STM32_I2C3_CLK_PCLK3)
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C3SEL_MASK,
-                  RCC_CCIPR4_I2C3SEL_RCCPCLK3);
-#  else
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C3SEL_MASK,
-                  RCC_CCIPR4_I2C3SEL_PLL3RCK);
-#  endif
-      break;
-#endif
-#ifdef CONFIG_STM32_I2C4
-    case STM32_I2C4_BASE:
-#  if defined(CONFIG_STM32_I2C4_CLK_HSI)
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C4SEL_MASK,
-                  RCC_CCIPR4_I2C4SEL_HSIKERCK);
-#  elif defined(CONFIG_STM32_I2C4_CLK_CSI)
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C4SEL_MASK,
-                  RCC_CCIPR4_I2C4SEL_CSIKERCK);
-#  elif defined(CONFIG_STM32_I2C4_CLK_PCLK3)
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C4SEL_MASK,
-                  RCC_CCIPR4_I2C4SEL_RCCPCLK3);
-#  else
-      modifyreg32(STM32_RCC_CCIPR4,
-                  RCC_CCIPR4_I2C4SEL_MASK,
-                  RCC_CCIPR4_I2C4SEL_PLL3RCK);
-#  endif
-      break;
-#endif
-      default:
-        break;
-    }
-
   /* Force a frequency update */
 
   priv->frequency = 0;
@@ -2677,7 +2564,7 @@ static int stm32_i2c_process(struct i2c_master_s *dev,
         }
       else if (status & I2C_INT_PECERR)
         {
-      /* PEC Error in reception (SMBus Only) */
+          /* PEC Error in reception (SMBus Only) */
 
           i2cerr("ERROR: I2C PEC Error\n");
           errval = EPROTO;
@@ -2964,31 +2851,31 @@ static int stm32_i2c_pm_prepare(struct pm_callback_s *cb, int domain,
 
   switch (pmstate)
     {
-    case PM_NORMAL:
-    case PM_IDLE:
-      break;
+      case PM_NORMAL:
+      case PM_IDLE:
+        break;
 
-    case PM_STANDBY:
-    case PM_SLEEP:
+      case PM_STANDBY:
+      case PM_SLEEP:
 
-      /* Check if exclusive lock for I2C bus is held. */
+        /* Check if exclusive lock for I2C bus is held. */
 
-      if (nxmutex_is_locked(&priv->lock))
-        {
-          /* Exclusive lock is held, do not allow entry to deeper PM
-           * states.
-           */
+        if (nxmutex_is_locked(&priv->lock))
+          {
+            /* Exclusive lock is held, do not allow entry to deeper PM
+             * states.
+             */
 
-          return -EBUSY;
-        }
+            return -EBUSY;
+          }
 
-      break;
+        break;
 
-    default:
+      default:
 
-      /* Should not get here */
+        /* Should not get here */
 
-      break;
+        break;
     }
 
   return OK;

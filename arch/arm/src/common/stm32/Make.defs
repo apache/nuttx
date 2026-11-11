@@ -98,6 +98,10 @@ CHIP_CSRCS += stm32_rtc_m3m4_v1_lowerhalf.c
 endif
 endif
 
+ifeq ($(CONFIG_STM32_I2C)$(CONFIG_STM32_HAVE_IP_I2C_M33M55_V2),yy)
+CHIP_CSRCS += stm32_i2c_m33m55_v2.c
+endif
+
 ifeq ($(CONFIG_STM32_COMMON_M33),y)
 CHIP_CSRCS += stm32_allocateheap_m33_v1.c
 CHIP_CSRCS += stm32_irq_m33_v1.c

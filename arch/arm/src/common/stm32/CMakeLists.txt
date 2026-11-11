@@ -87,6 +87,10 @@ if(CONFIG_STM32_RTC AND CONFIG_STM32_HAVE_IP_RTCC_M33M55_V1)
   endif()
 endif()
 
+if(CONFIG_STM32_I2C AND CONFIG_STM32_HAVE_IP_I2C_M33M55_V2)
+  list(APPEND SRCS stm32_i2c_m33m55_v2.c)
+endif()
+
 if(CONFIG_STM32_COMMON_M33)
   list(APPEND SRCS stm32_allocateheap_m33_v1.c stm32_irq_m33_v1.c
        stm32_start_m33_v1.c)

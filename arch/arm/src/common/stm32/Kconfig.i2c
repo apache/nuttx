@@ -2,94 +2,12 @@
 # STM32 I2C configuration options.
 #
 
-# TODO: generalize H5 specific options !
-
 config STM32_I2C_SLAVE
 	bool
 	default n
 
-menu "I2C Configuration H5-specific"
-	depends on STM32_HAVE_I2C_H5
-
-menu "Clock Selection"
-
-choice
-	depends on STM32_I2C1
-	prompt "I2C1 Input Clock Selection"
-	default STM32_I2C1_CLK_PCLK1
-
-config STM32_I2C1_CLK_CSI
-	bool "CSI"
-
-config STM32_I2C1_CLK_HSI
-	bool "HSI"
-
-config STM32_I2C1_CLK_PCLK1
-	bool "PCLK1"
-
-config STM32_I2C1_CLK_PLL3R
-	bool "PLL3R"
-
-endchoice # I2C1 Input Clock Selection
-
-choice
-	depends on STM32_I2C2
-	prompt "I2C2 Input Clock Selection"
-	default STM32_I2C2_CLK_PCLK1
-
-config STM32_I2C2_CLK_CSI
-	bool "CSI"
-
-config STM32_I2C2_CLK_HSI
-	bool "HSI"
-
-config STM32_I2C2_CLK_PCLK1
-	bool "PCLK1"
-
-config STM32_I2C2_CLK_PLL3R
-	bool "PLL3R"
-
-endchoice # I2C2 Input Clock Selection
-
-choice
-	depends on STM32_I2C3
-	prompt "I2C3 Input Clock Selection"
-	default STM32_I2C3_CLK_PCLK3
-
-config STM32_I2C3_CLK_CSI
-	bool "CSI"
-
-config STM32_I2C3_CLK_HSI
-	bool "HSI"
-
-config STM32_I2C3_CLK_PCLK3
-	bool "PCLK3"
-
-config STM32_I2C3_CLK_PLL3R
-	bool "PLL3R"
-
-endchoice # I2C3 Input Clock Selection
-
-choice
-	depends on STM32_I2C4
-	prompt "I2C4 Input Clock Selection"
-	default STM32_I2C4_CLK_PCLK3
-
-config STM32_I2C4_CLK_CSI
-	bool "CSI"
-
-config STM32_I2C4_CLK_HSI
-	bool "HSI"
-
-config STM32_I2C4_CLK_PCLK3
-	bool "PCLK3"
-
-config STM32_I2C4_CLK_PLL3R
-	bool "PLL3R"
-
-endchoice # I2C4 Input Clock Selection
-
-endmenu # Clock Selection
+menu "I2C v2 Configuration"
+	depends on STM32_HAVE_IP_I2C_M33M55_V2
 
 menu "Rise/Fall Override"
 
@@ -227,7 +145,7 @@ endmenu # Analog Filters
 
 endmenu # Filtering
 
-endmenu # "I2C Configuration"
+endmenu # I2C v2 Configuration
 
 if !STM32_HAVE_I2C_H5
 
