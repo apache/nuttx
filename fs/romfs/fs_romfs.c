@@ -874,6 +874,10 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   rdir->curroffset  = nodeinfo.rn_offset;
 #endif
 
+  /* An open directory keeps the mount busy (see romfs_unbind()) */
+
+  rm->rm_refs++;
+
   *dir = &rdir->base;
   nxrmutex_unlock(&rm->rm_lock);
   return 0;
@@ -897,9 +901,30 @@ errout_with_rdir:
 static int romfs_closedir(FAR struct inode *mountpt,
                           FAR struct fs_dirent_s *dir)
 {
-  DEBUGASSERT(dir);
+  FAR struct romfs_mountpt_s *rm;
+  int                         ret;
+
+  DEBUGASSERT(mountpt != NULL && dir != NULL);
+
+  /* Recover our private data from the inode instance */
+
+  rm = mountpt->i_private;
+  DEBUGASSERT(rm != NULL);
+
+  ret = nxrmutex_lock(&rm->rm_lock);
+  if (ret < 0)
+    {
+      goto errout_with_dir;
+    }
+
+  /* Give back the reference taken by romfs_opendir() */
+
+  rm->rm_refs--;
+  nxrmutex_unlock(&rm->rm_lock);
+
+errout_with_dir:
   fs_heap_free(dir);
-  return 0;
+  return ret;
 }
 
 /****************************************************************************
