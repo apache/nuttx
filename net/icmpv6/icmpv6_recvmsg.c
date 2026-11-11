@@ -29,6 +29,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/semaphore.h>
@@ -62,9 +63,9 @@ struct icmpv6_recvfrom_s
   struct in6_addr recv_from;            /* The peer we received the request
                                          * from */
   FAR uint8_t *recv_buf;                /* Location to return the response */
-  uint16_t recv_buflen;                 /* Size of the response */
+  size_t recv_buflen;                   /* Size of the response */
   FAR struct msghdr *msg;               /* Input message header */
-  int16_t recv_result;                  /* >=0: receive size on success;
+  ssize_t recv_result;                  /* >=0: receive size on success;
                                          * <0: negated errno on fail */
 };
 
@@ -133,17 +134,24 @@ static uint32_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
           if (recvsize > pstate->recv_buflen)
             {
               recvsize = pstate->recv_buflen;
+              if (pstate->msg != NULL)
+                {
+                  pstate->msg->msg_flags |= MSG_TRUNC;
+                }
             }
 
           /* Copy the ICMPv6 message to the user provided buffer
            * REVISIT:  What if there are IPv6 extension headers present?
            */
 
-          memcpy(pstate->recv_buf, IPBUF(IPv6_HDRLEN), recvsize);
+          if (recvsize > 0)
+            {
+              iob_copyout(pstate->recv_buf, dev->d_iob, recvsize,
+                          IPv6_HDRLEN);
+            }
 
           /* Return the size of the returned data */
 
-          DEBUGASSERT(recvsize <= INT16_MAX);
           pstate->recv_result = recvsize;
 
           /* Return the IPv6 address of the sender from the IPv6 header */
@@ -243,6 +251,14 @@ static inline ssize_t icmpv6_readahead(FAR struct icmpv6_conn_s *conn,
 
       /* Copy to user */
 
+      if ((size_t)iob->io_pktlen > buflen)
+        {
+          if (msg != NULL)
+            {
+              msg->msg_flags |= MSG_TRUNC;
+            }
+        }
+
       ret = iob_copyout(buf, iob, buflen, 0);
 
       ninfo("Received %ld bytes (of %u)\n", (long)ret, iob->io_pktlen);
@@ -295,26 +311,39 @@ static inline ssize_t icmpv6_readahead(FAR struct icmpv6_conn_s *conn,
 ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                        int flags)
 {
-  FAR void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
   FAR struct sockaddr *from = msg->msg_name;
   FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct sockaddr_in6 *inaddr;
   FAR struct icmpv6_conn_s *conn;
   FAR struct net_driver_s *dev = NULL;
+  FAR void *buf;
+  size_t len;
   struct icmpv6_recvfrom_s state;
   ssize_t ret;
 
-  /* Some sanity checks */
+  /* POSIX: fail with EMSGSIZE if msg_iovlen <= 0 or > IOV_MAX */
+
+  if (msg->msg_iovlen == 0 || msg->msg_iovlen > IOV_MAX)
+    {
+      return -EMSGSIZE;
+    }
+
+  /* Validity check, only single iov supported */
 
   if (msg->msg_iovlen != 1)
     {
       return -ENOTSUP;
     }
 
-  DEBUGASSERT(buf != NULL);
+  if (msg->msg_iov == NULL)
+    {
+      return -EINVAL;
+    }
 
-  if (len < ICMPv6_HDRLEN)
+  buf = msg->msg_iov[0].iov_base;
+  len = msg->msg_iov[0].iov_len;
+
+  if (len > 0 && buf == NULL)
     {
       return -EINVAL;
     }
@@ -332,6 +361,9 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     }
 
   conn = psock->s_conn;
+
+  msg->msg_flags = 0;
+
   conn_dev_lock(&conn->sconn, conn->dev);
   if (psock->s_type != SOCK_RAW)
     {
@@ -409,7 +441,7 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
       if (state.recv_result < 0)
         {
-          nerr("ERROR: Return error=%d\n", state.recv_result);
+          nerr("ERROR: Return error=%d\n", (int)state.recv_result);
           ret = state.recv_result;
           goto errout;
         }
