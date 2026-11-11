@@ -693,14 +693,14 @@ int rpmsgfs_client_ioctl(FAR void *handle, int fd,
   return ret;
 }
 
-void rpmsgfs_client_sync(FAR void *handle, int fd)
+int rpmsgfs_client_sync(FAR void *handle, int fd)
 {
   struct rpmsgfs_sync_s msg =
   {
     .fd = fd,
   };
 
-  rpmsgfs_send_recv(handle, RPMSGFS_SYNC, true,
+  return rpmsgfs_send_recv(handle, RPMSGFS_SYNC, true,
           (struct rpmsgfs_header_s *)&msg, sizeof(msg), NULL);
 }
 
