@@ -39,6 +39,54 @@
 #include "signal/signal.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsig_queue_send
+ *
+ * Description:
+ *   Send the signal of nxsig_queue() and sigqueue().  If limit is true, fail
+ *   with -EAGAIN if SIGQUEUE_MAX signals are queued at the receiver.
+ *
+ ****************************************************************************/
+
+static int nxsig_queue_send(int pid, int signo, union sigval value,
+                            bool limit)
+{
+#ifdef CONFIG_SCHED_HAVE_PARENT
+  FAR struct tcb_s *rtcb = this_task();
+#endif
+  siginfo_t info;
+
+  sinfo("pid=0x%08x signo=%d value=%d\n", pid, signo, value.sival_int);
+
+  /* Sanity checks */
+
+  if (!GOOD_SIGNO(signo))
+    {
+      return -EINVAL;
+    }
+
+  /* Create the siginfo structure */
+
+  info.si_signo = signo;
+  info.si_code = SI_QUEUE;
+  info.si_errno = OK;
+  info.si_value = value;
+#ifdef CONFIG_SCHED_HAVE_PARENT
+  info.si_pid = rtcb->pid;
+  info.si_uid = getuid();
+  info.si_status = OK;
+#endif
+  info.si_user = NULL; /* Will be set in sig_dispatch.c */
+
+  /* Send the signal */
+
+  return nxsig_dispatch(pid, &info, false, NULL, limit);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -57,7 +105,8 @@
  *   once.
  *
  *   This is an internal OS interface.  It is functionally equivalent to
- *   sigqueue() except that it does not modify the errno value.
+ *   sigqueue() except that it does not modify the errno value, and that
+ *   SIGQUEUE_MAX does not apply: the OS uses it for notifications.
  *
  * Input Parameters:
  *   pid - Process ID of task to receive signal
@@ -79,36 +128,7 @@
 
 int nxsig_queue(int pid, int signo, union sigval value)
 {
-#ifdef CONFIG_SCHED_HAVE_PARENT
-  FAR struct tcb_s *rtcb = this_task();
-#endif
-  siginfo_t info;
-
-  sinfo("pid=0x%08x signo=%d value=%d\n", pid, signo, value.sival_int);
-
-  /* Sanity checks */
-
-  if (!GOOD_SIGNO(signo))
-    {
-      return -EINVAL;
-    }
-
-  /* Create the siginfo structure */
-
-  info.si_signo           = signo;
-  info.si_code            = SI_QUEUE;
-  info.si_errno           = OK;
-  info.si_value           = value;
-#ifdef CONFIG_SCHED_HAVE_PARENT
-  info.si_pid             = rtcb->pid;
-  info.si_uid             = getuid();
-  info.si_status          = OK;
-#endif
-  info.si_user            = NULL; /* Will be set in sig_dispatch.c */
-
-  /* Send the signal */
-
-  return nxsig_dispatch(pid, &info, false, NULL);
+  return nxsig_queue_send(pid, signo, value, false);
 }
 
 /****************************************************************************
@@ -135,7 +155,7 @@ int nxsig_queue(int pid, int signo, union sigval value)
  *    any failure, -1 (ERROR) is returned and errno variable is set
  *    appropriately:
  *
- *    EGAIN  - The limit of signals which may be queued has been reached.
+ *    EAGAIN - SIGQUEUE_MAX signals are still pending at the receiver.
  *    EINVAL - sig was invalid.
  *    EPERM  - The  process  does  not  have  permission to send the
  *             signal to the receiving process.
@@ -153,9 +173,7 @@ int sigqueue(int pid, int signo, union sigval value)
       return ERROR;
     }
 
-  /* Let nxsig_queue() do all of the real work */
-
-  ret = nxsig_queue(pid, signo, value);
+  ret = nxsig_queue_send(pid, signo, value, true);
   if (ret < 0)
     {
       set_errno(-ret);

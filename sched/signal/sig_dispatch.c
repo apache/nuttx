@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <inttypes.h>
+#include <limits.h>
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
@@ -530,6 +531,48 @@ static bool nxsig_action_queued(FAR struct tcb_s *tcb,
 #endif
 
 /****************************************************************************
+ * Name: nxsig_queue_full
+ *
+ * Description:
+ *   Return true if SIGQUEUE_MAX signals are pending, or queued for a signal
+ *   handler, in the task group of stcb.
+ *
+ * Assumptions:
+ *   Called in a critical section.
+ *
+ ****************************************************************************/
+
+static bool nxsig_queue_full(FAR struct tcb_s *stcb)
+{
+  FAR struct task_group_s *group = stcb->group;
+  size_t count;
+#if defined(CONFIG_ENABLE_ALL_SIGNALS) && defined(HAVE_GROUP_MEMBERS)
+  FAR sq_entry_t *entry;
+  FAR struct tcb_s *tcb;
+#endif
+
+  /* tg_lock also keeps the list of the threads */
+
+  spin_lock(&group->tg_lock);
+  count = sq_count(&group->tg_sigpendingq);
+
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+#  ifdef HAVE_GROUP_MEMBERS
+  for (entry = group->tg_members.head; entry != NULL; entry = entry->flink)
+    {
+      tcb = container_of(entry, struct tcb_s, member);
+      count += sq_count(&tcb->sigpendactionq);
+    }
+#  else
+  count += sq_count(&stcb->sigpendactionq);
+#  endif
+#endif
+
+  spin_unlock(&group->tg_lock);
+  return count >= SIGQUEUE_MAX;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -554,13 +597,17 @@ static bool nxsig_action_queued(FAR struct tcb_s *tcb,
  *   the pending or queued entry, so that the timer can see that its signal
  *   is still queued (nxsig_source_queued()).
  *
+ *   limit is true for sigqueue() and pthread_sigqueue(): the signal is not
+ *   sent if SIGQUEUE_MAX signals are queued in the task group of stcb.
+ *
  * Returned Value:
  *   Returns 0 (OK) on success or a negated errno value on failure.
  *
  ****************************************************************************/
 
 int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
-                      bool group_dispatch, FAR const void *source)
+                      bool group_dispatch, FAR const void *source,
+                      bool limit)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
@@ -620,6 +667,16 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
     {
       leave_critical_section(flags);
       return -ESRCH;
+    }
+
+  /* Count the queued signals in the critical section that queues this one,
+   * so that other senders cannot pass the limit meanwhile.
+   */
+
+  if (limit && nxsig_queue_full(stcb))
+    {
+      leave_critical_section(flags);
+      return -EAGAIN;
     }
 
   masked = nxsig_ismember(&stcb->sigprocmask, info->si_signo);
@@ -915,7 +972,8 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
  *     - Get the TCB associated with the pid.
  *     - Call nxsig_tcbdispatch with the TCB
  *
- *   source is the POSIX timer that sends the signal, or NULL.
+ *   source is the POSIX timer that sends the signal, or NULL.  limit is
+ *   true for sigqueue() and pthread_sigqueue() (see nxsig_tcbdispatch()).
  *
  * Returned Value:
  *   Returns 0 (OK) on success or a negated errno value on failure.
@@ -923,7 +981,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
  ****************************************************************************/
 
 int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread,
-                   FAR const void *source)
+                   FAR const void *source, bool limit)
 {
 #ifdef HAVE_GROUP_MEMBERS
   if (!thread)
@@ -936,7 +994,7 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread,
 
       if (group != NULL)
         {
-          return group_signal(group, info, source);
+          return group_signal(group, info, source, limit);
         }
     }
   else
@@ -948,7 +1006,7 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread,
 
       if (stcb != NULL)
         {
-          return nxsig_tcbdispatch(stcb, info, false, source);
+          return nxsig_tcbdispatch(stcb, info, false, source, limit);
         }
     }
 

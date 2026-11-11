@@ -115,7 +115,7 @@ static bool nxsig_dispatch_unmasked(FAR struct tcb_s *rtcb)
                * other recipient for the signal other than this thread.
                */
 
-              nxsig_tcbdispatch(rtcb, &info, group, source);
+              nxsig_tcbdispatch(rtcb, &info, group, source, false);
             }
         }
     }

@@ -192,9 +192,10 @@ int                nxsig_default_initialize(FAR struct tcb_s *tcb);
 int                nxsig_tcbdispatch(FAR struct tcb_s *stcb,
                                      FAR siginfo_t *info,
                                      bool group_dispatch,
-                                     FAR const void *source);
+                                     FAR const void *source, bool limit);
 int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info,
-                                  bool thread, FAR const void *source);
+                                  bool thread, FAR const void *source,
+                                  bool limit);
 bool               nxsig_source_queued(pid_t pid, FAR const void *source,
                                        int signo);
 
