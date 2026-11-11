@@ -611,14 +611,6 @@
 #define GIC_IRQ_SGI14            14 /* Software Generated Interrupt (SGI) 14 */
 #define GIC_IRQ_SGI15            15 /* Software Generated Interrupt (SGI) 15 */
 
-#define GIC_IRQ_VM               25 /* Virtual Maintenance Interrupt (VM) PPI(6) */
-#define GIC_IRQ_HTM              26 /* Hypervisor Timer (HTM) PPI(5) */
-#define GIC_IRQ_VTM              27 /* Virtual Timer (VTM) PPI(4) */
-#define GIC_IRQ_FIQ              28 /* Fast Interrupt Request (nFIQ) PPI(0) */
-#define GIC_IRQ_STM              29 /* Secure Physical Timer (STM) PPI(1) */
-#define GIC_IRQ_PTM              30 /* Non-secure Physical Timer (PTM) PPI(2) */
-#define GIC_IRQ_IRQ              31 /* Interrupt Request (nIRQ) PPI(3) */
-
 /* Shared Peripheral Interrupts (SPI) follow */
 
 #define GIC_IRQ_SPI              32 /* First SPI interrupt ID */
