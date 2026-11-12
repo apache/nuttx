@@ -1158,6 +1158,10 @@ static void fdcan_receive_work(void *arg)
 
       rf = &priv->rx[index];
 
+      /* rx_pool, d_buf and d_len are shared with devif_poll() */
+
+      netdev_lock(&priv->dev);
+
       /* Read the frame contents */
 
 #ifdef CONFIG_NET_CAN_CANFD
@@ -1257,6 +1261,7 @@ static void fdcan_receive_work(void *arg)
        */
 
       priv->dev.d_buf = priv->tx_pool;
+      netdev_unlock(&priv->dev);
     }
 
   /* Check for errors and abort-transmission requests */
