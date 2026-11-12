@@ -65,13 +65,13 @@ static clock_t clock_process_runtime(FAR struct tcb_s *tcb)
     {
       tcb = container_of(curr, struct tcb_s, member);
 
-      runtime += tcb->run_time;
+      runtime += nxsched_critmon_runtime(tcb);
     }
 
   spin_unlock_irqrestore(&group->tg_lock, flags);
   return runtime;
 # else  /* HAVE_GROUP_MEMBERS */
-  return tcb->run_time;
+  return nxsched_critmon_runtime(tcb);
 # endif /* HAVE_GROUP_MEMBERS */
 }
 #endif
@@ -161,11 +161,11 @@ int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
         {
           if (clock_type == CLOCK_PROCESS_CPUTIME_ID)
             {
-              up_perf_convert(clock_process_runtime(tcb), tp);
+              perf_convert(clock_process_runtime(tcb), tp);
             }
           else if (clock_type == CLOCK_THREAD_CPUTIME_ID)
             {
-              up_perf_convert(tcb->run_time, tp);
+              perf_convert(nxsched_critmon_runtime(tcb), tp);
             }
           else
             {

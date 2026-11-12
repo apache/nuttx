@@ -118,6 +118,8 @@ static spinlock_t g_crimonitor_lock = SP_UNLOCKED;
  * run time of the CPU is not counted.  A context switch changes the values
  * of its own CPU, and clock_cpuload() changes the values of all CPUs.
  * They read the time and change the values under g_thread_lock[cpu].
+ * nxsched_critmon_runtime() reads them without a lock and reads again if
+ * they changed.
  */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
@@ -565,5 +567,57 @@ void nxsched_update_critmon(void)
           CHECK_THREAD(tcb->pid, elapsed);
         }
     }
+}
+#endif
+
+/****************************************************************************
+ * Name: nxsched_critmon_runtime
+ *
+ * Description:
+ *   Return the run time of a thread.  If the thread runs now, add the time
+ *   since the last update of its CPU.
+ *
+ ****************************************************************************/
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+clock_t nxsched_critmon_runtime(FAR struct tcb_s *tcb)
+{
+  uint32_t seq[CONFIG_SMP_NCPUS];
+  clock_t runtime;
+  bool retry;
+  int cpu;
+
+  /* Read again if a CPU changed the values, so that the run time does not
+   * go back.  The scheduler changes tcb->cpu before the context switch, and
+   * the thread can move to another CPU: look for the thread on all CPUs,
+   * and check the sequence of all CPUs.
+   */
+
+  do
+    {
+      for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+        {
+          seq[cpu] = read_seqbegin(&g_thread_lock[cpu]);
+        }
+
+      runtime = tcb->run_time;
+      for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+        {
+          if (g_thread_tcb[cpu] == tcb)
+            {
+              runtime += perf_gettime() - g_thread_start[cpu];
+              break;
+            }
+        }
+
+      retry = false;
+      for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+        {
+          retry |= read_seqretry(&g_thread_lock[cpu], seq[cpu]);
+        }
+    }
+  while (retry);
+
+  return runtime;
 }
 #endif
