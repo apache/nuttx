@@ -25,6 +25,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <unistd.h>
+
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 
