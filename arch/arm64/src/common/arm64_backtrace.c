@@ -142,8 +142,9 @@ int up_backtrace(struct tcb_s *tcb,
     {
       if (up_interrupt_context())
         {
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
           void *istackbase = (void *)up_get_intstackbase(this_cpu());
+
           ret = backtrace(istackbase,
                           istackbase + INTSTACK_SIZE,
                           (void *)__builtin_frame_address(0),
@@ -153,7 +154,7 @@ int up_backtrace(struct tcb_s *tcb,
                           rtcb->stack_base_ptr + rtcb->adj_stack_size,
                           (void *)__builtin_frame_address(0),
                           NULL, buffer, size, &skip);
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */
+#endif /* defined(CONFIG_ARCH_INTERRUPTSTACK) */
           if (ret < size)
             {
               ret += backtrace(rtcb->stack_base_ptr,

@@ -33,6 +33,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <nuttx/board.h>
 
 #include "sched/sched.h"
@@ -61,13 +62,13 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 void or1k_color_intstack(void)
 {
   uint32_t *ptr = (uint32_t *)g_intstackalloc;
   ssize_t size;
 
-  for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+  for (size = STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
        size > 0;
        size -= sizeof(uint32_t))
     {
@@ -144,12 +145,12 @@ size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
   return or1k_stack_check((uintptr_t)tcb->stack_base_ptr, check_size);
 }
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 size_t up_check_intstack(int cpu, size_t check_size)
 {
   if (check_size == 0)
     {
-      check_size = CONFIG_ARCH_INTERRUPTSTACK & ~3;
+      check_size = STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
     }
 
   return or1k_stack_check((uintptr_t)g_intstackalloc, check_size);

@@ -403,7 +403,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
   uintptr_t *ulimit;
   bool self = (tcb == NULL || tcb == rtcb);
   int nsegments = 0;
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   int cpu;
   uintptr_t *ilimit;
   uintptr_t *ibase;
@@ -445,7 +445,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
                                   self ? NULL :
                                   (uintptr_t *)tcb->xcp.regs[REG_EPC]);
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   if (self)
     {
       /* Only a self chain can genuinely start on the interrupt stack: it

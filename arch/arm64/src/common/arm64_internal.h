@@ -32,6 +32,7 @@
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
 #  include <nuttx/arch.h>
+#  include <nuttx/irq.h>
 #  include <sys/types.h>
 #  include <stdint.h>
 #  include <syscall.h>
@@ -149,7 +150,7 @@ extern "C"
 #define STACK_PTR_TO_FRAME(type, ptr) \
     (type *)STACKFRAME_ALIGN_DOWN((uintptr_t)(ptr) - sizeof(type))
 
-#define INTSTACK_SIZE        (CONFIG_ARCH_INTERRUPTSTACK & ~STACKFRAME_ALIGN_MASK)
+#define INTSTACK_SIZE        STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
 
 #ifdef CONFIG_SMP
 
@@ -182,7 +183,7 @@ INIT_STACK_DEFINE_EXTERN(g_interrupt_fiq_stack, INTSTACK_SIZE);
 
 /* Address of the saved user stack pointer */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 extern uint8_t g_intstackalloc[]; /* Allocated stack base */
 extern uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
 #else

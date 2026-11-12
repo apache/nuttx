@@ -155,7 +155,7 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 /* The (optional) interrupt stack */
 
 extern uint8_t g_intstackalloc[]; /* Allocated interrupt stack */
@@ -329,7 +329,7 @@ void xtensa_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #if defined(CONFIG_STACK_COLORATION) && \
-    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 15
+    defined(CONFIG_ARCH_INTERRUPTSTACK)
 void xtensa_color_intstack(void);
 #else
 #  define xtensa_color_intstack()

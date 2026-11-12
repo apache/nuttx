@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 .macro  setintstack tmp0, tmp1
   csrr  \tmp0, CSR_MHARTID
   li    \tmp1, STACKFRAME_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
@@ -56,7 +56,7 @@
   la    \tmp0, g_intstacktop
   sub   sp, \tmp0, \tmp1
 .endm
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 15 */
+#endif /* CONFIG_SMP && defined(CONFIG_ARCH_INTERRUPTSTACK) */
 
 #endif /* __ASSEMBLY__  */
 #endif /* __ARCH_RISCV_SRC_K210_CHIP_H */

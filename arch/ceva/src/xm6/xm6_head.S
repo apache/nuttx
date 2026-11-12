@@ -31,7 +31,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK == 0
+#ifndef CONFIG_ARCH_INTERRUPTSTACK
 #  undef CONFIG_ARCH_INTERRUPTSTACK
 #  define CONFIG_ARCH_INTERRUPTSTACK CONFIG_IDLETHREAD_STACKSIZE
 #endif

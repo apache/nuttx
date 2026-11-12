@@ -73,7 +73,7 @@
 
 #define EXC_RETURN_HANDLER       0xfffffff1
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 
 /* Execution uses PSP after return */
 

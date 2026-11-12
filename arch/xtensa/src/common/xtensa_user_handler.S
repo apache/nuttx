@@ -164,7 +164,7 @@ _xtensa_user_handler:
 
 	/* Switch to an interrupt stack if we have one */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	setintstack a13 a14
 #endif
 
@@ -288,7 +288,7 @@ _xtensa_syscall_handler:
 
 	/* Switch to an interrupt stack if we have one */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	setintstack a13 a14
 #endif
 
@@ -405,7 +405,7 @@ _xtensa_coproc_handler:
 
 	/* Switch to an interrupt stack if we have one */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	setintstack a13 a14
 #endif
 

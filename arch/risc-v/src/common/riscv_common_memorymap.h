@@ -70,7 +70,7 @@ extern uintptr_t g_idle_topstack;
 
 /* Address of the saved user stack pointer */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 extern uint8_t g_intstackalloc[]; /* Allocated stack base */
 extern uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
 #endif

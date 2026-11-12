@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK == 0
+#ifndef CONFIG_ARCH_INTERRUPTSTACK
 /* The interrupt stack is required for CEVA porting */
 
 #  undef CONFIG_ARCH_INTERRUPTSTACK

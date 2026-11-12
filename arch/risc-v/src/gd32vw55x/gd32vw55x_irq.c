@@ -81,10 +81,11 @@ void up_irqinitialize(void)
               GD32VW55X_ECLIC_INTCTL(i));
     }
 
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_ARCH_INTERRUPTSTACK)
   /* Colorize the interrupt stack for debug purposes */
 
-  size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
+  size_t intstack_size = STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
+
   riscv_stack_color(g_intstackalloc, intstack_size);
 #endif
 
