@@ -432,7 +432,7 @@ void up_perf_init(FAR void *arg)
   UNUSED(arg);
 }
 
-clock_t up_perf_gettime(void)
+clock_t noinstrument_function up_perf_gettime(void)
 {
   clock_t ret = 0;
 

@@ -53,7 +53,7 @@ unsigned long up_perf_getfreq(void)
   return g_x86_64_timer_freq;
 }
 
-clock_t up_perf_gettime(void)
+clock_t noinstrument_function up_perf_gettime(void)
 {
   return rdtscp();
 }

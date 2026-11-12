@@ -133,4 +133,17 @@ clock_t clock_get_sched_ticks(void);
 void cpuload_init(void);
 #endif
 
+/****************************************************************************
+ * Name: perf_setup
+ *
+ * Description:
+ *   Start the overflow watchdog.  Only used when the overflow state is a
+ *   single global, that is CONFIG_PERF_OVERFLOW_CORRECTION without SMP.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_PERF_OVERFLOW_CORRECTION) && !defined(CONFIG_SMP)
+void perf_setup(void);
+#endif
+
 #endif /* __SCHED_CLOCK_CLOCK_H */
