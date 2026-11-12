@@ -735,7 +735,6 @@ struct tcb_s
   /* Pre-emption monitor support ********************************************/
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
-  clock_t run_start;                     /* Time when thread begin run      */
   clock_t run_max;                       /* Max time thread run             */
   clock_t run_time;                      /* Total time thread run           */
 #endif

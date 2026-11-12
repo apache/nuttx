@@ -450,7 +450,7 @@ void nxsched_resume_critmon(FAR struct tcb_s *tcb);
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
-void nxsched_update_critmon(FAR struct tcb_s *tcb);
+void nxsched_update_critmon(void);
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0

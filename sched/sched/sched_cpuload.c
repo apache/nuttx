@@ -266,9 +266,9 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
   if (g_pidhash[hash_index] && g_pidhash[hash_index]->pid == pid)
     {
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
-      /* Update critmon in case of the target thread busyloop */
+      /* Update critmon in case of a running thread busyloop */
 
-      nxsched_update_critmon(g_pidhash[hash_index]);
+      nxsched_update_critmon();
 #endif
 
       cpuload->total  = g_cpuload_total;
