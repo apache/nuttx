@@ -110,7 +110,6 @@ static ssize_t vsock_virtio_send_pkt(FAR struct vsock_transport_s *t,
 
 static struct virtio_driver g_vsock_virtio_driver =
 {
-  LIST_INITIAL_VALUE(g_vsock_virtio_driver.node), /* node */
   VIRTIO_ID_VSOCK,                                /* device id */
   vsock_virtio_probe,                             /* probe */
   vsock_virtio_remove,                            /* remove */
