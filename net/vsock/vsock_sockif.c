@@ -34,6 +34,7 @@
 
 #include <netinet/in.h>
 #include <nuttx/circbuf.h>
+#include <nuttx/fs/uio.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/spinlock.h>
 
