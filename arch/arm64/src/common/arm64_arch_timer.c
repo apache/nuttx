@@ -90,6 +90,7 @@ static inline void arm64_arch_timer_set_irq_mask(bool mask)
 
 static inline uint64_t arm64_arch_timer_count(void)
 {
+  UP_ISB();
   return read_sysreg(cntpct_el0);
 }
 
@@ -120,6 +121,7 @@ static inline void arm64_arch_timer_set_irq_mask(bool mask)
 
 static inline uint64_t arm64_arch_timer_count(void)
 {
+  UP_ISB();
   return read_sysreg(cntpct_el0);
 }
 
@@ -150,6 +152,7 @@ static inline void arm64_arch_timer_set_irq_mask(bool mask)
 
 static inline uint64_t arm64_arch_timer_count(void)
 {
+  UP_ISB();
   return read_sysreg(cntvct_el0);
 }
 
