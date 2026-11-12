@@ -35,6 +35,7 @@
 #include <unistd.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/semaphore.h>
@@ -94,6 +95,7 @@ static void rpmsgfs_device_created(struct rpmsg_device *rdev,
                                    FAR void *priv_);
 static void rpmsgfs_device_destroy(struct rpmsg_device *rdev,
                                    FAR void *priv_);
+static void rpmsgfs_ept_release(FAR struct rpmsg_endpoint *ept);
 static int  rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,
                            FAR void *data, size_t len, uint32_t src,
                            FAR void *priv);
@@ -348,6 +350,14 @@ static void rpmsgfs_ns_bound(struct rpmsg_endpoint *ept)
   rpmsg_post(&priv->ept, &priv->wait);
 }
 
+static void rpmsgfs_ept_release(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct rpmsgfs_s *priv = container_of(ept, struct rpmsgfs_s, ept);
+
+  nxsem_destroy(&priv->wait);
+  fs_heap_free(priv);
+}
+
 static void rpmsgfs_device_created(FAR struct rpmsg_device *rdev,
                                    FAR void *priv_)
 {
@@ -358,6 +368,7 @@ static void rpmsgfs_device_created(FAR struct rpmsg_device *rdev,
     {
       priv->ept.priv = priv;
       priv->ept.ns_bound_cb = rpmsgfs_ns_bound;
+      priv->ept.release_cb = rpmsgfs_ept_release;
       snprintf(buf, sizeof(buf), "%s%p", RPMSGFS_NAME_PREFIX, priv);
       rpmsg_create_ept(&priv->ept, rdev, buf,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
@@ -824,16 +835,12 @@ int rpmsgfs_client_bind(FAR void **handle, FAR const char *cpuname)
 
 int rpmsgfs_client_unbind(FAR void *handle)
 {
-  struct rpmsgfs_s *priv = handle;
-
-  rpmsg_unregister_callback(priv,
+  rpmsg_unregister_callback(handle,
                             rpmsgfs_device_created,
                             rpmsgfs_device_destroy,
                             NULL,
                             NULL);
 
-  nxsem_destroy(&priv->wait);
-  fs_heap_free(priv);
   return 0;
 }
 
