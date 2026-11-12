@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
+#include <string.h>
 
 #include <nuttx/fs/fs.h>
 
@@ -62,7 +63,23 @@ int rmdir(FAR const char *pathname)
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
+  size_t len;
   int ret;
+
+  /* The lookup collapses ".", so reject a last component of "." first */
+
+  len = pathname != NULL ? strlen(pathname) : 0;
+  while (len > 1 && pathname[len - 1] == '/')
+    {
+      len--;
+    }
+
+  if ((len == 1 && pathname[0] == '.') ||
+      (len >= 2 && pathname[len - 1] == '.' && pathname[len - 2] == '/'))
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
 
   /* Get an inode for the directory (or for the mountpoint containing the
    * directory).  inode_find() automatically increments the reference count
