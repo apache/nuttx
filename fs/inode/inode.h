@@ -590,6 +590,23 @@ int dir_fstat(FAR struct file *filep, FAR struct stat *buf);
 #endif
 
 /****************************************************************************
+ * Name: dir_isdirectory
+ *
+ * Description:
+ *   Return true if filep is a directory opened with open().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DISABLE_DIRECTORY_OPERATIONS
+static inline bool dir_isdirectory(FAR struct file *filep)
+{
+  return false;
+}
+#else
+bool dir_isdirectory(FAR struct file *filep);
+#endif
+
+/****************************************************************************
  * Name: pseudofile_create
  *
  * Description:
