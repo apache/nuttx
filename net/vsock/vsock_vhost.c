@@ -89,7 +89,6 @@ static ssize_t vsock_vhost_send_pkt(FAR struct vsock_transport_s *t,
 
 static struct vhost_driver g_vsock_vhost_driver =
 {
-  LIST_INITIAL_VALUE(g_vsock_vhost_driver.node), /* Node */
   VIRTIO_ID_VSOCK,                               /* Device id */
   vsock_vhost_probe,                             /* Probe */
   vsock_vhost_remove,                            /* Remove */
