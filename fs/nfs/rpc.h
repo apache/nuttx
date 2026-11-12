@@ -311,6 +311,12 @@ struct rpc_call_rmdir
   struct RMDIR3args rmdir;
 };
 
+struct rpc_call_readlink
+{
+  struct rpc_call_header ch;
+  struct READLINK3args readlink;
+};
+
 struct rpc_call_readdir
 {
   struct rpc_call_header ch;
@@ -446,6 +452,15 @@ struct rpc_reply_setattr
   struct nfs_reply_header rh;
   struct SETATTR3resok setattr;
 };
+
+struct rpc_reply_readlink
+{
+  struct nfs_reply_header rh;
+  struct READLINK3resok readlink;
+};
+
+#define SIZEOF_rpc_reply_readlink(n) \
+  (sizeof(struct nfs_reply_header) + SIZEOF_READLINK3resok(n))
 
 struct rpcclnt
 {

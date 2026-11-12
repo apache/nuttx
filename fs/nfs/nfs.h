@@ -116,12 +116,17 @@ extern int  nfs_lookup(FAR struct nfsmount *nmp, FAR const char *filename,
 extern int  nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
               FAR struct file_handle *fhandle,
               FAR struct nfs_fattr *obj_attributes,
-              FAR struct nfs_fattr *dir_attributes);
+              FAR struct nfs_fattr *dir_attributes, bool nofollow);
 extern int nfs_finddir(FAR struct nfsmount *nmp, FAR const char *relpath,
               FAR struct file_handle *fhandle,
               FAR struct nfs_fattr *attributes, FAR char *filename);
 extern void nfs_attrupdate(FAR struct nfsnode *np,
               FAR struct nfs_fattr *attributes);
+#ifdef CONFIG_FS_LINKS
+extern int nfs_readlink_internal(FAR struct nfsmount *nmp,
+              FAR struct file_handle *fhandle,
+              FAR char *buffer, size_t bufsize);
+#endif
 
 #if defined(__cplusplus)
 }

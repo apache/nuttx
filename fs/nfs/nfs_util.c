@@ -36,7 +36,9 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <nuttx/debug.h>
+#include <nuttx/lib/lib.h>
 
 #include "rpc.h"
 #include "nfs.h"
@@ -100,6 +102,245 @@ static inline int nfs_pathsegment(FAR const char **path, FAR char *buffer,
         }
     }
 }
+
+#ifdef CONFIG_FS_LINKS
+/****************************************************************************
+ * Name: nfs_readlink_internal
+ *
+ * Description:
+ *   Read the target of a symbolic link.
+ *
+ * Input Parameters:
+ *   nmp     - NFS mount point
+ *   fhandle - File handle of the symbolic link
+ *   buffer  - Buffer to store the link target
+ *   bufsize - Size of the buffer
+ *
+ * Returned Value:
+ *   On success, returns the length of the link target stored in 'buffer'.
+ *   On failure, returns a negative errno value.
+ *
+ ****************************************************************************/
+
+int nfs_readlink_internal(FAR struct nfsmount *nmp,
+                          FAR struct file_handle *fhandle,
+                          FAR char *buffer, size_t bufsize)
+{
+  FAR struct rpc_reply_readlink *readlink;
+  FAR uint32_t *ptr;
+  uint32_t length;
+  int reqlen;
+  int ret;
+
+  /* Create the READLINK RPC call arguments */
+
+  ptr    = (FAR uint32_t *)&nmp->nm_msgbuffer.readlink.readlink;
+  reqlen = 0;
+
+  /* Copy the variable-length file handle */
+
+  *ptr++  = txdr_unsigned(fhandle->length);
+  reqlen += sizeof(uint32_t);
+
+  memcpy(ptr, &fhandle->handle, fhandle->length);
+  reqlen += uint32_alignup(fhandle->length);
+
+  /* Perform the READLINK RPC */
+
+  nfs_statistics(NFSPROC_READLINK);
+  ret = nfs_request(nmp, NFSPROC_READLINK,
+                    &nmp->nm_msgbuffer.readlink, reqlen,
+                    nmp->nm_iobuffer, nmp->nm_buflen);
+  if (ret != OK)
+    {
+      ferr("ERROR: nfs_request failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Parse the response */
+
+  readlink = (FAR struct rpc_reply_readlink *)nmp->nm_iobuffer;
+  ptr      = (FAR uint32_t *)&readlink->readlink;
+
+  /* Skip attributes if present */
+
+  if (*ptr++)
+    {
+      ptr += sizeof(struct nfs_fattr) / sizeof(uint32_t);
+    }
+
+  /* Get the target path length */
+
+  length = fxdr_unsigned(uint32_t, *ptr);
+  ptr++;
+
+  /* POSIX readlink() behavior: if buffer is too small, truncate the result
+   * and return the number of bytes placed in buffer (not an error).
+   */
+
+  if (length > bufsize)
+    {
+      length = bufsize;
+    }
+
+  /* Copy the target path */
+
+  memcpy(buffer, ptr, length);
+  return length;
+}
+
+/****************************************************************************
+ * Name: nfs_followlink
+ *
+ * Description:
+ *   Follow a symbolic link to its ultimate target. This function resolves
+ *   a symbolic link by reading its target and resolving the path from
+ *   the containing directory.
+ *
+ * Input Parameters:
+ *   nmp           - NFS mount point
+ *   dir_fhandle   - File handle of the directory containing the symlink
+ *   fhandle       - File handle of the symbolic link (input/output)
+ *   obj_attr      - Object attributes (input/output)
+ *   symloop_count - Pointer to symlink resolution depth counter
+ *
+ * Returned Value:
+ *   Zero on success; a negative errno value on failure.
+ *
+ ****************************************************************************/
+
+static int nfs_followlink(FAR struct nfsmount *nmp,
+                          FAR struct file_handle *dir_fhandle,
+                          FAR struct file_handle *fhandle,
+                          FAR struct nfs_fattr *obj_attr,
+                          FAR int *symloop_count)
+{
+  struct file_handle parent_fhandle;
+  struct file_handle tmphandle;
+  FAR const char *linkptr;
+  FAR char *linkpath;
+  FAR char *buffer;
+  char terminator;
+  uint32_t tmp;
+  int ret;
+
+  /* Limit the number of symbolic links that we pass through */
+
+  if (*symloop_count >= SYMLOOP_MAX)
+    {
+      ferr("ERROR: Too many symbolic links (loop?)\n");
+      return -ELOOP;
+    }
+
+  (*symloop_count)++;
+  linkpath = lib_get_tempbuffer(PATH_MAX);
+  if (linkpath == NULL)
+    {
+      ferr("ERROR: Failed to allocate buffer for symlink path\n");
+      return -ENOMEM;
+    }
+
+  buffer = lib_get_tempbuffer(NAME_MAX + 1);
+  if (buffer == NULL)
+    {
+      ferr("ERROR: Failed to allocate buffer for path segment\n");
+      lib_put_tempbuffer(linkpath);
+      return -ENOMEM;
+    }
+
+  /* Read the symlink target */
+
+  ret = nfs_readlink_internal(nmp, fhandle, linkpath, PATH_MAX - 1);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  linkpath[ret] = '\0';
+
+  /* Our fs can only resolve relative path symbolic links.
+   * Absolute paths are not supported.
+   */
+
+  if (linkpath[0] == '/')
+    {
+      ret = -ENOSYS;
+      goto errout;
+    }
+
+  memcpy(&tmphandle, dir_fhandle, sizeof(tmphandle));
+
+  /* Process each path component of the symlink target */
+
+  linkptr = linkpath;
+  for (; ; )
+    {
+      /* Set the parent directory which we will use for followlink
+       * in this iteration.
+       */
+
+      memcpy(&parent_fhandle, &tmphandle, sizeof(parent_fhandle));
+
+      /* Extract the next path component */
+
+      ret = nfs_pathsegment(&linkptr, buffer, &terminator);
+      if (ret != OK)
+        {
+          goto errout;
+        }
+
+      /* Lookup this component */
+
+      ret = nfs_lookup(nmp, buffer, &tmphandle, obj_attr, NULL);
+      if (ret != OK)
+        {
+          ferr("ERROR: nfs_lookup(\"%s\") failed: %d\n", buffer, ret);
+          goto errout;
+        }
+
+      /* If this is a symlink, follow it recursively */
+
+      tmp = fxdr_unsigned(uint32_t, obj_attr->fa_type);
+      if (tmp == NFLNK)
+        {
+          ret = nfs_followlink(nmp, &parent_fhandle, &tmphandle,
+                               obj_attr, symloop_count);
+          if (ret != OK)
+            {
+              goto errout;
+            }
+
+          /* Update the type after following the symlink */
+
+          tmp = fxdr_unsigned(uint32_t, obj_attr->fa_type);
+        }
+
+      if (terminator == '\0')
+        {
+          break;
+        }
+
+      /* Not the final component - verify it's a directory */
+
+      if (tmp != NFDIR)
+        {
+          ferr("ERROR: Intermediate component \"%s\" is not a directory\n",
+               buffer);
+          ret = -ENOTDIR;
+          goto errout;
+        }
+    }
+
+  /* Success - copy the result back */
+
+  memcpy(fhandle, &tmphandle, sizeof(*fhandle));
+
+errout:
+  lib_put_tempbuffer(buffer);
+  lib_put_tempbuffer(linkpath);
+  return ret;
+}
+#endif /* CONFIG_FS_LINKS */
 
 /****************************************************************************
  * Public Functions
@@ -317,13 +558,24 @@ int nfs_lookup(FAR struct nfsmount *nmp, FAR const char *filename,
 int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
                  FAR struct file_handle *fhandle,
                  FAR struct nfs_fattr *obj_attributes,
-                 FAR struct nfs_fattr *dir_attributes)
+                 FAR struct nfs_fattr *dir_attributes, bool nofollow)
 {
-  FAR const char *path = relpath;
-  char            buffer[NAME_MAX + 1];
-  char            terminator;
-  uint32_t         tmp;
-  int             error;
+  FAR const char    *path = relpath;
+  FAR char          *buffer;
+  char               terminator;
+  uint32_t           tmp;
+  int                error;
+#ifdef CONFIG_FS_LINKS
+  struct file_handle parent_fhandle;
+  int                symloop_count = 0;
+#endif
+
+  buffer = lib_get_tempbuffer(NAME_MAX + 1);
+  if (buffer == NULL)
+    {
+      ferr("ERROR: Failed to allocate buffer for path segment\n");
+      return -ENOMEM;
+    }
 
   /* Start with the file handle of the root directory.  */
 
@@ -348,6 +600,7 @@ int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
           memcpy(dir_attributes, &nmp->nm_fattr, sizeof(struct nfs_fattr));
         }
 
+      lib_put_tempbuffer(buffer);
       return OK;
     }
 
@@ -357,7 +610,15 @@ int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
 
   for (; ; )
     {
-      /* Extract the next path segment name. */
+#ifdef CONFIG_FS_LINKS
+      /* Save the current directory handle before looking up
+       * the next segment
+       */
+
+      memcpy(&parent_fhandle, fhandle, sizeof(parent_fhandle));
+#endif
+
+      /* Extract the next path segment name */
 
       error = nfs_pathsegment(&path, buffer, &terminator);
       if (error != OK)
@@ -366,7 +627,18 @@ int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
 
           ferr("ERROR: nfs_pathsegment of \"%s\" failed after \"%s\": %d\n",
                relpath, buffer, error);
+          lib_put_tempbuffer(buffer);
           return error;
+        }
+
+      /* If we got an empty segment (e.g., from trailing slash like "a/b/"),
+       * we're done. The previous lookup already resolved the directory.
+       */
+
+      if (buffer[0] == '\0')
+        {
+          lib_put_tempbuffer(buffer);
+          return OK;
         }
 
       /* Look-up this path segment */
@@ -376,14 +648,33 @@ int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
       if (error != OK)
         {
           ferr("ERROR: nfs_lookup of \"%s\" failed at \"%s\": %d\n",
-                relpath, buffer, error);
+               relpath, buffer, error);
+          lib_put_tempbuffer(buffer);
           return error;
         }
 
-      /* If the terminator character in the path was the end of the string
-       * then we have successfully found the directory entry that describes
-       * the path.
+#ifdef CONFIG_FS_LINKS
+      /* Handle symbolic links based on position and nofollow flag.
+       * For intermediate path components, always follow.
+       * For final component, follow only if nofollow is false.
        */
+
+      tmp = fxdr_unsigned(uint32_t, obj_attributes->fa_type);
+      if (tmp == NFLNK && (terminator || !nofollow))
+        {
+          error = nfs_followlink(nmp, &parent_fhandle, fhandle,
+                                 obj_attributes, &symloop_count);
+          if (error != OK)
+            {
+              lib_put_tempbuffer(buffer);
+              return error;
+            }
+
+          /* Update type after following symlink */
+
+          tmp = fxdr_unsigned(uint32_t, obj_attributes->fa_type);
+        }
+#endif /* CONFIG_FS_LINKS */
 
       if (!terminator)
         {
@@ -392,6 +683,7 @@ int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
            * dir_attributes.
            */
 
+          lib_put_tempbuffer(buffer);
           return OK;
         }
 
@@ -400,14 +692,17 @@ int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
        * the thing that we found is, indeed, a directory.
        */
 
+#ifndef CONFIG_FS_LINKS
       tmp = fxdr_unsigned(uint32_t, obj_attributes->fa_type);
+#endif
       if (tmp != NFDIR)
         {
           /* Ooops.. we found something else */
 
           ferr("ERROR: Intermediate segment \"%s\" of \'%s\" is not a "
-               "directory\n",
-               buffer, relpath);
+                "directory\n",
+                buffer, relpath);
+          lib_put_tempbuffer(buffer);
           return -ENOTDIR;
         }
     }
@@ -430,10 +725,14 @@ int nfs_finddir(FAR struct nfsmount *nmp, FAR const char *relpath,
                 FAR struct file_handle *fhandle,
                 FAR struct nfs_fattr *attributes, FAR char *filename)
 {
-  FAR const char  *path = relpath;
-  uint32_t         tmp;
-  char             terminator;
-  int              error;
+  FAR const char    *path = relpath;
+  uint32_t           tmp;
+  char               terminator;
+  int                error;
+#ifdef CONFIG_FS_LINKS
+  struct file_handle parent_fhandle;
+  int                symloop_count = 0;
+#endif
 
   /* Verify that a path was provided */
 
@@ -452,6 +751,14 @@ int nfs_finddir(FAR struct nfsmount *nmp, FAR const char *relpath,
 
   for (; ; )
     {
+#ifdef CONFIG_FS_LINKS
+      /* Save the current directory handle before looking up the next
+       * segment
+       */
+
+      memcpy(&parent_fhandle, fhandle, sizeof(parent_fhandle));
+#endif
+
       /* Extract the next path segment name. */
 
       error = nfs_pathsegment(&path, filename, &terminator);
@@ -484,13 +791,32 @@ int nfs_finddir(FAR struct nfsmount *nmp, FAR const char *relpath,
       if (error != OK)
         {
           ferr("ERROR: fs_lookup of \"%s\" failed at \"%s\": %d\n",
-                relpath, filename, error);
+               relpath, filename, error);
           return error;
         }
 
       /* Make sure the thing that we found is, indeed, a directory. */
 
       tmp = fxdr_unsigned(uint32_t, attributes->fa_type);
+
+#ifdef CONFIG_FS_LINKS
+      if (tmp == NFLNK)
+        {
+          /* Intermediate segment is a symlink - must follow it */
+
+          error = nfs_followlink(nmp, &parent_fhandle, fhandle, attributes,
+                                 &symloop_count);
+          if (error != OK)
+            {
+              return error;
+            }
+
+          /* Update type after following symlink */
+
+          tmp = fxdr_unsigned(uint32_t, attributes->fa_type);
+        }
+#endif /* CONFIG_FS_LINKS */
+
       if (tmp != NFDIR)
         {
           /* Ooops.. we found something else */
