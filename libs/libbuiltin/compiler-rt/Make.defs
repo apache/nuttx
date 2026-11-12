@@ -98,6 +98,9 @@ endif
 ifeq ($(CONFIG_LIB_COMPILER_RT_HAS_BFLOAT16),)
   BFLOAT16_SRCS := compiler-rt/compiler-rt/lib/builtins/truncdfbf2.c
   BFLOAT16_SRCS += compiler-rt/compiler-rt/lib/builtins/truncsfbf2.c
+  BFLOAT16_SRCS += compiler-rt/compiler-rt/lib/builtins/trunctfbf2.c
+  BFLOAT16_SRCS += compiler-rt/compiler-rt/lib/builtins/truncxfbf2.c
+  BFLOAT16_SRCS += compiler-rt/compiler-rt/lib/builtins/extendbfsf2.c
   CSRCS := $(filter-out $(BFLOAT16_SRCS), $(CSRCS))
 endif
 
@@ -105,6 +108,7 @@ ifeq ($(CONFIG_ARCH_X86_64),)
   x86_80_BIT_SOURCES := divxc3.c extendxftf2.c fixxfdi.c fixxfti.c fixunsxfdi.c
   x86_80_BIT_SOURCES += fixunsxfsi.c fixunsxfti.c floatdixf.c floattixf.c floatundixf.c
   x86_80_BIT_SOURCES += floatuntixf.c mulxc3.c powixf2.c trunctfxf2.c
+  x86_80_BIT_SOURCES += extendhfxf2.c truncxfhf2.c truncxfbf2.c
   x86_80_BIT_SOURCES := $(addprefix compiler-rt/compiler-rt/lib/builtins/, $(x86_80_BIT_SOURCES))
   CSRCS := $(filter-out $(x86_80_BIT_SOURCES), $(CSRCS))
 endif
