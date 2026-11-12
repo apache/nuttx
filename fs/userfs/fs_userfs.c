@@ -221,7 +221,7 @@ static int userfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Check the path length */
 
   DEBUGASSERT(relpath != NULL);
-  pathlen = strlen(relpath);
+  pathlen = strlen(relpath) + 1;
   if (pathlen > priv->mxwrite)
     {
       return -E2BIG;
@@ -242,10 +242,10 @@ static int userfs_open(FAR struct file *filep, FAR const char *relpath,
   req->oflags = oflags;
   req->mode   = mode;
 
-  strlcpy(req->relpath, relpath, priv->mxwrite);
+  memcpy(req->relpath, relpath, pathlen);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
-                       SIZEOF_USERFS_OPEN_REQUEST_S(pathlen + 1), 0,
+                       SIZEOF_USERFS_OPEN_REQUEST_S(pathlen), 0,
                        (FAR struct sockaddr *)&priv->server,
                        sizeof(struct sockaddr_in));
   if (nsent < 0)
@@ -1187,7 +1187,7 @@ static int userfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   /* Check the path length */
 
   DEBUGASSERT(relpath != NULL);
-  pathlen = strlen(relpath);
+  pathlen = strlen(relpath) + 1;
   if (pathlen > priv->mxwrite)
     {
       return -E2BIG;
@@ -1206,10 +1206,10 @@ static int userfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   req      = (FAR struct userfs_opendir_request_s *)priv->iobuffer;
   req->req = USERFS_REQ_OPENDIR;
 
-  strlcpy(req->relpath, relpath, priv->mxwrite);
+  memcpy(req->relpath, relpath, pathlen);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
-                       SIZEOF_USERFS_OPENDIR_REQUEST_S(pathlen + 1), 0,
+                       SIZEOF_USERFS_OPENDIR_REQUEST_S(pathlen), 0,
                        (FAR struct sockaddr *)&priv->server,
                        sizeof(struct sockaddr_in));
   if (nsent < 0)
@@ -1807,7 +1807,7 @@ static int userfs_unlink(FAR struct inode *mountpt,
   /* Check the path length */
 
   DEBUGASSERT(relpath != NULL);
-  pathlen     = strlen(relpath);
+  pathlen = strlen(relpath) + 1;
   if (pathlen > priv->mxwrite)
     {
       return -E2BIG;
@@ -1826,10 +1826,10 @@ static int userfs_unlink(FAR struct inode *mountpt,
   req      = (FAR struct userfs_unlink_request_s *)priv->iobuffer;
   req->req = USERFS_REQ_UNLINK;
 
-  strlcpy(req->relpath, relpath, priv->mxwrite);
+  memcpy(req->relpath, relpath, pathlen);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
-                       SIZEOF_USERFS_UNLINK_REQUEST_S(pathlen + 1), 0,
+                       SIZEOF_USERFS_UNLINK_REQUEST_S(pathlen), 0,
                        (FAR struct sockaddr *)&priv->server,
                        sizeof(struct sockaddr_in));
   if (nsent < 0)
@@ -1899,7 +1899,7 @@ static int userfs_mkdir(FAR struct inode *mountpt,
   /* Check the path length */
 
   DEBUGASSERT(relpath != NULL);
-  pathlen = strlen(relpath);
+  pathlen = strlen(relpath) + 1;
   if (pathlen > priv->mxwrite)
     {
       return -E2BIG;
@@ -1919,10 +1919,10 @@ static int userfs_mkdir(FAR struct inode *mountpt,
   req->req  = USERFS_REQ_MKDIR;
   req->mode = mode;
 
-  strlcpy(req->relpath, relpath, priv->mxwrite);
+  memcpy(req->relpath, relpath, pathlen);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
-                       SIZEOF_USERFS_MKDIR_REQUEST_S(pathlen + 1), 0,
+                       SIZEOF_USERFS_MKDIR_REQUEST_S(pathlen), 0,
                        (FAR struct sockaddr *)&priv->server,
                        sizeof(struct sockaddr_in));
   if (nsent < 0)
@@ -1992,7 +1992,7 @@ static int userfs_rmdir(FAR struct inode *mountpt,
   /* Check the path length */
 
   DEBUGASSERT(relpath != NULL);
-  pathlen = strlen(relpath);
+  pathlen = strlen(relpath) + 1;
   if (pathlen > priv->mxwrite)
     {
       return -E2BIG;
@@ -2011,10 +2011,10 @@ static int userfs_rmdir(FAR struct inode *mountpt,
   req      = (FAR struct userfs_rmdir_request_s *)priv->iobuffer;
   req->req = USERFS_REQ_RMDIR;
 
-  strlcpy(req->relpath, relpath, priv->mxwrite);
+  memcpy(req->relpath, relpath, pathlen);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
-                       SIZEOF_USERFS_RMDIR_REQUEST_S(pathlen + 1), 0,
+                       SIZEOF_USERFS_RMDIR_REQUEST_S(pathlen), 0,
                        (FAR struct sockaddr *)&priv->server,
                        sizeof(struct sockaddr_in));
   if (nsent < 0)
@@ -2118,8 +2118,8 @@ static int userfs_rename(FAR struct inode *mountpt,
   req->req       = USERFS_REQ_RENAME;
   req->newoffset = oldpathlen;
 
-  strlcpy(req->oldrelpath, oldrelpath, oldpathlen);
-  strlcpy(&req->oldrelpath[oldpathlen], newrelpath, newpathlen);
+  memcpy(req->oldrelpath, oldrelpath, oldpathlen);
+  memcpy(&req->oldrelpath[oldpathlen], newrelpath, newpathlen);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                       SIZEOF_USERFS_RENAME_REQUEST_S(oldpathlen, newpathlen),
@@ -2192,7 +2192,7 @@ static int userfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   /* Check the path length */
 
   DEBUGASSERT(relpath != NULL);
-  pathlen = strlen(relpath);
+  pathlen = strlen(relpath) + 1;
   if (pathlen > priv->mxwrite)
     {
       return -E2BIG;
@@ -2211,10 +2211,10 @@ static int userfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   req      = (FAR struct userfs_stat_request_s *)priv->iobuffer;
   req->req = USERFS_REQ_STAT;
 
-  strlcpy(req->relpath, relpath, priv->mxwrite);
+  memcpy(req->relpath, relpath, pathlen);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
-                       SIZEOF_USERFS_STAT_REQUEST_S(pathlen + 1), 0,
+                       SIZEOF_USERFS_STAT_REQUEST_S(pathlen), 0,
                        (FAR struct sockaddr *)&priv->server,
                        sizeof(struct sockaddr_in));
   if (nsent < 0)
@@ -2288,7 +2288,7 @@ static int userfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
   /* Check the path length */
 
   DEBUGASSERT(relpath != NULL);
-  pathlen = strlen(relpath);
+  pathlen = strlen(relpath) + 1;
   if (pathlen > priv->mxwrite)
     {
       return -E2BIG;
@@ -2309,10 +2309,10 @@ static int userfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
   req->buf   = *buf;
   req->flags = flags;
 
-  strlcpy(req->relpath, relpath, priv->mxwrite);
+  memcpy(req->relpath, relpath, pathlen);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
-                       SIZEOF_USERFS_CHSTAT_REQUEST_S(pathlen + 1), 0,
+                       SIZEOF_USERFS_CHSTAT_REQUEST_S(pathlen), 0,
                        (FAR struct sockaddr *)&priv->server,
                        sizeof(struct sockaddr_in));
   if (nsent < 0)
