@@ -57,6 +57,10 @@ if(CONFIG_DRIVERS_VIRTIO_RNG)
   list(APPEND SRCS virtio-rng.c)
 endif()
 
+if(CONFIG_DRIVERS_VIRTIO_GPIO)
+  list(APPEND SRCS virtio-gpio.c)
+endif()
+
 if(CONFIG_DRIVERS_VIRTIO_RPMB)
   list(APPEND SRCS virtio-rpmb.c)
 endif()

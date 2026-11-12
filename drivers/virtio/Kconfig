@@ -175,3 +175,17 @@ config DRIVERS_VIRTIO_SPI
 		virtio_spi_get_master(), and submits transfers through the request
 		virtqueue using the Linux-compatible VirtIO SPI wire format.
 
+config DRIVERS_VIRTIO_GPIO
+	bool "Virtio GPIO support"
+	depends on IOEXPANDER
+	default n
+	select DRIVERS_VIRTIO
+	---help---
+		Enable the native VirtIO GPIO frontend driver.  It probes a VirtIO
+		GPIO device (device ID 41), exposes a NuttX ioexpander instance
+		through virtio_gpio_get_ioe(), and submits line requests through the
+		request virtqueue using the OASIS VirtIO GPIO wire format.
+
+		With IOEXPANDER_INT_ENABLE the driver also negotiates
+		VIRTIO_GPIO_F_IRQ and delivers line interrupts over the eventq;
+		without it the feature is declined and lines are polled only.
