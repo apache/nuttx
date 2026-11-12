@@ -205,7 +205,7 @@ static void ameba_spi_setbits(struct spi_dev_s *dev, int nbits);
 static uint8_t ameba_spi_status(struct spi_dev_s *dev, uint32_t devid);
 static uint32_t ameba_spi_send(struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-static void ameba_spi_exchange(struct spi_dev_s *dev,
+static int  ameba_spi_exchange(struct spi_dev_s *dev,
                                const void *txbuffer, void *rxbuffer,
                                size_t nwords);
 #else
@@ -518,13 +518,15 @@ static uint32_t ameba_spi_send(struct spi_dev_s *dev, uint32_t wd)
  * Name: ameba_spi_exchange
  ****************************************************************************/
 
-static void ameba_spi_exchange(struct spi_dev_s *dev,
+static int  ameba_spi_exchange(struct spi_dev_s *dev,
                                const void *txbuffer, void *rxbuffer,
                                size_t nwords)
 {
   struct ameba_spi_dev_s *priv = (struct ameba_spi_dev_s *)dev;
 
   ameba_spi_transfer(priv, txbuffer, rxbuffer, nwords);
+
+  return OK;
 }
 
 #else

@@ -136,7 +136,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
 static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void spi_setbits(struct spi_dev_s *dev, int nbits);
 static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd);
-static void unused_code spi_exchange(struct spi_dev_s *dev,
+static int  unused_code spi_exchange(struct spi_dev_s *dev,
                                      const void *txbuffer,
                                      void *rxbuffer,
                                      size_t nwords);
@@ -759,7 +759,7 @@ static void spi_do_exchange(struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
 #ifdef CONFIG_RP23XX_SPI_DMA
@@ -780,6 +780,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       spi_do_exchange(dev, txbuffer, rxbuffer, nwords);
     }
+
+  return OK;
 }
 
 /****************************************************************************

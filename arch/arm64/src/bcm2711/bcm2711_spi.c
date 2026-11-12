@@ -201,7 +201,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
-static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+static int  spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          void *rxbuffer, size_t nwords);
 static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
                        bool selected);
@@ -823,7 +823,7 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
  *
  ****************************************************************************/
 
-static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
   struct bcm2711_spidev_s *priv = (struct bcm2711_spidev_s *)dev;
@@ -841,6 +841,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   /* Block on semaphore until transfers are all done */
 
   nxsem_wait_uninterruptible(&priv->wait);
+
+  return OK;
 }
 
 /****************************************************************************
