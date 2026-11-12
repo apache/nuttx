@@ -485,24 +485,24 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; NCPHA=1 */
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; NCPHA=1 */
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; NCPHA=0 */
-          regval |= Z16F_ESPI_CTL_PHASE;
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; NCPHA=0 */
+            regval |= Z16F_ESPI_CTL_PHASE;
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; NCPHA=1 */
-          regval |= Z16F_ESPI_CTL_CLKPOL;
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; NCPHA=1 */
+            regval |= Z16F_ESPI_CTL_CLKPOL;
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; NCPHA=0 */
-          regval |= (Z16F_ESPI_CTL_PHASE | Z16F_ESPI_CTL_CLKPOL);
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; NCPHA=0 */
+            regval |= (Z16F_ESPI_CTL_PHASE | Z16F_ESPI_CTL_CLKPOL);
+            break;
 
-        default:
-          DEBUGPANIC();
-          return;
+          default:
+            DEBUGPANIC();
+            return;
         }
 
       spi_putreg8(priv, regval, Z16F_ESPI_CTL);

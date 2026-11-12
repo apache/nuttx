@@ -380,24 +380,24 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-          regval |= SPI_C1_CPHA;
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+            regval |= SPI_C1_CPHA;
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          regval |= SPI_C1_CPOL;
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+            regval |= SPI_C1_CPOL;
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          regval |= (SPI_C1_CPOL | SPI_C1_CPHA);
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+            regval |= (SPI_C1_CPOL | SPI_C1_CPHA);
+            break;
 
-        default:
-          DEBUGASSERT(FALSE);
-          return;
+          default:
+            DEBUGASSERT(FALSE);
+            return;
         }
 
       spi_putreg(priv, KL_SPI_C1_OFFSET, regval);

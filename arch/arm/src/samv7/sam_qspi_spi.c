@@ -235,7 +235,7 @@ static inline void qspi_flush(struct sam_spidev_s *spi)
 
   while ((qspi_getreg(spi, SAM_QSPI_SR_OFFSET) & QSPI_INT_RDRF) != 0)
     {
-       qspi_getreg(spi, SAM_QSPI_RDR_OFFSET);
+      qspi_getreg(spi, SAM_QSPI_RDR_OFFSET);
     }
 }
 
@@ -544,24 +544,24 @@ static void qspi_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-          regval |= QSPI_SCR_CPHA;
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+            regval |= QSPI_SCR_CPHA;
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          regval |= QSPI_SCR_CPOL;
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+            regval |= QSPI_SCR_CPOL;
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          regval |= (QSPI_SCR_CPOL | QSPI_SCR_CPHA);
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+            regval |= (QSPI_SCR_CPOL | QSPI_SCR_CPHA);
+            break;
 
-        default:
-          DEBUGASSERT(FALSE);
-          return;
+          default:
+            DEBUGASSERT(FALSE);
+            return;
         }
 
       qspi_putreg(spi, regval, SAM_QSPI_SCR_OFFSET);
@@ -634,6 +634,7 @@ static void qspi_spi_setbits(struct spi_dev_s *dev, int nbits)
 static uint32_t qspi_spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
+
   if (spics->nbits <= 8)
     {
       uint8_t txbyte;

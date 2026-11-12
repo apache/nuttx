@@ -258,6 +258,7 @@ static struct bl602_spi_priv_s bl602_spi_priv =
 static void bl602_dma_rx_callback(uint8_t channel, uint8_t status, void *arg)
 {
   struct bl602_spi_priv_s *priv = (struct bl602_spi_priv_s *)arg;
+
   UNUSED(channel);
   spiinfo("RX interrupt fired with status %u\n", status);
   if (status == BL602_DMA_INT_EVT_TC)
@@ -273,6 +274,7 @@ static void bl602_dma_rx_callback(uint8_t channel, uint8_t status, void *arg)
 static void bl602_dma_tx_callback(uint8_t channel, uint8_t status, void *arg)
 {
   struct bl602_spi_priv_s *priv = (struct bl602_spi_priv_s *)arg;
+
   UNUSED(channel);
   spiinfo("TX interrupt fired with status %u\n", status);
   if (status == BL602_DMA_INT_EVT_TC)
@@ -625,28 +627,28 @@ bl602_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
     {
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-          modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_SCLK_POL
-                      | SPI_CFG_CR_SCLK_PH, 0);
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+            modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_SCLK_POL
+                        | SPI_CFG_CR_SCLK_PH, 0);
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-          modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_SCLK_POL,
-                      SPI_CFG_CR_SCLK_PH);
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+            modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_SCLK_POL,
+                        SPI_CFG_CR_SCLK_PH);
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_SCLK_PH,
-                      SPI_CFG_CR_SCLK_POL);
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+            modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_SCLK_PH,
+                        SPI_CFG_CR_SCLK_POL);
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          modifyreg32(BL602_SPI_CFG, 0, SPI_CFG_CR_SCLK_POL
-                      | SPI_CFG_CR_SCLK_PH);
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+            modifyreg32(BL602_SPI_CFG, 0, SPI_CFG_CR_SCLK_POL
+                        | SPI_CFG_CR_SCLK_PH);
+            break;
 
-        default:
-          return;
+          default:
+            return;
         }
 
       priv->mode = mode;
@@ -682,23 +684,23 @@ static void bl602_spi_setbits(struct spi_dev_s *dev, int nbits)
        * will be faster.
        */
 
-    switch (nbits)
-      {
-      case 8:
+      switch (nbits)
+        {
+          case 8:
 
-        /* set valid width for each fifo entry 8 bit */
+            /* set valid width for each fifo entry 8 bit */
 
-        modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_FRAME_SIZE_MASK, 0);
-        break;
+            modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_FRAME_SIZE_MASK, 0);
+            break;
 
-      case 16:
-        modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_FRAME_SIZE_MASK,
-                    1 << SPI_CFG_CR_FRAME_SIZE_SHIFT);
-        break;
+          case 16:
+            modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_FRAME_SIZE_MASK,
+                        1 << SPI_CFG_CR_FRAME_SIZE_SHIFT);
+            break;
 
-      default:
-        return;
-      }
+          default:
+            return;
+        }
 
       priv->nbits = nbits;
     }
@@ -933,26 +935,26 @@ static int lli_list_init(struct bl602_spi_priv_s *priv,
 
       /* Configure tx side */
 
-        {
-          dma_ctrl.dst_increment = 0;
-          dma_ctrl.src_increment = 1;
-          (*tx_lli)[i].dma_ctrl = dma_ctrl;
-          (*tx_lli)[i].dst_addr = BL602_SPI_FIFO_WDATA;
-          (*tx_lli)[i].src_addr = \
-            (uint32_t)txbuffer + \
-            ((dma_ctrl.src_width + 1) * i * LLI_BUFF_SIZE);
+      {
+        dma_ctrl.dst_increment = 0;
+        dma_ctrl.src_increment = 1;
+        (*tx_lli)[i].dma_ctrl = dma_ctrl;
+        (*tx_lli)[i].dst_addr = BL602_SPI_FIFO_WDATA;
+        (*tx_lli)[i].src_addr = \
+          (uint32_t)txbuffer + \
+          ((dma_ctrl.src_width + 1) * i * LLI_BUFF_SIZE);
 
-          /* Assume last entry, we will overwrite as needed. */
+        /* Assume last entry, we will overwrite as needed. */
 
-          (*tx_lli)[i].next_lli = 0;
+        (*tx_lli)[i].next_lli = 0;
 
-          /* Link entry */
+        /* Link entry */
 
-          if (i != 0)
-            {
-              (*tx_lli)[i - 1].next_lli = (uint32_t)&(*tx_lli)[i];
-            }
-        }
+        if (i != 0)
+          {
+            (*tx_lli)[i - 1].next_lli = (uint32_t)&(*tx_lli)[i];
+          }
+      }
 
       /* Configure rx side */
 
@@ -1014,9 +1016,9 @@ static void bl602_spi_dma_exchange(struct bl602_spi_priv_s *priv,
                                    void *rxbuffer, uint32_t nwords)
 {
   int err;
-  #ifdef CONFIG_DEBUG_DMA_INFO
-    struct bl602_dmaregs_s regs;
-  #endif
+#ifdef CONFIG_DEBUG_DMA_INFO
+  struct bl602_dmaregs_s regs;
+#endif
 
   struct bl602_lli_ctrl_s *tx_lli;
   struct bl602_lli_ctrl_s *rx_lli;
@@ -1470,9 +1472,9 @@ void bl602_spi_dma_init(struct spi_dev_s *dev)
 {
   struct bl602_spi_priv_s *priv = (struct bl602_spi_priv_s *)dev;
 
-  #ifdef CONFIG_DEBUG_DMA_INFO
-    struct bl602_dmaregs_s regs;
-  #endif
+#ifdef CONFIG_DEBUG_DMA_INFO
+  struct bl602_dmaregs_s regs;
+#endif
 
   /* NOTE DMA channels are limited on this device and not all SPI devices
    * care about the RX side.  Consider making the RX channel optional.
@@ -1658,12 +1660,12 @@ struct spi_dev_s *bl602_spibus_initialize(int port)
   switch (port)
     {
 #ifdef CONFIG_BL602_SPI0
-    case 0:
-      priv = &bl602_spi_priv;
-      break;
+      case 0:
+        priv = &bl602_spi_priv;
+        break;
 #endif
-  default:
-    return NULL;
+      default:
+        return NULL;
     }
 
   spi_dev = (struct spi_dev_s *)priv;

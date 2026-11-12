@@ -560,7 +560,7 @@ static inline void spi_flush(struct sam_spidev_s *spi)
 
   while ((spi_getreg(spi, SAM_SPI_SR_OFFSET) & SPI_INT_RDRF) != 0)
     {
-       spi_getreg(spi, SAM_SPI_RDR_OFFSET);
+      spi_getreg(spi, SAM_SPI_RDR_OFFSET);
     }
 }
 
@@ -724,6 +724,7 @@ static void spi_dma_sampledone(struct sam_spics_s *spics)
 static void spi_dmatimeout(wdparm_t arg)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)arg;
+
   DEBUGASSERT(spics != NULL);
 
   /* Sample DMA registers at the time of the timeout */
@@ -762,6 +763,7 @@ static void spi_dmatimeout(wdparm_t arg)
 static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)arg;
+
   DEBUGASSERT(spics != NULL);
 
   /* Cancel the watchdog timeout */
@@ -811,6 +813,7 @@ static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 static void spi_txcallback(DMA_HANDLE handle, void *arg, int result)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)arg;
+
   DEBUGASSERT(spics != NULL);
 
   spi_txdma_sample(spics, DMA_CALLBACK);
@@ -842,6 +845,7 @@ static inline uintptr_t spi_regaddr(struct sam_spics_s *spics,
                                     unsigned int offset)
 {
   struct sam_spidev_s *spi = spi_device(spics);
+
   return spi->base + offset;
 }
 #endif
@@ -1099,24 +1103,24 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; NCPHA=1 */
-          regval |= SPI_CSR_NCPHA;
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; NCPHA=1 */
+            regval |= SPI_CSR_NCPHA;
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; NCPHA=0 */
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; NCPHA=0 */
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; NCPHA=1 */
-          regval |= (SPI_CSR_CPOL | SPI_CSR_NCPHA);
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; NCPHA=1 */
+            regval |= (SPI_CSR_CPOL | SPI_CSR_NCPHA);
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; NCPHA=0 */
-          regval |= SPI_CSR_CPOL;
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; NCPHA=0 */
+            regval |= SPI_CSR_CPOL;
+            break;
 
-        default:
-          DEBUGASSERT(FALSE);
-          return;
+          default:
+            DEBUGASSERT(FALSE);
+            return;
         }
 
       spi_putreg(spi, regval, offset);
@@ -1579,7 +1583,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                      spi_dmatimeout, (wdparm_t)spics);
       if (ret < 0)
         {
-           spierr("ERROR: wd_start failed: %d\n", ret);
+          spierr("ERROR: wd_start failed: %d\n", ret);
         }
 
       /* Wait for the DMA complete */

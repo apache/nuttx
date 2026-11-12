@@ -479,6 +479,7 @@ static uint32_t ssi_disable(struct tiva_ssidev_s *priv)
 static void ssi_enable(struct tiva_ssidev_s *priv, uint32_t enable)
 {
   uint32_t regval = ssi_getreg(priv, TIVA_SSI_CR1_OFFSET);
+
   regval &= ~SSI_CR1_SSE;
   regval  |= (enable & SSI_CR1_SSE);
   ssi_putreg(priv, TIVA_SSI_CR1_OFFSET, regval);
@@ -511,6 +512,7 @@ static void ssi_txnull(struct tiva_ssidev_s *priv)
 static void ssi_txuint16(struct tiva_ssidev_s *priv)
 {
   uint16_t *ptr    = (uint16_t *)priv->txbuffer;
+
   spiinfo("TX: %p->%04x\n", ptr, *ptr);
   ssi_putreg(priv, TIVA_SSI_DR_OFFSET, (uint32_t)(*ptr++));
   priv->txbuffer = (void *)ptr;
@@ -519,6 +521,7 @@ static void ssi_txuint16(struct tiva_ssidev_s *priv)
 static void ssi_txuint8(struct tiva_ssidev_s *priv)
 {
   uint8_t *ptr   = (uint8_t *)priv->txbuffer;
+
   spiinfo("TX: %p->%02x\n", ptr, *ptr);
   ssi_putreg(priv, TIVA_SSI_DR_OFFSET, (uint32_t)(*ptr++));
   priv->txbuffer = (void *)ptr;
@@ -545,6 +548,7 @@ static void ssi_rxnull(struct tiva_ssidev_s *priv)
 {
 #ifdef CONFIG_DEBUG_SPI_INFO
   uint32_t regval  = ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
+
   spiinfo("RX: discard %04x\n", regval);
 #else
   ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
@@ -554,6 +558,7 @@ static void ssi_rxnull(struct tiva_ssidev_s *priv)
 static void ssi_rxuint16(struct tiva_ssidev_s *priv)
 {
   uint16_t *ptr    = (uint16_t *)priv->rxbuffer;
+
   *ptr           = (uint16_t)ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
   spiinfo("RX: %p<-%04x\n", ptr, *ptr);
   priv->rxbuffer = (void *)(++ptr);
@@ -562,6 +567,7 @@ static void ssi_rxuint16(struct tiva_ssidev_s *priv)
 static void ssi_rxuint8(struct tiva_ssidev_s *priv)
 {
   uint8_t *ptr   = (uint8_t *)priv->rxbuffer;
+
   *ptr           = (uint8_t)ssi_getreg(priv, TIVA_SSI_DR_OFFSET);
   spiinfo("RX: %p<-%02x\n", ptr, *ptr);
   priv->rxbuffer = (void *)(++ptr);
@@ -670,7 +676,7 @@ static int ssi_performtx(struct tiva_ssidev_s *priv)
           for (; ntxd < priv->ntxwords && !ssi_txfifofull(priv); ntxd++)
 #endif
             {
-               priv->txword(priv);
+              priv->txword(priv);
             }
 
           /* Update the count of words to be transferred */
@@ -1242,24 +1248,24 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv,
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0 CPHA=0 */
-          modebits = 0;
-          break;
+          case SPIDEV_MODE0: /* CPOL=0 CPHA=0 */
+            modebits = 0;
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0 CPHA=1 */
-          modebits = SSI_CR0_SPH;
-          break;
+          case SPIDEV_MODE1: /* CPOL=0 CPHA=1 */
+            modebits = SSI_CR0_SPH;
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1 CPHA=0 */
-          modebits = SSI_CR0_SPO;
-         break;
+          case SPIDEV_MODE2: /* CPOL=1 CPHA=0 */
+            modebits = SSI_CR0_SPO;
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1 CPHA=1 */
-          modebits = SSI_CR0_SPH | SSI_CR0_SPO;
-          break;
+          case SPIDEV_MODE3: /* CPOL=1 CPHA=1 */
+            modebits = SSI_CR0_SPH | SSI_CR0_SPO;
+            break;
 
-        default:
-          return;
+          default:
+            return;
         }
 
       /* Then set the selected mode: Freescale SPI format, mode0-3 */
@@ -1391,6 +1397,7 @@ static void ssi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
+
   ssi_transfer(priv, txbuffer, rxbuffer, nwords);
 }
 #endif
@@ -1420,6 +1427,7 @@ static void ssi_sndblock(struct spi_dev_s *dev, const void *buffer,
                          size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
+
   ssi_transfer(priv, buffer, NULL, nwords);
 }
 #endif
@@ -1449,6 +1457,7 @@ static void ssi_recvblock(struct spi_dev_s *dev, void *buffer,
                           size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
+
   ssi_transfer(priv, NULL, buffer, nwords);
 }
 #endif
@@ -1492,126 +1501,126 @@ struct spi_dev_s *tiva_ssibus_initialize(int port)
   switch (port)
     {
 #ifdef CONFIG_TIVA_SSI0
-    case 0:
+      case 0:
 
-      /* Select SSI0 */
+        /* Select SSI0 */
 
-      priv = &g_ssidev[SSI0_NDX];
+        priv = &g_ssidev[SSI0_NDX];
 
-      /* Enable power and clocking to the SSI0 peripheral.
-       *
-       * - Enable Power (TM4C129 family only):  Applies power (only) to the
-       *   SSI0 peripheral.  This is not an essential step since enabling
-       *   clocking will also apply power.  The only significance is that
-       *   the SSI0 state will be retained if the SSI0 clocking is
-       *   subsequently disabled.
-       * - Enable Clocking (All families):  Applies both power and clocking
-       *   to the SSI0 peripheral, bringing it a fully functional state.
-       */
+        /* Enable power and clocking to the SSI0 peripheral.
+         *
+         * - Enable Power (TM4C129 family only):  Applies power (only) to the
+         *   SSI0 peripheral.  This is not an essential step since enabling
+         *   clocking will also apply power.  The only significance is that
+         *   the SSI0 state will be retained if the SSI0 clocking is
+         *   subsequently disabled.
+         * - Enable Clocking (All families):  Applies both power and clocking
+         *   to the SSI0 peripheral, bringing it a fully functional state.
+         */
 
-      tiva_ssi0_enablepwr();
-      tiva_ssi0_enableclk();
+        tiva_ssi0_enablepwr();
+        tiva_ssi0_enableclk();
 
-      /* Configure SSI0 GPIOs (NOTE that SSI0Fss is not initialized here,
-       * the logic in this file makes no assumptions about chip select).
-       */
+        /* Configure SSI0 GPIOs (NOTE that SSI0Fss is not initialized here,
+         * the logic in this file makes no assumptions about chip select).
+         */
 
-      tiva_configgpio(GPIO_SSI0_CLK);  /* PA2: SSI0 clock (SSI0Clk) */
-      tiva_configgpio(GPIO_SSI0_RX);   /* PA4: SSI0 receive (SSI0Rx) */
-      tiva_configgpio(GPIO_SSI0_TX);   /* PA5: SSI0 transmit (SSI0Tx) */
-      break;
+        tiva_configgpio(GPIO_SSI0_CLK);  /* PA2: SSI0 clock (SSI0Clk) */
+        tiva_configgpio(GPIO_SSI0_RX);   /* PA4: SSI0 receive (SSI0Rx) */
+        tiva_configgpio(GPIO_SSI0_TX);   /* PA5: SSI0 transmit (SSI0Tx) */
+        break;
 #endif /* CONFIG_TIVA_SSI0 */
 
 #ifdef CONFIG_TIVA_SSI1
-    case 1:
+      case 1:
 
-      /* Select SSI1 */
+        /* Select SSI1 */
 
-      priv = &g_ssidev[SSI1_NDX];
+        priv = &g_ssidev[SSI1_NDX];
 
-      /* Enable power and clocking to the SSI1 peripheral.
-       *
-       * - Enable Power (TM4C129 family only):  Applies power (only) to the
-       *   SSI1 peripheral.  This is not an essential step since enabling
-       *   clocking will also apply power.  The only significance is that
-       *   the SSI1 state will be retained if the SSI1 clocking is
-       *   subsequently disabled.
-       * - Enable Clocking (All families):  Applies both power and clocking
-       *   to the SSI1 peripheral, bringing it a fully functional state.
-       */
+        /* Enable power and clocking to the SSI1 peripheral.
+         *
+         * - Enable Power (TM4C129 family only):  Applies power (only) to the
+         *   SSI1 peripheral.  This is not an essential step since enabling
+         *   clocking will also apply power.  The only significance is that
+         *   the SSI1 state will be retained if the SSI1 clocking is
+         *   subsequently disabled.
+         * - Enable Clocking (All families):  Applies both power and clocking
+         *   to the SSI1 peripheral, bringing it a fully functional state.
+         */
 
-      tiva_ssi1_enablepwr();
-      tiva_ssi1_enableclk();
+        tiva_ssi1_enablepwr();
+        tiva_ssi1_enableclk();
 
-      /* Configure SSI1 GPIOs (except for SSI1Fss) */
+        /* Configure SSI1 GPIOs (except for SSI1Fss) */
 
-      tiva_configgpio(GPIO_SSI1_CLK);  /* PE0: SSI1 clock (SSI1Clk) */
-      tiva_configgpio(GPIO_SSI1_RX);   /* PE2: SSI1 receive (SSI1Rx) */
-      tiva_configgpio(GPIO_SSI1_TX);   /* PE3: SSI1 transmit (SSI1Tx) */
-      break;
+        tiva_configgpio(GPIO_SSI1_CLK);  /* PE0: SSI1 clock (SSI1Clk) */
+        tiva_configgpio(GPIO_SSI1_RX);   /* PE2: SSI1 receive (SSI1Rx) */
+        tiva_configgpio(GPIO_SSI1_TX);   /* PE3: SSI1 transmit (SSI1Tx) */
+        break;
 #endif /* CONFIG_TIVA_SSI1 */
 
 #ifdef CONFIG_TIVA_SSI2
-    case 2:
+      case 2:
 
-      /* Select SSI2 */
+        /* Select SSI2 */
 
-      priv = &g_ssidev[SSI2_NDX];
+        priv = &g_ssidev[SSI2_NDX];
 
-      /* Enable power and clocking to the SSI2 peripheral.
-       *
-       * - Enable Power (TM4C129 family only):  Applies power (only) to the
-       *   SSI2 peripheral.  This is not an essential step since enabling
-       *   clocking will also apply power.  The only significance is that
-       *   the SSI2 state will be retained if the SSI2 clocking is
-       *   subsequently disabled.
-       * - Enable Clocking (All families):  Applies both power and clocking
-       *   to the SSI2 peripheral, bringing it a fully functional state.
-       */
+        /* Enable power and clocking to the SSI2 peripheral.
+         *
+         * - Enable Power (TM4C129 family only):  Applies power (only) to the
+         *   SSI2 peripheral.  This is not an essential step since enabling
+         *   clocking will also apply power.  The only significance is that
+         *   the SSI2 state will be retained if the SSI2 clocking is
+         *   subsequently disabled.
+         * - Enable Clocking (All families):  Applies both power and clocking
+         *   to the SSI2 peripheral, bringing it a fully functional state.
+         */
 
-      tiva_ssi2_enablepwr();
-      tiva_ssi2_enableclk();
+        tiva_ssi2_enablepwr();
+        tiva_ssi2_enableclk();
 
-      /* Configure SSI2 GPIOs (except for SSI2Fss) */
+        /* Configure SSI2 GPIOs (except for SSI2Fss) */
 
-      tiva_configgpio(GPIO_SSI2_CLK);  /* PE0: SSI2 clock (SSI2Clk) */
-      tiva_configgpio(GPIO_SSI2_RX);   /* PE2: SSI2 receive (SSI2Rx) */
-      tiva_configgpio(GPIO_SSI2_TX);   /* PE3: SSI2 transmit (SSI2Tx) */
-      break;
+        tiva_configgpio(GPIO_SSI2_CLK);  /* PE0: SSI2 clock (SSI2Clk) */
+        tiva_configgpio(GPIO_SSI2_RX);   /* PE2: SSI2 receive (SSI2Rx) */
+        tiva_configgpio(GPIO_SSI2_TX);   /* PE3: SSI2 transmit (SSI2Tx) */
+        break;
 #endif /* CONFIG_TIVA_SSI2 */
 
 #ifdef CONFIG_TIVA_SSI3
-    case 3:
+      case 3:
 
-      /* Select SSI3 */
+        /* Select SSI3 */
 
-      priv = &g_ssidev[SSI3_NDX];
+        priv = &g_ssidev[SSI3_NDX];
 
-      /* Enable power and clocking to the SSI3 peripheral.
-       *
-       * - Enable Power (TM4C129 family only):  Applies power (only) to the
-       *   SSI3 peripheral.  This is not an essential step since enabling
-       *   clocking will also apply power.  The only significance is that
-       *   the SSI3 state will be retained if the SSI3 clocking is
-       *   subsequently disabled.
-       * - Enable Clocking (All families):  Applies both power and clocking
-       *   to the SSI3 peripheral, bringing it a fully functional state.
-       */
+        /* Enable power and clocking to the SSI3 peripheral.
+         *
+         * - Enable Power (TM4C129 family only):  Applies power (only) to the
+         *   SSI3 peripheral.  This is not an essential step since enabling
+         *   clocking will also apply power.  The only significance is that
+         *   the SSI3 state will be retained if the SSI3 clocking is
+         *   subsequently disabled.
+         * - Enable Clocking (All families):  Applies both power and clocking
+         *   to the SSI3 peripheral, bringing it a fully functional state.
+         */
 
-      tiva_ssi3_enablepwr();
-      tiva_ssi3_enableclk();
+        tiva_ssi3_enablepwr();
+        tiva_ssi3_enableclk();
 
-      /* Configure SSI3 GPIOs (except for SSI3Fss) */
+        /* Configure SSI3 GPIOs (except for SSI3Fss) */
 
-      tiva_configgpio(GPIO_SSI3_CLK);  /* PE0: SSI3 clock (SSI3Clk) */
-      tiva_configgpio(GPIO_SSI3_RX);   /* PE2: SSI3 receive (SSI3Rx) */
-      tiva_configgpio(GPIO_SSI3_TX);   /* PE3: SSI3 transmit (SSI3Tx) */
-      break;
+        tiva_configgpio(GPIO_SSI3_CLK);  /* PE0: SSI3 clock (SSI3Clk) */
+        tiva_configgpio(GPIO_SSI3_RX);   /* PE2: SSI3 receive (SSI3Rx) */
+        tiva_configgpio(GPIO_SSI3_TX);   /* PE3: SSI3 transmit (SSI3Tx) */
+        break;
 #endif /* CONFIG_TIVA_SSI3 */
 
-    default:
-      leave_critical_section(flags);
-      return NULL;
+      default:
+        leave_critical_section(flags);
+        return NULL;
     }
 
   /* Initialize the state structure */

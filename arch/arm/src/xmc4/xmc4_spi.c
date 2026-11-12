@@ -1234,25 +1234,25 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-          regval |= XMC4_SPI_MODE0;
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+            regval |= XMC4_SPI_MODE0;
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-          regval |= XMC4_SPI_MODE1;
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+            regval |= XMC4_SPI_MODE1;
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          regval |= XMC4_SPI_MODE2;
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+            regval |= XMC4_SPI_MODE2;
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          regval |= XMC4_SPI_MODE3;
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+            regval |= XMC4_SPI_MODE3;
+            break;
 
-        default:
-          DEBUGASSERT(FALSE);
-          return;
+          default:
+            DEBUGASSERT(FALSE);
+            return;
         }
 
       spi_putreg(spi, regval, XMC4_USIC_BRG_OFFSET);
@@ -1685,7 +1685,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                      spi_dmatimeout, (wdparm_t)spics);
       if (ret != OK)
         {
-           spierr("ERROR: wd_start failed: %d\n", ret);
+          spierr("ERROR: wd_start failed: %d\n", ret);
         }
 
       /* Wait for the DMA complete */

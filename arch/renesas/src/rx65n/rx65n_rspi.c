@@ -811,6 +811,7 @@ static void rspi_txnull(struct rx65n_rspidev_s *priv)
 static void rspi_txuint32(struct rx65n_rspidev_s *priv)
 {
   uint32_t *ptr = (uint32_t *)priv->txbuffer;
+
   rspi_putreg32(priv, RX65N_RSPI_SPDR_OFFSET, *ptr++);
   priv->txbuffer = (void *)ptr;
 }
@@ -818,6 +819,7 @@ static void rspi_txuint32(struct rx65n_rspidev_s *priv)
 static void rspi_txuint16(struct rx65n_rspidev_s *priv)
 {
   uint16_t *ptr = (uint16_t *)priv->txbuffer;
+
   rspi_putreg16(priv, RX65N_RSPI_SPDR_OFFSET, *ptr++);
   priv->txbuffer = (void *)ptr;
 }
@@ -825,6 +827,7 @@ static void rspi_txuint16(struct rx65n_rspidev_s *priv)
 static void rspi_txuint8(struct rx65n_rspidev_s *priv)
 {
   uint8_t *ptr = (uint8_t *)priv->txbuffer;
+
   rspi_putreg8(priv, RX65N_RSPI_SPDR_OFFSET, *ptr++);
   priv->txbuffer = (void *)ptr;
 }
@@ -856,6 +859,7 @@ static void rspi_rxnull(struct rx65n_rspidev_s *priv)
 static void rspi_rxuint32(struct rx65n_rspidev_s *priv)
 {
   uint32_t *ptr = (uint32_t *)priv->rxbuffer;
+
   *ptr++ = (uint32_t)rspi_getreg32(priv, RX65N_RSPI_SPDR_OFFSET);
   priv->rxbuffer = (void *)ptr;
 }
@@ -863,6 +867,7 @@ static void rspi_rxuint32(struct rx65n_rspidev_s *priv)
 static void rspi_rxuint16(struct rx65n_rspidev_s *priv)
 {
   uint16_t *ptr = (uint16_t *)priv->rxbuffer;
+
   *ptr++ = (uint16_t)rspi_getreg16(priv, RX65N_RSPI_SPDR_OFFSET);
   priv->rxbuffer = (void *)ptr;
 }
@@ -870,6 +875,7 @@ static void rspi_rxuint16(struct rx65n_rspidev_s *priv)
 static void rspi_rxuint8(struct rx65n_rspidev_s *priv)
 {
   uint8_t *ptr = (uint8_t *)priv->rxbuffer;
+
   *ptr++ = (uint8_t)rspi_getreg8(priv, RX65N_RSPI_SPDR_OFFSET);
   priv->rxbuffer = (void *)ptr;
 }
@@ -1443,7 +1449,7 @@ static void rspi_errhandle(struct rx65n_rspidev_s *priv, uint8_t bus)
         {
           if (RSPI_EVT_ERR_UNDEF == event)
             {
-                event = RSPI_EVT_ERR_UNDER_RUN;
+              event = RSPI_EVT_ERR_UNDER_RUN;
             }
 
           /* Clear error source : MODF flag and UDRF */
@@ -1455,7 +1461,7 @@ static void rspi_errhandle(struct rx65n_rspidev_s *priv, uint8_t bus)
         {
           if (RSPI_EVT_ERR_UNDEF == event)
             {
-                event = RSPI_EVT_ERR_MODE_FAULT;
+              event = RSPI_EVT_ERR_MODE_FAULT;
             }
 
           /* Clear error source : MODF flag */
@@ -1469,7 +1475,7 @@ static void rspi_errhandle(struct rx65n_rspidev_s *priv, uint8_t bus)
     {
       if (RSPI_EVT_ERR_UNDEF == event)
         {
-           event = RSPI_EVT_ERR_PARITY;
+          event = RSPI_EVT_ERR_PARITY;
         }
 
       /* Clear error source: PERF flag */
@@ -1987,6 +1993,7 @@ static void rspi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                           void *rxbuffer, size_t nwords)
 {
   struct rx65n_rspidev_s *priv = (struct rx65n_rspidev_s *)dev;
+
   rspi_transfer(priv, txbuffer, rxbuffer, nwords);
 }
 #endif
@@ -2016,6 +2023,7 @@ static void rspi_sndblock(struct spi_dev_s *dev, const void *buffer,
                           size_t nwords)
 {
   struct rx65n_rspidev_s *priv = (struct rx65n_rspidev_s *)dev;
+
   rspi_transfer(priv, buffer, NULL, nwords);
 }
 #endif
@@ -2045,6 +2053,7 @@ static void rspi_recvblock(struct spi_dev_s *dev, void *buffer,
                            size_t nwords)
 {
   struct rx65n_rspidev_s *priv = (struct rx65n_rspidev_s *)dev;
+
   rspi_transfer(priv, NULL, buffer, nwords);
 }
 #endif

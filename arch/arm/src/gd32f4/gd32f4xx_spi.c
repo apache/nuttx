@@ -684,43 +684,43 @@ static void gd32_spi_reset(uint32_t spibase)
 
   switch (spibase)
     {
-    default:
-      return;
+      default:
+        return;
 #ifdef CONFIG_GD32F4_SPI0
-    case GD32_SPI0:
-      rcu_rst = RCU_APB2RST_SPI0RST;
-      regaddr = GD32_RCU_APB2RST;
-      break;
+      case GD32_SPI0:
+        rcu_rst = RCU_APB2RST_SPI0RST;
+        regaddr = GD32_RCU_APB2RST;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI1
-    case GD32_SPI1:
-      rcu_rst = RCU_APB1RST_SPI1RST;
-      regaddr = GD32_RCU_APB1RST;
-      break;
+      case GD32_SPI1:
+        rcu_rst = RCU_APB1RST_SPI1RST;
+        regaddr = GD32_RCU_APB1RST;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI2
-    case GD32_SPI2:
-      rcu_rst = RCU_APB1RST_SPI2RST;
-      regaddr = GD32_RCU_APB1RST;
-      break;
+      case GD32_SPI2:
+        rcu_rst = RCU_APB1RST_SPI2RST;
+        regaddr = GD32_RCU_APB1RST;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI3
-    case GD32_SPI3:
-      rcu_rst = RCU_APB2RST_SPI3RST;
-      regaddr = GD32_RCU_APB2RST;
-      break;
+      case GD32_SPI3:
+        rcu_rst = RCU_APB2RST_SPI3RST;
+        regaddr = GD32_RCU_APB2RST;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI4
-    case GD32_SPI4:
-      rcu_rst = RCU_APB2RST_SPI4RST;
-      regaddr = GD32_RCU_APB2RST;
-      break;
+      case GD32_SPI4:
+        rcu_rst = RCU_APB2RST_SPI4RST;
+        regaddr = GD32_RCU_APB2RST;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI5
-    case GD32_SPI5:
-      rcu_rst = RCU_APB2RST_SPI5RST;
-      regaddr = GD32_RCU_APB2RST;
-      break;
+      case GD32_SPI5:
+        rcu_rst = RCU_APB2RST_SPI5RST;
+        regaddr = GD32_RCU_APB2RST;
+        break;
 #endif
     }
 
@@ -749,43 +749,43 @@ static void gd32_spi_clock_enable(uint32_t spibase)
 
   switch (spibase)
     {
-    default:
-      return;
+      default:
+        return;
 #ifdef CONFIG_GD32F4_SPI0
-    case GD32_SPI0:
-      rcu_en = RCU_APB2EN_SPI0EN;
-      regaddr = GD32_RCU_APB2EN;
-      break;
+      case GD32_SPI0:
+        rcu_en = RCU_APB2EN_SPI0EN;
+        regaddr = GD32_RCU_APB2EN;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI1
-    case GD32_SPI1:
-      rcu_en = RCU_APB1EN_SPI1EN;
-      regaddr = GD32_RCU_APB1EN;
-      break;
+      case GD32_SPI1:
+        rcu_en = RCU_APB1EN_SPI1EN;
+        regaddr = GD32_RCU_APB1EN;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI2
-    case GD32_SPI2:
-      rcu_en = RCU_APB1EN_SPI2EN;
-      regaddr = GD32_RCU_APB1EN;
-      break;
+      case GD32_SPI2:
+        rcu_en = RCU_APB1EN_SPI2EN;
+        regaddr = GD32_RCU_APB1EN;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI3
-    case GD32_SPI3:
-      rcu_en = RCU_APB2EN_SPI3EN;
-      regaddr = GD32_RCU_APB2EN;
-      break;
+      case GD32_SPI3:
+        rcu_en = RCU_APB2EN_SPI3EN;
+        regaddr = GD32_RCU_APB2EN;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI4
-    case GD32_SPI4:
-      rcu_en = RCU_APB2EN_SPI4EN;
-      regaddr = GD32_RCU_APB2EN;
-      break;
+      case GD32_SPI4:
+        rcu_en = RCU_APB2EN_SPI4EN;
+        regaddr = GD32_RCU_APB2EN;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI5
-    case GD32_SPI5:
-      rcu_en = RCU_APB2EN_SPI5EN;
-      regaddr = GD32_RCU_APB2EN;
-      break;
+      case GD32_SPI5:
+        rcu_en = RCU_APB2EN_SPI5EN;
+        regaddr = GD32_RCU_APB2EN;
+        break;
 #endif
     }
 
@@ -810,43 +810,43 @@ static void gd32_spi_clock_disable(uint32_t spibase)
 
   switch (spibase)
     {
-    default:
-      return;
+      default:
+        return;
 #ifdef CONFIG_GD32F4_SPI0
-    case GD32_SPI0:
-      rcu_en = RCU_APB2EN_SPI0EN;
-      regaddr = GD32_RCU_APB2EN;
-      break;
+      case GD32_SPI0:
+        rcu_en = RCU_APB2EN_SPI0EN;
+        regaddr = GD32_RCU_APB2EN;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI1
-    case GD32_SPI1:
-      rcu_en = RCU_APB1EN_SPI1EN;
-      regaddr = GD32_RCU_APB1EN;
-      break;
+      case GD32_SPI1:
+        rcu_en = RCU_APB1EN_SPI1EN;
+        regaddr = GD32_RCU_APB1EN;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI2
-    case GD32_SPI2:
-      rcu_en = RCU_APB1EN_SPI2EN;
-      regaddr = GD32_RCU_APB1EN;
-      break;
+      case GD32_SPI2:
+        rcu_en = RCU_APB1EN_SPI2EN;
+        regaddr = GD32_RCU_APB1EN;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI3
-    case GD32_SPI3:
-      rcu_en = RCU_APB2EN_SPI3EN;
-      regaddr = GD32_RCU_APB2EN;
-      break;
+      case GD32_SPI3:
+        rcu_en = RCU_APB2EN_SPI3EN;
+        regaddr = GD32_RCU_APB2EN;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI4
-    case GD32_SPI4:
-      rcu_en = RCU_APB2EN_SPI4EN;
-      regaddr = GD32_RCU_APB2EN;
-      break;
+      case GD32_SPI4:
+        rcu_en = RCU_APB2EN_SPI4EN;
+        regaddr = GD32_RCU_APB2EN;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI5
-    case GD32_SPI5:
-      rcu_en = RCU_APB2EN_SPI5EN;
-      regaddr = GD32_RCU_APB2EN;
-      break;
+      case GD32_SPI5:
+        rcu_en = RCU_APB2EN_SPI5EN;
+        regaddr = GD32_RCU_APB2EN;
+        break;
 #endif
     }
 
@@ -939,6 +939,7 @@ static void spi_modifyreg(struct gd32_spidev_s *priv, uint32_t offset,
                           uint16_t setbits, uint16_t clrbits)
 {
   uint32_t regval;
+
   regval = spi_getreg(priv, offset);
   regval &= ~clrbits;
   regval |= setbits;
@@ -1206,30 +1207,30 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CKPL=0, CKPH=0 */
-          break;
+          case SPIDEV_MODE0: /* CKPL=0, CKPH=0 */
+            break;
 
-        case SPIDEV_MODE1: /* CKPL=0, CKPH=1 */
-          regval0 |= SPI_CTL0_CKPH;
-          break;
+          case SPIDEV_MODE1: /* CKPL=0, CKPH=1 */
+            regval0 |= SPI_CTL0_CKPH;
+            break;
 
-        case SPIDEV_MODE2: /* CKPL=1, CKPH=0 */
-          regval0 |= SPI_CTL0_CKPL;
-          break;
+          case SPIDEV_MODE2: /* CKPL=1, CKPH=0 */
+            regval0 |= SPI_CTL0_CKPL;
+            break;
 
-        case SPIDEV_MODE3: /* CKPL=1, CKPH=1 */
-          regval0 |= (SPI_CTL0_CKPH | SPI_CTL0_CKPL);
-          break;
+          case SPIDEV_MODE3: /* CKPL=1, CKPH=1 */
+            regval0 |= (SPI_CTL0_CKPH | SPI_CTL0_CKPL);
+            break;
 
 #ifdef SPI_TMOD_EN    /* If MCU TI Synchronous Serial Frame Format enable */
-        case SPIDEV_MODETI:
-          regval0 = (SPI_CTL0_CKPH | SPI_CTL0_CKPL);
-          regval1 | SPI_CTL1_TMOD;
-          break;
+          case SPIDEV_MODETI:
+            regval0 = (SPI_CTL0_CKPH | SPI_CTL0_CKPL);
+            regval1 | SPI_CTL1_TMOD;
+            break;
 #endif
 
-        default:
-          return;
+          default:
+            return;
         }
 
       spi_modifyreg(priv, GD32_SPI_CTL0_OFFSET, 0, SPI_CTL0_SPIEN);
@@ -1451,6 +1452,7 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
 #endif
 {
   struct gd32_spidev_s *priv = (struct gd32_spidev_s *)dev;
+
   DEBUGASSERT(priv && priv->spibase);
 
   uint8_t        *brxptr = (uint8_t *)rxbuffer;
@@ -1582,76 +1584,76 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       return;
     }
 
-    {
-      spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n",
-               txbuffer, rxbuffer, nwords);
+  {
+    spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n",
+             txbuffer, rxbuffer, nwords);
 
-      /* Setup DMAs */
+    /* Setup DMAs */
 
-      /* If this bus uses a in driver buffers we will incur 2 copies,
-       * The copy cost is << less the non DMA transfer time and having
-       * the buffer in the driver ensures DMA can be used. This is because
-       * the API does not support passing the buffer extent so the only
-       * extent is buffer + the transfer size. These can sizes be less than
-       * the cache line size, and not aligned and typically greater then 4
-       * bytes, which is about the break even point for the DMA IO overhead.
-       */
+    /* If this bus uses a in driver buffers we will incur 2 copies,
+     * The copy cost is << less the non DMA transfer time and having
+     * the buffer in the driver ensures DMA can be used. This is because
+     * the API does not support passing the buffer extent so the only
+     * extent is buffer + the transfer size. These can sizes be less than
+     * the cache line size, and not aligned and typically greater then 4
+     * bytes, which is about the break even point for the DMA IO overhead.
+     */
 
-      if (txbuffer && priv->txbuf)
-        {
-          if (nbytes > priv->buflen)
-            {
-              nbytes = priv->buflen;
-            }
+    if (txbuffer && priv->txbuf)
+      {
+        if (nbytes > priv->buflen)
+          {
+            nbytes = priv->buflen;
+          }
 
-          memcpy(priv->txbuf, txbuffer, nbytes);
-          txbuffer  = priv->txbuf;
-          rxbuffer  = rxbuffer ? priv->rxbuf : rxbuffer;
-        }
+        memcpy(priv->txbuf, txbuffer, nbytes);
+        txbuffer  = priv->txbuf;
+        rxbuffer  = rxbuffer ? priv->rxbuf : rxbuffer;
+      }
 
-      spi_dmarxsetup(priv, rxbuffer, &rxdummy, nwords);
-      spi_dmatxsetup(priv, txbuffer, &txdummy, nwords);
+    spi_dmarxsetup(priv, rxbuffer, &rxdummy, nwords);
+    spi_dmatxsetup(priv, txbuffer, &txdummy, nwords);
 
 #ifdef CONFIG_SPI_TRIGGER
-      /* Is deferred triggering in effect? */
+    /* Is deferred triggering in effect? */
 
-      if (!priv->defertrig)
-        {
-          /* No.. Start the DMAs */
+    if (!priv->defertrig)
+      {
+        /* No.. Start the DMAs */
 
-          spi_dmarxstart(priv);
-          spi_dmatxstart(priv);
-        }
-      else
-        {
-          /* Yes.. indicated that we are ready to be started */
+        spi_dmarxstart(priv);
+        spi_dmatxstart(priv);
+      }
+    else
+      {
+        /* Yes.. indicated that we are ready to be started */
 
-          priv->trigarmed = true;
-        }
+        priv->trigarmed = true;
+      }
 #else
-      /* Start the DMAs */
+    /* Start the DMAs */
 
-      spi_dmarxstart(priv);
-      spi_dmatxstart(priv);
+    spi_dmarxstart(priv);
+    spi_dmatxstart(priv);
 #endif
 
-      /* Then wait for each to complete */
+    /* Then wait for each to complete */
 
-      ret = spi_dmarxwait(priv);
-      if (ret < 0)
-        {
-          ret = spi_dmatxwait(priv);
-        }
+    ret = spi_dmarxwait(priv);
+    if (ret < 0)
+      {
+        ret = spi_dmatxwait(priv);
+      }
 
-      if (rxbuffer != NULL && priv->rxbuf != NULL && ret >= 0)
-        {
-          memcpy(xbuffer, priv->rxbuf, nbytes);
-        }
+    if (rxbuffer != NULL && priv->rxbuf != NULL && ret >= 0)
+      {
+        memcpy(xbuffer, priv->rxbuf, nbytes);
+      }
 
 #ifdef CONFIG_SPI_TRIGGER
-      priv->trigarmed = false;
+    priv->trigarmed = false;
 #endif
-    }
+  }
 }
 #endif /* CONFIG_GD32F4_SPI_DMA */
 
@@ -1891,7 +1893,7 @@ static void spi_dmarxsetup(struct gd32_spidev_s *priv,
           dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_DISABLE;
         }
 
-        dma_init_struct.periph_memory_width = DMA_WIDTH_16BITS_SELECT;
+      dma_init_struct.periph_memory_width = DMA_WIDTH_16BITS_SELECT;
     }
   else
     {
@@ -1907,7 +1909,7 @@ static void spi_dmarxsetup(struct gd32_spidev_s *priv,
           dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_DISABLE;
         }
 
-        dma_init_struct.periph_memory_width = DMA_WIDTH_8BITS_SELECT;
+      dma_init_struct.periph_memory_width = DMA_WIDTH_8BITS_SELECT;
     }
 
   dma_init_struct.direction = DMA_PERIPH_TO_MEMORY;
@@ -1959,7 +1961,7 @@ static void spi_dmatxsetup(struct gd32_spidev_s *priv,
           dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_DISABLE;
         }
 
-        dma_init_struct.periph_memory_width = DMA_WIDTH_16BITS_SELECT;
+      dma_init_struct.periph_memory_width = DMA_WIDTH_16BITS_SELECT;
     }
   else
     {
@@ -1975,7 +1977,7 @@ static void spi_dmatxsetup(struct gd32_spidev_s *priv,
           dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_DISABLE;
         }
 
-        dma_init_struct.periph_memory_width = DMA_WIDTH_8BITS_SELECT;
+      dma_init_struct.periph_memory_width = DMA_WIDTH_8BITS_SELECT;
     }
 
   dma_init_struct.direction = DMA_MEMORY_TO_PERIPH;
@@ -2099,60 +2101,60 @@ static void gd32_spi_gpio_config(uint32_t spibase)
 
   switch (spibase)
     {
-    default:
-      break;
+      default:
+        break;
 #ifdef CONFIG_GD32F4_SPI0
-    case GD32_SPI0:
+      case GD32_SPI0:
 
         /* Configure GPIO pins for SPI0: SCK, MISO, and MOSI */
 
         gd32_gpio_config(GPIO_SPI0_SCK_PIN);
         gd32_gpio_config(GPIO_SPI0_MISO_PIN);
         gd32_gpio_config(GPIO_SPI0_MOSI_PIN);
-      break;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI1
-    case GD32_SPI1:
+      case GD32_SPI1:
 
         /* Configure GPIO pins for SPI1: SCK, MISO, and MOSI */
 
         gd32_gpio_config(GPIO_SPI1_SCK_PIN);
         gd32_gpio_config(GPIO_SPI1_MISO_PIN);
         gd32_gpio_config(GPIO_SPI1_MOSI_PIN);
-      break;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI2
-    case GD32_SPI2:
+      case GD32_SPI2:
 
         /* Configure GPIO pins for SPI2: SCK, MISO, and MOSI */
 
         gd32_gpio_config(GPIO_SPI2_SCK_PIN);
         gd32_gpio_config(GPIO_SPI2_MISO_PIN);
         gd32_gpio_config(GPIO_SPI2_MOSI_PIN);
-      break;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI3
-    case GD32_SPI3:
+      case GD32_SPI3:
 
         /* Configure GPIO pins for SPI3: SCK, MISO, and MOSI */
 
         gd32_gpio_config(GPIO_SPI3_SCK_PIN);
         gd32_gpio_config(GPIO_SPI3_MISO_PIN);
         gd32_gpio_config(GPIO_SPI3_MOSI_PIN);
-      break;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI4
-    case GD32_SPI4:
+      case GD32_SPI4:
 
         /* Configure GPIO pins for SPI4: SCK, MISO, and MOSI */
 
         gd32_gpio_config(GPIO_SPI4_SCK_PIN);
         gd32_gpio_config(GPIO_SPI4_MISO_PIN);
         gd32_gpio_config(GPIO_SPI4_MOSI_PIN);
-      break;
+        break;
 #endif
 #ifdef CONFIG_GD32F4_SPI5
-    case GD32_SPI5:
+      case GD32_SPI5:
 
         /* Configure GPIO pins for SPI5: SCK, MISO, and MOSI */
 
@@ -2161,7 +2163,7 @@ static void gd32_spi_gpio_config(uint32_t spibase)
         gd32_gpio_config(GPIO_SPI5_MOSI_PIN);
         gd32_gpio_config(GPIO_SPI5_IO2_PIN);
         gd32_gpio_config(GPIO_SPI5_IO3_PIN);
-      break;
+        break;
 #endif
     }
 }

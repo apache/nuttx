@@ -256,7 +256,7 @@ static inline void serial_flush(struct sam_serial_spi_s *priv)
 
   while ((serial_getreg(priv, SAM_UART_SR_OFFSET) & UART_INT_RXRDY) != 0)
     {
-       serial_getreg(priv, SAM_UART_RHR_OFFSET);
+      serial_getreg(priv, SAM_UART_RHR_OFFSET);
     }
 }
 
@@ -479,24 +479,24 @@ static void serial_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=1 */
-          regval |= UART_MR_CPHA;
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=1 */
+            regval |= UART_MR_CPHA;
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=0 */
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=0 */
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=1 */
-          regval |= UART_MR_CPOL | UART_MR_CPHA;
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=1 */
+            regval |= UART_MR_CPOL | UART_MR_CPHA;
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=0 */
-          regval |= UART_MR_CPOL;
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=0 */
+            regval |= UART_MR_CPOL;
+            break;
 
-        default:
-          DEBUGASSERT(FALSE);
-          return;
+          default:
+            DEBUGASSERT(FALSE);
+            return;
         }
 
       serial_putreg(priv, SAM_UART_MR_OFFSET, regval);
