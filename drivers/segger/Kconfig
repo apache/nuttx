@@ -221,12 +221,12 @@ config NOTE_RTT_FILTER_DEFAULT_MODE
 	---help---
 		Filter mode for notertt jlink stream
 
-config SEGGER_SYSVIEW_CPUSET
-	hex "Segger System View CPU set"
+config NOTE_RTT_CPUSET
+	hex "Note RTT driver, Segger J-Link stream CPU set"
 	depends on SCHED_INSTRUMENTATION_FILTER && SMP
 	default SCHED_INSTRUMENTATION_CPUSET
 	---help---
-		CPU set for sysview
+		CPU set for notertt jlink stream
 
 config NOTE_RTT_CHANNEL
 	int "Note RTT driver, Segger J-Link stream channel"
