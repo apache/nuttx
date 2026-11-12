@@ -408,6 +408,7 @@ config ARCH_CHIP_QEMU_RV
 	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	select ARCH_HAVE_DEBUG
+	select ARCH_RISCV_NO_TCONTROL
 	---help---
 		QEMU Generic RV32/RV64 processor
 
@@ -695,6 +696,14 @@ config ARCH_RV_MMIO_BITS
 	# general fallbacks
 	default 32 if ARCH_RV32
 	default 64 if ARCH_RV64
+
+config ARCH_RISCV_NO_TCONTROL
+	bool
+	default n
+	---help---
+		tcontrol is optional in the RISC-V Debug Specification. Select
+		this for cores that do not implement it, so the trigger driver
+		does not trap when it enables M-mode triggers.
 
 config ARCH_RV_CPUID_MAP
 	bool "Enable CPUID mapping"
