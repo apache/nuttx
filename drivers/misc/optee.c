@@ -540,7 +540,7 @@ static int optee_shm_mmap(FAR struct file *filep,
       ret = optee_shm_register(priv, shm);
       if (ret < 0)
         {
-          shm->munmap(this_task()->group, entry,
+          shm->munmap(nxsched_self()->group, entry,
                       entry->vaddr, entry->length);
           optee_shm_free(shm);
         }
