@@ -33,6 +33,7 @@
 #include <stdbool.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/nuttx.h>
 
 #include "rpmsg_router.h"
 
@@ -54,7 +55,7 @@
  ****************************************************************************/
 
 #define rpmsg_router_edge_from_rdev(d) \
-  metal_container_of(d, struct rpmsg_router_edge_s, rdev)
+  container_of(d, struct rpmsg_router_edge_s, rdev)
 
 #define RPMSG_ROUTER_EDGE_NAME_SIZE (2 * RPMSG_NAME_SIZE)
 
