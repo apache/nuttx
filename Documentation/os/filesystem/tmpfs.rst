@@ -21,3 +21,21 @@ implements the optional ``mountpt_operations.permission`` hook.
 
 Access into the mount from the pseudoFS is gated by the VFS (parent and
 mountpoint ``X_OK``).  See :ref:`file-permission`.
+
+Timestamps
+==========
+
+Every tmpfs file and directory keeps ``st_atime``, ``st_mtime`` and
+``st_ctime``.  They are kept in RAM only and are lost when the volume is
+unmounted.
+
+- ``read()`` updates ``st_atime`` unless the file is opened with
+  ``O_NOATIME``.  ``mmap()`` also updates it, because tmpfs cannot trap the
+  first access to the mapping.
+- ``write()``, ``ftruncate()``, ``open()`` with ``O_TRUNC`` and ``msync()``
+  of a shared mapping update ``st_mtime`` and ``st_ctime``.
+- Creating, removing or renaming an entry updates ``st_mtime`` and
+  ``st_ctime`` of the directories involved, and ``st_ctime`` of a renamed
+  object.
+- ``utimensat()`` and ``futimens()`` set ``st_atime`` and ``st_mtime``.  Any
+  change of the times, mode or owner updates ``st_ctime``.
