@@ -30,6 +30,7 @@ config NET_LOCAL_STREAM
 config NET_LOCAL_DGRAM
 	bool "Unix domain datagram sockets"
 	default y
+	select FS_UIO
 	---help---
 		Enable support for Unix domain SOCK_DGRAM type sockets
 
