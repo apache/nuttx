@@ -45,7 +45,7 @@ FAR void *fs_heap_zalloc(size_t size) malloc_like1(1);
 FAR void *fs_heap_malloc(size_t size) malloc_like1(1);
 size_t    fs_heap_malloc_size(FAR void *mem);
 FAR void *fs_heap_realloc(FAR void *oldmem, size_t size) realloc_like(2);
-FAR void *fs_heap_memalign(size_t alignment, size_t size) malloc_like1(3);
+FAR void *fs_heap_memalign(size_t alignment, size_t size) malloc_like1(2);
 void      fs_heap_free(FAR void *mem);
 FAR char *fs_heap_strdup(FAR const char *s) malloc_like;
 FAR char *fs_heap_strndup(FAR const char *s, size_t size) malloc_like;
