@@ -248,6 +248,44 @@ const struct mountpt_operations g_tmpfs_operations =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: tmpfs_update_atime
+ ****************************************************************************/
+
+static inline void tmpfs_update_atime(FAR struct tmpfs_object_s *to)
+{
+  clock_gettime(CLOCK_REALTIME, &to->to_atime);
+}
+
+/****************************************************************************
+ * Name: tmpfs_update_mtime
+ ****************************************************************************/
+
+static inline void tmpfs_update_mtime(FAR struct tmpfs_object_s *to)
+{
+  clock_gettime(CLOCK_REALTIME, &to->to_mtime);
+}
+
+/****************************************************************************
+ * Name: tmpfs_update_ctime
+ ****************************************************************************/
+
+static inline void tmpfs_update_ctime(FAR struct tmpfs_object_s *to)
+{
+  clock_gettime(CLOCK_REALTIME, &to->to_ctime);
+}
+
+/****************************************************************************
+ * Name: tmpfs_init_times
+ ****************************************************************************/
+
+static void tmpfs_init_times(FAR struct tmpfs_object_s *to)
+{
+  tmpfs_update_atime(to);
+  to->to_mtime = to->to_atime;
+  to->to_ctime = to->to_atime;
+}
+
+/****************************************************************************
  * Name: tmpfs_realloc_directory
  ****************************************************************************/
 
@@ -867,6 +905,8 @@ tmpfs_alloc_file(FAR struct tmpfs_directory_s *parent, mode_t mode)
   tfo->tfo_size   = 0;
   tfo->tfo_data   = NULL;
 
+  tmpfs_init_times((FAR struct tmpfs_object_s *)tfo);
+
 #ifdef CONFIG_FS_PERMISSION
   tmpfs_init_object((FAR struct tmpfs_object_s *)tfo, mode);
 #else
@@ -1022,6 +1062,8 @@ tmpfs_alloc_directory(FAR struct tmpfs_directory_s *parent, mode_t mode)
   tdo->tdo_ino      = tmpfs_new_ino();
   tdo->tdo_nentries = 0;
   tdo->tdo_entry    = NULL;
+
+  tmpfs_init_times((FAR struct tmpfs_object_s *)tdo);
 
 #ifdef CONFIG_FS_PERMISSION
   tmpfs_init_object((FAR struct tmpfs_object_s *)tdo, mode);
@@ -1923,6 +1965,11 @@ static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
     {
       memcpy(buffer, &tfo->tfo_data[startpos], nread);
       filep->f_pos += nread;
+
+      if ((filep->f_oflags & O_NOATIME) == 0)
+        {
+          tmpfs_update_atime((FAR struct tmpfs_object_s *)tfo);
+        }
     }
   else
     {
@@ -2116,6 +2163,34 @@ static int tmpfs_unmap(FAR struct task_group_s *group,
   return ret;
 }
 
+/****************************************************************************
+ * Name: tmpfs_msync
+ ****************************************************************************/
+
+static int tmpfs_msync(FAR struct mm_map_entry_s *entry, FAR void *start,
+                       size_t length, int flags)
+{
+  FAR struct tmpfs_file_s *tfo = entry->priv.p;
+  int ret;
+
+  DEBUGASSERT(tfo != NULL);
+
+  /* The mapping is the file data itself, so there is nothing to write
+   * back.  Only mark the times as POSIX requires for a shared mapping.
+   */
+
+  ret = tmpfs_lock_file(tfo);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  tmpfs_update_mtime((FAR struct tmpfs_object_s *)tfo);
+  tfo->tfo_ctime = tfo->tfo_mtime;
+  tmpfs_unlock_file(tfo);
+  return OK;
+}
+
 static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 {
   FAR struct tmpfs_file_s *tfo;
@@ -2135,12 +2210,19 @@ static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
       map->vaddr = tfo->tfo_data + map->offset;
       map->priv.p = tfo;
       map->munmap = tmpfs_unmap;
+      map->msync = tmpfs_msync;
       ret = mm_map_add(get_current_mm(), map);
 
       if (ret >= 0)
         {
           tmpfs_lock_file(tfo);
           tfo->tfo_refs++;
+
+          /* POSIX marks st_atime for update on the first access to the
+           * mapping.  tmpfs cannot trap that access, so mark it here.
+           */
+
+          tmpfs_update_atime((FAR struct tmpfs_object_s *)tfo);
           tmpfs_unlock_file(tfo);
         }
     }
@@ -3208,6 +3290,9 @@ static void tmpfs_stat_common(FAR struct tmpfs_object_s *to,
   buf->st_blksize = CONFIG_FS_TMPFS_BLOCKSIZE;
   buf->st_blocks  = (objsize + CONFIG_FS_TMPFS_BLOCKSIZE - 1) /
                     CONFIG_FS_TMPFS_BLOCKSIZE;
+  buf->st_atim    = to->to_atime;
+  buf->st_mtim    = to->to_mtime;
+  buf->st_ctim    = to->to_ctime;
 }
 
 /****************************************************************************
