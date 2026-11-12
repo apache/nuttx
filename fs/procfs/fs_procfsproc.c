@@ -2174,6 +2174,9 @@ static int proc_stat(const char *relpath, struct stat *buf)
   unsigned long tmp;
   FAR char *ptr;
   pid_t pid;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  FAR struct tcb_s *tcb;
+#endif
 
   /* Two path forms are accepted:
    *
@@ -2229,10 +2232,16 @@ static int proc_stat(const char *relpath, struct stat *buf)
    * the task group.
    */
 
-  if (tcb->group != NULL)
+  tcb = nxsched_get_tcb(pid);
+  if (tcb != NULL)
     {
-      buf->st_uid = tcb->group->tg_euid;
-      buf->st_gid = tcb->group->tg_egid;
+      if (tcb->group != NULL)
+        {
+          buf->st_uid = tcb->group->tg_euid;
+          buf->st_gid = tcb->group->tg_egid;
+        }
+
+      nxsched_put_tcb(tcb);
     }
 #endif
 
