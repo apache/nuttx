@@ -287,7 +287,7 @@ uint32_t stm32_cap_gpio(const struct stm32_cap_priv_s *priv,
         break;
 #endif
 
-  /* TIM6 and TIM7 cannot be used in capture */
+      /* TIM6 and TIM7 cannot be used in capture */
 
 #ifdef CONFIG_STM32_TIM8_CAP
       case STM32_TIM8_BASE:
@@ -758,77 +758,77 @@ static int stm32_cap_setsmc(struct stm32_cap_dev_s *dev,
   switch (cfg & STM32_CAP_SMS_MASK)
     {
       case STM32_CAP_SMS_INT:
-          regval |= GTIM_SMCR_DISAB;
-          break;
+        regval |= GTIM_SMCR_DISAB;
+        break;
 
       case STM32_CAP_SMS_ENC1:
-          regval |= GTIM_SMCR_ENCMD1;
-          break;
+        regval |= GTIM_SMCR_ENCMD1;
+        break;
 
       case STM32_CAP_SMS_ENC2:
-          regval |= GTIM_SMCR_ENCMD2;
-          break;
+        regval |= GTIM_SMCR_ENCMD2;
+        break;
 
       case STM32_CAP_SMS_ENC3:
-          regval |= GTIM_SMCR_ENCMD3;
-          break;
+        regval |= GTIM_SMCR_ENCMD3;
+        break;
 
       case STM32_CAP_SMS_RST:
-          regval |= GTIM_SMCR_RESET;
-          break;
+        regval |= GTIM_SMCR_RESET;
+        break;
 
       case STM32_CAP_SMS_GAT:
-          regval |= GTIM_SMCR_GATED;
-          break;
+        regval |= GTIM_SMCR_GATED;
+        break;
 
       case STM32_CAP_SMS_TRG:
-          regval |= GTIM_SMCR_TRIGGER;
-          break;
+        regval |= GTIM_SMCR_TRIGGER;
+        break;
 
       case STM32_CAP_SMS_EXT:
-          regval |= GTIM_SMCR_EXTCLK1;
-          break;
+        regval |= GTIM_SMCR_EXTCLK1;
+        break;
 
       default:
-          break;
+        break;
     }
 
   switch (cfg & STM32_CAP_TS_MASK)
     {
       case STM32_CAP_TS_ITR0:
-          regval |= GTIM_SMCR_ITR0;
-          break;
+        regval |= GTIM_SMCR_ITR0;
+        break;
 
       case STM32_CAP_TS_ITR1:
-          regval |= GTIM_SMCR_ITR1;
-          break;
+        regval |= GTIM_SMCR_ITR1;
+        break;
 
       case STM32_CAP_TS_ITR2:
-          regval |= GTIM_SMCR_ITR2;
-          break;
+        regval |= GTIM_SMCR_ITR2;
+        break;
 
       case STM32_CAP_TS_ITR3:
-          regval |= GTIM_SMCR_ITR3;
-          break;
+        regval |= GTIM_SMCR_ITR3;
+        break;
 
       case STM32_CAP_TS_TI1FED:
-          regval |= GTIM_SMCR_TI1FED;
-          break;
+        regval |= GTIM_SMCR_TI1FED;
+        break;
 
       case STM32_CAP_TS_TI1FP1:
-          regval |= GTIM_SMCR_TI1FP1;
-          break;
+        regval |= GTIM_SMCR_TI1FP1;
+        break;
 
       case STM32_CAP_TS_TI2FP2:
-          regval |= GTIM_SMCR_TI2FP2;
-          break;
+        regval |= GTIM_SMCR_TI2FP2;
+        break;
 
       case STM32_CAP_TS_ETRF:
-          regval |= GTIM_SMCR_ETRF;
-          break;
+        regval |= GTIM_SMCR_ETRF;
+        break;
 
       default:
-          break;
+        break;
     }
 
   if (cfg & STM32_CAP_MSM_MASK)
