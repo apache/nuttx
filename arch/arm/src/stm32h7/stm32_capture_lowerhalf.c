@@ -281,13 +281,14 @@ static int stm32_cap_handler(int irq, void * context, void * arg)
     {
       lower->duty = (100 * STM32_CAP_GETCAPTURE(lower->cap, 0x3 & (~ch))) /
                     period;
+      lower->freq = lower->clock / period;
     }
   else
     {
       lower->duty = 0;
+      lower->freq = 0;
     }
 
-  lower->freq = lower->clock / period;
   lower->edges++;
 
   return OK;
