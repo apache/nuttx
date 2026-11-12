@@ -224,11 +224,17 @@ static int stm32_cap_handler(int irq, void * context, void * arg)
 
   STM32_CAP_ACKFLAGS(lower->cap, flags);
 
+  /* The counter is reset on the capture edge, so each captured value is
+   * one less than the number of timer ticks it represents.
+   */
+
   period = STM32_CAP_GETCAPTURE(lower->cap, ch);
 
   if (period != 0)
     {
-      lower->duty = (100 * STM32_CAP_GETCAPTURE(lower->cap, 0x3 & (~ch))) /
+      period++;
+      lower->duty = (100 * (STM32_CAP_GETCAPTURE(lower->cap,
+                                                 0x3 & (~ch)) + 1)) /
                     period;
       lower->freq = lower->clock / period;
     }
