@@ -350,7 +350,7 @@ killed without writing a ``'V'`` makes the channel time out, as on Linux.
 
 The hardware watchdog is armed when the device is registered and fed even
 with no channel, so the system also resets if the keepalive method stops, for
-example the low priority work queue with ``CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER``.
+example the low priority work queue with ``CONFIG_WATCHDOG_AUTOMONITOR_BY_LPWORK``.
 When a channel times out the auto-monitor logs the pid and the name of its task
 and stops feeding, or panics with ``CONFIG_WATCHDOG_AUTOMONITOR_TASKS_PANIC``.
 A time-out is detected up to one keepalive interval late
