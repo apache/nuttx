@@ -55,40 +55,6 @@
 
 #if defined(CONFIG_STM32_TIMX_CAP)
 
-/* Check if any channel is enabled.
- * This is done to simplify the logic below.
- */
-
-#if defined(GPIO_TIM1_CH1IN) || defined(GPIO_TIM2_CH1IN) || defined(GPIO_TIM3_CH1IN) || \
-    defined(GPIO_TIM4_CH1IN) || defined(GPIO_TIM5_CH1IN) || defined(GPIO_TIM8_CH1IN) || \
-    defined(GPIO_TIM12_CH1IN) || defined(GPIO_TIM15_CH1IN)
-#  define HAVE_CH1IN 1
-#endif
-
-#if defined(GPIO_TIM1_CH2IN) || defined(GPIO_TIM2_CH2IN) || defined(GPIO_TIM3_CH2IN) || \
-    defined(GPIO_TIM4_CH2IN) || defined(GPIO_TIM5_CH2IN) || defined(GPIO_TIM8_CH2IN) || \
-    defined(GPIO_TIM12_CH2IN) || defined(GPIO_TIM15_CH2IN)
-#  define HAVE_CH2IN 1
-#endif
-
-#if defined(GPIO_TIM1_CH3IN) || defined(GPIO_TIM2_CH3IN) || defined(GPIO_TIM3_CH3IN) || \
-    defined(GPIO_TIM4_CH3IN) || defined(GPIO_TIM5_CH3IN) || defined(GPIO_TIM8_CH3IN)
-#  define HAVE_CH3IN 1
-#endif
-
-#if defined(GPIO_TIM1_CH4IN) || defined(GPIO_TIM2_CH4IN) || defined(GPIO_TIM3_CH4IN) || \
-    defined(GPIO_TIM4_CH4IN) || defined(GPIO_TIM5_CH4IN) || defined(GPIO_TIM8_CH4IN)
-#  define HAVE_CH4IN 1
-#endif
-
-#if defined(GPIO_TIM1_CH5IN) || defined(GPIO_TIM8_CH5IN)
-#  define HAVE_CH5IN 1
-#endif
-
-#if defined(GPIO_TIM1_CH6IN) || defined(GPIO_TIM8_CH6IN)
-#  define HAVE_CH6IN 1
-#endif
-
 /* Check if we have any advanced timers */
 
 #if defined(CONFIG_STM32_TIM1_CAP) || defined(CONFIG_STM32_TIM8_CAP)
@@ -1084,26 +1050,18 @@ static uint32_t stm32_cap_getcapture(struct stm32_cap_dev_s *dev,
       case STM32_CAP_CHANNEL_COUNTER:
         offset = STM32_GTIM_CNT_OFFSET;
         break;
-#ifdef HAVE_CH1IN
       case 1:
         offset = STM32_GTIM_CCR1_OFFSET;
         break;
-#endif
-#ifdef HAVE_CH2IN
       case 2:
         offset = STM32_GTIM_CCR2_OFFSET;
         break;
-#endif
-#ifdef HAVE_CH3IN
       case 3:
         offset = STM32_GTIM_CCR3_OFFSET;
         break;
-#endif
-#ifdef HAVE_CH4IN
       case 4:
         offset = STM32_GTIM_CCR4_OFFSET;
         break;
-#endif
       default:
         return ERROR;
     }
