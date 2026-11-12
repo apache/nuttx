@@ -121,14 +121,19 @@ if(CONFIG_ARCH_BOARD_COMMON)
   endif()
 
   if(CONFIG_ETC_ROMFS)
+    set(RCSRCS etc/init.d/rc.sysinit etc/init.d/rcS)
+
+    if(CONFIG_SYSTEM_NXINIT)
+      list(APPEND RCSRCS etc/init.d/init.rc)
+    endif()
+
     nuttx_add_romfs(
       NAME
       etc
       MOUNTPOINT
       etc
       RCSRCS
-      etc/init.d/rc.sysinit
-      etc/init.d/rcS
+      ${RCSRCS}
       PATH
       ${CMAKE_CURRENT_BINARY_DIR}/etc)
     target_link_libraries(board PRIVATE romfs_etc)
