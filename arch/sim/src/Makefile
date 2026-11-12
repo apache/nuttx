@@ -483,11 +483,11 @@ define LINK_ALLSYMS_KASAN
 			$(Q) $(TOPDIR)/tools/mkallsyms.sh noconst $(NUTTX) $(CROSSDEV) > allsyms.tmp, \
 			$(Q) $(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.tmp --orderbyname $(CONFIG_SYMTAB_ORDEREDBYNAME)))
 	$(if $(CONFIG_ALLSYMS), \
-		$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c)
+		$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c -fno-sanitize=kernel-address)
 		$(Q) $(call DELFILE, allsyms.tmp))
 	$(if $(CONFIG_MM_KASAN_GLOBAL),
 	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp -a $(CONFIG_MM_KASAN_GLOBAL_ALIGN)
-	$(Q) $(call COMPILE, kasan_globals.tmp, kasan_globals$(OBJEXT) -fno-sanitize=kernel-address, -x c)
+	$(Q) $(call COMPILE, kasan_globals.tmp, kasan_globals$(OBJEXT), -x c -fno-sanitize=kernel-address)
 	$(Q) $(call DELFILE, kasan_globals.tmp))
 	$(if $(CONFIG_HAVE_CXX),\
 	$(Q) "$(CXX)" $(CFLAGS) $(LDFLAGS) -o $(NUTTX) \
