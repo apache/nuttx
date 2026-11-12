@@ -1,0 +1,38 @@
+From 377c2f881d48af09aa4d0f9e79da534d8bc91738 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Thu, 12 Nov 2026 10:10:59 +0800
+Subject: [PATCH 0024/24] virtio: restore the virtio_dev_name() declaration
+
+Commit a399378a5d ("virtio: remove deprecated virtio_describe()
+function") also dropped the prototype of virtio_dev_name(), which is
+not deprecated and is still implemented in lib/virtio/virtio.c. Put the
+prototype back so users can print the name of a virtio device.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/virtio.h | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
+index e4d79ec..e6e97cb 100644
+--- a/lib/include/openamp/virtio.h
++++ open-amp/lib/include/openamp/virtio.h
+@@ -224,6 +224,15 @@ struct virtio_device {
+  * Helper functions.
+  */
+ 
++/**
++ * @brief Get the name of a virtio device.
++ *
++ * @param devid Id of the device.
++ *
++ * @return pointer to the device name string if found, otherwise null.
++ */
++const char *virtio_dev_name(uint16_t devid);
++
+ /**
+  * @brief Virtio device dispatcher functions.
+  *
+-- 
+2.34.1
+
