@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 
-ssize_t uio_calc_resid(FAR const struct uio *uio)
+static ssize_t uio_calc_resid(FAR const struct uio *uio)
 {
   const struct iovec *iov = uio->uio_iov;
   int iovcnt = uio->uio_iovcnt;

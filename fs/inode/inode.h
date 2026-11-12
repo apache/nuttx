@@ -355,6 +355,17 @@ void inode_free(FAR struct inode *inode);
 const char *inode_nextname(FAR const char *name);
 
 /****************************************************************************
+ * Name: inode_basename
+ *
+ * Description:
+ *   Given a path with node names separated by '/', return name of last
+ *   segment in the path.
+ *
+ ****************************************************************************/
+
+FAR const char *inode_basename(FAR const char *name);
+
+/****************************************************************************
  * Name: inode_root_reserve
  *
  * Description:
