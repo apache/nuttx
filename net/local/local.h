@@ -525,6 +525,7 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
  *
  * Input Parameters:
  *   conn     A reference to local connection structure
+ *   path     The address of the sender ("" for none)
  *   buf      Payload to send
  *   len      Number of payload iovec segments
  *   rcvsize  Receive buffer size the peer advertised, preamble room
@@ -538,6 +539,7 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
  ****************************************************************************/
 
 ssize_t local_send_frame(FAR struct local_conn_s *conn,
+                         FAR const char *path,
                          FAR const struct iovec *buf, size_t len,
                          size_t rcvsize);
 

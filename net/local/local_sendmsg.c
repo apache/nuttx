@@ -144,8 +144,8 @@ fail:
  *
  * Description:
  *   Send one datagram, whole or not at all, to the peer of a SOCK_DGRAM
- *   socket pair: the header that psock_dgram_recvfrom() reads (address
- *   length 0, datagram length), then the data.
+ *   socket pair.  The frame has no address, so recvfrom() on the peer
+ *   gives none.
  *
  * Input Parameters:
  *   conn     The connection of the sender
@@ -170,16 +170,10 @@ static ssize_t local_pair_send(FAR struct local_conn_s *conn,
 {
   FAR const struct iovec *end = buf + len;
   FAR const struct iovec *iov;
-  lc_size_t header[2];
-  struct iovec hdriov;
-  size_t pktlen = 0;
+  size_t rcvsize;
+  size_t need;
   int space;
   int ret;
-
-  for (iov = buf; iov != end; iov++)
-    {
-      pktlen += iov->iov_len;
-    }
 
   ret = file_ioctl(&conn->lc_outfile, PIPEIOC_GETSIZE, 0);
   if (ret < 0)
@@ -187,44 +181,36 @@ static ssize_t local_pair_send(FAR struct local_conn_s *conn,
       return ret;
     }
 
-  if (pktlen + sizeof(header) > ret)
-    {
-      return -EMSGSIZE;
-    }
+  rcvsize = ret;
 
-  if ((flags & MSG_DONTWAIT) != 0 ||
-      (conn->lc_outfile.f_oflags & O_NONBLOCK) != 0)
+  /* The FIFO is in atomic mode, but it fails with -EAGAIN only when it is
+   * open with O_NONBLOCK.  For MSG_DONTWAIT, check the space here.  Only
+   * this socket writes to the FIFO and the caller holds lc_sendlock, so
+   * the space cannot become smaller before the write.
+   */
+
+  if ((flags & MSG_DONTWAIT) != 0 &&
+      (conn->lc_outfile.f_oflags & O_NONBLOCK) == 0)
     {
+      need = 2 * sizeof(lc_size_t);
+      for (iov = buf; iov != end; iov++)
+        {
+          need += iov->iov_len;
+        }
+
       ret = file_ioctl(&conn->lc_outfile, FIONSPACE, &space);
       if (ret < 0)
         {
           return ret;
         }
 
-      if (space < pktlen + sizeof(header))
+      if (need <= rcvsize && space < need)
         {
           return -EAGAIN;
         }
     }
 
-  header[0]       = 0;
-  header[1]       = pktlen;
-  hdriov.iov_base = header;
-  hdriov.iov_len  = sizeof(header);
-
-  ret = local_send_packet(&conn->lc_outfile, &hdriov, 1);
-  if (ret == sizeof(header) && pktlen > 0)
-    {
-      ret = local_send_packet(&conn->lc_outfile, buf, len);
-    }
-  else if (ret == sizeof(header))
-    {
-      ret = 0;
-    }
-  else if (ret >= 0)
-    {
-      ret = -EPIPE;
-    }
+  ret = local_send_frame(conn, "", buf, len, rcvsize);
 
   /* -EPIPE: the peer was closed.  A datagram socket reports that as
    * Linux does, and without SIGPIPE.
@@ -397,7 +383,8 @@ static ssize_t local_sendto(FAR struct socket *psock,
 
   /* Send preamble and payload as one atomic frame */
 
-  ret = local_send_frame(conn, buf, len, server->lc_rcvsize);
+  ret = local_send_frame(conn, conn->lc_path, buf, len,
+                         server->lc_rcvsize);
   if (ret < 0)
     {
       nerr("ERROR: Failed to send the frame: %zd\n", ret);

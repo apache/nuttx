@@ -118,6 +118,7 @@ static ssize_t local_fifo_write(FAR struct file *filep,
  *
  * Input Parameters:
  *   conn     A reference to local connection structure
+ *   path     The address of the sender ("" for none)
  *   buf      Payload to send
  *   len      Number of payload iovec segments
  *   rcvsize  Receive buffer size the peer advertised, preamble room
@@ -131,6 +132,7 @@ static ssize_t local_fifo_write(FAR struct file *filep,
  ****************************************************************************/
 
 ssize_t local_send_frame(FAR struct local_conn_s *conn,
+                         FAR const char *path,
                          FAR const struct iovec *buf, size_t len,
                          size_t rcvsize)
 {
@@ -143,7 +145,7 @@ ssize_t local_send_frame(FAR struct local_conn_s *conn,
   size_t i;
   ssize_t ret;
 
-  pathlen = strlen(conn->lc_path);
+  pathlen = strlen(path);
 
   /* Hold the frame to the capacity the receiver advertised.  The driver
    * refuses only what its FIFO can never hold, which is a different limit:
@@ -175,7 +177,7 @@ ssize_t local_send_frame(FAR struct local_conn_s *conn,
     {
       stackiov[0].iov_base = preamble;
       stackiov[0].iov_len  = sizeof(preamble);
-      stackiov[1].iov_base = conn->lc_path;
+      stackiov[1].iov_base = (FAR char *)path;
       stackiov[1].iov_len  = pathlen;
       memcpy(&stackiov[2], buf, len * sizeof(struct iovec));
     }
@@ -195,7 +197,7 @@ ssize_t local_send_frame(FAR struct local_conn_s *conn,
 
       memcpy(frame, preamble, sizeof(preamble));
       ptr = frame + sizeof(preamble);
-      memcpy(ptr, conn->lc_path, pathlen);
+      memcpy(ptr, path, pathlen);
       ptr += pathlen;
       for (i = 0; i < len; i++)
         {

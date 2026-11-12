@@ -1264,6 +1264,14 @@ static int local_socketpair(FAR struct socket *psocks[2])
             {
               goto errout;
             }
+
+          /* Each datagram goes whole into the FIFO, or not at all */
+
+          ret = file_ioctl(&conns[i]->lc_outfile, PIPEIOC_ATOMICWRITE, 1);
+          if (ret < 0)
+            {
+              goto errout;
+            }
         }
     }
 #endif
