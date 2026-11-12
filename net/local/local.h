@@ -555,8 +555,10 @@ ssize_t local_send_frame(FAR struct local_conn_s *conn,
  *   len      Length of data to send
  *
  * Returned Value:
- *   Zero is returned on success; a negated errno value is returned on any
- *   failure.
+ *   The number of bytes sent is returned on success.  It is less than the
+ *   length of the data when the FIFO is full and does not wait, or when a
+ *   signal came while the send waited.  A negated errno value is returned
+ *   on any failure (-EINTR: a signal came before the first byte).
  *
  ****************************************************************************/
 
