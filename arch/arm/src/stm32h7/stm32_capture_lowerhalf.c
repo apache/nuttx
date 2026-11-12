@@ -406,16 +406,26 @@ static int stm32_stop(struct cap_lowerhalf_s *lower)
 
   if (priv->started)
     {
-      STM32_CAP_SETCHANNEL(priv->cap, STM32_CAP_FLAG_IRQ_COUNTER,
-                           STM32_CAP_EDGE_DISABLED);
       switch (priv->channel)
         {
           case 1:
             STM32_CAP_ENABLEINT(priv->cap, STM32_CAP_FLAG_IRQ_CH_1, false);
+            STM32_CAP_SETCHANNEL(priv->cap, 1,
+                                 STM32_CAP_EDGE_DISABLED |
+                                 STM32_CAP_MAPPED_TI1);
+            STM32_CAP_SETCHANNEL(priv->cap, 2,
+                                 STM32_CAP_EDGE_DISABLED |
+                                 STM32_CAP_MAPPED_TI2);
             break;
 
           case 2:
             STM32_CAP_ENABLEINT(priv->cap, STM32_CAP_FLAG_IRQ_CH_2, false);
+            STM32_CAP_SETCHANNEL(priv->cap, 2,
+                                 STM32_CAP_EDGE_DISABLED |
+                                 STM32_CAP_MAPPED_TI1);
+            STM32_CAP_SETCHANNEL(priv->cap, 1,
+                                 STM32_CAP_EDGE_DISABLED |
+                                 STM32_CAP_MAPPED_TI2);
             break;
 
           default:
@@ -423,6 +433,7 @@ static int stm32_stop(struct cap_lowerhalf_s *lower)
         }
 
       STM32_CAP_SETISR(priv->cap, NULL, NULL);
+      STM32_CAP_SETCLOCK(priv->cap, 0, 0);
       priv->started = false;
       return OK;
     }
