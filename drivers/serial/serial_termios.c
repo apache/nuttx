@@ -55,7 +55,12 @@ void uart_termios_getattr(FAR const struct uart_termios_s *tc,
 #ifdef CONFIG_TTY_SIGTSTP
   termiosp->c_cc[VSUSP] = tc->vsusp;
 #endif
-  termiosp->c_cc[VMIN] = 1;
+#ifdef CONFIG_SERIAL_TERMIOS
+  termiosp->c_cc[VMIN]  = tc->vmin;
+  termiosp->c_cc[VTIME] = tc->vtime;
+#else
+  termiosp->c_cc[VMIN]  = 1;
+#endif
 }
 
 void uart_termios_setattr(FAR struct uart_termios_s *tc,
@@ -69,6 +74,10 @@ void uart_termios_setattr(FAR struct uart_termios_s *tc,
 #endif
 #ifdef CONFIG_TTY_SIGTSTP
   tc->vsusp = termiosp->c_cc[VSUSP];
+#endif
+#ifdef CONFIG_SERIAL_TERMIOS
+  tc->vmin  = termiosp->c_cc[VMIN];
+  tc->vtime = termiosp->c_cc[VTIME];
 #endif
 }
 

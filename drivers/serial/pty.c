@@ -1272,11 +1272,10 @@ int pty_register2(int minor, bool susv1)
   devpair->pp_locked            = true;
   devpair->pp_master.pd_devpair = devpair;
   devpair->pp_master.pd_master  = true;
-  devpair->pp_master.pd_termios.oflag = OPOST | OCRNL;
   devpair->pp_slave.pd_devpair  = devpair;
-  devpair->pp_slave.pd_termios.oflag  = OPOST | ONLCR;
-  devpair->pp_slave.pd_termios.lflag  = ECHO | ICANON | ISIG;
-  uart_termios_initcc(&devpair->pp_slave.pd_termios);
+  uart_termios_init(&devpair->pp_master.pd_termios, 0, OPOST | OCRNL, 0);
+  uart_termios_init(&devpair->pp_slave.pd_termios, 0, OPOST | ONLCR,
+                    ECHO | ICANON | ISIG);
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   /* Initialize  of the task that will receive SIGINT signals. */
 

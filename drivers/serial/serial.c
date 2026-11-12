@@ -1500,13 +1500,13 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                     {
 #ifdef CONFIG_SERIAL_TERMIOS
                       dev->minrecv = MIN(buflen - recvd,
-                                         dev->minread - recvd);
-                      if (dev->timeout)
+                                         dev->termios.vmin - recvd);
+                      if (dev->termios.vtime)
                         {
                           uart_spinunlock(dev, false, flags);
                           nxmutex_unlock(&dev->recv.lock);
                           ret = nxsem_tickwait(&dev->recvsem,
-                                               DSEC2TICK(dev->timeout));
+                                  DSEC2TICK(dev->termios.vtime));
                         }
                       else
 #endif
@@ -1520,7 +1520,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
                       flags = uart_spinlock(dev, false);
 
 #ifdef CONFIG_SERIAL_TERMIOS
-                      dev->minrecv = dev->minread;
+                      dev->minrecv = dev->termios.vmin;
 #endif
                     }
                 }
@@ -2228,10 +2228,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                */
 
               termiosp->c_cc[VERASE] = ASCII_DEL;
-#ifdef CONFIG_SERIAL_TERMIOS
-              termiosp->c_cc[VTIME] = dev->timeout;
-              termiosp->c_cc[VMIN] = dev->minread;
-#endif
 
               ret = 0;
             }
@@ -2249,9 +2245,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
               uart_termios_setattr(&dev->termios, termiosp);
 #ifdef CONFIG_SERIAL_TERMIOS
-              dev->timeout = termiosp->c_cc[VTIME];
-              dev->minread = termiosp->c_cc[VMIN];
-              dev->minrecv = dev->minread;
+              dev->minrecv = dev->termios.vmin;
 #endif
               ret = 0;
             }
@@ -2570,8 +2564,6 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   dev->pid = INVALID_PROCESS_ID;
 #endif
 
-  uart_termios_initcc(&dev->termios);
-
 #ifdef CONFIG_TTY_FORCE_PANIC
   dev->panic_count = 0;
 #endif
@@ -2580,21 +2572,20 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 
   if (dev->isconsole)
     {
-      /* Enable signals and echo by default */
+      /* Convert CR to LF, enable \n -> \r\n translation, and enable
+       * signals, echo and canonical input by default for the console.
+       */
 
-      dev->termios.lflag |= ISIG | ECHO | ICANON;
-
-      /* Enable \n -> \r\n translation for the console */
-
-      dev->termios.oflag = OPOST | ONLCR;
-
-      /* Convert CR to LF by default for console */
-
-      dev->termios.iflag |= ICRNL;
+      uart_termios_init(&dev->termios, ICRNL, OPOST | ONLCR,
+                        ISIG | ECHO | ICANON);
 
       /* Clear escape counter */
 
       dev->escape = 0;
+    }
+  else
+    {
+      uart_termios_init(&dev->termios, 0, 0, 0);
     }
 
   /* Initialize mutex & semaphores */
@@ -2605,11 +2596,6 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   nxsem_init(&dev->xmitsem, 0, 0);
   nxsem_init(&dev->recvsem, 0, 0);
   rspin_lock_init(&dev->lock);
-
-#ifdef CONFIG_SERIAL_TERMIOS
-  dev->timeout = 0;
-  dev->minread = 1;
-#endif
 
   /* Register the serial driver */
 
