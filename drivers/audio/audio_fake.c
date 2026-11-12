@@ -593,6 +593,7 @@ static int audio_fake_configure(FAR struct audio_lowerhalf_s *dev,
 {
   FAR struct audio_fake_s *priv = (FAR struct audio_fake_s *)dev;
   int ret;
+
   audinfo("ac_type: %d\n", caps->ac_type);
 
   if (priv->mqname[0] == '\0')
@@ -945,6 +946,7 @@ static int audio_fake_pause(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct audio_fake_s *priv = (FAR struct audio_fake_s *)dev;
+
   audinfo("%s pause\n", priv->dev_params->dev_name);
   return OK;
 }
@@ -966,6 +968,7 @@ static int audio_fake_resume(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct audio_fake_s *priv = (FAR struct audio_fake_s *)dev;
+
   audinfo("%s resume\n", priv->dev_params->dev_name);
   return OK;
 }
@@ -1092,6 +1095,7 @@ static int audio_fake_reserve(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct audio_fake_s *priv = (FAR struct audio_fake_s *)dev;
+
   priv->terminate               = false;
   audinfo("%s reserve\n", priv->dev_params->dev_name);
   return OK;
