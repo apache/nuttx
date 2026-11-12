@@ -556,6 +556,25 @@ struct FS3args
   struct file_handle fsroot;
 };
 
+/* SYMLINK structures */
+
+struct SYMLINK3args
+{
+  struct diropargs3  where;                                  /* Variable length */
+  struct nfsv3_sattr symlink_attributes;                     /* Variable length */
+  uint32_t           target_len;                             /* Length of target path */
+  uint32_t           target_path[(NFS_MAXPATHLEN + 3) >> 2]; /* Variable length */
+};
+
+struct SYMLINK3resok
+{
+  uint32_t           handle_follows;
+  struct file_handle fhandle;                       /* Variable length */
+  uint32_t           attributes_follows;
+  struct nfs_fattr   attributes;
+  struct wcc_data    dir_wcc;
+};
+
 /* READLINK structures */
 
 struct READLINK3args
@@ -573,5 +592,20 @@ struct READLINK3resok
 
 #define SIZEOF_READLINK3resok(n) \
   (sizeof(uint32_t) + sizeof(struct nfs_fattr) + sizeof(uint32_t) + (((n) + 3) & ~3))
+
+/* LINK structures */
+
+struct LINK3args
+{
+  struct file_handle file;                          /* Variable length */
+  struct diropargs3  link;                          /* Variable length */
+};
+
+struct LINK3resok
+{
+  uint32_t           attributes_follow;
+  struct nfs_fattr   file_attributes;
+  struct wcc_data    linkdir_wcc;
+};
 
 #endif /* __FS_NFS_NFS_PROTO_H */

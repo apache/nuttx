@@ -100,7 +100,9 @@ struct nfsmount
     struct rpc_call_setattr  setattr;
     struct rpc_call_fs       fsinfo;
     struct rpc_reply_write   write;
+    struct rpc_call_symlink  symlink;
     struct rpc_call_readlink readlink;
+    struct rpc_call_link     link;
   } nm_msgbuffer;
 
   /* I/O buffer (must be a aligned to 32-bit boundaries).  This buffer used
