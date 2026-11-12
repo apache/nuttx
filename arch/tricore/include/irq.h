@@ -104,6 +104,8 @@
 #define TC_CONTEXT_REGS  (16)
 #define TC_CONTEXT_SIZE  (sizeof(void *) * TC_CONTEXT_REGS)
 
+#define FCD_RESERVE_SIZE (TC_CONTEXT_SIZE * 4)
+
 #define XCPTCONTEXT_REGS (TC_CONTEXT_REGS * 2)
 #define XCPTCONTEXT_SIZE (sizeof(void *) * XCPTCONTEXT_REGS)
 

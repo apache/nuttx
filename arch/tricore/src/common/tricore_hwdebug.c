@@ -288,17 +288,20 @@ used_code static void tricore_trevt_match(void)
   uintptr_t *regs;
   bool switch_csa;
   int evtsrc;
+  int cpu;
 
   /* Save lower csa context. */
 
   __asm__ __volatile__ ("svlcx\n\t");
+
+  cpu = this_cpu();
 
   /* Switch to istack csa list. */
 
   switch_csa = !(g_trevt_debug.dcx[1] & PSW_IS);
   if (switch_csa)
     {
-      uintptr_t istackbase = up_get_intstackbase(up_cpu_index());
+      uintptr_t istackbase = up_get_intstackbase(cpu);
 
       saved_fcx = tricore_mfcr(TRICORE_CPU_FCX);
       saved_lcx = tricore_mfcr(TRICORE_CPU_LCX);
@@ -324,8 +327,8 @@ used_code static void tricore_trevt_match(void)
 
   /* Debug trap handler. */
 
-  regs = g_running_task->xcp.regs;
-  g_running_task->xcp.regs = context;
+  regs = g_running_tasks[cpu]->xcp.regs;
+  g_running_tasks[cpu]->xcp.regs = context;
 
   evtsrc = ((tricore_mfcr(TC_DBGSR) >> TC_DBGSR_EVTSRC_OFF) &
             TC_DBGSR_EVTSRC_MSK) - TREVT_DEBUG_EVTSRC_BASE;
@@ -335,7 +338,7 @@ used_code static void tricore_trevt_match(void)
                                     g_trevt_debug.dp[evtsrc].size,
                                     g_trevt_debug.dp[evtsrc].arg);
 
-  g_running_task->xcp.regs = regs;
+  g_running_tasks[cpu]->xcp.regs = regs;
 
   /* Switch to thread csa list. */
 
