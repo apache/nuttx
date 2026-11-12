@@ -38,6 +38,7 @@
 #include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/tls.h>
 #include <nuttx/mm/kmap.h>
 #include <arch/irq.h>
 
@@ -92,6 +93,15 @@ static int map_user_mem(FAR void *uaddr, size_t size, void **p_kaddr)
   return OK;
 }
 #endif
+
+/****************************************************************************
+ * Name: accept4_cleanup
+ ****************************************************************************/
+
+static void accept4_cleanup(FAR void *arg)
+{
+  file_put(arg);
+}
 
 /****************************************************************************
  * Public Functions
@@ -229,6 +239,10 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
       goto errout_with_kmap;
     }
 
+  /* Drop the reference to the listening socket if canceled in accept */
+
+  tls_cleanup_push(tls_get_info(), accept4_cleanup, filep);
+
   newsock = fs_heap_zalloc(sizeof(*newsock));
   if (newsock == NULL)
     {
@@ -264,6 +278,7 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
       goto errout_with_psock;
     }
 
+  tls_cleanup_pop(tls_get_info(), 0);
   file_put(filep);
 
 #ifdef CONFIG_MM_KMAP
@@ -281,6 +296,7 @@ errout_with_alloc:
   fs_heap_free(newsock);
 
 errout_with_filep:
+  tls_cleanup_pop(tls_get_info(), 0);
   file_put(filep);
 
 errout_with_kmap:
