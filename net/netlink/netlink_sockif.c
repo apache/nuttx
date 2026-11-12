@@ -34,6 +34,7 @@
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/poll.h>
@@ -579,13 +580,20 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd_s *fds,
 static ssize_t netlink_sendmsg(FAR struct socket *psock,
                                FAR const struct msghdr *msg, int flags)
 {
-  FAR const void *buf = msg->msg_iov->iov_base;
   FAR const struct sockaddr *to = msg->msg_name;
   socklen_t tolen = msg->msg_namelen;
   FAR struct netlink_conn_s *conn;
   FAR struct nlmsghdr *nlmsg;
   struct sockaddr_nl nladdr;
+  FAR const void *buf;
   int ret;
+
+  /* POSIX: fail with EMSGSIZE if msg_iovlen <= 0 or > IOV_MAX */
+
+  if (msg->msg_iovlen == 0 || msg->msg_iovlen > IOV_MAX)
+    {
+      return -EMSGSIZE;
+    }
 
   /* Validity check, only single iov supported */
 
@@ -593,6 +601,22 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
     {
       return -ENOTSUP;
     }
+
+  /* An iov must be provided */
+
+  if (msg->msg_iov == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Elements of the iov must not be NULL if length is non-zero */
+
+  if (msg->msg_iov[0].iov_len > 0 && msg->msg_iov[0].iov_base == NULL)
+    {
+      return -EINVAL;
+    }
+
+  buf = msg->msg_iov[0].iov_base;
 
   /* Get the underlying connection structure */
 
@@ -614,17 +638,28 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
 
   DEBUGASSERT(tolen >= sizeof(struct sockaddr_nl));
 
+  /* Netlink message must contain at least a complete nlmsghdr */
+
+  if (msg->msg_iov[0].iov_len < sizeof(struct nlmsghdr))
+    {
+      return -EINVAL;
+    }
+
   /* Get a reference to the netlink message */
 
   nlmsg = (FAR struct nlmsghdr *)buf;
-  DEBUGASSERT(nlmsg->nlmsg_len >= sizeof(struct nlmsghdr));
+  if (nlmsg->nlmsg_len < sizeof(struct nlmsghdr) ||
+      nlmsg->nlmsg_len > msg->msg_iov[0].iov_len)
+    {
+      return -EINVAL;
+    }
 
   switch (psock->s_proto)
     {
 #ifdef CONFIG_NETLINK_ROUTE
       case NETLINK_ROUTE:
         ret = netlink_route_sendto(conn, nlmsg,
-                                   msg->msg_iov->iov_len, flags,
+                                   msg->msg_iov[0].iov_len, flags,
                                    (FAR const struct sockaddr_nl *)to,
                                    tolen);
         break;
@@ -633,7 +668,7 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
 #ifdef CONFIG_NETLINK_NETFILTER
       case NETLINK_NETFILTER:
         ret = netlink_netfilter_sendto(conn, nlmsg,
-                                       msg->msg_iov->iov_len, flags,
+                                       msg->msg_iov[0].iov_len, flags,
                                        (FAR const struct sockaddr_nl *)to,
                                        tolen);
         break;
@@ -670,21 +705,45 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
 static ssize_t netlink_recvmsg(FAR struct socket *psock,
                                FAR struct msghdr *msg, int flags)
 {
-  FAR void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
   FAR struct sockaddr *from = msg->msg_name;
   FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct netlink_response_s *entry;
   FAR struct socket_conn_s *conn;
+  FAR void *buf;
+  size_t len;
   int ret = OK;
 
   DEBUGASSERT(from == NULL ||
               (fromlen != NULL && *fromlen >= sizeof(struct sockaddr_nl)));
 
+  /* POSIX: fail with EMSGSIZE if msg_iovlen <= 0 or > IOV_MAX */
+
+  if (msg->msg_iovlen == 0 || msg->msg_iovlen > IOV_MAX)
+    {
+      return -EMSGSIZE;
+    }
+
   if (msg->msg_iovlen != 1)
     {
       return -ENOTSUP;
     }
+
+  if (msg->msg_iov == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (msg->msg_iov[0].iov_len > 0 && msg->msg_iov[0].iov_base == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Clear flags that may be returned */
+
+  msg->msg_flags = 0;
+
+  buf = msg->msg_iov[0].iov_base;
+  len = msg->msg_iov[0].iov_len;
 
   /* Find the response to this message.  The return value */
 
@@ -714,14 +773,22 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
         }
     }
 
-  if (len > entry->msg.nlmsg_len)
+  if (len < entry->msg.nlmsg_len)
+    {
+      msg->msg_flags |= MSG_TRUNC;
+    }
+  else
     {
       len = entry->msg.nlmsg_len;
     }
 
   /* Copy the payload to the user buffer */
 
-  memcpy(buf, &entry->msg, len);
+  if (len > 0)
+    {
+      memcpy(buf, &entry->msg, len);
+    }
+
   kmm_free(entry);
 
   if (from != NULL)
