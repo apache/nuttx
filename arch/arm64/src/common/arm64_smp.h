@@ -93,19 +93,6 @@ void arm64_enable_smp(int cpu);
 
 void arm64_timer_secondary_init(void);
 
-/****************************************************************************
- * Name: arm64_perf_secondary_init
- *
- * Description:
- *   Start the PMU cycle counter of a secondary CPU.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void arm64_perf_secondary_init(void);
-
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_SMP */
 #endif /* __ARCH_ARM64_SRC_COMMON_ARM64_SMP_H */

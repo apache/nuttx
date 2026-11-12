@@ -27,7 +27,6 @@
 #include <nuttx/clock.h>
 
 #include "arm64_pmu.h"
-#include "arm64_smp.h"
 
 #ifdef CONFIG_ARCH_HAVE_PERF_EVENTS
 
@@ -37,21 +36,6 @@
  ****************************************************************************/
 
 static unsigned long g_cpu_freq = ULONG_MAX;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-#ifndef CONFIG_ARCH_CLUSTER_PMU
-static void arm64_perf_start(void)
-{
-  pmu_ccntr_ccfiltr_config(PMCCFILTR_EL0_NSH);
-  pmu_cntr_control_config(PMCR_EL0_C | PMCR_EL0_E);
-  pmu_cntr_trap_control(PMUSERENR_EL0_EN);
-  pmu_cntr_irq_disable(PMINTENCLR_EL1_C);
-  pmu_cntr_enable(PMCNTENSET_EL0_C);
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -68,28 +52,13 @@ void up_perf_init(void *arg)
   pmu_clucntr_irq_disable(CLUSTERPMINTENCLR_EL1_C);
   pmu_clucntr_enable(CLUSTERPMCNTENSET_EL1_C);
 #else
-  arm64_perf_start();
+  pmu_ccntr_ccfiltr_config(PMCCFILTR_EL0_NSH);
+  pmu_cntr_control_config(PMCR_EL0_C | PMCR_EL0_E);
+  pmu_cntr_trap_control(PMUSERENR_EL0_EN);
+  pmu_cntr_irq_disable(PMINTENCLR_EL1_C);
+  pmu_cntr_enable(PMCNTENSET_EL0_C);
 #endif
 }
-
-/****************************************************************************
- * Name: arm64_perf_secondary_init
- *
- * Description:
- *   Start the cycle counter of a secondary CPU.  up_perf_init() runs on
- *   the boot CPU only, and the cycle counter is a register of each CPU.
- *   The cluster PMU is common to the CPUs: it is already started.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-void arm64_perf_secondary_init(void)
-{
-#ifndef CONFIG_ARCH_CLUSTER_PMU
-  arm64_perf_start();
-#endif
-}
-#endif
 
 unsigned long up_perf_getfreq(void)
 {
