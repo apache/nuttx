@@ -29,10 +29,12 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
-#include <string.h>
-#include <poll.h>
-#include <errno.h>
 #include <assert.h>
+#include <errno.h>
+#include <limits.h>
+#include <poll.h>
+#include <string.h>
+#include <nuttx/clock.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
@@ -104,9 +106,46 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
       return ERROR;
     }
 
+  /* Convert the timeout to milliseconds */
+
+  if (timeout != NULL)
+    {
+      if (timeout->tv_sec < 0 || timeout->tv_usec < 0 ||
+          timeout->tv_usec >= USEC_PER_SEC)
+        {
+          set_errno(EINVAL);
+          return ERROR;
+        }
+
+      /* Calculate the timeout in milliseconds, clamping to INT_MAX
+       * to prevent integer overflow.
+       */
+
+      if (timeout->tv_sec > (INT_MAX - 1000) / 1000)
+        {
+          msec = INT_MAX;
+        }
+      else
+        {
+          msec = timeout->tv_sec * 1000 + (timeout->tv_usec + 999) / 1000;
+        }
+    }
+  else
+    {
+      /* Any negative value of msec means no timeout */
+
+      msec = -1;
+    }
+
 #ifdef CONFIG_FDCHECK
   nfds = fdcheck_restore(nfds - 1) + 1;
 #endif
+
+  if (nfds < 0 || nfds > FD_SETSIZE)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
 
   /* How many pollfd structures do we need to allocate? */
 
@@ -197,21 +236,6 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
     }
 
   DEBUGASSERT(ndx == npfds);
-
-  /* Convert the timeout to milliseconds */
-
-  if (timeout)
-    {
-      /* Calculate the timeout in milliseconds */
-
-      msec = timeout->tv_sec * 1000 + (timeout->tv_usec + 999) / 1000;
-    }
-  else
-    {
-      /* Any negative value of msec means no timeout */
-
-      msec = -1;
-    }
 
   /* Then let poll do all of the real work. */
 

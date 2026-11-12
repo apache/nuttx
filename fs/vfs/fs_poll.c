@@ -26,10 +26,11 @@
 
 #include <nuttx/config.h>
 
-#include <poll.h>
-#include <time.h>
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
+#include <poll.h>
+#include <time.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/clock.h>
@@ -428,11 +429,21 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
   int ret = OK;
   nfds_t i;
 
-  DEBUGASSERT(nfds == 0 || fds != NULL);
-
   /* poll() is a cancellation point */
 
   enter_cancellation_point();
+
+  if (nfds > OPEN_MAX)
+    {
+      ret = -EINVAL;
+      goto out_with_cancelpt;
+    }
+
+  if (nfds > 0 && fds == NULL)
+    {
+      ret = -EFAULT;
+      goto out_with_cancelpt;
+    }
 
   /* Copy the user fds to a kernel array, which also holds the internal
    * fields of each entry.
