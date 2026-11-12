@@ -508,6 +508,8 @@ static const char *g_white_content_list[] =
   "SETATTR3args",
   "SETATTR3resok",
   "FS3args",
+  "READLINK3args",
+  "READLINK3resok",
   "SIZEOF_rpc_reply_read",
   "SIZEOF_rpc_call_write",
   "SIZEOF_rpc_reply_readdir",
