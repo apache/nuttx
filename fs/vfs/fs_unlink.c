@@ -156,17 +156,17 @@ int nx_unlink(FAR const char *pathname)
             }
         }
 #endif
-      else if (
-#ifdef CONFIG_FS_LINKS
-      INODE_IS_SOFTLINK(inode) || INODE_IS_HARDLINK(inode) ||
-#endif
-      INODE_IS_PSEUDODIR(inode))
+      else if (INODE_IS_PSEUDODIR(inode))
         {
-          /* If this is a "dangling" pseudo-file node
-           * (i.e., it has no operations) or a soft link,
-           * then rm should remove the node.
-           */
+          ret = -EISDIR;
+          goto errout_with_inode;
         }
+#ifdef CONFIG_FS_LINKS
+      else if (INODE_IS_SOFTLINK(inode) || INODE_IS_HARDLINK(inode))
+        {
+          /* A link has no operations: removing the node removes it */
+        }
+#endif
       else
         {
           ret = -ENXIO;
