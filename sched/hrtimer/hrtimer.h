@@ -102,7 +102,7 @@ extern uint64_t g_hrtimer_last_expired;
 /* Red-Black tree containing all active high-resolution timers */
 
 extern struct hrtimer_tree_s g_hrtimer_tree;
-extern struct FAR hrtimer_s *g_hrtimer_head;
+extern FAR struct hrtimer_s *g_hrtimer_head;
 #else
 /* List containing all active high-resolution timers */
 
