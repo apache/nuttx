@@ -84,6 +84,8 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
       ${CMAKE_CURRENT_LIST_DIR}/0022-rpmsg_virtio-export-the-rx-buffer-helpers.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0023-rpmsg_virtio-let-the-caller-provide-the-virtqueue-ca.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0024-virtio-restore-the-virtio_dev_name-declaration.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
