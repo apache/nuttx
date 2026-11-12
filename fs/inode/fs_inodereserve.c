@@ -294,6 +294,16 @@ int inode_reserve(FAR const char *path,
       break;
     }
 
+#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
+  /* The directory that received the new entry was modified */
+
+  if (ret >= 0 && desc.parent != NULL)
+    {
+      clock_gettime(CLOCK_REALTIME, &desc.parent->i_ctime);
+      desc.parent->i_mtime = desc.parent->i_ctime;
+    }
+#endif
+
 errout_with_search:
   inode_search_release(&desc);
   return ret;
