@@ -40,6 +40,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/lib/lib.h>
 
 #include "inode/inode.h"
 

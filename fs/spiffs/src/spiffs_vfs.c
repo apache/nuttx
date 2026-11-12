@@ -58,6 +58,7 @@
 #include <nuttx/queue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/lib/lib.h>
 
 #include "fs_heap.h"
 #include "spiffs.h"
