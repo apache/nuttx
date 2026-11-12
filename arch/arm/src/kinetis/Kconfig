@@ -641,12 +641,16 @@ config KINETIS_DAC1
 config KINETIS_ADC0
 	bool "ADC0"
 	default n
+	select ANALOG
+	select ADC
 	---help---
 		Support ADC0
 
 config KINETIS_ADC1
 	bool "ADC1"
 	default n
+	select ANALOG
+	select ADC
 	---help---
 		Support ADC1
 
