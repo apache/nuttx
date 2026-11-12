@@ -170,6 +170,7 @@ static int  tmpfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 static int  tmpfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
               unsigned int flags);
 static int  tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf);
+static int  tmpfs_syncfs(FAR struct inode *mountpt);
 static int  tmpfs_unlink(FAR struct inode *mountpt, FAR const char *relpath);
 static int  tmpfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
               mode_t mode);
@@ -233,7 +234,7 @@ const struct mountpt_operations g_tmpfs_operations =
   tmpfs_rename,     /* rename */
   tmpfs_stat,       /* stat */
   tmpfs_chstat,     /* chstat */
-  NULL,             /* syncfs */
+  tmpfs_syncfs,     /* syncfs */
   NULL,             /* ioctldir */
 #ifdef CONFIG_FS_PERMISSION
   tmpfs_permission  /* permission */
@@ -2848,6 +2849,18 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   /* Release the lock on the file system */
 
   tmpfs_unlock(fs);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: tmpfs_syncfs
+ ****************************************************************************/
+
+static int tmpfs_syncfs(FAR struct inode *mountpt)
+{
+  /* tmpfs lives in RAM only, so there is nothing to write back */
+
+  UNUSED(mountpt);
   return OK;
 }
 
