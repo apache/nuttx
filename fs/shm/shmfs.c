@@ -29,8 +29,10 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/param.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mm/map.h>
 #include <nuttx/arch.h>
@@ -418,10 +420,11 @@ static int shmfs_mmap(FAR struct file *filep,
     {
 #ifndef CONFIG_BUILD_KERNEL
       /* Without an MMU mapping the object address is returned directly, so
-       * a mapping longer than the object would expose adjacent heap memory.
+       * a mapping longer than the page-rounded backing would expose
+       * adjacent heap memory.
        */
 
-      if (entry->length > object->length)
+      if (entry->length > ALIGN_UP(object->length, sysconf(_SC_PAGESIZE)))
         {
           inode_release(filep->f_inode);
           return -EINVAL;
