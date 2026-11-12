@@ -319,6 +319,12 @@ struct uart_termios_s
   tcflag_t iflag;
   tcflag_t oflag;
   tcflag_t lflag;
+#ifdef CONFIG_TTY_SIGINT
+  cc_t     vintr;                    /* c_cc[VINTR] */
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+  cc_t     vsusp;                    /* c_cc[VSUSP] */
+#endif
 };
 
 /* This is the device structure used by the driver.  The caller of
@@ -420,6 +426,26 @@ typedef struct uart_dev_s uart_dev_t;
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: uart_termios_initcc
+ *
+ * Description:
+ *   Set the INTR and SUSP characters to the ones of the configuration, the
+ *   characters of a terminal when it starts.
+ *
+ ****************************************************************************/
+
+static inline_function void
+uart_termios_initcc(FAR struct uart_termios_s *tc)
+{
+#ifdef CONFIG_TTY_SIGINT
+  tc->vintr = CONFIG_TTY_SIGINT_CHAR;
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+  tc->vsusp = CONFIG_TTY_SIGTSTP_CHAR;
+#endif
+}
 
 /****************************************************************************
  * Name: uart_termios_in_char
@@ -717,7 +743,10 @@ int uart_gdbstub_register(FAR uart_dev_t *dev, FAR const char *path);
  * Name: uart_termios_getattr / uart_termios_setattr
  *
  * Description:
- *   Copy c_iflag/c_oflag/c_lflag between the state and a termios.
+ *   Copy c_iflag/c_oflag/c_lflag and the INTR and SUSP characters between
+ *   the state and a termios.  getattr sets the other entries of c_cc to
+ *   _POSIX_VDISABLE and c_cc[VMIN] to 1; the caller adds the ones that it
+ *   acts on.
  *
  ****************************************************************************/
 
@@ -756,7 +785,8 @@ size_t uart_termios_out_copy(FAR const struct uart_termios_s *tc,
  * Name: uart_termios_isig_find
  *
  * Description:
- *   Locate the first SIGINT/SIGTSTP character in src when ISIG is set.
+ *   Locate the first INTR (SIGINT) or SUSP (SIGTSTP) character in src when
+ *   ISIG is set.  A character set to _POSIX_VDISABLE is not looked for.
  *   Returns its address and sets *signo, or NULL if none.
  *
  ****************************************************************************/

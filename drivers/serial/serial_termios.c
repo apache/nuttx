@@ -29,6 +29,7 @@
 #include <signal.h>
 #include <string.h>
 #include <sys/param.h>
+#include <unistd.h>
 
 #include <nuttx/serial/serial.h>
 
@@ -42,6 +43,19 @@ void uart_termios_getattr(FAR const struct uart_termios_s *tc,
   termiosp->c_iflag = tc->iflag;
   termiosp->c_oflag = tc->oflag;
   termiosp->c_lflag = tc->lflag;
+
+  /* The special characters that the helpers act on.  The others are
+   * disabled.
+   */
+
+  memset(termiosp->c_cc, _POSIX_VDISABLE, sizeof(termiosp->c_cc));
+#ifdef CONFIG_TTY_SIGINT
+  termiosp->c_cc[VINTR] = tc->vintr;
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+  termiosp->c_cc[VSUSP] = tc->vsusp;
+#endif
+  termiosp->c_cc[VMIN] = 1;
 }
 
 void uart_termios_setattr(FAR struct uart_termios_s *tc,
@@ -50,6 +64,12 @@ void uart_termios_setattr(FAR struct uart_termios_s *tc,
   tc->iflag = termiosp->c_iflag;
   tc->oflag = termiosp->c_oflag;
   tc->lflag = termiosp->c_lflag;
+#ifdef CONFIG_TTY_SIGINT
+  tc->vintr = termiosp->c_cc[VINTR];
+#endif
+#ifdef CONFIG_TTY_SIGTSTP
+  tc->vsusp = termiosp->c_cc[VSUSP];
+#endif
 }
 
 size_t uart_termios_in_copy(FAR const struct uart_termios_s *tc,
@@ -191,18 +211,26 @@ uart_termios_isig_find(FAR const struct uart_termios_s *tc,
     }
 
 #ifdef CONFIG_TTY_SIGINT
-  special = memchr(src, CONFIG_TTY_SIGINT_CHAR, len);
-  if (special != NULL)
+  if (tc->vintr != _POSIX_VDISABLE)
     {
-      *signo = SIGINT;
+      special = memchr(src, tc->vintr, len);
+      if (special != NULL)
+        {
+          *signo = SIGINT;
+        }
     }
 #endif
 
 #ifdef CONFIG_TTY_SIGTSTP
+  /* Search only before the INTR character: when both are the same
+   * character, INTR wins.
+   */
+
+  if (tc->vsusp != _POSIX_VDISABLE)
     {
       FAR const char *tmp;
 
-      tmp = memchr(src, CONFIG_TTY_SIGTSTP_CHAR,
+      tmp = memchr(src, tc->vsusp,
                    special != NULL ? (size_t)(special - src) : len);
       if (tmp != NULL)
         {
