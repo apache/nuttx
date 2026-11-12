@@ -123,6 +123,14 @@ static FAR struct inode *inode_unlink(FAR const char *path)
       inode->i_peer   = NULL;
       inode->i_parent = NULL;
       atomic_sub(&inode->i_crefs, 1);
+#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
+      if (desc.parent != NULL)
+        {
+          clock_gettime(CLOCK_REALTIME, &desc.parent->i_ctime);
+          desc.parent->i_mtime = desc.parent->i_ctime;
+        }
+#endif
+
 #ifdef CONFIG_FS_LINKS
       if (INODE_IS_HARDLINK(inode))
         {
@@ -130,6 +138,12 @@ static FAR struct inode *inode_unlink(FAR const char *path)
 
           DEBUGASSERT(inode->i_private != NULL);
           target = inode->i_private;
+#  ifdef CONFIG_PSEUDOFS_ATTRIBUTES
+          /* The link count of the target changes */
+
+          clock_gettime(CLOCK_REALTIME, &target->i_ctime);
+#  endif
+
           atomic_sub(&target->i_crefs, INODE_NLINK_INC);
           if (atomic_read(&target->i_crefs) == 0)
             {
