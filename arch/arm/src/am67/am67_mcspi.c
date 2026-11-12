@@ -88,7 +88,7 @@ static void      am67_mcspi_setmode(FAR struct spi_dev_s *dev,
 static void      am67_mcspi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint32_t  am67_mcspi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-static void      am67_mcspi_exchange(FAR struct spi_dev_s *dev,
+static int       am67_mcspi_exchange(FAR struct spi_dev_s *dev,
                                      FAR const void *txbuffer,
                                      FAR void *rxbuffer, size_t nwords);
 #endif
@@ -463,7 +463,7 @@ static uint32_t am67_mcspi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 }
 
 #ifdef CONFIG_SPI_EXCHANGE
-static void am67_mcspi_exchange(FAR struct spi_dev_s *dev,
+static int  am67_mcspi_exchange(FAR struct spi_dev_s *dev,
                                 FAR const void *txbuffer,
                                 FAR void *rxbuffer, size_t nwords)
 {
@@ -472,7 +472,7 @@ static void am67_mcspi_exchange(FAR struct spi_dev_s *dev,
 
   if (!priv->selected)
     {
-      return;
+      return OK;
     }
 
   if (priv->nbits > 8)
@@ -507,6 +507,8 @@ static void am67_mcspi_exchange(FAR struct spi_dev_s *dev,
             }
         }
     }
+
+  return OK;
 }
 #endif
 

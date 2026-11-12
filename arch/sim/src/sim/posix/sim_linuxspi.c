@@ -90,7 +90,7 @@ static int linux_spi_cmddata(struct spi_dev_s *dev, uint32_t devid,
 #endif
 static uint32_t linux_spi_send(struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-static void linux_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  linux_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                                void *rxbuffer, size_t nwords);
 #else
 static void linux_spi_sndblock(struct spi_dev_s *dev, const void *buffer,
@@ -511,10 +511,12 @@ static uint32_t linux_spi_send(struct spi_dev_s *dev, uint32_t wd)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_EXCHANGE
-static void linux_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  linux_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                                void *rxbuffer, size_t nwords)
 {
   linux_spi_transfer(dev, txbuffer, rxbuffer, nwords);
+
+  return 0;
 }
 #endif
 

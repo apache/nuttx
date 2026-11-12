@@ -86,7 +86,7 @@ struct spi_ops_s
  #endif
   uint32_t (*send)(struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-  void     (*exchange)(struct spi_dev_s *dev,
+  int      (*exchange)(struct spi_dev_s *dev,
                        const void *txbuffer, void *rxbuffer,
                        size_t nwords);
 #else

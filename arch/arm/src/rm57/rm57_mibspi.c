@@ -279,7 +279,7 @@ static int  mibspi_hwfeatures(struct spi_dev_s *dev,
                               spi_hwfeatures_t features);
 #endif
 static uint32_t mibspi_send(struct spi_dev_s *dev, uint32_t wd);
-static void mibspi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  mibspi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                             void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
 static void mibspi_sndblock(struct spi_dev_s *dev, const void *buffer,
@@ -1534,7 +1534,7 @@ static void mibspi_cmexchange(struct rm57_mibspi_s *priv,
  *
  ****************************************************************************/
 
-static void mibspi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  mibspi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                             void *rxbuffer, size_t nwords)
 {
   struct rm57_mibspi_s *priv = (struct rm57_mibspi_s *)dev;
@@ -1543,7 +1543,7 @@ static void mibspi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   if (priv->multibuf)
     {
       mibspi_mbexchange(priv, txbuffer, rxbuffer, nwords);
-      return;
+      return OK;
     }
 #endif
 
@@ -1554,11 +1554,13 @@ static void mibspi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       OSINIT_OS_READY() && !up_interrupt_context())
     {
       mibspi_dmaexchange(priv, txbuffer, rxbuffer, nwords);
-      return;
+      return OK;
     }
 #endif
 
   mibspi_cmexchange(priv, txbuffer, rxbuffer, nwords);
+
+  return OK;
 }
 
 /****************************************************************************
