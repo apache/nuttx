@@ -325,6 +325,10 @@ struct uart_termios_s
 #ifdef CONFIG_TTY_SIGTSTP
   cc_t     vsusp;                    /* c_cc[VSUSP] */
 #endif
+#ifdef CONFIG_SERIAL_TERMIOS
+  cc_t     vmin;                     /* c_cc[VMIN] */
+  cc_t     vtime;                    /* c_cc[VTIME] */
+#endif
 };
 
 /* This is the device structure used by the driver.  The caller of
@@ -406,8 +410,6 @@ struct uart_dev_s
 
 #ifdef CONFIG_SERIAL_TERMIOS
   uint8_t minrecv;                   /* Minimum received bytes */
-  uint8_t minread;                   /* c_cc[VMIN] */
-  uint8_t timeout;                   /* c_cc[VTIME] */
 #endif
 
   FAR struct pollfd_s *fds[CONFIG_SERIAL_NPOLLWAITERS];
@@ -420,22 +422,31 @@ typedef struct uart_dev_s uart_dev_t;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uart_termios_initcc
+ * Name: uart_termios_init
  *
  * Description:
- *   Set the INTR and SUSP characters to the ones of the configuration, the
- *   characters of a terminal when it starts.
+ *   Initialize all fields of the state: the given iflag, oflag and lflag,
+ *   the INTR and SUSP characters of the configuration, and VMIN 1 and
+ *   VTIME 0.
  *
  ****************************************************************************/
 
 static inline_function void
-uart_termios_initcc(FAR struct uart_termios_s *tc)
+uart_termios_init(FAR struct uart_termios_s *tc, tcflag_t iflag,
+                  tcflag_t oflag, tcflag_t lflag)
 {
+  tc->iflag = iflag;
+  tc->oflag = oflag;
+  tc->lflag = lflag;
 #ifdef CONFIG_TTY_SIGINT
   tc->vintr = CONFIG_TTY_SIGINT_CHAR;
 #endif
 #ifdef CONFIG_TTY_SIGTSTP
   tc->vsusp = CONFIG_TTY_SIGTSTP_CHAR;
+#endif
+#ifdef CONFIG_SERIAL_TERMIOS
+  tc->vmin  = 1;
+  tc->vtime = 0;
 #endif
 }
 
