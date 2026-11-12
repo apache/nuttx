@@ -51,60 +51,6 @@
 #define LOCAL_FRAME_NIOV 8
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: local_fifo_write
- *
- * Description:
- *   Write a data on the write-only FIFO.
- *
- * Input Parameters:
- *   filep    File structure of write-only FIFO.
- *   buf      Data to send
- *   len      Length of data to send
- *
- * Returned Value:
- *   On success, the number of bytes written are returned (zero indicates
- *   nothing was written).  On any failure, a negated errno value is returned
- *
- ****************************************************************************/
-
-static ssize_t local_fifo_write(FAR struct file *filep,
-                                FAR const uint8_t *buf,
-                                size_t len)
-{
-  ssize_t nwritten = 0;
-  ssize_t ret = 0;
-
-  while (len != nwritten)
-    {
-      ret = file_write(filep, buf + nwritten, len - nwritten);
-      if (ret < 0)
-        {
-          if (ret == -EINTR)
-            {
-              continue;
-            }
-          else if (ret == -EAGAIN)
-            {
-              break;
-            }
-          else
-            {
-              nerr("ERROR: file_write failed: %zd\n", ret);
-              break;
-            }
-        }
-
-      nwritten += ret;
-    }
-
-  return nwritten > 0 ? nwritten : ret;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -248,8 +194,10 @@ ssize_t local_send_frame(FAR struct local_conn_s *conn,
  *   len      Length of data to send
  *
  * Returned Value:
- *   Packet length is returned on success; a negated errno value is returned
- *   on any failure.
+ *   The number of bytes sent is returned on success.  It is less than the
+ *   length of the data when the FIFO is full and does not wait, or when a
+ *   signal came while the send waited.  A negated errno value is returned
+ *   on any failure (-EINTR: a signal came before the first byte).
  *
  ****************************************************************************/
 
@@ -269,10 +217,10 @@ ssize_t local_send_packet(FAR struct file *filep,
 
   for (iov = buf; iov != end; iov++)
     {
-      ret = local_fifo_write(filep, iov->iov_base, iov->iov_len);
+      ret = file_write(filep, iov->iov_base, iov->iov_len);
       if (ret < 0)
         {
-          if (ret != -EAGAIN)
+          if (ret != -EAGAIN && ret != -EINTR)
             {
               nerr("ERROR: local send packet failed ret: %zd\n", ret);
             }
@@ -280,13 +228,14 @@ ssize_t local_send_packet(FAR struct file *filep,
           break;
         }
 
-      if (ret > 0)
+      /* A short write: the FIFO is full and does not wait, or a signal came
+       * while the write waited.
+       */
+
+      sendlen += ret;
+      if (ret != iov->iov_len)
         {
-          sendlen += ret;
-          if (ret != iov->iov_len)
-            {
-              break;
-            }
+          break;
         }
     }
 
