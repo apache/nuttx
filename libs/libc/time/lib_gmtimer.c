@@ -31,6 +31,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/lib/math32.h>
 
 /****************************************************************************
  * Private Function Prototypes
@@ -161,7 +162,12 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
    * following:
    */
 
-  value   = days  / (4 * DAYSPERNYEAR + 1); /* Number of 4-years periods since the epoch */
+  /* Number of 4-years periods since the epoch (days is non-negative:
+   * only dates since Jan 1, 1970 are handled here, so div_const() holds
+   * its non-negative contract).
+   */
+
+  value   = (int)div_const(days, 4 * DAYSPERNYEAR + 1);
   days   -= value * (4 * DAYSPERNYEAR + 1); /* Remaining days */
   value <<= 2;                              /* Years since the epoch */
 
@@ -301,15 +307,18 @@ FAR struct tm *gmtime_r(FAR const time_t *timep, FAR struct tm *result)
   epoch = *timep;
   linfo("timer=%d\n", (int)epoch);
 
-  /* Convert to days, hours, minutes, and seconds since the EPOCH */
+  /* Convert to days, hours, minutes, and seconds since the EPOCH.
+   * div_const() keeps the time math out of the division library; it
+   * needs a non-negative epoch.
+   */
 
-  jdn    = epoch / SEC_PER_DAY;
+  jdn    = div_const(epoch, SEC_PER_DAY);
   epoch -= SEC_PER_DAY * jdn;
 
-  hour   = epoch / SEC_PER_HOUR;
+  hour   = (int)div_const(epoch, SEC_PER_HOUR);
   epoch -= SEC_PER_HOUR * hour;
 
-  min    = epoch / SEC_PER_MIN;
+  min    = (int)div_const(epoch, SEC_PER_MIN);
   epoch -= SEC_PER_MIN * min;
 
   sec    = epoch;
