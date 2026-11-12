@@ -630,12 +630,12 @@ static int stm32_cap_setclock(struct stm32_cap_dev_s *dev,
   switch (clk)
     {
       case STM32_CAP_CLK_INT:
-          regval = GTIM_SMCR_DISAB;
-          break;
+        regval = GTIM_SMCR_DISAB;
+        break;
 
       case STM32_CAP_CLK_EXT:
-          regval = GTIM_SMCR_EXTCLK1;
-          break;
+        regval = GTIM_SMCR_EXTCLK1;
+        break;
 
       /* TODO: Add other case */
 
