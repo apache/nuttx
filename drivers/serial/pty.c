@@ -1361,17 +1361,12 @@ int pty_register2(int minor, bool susv1)
   return OK;
 
 errout_with_master:
+
+  /* Hold a reference so that pty_unlink() does not destroy devpair */
+
+  devpair->pp_nopen++;
   snprintf(devname, sizeof(devname), "/dev/pty%d", minor);
   unregister_driver(devname);
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-
-  /* unregister_driver() will call pty_unlink(), which may call
-   * pty_destroy() to free devpair if pp_nopen == 0. So we must return
-   * here directly to avoid use-after-free.
-   */
-
-  return ret;
-#endif
 
 errout_with_devpair:
   nxmutex_destroy(&devpair->pp_lock);
