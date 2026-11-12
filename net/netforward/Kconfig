@@ -6,7 +6,7 @@
 config NET_FORWARD
 	bool
 	default n
-	--help--
+	---help---
 		Enable forwarding function.
 
 config NET_IPFORWARD
