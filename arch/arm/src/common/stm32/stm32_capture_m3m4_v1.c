@@ -49,29 +49,6 @@
 
 /* Configuration ************************************************************/
 
-#if defined(GPIO_TIM1_CH1IN) || defined(GPIO_TIM2_CH1IN) || defined(GPIO_TIM3_CH1IN) || \
-    defined(GPIO_TIM4_CH1IN) || defined(GPIO_TIM5_CH1IN) || defined(GPIO_TIM8_CH1IN) || \
-    defined(GPIO_TIM9_CH1IN) || defined(GPIO_TIM10_CH1IN) || defined(GPIO_TIM11_CH1IN) || \
-    defined(GPIO_TIM12_CH1IN) || defined(GPIO_TIM13_CH1IN) || defined(GPIO_TIM14_CH1IN)
-#  define HAVE_CH1IN 1
-#endif
-
-#if defined(GPIO_TIM1_CH2IN) || defined(GPIO_TIM2_CH2IN) || defined(GPIO_TIM3_CH2IN) || \
-    defined(GPIO_TIM4_CH2IN) || defined(GPIO_TIM5_CH2IN) || defined(GPIO_TIM8_CH2IN) || \
-    defined(GPIO_TIM9_CH2IN) || defined(GPIO_TIM12_CH2IN)
-#  define HAVE_CH2IN 1
-#endif
-
-#if defined(GPIO_TIM1_CH3IN) || defined(GPIO_TIM2_CH3IN) || defined(GPIO_TIM3_CH3IN) || \
-    defined(GPIO_TIM4_CH3IN) || defined(GPIO_TIM5_CH3IN) || defined(GPIO_TIM8_CH3IN)
-#  define HAVE_CH3IN 1
-#endif
-
-#if defined(GPIO_TIM1_CH4IN) || defined(GPIO_TIM2_CH4IN) || defined(GPIO_TIM3_CH4IN) || \
-    defined(GPIO_TIM4_CH4IN) || defined(GPIO_TIM5_CH4IN) || defined(GPIO_TIM8_CH4IN)
-#  define HAVE_CH4IN 1
-#endif
-
 #if defined(CONFIG_STM32_TIM1_CAP) || defined(CONFIG_STM32_TIM8_CAP)
 #define USE_ADVENCED_TIM 1
 #endif
@@ -1085,16 +1062,25 @@ static int stm32_cap_setchannel(struct stm32_cap_dev_s *dev,
 
   DEBUGASSERT(dev != NULL);
 
-  gpio = stm32_cap_gpio(priv, channel);
-
-  if (gpio == 0)
-    {
-      return ERROR;
-    }
-
   if ((cfg & STM32_CAP_MAPPED_MASK) == 0)
     {
       return ERROR; /* MAPPED not selected */
+    }
+
+  /* Only a channel mapped to its own input needs a pin.  A channel mapped
+   * to the input of its paired channel (as the second channel in PWM input
+   * mode) shares the pin of that channel.
+   */
+
+  if ((cfg & STM32_CAP_MAPPED_MASK) == STM32_CAP_MAPPED_TI1)
+    {
+      gpio = stm32_cap_gpio(priv, channel);
+
+      if (gpio == 0 &&
+          (cfg & STM32_CAP_EDGE_MASK) != STM32_CAP_EDGE_DISABLED)
+        {
+          return ERROR;
+        }
     }
 
   /* Change to zero base index */
@@ -1174,13 +1160,16 @@ static int stm32_cap_setchannel(struct stm32_cap_dev_s *dev,
 
   /* Set GPIO */
 
-  if ((cfg & STM32_CAP_EDGE_MASK) == STM32_CAP_EDGE_DISABLED)
+  if (gpio != 0)
     {
-      stm32_unconfiggpio(gpio);
-    }
-  else
-    {
-      stm32_configgpio(gpio);
+      if ((cfg & STM32_CAP_EDGE_MASK) == STM32_CAP_EDGE_DISABLED)
+        {
+          stm32_unconfiggpio(gpio);
+        }
+      else
+        {
+          stm32_configgpio(gpio);
+        }
     }
 
   /* Enable this channel timer */
@@ -1202,26 +1191,18 @@ static uint32_t stm32_cap_getcapture(struct stm32_cap_dev_s *dev,
       case STM32_CAP_CHANNEL_COUNTER:
         offset = STM32_GTIM_CNT_OFFSET;
         break;
-#ifdef HAVE_CH1IN
       case 1:
         offset = STM32_GTIM_CCR1_OFFSET;
         break;
-#endif
-#ifdef HAVE_CH2IN
       case 2:
         offset = STM32_GTIM_CCR2_OFFSET;
         break;
-#endif
-#ifdef HAVE_CH3IN
       case 3:
         offset = STM32_GTIM_CCR3_OFFSET;
         break;
-#endif
-#ifdef HAVE_CH4IN
       case 4:
         offset = STM32_GTIM_CCR4_OFFSET;
         break;
-#endif
       default:
         return ERROR;
     }
