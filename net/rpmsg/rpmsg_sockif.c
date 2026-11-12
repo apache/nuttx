@@ -251,7 +251,7 @@ const struct sock_intf_s g_rpmsg_sockif =
  * Private Data
  ****************************************************************************/
 
-static uint32_t g_rpmsg_id;
+static atomic_t g_rpmsg_id;
 
 /* Listening sockets.  rpmsg_socket_ns_bind() holds the lock while it uses
  * the server it found, so that close() cannot free that server meanwhile.
@@ -1021,7 +1021,7 @@ static int rpmsg_socket_setaddr(FAR struct rpmsg_socket_conn_s *conn,
   if (suffix)
     {
       snprintf(conn->nameid, sizeof(conn->nameid), ":%" PRIx32,
-               g_rpmsg_id++);
+               atomic_add(&g_rpmsg_id, 1));
     }
   else
     {
