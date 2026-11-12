@@ -187,10 +187,14 @@ ssize_t syslog_write_foreach(int priority, FAR const char *buffer,
                       continue;
                     }
 
-                  ret = write(channel, buffer + nwritten, head - nwritten);
-                  if (ret <= 0)
+                  if (head > nwritten)
                     {
-                      continue;
+                      ret = write(channel, buffer + nwritten,
+                                  head - nwritten);
+                      if (ret <= 0)
+                        {
+                          continue;
+                        }
                     }
 
                   /* On failure leave the '\n' to the tail write: rewinding
