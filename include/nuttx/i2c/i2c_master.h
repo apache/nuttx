@@ -174,6 +174,34 @@
 #endif
 
 /****************************************************************************
+ * Name: I2C_CANCEL
+ *
+ * Description:
+ *   Cancel pending asynchronous I2C transfer(s).
+ *
+ *   In asynchronous communication (i2c_msg_s with non-NULL callback),
+ *   this interface can be called to cancel transfers that have not yet
+ *   been completed by hardware.
+ *
+ *   The `cookie` is typically returned by the `transfer` function when
+ *   asynchronous sequences were initially submitted. The lower-half driver
+ *   uses this cookie to locate and cancel the specified transfer(s).
+ *   If `cookie` is `NULL`, the function should cancel all pending transfers
+ *   on the device.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   cookie - A pointer of unique identifier for the transfer to be canceled.
+ *            NULL means cancel all pending transfers.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#define I2C_CANCEL(d,c) ((d)->ops->cancel(d,c))
+
+/****************************************************************************
  * Name: I2C_SETUP
  *
  * Description:
@@ -251,6 +279,7 @@ struct i2c_ops_s
   CODE int (*setup)(FAR struct i2c_master_s *dev);
   CODE int (*shutdown)(FAR struct i2c_master_s *dev);
   CODE uint8_t (*status)(FAR struct i2c_master_s *dev);
+  CODE int (*cancel)(FAR struct i2c_master_s *dev, FAR void *cookie);
 };
 
 /* This structure contains the full state of I2C as needed for a specific
@@ -278,6 +307,12 @@ struct i2c_config_s
  *   4. Configure I2C.
  *   5. Configure and start DMA.
  *   6. Call the callback function and unlock i2c device in interrupt.
+ *
+ * The `cookie` field is an output parameter filled by the lower-half driver
+ * during asynchronous transfer submission. It serves as a handle that can
+ * be passed to I2C_CANCEL() to cancel the pending transfer. The caller
+ * should initialize it to NULL before calling I2C_TRANSFER(); the lower-half
+ * will set it to a non-NULL value if the transfer is queued asynchronously.
  */
 
 struct i2c_msg_s
@@ -289,6 +324,7 @@ struct i2c_msg_s
   ssize_t length;             /* Length of the buffer in bytes */
   i2c_statechange_t callback; /* Callback function */
   FAR void *arg;              /* Argument for the callback function */
+  FAR void *cookie;           /* Cookie returned by lower-half for cancel */
 };
 
 /* I2C private data.  This structure only defines the initial fields of the
