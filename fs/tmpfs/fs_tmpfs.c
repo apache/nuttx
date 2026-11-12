@@ -1511,6 +1511,10 @@ static int tmpfs_getpath(FAR struct tmpfs_object_s *to,
 
       tdo = to->to_parent;
 
+      /* unlink/rename free names and compact tdo_entry[] under this lock */
+
+      tmpfs_lock_directory(tdo);
+
       for (i = 0; i < tdo->tdo_nentries; i++)
         {
           tde = &tdo->tdo_entry[i];
@@ -1522,6 +1526,7 @@ static int tmpfs_getpath(FAR struct tmpfs_object_s *to,
 
       if (i == tdo->tdo_nentries)
         {
+          tmpfs_unlock_directory(tdo);
           return -ENOENT;
         }
 
@@ -1530,6 +1535,8 @@ static int tmpfs_getpath(FAR struct tmpfs_object_s *to,
         {
           strlcat(path, "/", len);
         }
+
+      tmpfs_unlock_directory(tdo);
     }
 
   return OK;
