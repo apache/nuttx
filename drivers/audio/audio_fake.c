@@ -882,6 +882,18 @@ static int audio_fake_stop(FAR struct audio_lowerhalf_s *dev)
   FAR void *value;
   int ret;
 
+  if (nxsem_trywait(&priv->exitsem) == 0)
+    {
+      nxsem_post(&priv->exitsem);
+      if (priv->threadid != 0)
+        {
+          pthread_join(priv->threadid, &value);
+          priv->threadid = 0;
+        }
+
+      return OK;
+    }
+
   /* Send a message to stop all audio streaming */
 
   term_msg.msg_id = AUDIO_MSG_STOP;
