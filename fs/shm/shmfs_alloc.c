@@ -178,6 +178,7 @@ void shmfs_free_object(FAR struct shmfs_object_s *object)
       size_t i;
       size_t n_pages = MM_NPAGES(object->length);
       FAR void **pages = &object->paddr;
+
       for (i = 0; i < n_pages; i++)
         {
           if (pages[i])
