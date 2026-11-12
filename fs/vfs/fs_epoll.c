@@ -219,6 +219,7 @@ static int epoll_do_close(FAR struct file *filep)
 
       nxmutex_unlock(&eph->lock);
       nxmutex_destroy(&eph->lock);
+      nxsem_destroy(&eph->sem);
       fs_heap_free(eph);
     }
   else
@@ -276,6 +277,7 @@ static int epoll_do_create(int size, int flags)
   if (fd < 0)
     {
       nxmutex_destroy(&eph->lock);
+      nxsem_destroy(&eph->sem);
       fs_heap_free(eph);
       set_errno(-fd);
       return ERROR;
@@ -669,6 +671,12 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
                     ret = file_poll(epn->filep, &epn->pfd, true);
                     if (ret < 0)
                       {
+                        /* Only registered nodes may stay in the setup list:
+                         * close and teardown tear down whatever is there.
+                         */
+
+                        list_delete(&epn->node);
+                        list_add_tail(&eph->teardown, &epn->node);
                         goto err;
                       }
                   }
