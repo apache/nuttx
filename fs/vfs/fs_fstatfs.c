@@ -78,9 +78,17 @@ int fstatfs(int fd, FAR struct statfs *buf)
     }
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-  /* Get the inode from the file structure */
+  /* Get the inode from the file structure.  A directory that open() opened
+   * has a stand-in inode: use the inode where the directory starts.
+   */
 
   inode = filep->f_inode;
+  if (dir_isdirectory(filep))
+    {
+      FAR struct fs_dirent_s *dir = filep->f_priv;
+
+      inode = dir->fd_root;
+    }
 
   /* The way we handle the stat depends on the type of inode that we
    * are dealing with.

@@ -733,3 +733,16 @@ int dir_fstat(FAR struct file *filep, FAR struct stat *buf)
   dir = filep->f_priv;
   return nx_stat(dir->fd_path, buf, 1);
 }
+
+/****************************************************************************
+ * Name: dir_isdirectory
+ *
+ * Description:
+ *   Return true if filep is a directory opened with open().
+ *
+ ****************************************************************************/
+
+bool dir_isdirectory(FAR struct file *filep)
+{
+  return filep->f_inode == &g_dir_inode;
+}
