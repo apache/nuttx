@@ -30,6 +30,7 @@
 #include <inttypes.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 
 #include "partition.h"
 

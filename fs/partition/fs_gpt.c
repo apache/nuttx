@@ -32,6 +32,7 @@
 
 #include <nuttx/crc32.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 
 #include "partition.h"
 #include "fs_heap.h"
