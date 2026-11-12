@@ -123,4 +123,7 @@ ifeq ($(CONFIG_ANALOG),y)
 ifeq ($(CONFIG_DAC),y)
 CHIP_CSRCS += kinetis_dac.c
 endif
+ifeq ($(CONFIG_ADC),y)
+CHIP_CSRCS += kinetis_adc.c
+endif
 endif

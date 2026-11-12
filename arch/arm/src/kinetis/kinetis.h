@@ -778,5 +778,10 @@ int kinetis_caninitialize(int intf);
 struct dac_dev_s *kinetis_dac_initialize(int which);
 #endif
 
+#if defined(CONFIG_KINETIS_ADC0) || defined (CONFIG_KINETIS_ADC1)
+struct adc_dev_s *kinetis_adc_initialize(
+    int which, uint8_t const *ch_list, uint8_t ch_count);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_H */
