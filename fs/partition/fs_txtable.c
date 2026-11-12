@@ -31,6 +31,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/macro.h>
 
 #include "partition.h"

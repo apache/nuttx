@@ -33,6 +33,7 @@
 #include <nuttx/crc32.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/mtd/mtd.h>
 
 #include "nxffs.h"
