@@ -528,7 +528,10 @@ static int rpmsgfs_lseek_handler(FAR struct rpmsg_endpoint *ept,
   filep = rpmsgfs_get_file(priv, msg->fd);
   if (filep != NULL)
     {
-      ret = file_seek(filep, msg->offset, msg->whence);
+      /* header.result is 32 bits, so return the position in offset */
+
+      msg->offset = file_seek(filep, msg->offset, msg->whence);
+      ret = msg->offset < 0 ? msg->offset : 0;
     }
 
   msg->header.result = ret;

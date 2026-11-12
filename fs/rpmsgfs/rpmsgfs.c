@@ -328,15 +328,15 @@ static int rpmsgfs_open(FAR struct file *filep, FAR const char *relpath,
 
   if ((oflags & O_APPEND) && (oflags & O_ACCMODE) != O_RDONLY)
     {
-      ret = rpmsgfs_client_lseek(fs->handle, hf->fd, 0, SEEK_END);
-      if (ret >= 0)
+      off_t pos = rpmsgfs_client_lseek(fs->handle, hf->fd, 0, SEEK_END);
+
+      if (pos < 0)
         {
-          filep->f_pos = ret;
-        }
-      else
-        {
+          ret = pos;
           goto errout_with_fd;
         }
+
+      filep->f_pos = pos;
     }
 
   /* Attach the private date to the struct file instance */
