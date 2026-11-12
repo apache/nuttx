@@ -314,6 +314,7 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
       size_t datsize = blkinfo->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR;
       size_t nerased = nxffs_erased(blkinfo->buffer + SIZEOF_NXFFS_BLOCK_HDR,
                                     datsize);
+
       if (nerased == datsize)
         {
           if (blkinfo->verbose)

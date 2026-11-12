@@ -653,6 +653,7 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
           /* Small write, try to cache it */
 
           bool alloc_cpage = true;
+
           if (fobj->cache_page != NULL)
             {
               /* We have a cached page for this object already, check cache
@@ -861,22 +862,22 @@ static off_t spiffs_seek(FAR struct file *filep, off_t offset, int whence)
   switch (whence)
     {
       case SEEK_SET: /* The offset is set to offset bytes. */
-          pos = offset;
-          break;
+        pos = offset;
+        break;
 
       case SEEK_CUR: /* The offset is set to its current location plus
                       * offset bytes. */
-          pos = offset + filep->f_pos;
-          break;
+        pos = offset + filep->f_pos;
+        break;
 
       case SEEK_END: /* The offset is set to the size of the file plus
                       * offset bytes. */
-          pos = fsize + offset;
-          break;
+        pos = fsize + offset;
+        break;
 
       default:
-          ret = -EINVAL;
-          goto errout_with_lock;
+        ret = -EINVAL;
+        goto errout_with_lock;
     }
 
   /* Verify the resulting file position */
@@ -990,6 +991,7 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               /* No.. we will have to erase a block at a time */
 
               int16_t blkndx = 0;
+
               while (blkndx < SPIFFS_GEO_BLOCK_COUNT(fs))
                 {
                   fs->max_erase_count = 0;
