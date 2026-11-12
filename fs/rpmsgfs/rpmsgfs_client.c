@@ -835,11 +835,22 @@ int rpmsgfs_client_bind(FAR void **handle, FAR const char *cpuname)
 
 int rpmsgfs_client_unbind(FAR void *handle)
 {
-  rpmsg_unregister_callback(handle,
+  FAR struct rpmsgfs_s *priv = handle;
+
+  /* rpmsg_unregister_callback() runs device_destroy() once per rpmsg
+   * instance.  The matching one drops the endpoint's last reference and
+   * frees priv through rpmsgfs_ept_release(), while the sweep goes on
+   * reading priv->cpuname for the instances left, so hold a reference
+   * of our own across it.
+   */
+
+  rpmsg_ept_incref(&priv->ept);
+  rpmsg_unregister_callback(priv,
                             rpmsgfs_device_created,
                             rpmsgfs_device_destroy,
                             NULL,
                             NULL);
+  rpmsg_ept_decref(&priv->ept);
 
   return 0;
 }
