@@ -687,27 +687,27 @@ static inline void s32k1xx_lpspi_set_delay_scaler(struct
 {
   switch (type)
     {
-    case LPSPI_PCS_TO_SCK:
-      s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET,
-                              LPSPI_CCR_PCSSCK_MASK, 0);
-      s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET, 0,
-                              LPSPI_CCR_PCSSCK(scaler));
-      break;
+      case LPSPI_PCS_TO_SCK:
+        s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET,
+                                LPSPI_CCR_PCSSCK_MASK, 0);
+        s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET, 0,
+                                LPSPI_CCR_PCSSCK(scaler));
+        break;
 
-    case LPSPI_LAST_SCK_TO_PCS:
-      s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET,
-                              LPSPI_CCR_SCKPCS_MASK, 0);
-      s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET, 0,
-                              LPSPI_CCR_SCKPCS(scaler));
-      break;
+      case LPSPI_LAST_SCK_TO_PCS:
+        s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET,
+                                LPSPI_CCR_SCKPCS_MASK, 0);
+        s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET, 0,
+                                LPSPI_CCR_SCKPCS(scaler));
+        break;
 
-    case LPSPI_BETWEEN_TRANSFER:
-      s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET,
-                                LPSPI_CCR_DBT_MASK,
-                                0);
-      s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET, 0,
-                              LPSPI_CCR_DBT(scaler));
-      break;
+      case LPSPI_BETWEEN_TRANSFER:
+        s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET,
+                                  LPSPI_CCR_DBT_MASK,
+                                  0);
+        s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CCR_OFFSET, 0,
+                                LPSPI_CCR_DBT(scaler));
+        break;
     }
 }
 
@@ -1072,28 +1072,28 @@ static void s32k1xx_lpspi_setmode(struct spi_dev_s *dev,
 
       switch (mode)
         {
-        case SPIDEV_MODE0:     /* CPOL=0; CPHA=0 */
-          setbits = 0;
-          clrbits = LPSPI_TCR_CPOL | LPSPI_TCR_CPHA;
-          break;
+          case SPIDEV_MODE0:     /* CPOL=0; CPHA=0 */
+            setbits = 0;
+            clrbits = LPSPI_TCR_CPOL | LPSPI_TCR_CPHA;
+            break;
 
-        case SPIDEV_MODE1:     /* CPOL=0; CPHA=1 */
-          setbits = LPSPI_TCR_CPHA;
-          clrbits = LPSPI_TCR_CPOL;
-          break;
+          case SPIDEV_MODE1:     /* CPOL=0; CPHA=1 */
+            setbits = LPSPI_TCR_CPHA;
+            clrbits = LPSPI_TCR_CPOL;
+            break;
 
-        case SPIDEV_MODE2:     /* CPOL=1; CPHA=0 */
-          setbits = LPSPI_TCR_CPOL;
-          clrbits = LPSPI_TCR_CPHA;
-          break;
+          case SPIDEV_MODE2:     /* CPOL=1; CPHA=0 */
+            setbits = LPSPI_TCR_CPOL;
+            clrbits = LPSPI_TCR_CPHA;
+            break;
 
-        case SPIDEV_MODE3:     /* CPOL=1; CPHA=1 */
-          setbits = LPSPI_TCR_CPOL | LPSPI_TCR_CPHA;
-          clrbits = 0;
-          break;
+          case SPIDEV_MODE3:     /* CPOL=1; CPHA=1 */
+            setbits = LPSPI_TCR_CPOL | LPSPI_TCR_CPHA;
+            clrbits = 0;
+            break;
 
-        default:
-          return;
+          default:
+            return;
         }
 
       s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_TCR_OFFSET,
@@ -1378,6 +1378,7 @@ static void s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
 {
   struct s32k1xx_lpspidev_s *priv = (struct s32k1xx_lpspidev_s *)dev;
   uint16_t framesize;
+
   DEBUGASSERT(priv && priv->spibase);
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
@@ -1414,20 +1415,20 @@ static void s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
             {
               /* read the required number of bytes */
 
-            switch (framesize)
-              {
+              switch (framesize)
+                {
 #ifdef CONFIG_S32K1XX_LPSPI_DWORD
-              case 40:
-                   word = (src[0] << 24) + (src[1] << 16)
-                          + (src[2] << 8) + src[3];
-                   word1 = src[4];
-                   src += 5;
-                   dwords = true;
-                   break;
+                  case 40:
+                    word = (src[0] << 24) + (src[1] << 16)
+                           + (src[2] << 8) + src[3];
+                    word1 = src[4];
+                    src += 5;
+                    dwords = true;
+                    break;
 #endif
-              default:
-                      break;
-              }
+                  default:
+                    break;
+                }
             }
           else
             {
@@ -1451,24 +1452,24 @@ static void s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
 
           if (dest)
             {
-            switch (framesize)
-              {
+              switch (framesize)
+                {
 #ifdef CONFIG_S32K1XX_LPSPI_DWORD
-              case 40:
-                   dest[0] = (word >> 24) & 0xff;
-                   dest[1] = (word >> 16) & 0xff;
-                   dest[2] = (word >>  8) & 0xff;
-                   dest[3] =  word        & 0xff;
-                   dest[4] =  rword1      & 0xff;
-                   dest += 5;
-                   break;
+                  case 40:
+                    dest[0] = (word >> 24) & 0xff;
+                    dest[1] = (word >> 16) & 0xff;
+                    dest[2] = (word >>  8) & 0xff;
+                    dest[3] =  word        & 0xff;
+                    dest[4] =  rword1      & 0xff;
+                    dest += 5;
+                    break;
 #endif
 
-              default:
+                  default:
 
-                      break;
+                    break;
+                }
             }
-          }
         }
     }
   else if (framesize > 16)
@@ -1492,22 +1493,22 @@ static void s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
             {
               /* read the required number of bytes */
 
-            switch (framesize)
-              {
-              case 32:
-                   word = __builtin_bswap32(*src);
-                   src += 4;
-                   break;
+              switch (framesize)
+                {
+                  case 32:
+                    word = __builtin_bswap32(*src);
+                    src += 4;
+                    break;
 #ifdef CONFIG_S32K1XX_LPSPI_DWORD
-              case 64:
-                   word  = __builtin_bswap32(src[0]);
-                   word1 = __builtin_bswap32(src[1]);
-                   src += 8;
-                   dwords = true;
+                  case 64:
+                    word  = __builtin_bswap32(src[0]);
+                    word1 = __builtin_bswap32(src[1]);
+                    src += 8;
+                    dwords = true;
 #endif
-              default:
-                      break;
-              }
+                  default:
+                    break;
+                }
             }
           else
             {
@@ -1524,32 +1525,32 @@ static void s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
           else
 #endif
             {
-            word = s32k1xx_lpspi_send(dev, word);
+              word = s32k1xx_lpspi_send(dev, word);
             }
 
           /* Is there a buffer to receive the return value? */
 
           if (dest)
             {
-            switch (framesize)
-              {
-              case 32:
-                   *dest = __builtin_bswap32(word);
-                   dest += 4;
-                   break;
+              switch (framesize)
+                {
+                  case 32:
+                    *dest = __builtin_bswap32(word);
+                    dest += 4;
+                    break;
 #ifdef CONFIG_S32K1XX_LPSPI_DWORD
-              case 64:
-                   dest[0] = __builtin_bswap32(word);
-                   dest[1] = __builtin_bswap32(rword1);
-                   dest += 8;
-                   break;
+                  case 64:
+                    dest[0] = __builtin_bswap32(word);
+                    dest[1] = __builtin_bswap32(rword1);
+                    dest += 8;
+                    break;
 #endif
 
-              default:
+                  default:
 
-                      break;
+                    break;
+                }
             }
-          }
         }
     }
   else if (framesize > 8)
@@ -1958,109 +1959,109 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
   /* check which PM it is  */
 
   switch (pmstate)
-  {
-    /* in case it needs to change to the RUN mode */
-
-    case PM_NORMAL:
     {
-      /* Logic for PM_NORMAL goes here */
+      /* in case it needs to change to the RUN mode */
 
-      /* set the right clock source to go back to RUN mode */
+      case PM_NORMAL:
+        {
+          /* Logic for PM_NORMAL goes here */
 
-      clock_source = CLK_SRC_SPLL_DIV2;
+          /* set the right clock source to go back to RUN mode */
+
+          clock_source = CLK_SRC_SPLL_DIV2;
 
 #  ifdef CONFIG_PM_SPI0
 
-      /* add 1 to count to do it for SPI0 */
+          /* add 1 to count to do it for SPI0 */
 
-      count++;
+          count++;
 #  endif
 
 #  ifdef CONFIG_PM_SPI1
 
-      /* add 1 to count to do it for SPI1 */
+          /* add 1 to count to do it for SPI1 */
 
-      count++;
+          count++;
 #  endif
-    }
-    break;
+        }
+        break;
 
-    default:
-    {
-      /* don't do anything, just return OK */
+      default:
+        {
+          /* don't do anything, just return OK */
+        }
+        break;
     }
-    break;
-  }
 
   /* check if the LPSPI needs to change */
 
   if (count)
-  {
-    /* make the peripheral clock config struct */
-
-    const struct peripheral_clock_config_s clock_config[] =
     {
-#  ifdef CONFIG_PM_SPI0
+      /* make the peripheral clock config struct */
 
+      const struct peripheral_clock_config_s clock_config[] =
       {
-        .clkname  =   LPSPI0_CLK,
-        .clkgate  =   true,
-        .clksrc   =   clock_source,
-        .frac     =   MULTIPLY_BY_ONE,
-        .divider  =   1,
-      },
+#  ifdef CONFIG_PM_SPI0
+
+        {
+          .clkname  =   LPSPI0_CLK,
+          .clkgate  =   true,
+          .clksrc   =   clock_source,
+          .frac     =   MULTIPLY_BY_ONE,
+          .divider  =   1,
+        },
 #  endif
 #  ifdef CONFIG_PM_SPI1
 
-      {
-        .clkname  =   LPSPI1_CLK,
-        .clkgate  =   true,
-        .clksrc   =   clock_source,
-        .frac     =   MULTIPLY_BY_ONE,
-        .divider  =   1,
-      }
+        {
+          .clkname  =   LPSPI1_CLK,
+          .clkgate  =   true,
+          .clksrc   =   clock_source,
+          .frac     =   MULTIPLY_BY_ONE,
+          .divider  =   1,
+        }
 #  endif
-    };
+      };
 
 #  ifdef CONFIG_PM_SPI0
 
-    /* disable LPSP0 */
+      /* disable LPSP0 */
 
-    s32k1xx_lpspi_modifyreg32(priv0, S32K1XX_LPSPI_CR_OFFSET, 0,
-                              !LPSPI_CR_MEN);
+      s32k1xx_lpspi_modifyreg32(priv0, S32K1XX_LPSPI_CR_OFFSET, 0,
+                                !LPSPI_CR_MEN);
 
 #  endif
 #  ifdef CONFIG_PM_SPI1
 
-    /* disable LPSPI */
+      /* disable LPSPI */
 
-    s32k1xx_lpspi_modifyreg32(priv1, S32K1XX_LPSPI_CR_OFFSET, 0,
-                              !LPSPI_CR_MEN);
+      s32k1xx_lpspi_modifyreg32(priv1, S32K1XX_LPSPI_CR_OFFSET, 0,
+                                !LPSPI_CR_MEN);
 
 #  endif
 
-    /* change the clock config for the new mode */
+      /* change the clock config for the new mode */
 
-    s32k1xx_periphclocks(count, clock_config);
+      s32k1xx_periphclocks(count, clock_config);
 
 #  ifdef CONFIG_PM_SPI0
 
-    /* Enable LPSP0 */
+      /* Enable LPSP0 */
 
-    s32k1xx_lpspi_modifyreg32(priv0, S32K1XX_LPSPI_CR_OFFSET, 0,
-                              LPSPI_CR_MEN);
+      s32k1xx_lpspi_modifyreg32(priv0, S32K1XX_LPSPI_CR_OFFSET, 0,
+                                LPSPI_CR_MEN);
 
 #  endif
 #  ifdef CONFIG_PM_SPI1
 
-    /* Enable LPSPI */
+      /* Enable LPSPI */
 
-    s32k1xx_lpspi_modifyreg32(priv1, S32K1XX_LPSPI_CR_OFFSET, 0,
-                              LPSPI_CR_MEN);
+      s32k1xx_lpspi_modifyreg32(priv1, S32K1XX_LPSPI_CR_OFFSET, 0,
+                                LPSPI_CR_MEN);
 #  endif
 
-    /* get the clock freq */
-  }
+      /* get the clock freq */
+    }
 }
 #endif
 
@@ -2303,134 +2304,134 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
   /* check which PM it is  */
 
   switch (pmstate)
-  {
-    /* in case it needs to prepare for VLPR mode */
-
-    case PM_STANDBY:
     {
-      /* Logic for PM_STANDBY goes here */
+      /* in case it needs to prepare for VLPR mode */
 
-       /* set the right clock source */
+      case PM_STANDBY:
+        {
+          /* Logic for PM_STANDBY goes here */
 
-      clock_source = CLK_SRC_SIRC_DIV2;
+          /* set the right clock source */
+
+          clock_source = CLK_SRC_SIRC_DIV2;
 
 #  ifdef CONFIG_PM_SPI0_STANDBY
 
-      /* increase count to change the SPI0  */
+          /* increase count to change the SPI0  */
 
-      count++;
+          count++;
 
 #  endif
 #  ifdef CONFIG_PM_SPI1_STANDBY
 
-      /* increase count to change the SPI1 */
+          /* increase count to change the SPI1 */
 
-      count++;
+          count++;
 
 #  endif
-    }
-    break;
+        }
+        break;
 
-    /* in case it needs to prepare for VLPR mode */
+      /* in case it needs to prepare for VLPR mode */
 
-    case PM_SLEEP:
-    {
-      /* Logic for PM_STANDBY goes here */
+      case PM_SLEEP:
+        {
+          /* Logic for PM_STANDBY goes here */
 
-      /* set the right clock source */
+          /* set the right clock source */
 
-      clock_source = CLK_SRC_SIRC_DIV2;
+          clock_source = CLK_SRC_SIRC_DIV2;
 
 #  ifdef CONFIG_PM_SPI0_SLEEP
 
-      /* increase count to change the SPI0  */
+          /* increase count to change the SPI0  */
 
-      count++;
+          count++;
 
 #  endif
 #  ifdef CONFIG_PM_SPI1_SLEEP
 
-      /* increase count to change the SPI1 */
+          /* increase count to change the SPI1 */
 
-      count++;
+          count++;
 
 #  endif
-    }
-    break;
+        }
+        break;
 
-    default:
-    {
-      /* don't do anything, just return OK */
+      default:
+        {
+          /* don't do anything, just return OK */
+        }
+        break;
     }
-    break;
-  }
 
   /* check if you need to change something */
 
   if (count)
-  {
-    /* make the peripheral clock config struct */
-
-    const struct peripheral_clock_config_s clock_config[] =
     {
-#  ifdef CONFIG_PM_SPI0
+      /* make the peripheral clock config struct */
+
+      const struct peripheral_clock_config_s clock_config[] =
       {
-        .clkname  =   LPSPI0_CLK,
-        .clkgate  =   true,
-        .clksrc   =   clock_source,
-        .frac     =   MULTIPLY_BY_ONE,
-        .divider  =   1,
-      },
+#  ifdef CONFIG_PM_SPI0
+        {
+          .clkname  =   LPSPI0_CLK,
+          .clkgate  =   true,
+          .clksrc   =   clock_source,
+          .frac     =   MULTIPLY_BY_ONE,
+          .divider  =   1,
+        },
 #  endif
 #  ifdef CONFIG_PM_SPI1
-      {
-        .clkname  =   LPSPI1_CLK,
-        .clkgate  =   true,
-        .clksrc   =   clock_source,
-        .frac     =   MULTIPLY_BY_ONE,
-        .divider  =   1,
-      }
+        {
+          .clkname  =   LPSPI1_CLK,
+          .clkgate  =   true,
+          .clksrc   =   clock_source,
+          .frac     =   MULTIPLY_BY_ONE,
+          .divider  =   1,
+        }
 #  endif
-    };
+      };
 
 #  ifdef CONFIG_PM_SPI0
 
-    /* disable LPSPI0 */
+      /* disable LPSPI0 */
 
-    s32k1xx_lpspi_modifyreg32(priv0, S32K1XX_LPSPI_CR_OFFSET, 0,
-                                     !LPSPI_CR_MEN);
+      s32k1xx_lpspi_modifyreg32(priv0, S32K1XX_LPSPI_CR_OFFSET, 0,
+                                       !LPSPI_CR_MEN);
 
 #  endif
 #  ifdef CONFIG_PM_SPI1
 
-    /* disable LPSPI1 */
+      /* disable LPSPI1 */
 
-    s32k1xx_lpspi_modifyreg32(priv1, S32K1XX_LPSPI_CR_OFFSET, 0,
-                              !LPSPI_CR_MEN);
+      s32k1xx_lpspi_modifyreg32(priv1, S32K1XX_LPSPI_CR_OFFSET, 0,
+                                !LPSPI_CR_MEN);
 
 #  endif
 
-    /* change the clock config for the new mode */
+      /* change the clock config for the new mode */
 
-    s32k1xx_periphclocks(count, clock_config);
+      s32k1xx_periphclocks(count, clock_config);
 
 #  ifdef CONFIG_PM_SPI0
 
-    /* Enable LPSPI */
+      /* Enable LPSPI */
 
-    s32k1xx_lpspi_modifyreg32(priv0, S32K1XX_LPSPI_CR_OFFSET, 0,
-                              LPSPI_CR_MEN);
+      s32k1xx_lpspi_modifyreg32(priv0, S32K1XX_LPSPI_CR_OFFSET, 0,
+                                LPSPI_CR_MEN);
 
 #  endif
 #  ifdef CONFIG_PM_SPI1
 
-    /* Enable LPSPI */
+      /* Enable LPSPI */
 
-    s32k1xx_lpspi_modifyreg32(priv1, S32K1XX_LPSPI_CR_OFFSET, 0,
-                              LPSPI_CR_MEN);
+      s32k1xx_lpspi_modifyreg32(priv1, S32K1XX_LPSPI_CR_OFFSET, 0,
+                                LPSPI_CR_MEN);
 
 #  endif
-  }
+    }
 
   /* get the clock freq */
 
@@ -2494,13 +2495,13 @@ struct spi_dev_s *s32k1xx_lpspibus_initialize(int bus)
     {
       #ifdef CONFIG_PM
         #if defined(CONFIG_PM_SPI_STANDBY) || defined(CONFIG_PM_SPI_SLEEP)
-          int ret;
+      int ret;
 
-          /* Register to receive power management callbacks */
+      /* Register to receive power management callbacks */
 
-          ret = pm_register(&g_spi1_pmcb);
-          DEBUGASSERT(ret == OK);
-          UNUSED(ret);
+      ret = pm_register(&g_spi1_pmcb);
+      DEBUGASSERT(ret == OK);
+      UNUSED(ret);
         #endif
       #endif
       /* Select SPI1 */

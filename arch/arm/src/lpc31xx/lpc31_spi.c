@@ -264,6 +264,7 @@ static void spi_putreg(uint32_t value, uint32_t address)
 static uint32_t spi_getreg(uint32_t address)
 {
   uint32_t value = getreg32(address);
+
   if (spi_checkreg(false, value, address))
     {
       spiinfo("%08x->%08x\n", address, value);
@@ -294,50 +295,50 @@ static inline void spi_drive_cs(struct lpc31_spidev_s *priv,
 {
   switch (slave)
     {
-    case 0:
-      if (val == 0)
-        {
-          spi_putreg(IOCONFIG_SPI_CSOUT0, LPC31_IOCONFIG_SPI_MODE0RESET);
-        }
-      else
-        {
-          spi_putreg(IOCONFIG_SPI_CSOUT0, LPC31_IOCONFIG_SPI_MODE0SET);
-        }
+      case 0:
+        if (val == 0)
+          {
+            spi_putreg(IOCONFIG_SPI_CSOUT0, LPC31_IOCONFIG_SPI_MODE0RESET);
+          }
+        else
+          {
+            spi_putreg(IOCONFIG_SPI_CSOUT0, LPC31_IOCONFIG_SPI_MODE0SET);
+          }
 
-      spi_putreg(IOCONFIG_SPI_CSOUT0, LPC31_IOCONFIG_SPI_MODE1SET);
-      break;
+        spi_putreg(IOCONFIG_SPI_CSOUT0, LPC31_IOCONFIG_SPI_MODE1SET);
+        break;
 
-    case 1:
-      if (val == 0)
-        {
-          spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN,
-                     LPC31_IOCONFIG_EBII2STX0_MODE0RESET);
-        }
-      else
-        {
-          spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN,
-                     LPC31_IOCONFIG_EBII2STX0_MODE0SET);
-        }
+      case 1:
+        if (val == 0)
+          {
+            spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN,
+                       LPC31_IOCONFIG_EBII2STX0_MODE0RESET);
+          }
+        else
+          {
+            spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN,
+                       LPC31_IOCONFIG_EBII2STX0_MODE0SET);
+          }
 
-      spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN,
-                 LPC31_IOCONFIG_EBII2STX0_MODE1SET);
-      break;
+        spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN,
+                   LPC31_IOCONFIG_EBII2STX0_MODE1SET);
+        break;
 
-    case 2:
-      if (val == 0)
-        {
-          spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN,
-                     LPC31_IOCONFIG_EBII2STX0_MODE0RESET);
-        }
-      else
-        {
-          spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN,
-                     LPC31_IOCONFIG_EBII2STX0_MODE0SET);
-        }
+      case 2:
+        if (val == 0)
+          {
+            spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN,
+                       LPC31_IOCONFIG_EBII2STX0_MODE0RESET);
+          }
+        else
+          {
+            spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN,
+                       LPC31_IOCONFIG_EBII2STX0_MODE0SET);
+          }
 
-      spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN,
-                 LPC31_IOCONFIG_EBII2STX0_MODE1SET);
-      break;
+        spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN,
+                   LPC31_IOCONFIG_EBII2STX0_MODE1SET);
+        break;
     }
 }
 
@@ -361,23 +362,23 @@ static inline void spi_select_slave(struct lpc31_spidev_s *priv,
 {
   switch (slave)
     {
-    case 0:
-      spi_putreg(priv->slv1, LPC31_SPI_SLV0_1);
-      spi_putreg(priv->slv2, LPC31_SPI_SLV0_2);
-      spi_putreg(SPI_SLVENABLE1_ENABLED, LPC31_SPI_SLVENABLE);
-      break;
+      case 0:
+        spi_putreg(priv->slv1, LPC31_SPI_SLV0_1);
+        spi_putreg(priv->slv2, LPC31_SPI_SLV0_2);
+        spi_putreg(SPI_SLVENABLE1_ENABLED, LPC31_SPI_SLVENABLE);
+        break;
 
-    case 1:
-      spi_putreg(priv->slv1, LPC31_SPI_SLV1_1);
-      spi_putreg(priv->slv2, LPC31_SPI_SLV1_2);
-      spi_putreg(SPI_SLVENABLE2_ENABLED, LPC31_SPI_SLVENABLE);
-      break;
+      case 1:
+        spi_putreg(priv->slv1, LPC31_SPI_SLV1_1);
+        spi_putreg(priv->slv2, LPC31_SPI_SLV1_2);
+        spi_putreg(SPI_SLVENABLE2_ENABLED, LPC31_SPI_SLVENABLE);
+        break;
 
-    case 2:
-      spi_putreg(priv->slv1, LPC31_SPI_SLV2_1);
-      spi_putreg(priv->slv2, LPC31_SPI_SLV2_2);
-      spi_putreg(SPI_SLVENABLE3_ENABLED, LPC31_SPI_SLVENABLE);
-      break;
+      case 2:
+        spi_putreg(priv->slv1, LPC31_SPI_SLV2_1);
+        spi_putreg(priv->slv2, LPC31_SPI_SLV2_2);
+        spi_putreg(SPI_SLVENABLE3_ENABLED, LPC31_SPI_SLVENABLE);
+        break;
     }
 }
 
@@ -501,20 +502,20 @@ static void spi_select(struct spi_dev_s *dev, uint32_t devid,
 
   switch (devid)
     {
-    case SPIDEV_FLASH(0):
-      slave = 0;
-      break;
+      case SPIDEV_FLASH(0):
+        slave = 0;
+        break;
 
-    case SPIDEV_MMCSD(0):
-      slave = 1;
-      break;
+      case SPIDEV_MMCSD(0):
+        slave = 1;
+        break;
 
-    case SPIDEV_ETHERNET(0):
-      slave = 2;
-      break;
+      case SPIDEV_ETHERNET(0):
+        slave = 2;
+        break;
 
-    default:
-      return;
+      default:
+        return;
     }
 
   /* Since we don't use sequential multi-slave mode, but rather
@@ -524,7 +525,7 @@ static void spi_select(struct spi_dev_s *dev, uint32_t devid,
    */
 
   if (selected)
-  {
+    {
       spi_drive_cs(priv, slave, 0);
       spi_select_slave(priv, slave);
 
@@ -533,9 +534,9 @@ static void spi_select(struct spi_dev_s *dev, uint32_t devid,
       spi_putreg((1 << SPI_CONFIG_INTERSLVDELAY_SHIFT) |
                  SPI_CONFIG_UPDENABLE | SPI_CONFIG_SPIENABLE,
                  LPC31_SPI_CONFIG);
-  }
+    }
   else
-  {
+    {
       spi_drive_cs(priv, slave, 1);
 
       /* Disable all slaves */
@@ -545,7 +546,7 @@ static void spi_select(struct spi_dev_s *dev, uint32_t devid,
       /* Disable SPI as master */
 
       spi_putreg(SPI_CONFIG_UPDENABLE, LPC31_SPI_CONFIG);
-  }
+    }
 }
 
 /****************************************************************************
@@ -637,28 +638,28 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* SPO=0; SPH=0 */
-          setbits = 0;
-          clrbits = SPI_SLV_2_SPO | SPI_SLV_2_SPH;
-          break;
+          case SPIDEV_MODE0: /* SPO=0; SPH=0 */
+            setbits = 0;
+            clrbits = SPI_SLV_2_SPO | SPI_SLV_2_SPH;
+            break;
 
-        case SPIDEV_MODE1: /* SPO=0; SPH=1 */
-          setbits = SPI_SLV_2_SPH;
-          clrbits = SPI_SLV_2_SPO;
-          break;
+          case SPIDEV_MODE1: /* SPO=0; SPH=1 */
+            setbits = SPI_SLV_2_SPH;
+            clrbits = SPI_SLV_2_SPO;
+            break;
 
-        case SPIDEV_MODE2: /* SPO=1; SPH=0 */
-          setbits = SPI_SLV_2_SPO;
-          clrbits = SPI_SLV_2_SPH;
-          break;
+          case SPIDEV_MODE2: /* SPO=1; SPH=0 */
+            setbits = SPI_SLV_2_SPO;
+            clrbits = SPI_SLV_2_SPH;
+            break;
 
-        case SPIDEV_MODE3: /* SPO=1; SPH=1 */
-          setbits = SPI_SLV_2_SPO | SPI_SLV_2_SPH;
-          clrbits = 0;
-          break;
+          case SPIDEV_MODE3: /* SPO=1; SPH=1 */
+            setbits = SPI_SLV_2_SPO | SPI_SLV_2_SPH;
+            clrbits = 0;
+            break;
 
-        default:
-          return;
+          default:
+            return;
         }
 
       priv->slv2 = (priv->slv2 & ~clrbits) | setbits;
@@ -738,6 +739,7 @@ static uint8_t spi_status(struct spi_dev_s *dev, uint32_t devid)
 static uint32_t spi_send(struct spi_dev_s *dev, uint32_t word)
 {
   struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *)dev;
+
   DEBUGASSERT(priv);
 
   spi_writeword(priv, word);
@@ -781,8 +783,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       /* 16-bit mode */
 
       const uint16_t *src  = (const uint16_t *)txbuffer;
-            uint16_t *dest = (uint16_t *)rxbuffer;
-            uint16_t  word;
+      uint16_t *dest = (uint16_t *)rxbuffer;
+      uint16_t  word;
 
       while (nwords > 0)
         {
@@ -822,8 +824,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       /* 8-bit mode */
 
       const uint8_t *src  = (const uint8_t *)txbuffer;
-            uint8_t *dest = (uint8_t *)rxbuffer;
-            uint8_t  word;
+      uint8_t *dest = (uint8_t *)rxbuffer;
+      uint8_t  word;
 
       while (nwords > 0)
         {

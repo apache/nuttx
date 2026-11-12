@@ -428,6 +428,7 @@ static void spi_txnull(struct imx_spidev_s *priv)
 static void spi_txuint16(struct imx_spidev_s *priv)
 {
   uint16_t *ptr = (uint16_t *)priv->txbuffer;
+
   spi_putreg(priv, ECSPI_TXDATA_OFFSET, *ptr++);
   priv->txbuffer = (void *)ptr;
 }
@@ -435,6 +436,7 @@ static void spi_txuint16(struct imx_spidev_s *priv)
 static void spi_txuint8(struct imx_spidev_s *priv)
 {
   uint8_t *ptr = (uint8_t *)priv->txbuffer;
+
   spi_putreg(priv, ECSPI_TXDATA_OFFSET, *ptr++);
   priv->txbuffer = (void *)ptr;
 }
@@ -464,6 +466,7 @@ static void spi_rxnull(struct imx_spidev_s *priv)
 static void spi_rxuint16(struct imx_spidev_s *priv)
 {
   uint16_t *ptr = (uint16_t *)priv->rxbuffer;
+
   *ptr++ = (uint16_t)spi_getreg(priv, ECSPI_TXDATA_OFFSET);
   priv->rxbuffer = (void *)ptr;
 }
@@ -471,6 +474,7 @@ static void spi_rxuint16(struct imx_spidev_s *priv)
 static void spi_rxuint8(struct imx_spidev_s *priv)
 {
   uint8_t *ptr = (uint8_t *)priv->rxbuffer;
+
   *ptr++ = (uint8_t)spi_getreg(priv, ECSPI_TXDATA_OFFSET);
   priv->rxbuffer = (void *)ptr;
 }
@@ -510,7 +514,7 @@ static int spi_performtx(struct imx_spidev_s *priv)
 
           for (; ntxd < priv->ntxwords && ntxd < IMX_TXFIFO_WORDS; ntxd++)
             {
-               priv->txword(priv);
+              priv->txword(priv);
             }
 
           /* Update the count of words to be transferred */
@@ -930,6 +934,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
 static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
+
   if (priv && mode != priv->mode)
     {
       uint32_t modebits;
@@ -939,24 +944,24 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0 CPHA=0 */
-          modebits = 0;
-          break;
+          case SPIDEV_MODE0: /* CPOL=0 CPHA=0 */
+            modebits = 0;
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0 CPHA=1 */
-          modebits = ECSPI_CONREG_PHA;
-          break;
+          case SPIDEV_MODE1: /* CPOL=0 CPHA=1 */
+            modebits = ECSPI_CONREG_PHA;
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1 CPHA=0 */
-          modebits = ECSPI_CONREG_POL;
-         break;
+          case SPIDEV_MODE2: /* CPOL=1 CPHA=0 */
+            modebits = ECSPI_CONREG_POL;
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1 CPHA=1 */
-          modebits = ECSPI_CONREG_PHA | ECSPI_CONREG_POL;
-          break;
+          case SPIDEV_MODE3: /* CPOL=1 CPHA=1 */
+            modebits = ECSPI_CONREG_PHA | ECSPI_CONREG_POL;
+            break;
 
-        default:
-          return;
+          default:
+            return;
         }
 
       /* Then set the selected mode */
@@ -986,9 +991,11 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 static void spi_setbits(struct spi_dev_s *dev, int nbits)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
+
   if (priv && nbits != priv->nbits && nbits > 0 && nbits <= 16)
     {
       uint32_t regval = spi_getreg(priv, ECSPI_CONREG_OFFSET);
+
       regval       &= ~ECSPI_CONREG_BITCOUNT_MASK;
       regval       |= ((nbits - 1) << ECSPI_CONREG_BITCOUNT_SHIFT);
       spi_putreg(priv, ECSPI_CONREG_OFFSET, regval);
@@ -1119,6 +1126,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
+
   spi_transfer(priv, txbuffer, rxbuffer, nwords);
 }
 #endif
@@ -1148,6 +1156,7 @@ static void spi_sndblock(struct spi_dev_s *dev, const void *buffer,
                          size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
+
   spi_transfer(priv, buffer, NULL, nwords);
 }
 #endif
@@ -1177,6 +1186,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer,
                           size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
+
   spi_transfer(priv, NULL, buffer, nwords);
 }
 #endif
@@ -1217,79 +1227,79 @@ struct spi_dev_s *imx_spibus_initialize(int port)
   switch (port)
     {
 #ifdef CONFIG_IMX6_ECSPI1
-    case 1:
+      case 1:
 
-      /* Select SPI1 */
+        /* Select SPI1 */
 
-      priv = &g_spidev[SPI1_NDX];
+        priv = &g_spidev[SPI1_NDX];
 
-      /* Configure SPI1 GPIOs (NOTE that SS is not initialized here, the
-       * logic in this file makes no assumptions about chip select)
-       */
+        /* Configure SPI1 GPIOs (NOTE that SS is not initialized here, the
+         * logic in this file makes no assumptions about chip select)
+         */
 
-      imxgpio_configpfinput(GPIOC, 13);  /* Port C, pin 13: RDY */
-      imxgpio_configpfoutput(GPIOC, 14); /* Port C, pin 14: SCLK */
-      imxgpio_configpfinput(GPIOC, 16);  /* Port C, pin 16: MISO */
-      imxgpio_configpfoutput(GPIOC, 17); /* Port C, pin 17: MOSI */
-      break;
+        imxgpio_configpfinput(GPIOC, 13);  /* Port C, pin 13: RDY */
+        imxgpio_configpfoutput(GPIOC, 14); /* Port C, pin 14: SCLK */
+        imxgpio_configpfinput(GPIOC, 16);  /* Port C, pin 16: MISO */
+        imxgpio_configpfoutput(GPIOC, 17); /* Port C, pin 17: MOSI */
+        break;
 #endif /* CONFIG_IMX6_ECSPI1 */
 
 #ifdef CONFIG_IMX6_ECSPI2
-    case 2:
+      case 2:
 
-      /* Select SPI2 */
+        /* Select SPI2 */
 
-      priv = &g_spidev[SPI2_NDX];
+        priv = &g_spidev[SPI2_NDX];
 
-      /* Configure SPI2 GPIOs */
+        /* Configure SPI2 GPIOs */
 
-      /* SCLK: AIN of Port A, pin 0 -OR- AIN of Port D, pin 7 */
-
-#if 1
-      imxgpio_configoutput(GPIOA, 0); /* Set GIUS=1 OCR=0 DIR=OUT */
-#else
-      imxgpio_configoutput(GPIOD, 7); /* Set GIUS=1 OCR=0 DIR=OUT */
-#endif
-
-      /* SS: AIN of Port A, pin 17 -OR- AIN of Port D, pin 8.(NOTE that SS
-       * is not initialized here, the logic in this file makes no assumptions
-       * about chip select)
-       */
-
-      /* RXD: AOUT of Port A, pin 1 -OR- AOUT of Port D, pin 9 */
+        /* SCLK: AIN of Port A, pin 0 -OR- AIN of Port D, pin 7 */
 
 #if 1
-      imxgpio_configinput(GPIOA, 1); /* Set GIUS=1 OCR=0 DIR=IN */
-
-      /* Select input from SPI2_RXD_0 pin (AOUT Port A, pin 1) */
-
-      regval = getreg32(IMX_SC_FMCR);
-      regval &= ~FMCR_SPI2_RXDSEL;
-      putreg32(regval, IMX_SC_FMCR);
+        imxgpio_configoutput(GPIOA, 0); /* Set GIUS=1 OCR=0 DIR=OUT */
 #else
-      imxgpio_configinput(GPIOD, 9); /* Set GIUS=1 OCR=0 DIR=IN */
-
-      /* Select input from SPI2_RXD_1 pin (AOUT Port D, pin 9) */
-
-      regval = getreg32(IMX_SC_FMCR);
-      regval |= FMCR_SPI2_RXDSEL;
-      putreg32(regval, IMX_SC_FMCR);
+        imxgpio_configoutput(GPIOD, 7); /* Set GIUS=1 OCR=0 DIR=OUT */
 #endif
 
-      /* TXD: BIN of Port D, pin 31 -OR- AIN of Port D, pin 10 */
+        /* SS: AIN of Port A, pin 17 -OR- AIN of Port D, pin 8.(NOTE that SS
+         * is not initialized here, the logic in this file makes no
+         * assumptions about chip select)
+         */
+
+        /* RXD: AOUT of Port A, pin 1 -OR- AOUT of Port D, pin 9 */
 
 #if 1
-      imxgpio_configinput(GPIOD, 31);
-      imxgpio_ocrbin(GPIOD, 31);
-      imxgpio_dirout(GPIOD, 31);
+        imxgpio_configinput(GPIOA, 1); /* Set GIUS=1 OCR=0 DIR=IN */
+
+        /* Select input from SPI2_RXD_0 pin (AOUT Port A, pin 1) */
+
+        regval = getreg32(IMX_SC_FMCR);
+        regval &= ~FMCR_SPI2_RXDSEL;
+        putreg32(regval, IMX_SC_FMCR);
 #else
-      imxgpio_configoutput(GPIOD, 10);
+        imxgpio_configinput(GPIOD, 9); /* Set GIUS=1 OCR=0 DIR=IN */
+
+        /* Select input from SPI2_RXD_1 pin (AOUT Port D, pin 9) */
+
+        regval = getreg32(IMX_SC_FMCR);
+        regval |= FMCR_SPI2_RXDSEL;
+        putreg32(regval, IMX_SC_FMCR);
 #endif
-      break;
+
+        /* TXD: BIN of Port D, pin 31 -OR- AIN of Port D, pin 10 */
+
+#if 1
+        imxgpio_configinput(GPIOD, 31);
+        imxgpio_ocrbin(GPIOD, 31);
+        imxgpio_dirout(GPIOD, 31);
+#else
+        imxgpio_configoutput(GPIOD, 10);
+#endif
+        break;
 #endif /* CONFIG_IMX6_ECSPI2 */
 
-    default:
-      return NULL;
+      default:
+        return NULL;
     }
 
   /* Initialize the state structure */

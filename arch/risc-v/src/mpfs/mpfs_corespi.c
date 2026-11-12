@@ -730,6 +730,7 @@ static int mpfs_spi_hwfeatures(struct spi_dev_s *dev,
 static int mpfs_spi_sem_waitdone(struct mpfs_spi_priv_s *priv)
 {
   uint32_t timeout = SPI_TTOA_US(priv->txwords * priv->nbits, priv->actual);
+
   timeout += SPI_TTOA_MARGIN_US;
   return nxsem_tickwait_uninterruptible(&priv->sem_isr, USEC2TICK(timeout));
 }
@@ -1090,8 +1091,8 @@ static uint32_t mpfs_spi_poll_send(struct mpfs_spi_priv_s *priv,
   rx_fifo_empty = getreg32(MPFS_SPI_STATUS) & MPFS_SPI_RXEMPTY;
   while (!rx_fifo_empty)
     {
-        getreg32(MPFS_SPI_RX_DATA);
-        rx_fifo_empty = getreg32(MPFS_SPI_STATUS) & MPFS_SPI_RXEMPTY;
+      getreg32(MPFS_SPI_RX_DATA);
+      rx_fifo_empty = getreg32(MPFS_SPI_STATUS) & MPFS_SPI_RXEMPTY;
     }
 
   spiinfo("send=%x and recv=%x\n", wd, val);

@@ -519,6 +519,7 @@ static void bl808_spi_select(struct spi_dev_s *dev, uint32_t devid,
   /* revert MISO from GPIO Pin to SPI Pin */
 
   struct bl808_spi_priv_s *priv = (struct bl808_spi_priv_s *)dev;
+
   if (!selected)
     {
 #ifdef CONFIG_BL808_SPI0
@@ -671,32 +672,32 @@ bl808_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
     {
       switch (mode)
         {
-          /* NOTE: CPHA definition in the register is inverted compared
-           * to the standard. See reference manual or bouffalo_sdk.
-           */
+            /* NOTE: CPHA definition in the register is inverted compared
+             * to the standard. See reference manual or bouffalo_sdk.
+             */
 
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-          modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_SCLK_POL,
-                      SPI_CFG_CR_SCLK_PH);
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+            modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_SCLK_POL,
+                        SPI_CFG_CR_SCLK_PH);
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-          modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_SCLK_POL
-                      | SPI_CFG_CR_SCLK_PH, 0);
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+            modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_SCLK_POL
+                        | SPI_CFG_CR_SCLK_PH, 0);
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          modifyreg32(BL808_SPI_CFG(idx), 0, SPI_CFG_CR_SCLK_POL
-                      | SPI_CFG_CR_SCLK_PH);
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+            modifyreg32(BL808_SPI_CFG(idx), 0, SPI_CFG_CR_SCLK_POL
+                        | SPI_CFG_CR_SCLK_PH);
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_SCLK_PH,
-                      SPI_CFG_CR_SCLK_POL);
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+            modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_SCLK_PH,
+                        SPI_CFG_CR_SCLK_POL);
+            break;
 
-        default:
-          return;
+          default:
+            return;
         }
 
       priv->mode = mode;
@@ -733,33 +734,33 @@ static void bl808_spi_setbits(struct spi_dev_s *dev, int nbits)
        * will be faster.
        */
 
-    switch (nbits)
-      {
-      case 8:
+      switch (nbits)
+        {
+          case 8:
 
-        /* set valid width for each fifo entry 8 bit */
+            /* set valid width for each fifo entry 8 bit */
 
-        modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_FRAME_SIZE_MASK, 0);
-        break;
+            modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_FRAME_SIZE_MASK, 0);
+            break;
 
-      case 16:
-        modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_FRAME_SIZE_MASK,
-                    1 << SPI_CFG_CR_FRAME_SIZE_SHIFT);
-        break;
+          case 16:
+            modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_FRAME_SIZE_MASK,
+                        1 << SPI_CFG_CR_FRAME_SIZE_SHIFT);
+            break;
 
-      case 24:
-        modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_FRAME_SIZE_MASK,
-                    2 << SPI_CFG_CR_FRAME_SIZE_SHIFT);
-        break;
+          case 24:
+            modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_FRAME_SIZE_MASK,
+                        2 << SPI_CFG_CR_FRAME_SIZE_SHIFT);
+            break;
 
-      case 32:
-        modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_FRAME_SIZE_MASK,
-                    3 << SPI_CFG_CR_FRAME_SIZE_SHIFT);
-        break;
+          case 32:
+            modifyreg32(BL808_SPI_CFG(idx), SPI_CFG_CR_FRAME_SIZE_MASK,
+                        3 << SPI_CFG_CR_FRAME_SIZE_SHIFT);
+            break;
 
-      default:
-        return;
-      }
+          default:
+            return;
+        }
 
       priv->nbits = nbits;
     }
@@ -968,6 +969,7 @@ static uint32_t bl808_spi_poll_send(struct bl808_spi_priv_s *priv,
 static uint32_t bl808_spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   struct bl808_spi_priv_s *priv = (struct bl808_spi_priv_s *)dev;
+
   return bl808_spi_poll_send(priv, wd);
 }
 
@@ -1056,6 +1058,7 @@ static void bl808_spi_exchange(struct spi_dev_s *dev,
                                size_t nwords)
 {
   struct bl808_spi_priv_s *priv = (struct bl808_spi_priv_s *)dev;
+
   bl808_spi_poll_exchange(priv, txbuffer, rxbuffer, nwords);
 }
 

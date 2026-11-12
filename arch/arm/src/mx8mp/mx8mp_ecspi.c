@@ -247,6 +247,7 @@ static inline int mx8mp_spi_wait_irq(struct mx8mp_spi_s *priv, int nsec)
 static int mx8mp_spi_interrupt(int irq, void *context, void *arg)
 {
   struct mx8mp_spi_s *priv = (struct mx8mp_spi_s *)arg;
+
   putreg32(0, priv->base + INTREG_OFFSET);
   nxsem_post(&priv->wait);
 
@@ -290,11 +291,13 @@ static int mx8mp_spi_transfer(struct mx8mp_spi_s *priv,
   /* 3. Configure burst size (in bits) and RX IT threshold (in words) */
 
   uint16_t const burst_length = ((words * 4 + remaining_bytes) * 8) & 0xfff;
+
   modreg32((burst_length - 1) << CONREG_BURST_LENGTH,
             0xfff << CONREG_BURST_LENGTH,
             priv->base + CONREG_OFFSET);
 
   uint16_t threshold = words;
+
   if (remaining_bytes)
     {
       ++threshold;
@@ -307,6 +310,7 @@ static int mx8mp_spi_transfer(struct mx8mp_spi_s *priv,
   if (remaining_bytes)
     {
       uint32_t data = 0;
+
       for (int32_t i = 0; i < remaining_bytes; ++i)
         {
           data = (data << 8) | out[i];
@@ -318,6 +322,7 @@ static int mx8mp_spi_transfer(struct mx8mp_spi_s *priv,
   for (int32_t i = 0; i < words; ++i)
     {
       uint32_t data = 0;
+
       memcpy(&data, out + i * 4 + remaining_bytes, 4);
       data = __builtin_bswap32(data);
       putreg32(data, priv->base + TXDATA_OFFSET);
@@ -327,6 +332,7 @@ static int mx8mp_spi_transfer(struct mx8mp_spi_s *priv,
 
   modreg32(CONREG_XCH, CONREG_XCH, priv->base + CONREG_OFFSET);
   int ret = mx8mp_spi_wait_irq(priv, priv->byte_duration * (size + 1)); /* add one byte duration of leeway */
+
   if (ret < 0)
     {
       return ret;
@@ -337,6 +343,7 @@ static int mx8mp_spi_transfer(struct mx8mp_spi_s *priv,
   if (remaining_bytes)
     {
       uint32_t data = getreg32(priv->base + RXDATA_OFFSET);
+
       data = __builtin_bswap32(data);
       data >>= (4 - remaining_bytes) * 8;
       memcpy(in, &data, remaining_bytes);
@@ -345,6 +352,7 @@ static int mx8mp_spi_transfer(struct mx8mp_spi_s *priv,
   for (int32_t i = 0; i < words; ++i)
     {
       uint32_t data = getreg32(priv->base + RXDATA_OFFSET);
+
       data = __builtin_bswap32(data);
       memcpy(in + i * 4 + remaining_bytes, &data, 4);
     }
@@ -415,6 +423,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
     }
 
   uint32_t clock = mx8mp_ccm_get_clock(priv->clock);
+
   DEBUGASSERT(clock > frequency);
 
   uint8_t pre_div  = 0;
@@ -426,6 +435,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
       for (uint8_t j = 0; j < 16; ++j)
         {
           uint32_t current_frequency = clock / ((1 << i) * (j + 1));
+
           if ((current_frequency <= frequency) &&
               (current_frequency > old_frequency))
             {
@@ -488,39 +498,40 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
   switch (mode)
     {
-    case SPIDEV_MODE0:
-      {
-        CPOL = 0;
-        CPHA = 0;
-      }
-      break;
+      case SPIDEV_MODE0:
+        {
+          CPOL = 0;
+          CPHA = 0;
+        }
+        break;
 
-    case SPIDEV_MODE1:
-      {
-        CPOL = 0;
-        CPHA = 1;
-      }
-      break;
+      case SPIDEV_MODE1:
+        {
+          CPOL = 0;
+          CPHA = 1;
+        }
+        break;
 
-    case SPIDEV_MODE2:
-      {
-        CPOL = 1;
-        CPHA = 0;
-      }
-      break;
+      case SPIDEV_MODE2:
+        {
+          CPOL = 1;
+          CPHA = 0;
+        }
+        break;
 
-    case SPIDEV_MODE3:
-      {
-        CPOL = 1;
-        CPHA = 1;
-      }
-      break;
+      case SPIDEV_MODE3:
+        {
+          CPOL = 1;
+          CPHA = 1;
+        }
+        break;
 
-    default:
-      return;
+      default:
+        return;
     }
 
   uint32_t configreg = 0;
+
   configreg |= (0xf << CONFIGREG_SLCK_CTL);
   configreg |= (0xf << CONFIGREG_DATA_CTL);
   configreg |= (0x0 << CONFIGREG_SS_POL);
@@ -597,6 +608,7 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
   DEBUGASSERT(priv && priv->base);
 
   uint32_t dummy;
+
   ret = mx8mp_spi_transfer(priv, (const uint8_t *)&wd,
                                  (uint8_t *)&dummy,
                                  priv->nbits % 8);
@@ -634,18 +646,21 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   struct mx8mp_spi_s *priv = (struct mx8mp_spi_s *)dev;
 
   int size = nwords;
+
   if (priv->nbits > 8)
     {
       size = size * 2;
     }
 
   int transferred = 0;
+
   while (transferred < size)
     {
       int ret = mx8mp_spi_transfer(priv,
                                   (const uint8_t *)txbuffer + transferred,
                                         (uint8_t *)rxbuffer + transferred,
                                     size - transferred);
+
       if (ret < 0)
         {
           break;
@@ -725,28 +740,28 @@ struct spi_dev_s *mx8mp_spibus_initialize(int bus)
   switch (bus)
     {
 #ifdef CONFIG_MX8MP_SPI1
-    case 1:
-      priv = &g_spi1_dev;
-      spi_bus_initialize(priv);
-      break;
+      case 1:
+        priv = &g_spi1_dev;
+        spi_bus_initialize(priv);
+        break;
 #endif
 
 #ifdef CONFIG_MX8MP_SPI2
-    case 2:
-      priv = &g_spi2_dev;
-      spi_bus_initialize(priv);
-      break;
+      case 2:
+        priv = &g_spi2_dev;
+        spi_bus_initialize(priv);
+        break;
 #endif
 
 #ifdef CONFIG_MX8MP_SPI3
-    case 3:
-      priv = &g_spi3_dev;
-      spi_bus_initialize(priv);
-      break;
+      case 3:
+        priv = &g_spi3_dev;
+        spi_bus_initialize(priv);
+        break;
 #endif
 
-    default:
-      spierr("ERROR: Unsupported SPI bus: %d\n", bus);
+      default:
+        spierr("ERROR: Unsupported SPI bus: %d\n", bus);
     }
 
   leave_critical_section(flags);

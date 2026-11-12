@@ -394,6 +394,7 @@ static void spi_interrupt_en(struct bcm2711_spidev_s *priv, bool en)
 static void spi_fill_txfifo(struct bcm2711_spidev_s *dev)
 {
   uint32_t data;
+
   while ((getreg32(BCM_SPI_CS(dev->base)) & BCM_SPI_CS_TXD) &&
         !(getreg32(BCM_SPI_CS(dev->base)) & BCM_SPI_CS_RXR) &&
         dev->nwords)
@@ -644,6 +645,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   /* Calculate the clock divisor needed (must be a multiple of 2) */
 
   uint32_t cdiv = SPI_CDIV(frequency);
+
   cdiv &= ~0x1; /* Clear last bit to guarantee multiple of 2 rounded down */
   DEBUGASSERT(cdiv < 0xffff);
 
@@ -691,22 +693,22 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
   switch (mode)
     {
-    case SPIDEV_MODE0: /* CPOL=0, CPHA=0 */
-      regval = 0;
-      break;
-    case SPIDEV_MODE1: /* CPOL=0, CPHA=1 */
-      regval = BCM_SPI_CS_CPHA;
-      break;
-    case SPIDEV_MODE2: /* CPOL=1, CPHA=0 */
-      regval = BCM_SPI_CS_CPOL;
-      break;
-    case SPIDEV_MODE3: /* CPOL=1, CPHA=1 */
-      regval = BCM_SPI_CS_CPOL | BCM_SPI_CS_CPHA;
-      break;
-    default:
-      spierr("Bad SPI mode: %d\n", mode);
-      DEBUGASSERT(false);
-      return;
+      case SPIDEV_MODE0: /* CPOL=0, CPHA=0 */
+        regval = 0;
+        break;
+      case SPIDEV_MODE1: /* CPOL=0, CPHA=1 */
+        regval = BCM_SPI_CS_CPHA;
+        break;
+      case SPIDEV_MODE2: /* CPOL=1, CPHA=0 */
+        regval = BCM_SPI_CS_CPOL;
+        break;
+      case SPIDEV_MODE3: /* CPOL=1, CPHA=1 */
+        regval = BCM_SPI_CS_CPOL | BCM_SPI_CS_CPHA;
+        break;
+      default:
+        spierr("Bad SPI mode: %d\n", mode);
+        DEBUGASSERT(false);
+        return;
     }
 
   spiinfo("SPI set mode: %d", mode);
@@ -765,7 +767,8 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
   /* Wait until the TX FIFO can accept data */
 
   while (!(getreg32(BCM_SPI_CS(priv->base)) & BCM_SPI_CS_TXD))
-    ;
+    {
+    }
 
   /* Make sure TA (transfer active) bit is set */
 
@@ -778,7 +781,8 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
   /* Wait for the RX FIFO not empty */
 
   while (!(getreg32(BCM_SPI_CS(priv->base)) & BCM_SPI_CS_RXD))
-    ;
+    {
+    }
 
   /* Get the value from the RX FIFO */
 
@@ -788,7 +792,8 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
   /* Wait for done signal */
 
   while (!(getreg32(BCM_SPI_CS(priv->base)) & BCM_SPI_CS_DONE))
-    ;
+    {
+    }
 
   /* End the transfer */
 
@@ -906,6 +911,7 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
                        bool selected)
 {
   struct bcm2711_spidev_s *priv = (struct bcm2711_spidev_s *)dev;
+
   spiinfo("Select devid %u", devid);
 
   /* Get the last bits of the device ID, indicating index (TODO: is this
@@ -955,42 +961,42 @@ struct spi_dev_s *bcm2711_spibus_initialize(int port)
   switch (port)
     {
 #if defined(CONFIG_BCM2711_SPI0)
-    case 0:
-      priv = &g_spi0dev;
-      break;
+      case 0:
+        priv = &g_spi0dev;
+        break;
 #endif
 #if defined(CONFIG_BCM2711_SPI1)
-    case 1:
+      case 1:
 #error "SPI1 is not implemented"
-      break;
+        break;
 #endif
 #if defined(CONFIG_BCM2711_SPI2)
-    case 2:
+      case 2:
 #error "SPI2 is not implemented"
-      break;
+        break;
 #endif
 #if defined(CONFIG_BCM2711_SPI3)
-    case 3:
-      priv = &g_spi3dev;
-      break;
+      case 3:
+        priv = &g_spi3dev;
+        break;
 #endif
 #if defined(CONFIG_BCM2711_SPI4)
-    case 4:
-      priv = &g_spi4dev;
-      break;
+      case 4:
+        priv = &g_spi4dev;
+        break;
 #endif
 #if defined(CONFIG_BCM2711_SPI5)
-    case 5:
-      priv = &g_spi5dev;
-      break;
+      case 5:
+        priv = &g_spi5dev;
+        break;
 #endif
 #if defined(CONFIG_BCM2711_SPI6)
-    case 6:
-      priv = &g_spi6dev;
-      break;
+      case 6:
+        priv = &g_spi6dev;
+        break;
 #endif
-    default:
-      return NULL;
+      default:
+        return NULL;
     }
 
   if (priv->initialized)
@@ -1042,101 +1048,101 @@ struct spi_dev_s *bcm2711_spibus_initialize(int port)
   switch (port)
     {
 #if defined(CONFIG_BCM2711_SPI0)
-    case 0:
-      bcm2711_gpio_set_pulls(CONFIG_BCM2711_SPI0_CE0, true, false);
-      bcm2711_gpio_set_pulls(CONFIG_BCM2711_SPI0_CE1, true, false);
-      bcm2711_gpio_set_pulls(CONFIG_BCM2711_SPI0_MOSI, false, true);
-      bcm2711_gpio_set_pulls(CONFIG_BCM2711_SPI0_MISO, false, true);
-      bcm2711_gpio_set_pulls(CONFIG_BCM2711_SPI0_SCLK, false, true);
+      case 0:
+        bcm2711_gpio_set_pulls(CONFIG_BCM2711_SPI0_CE0, true, false);
+        bcm2711_gpio_set_pulls(CONFIG_BCM2711_SPI0_CE1, true, false);
+        bcm2711_gpio_set_pulls(CONFIG_BCM2711_SPI0_MOSI, false, true);
+        bcm2711_gpio_set_pulls(CONFIG_BCM2711_SPI0_MISO, false, true);
+        bcm2711_gpio_set_pulls(CONFIG_BCM2711_SPI0_SCLK, false, true);
 
-      bcm2711_gpio_set_func(CONFIG_BCM2711_SPI0_CE0, SPI0_CE0_ALT);
-      bcm2711_gpio_set_func(CONFIG_BCM2711_SPI0_CE1, SPI0_CE1_ALT);
-      bcm2711_gpio_set_func(CONFIG_BCM2711_SPI0_MOSI, SPI0_MOSI_ALT);
-      bcm2711_gpio_set_func(CONFIG_BCM2711_SPI0_MISO, SPI0_MISO_ALT);
-      bcm2711_gpio_set_func(CONFIG_BCM2711_SPI0_SCLK, SPI0_SCLK_ALT);
-      break;
+        bcm2711_gpio_set_func(CONFIG_BCM2711_SPI0_CE0, SPI0_CE0_ALT);
+        bcm2711_gpio_set_func(CONFIG_BCM2711_SPI0_CE1, SPI0_CE1_ALT);
+        bcm2711_gpio_set_func(CONFIG_BCM2711_SPI0_MOSI, SPI0_MOSI_ALT);
+        bcm2711_gpio_set_func(CONFIG_BCM2711_SPI0_MISO, SPI0_MISO_ALT);
+        bcm2711_gpio_set_func(CONFIG_BCM2711_SPI0_SCLK, SPI0_SCLK_ALT);
+        break;
 #endif
 #if defined(CONFIG_BCM2711_SPI1)
-    case 1:
-      bcm2711_gpio_set_pulls(SPI1_CE0, true, false);
-      bcm2711_gpio_set_pulls(SPI1_CE1, true, false);
-      bcm2711_gpio_set_pulls(SPI2_CE1, true, false);
-      bcm2711_gpio_set_pulls(SPI1_MOSI, false, true);
-      bcm2711_gpio_set_pulls(SPI1_MISO, false, true);
-      bcm2711_gpio_set_pulls(SPI1_SCLK, false, true);
+      case 1:
+        bcm2711_gpio_set_pulls(SPI1_CE0, true, false);
+        bcm2711_gpio_set_pulls(SPI1_CE1, true, false);
+        bcm2711_gpio_set_pulls(SPI2_CE1, true, false);
+        bcm2711_gpio_set_pulls(SPI1_MOSI, false, true);
+        bcm2711_gpio_set_pulls(SPI1_MISO, false, true);
+        bcm2711_gpio_set_pulls(SPI1_SCLK, false, true);
 
-      bcm2711_gpio_set_func(SPI1_CE0, BCM_GPIO_FUNC4);
-      bcm2711_gpio_set_func(SPI1_CE1, BCM_GPIO_FUNC4);
-      bcm2711_gpio_set_func(SPI1_CE2, BCM_GPIO_FUNC4);
-      bcm2711_gpio_set_func(SPI1_MOSI, BCM_GPIO_FUNC4);
-      bcm2711_gpio_set_func(SPI1_MISO, BCM_GPIO_FUNC4);
-      bcm2711_gpio_set_func(SPI1_SCLK, BCM_GPIO_FUNC4);
-      break;
+        bcm2711_gpio_set_func(SPI1_CE0, BCM_GPIO_FUNC4);
+        bcm2711_gpio_set_func(SPI1_CE1, BCM_GPIO_FUNC4);
+        bcm2711_gpio_set_func(SPI1_CE2, BCM_GPIO_FUNC4);
+        bcm2711_gpio_set_func(SPI1_MOSI, BCM_GPIO_FUNC4);
+        bcm2711_gpio_set_func(SPI1_MISO, BCM_GPIO_FUNC4);
+        bcm2711_gpio_set_func(SPI1_SCLK, BCM_GPIO_FUNC4);
+        break;
 #endif
 #if defined(CONFIG_BCM2711_SPI2)
-    case 2:
+      case 2:
 #error "SPI2 is not implemented"
-      break;
+        break;
 #endif
 #if defined(CONFIG_BCM2711_SPI3)
-    case 3:
-      bcm2711_gpio_set_pulls(SPI3_CE0, true, false);
-      bcm2711_gpio_set_pulls(SPI3_CE1, true, false);
-      bcm2711_gpio_set_pulls(SPI3_MOSI, false, true);
-      bcm2711_gpio_set_pulls(SPI3_MISO, false, true);
-      bcm2711_gpio_set_pulls(SPI3_SCLK, false, true);
+      case 3:
+        bcm2711_gpio_set_pulls(SPI3_CE0, true, false);
+        bcm2711_gpio_set_pulls(SPI3_CE1, true, false);
+        bcm2711_gpio_set_pulls(SPI3_MOSI, false, true);
+        bcm2711_gpio_set_pulls(SPI3_MISO, false, true);
+        bcm2711_gpio_set_pulls(SPI3_SCLK, false, true);
 
-      bcm2711_gpio_set_func(SPI3_CE0, BCM_GPIO_FUNC3);
-      bcm2711_gpio_set_func(SPI3_CE1, BCM_GPIO_FUNC5);
-      bcm2711_gpio_set_func(SPI3_MOSI, BCM_GPIO_FUNC3);
-      bcm2711_gpio_set_func(SPI3_MISO, BCM_GPIO_FUNC3);
-      bcm2711_gpio_set_func(SPI3_SCLK, BCM_GPIO_FUNC3);
-      break;
+        bcm2711_gpio_set_func(SPI3_CE0, BCM_GPIO_FUNC3);
+        bcm2711_gpio_set_func(SPI3_CE1, BCM_GPIO_FUNC5);
+        bcm2711_gpio_set_func(SPI3_MOSI, BCM_GPIO_FUNC3);
+        bcm2711_gpio_set_func(SPI3_MISO, BCM_GPIO_FUNC3);
+        bcm2711_gpio_set_func(SPI3_SCLK, BCM_GPIO_FUNC3);
+        break;
 #endif
 #if defined(CONFIG_BCM2711_SPI4)
-    case 4:
-      bcm2711_gpio_set_pulls(SPI4_CE0, true, false);
-      bcm2711_gpio_set_pulls(SPI4_CE1, true, false);
-      bcm2711_gpio_set_pulls(SPI4_MOSI, false, true);
-      bcm2711_gpio_set_pulls(SPI4_MISO, false, true);
-      bcm2711_gpio_set_pulls(SPI4_SCLK, false, true);
+      case 4:
+        bcm2711_gpio_set_pulls(SPI4_CE0, true, false);
+        bcm2711_gpio_set_pulls(SPI4_CE1, true, false);
+        bcm2711_gpio_set_pulls(SPI4_MOSI, false, true);
+        bcm2711_gpio_set_pulls(SPI4_MISO, false, true);
+        bcm2711_gpio_set_pulls(SPI4_SCLK, false, true);
 
-      bcm2711_gpio_set_func(SPI4_CE0, BCM_GPIO_FUNC3);
-      bcm2711_gpio_set_func(SPI4_CE1, BCM_GPIO_FUNC5);
-      bcm2711_gpio_set_func(SPI4_MOSI, BCM_GPIO_FUNC3);
-      bcm2711_gpio_set_func(SPI4_MISO, BCM_GPIO_FUNC3);
-      bcm2711_gpio_set_func(SPI4_SCLK, BCM_GPIO_FUNC3);
-      break;
+        bcm2711_gpio_set_func(SPI4_CE0, BCM_GPIO_FUNC3);
+        bcm2711_gpio_set_func(SPI4_CE1, BCM_GPIO_FUNC5);
+        bcm2711_gpio_set_func(SPI4_MOSI, BCM_GPIO_FUNC3);
+        bcm2711_gpio_set_func(SPI4_MISO, BCM_GPIO_FUNC3);
+        bcm2711_gpio_set_func(SPI4_SCLK, BCM_GPIO_FUNC3);
+        break;
 #endif
 #if defined(CONFIG_BCM2711_SPI5)
-    case 5:
-      bcm2711_gpio_set_pulls(SPI5_CE0, true, false);
-      bcm2711_gpio_set_pulls(SPI5_CE1, true, false);
-      bcm2711_gpio_set_pulls(SPI5_MOSI, false, true);
-      bcm2711_gpio_set_pulls(SPI5_MISO, false, true);
-      bcm2711_gpio_set_pulls(SPI5_SCLK, false, true);
+      case 5:
+        bcm2711_gpio_set_pulls(SPI5_CE0, true, false);
+        bcm2711_gpio_set_pulls(SPI5_CE1, true, false);
+        bcm2711_gpio_set_pulls(SPI5_MOSI, false, true);
+        bcm2711_gpio_set_pulls(SPI5_MISO, false, true);
+        bcm2711_gpio_set_pulls(SPI5_SCLK, false, true);
 
-      bcm2711_gpio_set_func(SPI5_CE0, BCM_GPIO_FUNC3);
-      bcm2711_gpio_set_func(SPI5_CE1, BCM_GPIO_FUNC5);
-      bcm2711_gpio_set_func(SPI5_MOSI, BCM_GPIO_FUNC3);
-      bcm2711_gpio_set_func(SPI5_MISO, BCM_GPIO_FUNC3);
-      bcm2711_gpio_set_func(SPI5_SCLK, BCM_GPIO_FUNC3);
-      break;
+        bcm2711_gpio_set_func(SPI5_CE0, BCM_GPIO_FUNC3);
+        bcm2711_gpio_set_func(SPI5_CE1, BCM_GPIO_FUNC5);
+        bcm2711_gpio_set_func(SPI5_MOSI, BCM_GPIO_FUNC3);
+        bcm2711_gpio_set_func(SPI5_MISO, BCM_GPIO_FUNC3);
+        bcm2711_gpio_set_func(SPI5_SCLK, BCM_GPIO_FUNC3);
+        break;
 #endif
 #if defined(CONFIG_BCM2711_SPI6)
-    case 6:
-      bcm2711_gpio_set_pulls(SPI6_CE0, true, false);
-      bcm2711_gpio_set_pulls(SPI6_CE1, true, false);
-      bcm2711_gpio_set_pulls(SPI6_MOSI, false, true);
-      bcm2711_gpio_set_pulls(SPI6_MISO, false, true);
-      bcm2711_gpio_set_pulls(SPI6_SCLK, false, true);
+      case 6:
+        bcm2711_gpio_set_pulls(SPI6_CE0, true, false);
+        bcm2711_gpio_set_pulls(SPI6_CE1, true, false);
+        bcm2711_gpio_set_pulls(SPI6_MOSI, false, true);
+        bcm2711_gpio_set_pulls(SPI6_MISO, false, true);
+        bcm2711_gpio_set_pulls(SPI6_SCLK, false, true);
 
-      bcm2711_gpio_set_func(SPI6_CE0, BCM_GPIO_FUNC3);
-      bcm2711_gpio_set_func(SPI6_CE1, BCM_GPIO_FUNC5);
-      bcm2711_gpio_set_func(SPI6_MOSI, BCM_GPIO_FUNC3);
-      bcm2711_gpio_set_func(SPI6_MISO, BCM_GPIO_FUNC3);
-      bcm2711_gpio_set_func(SPI6_SCLK, BCM_GPIO_FUNC3);
-      break;
+        bcm2711_gpio_set_func(SPI6_CE0, BCM_GPIO_FUNC3);
+        bcm2711_gpio_set_func(SPI6_CE1, BCM_GPIO_FUNC5);
+        bcm2711_gpio_set_func(SPI6_MOSI, BCM_GPIO_FUNC3);
+        bcm2711_gpio_set_func(SPI6_MISO, BCM_GPIO_FUNC3);
+        bcm2711_gpio_set_func(SPI6_SCLK, BCM_GPIO_FUNC3);
+        break;
 #endif
     }
 

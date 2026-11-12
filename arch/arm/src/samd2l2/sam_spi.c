@@ -977,24 +977,24 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-          break;
+          case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+            break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-          regval |= SPI_CTRLA_CPHA;
-          break;
+          case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+            regval |= SPI_CTRLA_CPHA;
+            break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          regval |= SPI_CTRLA_CPOL;
-          break;
+          case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+            regval |= SPI_CTRLA_CPOL;
+            break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-          regval |= (SPI_CTRLA_CPOL | SPI_CTRLA_CPHA);
-          break;
+          case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+            regval |= (SPI_CTRLA_CPOL | SPI_CTRLA_CPHA);
+            break;
 
-        default:
-          DEBUGASSERT(FALSE);
-          return;
+          default:
+            DEBUGASSERT(FALSE);
+            return;
         }
 
       spi_putreg32(priv, regval | SPI_CTRLA_ENABLE, SAM_SPI_CTRLA_OFFSET);

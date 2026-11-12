@@ -200,9 +200,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 {
   if (frequency != g_spi_frequency)
     {
-     uint32_t brg;
+      uint32_t brg;
 
-     spiinfo("frequency: %lu\n", (unsigned long)frequency);
+      spiinfo("frequency: %lu\n", (unsigned long)frequency);
 
       /* We want select divisor to provide the highest frequency (SPIR) that
        * does NOT exceed the requested frequency.:

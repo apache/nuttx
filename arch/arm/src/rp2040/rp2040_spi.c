@@ -536,7 +536,8 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
   /* Wait while the TX FIFO is full */
 
   while (!(spi_getreg(priv, RP2040_SPI_SSPSR_OFFSET) & RP2040_SPI_SSPSR_TNF))
-    ;
+    {
+    }
 
   /* Write the byte to the TX FIFO */
 
@@ -545,7 +546,8 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
   /* Wait for the RX FIFO not empty */
 
   while (!(spi_getreg(priv, RP2040_SPI_SSPSR_OFFSET) & RP2040_SPI_SSPSR_RNE))
-    ;
+    {
+    }
 
   /* Get the value from the RX FIFO and return it */
 
@@ -901,7 +903,9 @@ void spi_flush(struct spi_dev_s *dev)
   /* Wait for the TX FIFO not full indication */
 
   while (!(spi_getreg(priv, RP2040_SPI_SSPSR_OFFSET) & RP2040_SPI_SSPSR_TNF))
-    ;
+    {
+    }
+
   spi_putreg(priv, RP2040_SPI_SSPDR_OFFSET, 0xff);
 
   /* Wait until TX FIFO and TX shift buffer are empty */
@@ -911,7 +915,8 @@ void spi_flush(struct spi_dev_s *dev)
   /* Wait until RX FIFO is not empty */
 
   while (!(spi_getreg(priv, RP2040_SPI_SSPSR_OFFSET) & RP2040_SPI_SSPSR_RNE))
-    ;
+    {
+    }
 
   /* Then read and discard bytes until the RX FIFO is empty */
 
