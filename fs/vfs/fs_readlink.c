@@ -139,10 +139,10 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
           goto errout_with_inode;
         }
 
-      /* Copy the link target path to the user-provided buffer. */
+      /* readlink() does not NUL-terminate: copy at most bufsize bytes */
 
-      nread = strlcpy(buf, node->u.i_link, bufsize);
-      nread = MIN(nread, bufsize);
+      nread = MIN(strlen(node->u.i_link), bufsize);
+      memcpy(buf, node->u.i_link, nread);
     }
 
   /* Release our reference on the inode and return the length */
