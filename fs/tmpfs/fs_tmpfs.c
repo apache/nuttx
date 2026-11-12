@@ -2369,7 +2369,7 @@ static int tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp)
       ret = OK;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
