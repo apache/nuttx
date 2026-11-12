@@ -939,12 +939,12 @@ struct canioc_errors_s
   uint8_t               rxerr;           /* Receive error counter (REC) */
   uint32_t              errors;          /* Bus errors observed since the
                                           * device was opened, monotonic */
-  uint32_t              arb_errors;      /* Errors observed during the
-                                          * arbitration phase */
-  uint32_t              data_errors;     /* Errors observed during the
-                                          * data phase */
-  uint32_t              rx_overruns;     /* RX frames the controller
-                                          * overwrote unread */
+  uint32_t              arb_errors;      /* Error events in the arbitration
+                                          * phase, may be a lower bound */
+  uint32_t              data_errors;     /* Error events in the data phase,
+                                          * may be a lower bound */
+  uint32_t              rx_overruns;     /* RX overrun events, may be a
+                                          * lower bound */
 };
 
 /* CANIOC_GET_CONNMODES/CANIOC_SET_CONNMODES:
