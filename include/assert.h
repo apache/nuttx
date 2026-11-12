@@ -96,12 +96,17 @@
 #define __VERIFY__(f, file, line, _f) \
   (predict_false((f) < 0)) ? __assert(file, line, _f) : ((void)0)
 
+/* The expression string is passed in so #f stringifies at the caller's
+ * first macro level; in a two-level chain the argument would be
+ * macro-expanded first and bloat the .rodata assert strings.
+ */
+
 #ifdef CONFIG_DEBUG_ASSERTIONS_EXPRESSION
-#  define _ASSERT(f,file,line) __ASSERT__(f, file, line, #f)
-#  define _VERIFY(f,file,line) __VERIFY__(f, file, line, #f)
+#  define _ASSERT(f,file,line,s) __ASSERT__(f, file, line, s)
+#  define _VERIFY(f,file,line,s) __VERIFY__(f, file, line, s)
 #else
-#  define _ASSERT(f,file,line) __ASSERT__(f, file, line, NULL)
-#  define _VERIFY(f,file,line) __VERIFY__(f, file, line, NULL)
+#  define _ASSERT(f,file,line,s) __ASSERT__(f, file, line, NULL)
+#  define _VERIFY(f,file,line,s) __VERIFY__(f, file, line, NULL)
 #endif
 
 #ifndef DEBUGPANIC
@@ -116,7 +121,7 @@
 #ifndef DEBUGASSERT
 #  ifdef CONFIG_DEBUG_ASSERTIONS
 #    define DEBUGASSERT(f) _ASSERT(f, __DEBUG_ASSERT_FILE__, \
-                                   __DEBUG_ASSERT_LINE__)
+                                   __DEBUG_ASSERT_LINE__, #f)
 #  else
 #    define DEBUGASSERT(f) ((void)(1 || (f)))
 #  endif
@@ -125,7 +130,7 @@
 #ifndef DEBUGVERIFY
 #  ifdef CONFIG_DEBUG_ASSERTIONS
 #    define DEBUGVERIFY(f) _VERIFY(f, __DEBUG_ASSERT_FILE__, \
-                                   __DEBUG_ASSERT_LINE__)
+                                   __DEBUG_ASSERT_LINE__, #f)
 #  else
 #    define DEBUGVERIFY(f) ((void)(f))
 #  endif
@@ -137,8 +142,8 @@
  */
 
 #ifndef NUTTX_NO_EXTENSIONS
-#define ASSERT(f) _ASSERT(f, __ASSERT_FILE__, __ASSERT_LINE__)
-#define VERIFY(f) _VERIFY(f, __ASSERT_FILE__, __ASSERT_LINE__)
+#define ASSERT(f) _ASSERT(f, __ASSERT_FILE__, __ASSERT_LINE__, #f)
+#define VERIFY(f) _VERIFY(f, __ASSERT_FILE__, __ASSERT_LINE__, #f)
 #endif
 
 /* Suppress 3rd party library redefine _assert/__assert */
@@ -236,6 +241,6 @@ void __assert(FAR const char *filename, int linenum,
 #  ifdef NDEBUG
 #    define assert(f) ((void)0)
 #  else
-#    define assert(f) _ASSERT(f, __ASSERT_FILE__, __ASSERT_LINE__)
+#    define assert(f) _ASSERT(f, __ASSERT_FILE__, __ASSERT_LINE__, #f)
 #  endif
 #endif
