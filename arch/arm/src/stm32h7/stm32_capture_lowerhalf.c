@@ -319,7 +319,7 @@ static int stm32_start(struct cap_lowerhalf_s *lower)
 {
   struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
   int flags = 0;
-  uint32_t maxtimeout = (1 << priv->resolution) - 1;
+  uint32_t maxtimeout = (uint32_t)(((uint64_t)1 << priv->resolution) - 1);
 
   if (priv->started)
     {
