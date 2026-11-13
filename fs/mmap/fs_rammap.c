@@ -204,16 +204,16 @@ static int unmap_rammap(FAR struct task_group_s *group,
     {
       if (type == MAP_KERNEL)
         {
-          newaddr = fs_heap_realloc(entry->vaddr, length);
+          newaddr = fs_heap_realloc(entry->vaddr, offset);
         }
       else if (type == MAP_USER)
         {
-          newaddr = kumm_realloc(entry->vaddr, length);
+          newaddr = kumm_realloc(entry->vaddr, offset);
         }
 
       DEBUGASSERT(newaddr == entry->vaddr);
       entry->vaddr = newaddr;
-      entry->length = length;
+      entry->length = offset;
     }
 
   return ret;
@@ -254,6 +254,7 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
   FAR uint8_t *rdbuffer;
   ssize_t nread;
   off_t fpos;
+  off_t opos;
   int ret;
   size_t length = entry->length;
 
@@ -276,6 +277,14 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
    * being, a new memory region is created each time that rammap() is called.
    * Not very useful!
    */
+
+  /* mmap() must not move the file position */
+
+  opos = file_seek(filep, 0, SEEK_CUR);
+  if (opos < 0)
+    {
+      return opos;
+    }
 
   /* Allocate a region of memory of the specified size */
 
@@ -300,7 +309,7 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
 
       ferr("ERROR: Seek to position %zu failed\n", (size_t)entry->offset);
       ret = fpos;
-      goto errout_with_region;
+      goto errout_with_pos;
     }
 
   /* Read the file data into the memory region */
@@ -322,7 +331,7 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
                    (size_t)entry->offset, nread);
 
               ret = nread;
-              goto errout_with_region;
+              goto errout_with_pos;
             }
 
           continue;
@@ -344,6 +353,7 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
   /* Zero any memory beyond the amount read from the file */
 
   memset(rdbuffer, 0, length);
+  file_seek(filep, opos, SEEK_SET);
 
   /* Add the buffer to the list of regions */
 
@@ -361,6 +371,9 @@ out:
     }
 
   return OK;
+
+errout_with_pos:
+  file_seek(filep, opos, SEEK_SET);
 
 errout_with_region:
   if (type == MAP_KERNEL)
