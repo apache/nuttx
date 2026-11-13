@@ -2718,10 +2718,11 @@ static int tmpfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     }
 
   /* Create a root file system.  This is like a single directory entry in
-   * the file system structure.
+   * the file system structure.  Everybody can make files in it, so it has
+   * the sticky bit (01777), as the shmfs directory.
    */
 
-  tdo = tmpfs_alloc_directory(NULL, 0777);
+  tdo = tmpfs_alloc_directory(NULL, S_ISVTX | 0777);
   if (tdo == NULL)
     {
       fs_heap_free(fs);
