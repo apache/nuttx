@@ -795,10 +795,7 @@ static int u16550_setup(FAR struct uart_dev_s *dev)
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
   uint32_t div;
   uint32_t lcr;
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL) || \
-    defined(CONFIG_16550_SET_MCR_OUT2)
   uint32_t mcr;
-#endif
 
   if (priv->uartbase == 0)
     {
@@ -898,17 +895,14 @@ static int u16550_setup(FAR struct uart_dev_s *dev)
                    UART_FCR_FIFOEN |
                    (priv->rxtrigger << UART_FCR_RXTRIGGER_SHIFT));
 
-#ifdef CONFIG_16550_SET_MCR_OUT2
-  /* Set OUT2 bit in MCR register */
+  /* Set up MCR: always set OUT2 so the UART can drive its interrupt
+   * output, following the default behavior of Windows and Linux, then
+   * set up the auto flow control.
+   */
 
-  mcr = u16550_serialin(priv, UART_MCR_OFFSET);
-  u16550_serialout(priv, UART_MCR_OFFSET, mcr | UART_MCR_OUT2);
-#endif
-
-  /* Set up the auto flow control */
+  mcr = u16550_serialin(priv, UART_MCR_OFFSET) | UART_MCR_OUT2;
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  mcr = u16550_serialin(priv, UART_MCR_OFFSET);
   if (priv->flow)
     {
       mcr |= UART_MCR_AFCE;
@@ -919,9 +913,9 @@ static int u16550_setup(FAR struct uart_dev_s *dev)
     }
 
   mcr |= UART_MCR_RTS;
+#endif /* defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL) */
 
   u16550_serialout(priv, UART_MCR_OFFSET, mcr);
-#endif /* defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL) */
 
   /* Reconfigure DMA Rx timeout value */
 
