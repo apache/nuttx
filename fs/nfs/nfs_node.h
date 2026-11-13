@@ -71,6 +71,7 @@ struct nfsnode
   struct timespec     n_ctime;      /* File creation time */
   nfsfh_t             n_fhandle;    /* NFS File Handle */
   uint64_t            n_size;       /* Current size of file */
+  char                n_relpath[1]; /* Relative path from mount point */
 };
 
 #endif /* __FS_NFS_NFS_NODE_H */
