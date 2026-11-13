@@ -39,13 +39,13 @@ typedef void (*imx9_mu_gpi_callback_t)(int id, void *arg);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: imx95_mu_init
+ * Name: imx9_mu_init
  *
  * Description:
  *   Initialize mu
  *
  * Input Parameters:
- *   index   - The index of mu
+ *   index   - The MU number: 2 on i.MX95 (side A), 1 on i.MX93 (side B)
  *
  * Returned Value:
  *   imx9_mu_dev_s struct is returned on success. NULL is returned on
@@ -53,10 +53,10 @@ typedef void (*imx9_mu_gpi_callback_t)(int id, void *arg);
  *
  ****************************************************************************/
 
-struct imx9_mu_dev_s *imx95_mu_init(int index);
+struct imx9_mu_dev_s *imx9_mu_init(int index);
 
 /****************************************************************************
- * Name: imx95_mu_subscribe_msg
+ * Name: imx9_mu_subscribe_msg
  *
  * Description:
  *  Subscribe msg, when the irq occur,the msg callback will be called.
@@ -71,12 +71,12 @@ struct imx9_mu_dev_s *imx95_mu_init(int index);
  *
  ****************************************************************************/
 
-void imx95_mu_subscribe_msg(struct imx9_mu_dev_s *priv,
+void imx9_mu_subscribe_msg(struct imx9_mu_dev_s *priv,
                             uint32_t msg_int_bitfield,
                             imx9_mu_msg_callback_t callback);
 
 /****************************************************************************
- * Name: imx95_mu_subscribe_gpi
+ * Name: imx9_mu_subscribe_gpi
  *
  * Description:
  *  Subscribe msg, when the irq occur,the msg callback will be called.
@@ -91,12 +91,12 @@ void imx95_mu_subscribe_msg(struct imx9_mu_dev_s *priv,
  *
  ****************************************************************************/
 
-void imx95_mu_subscribe_gpi(struct imx9_mu_dev_s *priv,
+void imx9_mu_subscribe_gpi(struct imx9_mu_dev_s *priv,
                             uint32_t gpi_int_enable,
                             imx9_mu_gpi_callback_t callback);
 
 /****************************************************************************
- * Name: imx95_mu_deinit
+ * Name: imx9_mu_deinit
  *
  * Description:
  *   Deinit mu
@@ -109,10 +109,10 @@ void imx95_mu_subscribe_gpi(struct imx9_mu_dev_s *priv,
  *
  ****************************************************************************/
 
-void imx95_mu_deinit(struct imx9_mu_dev_s *priv);
+void imx9_mu_deinit(struct imx9_mu_dev_s *priv);
 
 /****************************************************************************
- * Name: imx95_mu_send_msg_non_blocking
+ * Name: imx9_mu_send_msg_non_blocking
  *
  * Description:
  *  When the mu is busy, will return err
@@ -128,11 +128,11 @@ void imx95_mu_deinit(struct imx9_mu_dev_s *priv);
  *
  ****************************************************************************/
 
-int imx95_mu_send_msg_non_blocking(struct imx9_mu_dev_s *priv,
+int imx9_mu_send_msg_non_blocking(struct imx9_mu_dev_s *priv,
                                    uint32_t reg_index, uint32_t msg);
 
 /****************************************************************************
- * Name: imx95_mu_send_msg
+ * Name: imx9_mu_send_msg
  *
  * Description:
  *  Send msg blocking
@@ -147,11 +147,11 @@ int imx95_mu_send_msg_non_blocking(struct imx9_mu_dev_s *priv,
  *
  ****************************************************************************/
 
-void imx95_mu_send_msg(struct imx9_mu_dev_s *priv, uint32_t reg_index,
+void imx9_mu_send_msg(struct imx9_mu_dev_s *priv, uint32_t reg_index,
                        uint32_t msg);
 
 /****************************************************************************
- * Name: imx95_mu_has_received_msg
+ * Name: imx9_mu_has_received_msg
  *
  * Description:
  *   Check Mu if has msg
@@ -166,11 +166,11 @@ void imx95_mu_send_msg(struct imx9_mu_dev_s *priv, uint32_t reg_index,
  *
  ****************************************************************************/
 
-int imx95_mu_has_received_msg(struct imx9_mu_dev_s *priv,
+int imx9_mu_has_received_msg(struct imx9_mu_dev_s *priv,
                               uint32_t reg_index);
 
 /****************************************************************************
- * Name: imx95_mu_receive_msg_non_blocking
+ * Name: imx9_mu_receive_msg_non_blocking
  *
  * Description:
  *  Non block receive msg
@@ -184,11 +184,11 @@ int imx95_mu_has_received_msg(struct imx9_mu_dev_s *priv,
  *
  ****************************************************************************/
 
-uint32_t imx95_mu_receive_msg_non_blocking(struct imx9_mu_dev_s *priv,
+uint32_t imx9_mu_receive_msg_non_blocking(struct imx9_mu_dev_s *priv,
                                            uint32_t reg_index);
 
 /****************************************************************************
- * Name: imx95_mu_receive_msg
+ * Name: imx9_mu_receive_msg
  *
  * Description:
  *   Block receive msg
@@ -202,11 +202,11 @@ uint32_t imx95_mu_receive_msg_non_blocking(struct imx9_mu_dev_s *priv,
  *
  ****************************************************************************/
 
-uint32_t imx95_mu_receive_msg(struct imx9_mu_dev_s *priv,
+uint32_t imx9_mu_receive_msg(struct imx9_mu_dev_s *priv,
                               uint32_t reg_index);
 
 /****************************************************************************
- * Name: imx95_mu_trigger_interrupts
+ * Name: imx9_mu_trigger_interrupts
  *
  * Description:
  *  Send irq to MUB
@@ -221,7 +221,7 @@ uint32_t imx95_mu_receive_msg(struct imx9_mu_dev_s *priv,
  *
  ****************************************************************************/
 
-int imx95_mu_trigger_interrupts(struct imx9_mu_dev_s *priv,
+int imx9_mu_trigger_interrupts(struct imx9_mu_dev_s *priv,
                                 uint32_t interrupts);
 
 #endif /* __ARCH_ARM64_SRC_IMX9_MU_H */

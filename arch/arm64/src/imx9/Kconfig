@@ -13,6 +13,7 @@ choice
 
 config ARCH_CHIP_IMX93
 	bool "i.MX9 Application Processor"
+	select IMX9_HAVE_MU
 	select ARCH_HAVE_MULTICPU
 	select ARMV8A_HAVE_GICv3
 	select ARCH_CORTEX_A55 if !IMX9_BOOTLOADER
@@ -631,7 +632,7 @@ config IMX9_MU
 config IMX9_SCMI
 	bool "SCMI Interface"
 	default y
-	depends on IMX9_MU
+	depends on IMX9_MU && ARCH_CHIP_IMX95
 
 if IMX9_SCMI
 
