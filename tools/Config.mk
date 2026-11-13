@@ -41,7 +41,12 @@ endif
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   export SHELL=cmd
 else
-  BASHCMD := $(shell command -v bash 2> /dev/null)
+  # Look for bash once; sub-makes get BASHCMD from the environment.
+
+  ifeq ($(origin BASHCMD),undefined)
+    BASHCMD := $(shell command -v bash 2> /dev/null)
+    export BASHCMD
+  endif
   ifneq ($(BASHCMD),)
     export SHELL=$(BASHCMD)
     ifeq ($(V),)
