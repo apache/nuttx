@@ -52,7 +52,7 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 
   /* Was this file opened ? */
 
-  if (!filep->f_inode)
+  if (!filep || !filep->f_inode)
     {
       return -EBADF;
     }
@@ -60,6 +60,7 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
   switch (cmd)
     {
       case F_DUPFD:
+      case F_DUPFD_CLOEXEC:
         /* Return a new file descriptor which shall be the lowest numbered
          * available (that is, not already open) file descriptor greater than
          * or equal to the third argument, arg, taken as an integer of type
@@ -67,17 +68,20 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * description as the original file descriptor, and shall share any
          * locks.  The FD_CLOEXEC flag associated  with the new file
          * descriptor shall be cleared to keep the file open across calls to
-         * one of the exec functions.
+         * one of the exec functions (unless F_DUPFD_CLOEXEC is used).
          */
 
         {
-          ret = file_dup(filep, va_arg(ap, int), 0);
-        }
-        break;
+          int minfd = va_arg(ap, int);
 
-      case F_DUPFD_CLOEXEC:
-        {
-          ret = file_dup(filep, va_arg(ap, int), O_CLOEXEC);
+          if (minfd < 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          ret = file_dup(filep, minfd,
+                         cmd == F_DUPFD_CLOEXEC ? O_CLOEXEC : 0);
         }
         break;
 
@@ -146,73 +150,63 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
         break;
 
       case F_GETLK:
-        /* Get the first lock which blocks the lock description pointed to
-         * by the third argument, arg, taken as a pointer to type struct
-         * flock, defined in <fcntl.h>.  The information retrieved shall
-         * overwrite the information passed to fcntl() in the structure
-         * flock. If no lock is found that would prevent this lock from
-         * being created, then the structure shall be left unchanged except
-         * for the lock type which shall be set to F_UNLCK.
-         */
-
-        {
-          ret = file_ioctl(filep, FIOC_GETLK,
-                           va_arg(ap, FAR struct flock *));
-        }
-
-        break;
       case F_SETLK:
-        /* Set or clear a file segment lock according to the lock
-         * description pointed to by the third argument, arg, taken as a
-         * pointer to type struct flock, defined in <fcntl.h>. F_SETLK can
-         * establish shared (or read) locks (F_RDLCK) or exclusive (or
-         * write) locks (F_WRLCK), as well  as to remove either type of lock
-         * (F_UNLCK).  F_RDLCK, F_WRLCK, and F_UNLCK are defined in
-         * <fcntl.h>. If a shared or exclusive lock cannot be set, fcntl()
-         * shall return immediately with a return value of -1.
-         */
-
-        {
-          ret = file_ioctl(filep, FIOC_SETLK,
-                           va_arg(ap, FAR struct flock *));
-        }
-
-        break;
       case F_SETLKW:
-        /* This command shall be equivalent to F_SETLK except that if a
-         * shared or exclusive lock is blocked by other locks, the thread
-         * shall wait until the request can be satisfied. If a signal that
-         * is to be caught is received while fcntl() is waiting for a
-         * region, fcntl() shall be interrupted. Upon return from the signal
-         * handler, fcntl() shall return -1 with errno set to [EINTR], and
-         * the lock operation shall not be done.
+        /* Get, set, or clear a file segment lock according to the lock
+         * description pointed to by the third argument, arg, taken as a
+         * pointer to type struct flock, defined in <fcntl.h>.
          */
 
         {
-          ret = file_ioctl(filep, FIOC_SETLKW,
-                           va_arg(ap, FAR struct flock *));
-        }
+          FAR struct flock *flock = va_arg(ap, FAR struct flock *);
 
+          if (flock == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
+
+          ret = file_ioctl(filep,
+                           cmd == F_GETLK ? FIOC_GETLK :
+                           cmd == F_SETLK ? FIOC_SETLK : FIOC_SETLKW,
+                           flock);
+        }
         break;
+
       case F_GETPATH:
         /* Get the path of the file descriptor. The argument must be a buffer
          * of size PATH_MAX or greater.
          */
 
         {
-          ret = file_ioctl(filep, FIOC_FILEPATH, va_arg(ap, FAR char *));
-        }
+          FAR char *path = va_arg(ap, FAR char *);
 
+          if (path == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
+
+          ret = file_ioctl(filep, FIOC_FILEPATH, path);
+        }
         break;
+
       case F_SETPIPE_SZ:
         /* Modify the capacity of the pipe to arg bytes, but not larger than
          * CONFIG_DEV_PIPE_MAXSIZE.
          */
 
         {
-          ret = file_ioctl(filep, PIPEIOC_SETSIZE, va_arg(ap, int));
-        }
+          int size = va_arg(ap, int);
 
+          if (size <= 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          ret = file_ioctl(filep, PIPEIOC_SETSIZE, size);
+        }
         break;
       case F_GETPIPE_SZ:
 
@@ -337,7 +331,7 @@ int fcntl(int fd, int cmd, ...)
 
           if (oflags & ~FD_CLOEXEC)
             {
-              set_errno(ENOSYS);
+              set_errno(EINVAL);
               ret = ERROR;
               break;
             }
