@@ -40,7 +40,7 @@
  * Private Functions
  ****************************************************************************/
 
-#ifndef __KERNEL__
+#if defined(CONFIG_SYSLOG_OPENLOG) && !defined(__KERNEL__)
 /****************************************************************************
  * Name: vsyslog_perror
  *
@@ -135,7 +135,7 @@ void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
       nx_vsyslog(priority, fmt, &ap);
 #endif
 
-#ifndef __KERNEL__
+#if defined(CONFIG_SYSLOG_OPENLOG) && !defined(__KERNEL__)
       vsyslog_perror(fmt, ap);
 #endif
     }

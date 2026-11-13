@@ -91,6 +91,7 @@ g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS];
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SYSLOG_OPENLOG
 static inline FAR const char *syslog_ident(FAR char *tail, size_t size)
 {
   FAR struct task_info_s *info;
@@ -124,6 +125,7 @@ static inline FAR const char *syslog_ident(FAR char *tail, size_t size)
 
   return info->ta_openlog.ol_ident;
 }
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
