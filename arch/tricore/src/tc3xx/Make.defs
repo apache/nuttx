@@ -24,6 +24,7 @@ CHIP_CSRCS += tc3xx_timerisr.c
 CHIP_CSRCS += tc3xx_serial.c
 CHIP_CSRCS += tc3xx_wdt.c
 CHIP_CSRCS += tc3xx_clockconfig.c
+CHIP_CSRCS += tc3xx_start.c
 
 VPATH += tc3xx
 
@@ -94,7 +95,6 @@ SDK_INCDIR += $(ILLD_DIR)/Libraries/Infra/Sfr/TC39xB
 SDK_INCDIR += $(ILLD_DIR)/Libraries/Infra/Ssw/TC3xx/Tricore
 SDK_INCDIR += $(ILLD_DIR)/Libraries/Service/CpuGeneric
 
-SDK_CSRCS += ${CONFIG_DIR}/Ifx_Cfg_Ssw.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Asclin/Std/IfxAsclin.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Cpu/Std/IfxCpu.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxAsclin_cfg.c
@@ -110,8 +110,6 @@ SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuLbist.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuRcu.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC3xx/Tricore/Scu/Std/IfxScuWdt.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Platform/Tricore/Compilers/CompilerTasking.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_Infra.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_Tc0.c
 
 CFLAGS += $(addprefix ${INCDIR_PREFIX},$(SDK_INCDIR))
 

@@ -44,6 +44,27 @@ set(ASMEXT
     asm
     CACHE INTERNAL "")
 
+# The .asm sources go through the C preprocessor first, as the .S sources of
+# GCC, so that they can use the configuration and the headers.  ctc -Ep leaves
+# no line markers, which the assembler does not take.
+
+if(CMAKE_GENERATOR MATCHES "Ninja")
+  # Ninja moves the defines and includes into the response file, which also has
+  # the control program options that ctc does not take, so ctc only gets the -D,
+  # -U and -I options of it.
+
+  set(CMAKE_ASM_COMPILE_OBJECT
+      "grep -o -E -e \"-[DUI][^ ]+\" ${CMAKE_BINARY_DIR}/$RSP_FILE > <OBJECT>.opt"
+      "${TOOLCHAIN_PREFIX}ctc -f <OBJECT>.opt -Ep <SOURCE> -o <OBJECT>.src"
+      "<CMAKE_ASM_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -c <OBJECT>.src -o <OBJECT>"
+  )
+else()
+  set(CMAKE_ASM_COMPILE_OBJECT
+      "${TOOLCHAIN_PREFIX}ctc -Ep <DEFINES> <INCLUDES> <SOURCE> -o <OBJECT>.src"
+      "<CMAKE_ASM_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -c <OBJECT>.src -o <OBJECT>"
+  )
+endif()
+
 if(CONFIG_OUTPUT_STRIP_PATHS)
   # TASKING cctc has no -fmacro-prefix-map. Convert absolute source paths to
   # relative paths by cd-ing to code root before compilation, so __FILE__ embeds
