@@ -4165,3 +4165,71 @@ config STM32_TIM11_CLOCK
 endif # STM32_TIM11_CAP
 
 endmenu # Timer Configuration
+
+menuconfig STM32_PTP_PPS
+	bool "PPS disciplined PTP clock on a 32-bit timer"
+	default n
+	depends on PTP_PPS
+	depends on STM32_HAVE_IP_TIMERS
+	depends on (STM32_TIM2 && STM32_HAVE_TIM2_32BITS) || (STM32_TIM5 && STM32_HAVE_TIM5_32BITS)
+	---help---
+		Use a 32-bit general purpose timer (TIM2 or TIM5), free running
+		at the full timer clock, as the counter of a PPS disciplined
+		PTP clock (/dev/ptpX), with one of its channels in input capture
+		mode on the pin wired to the PPS output of a GNSS receiver.
+
+		The hardware latches the counter on the PPS edge, so the time
+		stamp has the resolution of the timer clock (11.9 ns at 84 MHz)
+		and is not affected by interrupt latency, critical sections or
+		system load.  This is better than any interrupt based scheme,
+		including zero latency interrupts.
+
+		The timer must not be used by any other driver (PWM, capture,
+		quadrature encoder, ADC trigger, tickless timer, /dev/timerX).
+		The board must define GPIO_TIMx_CHyIN for the PPS pin and call
+		stm32_ptp_pps_initialize() during bring-up.
+
+if STM32_PTP_PPS
+
+choice
+	prompt "Timer"
+	default STM32_PTP_PPS_TIM5 if STM32_TIM5 && STM32_HAVE_TIM5_32BITS
+	default STM32_PTP_PPS_TIM2
+
+config STM32_PTP_PPS_TIM2
+	bool "TIM2"
+	depends on STM32_TIM2 && STM32_HAVE_TIM2_32BITS
+	depends on !STM32_TIM2_PWM && !STM32_TIM2_CAP && !STM32_TIM2_QE && !STM32_TIM2_ADC
+
+config STM32_PTP_PPS_TIM5
+	bool "TIM5"
+	depends on STM32_TIM5 && STM32_HAVE_TIM5_32BITS
+	depends on !STM32_TIM5_PWM && !STM32_TIM5_CAP && !STM32_TIM5_QE && !STM32_TIM5_ADC
+
+endchoice
+
+config STM32_PTP_PPS_CHANNEL
+	int "PPS input capture channel"
+	default 1
+	range 1 4
+	---help---
+		Timer channel whose input (GPIO_TIMx_CHyIN) receives the PPS.
+
+config STM32_PTP_PPS_FILTER
+	int "PPS input digital filter (ICxF)"
+	default 0
+	range 0 15
+	---help---
+		Value of the ICxF input filter field.  0 disables the filter and
+		gives the best accuracy.  A non zero value rejects glitches on a
+		long or noisy PPS line, at the cost of a fixed delay of a few
+		timer clocks (identical on boards with the same setting).
+
+config STM32_PTP_PPS_DEVNO
+	int "PTP clock device number (/dev/ptpX)"
+	default 0
+	---help---
+		Must differ from the device number of any other PTP clock, for
+		example the Ethernet MAC clock (CONFIG_STM32_ETH_PTP).
+
+endif # STM32_PTP_PPS
