@@ -142,13 +142,13 @@ extern "C"
  * Name: log2ceil
  *
  * Description:
- *   Calculate the up-rounded power-of-two for input.
+ *   Calculate the base-2 logarithm of n, rounded up.
  *
  * Input Parameters:
- *   x - Argument to calculate the power-of-two from.
+ *   n - The value to take the logarithm of (n >= 1).
  *
  * Returned Value:
- *   Power-of-two for argument, rounded up.
+ *   ceil(log2(n)).
  *
  ****************************************************************************/
 
@@ -158,13 +158,13 @@ extern "C"
  * Name: log2floor
  *
  * Description:
- *   Calculate the down-rounded (truncated) power-of-two for input.
+ *   Calculate the base-2 logarithm of n, rounded down.
  *
  * Input Parameters:
- *   x - Argument to calculate the power-of-two from.
+ *   n - The value to take the logarithm of (n >= 1).
  *
  * Returned Value:
- *   Power-of-two for argument, rounded (truncated) down.
+ *   floor(log2(n)).
  *
  ****************************************************************************/
 
@@ -394,16 +394,17 @@ static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
  *
  * Usage:
  * If you want to do n/d division where d is an invariant integer,
- * initialize the param by `invdiv_init_param(d, param)` first,
- * then do the division by `invdiv(n, param)`.
+ * initialize the parameters with invdiv_init_param32() /
+ * invdiv_init_param64() first, then do the division with
+ * invdiv_u32() / invdiv_u64().
  */
 
 /****************************************************************************
  * Name: invdiv_init_param32
  *
  * Description:
- *   Calculate the triple (multiplier, right shift number 1, right shift
- * number 2) during initialization.
+ *   Calculate the invariant-division parameters (multiplier, shift) for
+ * divisor d during initialization.
  *
  * Input Parameters:
  *   d - The divisor (unsigned integer). d != 0 and d != 1 is required.
@@ -436,7 +437,7 @@ void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *ip)
  * Description:
  *   Return the result of `n / d`
  *   The division is realized by multiplication and right shift,
- *   where d is already converted to invdiv_param_t.
+ *   where d is already converted to invdiv_param32_t.
  *
  * Input Parameters:
  *   n - The dividend (uint32_t).
@@ -593,7 +594,7 @@ void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *ip)
  * Description:
  *   Return the result of `n / d`
  *   The division is realized by multiplication and right shift,
- *   where d is already converted to invdiv_param_t.
+ *   where d is already converted to invdiv_param64_t.
  *
  * Input Parameters:
  *   n - The dividend (uint64_t).
