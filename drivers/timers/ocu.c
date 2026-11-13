@@ -323,6 +323,7 @@ static int ocu_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct ocu_status_s *status =
             (FAR struct ocu_status_s *)((uintptr_t)arg);
+
           DEBUGASSERT(status != NULL);
 
           /* Let the lower-half fill in the hardware/config-specific fields
@@ -357,6 +358,7 @@ static int ocu_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case OCUIOC_GETCOUNTER:
         {
           FAR uint32_t *counter = (FAR uint32_t *)((uintptr_t)arg);
+
           DEBUGASSERT(counter != NULL);
           ret = OCU_GETCOUNTER(lower, counter);
         }
@@ -368,6 +370,7 @@ static int ocu_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct ocu_abs_threshold_s *threshold =
             (FAR struct ocu_abs_threshold_s *)((uintptr_t)arg);
+
           DEBUGASSERT(threshold != NULL);
           ret = OCU_SETABSTHRESHOLD(lower, threshold);
         }
@@ -379,6 +382,7 @@ static int ocu_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct ocu_rel_threshold_s *threshold =
             (FAR struct ocu_rel_threshold_s *)((uintptr_t)arg);
+
           DEBUGASSERT(threshold != NULL);
           ret = OCU_SETRELTHRESHOLD(lower, threshold);
         }
@@ -406,6 +410,7 @@ static int ocu_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case OCUIOC_SETPINACTION:
         {
           enum ocu_pinaction_e action = (enum ocu_pinaction_e)arg;
+
           ret = OCU_SETPINACTION(lower, action);
         }
         break;
@@ -416,6 +421,7 @@ static int ocu_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct ocu_advance_threshold_s *threshold =
             (FAR struct ocu_advance_threshold_s *)((uintptr_t)arg);
+
           DEBUGASSERT(threshold != NULL);
           ret = OCU_SETADVANCETHRESHOLD(lower, threshold);
         }
@@ -436,6 +442,7 @@ static int ocu_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct ocu_notify_s *notify =
             (FAR struct ocu_notify_s *)((uintptr_t)arg);
+
           DEBUGASSERT(notify != NULL);
 
           if (notify->enable)

@@ -350,11 +350,8 @@ struct ocu_lowerhalf_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -385,7 +382,6 @@ extern "C"
 int ocu_register(FAR const char *devpath,
                  FAR struct ocu_lowerhalf_s *lower);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif
