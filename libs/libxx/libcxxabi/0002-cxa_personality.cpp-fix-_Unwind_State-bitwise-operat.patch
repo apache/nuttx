@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Mon, 13 Apr 2026 15:28:45 +0800
+Subject: [PATCH] cxa_personality.cpp: fix _Unwind_State bitwise operation
+ error on ARM GCC
+
+On ARM, the C++ exception ABI (EHABI) defines _Unwind_State as an enum type. GCC 15 with -Werror rejects the implicit conversion from int back to _Unwind_State after a bitwise &= operation. Add static_cast to make the conversion explicit. This code is inside the _LIBCXXABI_ARM_EHABI branch and only affects ARM targets. Other architectures use the Itanium ABI where the equivalent parameter is int, so they are unaffected.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ src/cxa_personality.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/cxa_personality.cpp b/src/cxa_personality.cpp
+index 5f6e75c..d72d3ef 100644
+--- a/src/cxa_personality.cpp
++++ b/src/cxa_personality.cpp
+@@ -1074,7 +1074,7 @@ __gxx_personality_v0(_Unwind_State state,
+ 
+     // Check the undocumented force unwinding behavior
+     bool is_force_unwinding = state & _US_FORCE_UNWIND;
+-    state &= ~_US_FORCE_UNWIND;
++    state = static_cast<_Unwind_State>(state & ~_US_FORCE_UNWIND);
+ 
+     scan_results results;
+     switch (state) {

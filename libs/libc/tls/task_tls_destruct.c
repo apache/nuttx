@@ -143,6 +143,15 @@ void task_tls_destruct(void)
 
       info->ta_telem[candidate] = 0;
     }
+
+#if defined(CONFIG_LIBCXX) && !defined(CONFIG_DISABLE_PTHREAD)
+  if (info->ta_thread_local_data && info->ta_thread_local_dtor)
+    {
+      info->ta_thread_local_dtor(info->ta_thread_local_data);
+      info->ta_thread_local_data = NULL;
+      info->ta_thread_local_dtor = NULL;
+    }
+#endif
 }
 
 #endif

@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Thu, 9 Apr 2026 12:22:30 +0800
+Subject: [PATCH] include/string: remove constexpr from ~basic_string() for ARM
+ GCC
+
+ARM GCC does not emit an out-of-line definition for ~basic_string() when the destructor is marked constexpr, even through explicit template instantiation in string.cpp. This causes undefined reference errors at link time for locale.cpp and prebuilt libraries compiled at -O0.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ include/string | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/include/string b/include/string
+index d282071abf..39c26e99f3 100644
+--- a/include/string
++++ b/include/string
+@@ -1201,7 +1201,11 @@ public:
+   }
+ #  endif // _LIBCPP_CXX03_LANG
+ 
++#if defined(__arm__) && !defined(__clang__)
++  inline ~basic_string() {
++#else
+   inline _LIBCPP_CONSTEXPR_SINCE_CXX20 ~basic_string() {
++#endif
+     __annotate_delete();
+     if (__is_long())
+       __alloc_traits::deallocate(__alloc_, __get_long_pointer(), __get_long_cap());

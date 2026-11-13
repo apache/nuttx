@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Fri, 10 Apr 2026 17:06:56 +0800
+Subject: [PATCH] cxa_exception.cpp: guard ASAN interfaces with __has_include
+ for bare-metal
+
+GCC 15 added __has_feature() support, causing __has_feature(address_sanitizer) to return true when NuttX KASAN (-fsanitize=kernel-address) is enabled. This triggers includes of sanitizer/asan_interface.h.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ src/cxa_exception.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/cxa_exception.cpp b/src/cxa_exception.cpp
+index 92901a8..cfc443e 100644
+--- a/src/cxa_exception.cpp
++++ b/src/cxa_exception.cpp
+@@ -284,7 +284,7 @@ __cxa_throw(void *thrown_object, std::type_info *tinfo, void (_LIBCXXABI_DTOR_FU
+   __cxa_exception* exception_header = __cxa_init_primary_exception(thrown_object, tinfo, dest);
+   exception_header->referenceCount = 1; // This is a newly allocated exception, no need for thread safety.
+ 
+-#if __has_feature(address_sanitizer)
++#if __has_feature(address_sanitizer) && __has_include(<sanitizer/asan_interface.h>)
+   // Inform the ASan runtime that now might be a good time to clean stuff up.
+   __asan_handle_no_return();
+ #endif

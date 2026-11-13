@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Fri, 10 Apr 2026 16:46:53 +0800
+Subject: [PATCH] __hash_table: initialize __chash to fix GCC 15
+ -Werror=maybe-uninitialized
+
+GCC 15 reports __chash may be used uninitialized in __hash_table::__emplace_unique_key_args when inlined into unordered_map::operator[]. This is a false positive from GCC's value range analysis after deep.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ include/__hash_table | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/__hash_table b/include/__hash_table
+index 78f2f3bfd2..29de91a488 100644
+--- a/include/__hash_table
++++ b/include/__hash_table
+@@ -1569,7 +1569,7 @@ __hash_table<_Tp, _Hash, _Equal, _Alloc>::__emplace_unique_key_args(_Key const&
+   size_type __bc  = bucket_count();
+   bool __inserted = false;
+   __next_pointer __nd;
+-  size_t __chash;
++  size_t __chash = 0;
+   if (__bc != 0) {
+     __chash = std::__constrain_hash(__hash, __bc);
+     __nd    = __bucket_list_[__chash];

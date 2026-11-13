@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Sun, 5 Apr 2026 23:59:04 +0800
+Subject: [PATCH] from_chars_floating_point.h: replace llvm-libc shared headers
+ with from_chars_support.h
+
+llvm-21's from_chars_floating_point.h implementation depends on 3 llvm-libc shared headers which pull in 146 internal header files. Add a self-contained from_chars_support.h(under nuttx repo) that delegates actual float parsing to nuttx strtof/strtod, replacing the 146-file dependency tree.
+Known limitations of from_chars_support.h:
+- Correctness depends on system strtod quality
+- Extremely long inputs (500+ digits) may lose precision due to mantissa truncation during the mantissa->string->strtod round-trip
+- Overflow boundary rounding may differ from IEEE 754 strict compliance
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ src/include/from_chars_floating_point.h | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/src/include/from_chars_floating_point.h b/src/include/from_chars_floating_point.h
+index 19eeeb28fb..9cbabcd106 100644
+--- a/src/include/from_chars_floating_point.h
++++ b/src/include/from_chars_floating_point.h
+@@ -9,11 +9,6 @@
+ #ifndef _LIBCPP_SRC_INCLUDE_FROM_CHARS_FLOATING_POINT_H
+ #define _LIBCPP_SRC_INCLUDE_FROM_CHARS_FLOATING_POINT_H
+ 
+-// These headers are in the shared LLVM-libc header library.
+-#include "shared/fp_bits.h"
+-#include "shared/str_to_float.h"
+-#include "shared/str_to_integer.h"
+-
+ #include <__assert>
+ #include <__config>
+ #include <cctype>
+@@ -24,6 +19,16 @@
+ // Included for the _Floating_type_traits class
+ #include "to_chars_floating_point.h"
+ 
++// Included if llvm-libc/shared/ presents,
++// otherwise include libxx/libcxx/from_chars_support.h
++#if __has_include("shared/fp_bits.h")
++#include "shared/fp_bits.h"
++#include "shared/str_to_float.h"
++#include "shared/str_to_integer.h"
++#else
++#include "from_chars_support.h"
++#endif
++
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
+ // Parses an infinity string.

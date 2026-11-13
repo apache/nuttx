@@ -1,0 +1,60 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Tue, 14 Apr 2026 20:12:47 +0800
+Subject: [PATCH] cxa_exception_storage.cpp: use tls_info_s.tl_eh_globals for
+ per-thread exception storage on NuttX
+
+Store __cxa_eh_globals pointer directly in tls_info_s for per-thread isolation without depending on CONFIG_TLS_TASK_NELEM or pthread_key. Lazy-allocate on first access via __calloc_with_fallback, with destructor registered for cleanup on thread exit.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ src/cxa_exception_storage.cpp | 36 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
+
+diff --git a/src/cxa_exception_storage.cpp b/src/cxa_exception_storage.cpp
+index 05da6a4..8215160 100644
+--- a/src/cxa_exception_storage.cpp
++++ b/src/cxa_exception_storage.cpp
+@@ -24,6 +24,42 @@ extern "C" {
+ } // extern "C"
+ } // namespace __cxxabiv1
+ 
++#elif defined(__NuttX__) && defined(CONFIG_CXX_EXCEPTION) \
++      && !defined(CONFIG_SCHED_THREAD_LOCAL)
++
++// Use the dedicated tl_eh_globals field in tls_info_s for per-thread
++// exception storage. No dependency on CONFIG_TLS_TASK_NELEM.
++
++#include "abort_message.h"
++#include "fallback_malloc.h"
++
++#include <nuttx/tls.h>
++
++namespace __cxxabiv1 {
++extern "C" {
++    __cxa_eh_globals *__cxa_get_globals() {
++        FAR struct tls_info_s *tls = tls_get_info();
++        __cxa_eh_globals *retVal =
++            static_cast<__cxa_eh_globals *>(tls->tl_eh_globals);
++
++        if (NULL == retVal) {
++            retVal = static_cast<__cxa_eh_globals *>(
++                __calloc_with_fallback(1, sizeof(__cxa_eh_globals)));
++            if (NULL == retVal)
++                __abort_message("cannot allocate __cxa_eh_globals");
++            tls->tl_eh_globals = retVal;
++            tls->tl_eh_free = __free_with_fallback;
++        }
++        return retVal;
++    }
++
++    __cxa_eh_globals *__cxa_get_globals_fast() {
++        FAR struct tls_info_s *tls = tls_get_info();
++        return static_cast<__cxa_eh_globals *>(tls->tl_eh_globals);
++    }
++} // extern "C"
++} // namespace __cxxabiv1
++
+ #elif __has_feature(cxx_thread_local)
+ 
+ namespace __cxxabiv1 {
