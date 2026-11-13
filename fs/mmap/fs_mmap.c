@@ -98,7 +98,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
   if ((flags & (MAP_FIXED | MAP_DENYWRITE)) != 0)
     {
       ferr("ERROR: Unsupported options, prot=%x flags=%04x\n", prot, flags);
-      return -ENOSYS;
+      return -ENOTSUP;
     }
 
   /* A length of 0 is invalid. */
@@ -155,8 +155,14 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
    * in memory.
    */
 
+  /* A writable MAP_PRIVATE mapping of a file gets a private copy from
+   * rammap() below; a driver's own mmap() defines its own semantics.
+   */
+
   if (filep->f_inode &&
-      filep->f_inode->u.i_ops->mmap != NULL)
+      filep->f_inode->u.i_ops->mmap != NULL &&
+      ((flags & MAP_SHARED) != 0 || (prot & PROT_WRITE) == 0 ||
+       INODE_IS_DRIVER(filep->f_inode)))
     {
       ret = filep->f_inode->u.i_ops->mmap(filep, &entry);
     }
