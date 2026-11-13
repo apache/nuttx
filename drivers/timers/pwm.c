@@ -356,6 +356,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR const struct pwm_info_s *info =
             (FAR const struct pwm_info_s *)((uintptr_t)arg);
+
           DEBUGASSERT(info != NULL && lower->ops->start != NULL);
 
           pwm_dump("PWMIOC_SETCHARACTERISTICS", info, upper->started);
@@ -387,6 +388,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct pwm_info_s *info =
             (FAR struct pwm_info_s *)((uintptr_t)arg);
+
           DEBUGASSERT(info != NULL);
 
           memcpy(info, &upper->info, sizeof(struct pwm_info_s));
@@ -427,6 +429,104 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               ret = lower->ops->stop(lower);
               upper->started = false;
             }
+        }
+        break;
+
+      case PWMIOC_SETOUTPUTIDLE:
+        {
+          if (lower->ops->set_output_idle == NULL)
+            {
+              ret = -ENOSYS;
+              break;
+            }
+
+          ret = lower->ops->set_output_idle(lower, (int)arg);
+        }
+        break;
+
+      case PWMIOC_GETOUTPUTSTATE:
+        {
+          FAR struct pwm_output_state_s *p =
+            (FAR struct pwm_output_state_s *)((uintptr_t)arg);
+
+          if (lower->ops->get_output_state == NULL)
+            {
+              ret = -ENOSYS;
+            }
+          else if (p == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = lower->ops->get_output_state(lower,
+                                                 p->channel, &p->state);
+            }
+        }
+        break;
+
+      case PWMIOC_ENABLENOTIFY:
+        {
+          FAR const struct pwm_notify_s *p =
+            (FAR const struct pwm_notify_s *)((uintptr_t)arg);
+
+          if (lower->ops->enable_notify == NULL)
+            {
+              ret = -ENOSYS;
+            }
+          else if (p == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = lower->ops->enable_notify(lower,
+                                              p->channel, p->edge);
+            }
+        }
+        break;
+
+      case PWMIOC_DISABLENOTIFY:
+        {
+          if (lower->ops->disable_notify == NULL)
+            {
+              ret = -ENOSYS;
+              break;
+            }
+
+          ret = lower->ops->disable_notify(lower, (int)arg);
+        }
+        break;
+
+      case PWMIOC_GETPOWERSTATE:
+        {
+          FAR uint8_t *state =
+            (FAR uint8_t *)((uintptr_t)arg);
+
+          if (lower->ops->get_power_state == NULL)
+            {
+              ret = -ENOSYS;
+            }
+          else if (state == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              ret = lower->ops->get_power_state(lower, state);
+            }
+        }
+        break;
+
+      case PWMIOC_SETPOWERSTATE:
+        {
+          if (lower->ops->set_power_state == NULL)
+            {
+              ret = -ENOSYS;
+              break;
+            }
+
+          ret = lower->ops->set_power_state(lower, (uint8_t)arg);
         }
         break;
 
