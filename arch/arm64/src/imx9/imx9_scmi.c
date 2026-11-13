@@ -360,7 +360,7 @@ static int imx9_smt_tx(uint32_t channel, uint32_t len, bool callee,
 
       /* Trigger GI interrupt */
 
-      imx95_mu_trigger_interrupts(g_mudev, 1 << db);
+      imx9_mu_trigger_interrupts(g_mudev, 1 << db);
     }
 
   /* Return status */
@@ -1270,5 +1270,5 @@ void imx9_scmi_initialize(void)
 
   /* Configure MU */
 
-  g_mudev = imx95_mu_init(2);
+  g_mudev = imx9_mu_init(2);
 }
