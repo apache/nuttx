@@ -223,6 +223,10 @@ void drivers_initialize(void)
   up_cryptoinitialize();
 #endif
 
+#ifdef CONFIG_CRYPTO_BACKENDS
+  crypto_backends_init();
+#endif
+
 #ifdef CONFIG_CRYPTO_CRYPTODEV
   devcrypto_register();
 #endif

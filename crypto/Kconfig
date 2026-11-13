@@ -35,20 +35,37 @@ config CRYPTO_AES256_DISABLE
 
 endif # CRYPTO_ALGTEST
 
+config CRYPTO_BACKENDS
+	bool
+	default n
+	---help---
+		Register the software and hardware crypto backends into the
+		driver table, so in-kernel users can reach them through
+		crypto_newsession() and crypto_invoke(). This is independent of
+		the /dev/crypto interface: a build that only has in-kernel users
+		needs this option and not the character device.
+
 config CRYPTO_CRYPTODEV
 	bool "cryptodev support"
 	depends on ALLOW_BSD_COMPONENTS
+	select CRYPTO_BACKENDS
 	default n
+	---help---
+		The BSD compatible /dev/crypto character device, which lets
+		user-space libraries such as OpenSSL and GnuTLS reach the crypto
+		backends. In-kernel users call the crypto API directly and do
+		not need it, so a core that has no user-space crypto client can
+		enable CRYPTO_BACKENDS alone and leave the device out.
 
 config CRYPTO_CRYPTODEV_SOFTWARE_CRYPTO
 	bool "cryptodev software cipher support"
-	depends on CRYPTO_CRYPTODEV && CRYPTO_SW_AES
+	depends on CRYPTO_BACKENDS && CRYPTO_SW_AES
 	select CRYPTO_CURVE25519
 	default n
 
 config CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
 	bool "cryptodev software key management support"
-	depends on CRYPTO_CRYPTODEV && !MTD_CONFIG_NONE
+	depends on CRYPTO_BACKENDS && !MTD_CONFIG_NONE
 	select CRYPTO_CURVE25519
 	default n
 
@@ -74,7 +91,7 @@ endif # CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
 
 config CRYPTO_CRYPTODEV_HARDWARE
 	bool "cryptodev hardware support"
-	depends on CRYPTO_CRYPTODEV
+	depends on CRYPTO_BACKENDS
 	default n
 
 config CRYPTO_SW_AES
