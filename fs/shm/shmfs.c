@@ -480,6 +480,108 @@ static int shmfs_unmap_area(FAR struct task_group_s *group,
 }
 
 /****************************************************************************
+ * Name: shmfs_munmap_partial
+ *
+ * Description:
+ *   Shrink the mapping, or split it in two when the middle is unmapped.
+ *   Each resulting mapping holds one inode reference.  The object's pages
+ *   stay allocated until its last mapping is removed.
+ *
+ ****************************************************************************/
+
+static int shmfs_munmap_partial(FAR struct task_group_s *group,
+                                FAR struct mm_map_entry_s *entry,
+                                FAR void *start, size_t length)
+{
+  FAR struct mm_map_s *mm = get_group_mm(group);
+  FAR char *entry_end = (FAR char *)entry->vaddr + entry->length;
+  FAR char *unmap_end = (FAR char *)start + length;
+  off_t head;
+  off_t tail;
+  int ret;
+
+#ifdef CONFIG_BUILD_KERNEL
+  /* The MMU unmaps whole pages, so the bookkeeping must use the same
+   * page-rounded range.
+   */
+
+  if (!MM_ISALIGNED(start))
+    {
+      return -EINVAL;
+    }
+
+  unmap_end = (FAR char *)MIN(MM_PGALIGNUP(unmap_end),
+                              (uintptr_t)entry_end);
+  length    = unmap_end - (FAR char *)start;
+  if (start == entry->vaddr && unmap_end == entry_end)
+    {
+      return shmfs_munmap(group, entry, start, length);
+    }
+#endif
+
+  head = (FAR char *)start - (FAR char *)entry->vaddr;
+  tail = entry_end - unmap_end;
+
+  if (head > 0 && tail > 0)
+    {
+      FAR struct mm_map_entry_s *added = NULL;
+      struct mm_map_entry_s tailmap = *entry;
+
+      tailmap.vaddr  = unmap_end;
+      tailmap.length = tail;
+      tailmap.offset = entry->offset + head + length;
+
+      /* Track the tail before unmapping, so that a failure leaves only
+       * this entry to undo.
+       */
+
+      ret = mm_map_add(mm, &tailmap);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ret = shmfs_unmap_area(group, start, length);
+      if (ret < 0)
+        {
+          do
+            {
+              added = mm_map_next(mm, added);
+            }
+          while (added != NULL && (added == entry ||
+                 added->vaddr != tailmap.vaddr ||
+                 added->length != tailmap.length));
+
+          mm_map_remove(mm, added);
+          return ret;
+        }
+
+      entry->length = head;
+      inode_addref((FAR struct inode *)entry->priv.p);
+      return OK;
+    }
+
+  ret = shmfs_unmap_area(group, start, length);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (tail > 0)
+    {
+      entry->vaddr   = unmap_end;
+      entry->offset += length;
+      entry->length  = tail;
+    }
+  else
+    {
+      entry->length = head;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: shmfs_munmap
  ****************************************************************************/
 
@@ -491,11 +593,9 @@ static int shmfs_munmap(FAR struct task_group_s *group,
   FAR struct inode *inode;
   int ret;
 
-  /* Partial unmap is not supported yet */
-
   if (start != entry->vaddr || length != entry->length)
     {
-      return -EINVAL;
+      return shmfs_munmap_partial(group, entry, start, length);
     }
 
   inode = (FAR struct inode *)entry->priv.p;
