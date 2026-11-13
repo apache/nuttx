@@ -2840,6 +2840,15 @@ config ARCH_BOARD_SABRE_6QUAD
 		This options selects support for NuttX on the NXP/Freescale Sabre
 		board featuring the iMX 6Quad CPU.
 
+config ARCH_BOARD_QEMU_RH850_U2C
+	bool "QEMU rh850-u2c machine"
+	depends on ARCH_CHIP_R7F702600
+	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_RESET
+	---help---
+		This options selects support for NuttX on the QEMU rh850-u2c
+		machine, the Renesas RH850/U2C8 (R7F702600) with its G4KH CPU0.
+
 config ARCH_BOARD_A2G_TC397_5V_TFT
 	bool "Infineon's AURIX TC397 board: KIT_A2G_TC397_5V_TFT"
 	depends on ARCH_CHIP_TC39X
@@ -4429,6 +4438,7 @@ config ARCH_BOARD
 	default "starpro64"                    if ARCH_BOARD_EIC7700X_STARPRO64
 	default "eic7700-evb"                  if ARCH_BOARD_EIC7700X_EVB
 	default "sabre-6quad"                  if ARCH_BOARD_SABRE_6QUAD
+	default "qemu-rh850-u2c"               if ARCH_BOARD_QEMU_RH850_U2C
 	default "a2g-tc397-5v-tft"             if ARCH_BOARD_A2G_TC397_5V_TFT
 	default "triboard_tc4x9_com"           if ARCH_BOARD_TRIBOARD_TC4X9_COM
 	default "qemu-armv7a"                  if ARCH_BOARD_QEMU_ARMV7A
@@ -4671,6 +4681,9 @@ source "boards/arm/s32k3xx/mr-canhubk3/Kconfig"
 endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
+endif
+if ARCH_BOARD_QEMU_RH850_U2C
+source "boards/rh850/u2c/qemu-rh850-u2c/Kconfig"
 endif
 if ARCH_BOARD_A2G_TC397_5V_TFT
 source "boards/tricore/tc3xx/a2g-tc397-5v-tft/Kconfig"

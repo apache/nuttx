@@ -1,0 +1,20 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+
+if ARCH_BOARD_QEMU_RH850_U2C
+
+config QEMU_RH850_U2C_TEST_EXIT
+	bool "Stop QEMU on a reset with an error status"
+	default n
+	depends on BOARDCTL_RESET
+	---help---
+		board_reset() with a non-zero status (the PANIC path with
+		BOARD_RESET_ON_ASSERT) writes the QEMU test-exit device at
+		0x40000000, so QEMU exits with that status.  Needs
+		-M rh850-u2c,test-exit=on.  Without it, and for status 0,
+		board_reset() starts a software system reset.
+
+endif

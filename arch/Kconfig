@@ -84,6 +84,17 @@ config ARCH_RENESAS
 	---help---
 		Renesas architectures (SH and M16C).
 
+config ARCH_RH850
+	bool "Renesas RH850"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_STACKCHECK
+	select ARCH_TOOLCHAIN_GNU
+	select LIBC_ATOMIC_IRQ
+	---help---
+		Renesas RH850 architecture (G4KH core).
+
 config ARCH_RISCV
 	bool "RISC-V"
 	select ARCH_HAVE_FORK if BUILD_KERNEL && ARCH_ADDRENV && !ARCH_STACK_DYNAMIC
@@ -226,6 +237,7 @@ config ARCH
 	default "mips"    if ARCH_MIPS
 	default "misoc"   if ARCH_MISOC
 	default "renesas" if ARCH_RENESAS
+	default "rh850"   if ARCH_RH850
 	default "risc-v"  if ARCH_RISCV
 	default "sim"     if ARCH_SIM
 	default "x86"     if ARCH_X86
@@ -257,6 +269,9 @@ source "arch/misoc/Kconfig"
 endif
 if ARCH_RENESAS
 source "arch/renesas/Kconfig"
+endif
+if ARCH_RH850
+source "arch/rh850/Kconfig"
 endif
 if ARCH_RISCV
 source "arch/risc-v/Kconfig"
