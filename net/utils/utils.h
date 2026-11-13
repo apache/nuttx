@@ -155,6 +155,49 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: conn_init
+ *
+ * Description:
+ *   Initialize a connection structure, including s_lock mutex
+ *
+ * Parameters:
+ *   sconn - Pointer to the socket_conn_s structure to initialize
+ *
+ * Return:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline_function void conn_init(FAR struct socket_conn_s *sconn)
+{
+  DEBUGASSERT(sconn != NULL);
+
+  /* Initialize the connection lock */
+
+  nxrmutex_init(&sconn->s_lock);
+}
+
+/****************************************************************************
+ * Name: conn_uninit
+ *
+ * Description:
+ *   Uninitialize a connection structure, releasing all resources
+ *
+ * Parameters:
+ *   sconn - Pointer to the socket_conn_s structure to uninitialize
+ *
+ ****************************************************************************/
+
+static inline_function void conn_uninit(FAR struct socket_conn_s *sconn)
+{
+  DEBUGASSERT(sconn != NULL);
+
+  /* Destroy the connection lock */
+
+  nxrmutex_destroy(&sconn->s_lock);
+}
+
+/****************************************************************************
  * Name: conn_lock, conn_unlock, conn_dev_lock, conn_dev_unlock
  *
  * Description:

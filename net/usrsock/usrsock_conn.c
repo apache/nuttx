@@ -103,7 +103,10 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
       /* Make sure that the connection is marked as uninitialized */
 
       nxsem_init(&conn->resp.sem, 0, 1);
-      nxrmutex_init(&conn->sconn.s_lock);
+
+      /* Use conn_init to initialize the connection structure */
+
+      conn_init(&conn->sconn);
       conn->usockid = USRSOCK_USOCKID_INVALID;
       conn->state = USRSOCK_CONN_STATE_UNINITIALIZED;
 
@@ -140,7 +143,10 @@ void usrsock_free(FAR struct usrsock_conn_s *conn)
   /* Reset structure */
 
   nxsem_destroy(&conn->resp.sem);
-  nxrmutex_destroy(&conn->sconn.s_lock);
+
+  /* Use conn_uninit to release all connection resources */
+
+  conn_uninit(&conn->sconn);
 
   /* Free the connection. */
 
