@@ -33,7 +33,9 @@ CSRCS += fs_blockmerge.c fs_finddriver.c
 
 ifeq ($(CONFIG_MTD),y)
 CSRCS += fs_registermtddriver.c fs_unregistermtddriver.c
+ifeq ($(CONFIG_FS_MTD_PROXY),y)
 CSRCS += fs_mtdproxy.c
+endif
 ifeq ($(CONFIG_MTD_PARTITION),y)
 CSRCS += fs_mtdpartition.c
 endif

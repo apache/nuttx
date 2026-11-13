@@ -82,7 +82,7 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
   ret = find_blockdriver(pathname, mountflags, &inode);
   if (ret < 0)
     {
-#ifdef CONFIG_MTD
+#ifdef CONFIG_FS_MTD_PROXY
       /* Not block device, mtd device? let's try it. */
 
       return mtd_proxy(pathname, mountflags, ppinode);

@@ -148,7 +148,7 @@ int register_partition_with_mtd(FAR const char *partition,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MTD
+#ifdef CONFIG_FS_MTD_PROXY
 int mtd_proxy(FAR const char *mtddev, int mountflags,
               FAR struct inode **ppinode);
 #endif
