@@ -43,6 +43,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 #include <sys/param.h>
 #include <sys/time.h>
@@ -74,6 +75,7 @@ struct audio_fake_s
   uint32_t      sample_rate;    /* Request audio sample rate */
   uint32_t      scaler;         /* Data bytes to sec scaler (bytes per sec) */
   pthread_t     threadid;       /* ID of worker thread */
+  sem_t         exitsem;        /* 1 while no worker thread is alive */
   char          mqname[16];     /* Our message queue name */
   struct file   mq;             /* Message queue for receiving messages */
   struct file   file;           /* Audio file for playback or capture */
@@ -591,6 +593,7 @@ static int audio_fake_configure(FAR struct audio_lowerhalf_s *dev,
 {
   FAR struct audio_fake_s *priv = (FAR struct audio_fake_s *)dev;
   int ret;
+
   audinfo("ac_type: %d\n", caps->ac_type);
 
   if (priv->mqname[0] == '\0')
@@ -778,6 +781,10 @@ static void *audio_fake_workerthread(pthread_addr_t pvarg)
 #endif
   audinfo("Exit %s\n", priv->dev_params->dev_name);
 
+  /* Must be the last access to priv: the waiter may reuse it right away */
+
+  nxsem_post(&priv->exitsem);
+
   return NULL;
 }
 
@@ -802,12 +809,20 @@ static int audio_fake_start(FAR struct audio_lowerhalf_s *dev)
   FAR void *value;
   int ret;
 
+#ifndef CONFIG_AUDIO_EXCLUDE_STOP
+  /* A previous worker may have exited by itself (processing error)
+   * without stop(); make sure its cleanup is done before reinit.
+   */
+
+  nxsem_wait_uninterruptible(&priv->exitsem);
+#endif
+
   priv->terminate = false;
 
   ret = audio_fake_file_init(dev);
   if (ret < 0)
     {
-      return ret;
+      goto errout;
     }
 
   /* Join any old worker thread we had created to prevent a memory leak */
@@ -831,14 +846,19 @@ static int audio_fake_start(FAR struct audio_lowerhalf_s *dev)
   if (ret != OK)
     {
       auderr("ERROR: pthread_create failed: %d\n", ret);
-    }
-  else
-    {
-      pthread_setname_np(priv->threadid, "audio_fake");
-      audinfo("Created worker thread\n");
+      goto errout;
     }
 
+  pthread_setname_np(priv->threadid, "audio_fake");
+  audinfo("Created worker thread\n");
+
   audinfo("Return %d\n", ret);
+  return ret;
+
+errout:
+#ifndef CONFIG_AUDIO_EXCLUDE_STOP
+  nxsem_post(&priv->exitsem);
+#endif
   return ret;
 }
 
@@ -861,13 +881,38 @@ static int audio_fake_stop(FAR struct audio_lowerhalf_s *dev)
   FAR struct audio_fake_s *priv = (FAR struct audio_fake_s *)dev;
   struct audio_msg_s term_msg;
   FAR void *value;
+  int ret;
+
+  if (nxsem_trywait(&priv->exitsem) == 0)
+    {
+      nxsem_post(&priv->exitsem);
+      if (priv->threadid != 0)
+        {
+          pthread_join(priv->threadid, &value);
+          priv->threadid = 0;
+        }
+
+      return OK;
+    }
 
   /* Send a message to stop all audio streaming */
 
   term_msg.msg_id = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
-  file_mq_send(&priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
-               CONFIG_AUDIO_FAKE_MSG_PRIO);
+  ret = file_mq_send(&priv->mq, (FAR const char *)&term_msg,
+                     sizeof(term_msg), CONFIG_AUDIO_FAKE_MSG_PRIO);
+  if (ret < 0)
+    {
+      auderr("ERROR: stop file_mq_send failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Wait for the worker to finish its cleanup and report
+   * AUDIO_CALLBACK_COMPLETE, so the upper-half lock covers the teardown.
+   */
+
+  nxsem_wait_uninterruptible(&priv->exitsem);
+  nxsem_post(&priv->exitsem);
 
   /* Join the worker thread */
 
@@ -901,6 +946,7 @@ static int audio_fake_pause(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct audio_fake_s *priv = (FAR struct audio_fake_s *)dev;
+
   audinfo("%s pause\n", priv->dev_params->dev_name);
   return OK;
 }
@@ -922,6 +968,7 @@ static int audio_fake_resume(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct audio_fake_s *priv = (FAR struct audio_fake_s *)dev;
+
   audinfo("%s resume\n", priv->dev_params->dev_name);
   return OK;
 }
@@ -1048,6 +1095,7 @@ static int audio_fake_reserve(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct audio_fake_s *priv = (FAR struct audio_fake_s *)dev;
+
   priv->terminate               = false;
   audinfo("%s reserve\n", priv->dev_params->dev_name);
   return OK;
@@ -1107,6 +1155,7 @@ audio_fake_init_device(bool playback,
   priv->dev_params = dev_params;
   priv->playback   = playback;
   priv->terminate  = false;
+  nxsem_init(&priv->exitsem, 0, 1);
 
   return &priv->dev;
 }
