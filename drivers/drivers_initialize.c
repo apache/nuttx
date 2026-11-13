@@ -46,7 +46,7 @@
 #include <nuttx/power/regulator.h>
 #include <nuttx/reset/reset-controller.h>
 #include <nuttx/rpmsg/rpmsg.h>
-#include <nuttx/segger/rtt.h>
+#include <nuttx/rtt.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/serial/netdev_console.h>
 #include <nuttx/serial/pty.h>

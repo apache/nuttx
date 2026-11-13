@@ -203,16 +203,30 @@ config SERIAL_RTT_CONSOLE_CHANNEL
 		The buffer size of RTT channel 0 is configured by SEGGER_RTT_BUFFER_SIZE_UP/DOWN
 		You need to turn off other console devices before using Segger RTT console
 
-if DRIVERS_NOTE
-
 config NOTE_RTT
 	bool "Note RTT driver, write note into Segger J-Link RTTLog"
+	select DRIVERS_NOTE
+	select STREAM_RTT
 	default n
 	---help---
 		If this option is selected, then jlink rtt is enabled to capture
 		scheduler instrumentation data.
 
 if NOTE_RTT
+
+config NOTE_RTT_FILTER_DEFAULT_MODE
+	hex "Note RTT driver, Segger J-Link stream filter mode"
+	depends on SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	---help---
+		Filter mode for notertt jlink stream
+
+config NOTE_RTT_CPUSET
+	hex "Note RTT driver, Segger J-Link stream CPU set"
+	depends on SCHED_INSTRUMENTATION_FILTER && SMP
+	default SCHED_INSTRUMENTATION_CPUSET
+	---help---
+		CPU set for notertt jlink stream
 
 config NOTE_RTT_CHANNEL
 	int "Note RTT driver, Segger J-Link stream channel"
@@ -230,6 +244,7 @@ endif # NOTE_RTT
 
 config SEGGER_SYSVIEW
 	bool "Note SEGGER SystemView driver"
+	select DRIVERS_NOTE
 	select SEGGER_RTT
 	---help---
 		SystemView is a real-time recording and visualization tool for embedded
@@ -240,6 +255,20 @@ config SEGGER_SYSVIEW
 		unintended interactions and resource conflicts.
 
 if SEGGER_SYSVIEW
+
+config SEGGER_SYSVIEW_FILTER_DEFAULT_MODE
+	hex "Segger System View filter mode"
+	default SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	depends on SCHED_INSTRUMENTATION_FILTER
+	---help---
+		Filter mode for sysview
+
+config SEGGER_SYSVIEW_CPUSET
+	hex "Segger System View CPU set"
+	default SCHED_INSTRUMENTATION_CPUSET
+	depends on SCHED_INSTRUMENTATION_FILTER && SMP
+	---help---
+		CPU set for sysview
 
 config SEGGER_SYSVIEW_RTT_CHANNEL
 	int "Segger System View RTT channel"
@@ -266,7 +295,5 @@ config SEGGER_SYSVIEW_POST_MORTEM
 		Configures the System View to record continuously in circular buffer
 
 endif # SEGGER_SYSVIEW
-
-endif # DRIVERS_NOTE
 
 endmenu # Segger RTT drivers

@@ -3,12 +3,12 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config DRIVERS_NOTE
-	bool "Note Driver Support"
-	depends on SCHED_INSTRUMENTATION
-	default n
+menu "Note Driver Support"
 
-if DRIVERS_NOTE
+config DRIVERS_NOTE
+	bool
+	---help---
+		Note Driver Support, enable this option to enable note driver.
 
 config DRIVERS_NOTE_MAX
 	int "Maximum number of sched_note drivers"
@@ -30,15 +30,16 @@ config DRIVERS_NOTE_TASKNAME_BUFSIZE
 
 config DRIVERS_NOTECTL
 	bool "Scheduler instrumentation filter control driver"
-	default n
 	depends on SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_FILTER
 	---help---
 		If this option is selected, the instrumentation filter control device
 		/dev/notectl is provided.
 
 config DRIVERS_NOTERAM
 	bool "Note RAM driver"
-	default y
+	select DRIVERS_NOTE
+	default SCHED_INSTRUMENTATION
 	---help---
 		If this option is selected, then in-memory buffering logic is
 		enabled to capture scheduler instrumentation data.  This has
@@ -99,14 +100,44 @@ config DRIVERS_NOTE_STRIP_FORMAT
 
 config DRIVERS_NOTELOWEROUT
 	bool "Note lower output"
+	select DRIVERS_NOTE
 	default n
 	---help---
 		Note uses lower output.
 
+config DRIVERS_NOTELOWEROUT_FILTER_DEFAULT_MODE
+	hex "Note lower output filter mode"
+	depends on DRIVERS_NOTELOWEROUT && SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	---help---
+		Filter mode for notelowerout
+
+config DRIVERS_NOTELOWEROUT_CPUSET
+	hex "Note lower output CPU set"
+	depends on DRIVERS_NOTELOWEROUT && SMP && SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_CPUSET
+	---help---
+		CPU set for notelowerout
+
 config DRIVERS_NOTEFILE
 	bool "Note file driver"
+	select DRIVERS_NOTE
 	---help---
 		The Note driver output to file.
+
+config DRIVERS_NOTEFILE_FILTER_DEFAULT_MODE
+	hex "Note file driver filter mode"
+	depends on DRIVERS_NOTEFILE && SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	---help---
+		Filter mode for notefile
+
+config DRIVERS_NOTEFILE_CPUSET
+	hex "Note file driver CPU set"
+	depends on DRIVERS_NOTEFILE && SMP && SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_CPUSET
+	---help---
+		CPU set for notefile
 
 config DRIVERS_NOTEFILE_PATH
 	string "Note file path"
@@ -117,16 +148,47 @@ config DRIVERS_NOTEFILE_PATH
 
 config DRIVERS_NOTELOG
 	bool "Note syslog driver"
+	select DRIVERS_NOTE
 	---help---
 		The Note driver output to syslog.
 
+config DRIVERS_NOTELOG_FILTER_DEFAULT_MODE
+	hex "Note syslog driver filter mode"
+	depends on DRIVERS_NOTELOG && SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	---help---
+		Filter mode for notelog
+
+config DRIVERS_NOTELOG_CPUSET
+	hex "Note syslog driver CPU set"
+	depends on DRIVERS_NOTELOG && SMP && SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_CPUSET
+	---help---
+		CPU set for notelog
+
 config DRIVERS_NOTESNAP
 	bool "Last scheduling information"
+	select DRIVERS_NOTE
 	default n
 	---help---
 		Record the last scheduling information.
 
 if DRIVERS_NOTESNAP
+
+config DRIVERS_NOTESNAP_FILTER_DEFAULT_MODE
+	hex "Note snap driver filter mode"
+	depends on SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	---help---
+		Filter mode for notesnap
+
+config DRIVERS_NOTESNAP_CPUSET
+	hex "Note snap driver CPU set"
+	depends on SMP && SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_CPUSET
+	---help---
+		CPU set for notesnap
+
 config DRIVERS_NOTESNAP_NBUFFERS
 	int "Number of last scheduling information buffers"
 	default 128
@@ -136,6 +198,7 @@ endif
 
 config DRIVERS_NOTERPMSG_SERVER
 	bool "Enable RPMSG server for NOTE"
+	select DRIVERS_NOTE
 	default n
 	depends on RPTUN
 	---help---
@@ -143,6 +206,7 @@ config DRIVERS_NOTERPMSG_SERVER
 
 config DRIVERS_NOTERPMSG
 	bool "Note to RPMSG"
+	select DRIVERS_NOTE
 	depends on RPTUN
 	depends on SCHED_WORKQUEUE
 	default n
@@ -150,6 +214,20 @@ config DRIVERS_NOTERPMSG
 		Use the rpmsg as a Note output device, send message to remote proc.
 
 if DRIVERS_NOTERPMSG
+
+config DRIVERS_NOTERPMSG_FILTER_DEFAULT_MODE
+	hex "Note RPMSG client filter mode"
+	depends on SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	---help---
+		Filter mode for noterpmsg
+
+config DRIVERS_NOTERPMSG_CPUSET
+	hex "Note RPMSG client CPU set"
+	depends on SMP && SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_CPUSET
+	---help---
+		CPU set for noterpmsg
 
 config DRIVERS_NOTERPMSG_BUFSIZE
 	int "Note RPMSG client buffer size"
@@ -213,4 +291,4 @@ config DRIVERS_NOTENET_WORK_DELAY
 
 endif
 
-endif # DRIVERS_NOTE
+endmenu # Note Driver Support

@@ -157,9 +157,9 @@ static struct notesnap_s g_notesnap =
     "snap",
     {
       {
-        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+        CONFIG_DRIVERS_NOTESNAP_FILTER_DEFAULT_MODE,
 #  ifdef CONFIG_SMP
-        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+        CONFIG_DRIVERS_NOTESNAP_CPUSET
 #  endif
       },
     },
@@ -421,6 +421,7 @@ void notesnap_dump_with_stream(FAR struct lib_outstream_s *stream)
 void notesnap_dump(void)
 {
   struct lib_syslograwstream_s stream;
+
   lib_syslograwstream_open(&stream);
   notesnap_dump_with_stream(&stream.common);
   lib_syslograwstream_close(&stream);

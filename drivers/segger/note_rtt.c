@@ -25,8 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/note/note_driver.h>
-#include <nuttx/segger/note_rtt.h>
-#include <nuttx/segger/rtt.h>
+#include <nuttx/rtt.h>
 
 /****************************************************************************
  * Private Types
@@ -61,9 +60,9 @@ struct notertt_s g_notertt =
     "rtt",
     {
       {
-        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+        CONFIG_NOTE_RTT_FILTER_DEFAULT_MODE,
 #  ifdef CONFIG_SMP
-        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+        CONFIG_NOTE_RTT_CPUSET
 #  endif
       },
     },
@@ -95,6 +94,7 @@ static void notertt_add(FAR struct note_driver_s *drv,
                         FAR const void *buf, size_t notelen)
 {
   FAR struct notertt_s *note = (FAR struct notertt_s *)drv;
+
   lib_stream_puts(&note->stream, buf, notelen);
 }
 
