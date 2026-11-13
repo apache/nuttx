@@ -232,6 +232,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
    * have incremented the reference count on the inode.
    */
 
+retry:
   ret = inode_search_setup(&desc, fullpath, false);
   if (ret < 0)
     {
@@ -303,40 +304,54 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
           goto errout_with_search;
         }
 
-      /* Create an inode in the pseudo-filesystem at this path */
+      /* Allocate memory for the new message queue */
 
-      inode_lock();
-      ret = inode_reserve(fullpath, mode, &inode);
-      inode_unlock();
-
+      ret = nxmq_alloc_msgq(attr, &msgq);
       if (ret < 0)
         {
           goto errout_with_search;
         }
 
-      /* Allocate memory for the new message queue.  The new inode will
-       * be created with a reference count of zero.
+      /* Create an inode in the pseudo-filesystem at this path.  Set it up
+       * before dropping the tree lock: a concurrent mq_open() must not
+       * find a node that is not yet a message queue.
        */
 
-      ret = nxmq_alloc_msgq(attr, &msgq);
+      inode_lock();
+      ret = inode_reserve(fullpath, mode, &inode);
+      if (ret >= 0)
+        {
+          INODE_SET_MQUEUE(inode);
+          inode->u.i_ops    = &g_nxmq_fileops;
+          inode->i_private  = msgq;
+          msgq->inode       = inode;
+
+          /* Set the initial reference count on this inode to one */
+
+          atomic_add(&inode->i_crefs, 1);
+        }
+
+      inode_unlock();
+
       if (ret < 0)
         {
-          goto errout_with_inode;
+          nxmq_free_msgq(msgq);
+
+          /* Another mq_open() created it first: open that one instead */
+
+          if (ret == -EEXIST)
+            {
+              inode_search_release(&desc);
+              goto retry;
+            }
+
+          goto errout_with_search;
         }
 
       /* Associate the inode with a file structure */
 
       mq->f_oflags = oflags;
       mq->f_inode  = inode;
-
-      INODE_SET_MQUEUE(inode);
-      inode->u.i_ops    = &g_nxmq_fileops;
-      inode->i_private  = msgq;
-      msgq->inode       = inode;
-
-      /* Set the initial reference count on this inode to one */
-
-      atomic_add(&inode->i_crefs, 1);
 
       if (created)
         {
