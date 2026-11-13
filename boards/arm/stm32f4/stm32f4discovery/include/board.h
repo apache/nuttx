@@ -294,6 +294,16 @@
 #define GPIO_USART6_RX    (GPIO_USART6_RX_1|GPIO_SPEED_100MHz)     /* PC7 (also I2S3_MCK and P2 pin 48) */
 #define GPIO_USART6_TX    (GPIO_USART6_TX_1|GPIO_SPEED_100MHz)     /* PC6 (also P2 pin 47) */
 
+/* GNSS PPS input (CONFIG_STM32_PTP_PPS with TIM5, channel 2)
+ *
+ * The PPS output of a GNSS receiver goes to PA1 (P1 pin 12), TIM5 CH2.
+ * PA0 (TIM5 CH1) is avoided because the USER button and its RC filter
+ * are connected to it.  The NMEA output of the receiver can go to
+ * USART3 RX on PB11 (P1 pin 35).
+ */
+
+#define GPIO_TIM5_CH2IN   GPIO_TIM5_CH2IN_1                        /* PA1 */
+
 /* PWM
  *
  * The STM32F4 Discovery has no real on-board PWM devices, but the board
