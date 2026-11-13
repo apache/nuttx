@@ -194,7 +194,6 @@ static const char *g_white_prefix[] =
   "Dl_info", /* Ref:  include/dlfcn.h */
   "Elf",     /* Ref:  include/elf.h, include/elf32.h, include/elf64.h */
   "GL",      /* Ref:  apps/graphics/tinygl/tinygl/include/GL/gl.h */
-  "Ifx",     /* Ref:  arch/tricore/src */
   "PDC_",    /* Ref:  apps/include/graphics/curses.h */
   "PRId",    /* Ref:  inttypes.h */
   "PRIi",    /* Ref:  inttypes.h */
@@ -825,12 +824,6 @@ static const char *g_white_content_list[] =
 static const char *g_white_headers[] =
 {
   "windows.h",
-
-  /* Ref:
-   * arch/tricore/src/common/tricore_serial.c
-   */
-
-  "IfxAsclin_Asc.h",
   NULL
 };
 
@@ -887,15 +880,6 @@ static const char *g_white_files[] =
    */
 
   "lpc43xx/spifi/src/spifilib_fam_standard_cmd.c",
-
-  /* Skip infineon illd files
-   * Ref:
-   * arch/tricore/src/illd
-   */
-
-  "Ifx_Cfg_Ssw.c",
-  "Ifx_Cfg_Ssw.h",
-  "Ifx_Cfg.h",
 
   /* Skip the GigaDevice GD32VW55x Wi-Fi/BLE SDK glue: the vendor config
    * headers, the lwIP-compat shims and the OS-facade files reference vendor

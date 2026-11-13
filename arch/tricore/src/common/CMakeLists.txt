@@ -65,8 +65,6 @@ if(CONFIG_ARCH_HAVE_DEBUG)
   list(APPEND SRCS tricore_hwdebug.c)
 endif()
 
-set(IFXFLAGS -DIFX_USE_SW_MANAGED_INT)
-
 target_sources(arch PRIVATE ${SRCS})
 target_sources(nuttx PRIVATE tricore_doirq.c)
 
@@ -75,11 +73,11 @@ target_sources(nuttx PRIVATE tricore_doirq.c)
 
 if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
   target_sources(nuttx PRIVATE tasking/tricore_vectors.${ASMEXT})
+  target_sources(nuttx PRIVATE tasking/tricore_head.${ASMEXT})
 else()
   target_sources(nuttx PRIVATE gnu/tricore_vectors.${ASMEXT})
+  target_sources(nuttx PRIVATE gnu/tricore_head.${ASMEXT})
 endif()
-target_compile_options(arch PRIVATE ${IFXFLAGS})
-target_compile_options(nuttx PRIVATE ${IFXFLAGS})
 target_include_directories(
   nuttx SYSTEM PRIVATE ${NUTTX_DIR}/include ${NUTTX_BINARY_DIR}/include
                        ${NUTTX_BINARY_DIR}/include_arch)
@@ -88,23 +86,8 @@ target_include_directories(
 # tricore_libc.c for details).
 
 if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
-  # iLLD calls _c_init, the TASKING copy table init, so take cinit.o from the
-  # toolchain C library.  The rest of that library clashes with NuttX.
-
-  if(CONFIG_ARCH_TC1V8)
-    set(TASKING_LIBDIR tc18/dpfpu)
-  else()
-    set(TASKING_LIBDIR tc162)
-  endif()
-
-  get_filename_component(TASKING_BIN_DIR ${CMAKE_C_COMPILER} DIRECTORY)
-  execute_process(
-    COMMAND ${TASKING_BIN_DIR}/artc -x
-            ${TASKING_BIN_DIR}/../lib/${TASKING_LIBDIR}/libc_fpu.a cinit.o
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
   nuttx_add_kernel_library(c_fpu)
-  target_sources(c_fpu PRIVATE tricore_libc.c
-                               ${CMAKE_CURRENT_BINARY_DIR}/cinit.o)
+  target_sources(c_fpu PRIVATE tricore_libc.c)
   target_link_options(nuttx PRIVATE
                       --library-directory=${CMAKE_CURRENT_BINARY_DIR})
 

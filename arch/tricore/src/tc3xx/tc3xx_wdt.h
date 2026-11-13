@@ -34,5 +34,8 @@
  ****************************************************************************/
 
 void tc3xx_wdt_safety_endinit(bool set);
+void tc3xx_wdt_cpu_endinit(bool set);
+void tc3xx_wdt_service(void);
+void tc3xx_wdt_set_disabled(bool disable);
 
 #endif /* __ARCH_TRICORE_SRC_TC3XX_TC3XX_WDT_H */

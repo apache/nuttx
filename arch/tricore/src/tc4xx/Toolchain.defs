@@ -29,12 +29,6 @@ ifeq ($(CONFIG_ARCH_CHIP_TC4XX),y)
     ARCHCPUFLAGS += -mcpu=tc4DAx
     ARCHCPUFLAGS += -mtc18
 endif
-
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/iLLD/TC4xx/Tricore/Cpu/Std
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Platform
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Platform/Compilers
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Sfr/TC4Dx
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Configurations
 endif
 
 include $(TOPDIR)/arch/tricore/src/common/Toolchain.defs

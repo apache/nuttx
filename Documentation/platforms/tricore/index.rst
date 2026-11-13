@@ -27,9 +27,11 @@ For SoC chips, in particular, on-chip devices and differing interrupt
 structures may require special, chip-specific definitions in these chip-
 specific directories.
 
-The core Chip implementation is based on Infineon Low Level Drivers (iLLDs).
-The unified API is more friendly to developers familiar with Infineon SDK/HAL.
-We can get more code examples on Infineon's official Github: `AURIX_code_examples <https://github.com/Infineon/AURIX_code_examples>`__
+The chip support programs the AURIX registers directly and does not need
+the Infineon Low Level Drivers (iLLDs).  The register definitions of each
+chip family are in ``arch/tricore/src/<chip>/hardware``, and the drivers
+common to TC3xx and TC4xx, such as the ASCLIN UART, are in
+``arch/tricore/src/aurix``.
 
 ``TC3xx/TC4xx``
   This is the implementation of NuttX on the Infineon’s AURIX™- TC3xx/TC4xx microcontroller family.

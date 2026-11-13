@@ -179,7 +179,7 @@ derivative tc39
         start_address
         (
 #if CONFIG_CPU_COREID == 0
-            symbol = "_START"
+            symbol = "__start"
 #elif CONFIG_CPU_COREID == 1
             symbol = "_START1"
 #elif CONFIG_CPU_COREID == 2
@@ -269,7 +269,7 @@ derivative tc39
             "__CSA5_END":= "__CSA_END";
         }
 
-        /*Fixed memory Allocations for _START*/
+        /*Fixed memory Allocations for __start*/
         group (ordered)
         {
           group  interface_const (run_addr=mem:pfls[0x0020])
@@ -417,22 +417,16 @@ derivative tc39
             group (ordered, contiguous, align = 4, attributes=r, run_addr=mem:pfls)
             {
 #if CONFIG_CPU_COREID == 0
-                select ".zrodata.Ifx_Ssw_Tc?.*";
                 select ".zrodata.Cpu?_Main.*";
 #elif CONFIG_CPU_COREID == 1
-                select ".zrodata.Ifx_Ssw_Tc1.*";
                 select ".zrodata.Cpu1_Main.*";
 #elif CONFIG_CPU_COREID == 2
-                select ".zrodata.Ifx_Ssw_Tc2.*";
                 select ".zrodata.Cpu2_Main.*";
 #elif CONFIG_CPU_COREID == 3
-                select ".zrodata.Ifx_Ssw_Tc3.*";
                 select ".zrodata.Cpu3_Main.*";
 #elif CONFIG_CPU_COREID == 4
-                select ".zrodata.Ifx_Ssw_Tc4.*";
                 select ".zrodata.Cpu4_Main.*";
 #elif CONFIG_CPU_COREID == 5
-                select ".zrodata.Ifx_Ssw_Tc5.*";
                 select ".zrodata.Cpu5_Main.*";
 #endif
                 /*Near Absolute Const, selectable by toolchain*/
@@ -517,9 +511,7 @@ derivative tc39
         {
             group (attributes=rw)
             {
-                select ".data.Ifx_Ssw_Tc?.*";
                 select ".data.Cpu?_Main.*";
-                select ".bss.Ifx_Ssw_Tc?.*";
                 select ".bss.Cpu?_Main.*";
                 select ".bss.os_scheduletable_misc.*";
                 select ".bss.iob_initialize.*";
@@ -560,7 +552,6 @@ derivative tc39
         {
             group (ordered, align = 4, attributes=r, run_addr=mem:pfls)
             {
-                select ".rodata.Ifx_Ssw_Tc?.*";
                 select ".rodata.Cpu?_Main.*";
             }
         }
@@ -601,9 +592,7 @@ derivative tc39
             {
                 group (ordered, align = 4, attributes=rx, run_addr=mem:pfls)
                 {
-                    select ".text.Ifx_Ssw_Tc?.*";
                     select ".text.Cpu?_Main.*";
-                    select ".text.CompilerTasking.Ifx_C_Init";
                 }
             }
         }

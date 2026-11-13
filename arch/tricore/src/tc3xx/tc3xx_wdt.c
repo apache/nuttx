@@ -66,21 +66,43 @@ static void tc3xx_wdt_endinit(uintptr_t con0, uint32_t pw, bool set)
 }
 
 /****************************************************************************
- * Name: tc3xx_wdt_disable
+ * Name: tc3xx_wdt_password
+ ****************************************************************************/
+
+static uint32_t tc3xx_wdt_password(uintptr_t con0)
+{
+  return ((getreg32(con0) & TC3XX_WDT_CON0_PW_MASK) >>
+          TC3XX_WDT_CON0_PW_SHIFT) ^ TC3XX_WDT_PW_INVERTED;
+}
+
+/****************************************************************************
+ * Name: tc3xx_wdt_request
  *
  * Description:
- *   Request a watchdog to be disabled.
+ *   Request a watchdog to be disabled or enabled again.
  *
  ****************************************************************************/
 
-static void tc3xx_wdt_disable(uintptr_t con0, uintptr_t con1)
+static void tc3xx_wdt_request(uintptr_t con0, uintptr_t con1, bool disable)
 {
-  uint32_t pw = ((getreg32(con0) & TC3XX_WDT_CON0_PW_MASK) >>
-                 TC3XX_WDT_CON0_PW_SHIFT) ^ TC3XX_WDT_PW_INVERTED;
+  uint32_t pw = tc3xx_wdt_password(con0);
+  uint32_t regval;
 
   tc3xx_wdt_endinit(con0, pw, false);
-  putreg32(getreg32(con1) | TC3XX_WDT_CON1_DR, con1);
+  regval = getreg32(con1) & ~TC3XX_WDT_CON1_DR;
+  putreg32(regval | (disable ? TC3XX_WDT_CON1_DR : 0), con1);
   tc3xx_wdt_endinit(con0, pw, true);
+}
+
+/****************************************************************************
+ * Name: tc3xx_wdt_cpu
+ ****************************************************************************/
+
+static uint32_t tc3xx_wdt_cpu(void)
+{
+  uint32_t cpu = tricore_mfcr(TRICORE_CPU_CORE_ID);
+
+  return cpu > 5 ? 5 : cpu;
 }
 
 /****************************************************************************
@@ -97,10 +119,65 @@ static void tc3xx_wdt_disable(uintptr_t con0, uintptr_t con1)
 
 void tc3xx_wdt_safety_endinit(bool set)
 {
-  uint32_t pw = ((getreg32(TC3XX_SCU_WDTS_CON0) & TC3XX_WDT_CON0_PW_MASK) >>
-                 TC3XX_WDT_CON0_PW_SHIFT) ^ TC3XX_WDT_PW_INVERTED;
+  tc3xx_wdt_endinit(TC3XX_SCU_WDTS_CON0,
+                    tc3xx_wdt_password(TC3XX_SCU_WDTS_CON0), set);
+}
 
-  tc3xx_wdt_endinit(TC3XX_SCU_WDTS_CON0, pw, set);
+/****************************************************************************
+ * Name: tc3xx_wdt_service
+ *
+ * Description:
+ *   Service the CPU and the safety watchdog by setting their ENDINIT.
+ *
+ ****************************************************************************/
+
+void tc3xx_wdt_service(void)
+{
+  tc3xx_wdt_cpu_endinit(true);
+  tc3xx_wdt_safety_endinit(true);
+}
+
+/****************************************************************************
+ * Name: tc3xx_wdt_set_disabled
+ *
+ * Description:
+ *   Disable the CPU and the safety watchdog, or enable them again, in the
+ *   order of the iLLD startup code.
+ *
+ ****************************************************************************/
+
+void tc3xx_wdt_set_disabled(bool disable)
+{
+  uint32_t cpu = tc3xx_wdt_cpu();
+
+  if (disable)
+    {
+      tc3xx_wdt_request(TC3XX_SCU_WDTCPU_CON0(cpu),
+                        TC3XX_SCU_WDTCPU_CON1(cpu), true);
+      tc3xx_wdt_request(TC3XX_SCU_WDTS_CON0, TC3XX_SCU_WDTS_CON1, true);
+    }
+  else
+    {
+      tc3xx_wdt_request(TC3XX_SCU_WDTS_CON0, TC3XX_SCU_WDTS_CON1, false);
+      tc3xx_wdt_request(TC3XX_SCU_WDTCPU_CON0(cpu),
+                        TC3XX_SCU_WDTCPU_CON1(cpu), false);
+    }
+}
+
+/****************************************************************************
+ * Name: tc3xx_wdt_cpu_endinit
+ *
+ * Description:
+ *   Set or clear the ENDINIT of the calling CPU, which protects for example
+ *   the module clock control and the pad driver registers.
+ *
+ ****************************************************************************/
+
+void tc3xx_wdt_cpu_endinit(bool set)
+{
+  uintptr_t con0 = TC3XX_SCU_WDTCPU_CON0(tc3xx_wdt_cpu());
+
+  tc3xx_wdt_endinit(con0, tc3xx_wdt_password(con0), set);
 }
 
 /****************************************************************************
@@ -114,9 +191,5 @@ void tc3xx_wdt_safety_endinit(bool set)
 
 void tricore_wdt_disable(void)
 {
-  uint32_t cpu = tricore_mfcr(TRICORE_CPU_CORE_ID);
-
-  cpu = cpu > 5 ? 5 : cpu;
-  tc3xx_wdt_disable(TC3XX_SCU_WDTCPU_CON0(cpu), TC3XX_SCU_WDTCPU_CON1(cpu));
-  tc3xx_wdt_disable(TC3XX_SCU_WDTS_CON0, TC3XX_SCU_WDTS_CON1);
+  tc3xx_wdt_set_disabled(true);
 }
