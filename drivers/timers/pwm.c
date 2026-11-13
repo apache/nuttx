@@ -107,7 +107,13 @@ static void pwm_dump(FAR const char *msg, FAR const struct pwm_info_s *info,
 {
   int i;
 
-  pwminfo("%s: frequency: %" PRId32 "\n", msg, info->frequency);
+  pwminfo("%s: frequency: "
+#ifdef CONFIG_PWM_FREQUENCY_FIXED
+          "%016" PRIx64
+#else
+          "%" PRId32
+#endif
+          "\n", msg, info->frequency);
 
   for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
     {
@@ -356,6 +362,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR const struct pwm_info_s *info =
             (FAR const struct pwm_info_s *)((uintptr_t)arg);
+
           DEBUGASSERT(info != NULL && lower->ops->start != NULL);
 
           pwm_dump("PWMIOC_SETCHARACTERISTICS", info, upper->started);
@@ -387,6 +394,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct pwm_info_s *info =
             (FAR struct pwm_info_s *)((uintptr_t)arg);
+
           DEBUGASSERT(info != NULL);
 
           memcpy(info, &upper->info, sizeof(struct pwm_info_s));
