@@ -29,6 +29,7 @@
 #include <stdio.h>
 
 #include <nuttx/atomic.h>
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/lib/xorsum.h>
@@ -123,6 +124,14 @@ struct rpmsg_port_spi_s
   uint16_t                       rxerr_count;
 
   atomic_t                       transferring;
+
+  /* Debug counters to locate a stalled exchange from a single dump */
+
+  uint32_t                       mreq_count;
+  uint32_t                       enqueue_count;
+  uint32_t                       notify_count;
+  int                            enqueue_ret;
+  clock_t                        notify_tick;
 };
 
 /****************************************************************************
@@ -328,8 +337,11 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 #endif
 
   rpmsg_port_spi_pm_action(rpspi, true);
-  SPIS_CTRLR_ENQUEUE(rpspi->spictrlr, txhdr,
-                     RPMSG_PORT_SPI_BYTES2WORDS(rpspi, rpspi->port.txq.len));
+  rpspi->enqueue_count++;
+  rpspi->enqueue_ret =
+    SPIS_CTRLR_ENQUEUE(rpspi->spictrlr, txhdr,
+                       RPMSG_PORT_SPI_BYTES2WORDS(rpspi,
+                                                  rpspi->port.txq.len));
   IOEXP_WRITEPIN(rpspi->ioe, rpspi->sreq, 1);
 
   rpspi->rxavail = txhdr->avail;
@@ -411,6 +423,11 @@ static void rpmsg_port_spi_dump(FAR struct rpmsg_port_s *port, bool verbose)
   _emerg("mode: %d nbits: %d\n", rpspi->mode, rpspi->nbits);
   _emerg("cmdhdr: %p txhdr: %p rxhdr: %p\n",
          rpspi->cmdhdr, rpspi->txhdr, rpspi->rxhdr);
+  _emerg("mreq: %" PRIu32 " enqueue: %" PRIu32 " ret: %d "
+         "notify: %" PRIu32 " last notify: %" PRIu32 " ms ago\n",
+         rpspi->mreq_count, rpspi->enqueue_count, rpspi->enqueue_ret,
+         rpspi->notify_count,
+         (uint32_t)TICK2MSEC(clock_systime_ticks() - rpspi->notify_tick));
 
   if (rpspi->tid != 0)
     {
@@ -491,6 +508,8 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
   irqstate_t flags;
   uint16_t crc;
 
+  rpspi->notify_count++;
+  rpspi->notify_tick = clock_systime_ticks();
   IOEXP_WRITEPIN(rpspi->ioe, rpspi->sreq, 0);
   SPIS_CTRLR_QPOLL(rpspi->spictrlr);
 
@@ -681,6 +700,7 @@ static int rpmsg_port_spi_mreq_handler(FAR struct ioexpander_dev_s *dev,
   FAR struct rpmsg_port_spi_s *rpspi = arg;
 
   rpmsginfo("received a mreq\n");
+  rpspi->mreq_count++;
 
   if (!rpspi->bound)
     {
