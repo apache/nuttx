@@ -73,9 +73,7 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
   struct inode_search_s newdesc;
   FAR struct inode *newinode;
   FAR char *subdir = NULL;
-#ifdef CONFIG_FS_NOTIFY
   bool isdir = INODE_IS_PSEUDODIR(oldinode);
-#endif
   size_t oldlen;
   int ret;
 
@@ -182,6 +180,14 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
            * inode_reserve() will complain below, and (2) the inode
            * won't really be removed until we call inode_release();
            */
+
+          if (isdir)
+            {
+              /* It is an error to rename a directory to a file */
+
+              ret = -ENOTDIR;
+              goto errout_with_newsearch;
+            }
 
           ret = inode_remove(newpath);
           if (ret < 0 && ret != -EBUSY)
