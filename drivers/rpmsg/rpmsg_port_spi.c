@@ -30,6 +30,7 @@
 
 #include <nuttx/lib/xorsum.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/power/pm.h>
@@ -119,6 +120,13 @@ struct rpmsg_port_spi_s
   uint16_t                       rxerr_count;
 
   atomic_t                       transferring;
+
+  /* Debug counters to locate a stalled exchange from a single dump */
+
+  uint32_t                       sreq_count;
+  uint32_t                       exchange_count;
+  uint32_t                       complete_count;
+  clock_t                        complete_tick;
 };
 
 /****************************************************************************
@@ -302,6 +310,10 @@ static void rpmsg_port_spi_dump(FAR struct rpmsg_port_s *port, bool verbose)
          rpspi->freq, rpspi->devid, rpspi->nbits);
   _emerg("cmdhdr: %p txhdr: %p rxhdr: %p\n",
          rpspi->cmdhdr, rpspi->txhdr, rpspi->rxhdr);
+  _emerg("sreq: %" PRIu32 " exchange: %" PRIu32 " complete: %" PRIu32
+         " last complete: %" PRIu32 " ms ago\n",
+         rpspi->sreq_count, rpspi->exchange_count, rpspi->complete_count,
+         (uint32_t)TICK2MSEC(clock_systime_ticks() - rpspi->complete_tick));
 
   if (rpspi->tid != 0)
     {
@@ -397,6 +409,7 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 #endif
 
   rpmsg_port_spi_pm_action(rpspi, true);
+  rpspi->exchange_count++;
   SPI_SELECT(rpspi->spi, rpspi->devid, true);
   SPI_EXCHANGE(rpspi->spi, txhdr, rpspi->rxhdr,
                RPMSG_PORT_SPI_BYTES2WORDS(rpspi, rpspi->port.txq.len));
@@ -414,6 +427,8 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
   irqstate_t flags;
   uint16_t crc;
 
+  rpspi->complete_count++;
+  rpspi->complete_tick = clock_systime_ticks();
   SPI_SELECT(rpspi->spi, rpspi->devid, false);
 
   rpmsginfo("received cmd:%u avail:%u\n",
@@ -607,6 +622,7 @@ static int rpmsg_port_spi_sreq_handler(FAR struct ioexpander_dev_s *dev,
   FAR struct rpmsg_port_spi_s *rpspi = arg;
 
   rpmsginfo("sreq enter\n");
+  rpspi->sreq_count++;
 
   if (rpspi->state == RPMSG_PORT_SPI_STATE_UNCONNECTED)
     {
