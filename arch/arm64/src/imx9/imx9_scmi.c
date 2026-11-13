@@ -1270,5 +1270,5 @@ void imx9_scmi_initialize(void)
 
   /* Configure MU */
 
-  g_mudev = imx9_mu_init(2);
+  g_mudev = imx9_mu_init(IMX9_MU_SCMI);
 }
