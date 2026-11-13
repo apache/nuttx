@@ -448,6 +448,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct pwm_output_state_s *p =
             (FAR struct pwm_output_state_s *)((uintptr_t)arg);
+
           if (lower->ops->get_output_state == NULL)
             {
               ret = -ENOSYS;
@@ -468,6 +469,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR const struct pwm_notify_s *p =
             (FAR const struct pwm_notify_s *)((uintptr_t)arg);
+
           if (lower->ops->enable_notify == NULL)
             {
               ret = -ENOSYS;
@@ -500,6 +502,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR uint8_t *state =
             (FAR uint8_t *)((uintptr_t)arg);
+
           if (lower->ops->get_power_state == NULL)
             {
               ret = -ENOSYS;
