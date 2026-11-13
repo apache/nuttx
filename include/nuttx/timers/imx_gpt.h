@@ -215,11 +215,8 @@ static inline void imx_gpt_modreg(FAR struct imx_gpt_dev_s *dev,
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -286,7 +283,6 @@ void imx_gpt_ocu_on_match(FAR struct imx_gpt_ocu_s *ocu);
 void imx_gpt_icu_on_edge(FAR struct imx_gpt_icu_s *icu);
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif
