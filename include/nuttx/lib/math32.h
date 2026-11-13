@@ -74,10 +74,13 @@
 #define IS_POWER_OF_2(n)           ((n) > 0 && ((n) & (n - 1)) == 0)
 
 /* Returns round up and round down value of log2(n). Note: it can be used at
- * compile time.
+ * compile time.  n >= 1 is required: log2() itself is undefined for 0 and
+ * for negative arguments, so behavior outside that domain was never a
+ * contract.  ceil(log2 n) is FLS(n - 1): no power-of-two test; as with
+ * FLS(), n is evaluated multiple times.
  */
 
-#define LOG2_CEIL(n)  (IS_POWER_OF_2(n) ? FLS(n) - 1 : FLS(n))
+#define LOG2_CEIL(n)  (FLS((n) - 1))
 #define LOG2_FLOOR(n) (FLS(n) - 1)
 
 /****************************************************************************
@@ -149,7 +152,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#define log2ceil(n) (IS_POWER_OF_2(n) ? (flsx(n) - 1) : flsx(n))
+#define log2ceil(n) (flsx((n) - 1))
 
 /****************************************************************************
  * Name: log2floor
