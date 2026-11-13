@@ -98,7 +98,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
   if ((flags & (MAP_FIXED | MAP_DENYWRITE)) != 0)
     {
       ferr("ERROR: Unsupported options, prot=%x flags=%04x\n", prot, flags);
-      return -ENOSYS;
+      return -ENOTSUP;
     }
 
   /* A length of 0 is invalid. */
