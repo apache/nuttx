@@ -64,6 +64,15 @@ int msync(FAR void *start, size_t length, int flags)
   FAR struct mm_map_entry_s *entry;
   int ret;
 
+  /* MS_ASYNC and MS_SYNC are mutually exclusive */
+
+  if ((flags & ~(MS_ASYNC | MS_SYNC | MS_INVALIDATE)) != 0 ||
+      ((flags & MS_ASYNC) != 0 && (flags & MS_SYNC) != 0))
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
   ret = mm_map_lock();
   if (ret < 0)
     {
