@@ -470,39 +470,101 @@ uint64_t invdiv_u32(uint32_t n, FAR const invdiv_param32_t *ip)
   return (t1 + t2) >> sh;
 }
 
-/* Helper function to do n bits integer division. */
+/* One Knuth-D correction step: while qv*v0v exceeds rv*2^32 + lx, step
+ * qv back one and return v1v to rv.  A normalized divisor bounds it to
+ * two per digit, one when qv was clamped to b-1; the rv < 2^32 guard is
+ * exact.  The arguments are evaluated more than once.
+ */
 
-#define invdiv_udiv_soft(arr, n, q, d) \
+#define KD2_CORR(qv, rv, v1v, v0v, lx) \
 do \
-{ \
-    uint32_t idx; \
-    uint32_t bits_per_idx = sizeof(uint64_t) * 8; \
-    uint32_t bits_max = bits_per_idx * n; \
-    uint64_t reminder = 0ull; \
-    uint64_t high_rem = 0ull; \
-    for (idx = 0; idx < bits_max; idx++) \
-      { \
-        uint32_t bits = bits_max - idx - 1; \
-        uint32_t bits_idx = bits / bits_per_idx; \
-        uint32_t bits_idx_off = bits % bits_per_idx; \
-        reminder <<= 1u; \
-        reminder |= ((arr)[bits_idx] >> bits_idx_off) & 1u; \
-        if (reminder >= (d)) \
-          { \
-            reminder    -= (d); \
-            q[bits_idx] |= (1ull << bits_idx_off); \
-          } \
-        else if (high_rem != 0) \
-          { \
-            uint64_t c   = 0ull - (d); \
-            high_rem    -= 1; \
-            reminder    += c; \
-            q[bits_idx] |= (1ull << bits_idx_off); \
-          } \
-        high_rem += (reminder >> (bits_per_idx - 1)) & 1u; \
-      } \
-} \
-while(0)
+  { \
+    uint64_t c_ = ((rv) < (1ULL << 32)) && \
+                  ((qv) * (v0v) > (((rv) << 32) | (lx))); \
+    (qv) -= c_; \
+    (rv) += c_ * (v1v); \
+  } \
+while (0)
+
+/****************************************************************************
+ * Name: invdiv_udiv128_soft
+ *
+ * Description:
+ *   Divide (hi*2^64 + lo) by d for hi < d, where the quotient fits 64
+ *   bits and is returned whole.  s = clz(d) is supplied by the caller.
+ *
+ * Input Parameters:
+ *   hi - The high 64 bits of the dividend.
+ *   lo - The low 64 bits of the dividend.
+ *   d  - The divisor.
+ *   s  - The normalizer, clz(d).
+ *
+ * Returned Value:
+ *   floor((hi*2^64 + lo) / d); hi < d is a precondition.
+ *
+ ****************************************************************************/
+
+static inline_function uint64_t
+invdiv_udiv128_soft(uint64_t hi, uint64_t lo, uint64_t d, int s)
+{
+  /* Hand long division in base b = 2^32 (Knuth, TAOCP vol. 2, 4.3.1,
+   * algorithm D):
+   *
+   *   D    = d<<s            = v1*b + v0
+   *   N<<s = nh*b^2 + l1*b + l0
+   *   Q    = floor(N / d)    = q1*b + q0
+   *
+   * One quotient digit, with u the next dividend digit:
+   *
+   *   q = min(floor(nh / v1), b-1)     trial quotient
+   *   r = nh - q*v1
+   *   while (q*v0 > r*b + u)           normalized d: <= 2 times
+   *     { q--;  r += v1; }
+   *   nh = r*b + u - q*v0              subtract, bring down
+   *
+   * KD2_CORR() is one while-step; three slots per digit hold the
+   * theorem-B bound without a branch.  Round 1 takes u = l1, round 2
+   * u = l0; the digits assemble Q = q1*b + q0.  Only Q is wanted.
+   */
+
+  uint64_t dv = d << s;
+  uint64_t v1 = dv >> 32;
+  uint64_t v0 = dv & UINT32_MAX;
+
+  /* s == 0 would make lo >> (64 - s) a 64-bit shift (UB). */
+
+  uint64_t nh = s ? ((hi << s) | (lo >> (64 - s))) : hi;
+  uint64_t nl = lo << s;
+  uint64_t l1 = nl >> 32;
+  uint64_t l0 = nl & UINT32_MAX;
+  uint64_t q1;
+  uint64_t r1;
+  uint64_t R;
+  uint64_t q0;
+  uint64_t r0;
+
+  /* digit 1 */
+
+  q1 = nh / v1;
+  q1 = q1 > UINT32_MAX ? UINT32_MAX : q1;
+  r1 = nh - q1 * v1;
+  KD2_CORR(q1, r1, v1, v0, l1);
+  KD2_CORR(q1, r1, v1, v0, l1);
+  KD2_CORR(q1, r1, v1, v0, l1);
+
+  R  = ((r1 << 32) | l1) - q1 * v0;
+
+  /* digit 2 */
+
+  q0 = R / v1;
+  q0 = q0 > UINT32_MAX ? UINT32_MAX : q0;
+  r0 = R - q0 * v1;
+  KD2_CORR(q0, r0, v1, v0, l0);
+  KD2_CORR(q0, r0, v1, v0, l0);
+  KD2_CORR(q0, r0, v1, v0, l0);
+
+  return (q1 << 32) + q0;
+}
 
 /* UMULH: high 64 bits of a * b.  One instruction inline when the
  * compiler has a native 128-bit multiply; otherwise one out-of-line copy
@@ -529,11 +591,18 @@ uint64_t up_umulh64(uint64_t a, uint64_t b);
  * Name: invdiv_init_param64
  *
  * Description:
- *   Calculate the triple (multiplier, right shift number 1, right shift
- * number 2) during initialization.
+ *   Calculate the invariant-division parameters from the divisor: the
+ *   multiplier is floor((2^l - d) * 2^64 / d) + 1
+ *   through the single 128-by-64 division invdiv_udiv128(), with
+ *   l = ceil(log2 d).  The division's normalizer s = clz(d) is the
+ *   branch-free 64 - l - (((d - 1) & d) == 0): l is one more than
+ *   floor(log2 d) exactly when d is not a power of two (d >= 2 makes
+ *   the bare bit test exact).
  *
  * Input Parameters:
- *   d - The divisor (unsigned integer), d != 0 and d != 1 is required.
+ *   d - The divisor (unsigned integer), d != 0 and d != 1 is required;
+ *       d > 2^63 keeps the pre-existing undefined behavior of the
+ *       1 << l setup (d == 2^63 is in contract).
  *
  * Output Parameters:
  *   ip    - The invariant division parameter to be cached.
@@ -548,29 +617,14 @@ void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *ip)
 
   DEBUGASSERT(d > 1);
 
-#ifndef __INT128_DEFINED
-  /* If the compiler do not support UINT128 */
-
-  uint64_t q[2];
-  uint64_t mres[2];
-
-  /* Calculate the mult via 2^64 * (2^l - d) / d + 1
-   * It is equal to ((2^l - d) << 64) / d + 1. So...
-   */
-
-  mres[1] = t;
-  mres[0] = 0;
-  q[0] = 0;
-  q[1] = 0;
-
-  /* Then, do the 128-bit division. */
-
-  invdiv_udiv_soft(mres, 2, q, d);
-
-  ip->mult = q[0] + 1;
-#else
+#ifdef __INT128_DEFINED
   _uint128_t one128 = 1;
+
   ip->mult = (one128 << 64) * t / d + 1;
+#else
+  int s = 64 - l - (((d - 1) & d) == 0);   /* = clz(d) */
+
+  ip->mult = invdiv_udiv128_soft(t, 0, d, s) + 1;
 #endif
   ip->shift = l - 1;
 }
