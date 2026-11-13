@@ -885,12 +885,7 @@ static int tmpfs_chstat_object(FAR struct tmpfs_object_s *to,
       to->to_mtime = buf->st_mtim;
     }
 
-  /* Any metadata change is a status change.  The VFS has already filled
-   * st_ctim with the current time.
-   */
-
-  if ((flags & (CH_STAT_MODE | CH_STAT_UID | CH_STAT_GID |
-                CH_STAT_ATIME | CH_STAT_MTIME)) != 0)
+  if ((flags & CH_STAT_CTIME) != 0)
     {
       to->to_ctime = buf->st_ctim;
     }
