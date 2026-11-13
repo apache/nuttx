@@ -112,10 +112,7 @@ void _exit(int status)
        * We stop the execution here.
        */
 
-      for (; ; )
-        {
-          usleep(1000);
-        }
+      nxsched_park_task(tcb);
     }
   else
     {

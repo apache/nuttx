@@ -82,10 +82,7 @@ void nx_pthread_exit(FAR void *exit_value)
        * We stop the execution here.
        */
 
-      for (; ; )
-        {
-          usleep(1000);
-        }
+      nxsched_park_task(tcb);
     }
   else
     {
