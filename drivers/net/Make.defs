@@ -132,11 +132,20 @@ ifeq ($(CONFIG_NET_PHYLIB),y)
   CSRCS += phy_core.c phy_access.c phy_device.c
   CSRCS += phy_gen.c
   DEPPATH += --dep-path net/phy
-  VPATH += :net/phy
+  DEPPATH += --dep-path net/phy/realtek
+  VPATH += :net/phy:net/phy/realtek
   CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)net$(DELIM)phy
 
 ifeq ($(CONFIG_MDIO_CLAUSE_45),y)
   CSRCS += phy_genc45.c
+endif
+
+ifeq ($(CONFIG_NET_PHY_REALTEK_RTL8201F),y)
+  CSRCS += rtl8201f.c
+endif
+
+ifeq ($(CONFIG_NET_PHY_REALTEK_RTL8211F),y)
+  CSRCS += rtl8211f.c
 endif
 
 ifeq ($(CONFIG_NET_PHY_REALTEK_RTL8221B),y)

@@ -236,6 +236,7 @@ config ARCH_FAMILY_IMXRT118x
 	select IMXRT_HAVE_LPUART10
 	select IMXRT_HAVE_LPUART11
 	select IMXRT_HAVE_LPUART12
+	select IMXRT_HAVE_NETC
 	select IMXRT_CLOCKCONFIG_VER3
 	select IMXRT_IOMUX_VER3
 	select IMXRT_RGPIO
@@ -561,8 +562,174 @@ config IMXRT_USBDEV
 config IMXRT_ENET
 	bool "Ethernet"
 	default n
+	depends on !ARCH_FAMILY_IMXRT118x
 	select ARCH_HAVE_PHY
 	select ARCH_HAVE_NETDEV_STATISTICS
+
+config IMXRT_HAVE_NETC
+	bool
+
+menu "NETC Ethernet ports"
+	depends on IMXRT_HAVE_NETC && NET && NET_ETHERNET
+	# Include the remaining existing NETC prerequisites here.
+
+config IMXRT_NETC_ENETC0
+	bool "NETC Eth0 port"
+	default n
+	select IMXRT_NETC
+	---help---
+		Enable the independent ENETC0 direct-PHY interface on physical
+		link 4. This is not switch CPU port 4. The board must provide
+		PHY, pinmux, clock and reset configuration for this attachment.
+		It may operate alone or alongside the ENETC1 switched interface;
+		hardware controller indices are not network interface names.
+
+config IMXRT_NETC_ENETC1_PORT0
+	bool "NETC Eth1 switch port0"
+	default n
+	select IMXRT_NETC
+
+config IMXRT_NETC_ENETC1_PORT1
+	bool "NETC Eth1 switch port1"
+	default n
+	select IMXRT_NETC
+
+config IMXRT_NETC_ENETC1_PORT2
+	bool "NETC Eth1 switch port2"
+	default n
+	select IMXRT_NETC
+
+config IMXRT_NETC_ENETC1_PORT3
+	bool "NETC Eth1 switch port3"
+	default n
+	select IMXRT_NETC
+
+endmenu
+
+if IMXRT_NETC_ENETC0 || IMXRT_NETC_ENETC1_PORT0 || \
+   IMXRT_NETC_ENETC1_PORT1 || IMXRT_NETC_ENETC1_PORT2 || \
+   IMXRT_NETC_ENETC1_PORT3
+
+config IMXRT_NETC
+	bool
+	default y
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+	select MDIO_BUS
+	select NET_PHYLIB
+	select NETDEV_LATEINIT
+	---help---
+		NETDEV lower-half Ethernet interfaces for direct-PHY ENETC0 and
+		switch-attached ENETC1. Selected switch ports share one ENETC1
+		interface; ENETC0 is separate and is not bridged to those ports.
+		Both controllers use the descriptor settings below, with separate
+		DMA storage, IRQs and exclusive MSGINTR channels. Board integration
+		and target hardware acceptance are required.
+
+menu "NETC settings"
+	depends on IMXRT_NETC
+
+choice
+	prompt "NETC transmit descriptors"
+	default IMXRT_NETC_TX16
+	---help---
+		Two 16-byte hardware descriptors form one cache-isolated packet
+		slot. One slot remains unused to distinguish full from empty.
+		Pool constraints reserve room for chained 1518-byte packets,
+		stack work and up to 16 throttled IOBs.
+
+config IMXRT_NETC_TX8
+	bool "8 descriptors (3 packets)"
+	depends on IOB_NBUFFERS >= 96
+
+config IMXRT_NETC_TX16
+	bool "16 descriptors (7 packets)"
+	depends on IOB_NBUFFERS >= 160
+
+config IMXRT_NETC_TX32
+	bool "32 descriptors (15 packets)"
+	depends on IOB_NBUFFERS >= 320
+
+config IMXRT_NETC_TX64
+	bool "64 descriptors (31 packets)"
+	depends on IOB_NBUFFERS >= 640
+
+endchoice
+
+config IMXRT_NETC_NTXDESC
+	int
+	default 8 if IMXRT_NETC_TX8
+	default 16 if IMXRT_NETC_TX16
+	default 32 if IMXRT_NETC_TX32
+	default 64 if IMXRT_NETC_TX64
+
+choice
+	prompt "NETC receive descriptors"
+	default IMXRT_NETC_RX16
+
+config IMXRT_NETC_RX8
+	bool "8 descriptors"
+
+config IMXRT_NETC_RX16
+	bool "16 descriptors"
+
+config IMXRT_NETC_RX32
+	bool "32 descriptors"
+
+config IMXRT_NETC_RX64
+	bool "64 descriptors"
+
+endchoice
+
+config IMXRT_NETC_NRXDESC
+	int
+	default 8 if IMXRT_NETC_RX8
+	default 16 if IMXRT_NETC_RX16
+	default 32 if IMXRT_NETC_RX32
+	default 64 if IMXRT_NETC_RX64
+
+config IMXRT_NETC_LINK_POLL_MS
+	int "NETC MAC update and watchdog interval (milliseconds)"
+	default 1000
+	range 100 1000
+	---help---
+		Consume PHYLIB link state and update MAC modes and carrier.
+		ENETC1 external PHYs remain active while its CPU interface is
+		down. ENETC0 starts and stops its PHY with the interface.
+		PHY polling is controlled by NET_PHYLIB_POLL_INTERVAL.
+		Each worker checks for stalled TX and
+		attempts a reset of only the affected CPU function, without a
+		shared NETC reset or reset of the external switch.
+
+config IMXRT_NETC_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Enable this option if the board needs specialized PHY setup,
+		such as configuring GPIOs or resetting the PHY. The board must
+		provide board_netc_phyinit(), which receives the physical link
+		index (0..4) and the port configuration. The driver calls it for
+		each enabled port after interface mode and clock-direction setup,
+		before MDIO probing. Complete any required reset delays before
+		returning.
+
+config IMXRT_NETC_PHYRESET
+	bool "Board-specific PHY hardware reset control"
+	default n
+	---help---
+		Enable the MDIO hardware-reset callback. The board must provide
+		board_netc_phyreset(), which receives the MDIO endpoint, PHY
+		address and reset level: nonzero asserts reset, zero releases it.
+		Board code owns GPIO configuration, polarity and the required
+		assert/release delays. The callback runs with the MDIO bus locked
+		and must not perform MDIO transactions.
+
+		This does not replace initial board PHY setup. Any reset needed
+		before PHY discovery must still be completed before MDIO probing,
+		for example through IMXRT_NETC_PHYINIT.
+
+endmenu # "NETC settings"
+endif
 
 config IMXRT_LCD
 	bool "LCD controller"

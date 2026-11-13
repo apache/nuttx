@@ -25,11 +25,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
-#include <errno.h>
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <debug.h>
 
 #include <arch/board/board.h>
 #include <arch/barriers.h>
@@ -49,11 +49,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Fixed clock source frequencies programmed by the Cortex-M33 boot ROM
- * before the M7 is released.  NuttX does not reprogram these PLLs, so
- * their frequencies are treated as static constants; if a future use
- * case needs to reconfigure the PLLs, extend imxrt_get_clock() to read
- * the ANADIG registers instead.
+/* Fixed clock source frequencies supplied by the bootloader, except for
+ * SYS_PLL1 started on demand.
  */
 
 #define IMXRT_OSC_24M_HZ         (24000000u)
@@ -75,31 +72,28 @@
 #define IMXRT_SYS_PLL3_PFD0_HZ   (664615384u)  /* frac = 13 */
 #define IMXRT_SYS_PLL3_PFD1_HZ   (508235294u)  /* frac = 17 */
 #define IMXRT_SYS_PLL3_PFD2_HZ   (392727272u)  /* frac = 22 */
-#define IMXRT_SYS_PLL3_PFD3_HZ   (392727272u)  /* frac = 22 */
+#define IMXRT_SYS_PLL3_PFD3_HZ   (480000000u)  /* frac = 18 */
 
 /* Analog settling delays, expressed as NOP spins because no timer exists
- * this early.  The M33 still runs from OSC_RC_400M/2 (200 MHz), so one
- * iteration is roughly 5 ns; both values are generously rounded up.
+ * this early. The PLL LDO delay also allows for the M7 at up to 800 MHz.
  */
 
 #define PLL_LDO_SETTLE_SPINS     (1000)     /* SDK uses 1 us */
 #define ARM_PLL_SETTLE_SPINS     (25000)    /* SDK uses 30 us */
 #define DCDC_SETTLE_SPINS        (100000)   /* ~123 us of 32 kHz clock */
+#define SYS_PLL1_LOCK_RETRIES    (1000)
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-#ifdef CONFIG_ARCH_CHIP_MIMXRT1189CVM8C_CM33
 
 /****************************************************************************
  * Name: imxrt_spin
  *
  * Description:
  *   Crude busy delay for the analog settling times required during clock
- *   bring-up.  The OS timer is not running this early and the core clock
- *   is still OSC_RC_400M/2, so this is expressed in loop iterations rather
- *   than microseconds.
+ *   bring-up.  The OS timer is not running this early, so delays are
+ *   expressed in loop iterations rather than microseconds.
  *
  ****************************************************************************/
 
@@ -112,6 +106,8 @@ static void imxrt_spin(int spins)
       __asm__ __volatile__("nop");
     }
 }
+
+#ifdef CONFIG_ARCH_CHIP_MIMXRT1189CVM8C_CM33
 
 /****************************************************************************
  * Name: imxrt_set_core_voltage
@@ -172,6 +168,8 @@ static void imxrt_set_core_voltage(uint32_t target)
   while ((getreg32(IMXRT_DCDC_REG0) & DCDC_REG0_STS_DC_OK) == 0);
 }
 
+#endif /* CONFIG_ARCH_CHIP_MIMXRT1189CVM8C_CM33 */
+
 /****************************************************************************
  * Name: imxrt_enable_pll_ldo
  *
@@ -202,6 +200,8 @@ static void imxrt_enable_pll_ldo(void)
       putreg32(regval, IMXRT_PHY_LDO_CTRL0_RW);
     }
 }
+
+#ifdef CONFIG_ARCH_CHIP_MIMXRT1189CVM8C_CM33
 
 /****************************************************************************
  * Name: imxrt_init_arm_pll
@@ -291,6 +291,100 @@ static void imxrt_enable_osc_24m(void)
     }
 }
 
+/****************************************************************************
+ * Name: imx_enable_sys_pll1
+ *
+ * Description:
+ *   Start SYS_PLL1 if it is not locked, preserving an already-running PLL's
+ *   fractional configuration.
+ *
+ ****************************************************************************/
+
+static void imx_enable_sys_pll1(void)
+{
+  const struct ccm_sys_pll1 *config = &g_initial_clkconfig.sys_pll1;
+  unsigned int retry;
+
+  if ((getreg32(IMXRT_ANADIG_PLL_SYS1_CTRL) &
+       ANADIG_PLL_SYS1_STABLE) == 0)
+    {
+      imxrt_enable_osc_24m();
+      imxrt_enable_pll_ldo();
+
+      modifyreg32(IMXRT_ANADIG_PLL_SYS1_CTRL,
+                  ANADIG_PLL_SYS1_CONTROL_MODE,
+                  ANADIG_PLL_SYS1_ENABLE_CLK | ANADIG_PLL_SYS1_GATE);
+      putreg32(SYS_PLL1_CTRL0_BYPASS, IMXRT_SYS_PLL1_CTRL0_SET);
+      putreg32(config->num, IMXRT_SYS_PLL1_NUMERATOR);
+      putreg32(config->denom, IMXRT_SYS_PLL1_DENOMINATOR);
+      putreg32(SYS_PLL1_CTRL0_DIV_SELECT_MASK, IMXRT_SYS_PLL1_CTRL0_CLR);
+      putreg32(SYS_PLL1_CTRL0_DIV_SELECT(config->div) |
+               SYS_PLL1_CTRL0_PLL_REG_EN, IMXRT_SYS_PLL1_CTRL0_SET);
+      up_udelay(100);
+      putreg32(SYS_PLL1_CTRL0_POWERUP | SYS_PLL1_CTRL0_HOLD_RING_OFF,
+               IMXRT_SYS_PLL1_CTRL0_SET);
+      up_udelay(225);
+      putreg32(SYS_PLL1_CTRL0_HOLD_RING_OFF, IMXRT_SYS_PLL1_CTRL0_CLR);
+
+      for (retry = 0; retry < SYS_PLL1_LOCK_RETRIES; retry++)
+        {
+          if ((getreg32(IMXRT_ANADIG_PLL_SYS1_CTRL) &
+               ANADIG_PLL_SYS1_STABLE) != 0)
+            {
+              break;
+            }
+
+          up_udelay(1);
+        }
+
+      if (retry == SYS_PLL1_LOCK_RETRIES)
+        {
+          /* SYS_PLL1 Lock wait timed out */
+
+          PANIC();
+        }
+    }
+
+  putreg32(SYS_PLL1_CTRL0_ENABLE, IMXRT_SYS_PLL1_CTRL0_SET);
+  putreg32(SYS_PLL1_CTRL0_BYPASS, IMXRT_SYS_PLL1_CTRL0_CLR);
+  modifyreg32(IMXRT_ANADIG_PLL_SYS1_CTRL, ANADIG_PLL_SYS1_GATE,
+              ANADIG_PLL_SYS1_ENABLE_CLK);
+}
+
+/****************************************************************************
+ * Name: imx_enable_sys_pll1_div
+ *
+ * Description:
+ *   Start SYS_PLL1 as needed and enable a divided output under software
+ *   control.
+ *
+ ****************************************************************************/
+
+static void imx_enable_sys_pll1_div(uint32_t enable)
+{
+  uint32_t control_mode;
+
+  switch (enable)
+    {
+      case ANADIG_PLL_SYS1_DIV2:
+        control_mode = ANADIG_PLL_SYS1_DIV2_CONTROL_MODE;
+        break;
+
+      case ANADIG_PLL_SYS1_DIV5:
+        control_mode = ANADIG_PLL_SYS1_DIV5_CONTROL_MODE;
+        break;
+
+      default:
+        PANIC();
+    }
+
+  imx_enable_sys_pll1();
+
+  modifyreg32(IMXRT_ANADIG_PLL_SYS1_CTRL,
+              control_mode | ANADIG_PLL_SYS1_GATE,
+              enable | ANADIG_PLL_SYS1_ENABLE_CLK);
+}
+
 static void imxrt_enable_clock_source(int source)
 {
   switch (source)
@@ -300,9 +394,6 @@ static void imxrt_enable_clock_source(int source)
       case OSC_RC_24M:
       case OSC_RC_400M:
       case ARM_PLL_OUT:
-      case SYS_PLL1_OUT:
-      case SYS_PLL1_DIV2:
-      case SYS_PLL1_DIV5:
       case SYS_PLL2_OUT:
       case SYS_PLL2_PFD0:
       case SYS_PLL2_PFD1:
@@ -316,13 +407,24 @@ static void imxrt_enable_clock_source(int source)
       case SYS_PLL3_PFD3:
         break;
 
+      case SYS_PLL1_OUT:
+        imx_enable_sys_pll1();
+        break;
+
+      case SYS_PLL1_DIV2:
+        imx_enable_sys_pll1_div(ANADIG_PLL_SYS1_DIV2);
+        break;
+
+      case SYS_PLL1_DIV5:
+        imx_enable_sys_pll1_div(ANADIG_PLL_SYS1_DIV5);
+        break;
+
       case OSC_24M:
         imxrt_enable_osc_24m();
         break;
 
       default:
-        _err("Enabling source %d is not implemented\n", source);
-        break;
+        PANIC();
     }
 }
 

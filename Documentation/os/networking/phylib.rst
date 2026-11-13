@@ -129,6 +129,9 @@ of PHYLIB:
    CONFIG_NET_PHYLIB_MAX_DRIVERS=8        # Maximum number of PHY drivers
    CONFIG_NET_PHYLIB_MAX_PHYS=8           # Maximum number of PHY devices
 
+See :doc:`PHY Device Drivers </os/drivers/special/net/phy>` for
+device-specific configuration and registration.
+
 5. Core Data Structures
 =======================
 

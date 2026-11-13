@@ -150,6 +150,14 @@ extern const struct phy_driver_s g_genphy_c45_driver;
 
 int phy_driver_register(FAR const struct phy_driver_s *drv);
 
+/* Generic Clause 22 operations shared by vendor drivers. */
+
+int genphy_config_init(FAR struct phy_device_s *phydev);
+int genphy_config_aneg(FAR struct phy_device_s *phydev);
+int genphy_read_status(FAR struct phy_device_s *phydev);
+int genphy_config_power(FAR struct phy_device_s *phydev, bool enable);
+int genphy_soft_reset(FAR struct phy_device_s *phydev);
+
 /* PHY register utilities (phy_access.c).  Internal to the phylib core and
  * the vendor PHY drivers under drivers/net/phy; not part of the public API.
  */

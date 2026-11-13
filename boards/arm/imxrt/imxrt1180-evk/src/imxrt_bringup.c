@@ -126,5 +126,13 @@ int imxrt_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_IMXRT_NETC
+  ret = imxrt_netc_boardinitialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: NETC initialization failed: %d\n", ret);
+    }
+#endif
+
   return ret;
 }

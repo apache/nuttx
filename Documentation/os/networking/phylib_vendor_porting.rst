@@ -168,6 +168,22 @@ A successful ``phy_connect(phydev, &priv->dev)`` also sets
 ``priv->dev.phydev``, so the netdev upper-half dispatches standard PHY
 ioctls to ``phy_ioctl()``.
 
+For switch ports, or MACs that must apply their link mode before reporting
+carrier, ``phy_connect(phydev, NULL)`` creates a connection without automatic
+carrier notification or netdev ioctl dispatch. The MAC consumes
+``state/link/speed/duplex`` under ``phydev->lock``, applies its hardware
+configuration, and reports carrier itself. It must forward PHY ioctls
+explicitly and release the device with ``phy_disconnect()``. This also
+allows several independently negotiated switch PHYs to contribute to one
+network interface's carrier without overwriting ``lower->phydev``.
+
+Set ``phydev->interface`` before connecting. For RMII, select
+``PHY_INTERFACE_RMII`` when the reference clock is supplied to the PHY,
+or ``PHY_INTERFACE_RMII_PHY_CLK_OUT`` when the PHY supplies the clock.
+MAC and PHY drivers must handle both modes as RMII signaling, with opposite
+reference-clock directions. The PHY driver owns ``phydev->priv``; MAC and
+board code must not overwrite or free it.
+
 5. Implementing the MDIO Lower-half
 ===================================
 
@@ -369,6 +385,14 @@ Match rule:
      - Polling or PHY event work
      - Update ``link/speed/duplex``, update ``lp_advertising`` as needed
      - OK on link down; negative errno only on access failure
+
+Clause 22 drivers can reuse ``genphy_c22_config_init()``,
+``genphy_c22_config_aneg()``, ``genphy_c22_read_status()``,
+``genphy_c22_config_power()`` and ``genphy_c22_soft_reset()`` from the
+internal ``drivers/net/phy/phy.h`` interface. Callback tables can reference
+these shared operations directly; forwarding wrappers are unnecessary.
+Implementation-only helpers remain static. Clause 45 operations use the
+separate ``genphy_c45_*`` naming.
 
 6.4 Capability-dependent Callbacks
 ----------------------------------
