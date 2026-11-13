@@ -295,7 +295,6 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
   struct inode_search_s newdesc;
   FAR struct inode *newinode;
   FAR const char *newrelpath;
-  FAR char *subdir = NULL;
   bool newexists = false;
   bool newisdir = false;
   bool oldisdir = false;
@@ -520,10 +519,6 @@ errout_with_newinode:
 
 errout_with_newsearch:
   inode_search_release(&newdesc);
-  if (subdir != NULL)
-    {
-      fs_heap_free(subdir);
-    }
 
   return ret;
 }
