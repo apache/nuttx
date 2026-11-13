@@ -28,8 +28,17 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdbool.h>
 #include <stdint.h>
+
+/* Indices into g_mu_devs[]: MU1 A, MU1 B, MU2 A, MU2 B.
+ * These are the ones which are currently in use.
+ */
+
+#define IMX9_MU_M33  1 /* MU1 side B: A55 <-> Cortex-M33 (i.MX93) */
+#define IMX9_MU_SCMI 2 /* MU2 side A: A55 <-> SCMI agent (i.MX95) */
 
 typedef void (*imx9_mu_msg_callback_t)(int id, uint32_t msg, void *arg);
 typedef void (*imx9_mu_gpi_callback_t)(int id, void *arg);
@@ -45,7 +54,7 @@ typedef void (*imx9_mu_gpi_callback_t)(int id, void *arg);
  *   Initialize mu
  *
  * Input Parameters:
- *   index   - The MU number: 2 on i.MX95 (side A), 1 on i.MX93 (side B)
+ *   index   - Index into g_mu_devs[], e.g. IMX9_MU_M33
  *
  * Returned Value:
  *   imx9_mu_dev_s struct is returned on success. NULL is returned on

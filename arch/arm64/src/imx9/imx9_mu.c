@@ -28,6 +28,7 @@
 #include <nuttx/debug.h>
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
+#include <nuttx/nuttx.h>
 #include <sys/types.h>
 
 #include "imx9_mu.h"
@@ -56,31 +57,15 @@ struct imx9_mu_dev_s
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_IMX95)
+/* MU1 A, MU1 B, MU2 A, MU2 B */
 
-/* i.MX95: MU2 side A, towards the SCMI agent */
-
-static struct imx9_mu_dev_s g_mu_dev =
+static struct imx9_mu_dev_s g_mu_devs[] =
 {
-  .mubase = IMX9_MU2_MUA_BASE,
-  .irq = IMX9_IRQ_MU2_A
+  { .mubase = IMX9_MU1_MUA_BASE, .irq = IMX9_IRQ_MU1_A },
+  { .mubase = IMX9_MU1_MUB_BASE, .irq = IMX9_IRQ_MU1_B },
+  { .mubase = IMX9_MU2_MUA_BASE, .irq = IMX9_IRQ_MU2_A },
+  { .mubase = IMX9_MU2_MUB_BASE, .irq = IMX9_IRQ_MU2_B },
 };
-
-#  define IMX9_MU_INSTANCE 2
-
-#elif defined(CONFIG_ARCH_CHIP_IMX93)
-
-/* i.MX93: MU1 side B, the A55 end of the link to the Cortex-M33 */
-
-static struct imx9_mu_dev_s g_mu_dev =
-{
-  .mubase = IMX9_MU1__MUB_BASE,
-  .irq = IMX9_IRQ_MU1_B
-};
-
-#  define IMX9_MU_INSTANCE 1
-
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -149,7 +134,7 @@ static int imx9_mu_interrupt(int irq, void *context, void *args)
  *   Initialize mu
  *
  * Input Parameters:
- *   index   - The MU number: 2 on i.MX95 (side A), 1 on i.MX93 (side B)
+ *   index   - Index into g_mu_devs[], e.g. IMX9_MU_M33
  *
  * Returned Value:
  *   imx9_mu_dev_s struct is returned on success. NULL is returned on
@@ -161,15 +146,12 @@ struct imx9_mu_dev_s *imx9_mu_init(int index)
 {
   struct imx9_mu_dev_s *priv;
 
-  if (index == IMX9_MU_INSTANCE)
-    {
-      priv = &g_mu_dev;
-    }
-
-  else
+  if (index < 0 || index >= nitems(g_mu_devs))
     {
       return NULL;
     }
+
+  priv = &g_mu_devs[index];
 
   irq_attach(priv->irq, imx9_mu_interrupt, priv);
   up_enable_irq(priv->irq);
