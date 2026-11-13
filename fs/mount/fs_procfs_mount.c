@@ -397,18 +397,22 @@ static int mount_open(FAR struct file *filep, FAR const char *relpath,
     {
       id = FS_MOUNT_FILE;
     }
+  else
 #endif
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_BLOCKS
-  else if (strcmp(relpath, "fs/blocks") == 0)
+  if (strcmp(relpath, "fs/blocks") == 0)
     {
       id = FS_BLOCKS_FILE;
     }
+  else
 #endif
-  else if (strcmp(relpath, "fs/usage") == 0)
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_USAGE
+  if (strcmp(relpath, "fs/usage") == 0)
     {
       id = FS_USAGE_FILE;
     }
   else
+#endif
     {
       ferr("ERROR: relpath is '%s'\n", relpath);
       return -ENOENT;

@@ -31,7 +31,7 @@ CSRCS += fs_automount.c
 endif
 
 ifeq  ($(CONFIG_FS_PROCFS),y)
-ifneq ($(CONFIG_FS_PROCFS_EXCLUDE_MOUNT),y)
+ifneq ($(CONFIG_FS_PROCFS_EXCLUDE_MOUNT)$(CONFIG_FS_PROCFS_EXCLUDE_BLOCKS)$(CONFIG_FS_PROCFS_EXCLUDE_USAGE),yyy)
 CSRCS += fs_procfs_mount.c fs_gettype.c
 endif
 endif
