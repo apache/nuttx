@@ -115,6 +115,17 @@ config DSHOT_NCHANNELS
 
 endif # DSHOT
 
+config OCU
+	bool "OCU (Output Compare Unit) Driver Support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" OCU driver.
+		The OCU driver provides a standard interface for hardware output
+		compare functionality. An OCU channel compares a free-running
+		counter against a programmable threshold and performs configurable
+		actions (pin toggle, notification callback) on match.
+		See include/nuttx/timers/ocu.h for further OCU driver information.
+
 config TIMER
 	bool "Timer Support"
 	default n
