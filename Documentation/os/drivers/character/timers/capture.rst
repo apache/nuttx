@@ -101,6 +101,46 @@ Supported ``ioctl`` Commands
 
    **Returns:** ``OK`` on success.
 
+.. c:macro:: CAPIOC_SET_EDGE
+
+   Set the capture edge polarity.  The command is handled by the lower
+   half ``ioctl`` method.
+
+   **Argument:** ``enum cap_edge_e`` (``CAP_EDGE_RISING``,
+   ``CAP_EDGE_FALLING`` or ``CAP_EDGE_BOTH``).
+
+.. c:macro:: CAPIOC_START_CAPTURE
+
+   Start capturing, using the optional lower half ``start_capture`` method.
+
+   **Argument:** None.
+
+   **Returns:** ``OK`` on success, ``-ENOSYS`` if the lower half does not
+   support it.
+
+.. c:macro:: CAPIOC_STOP_CAPTURE
+
+   Stop capturing, using the optional lower half ``stop_capture`` method.
+
+   **Argument:** None.
+
+   **Returns:** ``OK`` on success, ``-ENOSYS`` if the lower half does not
+   support it.
+
+.. c:macro:: CAPIOC_GET_INPUT_STATE
+
+   Read the current level of the input pin, using the optional lower half
+   ``get_input_state`` method.
+
+   **Argument:** ``uint8_t *`` (``CAP_STATE_IDLE`` or ``CAP_STATE_ACTIVE``).
+
+   **Returns:** ``OK`` on success, ``-ENOSYS`` if the lower half does not
+   support it.
+
+Commands that the upper half does not handle are passed to the lower half
+``ioctl`` method with the argument unchanged.  ``-ENOTTY`` is returned when
+the lower half has no ``ioctl`` method.
+
 Configuration
 -------------
 

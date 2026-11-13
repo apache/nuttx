@@ -31,8 +31,6 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/signal.h>
 
-#include <nuttx/signal.h>
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -134,9 +132,59 @@
 
 #define CAPIOC_UNREGISTER _CAPIOC(11)
 
+/* Command:     CAPIOC_SET_EDGE
+ * Description: Set the capture edge polarity (handled by the lower half).
+ * Arguments:   enum cap_edge_e value.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_SET_EDGE        _CAPIOC(12)
+
+/* Command:     CAPIOC_START_CAPTURE
+ * Description: Start capture on all channels.
+ * Arguments:   None.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_START_CAPTURE   _CAPIOC(13)
+
+/* Command:     CAPIOC_STOP_CAPTURE
+ * Description: Stop capture on all channels.
+ * Arguments:   None.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_STOP_CAPTURE    _CAPIOC(14)
+
+/* Command:     CAPIOC_GET_INPUT_STATE
+ * Description: Read the input pin state of each channel.
+ * Arguments:   uint8_t array (one entry per channel) to return
+ *              enum cap_input_state_e values.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_GET_INPUT_STATE _CAPIOC(15)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Activation edge type */
+
+enum cap_edge_e
+{
+  CAP_EDGE_RISING  = 0,
+  CAP_EDGE_FALLING = 1,
+  CAP_EDGE_BOTH    = 2,
+};
+
+/* Input state */
+
+enum cap_input_state_e
+{
+  CAP_STATE_IDLE   = 0,
+  CAP_STATE_ACTIVE = 1,
+};
 
 struct cap_all_s
 {
@@ -220,6 +268,19 @@ struct cap_ops_s
 
   CODE int (*unbind)(FAR struct cap_lowerhalf_s *lower);
 #endif
+
+  /* Start capture on a channel */
+
+  CODE int (*start_capture)(FAR struct cap_lowerhalf_s *lower);
+
+  /* Stop capture on a channel */
+
+  CODE int (*stop_capture)(FAR struct cap_lowerhalf_s *lower);
+
+  /* Read current input pin state (ACTIVE/IDLE) */
+
+  CODE int (*get_input_state)(FAR struct cap_lowerhalf_s *lower,
+                              FAR uint8_t *state);
 };
 
 /* This structure provides the publicly visible representation of the
