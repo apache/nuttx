@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
+#include <unistd.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/cache.h>
@@ -52,7 +53,12 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
    */
 
   size_t hdr_size = sizeof(struct shmfs_object_s);
-  size_t alloc_size = length;
+
+  /* mmap() hands out this buffer directly: round it up to a page so that
+   * a page-sized mapping of a smaller object stays inside it.
+   */
+
+  size_t alloc_size = ALIGN_UP(length, sysconf(_SC_PAGESIZE));
 #ifdef CONFIG_FS_SHMFS_NO_ALIGN
   size_t cachesize = 0;
 #else
@@ -82,7 +88,7 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
    * memory in user heap
    */
 
-  size_t alloc_size = length;
+  size_t alloc_size = ALIGN_UP(length, sysconf(_SC_PAGESIZE));
 
   object = fs_heap_zalloc(sizeof(struct shmfs_object_s));
   if (object)
@@ -172,6 +178,7 @@ void shmfs_free_object(FAR struct shmfs_object_s *object)
       size_t i;
       size_t n_pages = MM_NPAGES(object->length);
       FAR void **pages = &object->paddr;
+
       for (i = 0; i < n_pages; i++)
         {
           if (pages[i])
