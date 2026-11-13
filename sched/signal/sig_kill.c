@@ -33,6 +33,8 @@
 #include <unistd.h>
 #include <nuttx/debug.h>
 
+#include <string.h>
+
 #include <nuttx/signal.h>
 
 #include "sched/sched.h"
@@ -127,6 +129,13 @@ int nxsig_kill(pid_t pid, int signo)
 
   /* Create the siginfo structure */
 
+  /* Zero the whole siginfo first: sigaction-queued signals carry a
+   * si_user field that only the sigaction queue path assigns, so a
+   * stack-garbage si_user here would be memcpy'd into the pending
+   * entry and handed back to a sigtimedwait() consumer.
+   */
+
+  memset(&info, 0, sizeof(siginfo_t));
   info.si_signo           = signo;
   info.si_code            = SI_USER;
   info.si_errno           = EINTR;
