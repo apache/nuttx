@@ -40,6 +40,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/fs/uio.h>
 
 #include "inode/inode.h"
 #include "fs_tmpfs.h"
@@ -142,10 +143,8 @@ static int  tmpfs_foreach(FAR struct tmpfs_directory_s *tdo,
 static int  tmpfs_open(FAR struct file *filep, FAR const char *relpath,
               int oflags, mode_t mode);
 static int  tmpfs_close(FAR struct file *filep);
-static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
-              size_t buflen);
-static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
-              size_t buflen);
+static ssize_t tmpfs_readv(FAR struct file *filep, FAR struct uio *uio);
+static ssize_t tmpfs_writev(FAR struct file *filep, FAR struct uio *uio);
 static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence);
 static int  tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int  tmpfs_sync(FAR struct file *filep);
@@ -204,15 +203,15 @@ const struct mountpt_operations g_tmpfs_operations =
 {
   tmpfs_open,       /* open */
   tmpfs_close,      /* close */
-  tmpfs_read,       /* read */
-  tmpfs_write,      /* write */
+  NULL,             /* read */
+  NULL,             /* write */
   tmpfs_seek,       /* seek */
   tmpfs_ioctl,      /* ioctl */
   tmpfs_mmap,       /* mmap */
   tmpfs_truncate,   /* truncate */
   NULL,             /* poll */
-  NULL,             /* readv */
-  NULL,             /* writev */
+  tmpfs_readv,      /* readv */
+  tmpfs_writev,     /* writev */
 
   tmpfs_sync,       /* sync */
   tmpfs_dup,        /* dup */
@@ -1958,11 +1957,10 @@ static int tmpfs_close(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: tmpfs_read
+ * Name: tmpfs_readv
  ****************************************************************************/
 
-static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
-                          size_t buflen)
+static ssize_t tmpfs_readv(FAR struct file *filep, FAR struct uio *uio)
 {
   FAR struct tmpfs_file_s *tfo;
   ssize_t nread;
@@ -1970,8 +1968,7 @@ static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
   off_t endpos;
   int ret;
 
-  finfo("filep: %p buffer: %p buflen: %lu\n",
-        filep, buffer, (unsigned long)buflen);
+  finfo("filep: %p resid: %zu\n", filep, uio->uio_resid);
   DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
@@ -1996,8 +1993,8 @@ static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
   /* Handle attempts to read beyond the end of the file. */
 
   startpos = filep->f_pos;
-  nread    = buflen;
-  endpos   = startpos + buflen;
+  nread    = uio->uio_resid;
+  endpos   = startpos + nread;
 
   if (endpos > tfo->tfo_size)
     {
@@ -2005,11 +2002,11 @@ static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
       nread  = endpos - startpos;
     }
 
-  /* Copy data from the memory object to the user buffer */
+  /* Copy data from the memory object to the user buffers */
 
   if (tfo->tfo_data != NULL)
     {
-      memcpy(buffer, &tfo->tfo_data[startpos], nread);
+      uio_copyfrom(uio, 0, &tfo->tfo_data[startpos], nread);
       filep->f_pos += nread;
 
       if ((filep->f_oflags & O_NOATIME) == 0)
@@ -2029,11 +2026,10 @@ static ssize_t tmpfs_read(FAR struct file *filep, FAR char *buffer,
 }
 
 /****************************************************************************
- * Name: tmpfs_write
+ * Name: tmpfs_writev
  ****************************************************************************/
 
-static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
-                           size_t buflen)
+static ssize_t tmpfs_writev(FAR struct file *filep, FAR struct uio *uio)
 {
   FAR struct tmpfs_file_s *tfo;
   ssize_t nwritten;
@@ -2041,8 +2037,7 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
   off_t endpos;
   int ret;
 
-  finfo("filep: %p buffer: %p buflen: %lu\n",
-        filep, buffer, (unsigned long)buflen);
+  finfo("filep: %p resid: %zu\n", filep, uio->uio_resid);
   DEBUGASSERT(filep->f_priv != NULL);
 
   /* Recover our private data from the struct file instance */
@@ -2068,8 +2063,8 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
       startpos = filep->f_pos;
     }
 
-  nwritten = buflen;
-  endpos   = startpos + buflen;
+  nwritten = uio->uio_resid;
+  endpos   = startpos + nwritten;
 
   if (endpos > tfo->tfo_size)
     {
@@ -2093,11 +2088,11 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
         }
     }
 
-  /* Copy data from the memory object to the user buffer */
+  /* Copy data from the user buffers to the memory object */
 
   if (tfo->tfo_data != NULL)
     {
-      memcpy(&tfo->tfo_data[startpos], buffer, nwritten);
+      uio_copyto(uio, 0, &tfo->tfo_data[startpos], nwritten);
     }
   else
     {
