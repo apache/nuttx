@@ -267,7 +267,9 @@ mm_initialize_heap(FAR const struct mm_heap_config_s *config)
     }
   else
     {
-      heap = lib_memalign(MM_ALIGN, sizeof(struct mm_heap_s));
+      /* malloc() alignment is sufficient, and memalign() adds code */
+
+      heap = lib_malloc(sizeof(struct mm_heap_s));
       if (heap == NULL)
         {
           return NULL;
