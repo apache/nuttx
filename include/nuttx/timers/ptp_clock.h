@@ -27,6 +27,8 @@
 
 #include <sys/types.h>
 #include <sys/timex.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/fs/ioctl.h>
@@ -52,6 +54,40 @@
 
 #define PTP_CLOCK_SETSTATS       _PTPIOC(0xd)
 #define PTP_CLOCK_GETSTATS       _PTPIOC(0xe)
+
+/* External timestamp (EXTTS), periodic output (PEROUT) and PPS requests.
+ * These follow the Linux PTP hardware clock API: once an external
+ * timestamp channel is enabled with PTP_EXTTS_REQUEST, every edge seen on
+ * that input is time stamped with the PTP clock and can be read() from
+ * the /dev/ptpX device as a struct ptp_extts_event.
+ */
+
+#define PTP_EXTTS_REQUEST        _PTPIOC(0xf)
+#define PTP_PEROUT_REQUEST       _PTPIOC(0x10)
+#define PTP_ENABLE_PPS           _PTPIOC(0x11)
+#define PTP_EXTTS_REQUEST2       _PTPIOC(0x12)
+#define PTP_PEROUT_REQUEST2      _PTPIOC(0x13)
+#define PTP_ENABLE_PPS2          _PTPIOC(0x14)
+
+/* Bits of the ptp_extts_request.flags field */
+
+#define PTP_ENABLE_FEATURE       (1 << 0)
+#define PTP_RISING_EDGE          (1 << 1)
+#define PTP_FALLING_EDGE         (1 << 2)
+#define PTP_STRICT_FLAGS         (1 << 3)
+#define PTP_EXTTS_EDGES          (PTP_RISING_EDGE | PTP_FALLING_EDGE)
+
+/* Bits of the ptp_perout_request.flags field */
+
+#define PTP_PEROUT_ONE_SHOT      (1 << 0)
+#define PTP_PEROUT_DUTY_CYCLE    (1 << 1)
+#define PTP_PEROUT_PHASE         (1 << 2)
+
+/* Request types passed to the lower half enable() method */
+
+#define PTP_CLK_REQ_EXTTS        0
+#define PTP_CLK_REQ_PEROUT       1
+#define PTP_CLK_REQ_PPS          2
 
 /* Maximum allowed offset measurement samples. */
 
@@ -117,6 +153,55 @@ struct ptp_clock_caps
   int max_adj;            /* Maximum frequency adjustment in parts per billion. */
   int cross_timestamping; /* Whether the clock supports precise system-device cross timestamps */
   int adjust_phase;       /* Whether the clock supports phase adjustment */
+  int n_ext_ts;           /* Number of external time stamp channels */
+  int n_per_out;          /* Number of programmable periodic signals */
+  int pps;                /* Whether the clock supports a PPS callback */
+};
+
+/* struct ptp_extts_request - enable or disable an external timestamp
+ * channel (PTP_EXTTS_REQUEST).
+ */
+
+struct ptp_extts_request
+{
+  unsigned int index;     /* Which channel to configure */
+  unsigned int flags;     /* Bit field of PTP_ENABLE_FEATURE and edges */
+  unsigned int rsv[2];    /* Reserved for future use */
+};
+
+/* struct ptp_extts_event - an external timestamp, returned by read() */
+
+struct ptp_extts_event
+{
+  struct ptp_clock_time t; /* Time when the event occurred */
+  unsigned int index;      /* Which channel produced the event */
+  unsigned int flags;      /* Edge that produced the event, if known */
+  unsigned int rsv[2];     /* Reserved for future use */
+};
+
+/* struct ptp_perout_request - configure a periodic output
+ * (PTP_PEROUT_REQUEST).
+ */
+
+struct ptp_perout_request
+{
+  struct ptp_clock_time start;   /* Absolute start time, or phase offset
+                                  * with PTP_PEROUT_PHASE */
+  struct ptp_clock_time period;  /* Desired period, zero means disable */
+  unsigned int index;            /* Which channel to configure */
+  unsigned int flags;            /* PTP_PEROUT_xxx flags */
+  struct ptp_clock_time on;      /* "On" time (PTP_PEROUT_DUTY_CYCLE) */
+};
+
+/* struct ptp_clock_request - request passed to the lower half enable()
+ * method.
+ */
+
+struct ptp_clock_request
+{
+  int type;                         /* PTP_CLK_REQ_xxx */
+  struct ptp_extts_request extts;   /* Valid for PTP_CLK_REQ_EXTTS */
+  struct ptp_perout_request perout; /* Valid for PTP_CLK_REQ_PEROUT */
 };
 
 struct ptp_sys_offset
@@ -317,6 +402,29 @@ struct ptp_ops_s
 
   CODE int (*control)(FAR struct ptp_lowerhalf_s *lower,
                       int cmd, unsigned long arg);
+
+  /**************************************************************************
+   * Name: enable
+   *
+   * Description:
+   *   Enables or disables an ancillary feature of the clock: an external
+   *   timestamp channel (EXTTS), a periodic output (PEROUT) or the PPS
+   *   event.  Time stamps of an enabled EXTTS channel are reported to the
+   *   upper half with ptp_clock_event().
+   *
+   * Input Parameters:
+   *   lower - The instance of lower half ptp driver.
+   *   rq    - The feature to change and its parameters.
+   *   on    - true to enable the feature, false to disable it.
+   *
+   * Returned Value:
+   *   Zero (OK) or positive on success; a negated errno value on failure.
+   *   -EOPNOTSUPP - The feature is not supported.
+   *
+   **************************************************************************/
+
+  CODE int (*enable)(FAR struct ptp_lowerhalf_s *lower,
+                     FAR struct ptp_clock_request *rq, bool on);
 };
 
 /* The ptp lower half driver interface, describes a PTP hardware
@@ -327,6 +435,19 @@ struct ptp_lowerhalf_s
 {
   FAR const struct ptp_ops_s *ops; /* Lower half driver operations. */
   FAR void *upper;                 /* The upper handle */
+  uint8_t n_ext_ts;                /* Number of external time stamp inputs */
+  uint8_t n_per_out;               /* Number of periodic outputs */
+  bool    pps;                     /* Whether PTP_ENABLE_PPS is supported */
+};
+
+/* struct ptp_clock_event - an event reported by the lower half */
+
+struct ptp_clock_event
+{
+  int type;                        /* PTP_CLK_REQ_EXTTS only for now */
+  unsigned int index;              /* Channel that produced the event */
+  unsigned int flags;              /* Edge, PTP_RISING/FALLING_EDGE or 0 */
+  struct timespec ts;              /* Time stamp in the PTP time scale */
 };
 
 /****************************************************************************
@@ -387,6 +508,26 @@ int ptp_clock_register(FAR struct ptp_lowerhalf_s *lower, int32_t max_adj,
  ****************************************************************************/
 
 void ptp_clock_unregister(FAR struct ptp_lowerhalf_s *dev, int devno);
+
+/****************************************************************************
+ * Name: ptp_clock_event
+ *
+ * Description:
+ *   Report an event (an external time stamp) to the upper half.  The event
+ *   is queued and can be read() from /dev/ptpX by the application.
+ *
+ *   This function may be called from a normal interrupt handler.  It must
+ *   NOT be called from a zero latency (CONFIG_ARCH_HIPRI_INTERRUPT)
+ *   handler, which is not allowed to use OS services.
+ *
+ * Input Parameters:
+ *   lower - A pointer to an instance of lower half ptp driver.
+ *   event - The event to report.
+ *
+ ****************************************************************************/
+
+void ptp_clock_event(FAR struct ptp_lowerhalf_s *lower,
+                     FAR const struct ptp_clock_event *event);
 
 #if defined(__cplusplus)
 }
