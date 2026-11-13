@@ -700,6 +700,28 @@ config PTP_CLOCK
 		devices. If you want to use a PTP clock, then you should
 		also enable at least one clock driver as well.
 
+if PTP_CLOCK
+
+config PTP_CLOCK_EXTTS_QUEUE_SIZE
+	int "External time stamp event queue size"
+	default 16
+	range 1 1024
+	---help---
+		Number of external time stamp (EXTTS) events, for example
+		PPS pulses, that the PTP clock driver keeps until the
+		application reads them from /dev/ptpX.  When the queue is
+		full the oldest event is dropped.
+
+config PTP_CLOCK_NPOLLWAITERS
+	int "Number of poll waiters"
+	default 2
+	range 1 16
+	---help---
+		Maximum number of threads that can poll() one /dev/ptpX
+		device at the same time.
+
+endif # PTP_CLOCK
+
 config PTP_CLOCK_DUMMY
 	bool "the dummy test driver for ptp clock"
 	default n

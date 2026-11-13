@@ -24,6 +24,9 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
+#include <poll.h>
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
@@ -31,11 +34,24 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/poll.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/timers/ptp_clock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef CONFIG_PTP_CLOCK_EXTTS_QUEUE_SIZE
+#  define CONFIG_PTP_CLOCK_EXTTS_QUEUE_SIZE 16
+#endif
+
+#ifndef CONFIG_PTP_CLOCK_NPOLLWAITERS
+#  define CONFIG_PTP_CLOCK_NPOLLWAITERS 2
+#endif
+
+#define PTP_QUEUE_SIZE  CONFIG_PTP_CLOCK_EXTTS_QUEUE_SIZE
 
 /****************************************************************************
  * Private Types
@@ -49,6 +65,22 @@ struct ptp_upperhalf_s
   mutex_t                     lock;     /* Manages exclusive access to file operations */
   long                        max_adj;  /* The maximum frequency adjustment */
   long                        adj_freq; /* remembers the frequency adjustment */
+
+  /* External time stamp event queue.  Written by ptp_clock_event(), which
+   * may run in interrupt context, so it is protected by a spinlock.
+   */
+
+  spinlock_t                  qlock;    /* Protects the event queue */
+  sem_t                       qsem;     /* Wakes up blocked readers */
+  uint16_t                    qhead;    /* Index of the oldest event */
+  uint16_t                    qcount;   /* Number of queued events */
+  uint16_t                    nwaiters; /* Number of blocked readers */
+  uint32_t                    overrun;  /* Events lost due to full queue */
+  struct ptp_extts_event      queue[PTP_QUEUE_SIZE];
+
+  /* Poll waiters */
+
+  FAR struct pollfd_s         *fds[CONFIG_PTP_CLOCK_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -59,6 +91,8 @@ static ssize_t ptp_clock_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen);
 static int     ptp_clock_ioctl(FAR struct file *filep, int cmd,
                                unsigned long arg);
+static int     ptp_clock_poll(FAR struct file *filep,
+                              FAR struct pollfd_s *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -72,16 +106,162 @@ static const struct file_operations g_ptp_clock_file_ops =
   NULL,            /* write */
   NULL,            /* seek */
   ptp_clock_ioctl, /* ioctl */
+  NULL,            /* mmap */
+  NULL,            /* truncate */
+  ptp_clock_poll,  /* poll */
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: ptp_clock_read
+ *
+ * Description:
+ *   Return queued external time stamp events as an array of
+ *   struct ptp_extts_event.  Blocks until at least one event is available
+ *   unless the file was opened with O_NONBLOCK.
+ *
+ ****************************************************************************/
+
 static ssize_t ptp_clock_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen)
 {
-  return 0;
+  FAR struct ptp_upperhalf_s *upper = filep->f_inode->i_private;
+  FAR struct ptp_extts_event *event = (FAR struct ptp_extts_event *)buffer;
+  size_t nevents = buflen / sizeof(struct ptp_extts_event);
+  irqstate_t flags;
+  size_t n = 0;
+  int ret;
+
+  if (nevents == 0)
+    {
+      return -EINVAL;
+    }
+
+  flags = spin_lock_irqsave(&upper->qlock);
+  while (upper->qcount == 0)
+    {
+      if (filep->f_oflags & O_NONBLOCK)
+        {
+          spin_unlock_irqrestore(&upper->qlock, flags);
+          return -EAGAIN;
+        }
+
+      upper->nwaiters++;
+      spin_unlock_irqrestore(&upper->qlock, flags);
+
+      ret = nxsem_wait(&upper->qsem);
+      if (ret < 0)
+        {
+          flags = spin_lock_irqsave(&upper->qlock);
+          if (upper->nwaiters > 0)
+            {
+              upper->nwaiters--;
+            }
+
+          spin_unlock_irqrestore(&upper->qlock, flags);
+          return ret;
+        }
+
+      flags = spin_lock_irqsave(&upper->qlock);
+    }
+
+  /* Copy the events.  The lock is held only for a few small copies */
+
+  while (n < nevents && upper->qcount > 0)
+    {
+      event[n++] = upper->queue[upper->qhead];
+      upper->qhead = (upper->qhead + 1) % PTP_QUEUE_SIZE;
+      upper->qcount--;
+    }
+
+  spin_unlock_irqrestore(&upper->qlock, flags);
+  return n * sizeof(struct ptp_extts_event);
+}
+
+/****************************************************************************
+ * Name: ptp_clock_poll
+ ****************************************************************************/
+
+static int ptp_clock_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
+                          bool setup)
+{
+  FAR struct ptp_upperhalf_s *upper = filep->f_inode->i_private;
+  irqstate_t flags;
+  int ret = OK;
+  int i;
+
+  flags = spin_lock_irqsave(&upper->qlock);
+  if (setup)
+    {
+      for (i = 0; i < CONFIG_PTP_CLOCK_NPOLLWAITERS; i++)
+        {
+          if (upper->fds[i] == NULL)
+            {
+              upper->fds[i] = fds;
+              fds->priv     = &upper->fds[i];
+              break;
+            }
+        }
+
+      if (i >= CONFIG_PTP_CLOCK_NPOLLWAITERS)
+        {
+          fds->priv = NULL;
+          ret       = -EBUSY;
+        }
+      else if (upper->qcount > 0)
+        {
+          spin_unlock_irqrestore(&upper->qlock, flags);
+          poll_notify(&fds, 1, POLLIN);
+          return OK;
+        }
+    }
+  else if (fds->priv != NULL)
+    {
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
+
+      *slot     = NULL;
+      fds->priv = NULL;
+    }
+
+  spin_unlock_irqrestore(&upper->qlock, flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ptp_clock_flush
+ *
+ * Description:
+ *   Discard the queued external time stamp events, so that the application
+ *   does not read stale time stamps after (re)enabling a channel.
+ *
+ ****************************************************************************/
+
+static void ptp_clock_flush(FAR struct ptp_upperhalf_s *upper)
+{
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&upper->qlock);
+  upper->qhead  = 0;
+  upper->qcount = 0;
+  spin_unlock_irqrestore(&upper->qlock, flags);
+}
+
+/****************************************************************************
+ * Name: ptp_clock_enable
+ ****************************************************************************/
+
+static int ptp_clock_enable(FAR struct ptp_lowerhalf_s *lower,
+                            FAR struct ptp_clock_request *rq, bool on)
+{
+  if (lower->ops->enable == NULL)
+    {
+      return -EOPNOTSUPP;
+    }
+
+  return lower->ops->enable(lower, rq, on);
 }
 
 static inline long ptp_clock_scaled_ppm_to_ppb(long ppm)
@@ -224,7 +404,92 @@ static int ptp_clock_ioctl(FAR struct file *filep, int cmd,
           caps->max_adj            = upper->max_adj;
           caps->cross_timestamping = lower->ops->getcrosststamp != NULL;
           caps->adjust_phase       = lower->ops->adjphase != NULL;
+          caps->n_ext_ts           = lower->n_ext_ts;
+          caps->n_per_out          = lower->n_per_out;
+          caps->pps                = lower->pps;
           ret = OK;
+        }
+        break;
+
+      case PTP_EXTTS_REQUEST:
+      case PTP_EXTTS_REQUEST2:
+        {
+          FAR struct ptp_extts_request *req =
+            (FAR struct ptp_extts_request *)(uintptr_t)arg;
+          struct ptp_clock_request rq;
+          bool on;
+
+          if (req == NULL || req->index >= lower->n_ext_ts)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          if (cmd == PTP_EXTTS_REQUEST2 &&
+              (req->flags & ~(PTP_ENABLE_FEATURE | PTP_EXTTS_EDGES |
+                              PTP_STRICT_FLAGS)) != 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          on = (req->flags & PTP_ENABLE_FEATURE) != 0;
+
+          memset(&rq, 0, sizeof(rq));
+          rq.type        = PTP_CLK_REQ_EXTTS;
+          rq.extts.index = req->index;
+          rq.extts.flags = req->flags;
+
+          if (on && (rq.extts.flags & PTP_EXTTS_EDGES) == 0)
+            {
+              rq.extts.flags |= PTP_RISING_EDGE;
+            }
+
+          if (on)
+            {
+              ptp_clock_flush(upper);
+            }
+
+          ret = ptp_clock_enable(lower, &rq, on);
+        }
+        break;
+
+      case PTP_PEROUT_REQUEST:
+      case PTP_PEROUT_REQUEST2:
+        {
+          FAR struct ptp_perout_request *req =
+            (FAR struct ptp_perout_request *)(uintptr_t)arg;
+          struct ptp_clock_request rq;
+
+          if (req == NULL || req->index >= lower->n_per_out)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          memset(&rq, 0, sizeof(rq));
+          rq.type   = PTP_CLK_REQ_PEROUT;
+          rq.perout = *req;
+          ret = ptp_clock_enable(lower, &rq,
+                                 req->period.sec != 0 ||
+                                 req->period.nsec != 0);
+        }
+        break;
+
+      case PTP_ENABLE_PPS:
+      case PTP_ENABLE_PPS2:
+        {
+          struct ptp_clock_request rq;
+
+          if (!lower->pps)
+            {
+              ret = -EOPNOTSUPP;
+              break;
+            }
+
+          memset(&rq, 0, sizeof(rq));
+          rq.type = PTP_CLK_REQ_PPS;
+          ret = ptp_clock_enable(lower, &rq, arg != 0);
         }
         break;
 
@@ -440,13 +705,17 @@ int ptp_clock_register(FAR struct ptp_lowerhalf_s *lower, int32_t max_adj,
   upper->max_adj = max_adj;
   lower->upper   = upper;
   nxmutex_init(&upper->lock);
+  spin_lock_init(&upper->qlock);
+  nxsem_init(&upper->qsem, 0, 0);
 
   snprintf(path, sizeof(path), "/dev/ptp%d", devno);
   ptpinfo("Registering %s\n", path);
   ret = register_driver(path, &g_ptp_clock_file_ops, 0600, upper);
   if (ret < 0)
     {
+      nxsem_destroy(&upper->qsem);
       nxmutex_destroy(&upper->lock);
+      lower->upper = NULL;
       kmm_free(upper);
     }
 
@@ -477,7 +746,68 @@ void ptp_clock_unregister(FAR struct ptp_lowerhalf_s *lower, int devno)
 
       snprintf(path, sizeof(path), "/dev/ptp%d", devno);
       unregister_driver(path);
+      lower->upper = NULL;
+      nxsem_destroy(&upper->qsem);
       nxmutex_destroy(&upper->lock);
       kmm_free(upper);
     }
+}
+
+/****************************************************************************
+ * Name: ptp_clock_event
+ *
+ * Description:
+ *   Report an event (an external time stamp) to the upper half.  The event
+ *   is queued and can be read() from /dev/ptpX by the application.  When
+ *   the queue is full the oldest event is dropped.
+ *
+ *   This function may be called from a normal interrupt handler.  It must
+ *   NOT be called from a zero latency (CONFIG_ARCH_HIPRI_INTERRUPT)
+ *   handler, which is not allowed to use OS services.
+ *
+ * Input Parameters:
+ *   lower - A pointer to an instance of lower half ptp driver.
+ *   event - The event to report.
+ *
+ ****************************************************************************/
+
+void ptp_clock_event(FAR struct ptp_lowerhalf_s *lower,
+                     FAR const struct ptp_clock_event *event)
+{
+  FAR struct ptp_upperhalf_s *upper = lower->upper;
+  FAR struct ptp_extts_event *slot;
+  irqstate_t flags;
+
+  if (upper == NULL || event->type != PTP_CLK_REQ_EXTTS)
+    {
+      return;
+    }
+
+  flags = spin_lock_irqsave(&upper->qlock);
+
+  if (upper->qcount >= PTP_QUEUE_SIZE)
+    {
+      /* Drop the oldest event to make room for the newest one */
+
+      upper->qhead = (upper->qhead + 1) % PTP_QUEUE_SIZE;
+      upper->qcount--;
+      upper->overrun++;
+    }
+
+  slot = &upper->queue[(upper->qhead + upper->qcount) % PTP_QUEUE_SIZE];
+  memset(slot, 0, sizeof(*slot));
+  slot->t.sec  = event->ts.tv_sec;
+  slot->t.nsec = event->ts.tv_nsec;
+  slot->index  = event->index;
+  slot->flags  = event->flags;
+  upper->qcount++;
+
+  while (upper->nwaiters > 0)
+    {
+      upper->nwaiters--;
+      nxsem_post(&upper->qsem);
+    }
+
+  spin_unlock_irqrestore(&upper->qlock, flags);
+  poll_notify(upper->fds, CONFIG_PTP_CLOCK_NPOLLWAITERS, POLLIN);
 }
