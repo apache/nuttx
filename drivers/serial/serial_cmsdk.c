@@ -284,16 +284,6 @@ uart_cmsdk_disableuartint(FAR struct uart_cmsdk_s *priv)
 }
 
 /****************************************************************************
- * Name: uart_cmsdk_restoreuartint
- ****************************************************************************/
-
-static inline void uart_cmsdk_restoreuartint(FAR struct uart_cmsdk_s *priv,
-                                             uint32_t ier)
-{
-  uart_cmsdk_serialmodify(priv, UART_CTRL_OFFSET, 0, ier & UART_CTRL_ALLIE);
-}
-
-/****************************************************************************
  * Name: uart_cmsdk_divisor
  *
  * Description:
@@ -580,6 +570,18 @@ static void uart_cmsdk_rxint(struct uart_dev_s *dev, bool enable)
     {
       uart_cmsdk_serialmodify(priv, UART_CTRL_OFFSET,
         0, UART_CTRL_RX_INT_ENABLE | UART_CTRL_RX_OVERRUN_INT_ENABLE);
+
+      /* If a character arrived before the RX interrupt was enabled
+       * (e.g. during early boot when RX is on but RX_INT is off),
+       * RXFULL is already set but no interrupt was generated.
+       * The CMSDK UART won't accept new characters while RXFULL is
+       * set, so we must drain it here to avoid a permanent stall.
+       */
+
+      if (uart_cmsdk_rxavailable(dev))
+        {
+          uart_recvchars(dev);
+        }
     }
   else
     {
@@ -779,8 +781,20 @@ void up_putc(int ch)
   FAR struct uart_cmsdk_s *priv = CONSOLE_DEV.priv;
   uint32_t ier;
 
-  ier = uart_cmsdk_disableuartint(priv);
+  /* Only disable TX interrupts for polled output.  Disabling RX
+   * interrupts here is dangerous: if a character arrives while
+   * RX_INT_ENABLE is cleared, the CMSDK UART sets RX_BUF_FULL but
+   * does NOT set INTSTATUS_RX (the enable is checked at the moment
+   * the character is received).  When we restore the enable bit the
+   * interrupt is never generated and the byte stays in the holding
+   * register forever, blocking all further RX and — because the
+   * console task is now stuck — TX as well.
+   */
+
+  ier = uart_cmsdk_serialmodify(priv, UART_CTRL_OFFSET,
+          UART_CTRL_TX_INT_ENABLE | UART_CTRL_TX_OVERRUN_INT_ENABLE, 0);
   uart_cmsdk_putc(priv, ch);
-  uart_cmsdk_restoreuartint(priv, ier);
+  uart_cmsdk_serialmodify(priv, UART_CTRL_OFFSET, 0,
+          ier & (UART_CTRL_TX_INT_ENABLE | UART_CTRL_TX_OVERRUN_INT_ENABLE));
 }
 #endif
