@@ -572,6 +572,7 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case CAPIOC_GET_INPUT_STATE:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)(uintptr_t)arg;
+
           DEBUGASSERT(ptr);
           for (i = 0; i < upper->nchan; i++)
             {
