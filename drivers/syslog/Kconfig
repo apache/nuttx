@@ -56,6 +56,17 @@ config SYSLOG_DEFAULT_MASK
 	hex "syslog mask default value"
 	default 0xff
 
+config SYSLOG_OPENLOG
+	bool "openlog() ident and options"
+	default !DEFAULT_SMALL
+	depends on SYSLOG
+	---help---
+		Keep the ident and the options that openlog() sets, and put
+		"ident: " ("ident[pid]: " with LOG_PID) before the messages of the
+		process, and copy them to stderr with LOG_PERROR.  If disabled,
+		openlog() and closelog() still exist but do nothing, and the
+		messages have no ident, as when a program never calls openlog().
+
 if SYSLOG
 comment "SYSLOG options"
 

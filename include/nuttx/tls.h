@@ -127,6 +127,7 @@ struct usershell_s
 };
 #endif
 
+#ifdef CONFIG_SYSLOG_OPENLOG
 /* This structure holds the settings of openlog() */
 
 #define OPENLOG_IDENT_SIZE 32
@@ -137,6 +138,7 @@ struct openlog_s
   int  ol_option;                    /* LOG_PID, LOG_PERROR ... */
   int  ol_facility;                  /* Default facility */
 };
+#endif
 
 #ifdef CONFIG_PTHREAD_ATFORK
 /* This structure defines the pthread_atfork_s, which is used to manage
@@ -175,7 +177,9 @@ struct task_info_s
                                    * libc at the first use
                                    */
 #endif
+#ifdef CONFIG_SYSLOG_OPENLOG
   struct openlog_s ta_openlog; /* Settings of openlog() */
+#endif
 #if CONFIG_LIBC_MAX_EXITFUNS > 0
   struct atexit_list_s ta_exit; /* Exit functions */
 #endif

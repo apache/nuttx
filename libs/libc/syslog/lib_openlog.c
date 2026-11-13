@@ -51,6 +51,7 @@
 
 void openlog(FAR const char *ident, int option, int facility)
 {
+#ifdef CONFIG_SYSLOG_OPENLOG
   FAR struct task_info_s *info = task_get_info();
   FAR struct openlog_s *state;
   size_t n = 0;
@@ -72,6 +73,11 @@ void openlog(FAR const char *ident, int option, int facility)
   state->ol_option   = option;
   state->ol_facility = facility;
   nxrmutex_unlock(&info->ta_lock);
+#else
+  UNUSED(ident);
+  UNUSED(option);
+  UNUSED(facility);
+#endif
 }
 
 /****************************************************************************
