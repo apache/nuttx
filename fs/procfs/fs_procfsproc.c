@@ -723,7 +723,7 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
 
   linesize   = nxtask_argvstr(tcb, procfile->line, sizeof(procfile->line));
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
-                             sizeof(procfile->line), &offset);
+                             remaining, &offset);
   totalsize += copysize;
   buffer    += copysize;
   remaining -= copysize;
