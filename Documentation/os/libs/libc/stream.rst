@@ -9,6 +9,10 @@ https://en.cppreference.com/w/c/io/fscanf
 -  **special**:
 
    1. Float use %hf, “%f” or “%lf” is double, “%Lf” is long double.
+      If ``CONFIG_LIBC_BFORMAT_B16`` is enabled, %hf is a ``b16_t``
+      (16.16 fixed-point) value instead of a float. Without
+      ``CONFIG_LIBC_FLOATINGPOINT`` it is printed as integer.fraction with four
+      decimal digits, and it can't be scanned.
    2. The char array is specified with %.xs. for example: “char t[30]”
       is specified with “%.30s”, char a [20] - " %.20s "
    3. “%u” is unsigned int.
