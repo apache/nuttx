@@ -209,7 +209,7 @@ static void dac_shutdown(struct dac_dev_s *dev)
         {
           /* Disable DAC0 */
 
-          putreg8(DAC_C0_DACEN, KINETIS_DAC0_C0);
+          putreg8(0, KINETIS_DAC0_C0);
         }
 
       /* Disable DAC0 module */
@@ -231,7 +231,7 @@ static void dac_shutdown(struct dac_dev_s *dev)
         {
           /* Disable DAC1 */
 
-          putreg8(DAC_C0_DACEN, KINETIS_DAC1_C0);
+          putreg8(0, KINETIS_DAC1_C0);
         }
 
       /* Disable DAC1 module */
