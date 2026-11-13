@@ -80,6 +80,8 @@ jobs:
             echo 'arch_contains_x86=1' | tee -a $GITHUB_OUTPUT
           elif [[ "$labels" == *"Arch: xtensa"* ]]; then
             echo 'arch_contains_xtensa=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Arch: tricore"* ]]; then
+            echo 'arch_contains_tricore=1' | tee -a $GITHUB_OUTPUT
           fi
 
           # Get the Board Label
@@ -97,6 +99,8 @@ jobs:
             echo 'board_contains_x86=1' | tee -a $GITHUB_OUTPUT
           elif [[ "$labels" == *"Board: xtensa"* ]]; then
             echo 'board_contains_xtensa=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Board: tricore"* ]]; then
+            echo 'board_contains_tricore=1' | tee -a $GITHUB_OUTPUT
           fi
 
           # Identify ARM Chip Family if PR is isolated to a single family
@@ -238,6 +242,7 @@ jobs:
           arch_contains_x86=${{ steps.get-arch.outputs.arch_contains_x86 }}
           arch_contains_x86_64=${{ steps.get-arch.outputs.arch_contains_x86_64 }}
           arch_contains_xtensa=${{ steps.get-arch.outputs.arch_contains_xtensa }}
+          arch_contains_tricore=${{ steps.get-arch.outputs.arch_contains_tricore }}
           board_contains_arm=${{ steps.get-arch.outputs.board_contains_arm }}
           board_contains_arm64=${{ steps.get-arch.outputs.board_contains_arm64 }}
           board_contains_riscv=${{ steps.get-arch.outputs.board_contains_riscv }}
@@ -245,6 +250,7 @@ jobs:
           board_contains_x86=${{ steps.get-arch.outputs.board_contains_x86 }}
           board_contains_x86_64=${{ steps.get-arch.outputs.board_contains_x86_64 }}
           board_contains_xtensa=${{ steps.get-arch.outputs.board_contains_xtensa }}
+          board_contains_tricore=${{ steps.get-arch.outputs.board_contains_tricore }}
           arm_family=${{ steps.get-arch.outputs.arm_family }}
 
           # inputs.boards is a JSON Array: ["arm-01", "risc-v-01", "xtensa-01", ...]
@@ -272,7 +278,8 @@ jobs:
               "$arch_contains_sim" != "$board_contains_sim" ||
               "$arch_contains_x86" != "$board_contains_x86" ||
               "$arch_contains_x86_64" != "$board_contains_x86_64" ||
-              "$arch_contains_xtensa" != "$board_contains_xtensa"
+              "$arch_contains_xtensa" != "$board_contains_xtensa" ||
+              "$arch_contains_tricore" != "$board_contains_tricore"
             ]]; then
               echo "Arch and Board are not the same, will build all targets"
               quit=1
@@ -350,6 +357,12 @@ jobs:
             # For "Arch / Board: xtensa": Build xtensa-01, xtensa-02, xtensa-03
             elif [[ "$arch_contains_xtensa" == "1" || "$board_contains_xtensa" == "1" ]]; then
               if [[ "$board" != *"xtensa-"* ]]; then
+                skip_build=1
+              fi
+
+            # For "Arch / Board: tricore": Build tricore-01
+            elif [[ "$arch_contains_tricore" == "1" || "$board_contains_tricore" == "1" ]]; then
+              if [[ "$board" != *"tricore-"* ]]; then
                 skip_build=1
               fi
 
