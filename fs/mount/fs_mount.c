@@ -354,7 +354,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
               ret = -ENODEV;
               goto errout_with_inode;
             }
-#ifdef CONFIG_MTD
+#ifdef CONFIG_FS_MTD_PROXY
           else
             {
               inode_release(drvr_inode);

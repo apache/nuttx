@@ -214,6 +214,17 @@ config FS_HEAPBUF_SECTION
 		Allocated fs heap from the specified section. If not
 		specified, it will alloc from kernel heap.
 
+config FS_MTD_PROXY
+	bool "Auto-create FTL block device when mounting MTD"
+	default y
+	depends on MTD
+	---help---
+		When enabled, mount() and open_blockdriver() will automatically
+		create a temporary FTL block device for an MTD device that is
+		passed as the source.  Disable this to save code space when
+		the block device is created manually (e.g. via
+		ftl_initialize_by_path).
+
 source "fs/vfs/Kconfig"
 source "fs/aio/Kconfig"
 source "fs/semaphore/Kconfig"
