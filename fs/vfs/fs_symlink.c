@@ -83,9 +83,15 @@ int symlink(FAR const char *path1, FAR const char *path2)
   FAR struct inode *inode = NULL;
   int ret;
 
-  if (path1 == NULL)
+  if (path1 == NULL || path2 == NULL)
     {
       ret = -EINVAL;
+      goto errout;
+    }
+
+  if (*path1 == '\0' || *path2 == '\0')
+    {
+      ret = -ENOENT;
       goto errout;
     }
 
@@ -93,7 +99,7 @@ int symlink(FAR const char *path1, FAR const char *path2)
    * 'path2' does not lie on a mounted volume.
    */
 
-  ret = inode_search_setup(&desc, path2, false);
+  ret = inode_search_setup(&desc, path2, true);
   if (ret < 0)
     {
       goto errout;
@@ -137,6 +143,13 @@ int symlink(FAR const char *path1, FAR const char *path2)
           ret = -EEXIST;
           goto errout_with_inode;
         }
+    }
+
+  /* Only a missing path2 may be created; any other error stands */
+
+  else if (ret != -ENOENT)
+    {
+      goto errout_with_search;
     }
 
   /* No inode exists that contains this path.  Create a new inode in the
