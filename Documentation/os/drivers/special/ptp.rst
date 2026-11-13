@@ -42,6 +42,9 @@ Hardware-specific drivers embed a ``struct ptp_lowerhalf_s`` and point its
    {
      FAR const struct ptp_ops_s *ops;  /* Lower half driver operations */
      FAR void *upper;                  /* The upper handle */
+     uint8_t n_ext_ts;                 /* Number of external time stamp inputs */
+     uint8_t n_per_out;                /* Number of periodic outputs */
+     bool    pps;                      /* Whether PTP_ENABLE_PPS is supported */
    };
 
    struct ptp_ops_s
@@ -60,6 +63,8 @@ Hardware-specific drivers embed a ``struct ptp_lowerhalf_s`` and point its
                         FAR struct timespec *res);
      CODE int (*control)(FAR struct ptp_lowerhalf_s *lower,
                          int cmd, unsigned long arg);
+     CODE int (*enable)(FAR struct ptp_lowerhalf_s *lower,
+                        FAR struct ptp_clock_request *rq, bool on);
    };
 
 The units are:
@@ -81,6 +86,21 @@ half from which operations exist and from ``max_adj``, so there is no
 operation to report them. Ioctl commands that the upper half does not know
 are passed to ``control``.
 
+``enable`` switches an ancillary feature on or off: an external time stamp
+input (``PTP_CLK_REQ_EXTTS``), a periodic output (``PTP_CLK_REQ_PEROUT``) or
+the PPS event (``PTP_CLK_REQ_PPS``). The number of inputs and outputs is
+declared in ``n_ext_ts`` and ``n_per_out`` and reported in the capabilities.
+A driver that time stamps an edge on an enabled input reports it with:
+
+.. code-block:: c
+
+   void ptp_clock_event(FAR struct ptp_lowerhalf_s *lower,
+                        FAR const struct ptp_clock_event *event);
+
+The upper half queues the event and the application reads it from the
+device. ``ptp_clock_event()`` can be called from a normal interrupt handler,
+but not from a zero latency (``CONFIG_ARCH_HIPRI_INTERRUPT``) handler.
+
 Configuration Options
 =====================
 
@@ -98,6 +118,13 @@ The PTP clock framework can be enabled with the following Kconfig options:
 ``CONFIG_CLOCK_ADJTIME``
   Enable the ``clock_adjtime()`` system call, required for frequency and
   phase adjustments of PTP clocks.
+
+``CONFIG_PTP_CLOCK_EXTTS_QUEUE_SIZE``
+  Number of external time stamp events kept until the application reads them
+  (default 16). When the queue is full the oldest event is dropped.
+
+``CONFIG_PTP_CLOCK_NPOLLWAITERS``
+  Number of threads that can ``poll()`` one device at the same time.
 
 Device Interface
 ================
@@ -184,6 +211,35 @@ The following ioctl commands are supported:
 ``PTP_CLOCK_GETSTATS`` and ``PTP_CLOCK_SETSTATS``
   Read or set the drift statistics kept by the upper half
   (``struct ptp_statistics_s``).
+
+``PTP_EXTTS_REQUEST``
+  Enable or disable an external time stamp input. Every edge seen on an
+  enabled input is time stamped with the PTP clock and returned by
+  ``read()`` as a ``struct ptp_extts_event``. ``read()`` blocks until an
+  event is available (unless ``O_NONBLOCK`` is set) and ``poll()`` reports
+  ``POLLIN`` when events are queued. Enabling an input discards the events
+  that were queued before.
+
+  .. code-block:: c
+
+     struct ptp_extts_request req;
+     struct ptp_extts_event ev;
+
+     memset(&req, 0, sizeof(req));
+     req.index = 0;
+     req.flags = PTP_ENABLE_FEATURE | PTP_RISING_EDGE;
+     ioctl(fd, PTP_EXTTS_REQUEST, &req);
+
+     while (read(fd, &ev, sizeof(ev)) == sizeof(ev))
+       {
+         printf("edge on %u at %lld.%09u\n", ev.index,
+                (long long)ev.t.sec, ev.t.nsec);
+       }
+
+``PTP_PEROUT_REQUEST`` and ``PTP_ENABLE_PPS``
+  Configure a periodic output (``struct ptp_perout_request``, a zero period
+  disables it) or enable the PPS event. They are passed to the ``enable``
+  operation of the lower half.
 
 The ``PTP_CLOCK_GETCAPS``, ``PTP_SYS_OFFSET``, ``PTP_SYS_OFFSET_PRECISE`` and
 ``PTP_SYS_OFFSET_EXTENDED`` commands also exist with a ``2`` suffix
