@@ -37,6 +37,30 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsched_park_task
+ *
+ * Description:
+ *   Stop a task that found itself already inside a termination flow.  It
+ *   must not touch its stack again: it removes itself from the ready-to-run
+ *   list, blocks on the signal wait list and switches away for good.  The
+ *   termination path already handles a task blocked in TSTATE_WAIT_SIG.
+ *
+ ****************************************************************************/
+
+void nxsched_park_task(FAR struct tcb_s *tcb)
+{
+  enter_critical_section();
+  for (; ; )
+    {
+      nxsched_remove_self(tcb);
+      tcb->task_state = TSTATE_TASK_INACTIVE;
+      up_switch_context(this_task(), tcb);
+    }
+
+  PANIC();
+}
+
+/****************************************************************************
  * Name: nxsched_get_tcb/nxsched_put_tcb
  *
  * Description:
@@ -140,9 +164,6 @@ void nxsched_put_tcb(FAR struct tcb_s *tcb)
        * the TCB again and it gets killed.
        */
 
-      for (; ; )
-        {
-          usleep(1000);
-        }
+      nxsched_park_task(tcb);
     }
 }
