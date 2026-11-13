@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <stdio.h>
+#include <string.h>
 #include <poll.h>
 #include <assert.h>
 #include <errno.h>
@@ -157,11 +158,17 @@ static ssize_t signalfd_file_read(FAR struct file *filep,
   ssize_t ret;
   int count;
 
-  count = len / sizeof(struct signalfd_siginfo);
-  if (buffer == NULL || count == 0)
+  if (buffer == NULL)
+    {
+      return -EFAULT;
+    }
+
+  if (len < sizeof(struct signalfd_siginfo))
     {
       return -EINVAL;
     }
+
+  count = len / sizeof(struct signalfd_siginfo);
 
   pendmask = nxsig_pendingset(NULL);
   sigandset(&pendmask, &pendmask, &dev->sigmask);
@@ -345,7 +352,7 @@ void signalfd_notify(FAR struct task_group_s *group, int signo)
 
   /* A group that never set up a signalfd poll has no waiter array. */
 
-  if (group->tg_sigfds == NULL)
+  if (group == NULL || group->tg_sigfds == NULL)
     {
       return;
     }
@@ -421,6 +428,12 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
   FAR struct file *filep = NULL;
   int ret = EINVAL;
 
+  if (mask == NULL)
+    {
+      ret = EFAULT;
+      goto errout;
+    }
+
   if (flags & ~(SFD_CLOEXEC | SFD_NONBLOCK))
     {
       goto errout;
@@ -455,7 +468,8 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
           goto errout;
         }
 
-      if (filep->f_inode->u.i_ops != &g_signalfd_fileops)
+      if (filep->f_inode == NULL ||
+          filep->f_inode->u.i_ops != &g_signalfd_fileops)
         {
           file_put(filep);
           goto errout;
