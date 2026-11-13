@@ -78,6 +78,13 @@ else()
   )
 endif()
 
+# The astc assembler has no C preprocessor and .asm files need explicit
+# preprocessing with ctc -E.
+
+set(CMAKE_ASM_COMPILE_OBJECT
+    "ctc -E <DEFINES> <INCLUDES> <SOURCE> -o <OBJECT>.pp.asm && <CMAKE_ASM_COMPILER> <FLAGS> -c <OBJECT>.pp.asm -o <OBJECT>"
+)
+
 if(CMAKE_GENERATOR MATCHES "Ninja")
   set(CMAKE_C_RESPONSE_FILE_FLAG "-f ${CMAKE_BINARY_DIR}/")
   set(CMAKE_CXX_RESPONSE_FILE_FLAG "-f ${CMAKE_BINARY_DIR}/")
