@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include <nuttx/debug.h>
 
@@ -292,7 +293,12 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
   irqstate_t intflags;
   ssize_t ret;
 
-  if (len < sizeof(timerfd_t) || buffer == NULL)
+  if (buffer == NULL)
+    {
+      return -EFAULT;
+    }
+
+  if (len < sizeof(timerfd_t))
     {
       return -EINVAL;
     }
@@ -346,7 +352,7 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
       nxsem_destroy(&sem.sem);
     }
 
-  *(FAR timerfd_t *)buffer = dev->counter;
+  memcpy(buffer, &dev->counter, sizeof(timerfd_t));
   dev->counter = 0;
 
   leave_critical_section(intflags);
@@ -557,13 +563,24 @@ int timerfd_settime(int fd, int flags,
 
   /* Some sanity checks */
 
-  if (!new_value)
+  if (new_value == NULL)
     {
       ret = -EFAULT;
       goto errout;
     }
 
   if ((flags & ~(TFD_TIMER_ABSTIME | TFD_TIMER_CANCEL_ON_SET)) != 0)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  if (new_value->it_value.tv_nsec < 0 ||
+      new_value->it_value.tv_nsec >= NSEC_PER_SEC ||
+      new_value->it_interval.tv_nsec < 0 ||
+      new_value->it_interval.tv_nsec >= NSEC_PER_SEC ||
+      new_value->it_value.tv_sec < 0 ||
+      new_value->it_interval.tv_sec < 0)
     {
       ret = -EINVAL;
       goto errout;
@@ -577,8 +594,10 @@ int timerfd_settime(int fd, int flags,
       goto errout;
     }
 
-  if (filep->f_inode->u.i_ops != &g_timerfd_fops)
+  if (filep->f_inode == NULL ||
+      filep->f_inode->u.i_ops != &g_timerfd_fops)
     {
+      ret = -EINVAL;
       goto errout_with_filep;
     }
 
@@ -661,7 +680,9 @@ int timerfd_settime(int fd, int flags,
       delay = dev->delay;
     }
 
-  if (flags & TFD_TIMER_CANCEL_ON_SET)
+  if ((flags & TFD_TIMER_CANCEL_ON_SET) != 0 &&
+      (flags & TFD_TIMER_ABSTIME) != 0 &&
+      dev->clock == CLOCK_REALTIME)
     {
       dev->nb.notifier_call = timerfd_changed_handler;
       register_clock_notifier(&dev->nb);
@@ -699,7 +720,7 @@ int timerfd_gettime(int fd, FAR struct itimerspec *curr_value)
 
   /* Some sanity checks */
 
-  if (!curr_value)
+  if (curr_value == NULL)
     {
       ret = -EFAULT;
       goto errout;
@@ -713,8 +734,10 @@ int timerfd_gettime(int fd, FAR struct itimerspec *curr_value)
       goto errout;
     }
 
-  if (filep->f_inode->u.i_ops != &g_timerfd_fops)
+  if (filep->f_inode == NULL ||
+      filep->f_inode->u.i_ops != &g_timerfd_fops)
     {
+      ret = -EINVAL;
       file_put(filep);
       goto errout;
     }
