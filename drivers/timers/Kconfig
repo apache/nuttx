@@ -729,4 +729,85 @@ config PTP_CLOCK_DUMMY
 	---help---
 		The dummy test driver.
 
+config PTP_PPS
+	bool "PPS disciplined software PTP clock"
+	default n
+	select PTP_CLOCK
+	---help---
+		A PTP hardware clock (/dev/ptpX) built on top of any free
+		running 32-bit hardware counter, with external time stamp
+		(EXTTS) inputs that latch the counter in hardware, for
+		example a timer input capture channel connected to the PPS
+		output of a GNSS receiver.
+
+		The clock is read, stepped and frequency adjusted through the
+		standard clock_gettime(), clock_settime() and clock_adjtime()
+		interfaces, and PPS edges are delivered to the application
+		as struct ptp_extts_event records read from /dev/ptpX.  The
+		gnsspps application in nuttx-apps uses them to discipline
+		the clock to GNSS time, so that boards that each have a GNSS
+		receiver share the same time scale.
+
+		The architecture provides the counter and the capture
+		inputs, see for example STM32_PTP_PPS.
+
+if PTP_PPS
+
+config PTP_PPS_MAX_ADJ
+	int "Maximum frequency adjustment (ppb)"
+	default 500000
+	range 1000 10000000
+	---help---
+		Largest frequency correction, in parts per billion, that the
+		clock accepts through clock_adjtime(ADJ_FREQUENCY).  It must
+		cover the tolerance of the oscillator that drives the
+		counter.  The default of 500 ppm covers any crystal.
+
+config PTP_PPS_DUMMY
+	bool "Simulated PPS source for testing"
+	default n
+	---help---
+		Register a PPS disciplined clock whose counter and PPS pulses
+		are simulated in software from up_perf_gettime().  The
+		simulated oscillator has a configurable frequency error and
+		the simulated PPS has a configurable jitter, so the complete
+		chain (driver, EXTTS events and the gnsspps servo) can be
+		tested on the simulator without any hardware.
+
+		up_perf_gettime() is used as the "true" time reference, so
+		it must have a good resolution (it is in nanoseconds on the
+		simulator).
+
+if PTP_PPS_DUMMY
+
+config PTP_PPS_DUMMY_DEVNO
+	int "Device number (/dev/ptpX)"
+	default 0
+
+config PTP_PPS_DUMMY_FREQ
+	int "Simulated counter frequency (Hz)"
+	default 100000000
+	range 1000000 1000000000
+
+config PTP_PPS_DUMMY_ERROR_PPB
+	int "Simulated oscillator frequency error (ppb)"
+	default 37000
+	range -400000 400000
+	---help---
+		Frequency error of the simulated oscillator, in parts per
+		billion.  The servo must measure and cancel it.
+
+config PTP_PPS_DUMMY_JITTER_NS
+	int "Simulated PPS jitter (ns, peak)"
+	default 20
+	range 0 1000000
+	---help---
+		Uniformly distributed jitter added to every simulated PPS
+		edge.  Typical GNSS receivers have a PPS jitter of a few
+		nanoseconds to some tens of nanoseconds.
+
+endif # PTP_PPS_DUMMY
+
+endif # PTP_PPS
+
 endmenu # Timer Driver Support

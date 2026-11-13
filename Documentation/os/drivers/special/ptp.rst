@@ -126,6 +126,10 @@ The PTP clock framework can be enabled with the following Kconfig options:
 ``CONFIG_PTP_CLOCK_NPOLLWAITERS``
   Number of threads that can ``poll()`` one device at the same time.
 
+``CONFIG_PTP_PPS``
+  PPS disciplined software PTP clock, see
+  `PPS Disciplined Software Clock`_ below.
+
 Device Interface
 ================
 
@@ -471,6 +475,64 @@ Time Offset Adjustment
      close(fd);
      return 0;
    }
+
+PPS Disciplined Software Clock
+==============================
+
+``CONFIG_PTP_PPS`` (``drivers/timers/ptp_pps.c``) builds a PTP clock on top
+of any free running 32-bit hardware counter, with external time stamp inputs
+that latch that counter in hardware, typically timer input capture channels.
+Its main use is to synchronize boards to GNSS time: the PPS output of a GNSS
+receiver goes to a capture input, the ``gnsspps`` application reads the
+EXTTS events and disciplines the clock. See
+:doc:`/applications/system/gnsspps/index`.
+
+The time is a linear function of the counter,
+``t = base_ns + ((cnt - base_cnt) * mult + base_frac) >> shift``, where
+``shift`` is chosen so that ``mult`` stays below 2\ :sup:`31`. This gives a
+frequency resolution better than 1 ppb for any counter frequency, an exact
+conversion (the remainder is kept in ``base_frac``) and phase continuous
+frequency changes. A watchdog re-bases the clock every 2\ :sup:`30` counter
+periods so the conversion never overflows, even without PPS.
+
+A lower half provides the counter and the capture inputs:
+
+.. code-block:: c
+
+   struct ptp_pps_ops_s
+   {
+     CODE uint32_t (*read)(FAR struct ptp_pps_lowerhalf_s *lower);
+     CODE int (*enable)(FAR struct ptp_pps_lowerhalf_s *lower,
+                        unsigned int index, unsigned int flags, bool on);
+   };
+
+   struct ptp_pps_lowerhalf_s
+   {
+     FAR const struct ptp_pps_ops_s *ops;
+     uint32_t freq;       /* Nominal counter frequency (Hz) */
+     uint8_t  n_ext_ts;   /* Number of capture inputs */
+     FAR void *priv;      /* Used by the upper half */
+   };
+
+   int  ptp_pps_register(FAR struct ptp_pps_lowerhalf_s *lower, int devno);
+   void ptp_pps_capture(FAR struct ptp_pps_lowerhalf_s *lower,
+                        unsigned int index, unsigned int flags,
+                        uint32_t count);
+
+The capture interrupt handler passes the latched counter value to
+``ptp_pps_capture()``, which converts it to the time of the clock and queues
+the EXTTS event. Because the counter is latched by hardware, the interrupt
+latency does not affect the time stamp; the handler only has to run within
+2\ :sup:`31` counter periods.
+
+Existing lower halves:
+
+- ``CONFIG_STM32_PTP_PPS``: STM32 TIM2 or TIM5 (32-bit) free running at the
+  timer clock, PPS on one of its input capture channels
+  (``arch/arm/src/common/stm32/stm32_ptp_pps.c``).
+- ``CONFIG_PTP_PPS_DUMMY``: a simulated counter with a configurable
+  frequency error and a simulated PPS with a configurable jitter, to test the
+  complete chain on the simulator.
 
 Implementing a Lower-Half Driver
 =================================
