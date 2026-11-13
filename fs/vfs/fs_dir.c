@@ -166,8 +166,13 @@ static int open_pseudodir(FAR struct inode *inode,
 
   *dir              = &pdir->dir;
   pdir->dir.fd_root = inode;          /* Save the inode where we start */
+
+  /* A concurrent unlink may free i_child between the read and the addref */
+
+  inode_lock();
   pdir->next        = inode->i_child; /* This next node for readdir */
-  inode_addref(inode->i_child);
+  inode_addref(pdir->next);
+  inode_unlock();
   return 0;
 }
 
@@ -188,6 +193,8 @@ static off_t seek_pseudodir(FAR struct file *filep, off_t offset)
    * "rewind" to the root dir.
    */
 
+  inode_lock();
+
   if (offset < filep->f_pos)
     {
       pos  = 0;
@@ -204,8 +211,6 @@ static off_t seek_pseudodir(FAR struct file *filep, off_t offset)
    * are being registered and unregistered, then this can
    * be a very unpredictable operation.
    */
-
-  inode_lock();
 
   for (; curr != NULL && pos != offset; pos++, curr = curr->i_peer);
 
