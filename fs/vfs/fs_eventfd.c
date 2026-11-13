@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <stdio.h>
+#include <string.h>
 #include <poll.h>
 #include <assert.h>
 #include <errno.h>
@@ -274,9 +275,15 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct eventfd_priv_s *dev = filep->f_priv;
   FAR eventfd_waiter_sem_t *cur_sem;
+  eventfd_t value;
   ssize_t ret;
 
-  if (len < sizeof(eventfd_t) || buffer == NULL)
+  if (buffer == NULL)
+    {
+      return -EFAULT;
+    }
+
+  if (len < sizeof(eventfd_t))
     {
       return -EINVAL;
     }
@@ -318,14 +325,16 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
 
   if ((filep->f_oflags & EFD_SEMAPHORE) != 0)
     {
-      *(FAR eventfd_t *)buffer = 1;
+      value = 1;
       dev->counter -= 1;
     }
   else
     {
-      *(FAR eventfd_t *)buffer = dev->counter;
+      value = dev->counter;
       dev->counter = 0;
     }
+
+  memcpy(buffer, &value, sizeof(eventfd_t));
 
 #ifdef CONFIG_EVENT_FD_POLL
   /* Notify all poll/select waiters */
@@ -354,11 +363,22 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
   FAR struct eventfd_priv_s *dev = filep->f_priv;
   FAR eventfd_waiter_sem_t *cur_sem;
   eventfd_t new_counter;
+  eventfd_t value;
   ssize_t ret;
 
-  if (len < sizeof(eventfd_t) || buffer == NULL ||
-      (*(FAR eventfd_t *)buffer == (eventfd_t)-1) ||
-      (*(FAR eventfd_t *)buffer == (eventfd_t)0))
+  if (buffer == NULL)
+    {
+      return -EFAULT;
+    }
+
+  if (len < sizeof(eventfd_t))
+    {
+      return -EINVAL;
+    }
+
+  memcpy(&value, buffer, sizeof(eventfd_t));
+
+  if (value == (eventfd_t)-1 || value == (eventfd_t)0)
     {
       return -EINVAL;
     }
@@ -369,9 +389,9 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
       return ret;
     }
 
-  new_counter = dev->counter + *(FAR eventfd_t *)buffer;
+  new_counter = dev->counter + value;
 
-  if (new_counter < dev->counter)
+  if (new_counter < dev->counter || new_counter == (eventfd_t)-1)
     {
       eventfd_waiter_sem_t sem;
 
@@ -393,8 +413,8 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
               return ret;
             }
         }
-      while ((new_counter = dev->counter + *(FAR eventfd_t *)buffer)
-            < dev->counter);
+      while ((new_counter = dev->counter + value) < dev->counter ||
+             new_counter == (eventfd_t)-1);
 
       nxsem_destroy(&sem.sem);
     }
