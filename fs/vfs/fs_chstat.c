@@ -182,6 +182,18 @@ static int chstat(FAR const char *path,
         }
     }
 
+  /* Changing the mode, owner, group or times is a status change, so mark
+   * st_ctime for update.  st_ctim already holds the current time.  This
+   * runs after the UTIME_OMIT handling, so a no-op utimens() leaves
+   * st_ctime alone.
+   */
+
+  if (flags & (CH_STAT_MODE | CH_STAT_UID | CH_STAT_GID |
+               CH_STAT_ATIME | CH_STAT_MTIME))
+    {
+      flags |= CH_STAT_CTIME;
+    }
+
   /* Perform the chstat operation */
 
   ret = chstat_recursive(path, buf, flags, resolve);

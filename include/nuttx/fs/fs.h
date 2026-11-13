@@ -178,6 +178,7 @@
 #define CH_STAT_GID        (1 << 2)
 #define CH_STAT_ATIME      (1 << 3)
 #define CH_STAT_MTIME      (1 << 4)
+#define CH_STAT_CTIME      (1 << 5)
 #define CH_STAT_SIZE       (1 << 7)
 #define CH_STAT_NOFOLLOW   (1 << 8)  /* Do not follow a final symbolic link */
 
