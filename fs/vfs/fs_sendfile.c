@@ -33,8 +33,8 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/net/net.h>
-#include "fs_heap.h"
 
 /****************************************************************************
  * Private Functions
@@ -76,7 +76,7 @@ static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
 
   /* Allocate an I/O buffer */
 
-  iobuffer = fs_heap_malloc(CONFIG_SENDFILE_BUFSIZE);
+  iobuffer = lib_get_tempbuffer(CONFIG_SENDFILE_BUFSIZE);
   if (!iobuffer)
     {
       return -ENOMEM;
@@ -199,7 +199,7 @@ static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
 
   /* Release the I/O buffer */
 
-  fs_heap_free(iobuffer);
+  lib_put_tempbuffer(iobuffer);
 
   /* Return the current file position */
 

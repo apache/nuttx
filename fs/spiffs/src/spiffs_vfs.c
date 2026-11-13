@@ -58,6 +58,7 @@
 #include <nuttx/queue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/lib/lib.h>
 
 #include "fs_heap.h"
 #include "spiffs.h"
@@ -653,6 +654,7 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
           /* Small write, try to cache it */
 
           bool alloc_cpage = true;
+
           if (fobj->cache_page != NULL)
             {
               /* We have a cached page for this object already, check cache
@@ -861,22 +863,22 @@ static off_t spiffs_seek(FAR struct file *filep, off_t offset, int whence)
   switch (whence)
     {
       case SEEK_SET: /* The offset is set to offset bytes. */
-          pos = offset;
-          break;
+        pos = offset;
+        break;
 
       case SEEK_CUR: /* The offset is set to its current location plus
                       * offset bytes. */
-          pos = offset + filep->f_pos;
-          break;
+        pos = offset + filep->f_pos;
+        break;
 
       case SEEK_END: /* The offset is set to the size of the file plus
                       * offset bytes. */
-          pos = fsize + offset;
-          break;
+        pos = fsize + offset;
+        break;
 
       default:
-          ret = -EINVAL;
-          goto errout_with_lock;
+        ret = -EINVAL;
+        goto errout_with_lock;
     }
 
   /* Verify the resulting file position */
@@ -990,6 +992,7 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               /* No.. we will have to erase a block at a time */
 
               int16_t blkndx = 0;
+
               while (blkndx < SPIFFS_GEO_BLOCK_COUNT(fs))
                 {
                   fs->max_erase_count = 0;
@@ -1700,7 +1703,7 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
        */
 
       fobj = (FAR struct spiffs_file_s *)
-        fs_heap_zalloc(sizeof(struct spiffs_file_s));
+        lib_get_tempbuffer(sizeof(struct spiffs_file_s));
       if (fobj == NULL)
         {
           fwarn("WARNING: Failed to allocate fobj\n");
@@ -1714,14 +1717,14 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
       if (ret < 0)
         {
           ferr("ERROR: spiffs_fobj_open_bypage failed: %d\n", ret);
-          fs_heap_free(fobj);
+          lib_put_tempbuffer(fobj);
           goto errout_with_lock;
         }
 
       /* Now we can remove the file by truncating it to zero length */
 
       ret = spiffs_fobj_truncate(fs, fobj, 0, true);
-      fs_heap_free(fobj);
+      lib_put_tempbuffer(fobj);
 
       if (ret < 0)
         {

@@ -40,9 +40,9 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/lib/lib.h>
 
 #include "inode/inode.h"
-#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -170,7 +170,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
   if (npfds > 0)
     {
       pollset = (FAR struct pollfd *)
-        fs_heap_zalloc(npfds * sizeof(struct pollfd));
+        lib_get_tempbuffer(npfds * sizeof(struct pollfd));
 
       if (pollset == NULL)
         {
@@ -178,6 +178,8 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
           return ERROR;
         }
     }
+
+  memset(pollset, 0, npfds * sizeof(struct pollfd));
 
   /* Initialize the descriptor list for poll() */
 
@@ -309,6 +311,6 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
         }
     }
 
-  fs_heap_free(pollset);
+  lib_put_tempbuffer(pollset);
   return ret;
 }

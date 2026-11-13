@@ -31,10 +31,10 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/macro.h>
 
 #include "partition.h"
-#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -83,9 +83,9 @@ int parse_txtable_partition(FAR struct partition_state_s *state,
 
   /* Allocate memory for table of parsed and raw */
 
-  part = fs_heap_malloc(CONFIG_TXTABLE_PARTITION_MAX_NUM *
-                    sizeof(struct partition_s) +
-                    TXTABLE_LENGTH);
+  part = lib_get_tempbuffer(CONFIG_TXTABLE_PARTITION_MAX_NUM *
+                            sizeof(struct partition_s) +
+                            TXTABLE_LENGTH);
   if (part == NULL)
     {
       return -ENOMEM;
@@ -225,6 +225,6 @@ int parse_txtable_partition(FAR struct partition_state_s *state,
   handler(&part[j], arg);
 
 out:
-  fs_heap_free(part);
+  lib_put_tempbuffer(part);
   return ret;
 }

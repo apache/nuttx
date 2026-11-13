@@ -44,7 +44,6 @@
 #include <nuttx/mutex.h>
 
 #include "driver.h"
-#include "fs_heap.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && \
     !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)

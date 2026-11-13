@@ -32,6 +32,7 @@
 
 #include <nuttx/crc32.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 
 #include "partition.h"
 #include "fs_heap.h"
@@ -403,7 +404,7 @@ int parse_gpt_partition(FAR struct partition_state_s *state,
 
   count = (sizeof(struct gpt_ptable_s) + (state->blocksize - 1)) /
           state->blocksize;
-  ptbl = fs_heap_malloc(count * state->blocksize);
+  ptbl = lib_get_tempbuffer(count * state->blocksize);
   if (!ptbl)
     {
       return -ENOMEM;
@@ -491,6 +492,6 @@ int parse_gpt_partition(FAR struct partition_state_s *state,
 
   fs_heap_free(ptes);
 err:
-  fs_heap_free(ptbl);
+  lib_put_tempbuffer(ptbl);
   return ret;
 }
