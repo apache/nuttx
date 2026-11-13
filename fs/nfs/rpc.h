@@ -311,6 +311,24 @@ struct rpc_call_rmdir
   struct RMDIR3args rmdir;
 };
 
+struct rpc_call_symlink
+{
+  struct rpc_call_header ch;
+  struct SYMLINK3args symlink;
+};
+
+struct rpc_call_readlink
+{
+  struct rpc_call_header ch;
+  struct READLINK3args readlink;
+};
+
+struct rpc_call_link
+{
+  struct rpc_call_header ch;
+  struct LINK3args link;
+};
+
 struct rpc_call_readdir
 {
   struct rpc_call_header ch;
@@ -445,6 +463,27 @@ struct rpc_reply_setattr
 {
   struct nfs_reply_header rh;
   struct SETATTR3resok setattr;
+};
+
+struct rpc_reply_symlink
+{
+  struct nfs_reply_header rh;
+  struct SYMLINK3resok symlink;
+};
+
+struct rpc_reply_readlink
+{
+  struct nfs_reply_header rh;
+  struct READLINK3resok readlink;
+};
+
+#define SIZEOF_rpc_reply_readlink(n) \
+  (sizeof(struct nfs_reply_header) + SIZEOF_READLINK3resok(n))
+
+struct rpc_reply_link
+{
+  struct nfs_reply_header rh;
+  struct LINK3resok link;
 };
 
 struct rpcclnt

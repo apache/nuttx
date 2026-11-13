@@ -88,18 +88,21 @@ struct nfsmount
 
   union
   {
-    struct rpc_call_create  create;
-    struct rpc_call_lookup  lookup;
-    struct rpc_call_read    read;
-    struct rpc_call_remove  removef;
-    struct rpc_call_rename  renamef;
-    struct rpc_call_mkdir   mkdir;
-    struct rpc_call_rmdir   rmdir;
-    struct rpc_call_readdir readdir;
-    struct rpc_call_fs      fsstat;
-    struct rpc_call_setattr setattr;
-    struct rpc_call_fs      fsinfo;
-    struct rpc_reply_write  write;
+    struct rpc_call_create   create;
+    struct rpc_call_lookup   lookup;
+    struct rpc_call_read     read;
+    struct rpc_call_remove   removef;
+    struct rpc_call_rename   renamef;
+    struct rpc_call_mkdir    mkdir;
+    struct rpc_call_rmdir    rmdir;
+    struct rpc_call_readdir  readdir;
+    struct rpc_call_fs       fsstat;
+    struct rpc_call_setattr  setattr;
+    struct rpc_call_fs       fsinfo;
+    struct rpc_reply_write   write;
+    struct rpc_call_symlink  symlink;
+    struct rpc_call_readlink readlink;
+    struct rpc_call_link     link;
   } nm_msgbuffer;
 
   /* I/O buffer (must be a aligned to 32-bit boundaries).  This buffer used
