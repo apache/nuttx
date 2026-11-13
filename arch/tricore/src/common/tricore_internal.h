@@ -192,6 +192,15 @@ extern uintptr_t        _eheap[]; /* End+1 of .heap */
 void tricore_ack_irq(int irq);
 void tricore_doirq(void);
 
+/* Watchdog *****************************************************************/
+
+void tricore_wdt_disable(void);
+
+/* Clocks *******************************************************************/
+
+int tricore_clockconfig(void);
+uint32_t tricore_clock_asclinf(void);
+
 /* Signal handling **********************************************************/
 
 void tricore_sigdeliver(void);

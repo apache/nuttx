@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/tricore/src/illd/tc3xx/Configurations/Ifx_Cfg_Ssw.c
+ * arch/tricore/src/tc3xx/hardware/tc3xx_scu.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,46 +20,24 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include "Ifx_Cfg_Ssw.h"
-#include "Ifx_Ssw_Infra.h"
+#ifndef __ARCH_TRICORE_SRC_TC3XX_HARDWARE_TC3XX_SCU_H
+#define __ARCH_TRICORE_SRC_TC3XX_HARDWARE_TC3XX_SCU_H
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(__TASKING__)
-#pragma optimize RL
-#elif defined(__GNUC__)
-#pragma GCC optimize ("O1")
-#endif
+/* SCU reset status and control.  A power-on reset sets one of the
+ * TC3XX_RSTSTAT_POWERON bits, an application reset has the RSTCON
+ * reaction 2 for its RSTSTAT bit, CB3 or a CPU0 kernel reset.
+ */
 
-#if (IFX_CFG_SSW_ENABLE_LBIST == 1)
-void Ifx_Ssw_Lbist(void)
-{
-  if (!IfxScuLbist_isDone())
-    {
-      if(Ifx_Ssw_isColdPoweronReset())
-        {
-          IfxScuLbist_triggerInline(&IfxScuLbist_defaultConfig);
-        }
-    }
+#define TC3XX_SCU_RSTSTAT          0xf0036050
+#define TC3XX_SCU_RSTCON           0xf0036058
 
-  if (!IfxScuLbist_evaluateResult(IfxScuLbist_defaultConfig.signature))
-    {
-       __debug();
-       while(1);
-    }
+#define TC3XX_RSTSTAT_POWERON      0x138d0000
+#define TC3XX_RSTSTAT_RESET        0x000007fb
+#define TC3XX_RSTSTAT_CB3          (1 << 20)
+#define TC3XX_RSTCON_APPLICATION   2
 
-    Ifx_Ssw_jumpBackToLink();
-}
-#endif
-
-#if defined(__TASKING__)
-#pragma endoptimize
-#elif defined(__GNUC__)
-#pragma GCC reset_options
-#endif
+#endif /* __ARCH_TRICORE_SRC_TC3XX_HARDWARE_TC3XX_SCU_H */

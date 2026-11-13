@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/tricore/src/illd/tc3xx/Configurations/Ifx_Cfg.h
+ * arch/tricore/src/tc3xx/tc3xx_wdt.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,49 +20,22 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_TRICORE_SRC_ILLD_TC3XX_CONFIGURATIONS_IFX_CFG_H
-#define __ARCH_TRICORE_SRC_ILLD_TC3XX_CONFIGURATIONS_IFX_CFG_H
+#ifndef __ARCH_TRICORE_SRC_TC3XX_TC3XX_WDT_H
+#define __ARCH_TRICORE_SRC_TC3XX_TC3XX_WDT_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <stdbool.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
 
-#define DEVICE_TC39XB  1
-#define IFX_PIN_PACKAGE_LFBGA292  1
+void tc3xx_wdt_safety_endinit(bool set);
+void tc3xx_wdt_cpu_endinit(bool set);
+void tc3xx_wdt_service(void);
+void tc3xx_wdt_set_disabled(bool disable);
 
-#define IFX_CFG_SCU_XTAL_FREQUENCY      (20000000)
-#define IFX_CFG_SCU_PLL_FREQUENCY       (300000000)
-#define IFX_CFG_SCU_PLL1_FREQUENCY      (320000000)
-#define IFX_CFG_SCU_PLL2_FREQUENCY      (200000000)
-
-#define IFX_CFG_CPU_CLOCK_FREQUENCY     IFX_CFG_SCU_PLL_FREQUENCY
-
-#define ISR_PRIORITY_STM_TICK          1
-#define ISR_PRIORITY_GETH_DMA0_TX      2
-#define ISR_PRIORITY_GETH_DMA0_RX      3
-
-#ifdef CONFIG_TRICORE_BL
-#  define IFX_CFG_SSW_ENABLE_TRICORE0 1
-#  define IFX_CFG_SSW_ENABLE_TRICORE1 0
-#  define IFX_CFG_SSW_ENABLE_TRICORE2 0
-#  define IFX_CFG_SSW_ENABLE_TRICORE3 0
-#  define IFX_CFG_SSW_ENABLE_TRICORE4 0
-#  define IFX_CFG_SSW_ENABLE_TRICORE5 0
-#else
-#  define IFX_CFG_SSW_ENABLE_TRICORE0 1
-#  define IFX_CFG_SSW_ENABLE_TRICORE1 1
-#  define IFX_CFG_SSW_ENABLE_TRICORE2 1
-#  define IFX_CFG_SSW_ENABLE_TRICORE3 1
-#  define IFX_CFG_SSW_ENABLE_TRICORE4 1
-#  define IFX_CFG_SSW_ENABLE_TRICORE5 1
-#endif
-
-#define IFX_CFG_SSW_ENABLE_INDIVIDUAL_C_INIT (1U)
-
-#endif /* __ARCH_TRICORE_SRC_ILLD_TC3XX_CONFIGURATIONS_IFX_CFG_H */
+#endif /* __ARCH_TRICORE_SRC_TC3XX_TC3XX_WDT_H */

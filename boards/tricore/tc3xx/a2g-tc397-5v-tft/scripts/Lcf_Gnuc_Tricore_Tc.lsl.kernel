@@ -36,7 +36,7 @@
 OUTPUT_FORMAT("elf32-tricore")
 OUTPUT_ARCH("tricore")
 #if CONFIG_CPU_COREID == 0
-ENTRY(_START)
+ENTRY(__start)
 #endif
 
 __TRICORE_DERIVATE_MEMORY_MAP__ = 0x390;
@@ -126,7 +126,7 @@ SECTIONS
     }
 }
 
-/*Fixed memory Allocations for _START*/
+/*Fixed memory Allocations for __start*/
 CORE_ID = GLOBAL ;
 SECTIONS
 {
@@ -281,14 +281,12 @@ SECTIONS
 {
     CORE_SEC(.dspr_data) : FLAGS(awzl)
     {
-        *Ifx_Ssw_Tc?.* (.data)
         *Cpu?_Main.* (.data.*)
         . = ALIGN(4);
     } > dspr AT> pfls
 
     CORE_SEC(.dspr_bss) (NOLOAD) : FLAGS(awz)
     {
-        *Ifx_Ssw_Tc?.* (.bss)
         *Cpu?_Main.* (.bss.*)
         . = ALIGN(4);
     } > dspr
@@ -384,7 +382,6 @@ SECTIONS
 {
     CORE_SEC(.zrodata) : FLAGS(arzl)
     {
-        *Ifx_Ssw_Tc?.* (.zrodata)
         *Cpu?_Main.* (.zrodata)
         *(.zrodata_cpu?)
         *(.zrodata)
@@ -431,9 +428,7 @@ SECTIONS
     CORE_SEC(.text) : FLAGS(axl)
     {
         . = ALIGN(4);
-        *Ifx_Ssw_Tc?.*(.text)
         *Cpu?_Main.*(.text)
-        *Ifx_Ssw_Tc?.*(.text.*)
         *Cpu?_Main.*(.text.*)
         *(.text)
         *(.text.*)
