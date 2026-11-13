@@ -2107,7 +2107,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           case TIOCGWINSZ:
             {
-              FAR struct winsize *ws = (FAR struct winsize *)arg;
+              FAR struct winsize *ws = (FAR struct winsize *)(uintptr_t)arg;
 
               if (ws == NULL)
                 {
@@ -2123,7 +2123,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           case TIOCSWINSZ:
             {
               FAR const struct winsize *ws =
-                (FAR const struct winsize *)arg;
+                (FAR const struct winsize *)(uintptr_t)arg;
 
               if (ws == NULL)
                 {
