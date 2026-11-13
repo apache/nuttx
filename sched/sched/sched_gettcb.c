@@ -27,6 +27,7 @@
 #include <sys/types.h>
 
 #include <sched.h>
+#include <signal.h>
 #include <stdbool.h>
 
 #include "nuttx/irq.h"
@@ -36,6 +37,35 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsched_park_task
+ *
+ * Description:
+ *   Stop a task that found itself already inside a termination flow.  It
+ *   must not touch its stack again: it removes itself from the ready-to-run
+ *   list, blocks on the signal wait list and switches away for good.  The
+ *   termination path already handles a task blocked in TSTATE_WAIT_SIG.
+ *
+ ****************************************************************************/
+
+void nxsched_park_task(FAR struct tcb_s *tcb)
+{
+  enter_critical_section();
+
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  sigemptyset(&tcb->sigwaitmask);
+#endif
+
+  for (; ; )
+    {
+      nxsched_remove_self(tcb);
+      nxsched_add_blocked(tcb, TSTATE_WAIT_SIG);
+      up_switch_context(this_task(), tcb);
+    }
+
+  PANIC();
+}
 
 /****************************************************************************
  * Name: nxsched_get_tcb
@@ -171,10 +201,7 @@ void nxsched_put_tcb(FAR struct tcb_s *tcb)
       if ((atomic_read(&tcb->shared_flags) &
            TCB_FLAG_KILL_PROCESSING) != 0)
         {
-          for (; ; )
-            {
-              usleep(1000);
-            }
+          nxsched_park_task(tcb);
         }
     }
 }

@@ -113,11 +113,7 @@ void nx_pthread_exit(FAR void *exit_value)
        TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       leave_critical_section(flags);
-
-      for (; ; )
-        {
-          usleep(1000);
-        }
+      nxsched_park_task(tcb);
     }
 
   leave_critical_section(flags);

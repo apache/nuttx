@@ -86,7 +86,15 @@ void _exit(int status)
    * once, or does something very naughty.
    */
 
-  atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING);
+  /* If the TCB is already in the exiting state, we should allow the
+   * killing task to execute normally first.  We stop the execution here.
+   */
+
+  if ((atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING) &
+       TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      nxsched_park_task(tcb);
+    }
 
   /* A task leaving on its own must have dropped every reference it
    * took: kernel paths finish before exit() can be called.
