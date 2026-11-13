@@ -124,14 +124,14 @@ static inline int userfs_open_dispatch(FAR struct userfs_info_s *info,
       return -EINVAL;
     }
 
-  pathlen = strlen(req->relpath);
+  pathlen = strlen(req->relpath) + 1;
   if (pathlen > info->mxwrite)
     {
       return -EINVAL;
     }
 
   expected = SIZEOF_USERFS_OPEN_REQUEST_S(pathlen);
-  if (expected >= reqlen)
+  if (expected > reqlen)
     {
       return -EINVAL;
     }
@@ -463,14 +463,14 @@ static inline int userfs_opendir_dispatch(FAR struct userfs_info_s *info,
       return -EINVAL;
     }
 
-  pathlen = strlen(req->relpath);
+  pathlen = strlen(req->relpath) + 1;
   if (pathlen > info->mxwrite)
     {
       return -EINVAL;
     }
 
   expected = SIZEOF_USERFS_OPENDIR_REQUEST_S(pathlen);
-  if (expected >= reqlen)
+  if (expected > reqlen)
     {
       return -EINVAL;
     }
@@ -618,14 +618,14 @@ static inline int userfs_unlink_dispatch(FAR struct userfs_info_s *info,
       return -EINVAL;
     }
 
-  pathlen = strlen(req->relpath);
+  pathlen = strlen(req->relpath) + 1;
   if (pathlen > info->mxwrite)
     {
       return -EINVAL;
     }
 
   expected = SIZEOF_USERFS_UNLINK_REQUEST_S(pathlen);
-  if (expected >= reqlen)
+  if (expected > reqlen)
     {
       return -EINVAL;
     }
@@ -660,14 +660,14 @@ static inline int userfs_mkdir_dispatch(FAR struct userfs_info_s *info,
       return -EINVAL;
     }
 
-  pathlen = strlen(req->relpath);
+  pathlen = strlen(req->relpath) + 1;
   if (pathlen > info->mxwrite)
     {
       return -EINVAL;
     }
 
   expected = SIZEOF_USERFS_MKDIR_REQUEST_S(pathlen);
-  if (expected >= reqlen)
+  if (expected > reqlen)
     {
       return -EINVAL;
     }
@@ -702,14 +702,14 @@ static inline int userfs_rmdir_dispatch(FAR struct userfs_info_s *info,
       return -EINVAL;
     }
 
-  pathlen = strlen(req->relpath);
+  pathlen = strlen(req->relpath) + 1;
   if (pathlen > info->mxwrite)
     {
       return -EINVAL;
     }
 
   expected = SIZEOF_USERFS_MKDIR_REQUEST_S(pathlen);
-  if (expected >= reqlen)
+  if (expected > reqlen)
     {
       return -EINVAL;
     }
@@ -747,16 +747,16 @@ static inline int userfs_rename_dispatch(FAR struct userfs_info_s *info,
       return -EINVAL;
     }
 
-  oldpathlen = strlen(req->oldrelpath);
+  oldpathlen = strlen(req->oldrelpath) + 1;
   newoffset  = req->newoffset;
 
-  if (oldpathlen >= newoffset)
+  if (oldpathlen > newoffset)
     {
       return -EINVAL;
     }
 
   newrelpath = &req->oldrelpath[newoffset];
-  newpathlen = strlen(newrelpath);
+  newpathlen = strlen(newrelpath) + 1;
 
   if ((newpathlen + newoffset) > info->mxwrite)
     {
@@ -764,7 +764,7 @@ static inline int userfs_rename_dispatch(FAR struct userfs_info_s *info,
     }
 
   expected = SIZEOF_USERFS_RENAME_REQUEST_S(newoffset, newpathlen);
-  if (expected >= reqlen)
+  if (expected > reqlen)
     {
       return -EINVAL;
     }
@@ -800,14 +800,14 @@ static inline int userfs_stat_dispatch(FAR struct userfs_info_s *info,
       return -EINVAL;
     }
 
-  pathlen = strlen(req->relpath);
+  pathlen = strlen(req->relpath) + 1;
   if (pathlen > info->mxwrite)
     {
       return -EINVAL;
     }
 
   expected = SIZEOF_USERFS_STAT_REQUEST_S(pathlen);
-  if (expected >= reqlen)
+  if (expected > reqlen)
     {
       return -EINVAL;
     }
@@ -912,14 +912,14 @@ static inline int userfs_chstat_dispatch(FAR struct userfs_info_s *info,
       return -EINVAL;
     }
 
-  pathlen = strlen(req->relpath);
+  pathlen = strlen(req->relpath) + 1;
   if (pathlen > info->mxwrite)
     {
       return -EINVAL;
     }
 
   expected = SIZEOF_USERFS_CHSTAT_REQUEST_S(pathlen);
-  if (expected >= reqlen)
+  if (expected > reqlen)
     {
       return -EINVAL;
     }
