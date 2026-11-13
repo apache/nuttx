@@ -21,9 +21,9 @@
 ############################################################################
 
 CHIP_CSRCS += tc4xx_timerisr.c
-CHIP_CSRCS += tc4xx_serial.c
 CHIP_CSRCS += tc4xx_wdt.c
 CHIP_CSRCS += tc4xx_clockconfig.c
+CHIP_CSRCS += tc4xx_start.c
 
 VPATH += tc4xx
 
@@ -120,19 +120,13 @@ SDK_INCDIR += $(ILLD_DIR)/Libraries/Infra/Ssw/TC4xx/Tricore
 SDK_INCDIR += $(ILLD_DIR)/Libraries/Service/CpuGeneric
 SDK_INCDIR += $(ILLD_DIR)/Libraries/Infra/Platform/Compilers
 
-SDK_CSRCS += $(CONFIG_DIR)/Ifx_Cfg_Ssw.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxAp_cfg.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxDma_cfg.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxAsclin_cfg.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/TC4Dx/IfxPort_cfg_TC4Dx.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/_PinMap/TC4Dx/IfxAsclin_PinMap_TC4Dx_BGA436_COM.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Asclin/Std/IfxAsclin.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Ap/Std/IfxApApu.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Ap/Std/IfxApProt.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Clock/Std/IfxClock.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Dma/Dma/IfxDma_Dma.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Dma/Std/IfxDma.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Port/Std/IfxPort.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxCpu_cfg.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Cpu/Std/IfxCpu.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Scu/Std/IfxScuEru.c
@@ -142,8 +136,6 @@ SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Smu/Std/IfxSmu.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Vmt/Std/IfxVmt.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Wtu/Std/IfxWtu.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Platform/Compilers/CompilerTasking.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Tc0.c
 
 CFLAGS += $(addprefix ${INCDIR_PREFIX},$(SDK_INCDIR))
 

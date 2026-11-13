@@ -27,7 +27,27 @@
  * Included Files
  ****************************************************************************/
 
-#define UART_PIN_RX IfxAsclin0_RXA_P14_1_IN     /* UART receive port pin  */
-#define UART_PIN_TX IfxAsclin0_TX_P14_0_OUT     /* UART transmit port pin */
+/* UART0 pins: ASCLIN0 RXA on P14.1, TX on P14.0 (alternate output 2) */
+
+#define UART_PIN_PORT              0xf003ae00  /* P14 */
+#define UART_PIN_RX                1
+#define UART_PIN_TX                0
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Startup core synchronization: core ID bits to wait for and the timeout
+ * in STM ticks (0: no timeout)
+ */
+
+#define TRICORE_CORE_SYNC_MASK     0x5f
+#define TRICORE_CORE_SYNC_TIMEOUT  100000
+
+/* Core index from CORE_ID; CPU5 has the core ID 6 on TC39x */
+
+#define tricore_core_id()          tricore_mfcr(TRICORE_CPU_CORE_ID)
+#define tricore_core_index()       (tricore_core_id() > 5 ? 5 : \
+                                    tricore_core_id())
 
 #endif /* __ARCH_TRICORE_SRC_TC3XX_CHIP_H */

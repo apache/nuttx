@@ -53,6 +53,8 @@ else
 endif
 
 HEAD_ASRC += tricore_vectors$(ASMEXT)
+
+HEAD_ASRC += tricore_head$(ASMEXT)
 VPATH += common$(DELIM)$(TRICORE_SUBDIR)
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)

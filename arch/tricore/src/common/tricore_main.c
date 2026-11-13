@@ -24,19 +24,64 @@
  * Included Files
  ****************************************************************************/
 
-#include <tricore_internal.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
+
 #include <nuttx/init.h>
 
-#include "Ifx_Types.h"
-#include "IfxCpu.h"
+#include <arch/arch.h>
+
+#include "tricore_internal.h"
+#include "tricore_stm.h"
+#include "chip.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: tricore_core_sync
+ *
+ * Description:
+ *   Set the bit of this core in the sync word, atomically for the other
+ *   cores, and wait until the bits of TRICORE_CORE_SYNC_MASK are set or the
+ *   timeout on the STM of CPU0 has passed.
+ *
+ ****************************************************************************/
+
+static void tricore_core_sync(volatile uint32_t *sync)
+{
+  uint32_t core = tricore_core_id();
+#if TRICORE_CORE_SYNC_TIMEOUT > 0
+  uint32_t start = getreg32(TRICORE_STM0_BASE + TRICORE_STM_TIM0_OFFSET);
+#endif
+
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
+  __imaskldmst((unsigned int *)sync, 1, core, 1);
+#else
+  long long tmp;
+
+  __asm__ __volatile__ ("imask %A0, %1, %2, 1\n\t"
+                    "ldmst [%3]0, %A0"
+                    : "=&d"(tmp) : "d"(1), "d"(core), "a"(sync) : "memory");
+#endif
+
+  while ((*sync & TRICORE_CORE_SYNC_MASK) != TRICORE_CORE_SYNC_MASK)
+    {
+#if TRICORE_CORE_SYNC_TIMEOUT > 0
+      if (getreg32(TRICORE_STM0_BASE + TRICORE_STM_TIM0_OFFSET) - start >=
+          TRICORE_CORE_SYNC_TIMEOUT)
+        {
+          break;
+        }
+#endif
+    }
+}
+
 static void core_main(void)
 {
-  static IfxCpu_syncEvent g_sync_event = 0;
+  static volatile uint32_t g_sync_event;
 
 #ifdef CONFIG_ARCH_HAVE_FPU
   tricore_fpuinit();
@@ -48,15 +93,9 @@ static void core_main(void)
 
   /* Wait for CPU sync event */
 
-  IfxCpu_emitEvent(&g_sync_event);
+  tricore_core_sync(&g_sync_event);
 
-#if defined(CONFIG_ARCH_CHIP_TC3XX)
-  IfxCpu_waitEvent(&g_sync_event, 1);
-#else
-  IfxCpu_waitEvent(&g_sync_event, UINT32_MAX, 1);
-#endif
-
-  if (IfxCpu_getCoreIndex() == 0)
+  if (tricore_core_index() == 0)
     {
       tricore_earlyserialinit();
       nx_start();
