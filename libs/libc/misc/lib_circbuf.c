@@ -90,6 +90,54 @@ int circbuf_init(FAR struct circbuf_s *circ, FAR void *base, size_t bytes)
 }
 
 /****************************************************************************
+ * Name: circbuf_reinit
+ *
+ * Description:
+ *   Reinitialize a circular buffer with a new buffer, and new size.
+ *   In case malloc & free is not reliable here, we handle buffer outside.
+ *   Will copy the old data to new buffer.
+ *
+ * Input Parameters:
+ *   circ  - Address of the circular buffer to be used.
+ *   base  - A pointer to circular buffer's internal buffer. It can be
+ *           provided by caller because sometimes the creation of buffer
+ *           is special or needs to preallocated, eg: DMA buffer.
+ *           If NULL, a buffer of the given size will be allocated.
+ *   bytes - The size of the internal buffer.
+ *
+ * Returned Value:
+ *   The previous internal buffer pointer is returned.
+ *
+ ****************************************************************************/
+
+FAR void *circbuf_reinit(FAR struct circbuf_s *circ, FAR void *base,
+                         size_t bytes)
+{
+  size_t len = 0;
+  FAR void *old;
+
+  if (bytes && base)
+    {
+      len = circbuf_used(circ);
+      if (bytes < len)
+        {
+          circbuf_skip(circ, len - bytes);
+          len = bytes;
+        }
+
+      circbuf_read(circ, base, len);
+    }
+
+  old = circ->base;
+  circ->base = base;
+  circ->size = bytes;
+  circ->head = len;
+  circ->tail = 0;
+
+  return old;
+}
+
+/****************************************************************************
  * Name: circbuf_resize
  *
  * Description:
@@ -107,7 +155,6 @@ int circbuf_init(FAR struct circbuf_s *circ, FAR void *base, size_t bytes)
 int circbuf_resize(FAR struct circbuf_s *circ, size_t bytes)
 {
   FAR void *tmp = NULL;
-  size_t len = 0;
 
   DEBUGASSERT(circ);
   DEBUGASSERT(!circ->external);
@@ -123,24 +170,9 @@ int circbuf_resize(FAR struct circbuf_s *circ, size_t bytes)
         {
           return -ENOMEM;
         }
-
-      len = circbuf_used(circ);
-      if (bytes < len)
-        {
-          circbuf_skip(circ, len - bytes);
-          len = bytes;
-        }
-
-      circbuf_read(circ, tmp, len);
     }
 
-  lib_free(circ->base);
-
-  circ->base = tmp;
-  circ->size = bytes;
-  circ->head = len;
-  circ->tail = 0;
-
+  lib_free(circbuf_reinit(circ, tmp, bytes));
   return 0;
 }
 
