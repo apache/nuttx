@@ -245,6 +245,18 @@ static void arm64_oneshot_initialize_per_cpu(void)
 
 #ifdef CONFIG_ARCH_TRUSTZONE_SECURE
   up_secure_irq(GIC_IRQ_PTM, false);
+
+  /* Release the virtual timer too. A NuttX non-secure world uses the
+   * non-secure physical timer (PTM), but a Linux REE entered at EL1NS and
+   * not in hyp mode (arch_timer_select_ppi() -> ARCH_TIMER_VIRT_PPI) uses
+   * the virtual timer instead -- this holds even when EL2 exists, because
+   * the bootloader has already dropped to EL1 before handing over. Leaving
+   * VTM in Group-1-Secure means such a REE never receives a single timer
+   * interrupt: it cannot sleep, its timers never fire, and it only makes
+   * progress while busy-spinning.
+   */
+
+  up_secure_irq(GIC_IRQ_VTM, false);
 #endif
 
   /* First mask the timer interrupt and set compare to max
