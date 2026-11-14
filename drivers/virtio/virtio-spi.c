@@ -31,6 +31,7 @@
 #include <sys/endian.h>
 #include <syslog.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/nuttx.h>
@@ -39,6 +40,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/spi/spi_virtio.h>
+#include <nuttx/spi/spi_transfer.h>
 #include <nuttx/virtio/virtio-spi.h>
 #include <nuttx/virtio/virtio.h>
 
@@ -72,7 +74,7 @@ struct virtio_spi_bus_s
 {
   spinlock_t        lock;
   struct dq_queue_s devices;
-  int               idx;      /* Next bus index */
+  atomic_t          idx;      /* Next bus index (atomic allocator) */
 };
 
 /****************************************************************************
@@ -658,20 +660,46 @@ static int virtio_spi_probe(FAR struct virtio_device *vdev)
 
   virtio_read_config(vdev, 0, &priv->hwcfg, sizeof(priv->hwcfg));
 
-  /* Publish the lower-half so board/in-kernel code can fetch it by bus index
-   * with virtio_spi_get_master().  Exposing it as a /dev/spiN character
-   * device with spi_register() is left to the board, as for any other SPI
-   * lower-half.
+  /* Assign this device's VirtIO SPI bus index up front so the /dev/spiN
+   * character device registered below carries the same index.  The index is
+   * a monotonic atomic allocator (no lock needed); atomic_add() returns the
+   * previous value.  A failed probe simply leaves a harmless gap (it is not
+   * rolled back, which would risk handing a duplicate index to a later
+   * device).
+   */
+
+  priv->idx = atomic_add(&g_virtio_spi_bus.idx, 1);
+
+#ifdef CONFIG_SPI_DRIVER
+  /* Expose the lower-half as a /dev/spiN character device.  For other SPI
+   * lower-halves this is left to the board, but when the SPI character
+   * driver is present we register it here so no board code is needed (a
+   * successful probe already implies the device exists; works for
+   * dynamically discovered AMP devices too).
+   */
+
+  ret = spi_register(&priv->spi, priv->idx);
+  if (ret < 0)
+    {
+      virtio_reset_device(vdev);
+      virtio_delete_virtqueues(vdev);
+      vrterr("spi_register(/dev/spi%d) failed, ret=%d\n", priv->idx, ret);
+      goto err_with_priv;
+    }
+#endif
+
+  /* Publish the lower-half in the frontend registry so board/in-kernel code
+   * can fetch it by bus index with virtio_spi_get_master().
    */
 
   flags = spin_lock_irqsave(&g_virtio_spi_bus.lock);
-  priv->idx = g_virtio_spi_bus.idx++;
   dq_addlast(&priv->node, &g_virtio_spi_bus.devices);
   spin_unlock_irqrestore(&g_virtio_spi_bus.lock, flags);
 
   return OK;
 
 err_with_priv:
+  vdev->priv = NULL;
   nxsem_destroy(&priv->done);
   nxmutex_destroy(&priv->buslock);
   kmm_free(priv);
