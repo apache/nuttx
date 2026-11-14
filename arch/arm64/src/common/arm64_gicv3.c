@@ -844,7 +844,24 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
 
   if (GIC_IS_SGI(irq))
     {
-      arm64_gic_raise_sgi(irq, cpuset);
+#ifdef CONFIG_ARCH_TRUSTZONE_NONSECURE
+      /* If this SGI is configured as secure (bit=0 in
+       * IGROUPR_SGI_SECURE_VAL), REE cannot send it directly.
+       * Use SMC to request the secure world to trigger it.
+       */
+
+      if (!(IGROUPR_SGI_SECURE_VAL & BIT(irq)))
+        {
+          struct arm64_smccc_res res;
+
+          arm64_smccc_smc(ARM64_SMCCC_NUTTX_SEND_SECURE_SGI,
+                          irq, 0, 0, 0, 0, 0, 0, &res);
+        }
+      else
+#endif
+        {
+          arm64_gic_raise_sgi(irq, cpuset);
+        }
     }
   else if (irq >= 0 && irq < NR_IRQS)
     {
