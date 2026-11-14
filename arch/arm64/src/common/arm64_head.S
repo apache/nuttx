@@ -218,15 +218,9 @@ primary_core:
 
     bl     __reset_prep_c
 
-#ifdef CONFIG_ARCH_EARLY_PRINT
-    /* Initialize the UART for early print.
-     * Should only be called on the boot CPU
-     */
-
-    bl    arm64_earlyprintinit
-#endif
-
+#ifndef CONFIG_ARCH_SKIP_ZERO_BSS
     bl    arm64_data_initialize
+#endif
 
     PRINT(primary_boot, "- Ready to Boot Primary CPU\r\n")
 
@@ -381,6 +375,8 @@ boot_stage_puts:
 
 #endif /* !CONFIG_ARCH_EARLY_PRINT */
 
+#ifndef CONFIG_ARCH_SKIP_ZERO_BSS
+
 /***************************************************************************
  * Name: arm64_data_initialize
  ***************************************************************************/
@@ -416,3 +412,5 @@ arm64_data_initialize:
     .quad   _sbss
     .quad   _ebss
     .size   .Linitparms, . -.Linitparms
+
+#endif /* CONFIG_ARCH_SKIP_ZERO_BSS */

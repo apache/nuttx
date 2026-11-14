@@ -52,13 +52,6 @@
  * Public Functions
  ****************************************************************************/
 
-/* PL011 UART initialization */
-
-GTEXT(arm64_earlyprintinit)
-SECTION_FUNC(text, arm64_earlyprintinit)
-    /* Already initialized in bootloader */
-    ret
-
 /* i.MX8QM wait LPUART to be ready to transmit
  * rb: register which contains the UART base address
  * rc: scratch register

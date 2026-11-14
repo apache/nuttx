@@ -571,10 +571,12 @@ __start:
 
 	mov		fp, #0
 
+#ifndef CONFIG_ARCH_SKIP_ZERO_BSS
 .Lbssinit:
 	cmp		r0, r1				/* Clear up to _bss_end_ */
 	strcc		fp, [r0],#4
 	bcc		.Lbssinit
+#endif
 
 	/* If the .data section is in a separate, uninitialized address space,
 	 * then we will also need to copy the initial values of the .data

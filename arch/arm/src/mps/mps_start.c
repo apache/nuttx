@@ -134,10 +134,12 @@ void __start(void)
 
   /* Set bss to zero */
 
+#ifndef CONFIG_ARCH_SKIP_ZERO_BSS
   for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
     {
       *dest++ = 0;
     }
+#endif
 
   /* Copy the program from FLASH to RAM. */
 
