@@ -96,6 +96,10 @@ ifeq ($(CONFIG_CAPTURE),y)
 CSRCS += stm32_capture.c
 endif
 
+ifeq ($(CONFIG_PTP_PPS),y)
+CSRCS += stm32_ptp_pps.c
+endif
+
 ifeq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 CSRCS += stm32_pm.c
 endif

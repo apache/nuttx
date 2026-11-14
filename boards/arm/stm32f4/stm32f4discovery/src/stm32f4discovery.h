@@ -271,6 +271,16 @@
 #define STM32F4DISCOVERY_CAPTURETIMER   3
 #define STM32F4DISCOVERY_CAPTURECHANNEL 2
 
+/* PPS disciplined PTP clock
+ *
+ * The PPS output of a GNSS receiver can be captured by TIM5 CH2 on PA1.
+ * TIM5 is a 32-bit timer, its free running counter is the counter of the
+ * clock.
+ */
+
+#define STM32F4DISCOVERY_PPSTIMER       5
+#define STM32F4DISCOVERY_PPSCHANNEL     2
+
 /* SPI chip selects */
 
 #define GPIO_CS_MEMS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
@@ -609,6 +619,18 @@ int stm32_pwm_setup(void);
 
 #ifdef CONFIG_CAPTURE
 int stm32_capture_setup(const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: stm32_ptp_pps_setup
+ *
+ * Description:
+ *  Register a PPS disciplined PTP clock on the TIM5 capture
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PTP_PPS
+int stm32_ptp_pps_setup(int devno);
 #endif
 
 /****************************************************************************

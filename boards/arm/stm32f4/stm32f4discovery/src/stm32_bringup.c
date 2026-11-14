@@ -437,7 +437,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_CAPTURE
+#if defined(CONFIG_CAPTURE) && defined(CONFIG_STM32_TIM3_CAP)
   /* Initialize Capture and register the Capture driver. */
 
   ret = stm32_capture_setup("/dev/capture0");
@@ -726,6 +726,16 @@ int stm32_bringup(void)
   if (ret != OK)
     {
       aerr("ERROR: Failed to initialize hx711: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_PTP_PPS
+  /* PPS disciplined PTP clock: TIM5 counter, GNSS PPS on PA1 (TIM5_CH2) */
+
+  ret = stm32_ptp_pps_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_ptp_pps_setup failed: %d\n", ret);
     }
 #endif
 
