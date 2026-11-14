@@ -117,8 +117,8 @@ structure(lib_bscanf). 1. https://zh.cppreference.com/w/c/io/fscanf
 
 -  **special**:
 
-   1. Please use %lf for double precision, “%hf” or “%f” for float, long
-      double (“%Lf”) is not supported.
+   1. Please use %lf for double precision, “%hf” or “%f” for float, and
+      “%Lf” for long double.
    2. Please use %hhd or %hhu for a single char or unsigned char.
    3. Use %hd or %hu for short int or unsigned short int.
    4. When using %s or %c, please specify the length of the char array,
