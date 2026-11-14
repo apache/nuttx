@@ -75,4 +75,19 @@ void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
             (uintptr_t)info, (uintptr_t)ucontext);
 }
 
+/****************************************************************************
+ * Name: STUB_signal_handler_return
+ *
+ * Description:
+ *   Stub target for SYS_signal_handler_return in g_stublookup table.
+ *   This system call is intercepted directly by the architecture SVCall
+ *   handler and is never dispatched through g_stublookup.
+ *
+ ****************************************************************************/
+
+uintptr_t STUB_signal_handler_return(int nbr)
+{
+  return 0;
+}
+
 #endif /* __KERNEL__ */

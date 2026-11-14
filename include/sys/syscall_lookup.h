@@ -26,7 +26,15 @@
  * configuration
  */
 
-SYSCALL_LOOKUP1(_exit,                     1)
+#if defined(CONFIG_ARCH_ARM) && !defined(CONFIG_BUILD_FLAT) && \
+    defined(CONFIG_ENABLE_ALL_SIGNALS)
+SYSCALL_LOOKUP1(signal_handler_return,     0)
+#  define SYSCALL_LOOKUP_EXIT              SYSCALL_LOOKUP
+#else
+#  define SYSCALL_LOOKUP_EXIT              SYSCALL_LOOKUP1
+#endif
+SYSCALL_LOOKUP_EXIT(_exit,                 1)
+#undef SYSCALL_LOOKUP_EXIT
 SYSCALL_LOOKUP(_assert,                    4)
 SYSCALL_LOOKUP(prctl,                      2)
 
