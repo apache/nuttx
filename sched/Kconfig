@@ -2149,13 +2149,15 @@ config SCHED_BACKTRACE
 
 config GROUP_KILL_CHILDREN_TIMEOUT_MS
 	int "Group kill children timeout"
-	default -1
+	default 0
 	depends on !DISABLE_PTHREAD && SIG_SIGKILL_ACTION
 	---help---
-		Kill children a SIGQUIT signal before cancel them,
-		< 0 means wait until all the child thread exit
-		> 0 means wait timeout
-		= 0 means don't do kill signal
+		What exit() and task_restart() do with the other threads of
+		the task group before they cancel them:
+		= 0 means do not send a signal: cancel them at once
+		> 0 means send SIGTERM, then wait this number of milliseconds
+		    for them to exit
+		< 0 means send SIGTERM, then wait until they all exit
 		The default action of a signal (abnormal termination) does not
 		send the signal: it cancels the other threads at once.
 

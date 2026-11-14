@@ -30,11 +30,14 @@
 #include <nuttx/debug.h>
 #include <pthread.h>
 #include <sched.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
+#include <nuttx/spinlock.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -72,6 +75,49 @@ static int group_kill_children_handler(pid_t pid, FAR void *arg)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: group_kill_children_joining
+ *
+ * Description:
+ *   Check if each member of the group, except tcb, waits in pthread_join().
+ *   Such a member waits for tcb or for another member that also waits in
+ *   pthread_join().  Only tcb can end these waits, when it exits.  The
+ *   SIGTERM does not end them: pthread_join() waits without interruption,
+ *   and in a system call the default action runs only when the call
+ *   returns.
+ *
+ * Input Parameters:
+ *   tcb - TCB of the task to be retained.
+ *
+ * Returned Value:
+ *   true if each other member of the group waits in pthread_join().
+ *
+ ****************************************************************************/
+
+static bool group_kill_children_joining(FAR struct tcb_s *tcb)
+{
+  FAR struct task_group_s *group = tcb->group;
+  FAR struct tcb_s *mtcb;
+  FAR sq_entry_t *curr;
+  irqstate_t flags;
+  bool joining = true;
+
+  flags = spin_lock_irqsave(&group->tg_lock);
+  sq_for_every(&group->tg_members, curr)
+    {
+      mtcb = container_of(curr, struct tcb_s, member);
+      if (mtcb != tcb && (mtcb->task_state != TSTATE_WAIT_SEM ||
+                          mtcb->waitobj != &mtcb->join_sem))
+        {
+          joining = false;
+          break;
+        }
+    }
+
+  spin_unlock_irqrestore(&group->tg_lock, flags);
+  return joining;
 }
 #endif
 
@@ -186,7 +232,8 @@ int group_kill_children(FAR struct tcb_s *tcb)
       while (1)
         {
           if (sq_empty(&tcb->group->tg_members) ||
-              sq_is_singular(&tcb->group->tg_members))
+              sq_is_singular(&tcb->group->tg_members) ||
+              group_kill_children_joining(tcb))
             {
               break;
             }
