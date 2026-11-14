@@ -81,6 +81,10 @@
 
 #include "stm32f4discovery.h"
 
+#ifdef CONFIG_STM32_PTP_PPS
+#  include "stm32_ptp_pps.h"
+#endif
+
 /* Conditional logic in stm32f4discovery.h will determine if certain features
  * are supported.  Tests for these features need to be made after including
  * stm32f4discovery.h.
@@ -726,6 +730,16 @@ int stm32_bringup(void)
   if (ret != OK)
     {
       aerr("ERROR: Failed to initialize hx711: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_STM32_PTP_PPS
+  /* PPS disciplined PTP clock: TIM5 counter, GNSS PPS on PA1 (TIM5_CH2) */
+
+  ret = stm32_ptp_pps_initialize(CONFIG_STM32_PTP_PPS_DEVNO);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_ptp_pps_initialize failed: %d\n", ret);
     }
 #endif
 

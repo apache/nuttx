@@ -1173,6 +1173,29 @@ NOTES:
    OUT mode.  In that mode, the PHY interrupt is not supported.  The NINT
    pin serves as REFLCK0 in that case.
 
+gnsspps
+-------
+
+Synchronizes the board to GNSS time with the PPS output of a GNSS receiver,
+see :doc:`/applications/system/gnsspps/index`.  TIM5 (32-bit, 84 MHz) is the
+counter of a PPS disciplined PTP clock, ``/dev/ptp0``, and its channel 2
+captures the PPS in hardware.
+
+Connections:
+
+=============  ==================  ============
+GNSS receiver  STM32F4Discovery    Function
+=============  ==================  ============
+PPS            PA1 (P1 pin 12)     TIM5_CH2
+TX (NMEA)      PB11 (P1 pin 35)    USART3_RX
+GND            GND
+=============  ==================  ============
+
+The NMEA port is ``/dev/ttyS1`` at 9600 baud and the console is on USART2
+(PA2/PA3).  Start the servo with::
+
+    nsh> gnsspps -s /dev/ttyS1 &
+
 hciuart
 -------
 

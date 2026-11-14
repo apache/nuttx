@@ -112,6 +112,10 @@ if(CONFIG_STM32_TIM)
   list(APPEND SRCS stm32_tim.c)
 endif()
 
+if(CONFIG_STM32_PTP_PPS)
+  list(APPEND SRCS stm32_ptp_pps.c)
+endif()
+
 if(CONFIG_STM32_LPTIM)
   list(APPEND SRCS stm32_lptim.c)
   if(CONFIG_TIMER)

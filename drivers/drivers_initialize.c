@@ -56,6 +56,7 @@
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/thermal.h>
 #include <nuttx/timers/ptp_clock_dummy.h>
+#include <nuttx/timers/ptp_pps.h>
 #include <nuttx/timers/capture.h>
 #include <nuttx/trace.h>
 #include <nuttx/usrsock/usrsock_rpmsg.h>
@@ -331,6 +332,10 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_PTP_CLOCK_DUMMY
   ptp_clock_dummy_initialize(0);
+#endif
+
+#ifdef CONFIG_PTP_PPS_DUMMY
+  ptp_pps_dummy_initialize(CONFIG_PTP_PPS_DUMMY_DEVNO);
 #endif
 
 #ifdef CONFIG_FAKE_CAPTURE

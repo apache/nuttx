@@ -121,4 +121,12 @@ if(CONFIG_PTP_CLOCK_DUMMY)
   list(APPEND SRCS ptp_clock_dummy.c)
 endif()
 
+if(CONFIG_PTP_PPS)
+  list(APPEND SRCS ptp_pps.c)
+endif()
+
+if(CONFIG_PTP_PPS_DUMMY)
+  list(APPEND SRCS ptp_pps_dummy.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
