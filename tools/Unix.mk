@@ -55,9 +55,14 @@ else
 # Generate .version.tmp every time from GIT history
 # Only update .version if the contents of version.tmp actually changes
 # Note: this is executed before any rule is run
+# Do it once per make invocation; sub-makes get NUTTX_VERSION_UPDATED from
+# the environment.
 
+ifeq ($(origin NUTTX_VERSION_UPDATED),undefined)
 $(shell tools/version.sh $(VERSION_ARG) .version.tmp > /dev/null)
 $(shell $(call TESTANDREPLACEFILE, .version.tmp, .version))
+export NUTTX_VERSION_UPDATED := y
+endif
 endif
 
 # Process architecture specific directories
