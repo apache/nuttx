@@ -14,7 +14,9 @@ interface.
   message, ``ident[pid]: `` with ``LOG_PID``, and writes the message to
   stderr too with ``LOG_PERROR``. The messages that the OS prints while the
   process runs get the same prefix. NuttX does not use the other options or
-  the facility. :c:func:`closelog` has no descriptor to close.
+  the facility. :c:func:`closelog` has no descriptor to close. Without
+  ``CONFIG_SYSLOG_OPENLOG`` (off by default with ``CONFIG_DEFAULT_SMALL``),
+  :c:func:`openlog` does nothing and the messages have no ident.
 
 .. c:function:: void syslog(int priority, const char *fmt, ...)
 

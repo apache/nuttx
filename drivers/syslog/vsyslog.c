@@ -84,9 +84,11 @@ static FAR const char * const g_priority_str[] =
 int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
   struct lib_syslograwstream_s stream;
+#ifdef CONFIG_SYSLOG_OPENLOG
   FAR const char *ident;
   char tail[16];
-  int ret;
+#endif
+  int ret = 0;
 #ifdef CONFIG_SYSLOG_PROCESS_NAME
   FAR struct tcb_s *tcb = nxsched_self();
 #endif
@@ -155,9 +157,15 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #  endif
 #endif
 
+#if defined(CONFIG_SYSLOG_COLOR_OUTPUT) || defined(CONFIG_SYSLOG_TIMESTAMP) || \
+    defined(CONFIG_SMP) || defined(CONFIG_SYSLOG_PROCESSID) || \
+    defined(CONFIG_SYSLOG_PRIORITY) || defined(CONFIG_SYSLOG_PREFIX) || \
+    defined(CONFIG_SYSLOG_PROCESS_NAME) || defined(CONFIG_SYSLOG_OPENLOG)
+#  ifdef CONFIG_SYSLOG_OPENLOG
   /* The ident and the process ID of openlog() */
 
   ident = syslog_ident(tail, sizeof(tail));
+#  endif
 
   ret = lib_sprintf_internal(&stream.common,
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
@@ -215,9 +223,11 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
                              "%s: "
 #endif
 
+#ifdef CONFIG_SYSLOG_OPENLOG
   /* Prepend the ident of openlog() */
 
                              "%.*s%s"
+#endif
 #ifdef CONFIG_SYSLOG_TIMESTAMP
 #  if defined(CONFIG_SYSLOG_TIMESTAMP_FORMATTED)
 #    if defined(CONFIG_SYSLOG_TIMESTAMP_FORMAT_MICROSECOND)
@@ -270,10 +280,13 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
                              , get_task_name(tcb)
 #endif
 
+#ifdef CONFIG_SYSLOG_OPENLOG
   /* Prepend the ident of openlog() */
 
                              , OPENLOG_IDENT_SIZE - 1, ident, tail
+#endif
                     );
+#endif
 
   /* Generate the output */
 

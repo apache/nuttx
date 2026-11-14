@@ -174,9 +174,10 @@ extern "C"
  *
  *   It is not necessary to call openlog() prior to calling syslog().
  *
- *   NuttX puts the ident (up to 31 characters) and, with LOG_PID, the
- *   process ID before each message, and writes the messages to stderr too
- *   with LOG_PERROR.  It does not use the other options or the facility.
+ *   With CONFIG_SYSLOG_OPENLOG, NuttX puts the ident (up to 31
+ *   characters) and, with LOG_PID, the process ID before each message, and
+ *   writes the messages to stderr too with LOG_PERROR.  It does not use
+ *   the other options or the facility.  Without it, openlog() does nothing.
  *
  ****************************************************************************/
 
