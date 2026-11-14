@@ -369,16 +369,19 @@ typedef struct sigevent
     } _sigev_un;
 } sigevent_t;
 
-#define sigev_notify_function   _sigev_un._sigev_thread._function
-#define sigev_notify_attributes _sigev_un._sigev_thread._attribute
-#define sigev_notify_thread_id  _sigev_un._tid
+#ifdef CONFIG_SIG_EVTHREAD
+#  define sigev_notify_function   _sigev_un._sigev_thread._function
+#  define sigev_notify_attributes _sigev_un._sigev_thread._attribute
+#endif
+
+#define sigev_notify_thread_id    _sigev_un._tid
 
 /* The following types is used to pass parameters to/from signal handlers */
 
 struct siginfo
 {
-  uint8_t      si_signo;     /* Identifies signal */
-  uint8_t      si_code;      /* Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ */
+  int          si_signo;     /* Identifies signal */
+  int          si_code;      /* Source: SI_USER, SI_QUEUE, SI_TIMER, SI_ASYNCIO, or SI_MESGQ */
   uint8_t      si_errno;     /* Zero or errno value associated with signal */
   union sigval si_value;     /* Data passed with signal */
 #ifdef CONFIG_SCHED_HAVE_PARENT
@@ -473,7 +476,7 @@ int  sigorset(FAR sigset_t *dest, FAR const sigset_t *left,
 int  sigpause(int signo);
 int  sigpending(FAR sigset_t *set);
 int  sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
-int  sigqueue(int pid, int signo, union sigval value);
+int  sigqueue(int pid, int signo, const union sigval value);
 int  sigrelse(int signo);
 _sa_handler_t sigset(int signo, _sa_handler_t func);
 int  sigwait(FAR const sigset_t *set, FAR int *sig);

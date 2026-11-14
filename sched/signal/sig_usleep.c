@@ -70,16 +70,14 @@
 int nxsig_usleep(useconds_t usec)
 {
   struct timespec rqtp;
-  time_t sec;
   int ret = 0;
 
   if (usec)
     {
       /* Let nxsig_nanosleep() do all of the work. */
 
-      sec          = USEC2SEC(usec);
-      rqtp.tv_sec  = sec;
-      rqtp.tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
+      rqtp.tv_sec  = (time_t)(usec / (useconds_t)USEC_PER_SEC);
+      rqtp.tv_nsec = (long)(usec % (useconds_t)USEC_PER_SEC) * NSEC_PER_USEC;
 
       ret = nxsig_nanosleep(&rqtp, NULL);
     }
