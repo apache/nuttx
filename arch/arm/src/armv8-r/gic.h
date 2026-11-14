@@ -326,7 +326,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-/* redirect to arm_gic_initialize() beofre SMP added */
+/* redirect to arm_gic_initialize() before SMP added */
 
 #define arm_gic0_initialize  arm_gic_initialize
 
