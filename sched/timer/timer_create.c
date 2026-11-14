@@ -108,6 +108,38 @@ static FAR struct posix_timer_s *timer_allocate(void)
 }
 
 /****************************************************************************
+ * Name: timer_cpu_getclockid
+ *
+ * Description:
+ *   Check a CPU-time clock of a new timer.  Give a clock of the calling
+ *   thread its thread ID: the timer reads the clock in interrupt handlers.
+ *
+ ****************************************************************************/
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+static bool timer_cpu_getclockid(FAR clockid_t *clockid)
+{
+  pid_t pid = *clockid >> CLOCK_SHIFT;
+
+  if ((*clockid & CLOCK_MASK) != CLOCK_PROCESS_CPUTIME_ID &&
+      (*clockid & CLOCK_MASK) != CLOCK_THREAD_CPUTIME_ID)
+    {
+      return false;
+    }
+
+  if (pid == 0)
+    {
+      *clockid |= this_task()->pid << CLOCK_SHIFT;
+      return true;
+    }
+
+  return nxsched_get_tcb(pid) != NULL;
+}
+#else
+#  define timer_cpu_getclockid(c) false
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -168,7 +200,8 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
   /* Sanity checks. */
 
   if (timerid == NULL || (clockid != CLOCK_REALTIME &&
-      clockid != CLOCK_MONOTONIC && clockid != CLOCK_BOOTTIME) ||
+      clockid != CLOCK_MONOTONIC && clockid != CLOCK_BOOTTIME &&
+      !timer_cpu_getclockid(&clockid)) ||
       (evp != NULL && nxsig_event_valid(evp) < 0))
     {
       set_errno(EINVAL);

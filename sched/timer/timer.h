@@ -33,6 +33,7 @@
 #include <stdint.h>
 
 #include <nuttx/compiler.h>
+#include <nuttx/irq.h>
 #include <nuttx/signal.h>
 #include <nuttx/wdog.h>
 #include <nuttx/spinlock.h>
@@ -44,6 +45,14 @@
  ****************************************************************************/
 
 #define PT_FLAGS_PREALLOCATED 0x01u /* Timer comes from a pool of preallocated timers */
+
+/* Timers on the CPU-time clocks need the run time of the threads */
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+#  define timer_is_cputime(t) \
+     (((t)->pt_clock & CLOCK_MASK) == CLOCK_PROCESS_CPUTIME_ID || \
+      ((t)->pt_clock & CLOCK_MASK) == CLOCK_THREAD_CPUTIME_ID)
+#endif
 
 /****************************************************************************
  * Public Types
@@ -96,6 +105,11 @@ void timer_initialize(void);
 void timer_deleteall(pid_t pid);
 int timer_release(FAR struct posix_timer_s *timer);
 FAR struct posix_timer_s *timer_gethandle(timer_t timerid);
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+void timer_cpu_gettime(FAR struct posix_timer_s *timer,
+                       FAR struct timespec *ts);
+#endif
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */
 #endif /* __SCHED_TIMER_TIMER_H */
