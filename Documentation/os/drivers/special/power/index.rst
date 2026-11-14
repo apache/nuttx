@@ -10,6 +10,7 @@ Power-related Drivers
   battery/fakegauge.rst
   smps.rst
   lm51772.rst
+  npzero.rst
   battery/ltc4013.rst
   battery/npm1100.rst
 

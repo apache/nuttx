@@ -58,6 +58,28 @@ config SMPS_LM51772
 
 endif
 
+config NPZERO
+	bool "Nanopower nPZero G1S power-saving IC"
+	default n
+	depends on I2C
+	---help---
+		Character driver for the Nanopower nPZero G1S power-saving IC,
+		controlled over I2C.  The nPZero switches the host off, polls up
+		to four I2C or SPI peripherals by itself and switches the host on
+		again when a wake-up condition happens.
+
+if NPZERO
+
+config NPZERO_I2C_FREQUENCY
+	int "nPZero I2C frequency"
+	default 100000
+	range 1 100000
+	---help---
+		I2C frequency of the nPZero.  It supports the standard mode
+		(100 kHz) only.
+
+endif # NPZERO
+
 config REGULATOR
 	bool "Regulator core driver support"
 	default n

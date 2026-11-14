@@ -1,0 +1,21 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_NPZERO_G1S_DK
+
+config NPZERO_G1S_DK_PMOD_POWER
+	bool "Power the PMOD 3 and 4 peripherals at boot"
+	default y
+	depends on NPZERO
+	---help---
+		After a reset of the nPZero, the power switches of the
+		peripherals are off.  An unpowered sensor board on the I2C bus
+		(the AS6212 on PMOD 4) slows down SDA so much that the STM32 I2C
+		controller cannot talk to the nPZero.  If this option is
+		selected, the power switches of PMOD 3 and 4 are enabled
+		(PSWCTL) with a slow bit-banged I2C transfer, before the I2C
+		driver is initialized.
+
+endif

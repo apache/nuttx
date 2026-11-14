@@ -38,6 +38,10 @@ if(CONFIG_SMPS_LM51772)
   list(APPEND SRCS lm51772.c)
 endif()
 
+if(CONFIG_NPZERO)
+  list(APPEND SRCS npzero.c)
+endif()
+
 if(CONFIG_REGULATOR)
   list(APPEND SRCS regulator.c)
 
