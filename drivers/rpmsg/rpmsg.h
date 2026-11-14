@@ -27,6 +27,7 @@
 
 #ifdef CONFIG_RPMSG
 
+#include <nuttx/list.h>
 #include <nuttx/panic_notifier.h>
 #include <nuttx/rpmsg/rpmsg.h>
 
@@ -47,9 +48,9 @@
 struct rpmsg_s
 {
   bool                         init;
-  struct metal_list            bind;
+  struct list_node             bind;
   rmutex_t                     lock;
-  struct metal_list            node;
+  struct list_node             node;
   char                         local_cpuname[RPMSG_NAME_SIZE];
   char                         cpuname[RPMSG_NAME_SIZE];
   FAR const struct rpmsg_ops_s *ops;
