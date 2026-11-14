@@ -84,6 +84,10 @@ if(CONFIG_RGBLED)
   list(APPEND SRCS stm32_rgbled.c)
 endif()
 
+if(CONFIG_PTP_PPS)
+  list(APPEND SRCS stm32_ptp_pps.c)
+endif()
+
 if(CONFIG_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
