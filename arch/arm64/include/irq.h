@@ -296,6 +296,14 @@ struct xcptcontext
   uint64_t *sregs;
 #endif
 
+#ifdef CONFIG_BUILD_KERNEL
+  /* A user address that faulted in memcpy() or memset() during the current
+   * system call.  The system call finishes, then the caller ends.
+   */
+
+  uintptr_t ufault;
+#endif
+
 #ifdef CONFIG_ARCH_FPU
   uint64_t *fpu_regs;
   uint64_t *saved_fpu_regs;

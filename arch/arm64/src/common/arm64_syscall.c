@@ -32,6 +32,8 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <signal.h>
+#include <unistd.h>
 #include <nuttx/debug.h>
 #include <syscall.h>
 
@@ -158,6 +160,19 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
   /* System call is now done */
 
   rtcb->flags &= ~TCB_FLAG_SYSCALL;
+
+#ifdef CONFIG_BUILD_KERNEL
+  /* memcpy() or memset() faulted on a bad user address during the system
+   * call (see arm64_fatal_handler()).  The system call has finished and
+   * released what it held: now end the caller.
+   */
+
+  if (rtcb->xcp.ufault != 0)
+    {
+      rtcb->flags |= TCB_FLAG_FORCED_CANCEL;
+      _exit(SIGSEGV);
+    }
+#endif
 
   /* Unmask any pending signals now */
 

@@ -28,6 +28,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <arch/irq.h>
 #include <nuttx/debug.h>
@@ -53,6 +54,15 @@
 #endif
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* ISS bits of a data abort: 10, FAR is not valid; 6, a write caused it */
+
+#define ESR_ELX_FNV             (1 << 10)
+#define ESR_ELX_WNR             (1 << 6)
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -72,6 +82,21 @@ struct fatal_handle_info
 
 static int default_debug_handler(uint64_t *regs, uint64_t far, uint64_t esr);
 static int default_fatal_handler(uint64_t *regs, uint64_t far, uint64_t esr);
+
+/****************************************************************************
+ * External Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+/* The code of memcpy() and memset() (libs/libc/machine/arm64).  They are
+ * not there if the C versions are in use.
+ */
+
+extern const char arm64_memcpy_start[] weak_data;
+extern const char arm64_memcpy_end[] weak_data;
+extern const char arm64_memset_start[] weak_data;
+extern const char arm64_memset_end[] weak_data;
+#endif
 
 /****************************************************************************
  * Private Data
@@ -623,6 +648,96 @@ static int arm64_exception_handler(uint64_t *regs)
   return ret;
 }
 
+#ifdef CONFIG_BUILD_KERNEL
+/****************************************************************************
+ * Name: arm64_syscall_user_fault
+ *
+ * Description:
+ *   Return true if a kernel data abort is on a user address that a system
+ *   call touched for its caller.  Then the bad pointer came from the
+ *   caller, and only the caller must end.
+ *
+ ****************************************************************************/
+
+static bool arm64_syscall_user_fault(struct tcb_s *tcb, uint64_t esr,
+                                     uint64_t far)
+{
+  uint64_t fsc = esr & ESR_ELX_FSC_TYPE;
+
+  return ESR_ELX_EC(esr) == ESR_ELX_EC_DABT_CUR &&
+         (esr & ESR_ELX_FNV) == 0 &&
+         (fsc == ESR_ELX_FSC_FAULT || fsc == ESR_ELX_FSC_ACCESS ||
+          fsc == ESR_ELX_FSC_PERM) &&
+         (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL &&
+         (tcb->flags & (TCB_FLAG_SYSCALL | TCB_FLAG_EXIT_PROCESSING)) ==
+         TCB_FLAG_SYSCALL &&
+         tcb->addrenv_curr == tcb->addrenv_own &&
+         up_addrenv_user_vaddr(far);
+}
+
+/****************************************************************************
+ * Name: arm64_syscall_resume
+ *
+ * Description:
+ *   Return true if the fault is in memcpy() or memset().  Both are leaf
+ *   functions: x30 holds the return address and x0 the destination, so the
+ *   handler can return from them, and the system call can finish and
+ *   release its locks, references and memory.  If memcpy() faulted on a
+ *   read of the user source, clear the kernel destination first, so that
+ *   old kernel data does not go on in place of the user data.
+ *
+ ****************************************************************************/
+
+static bool arm64_syscall_resume(uint64_t *regs, uint64_t esr)
+{
+  uint64_t elr = regs[REG_ELR];
+  uint64_t dst = regs[REG_X0];
+  uint64_t end = regs[REG_X5];   /* dstend in arch_memcpy.S */
+
+  if (arm64_memcpy_start != NULL &&
+      elr >= (uintptr_t)arm64_memcpy_start &&
+      elr < (uintptr_t)arm64_memcpy_end)
+    {
+      if ((esr & ESR_ELX_WNR) == 0 && end > dst &&
+          !up_addrenv_user_vaddr(dst) && !up_addrenv_user_vaddr(end - 1))
+        {
+          memset((void *)dst, 0, end - dst);
+        }
+
+      return true;
+    }
+
+  return arm64_memset_start != NULL &&
+         elr >= (uintptr_t)arm64_memset_start &&
+         elr < (uintptr_t)arm64_memset_end;
+}
+
+/****************************************************************************
+ * Name: arm64_kstack_frame
+ *
+ * Description:
+ *   Move the exception frame to the top of the kernel stack, so that
+ *   _exit() does not run below the frames of the system call that faulted.
+ *
+ ****************************************************************************/
+
+static uint64_t *arm64_kstack_frame(struct tcb_s *tcb, uint64_t *regs)
+{
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  uintptr_t base = (uintptr_t)tcb->xcp.kstack;
+  uintptr_t top  = base + ARCH_KERNEL_STACKSIZE - XCPTCONTEXT_SIZE;
+
+  if (base != 0 && (uintptr_t)regs >= base && (uintptr_t)regs <= top)
+    {
+      memmove((void *)top, regs, XCPTCONTEXT_SIZE);
+      regs = (uint64_t *)top;
+    }
+#endif
+
+  return regs;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -630,11 +745,17 @@ static int arm64_exception_handler(uint64_t *regs)
 uint64_t *arm64_fatal_handler(uint64_t *regs)
 {
   struct tcb_s *tcb = this_task();
+  bool inirq = up_interrupt_context();
+  bool resume = false;
+  bool report = true;
+  bool user = false;
+  uint64_t esr;
+  uint64_t far;
   int ret;
 
   /* Nested exception are not supported */
 
-  DEBUGASSERT(!up_interrupt_context());
+  DEBUGASSERT(!inirq);
 
   tcb->xcp.regs = (uint64_t *)regs;
 
@@ -646,17 +767,52 @@ uint64_t *arm64_fatal_handler(uint64_t *regs)
 
   if (ret != 0)
     {
+      arm64_get_exception_info(arm64_current_el(), &esr, &far, NULL, NULL);
+
       if (((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&
           ((tcb->flags & TCB_FLAG_SYSCALL) == 0) &&
           ((regs[REG_SPSR] & SPSR_MODE_MASK) == SPSR_MODE_EL0T))
         {
+          user = true;
+        }
+#ifdef CONFIG_BUILD_KERNEL
+      else if (!inirq && arm64_syscall_user_fault(tcb, esr, far))
+        {
+          /* A bad pointer from the caller: end the caller, not the system.
+           * In memcpy() or memset(), return from it and end the caller when
+           * the system call returns (see dispatch_syscall()).  Elsewhere
+           * end the caller now: the system call does not finish, so what
+           * it holds stays held.
+           */
+
+          resume = arm64_syscall_resume(regs, esr);
+          report = !resume || tcb->xcp.ufault == 0;
+          if (report)
+            {
+              _alert("Bad user address 0x%" PRIx64 " in a system call\n",
+                     far);
+            }
+
+          if (resume)
+            {
+              tcb->xcp.ufault = far;
+            }
+          else
+            {
+              tcb->flags &= ~TCB_FLAG_SYSCALL;
+              regs = arm64_kstack_frame(tcb, regs);
+              tcb->xcp.regs = regs;
+            }
+
+          user = true;
+        }
+#endif
+
+      if (user)
+        {
           struct tcb_s *ptcb;
-          uint64_t esr;
           const char *reason;
           const char *desc;
-
-          arm64_get_exception_info(arm64_current_el(), &esr, NULL,
-                                   NULL, NULL);
 
           reason = esr_get_class_string(esr);
           if (reason == NULL)
@@ -675,19 +831,31 @@ uint64_t *arm64_fatal_handler(uint64_t *regs)
            * the register dump to the paths that are fatal.
            */
 
-          ptcb = nxsched_get_tcb(tcb->group->tg_pid);
+          if (report)
+            {
+              ptcb = nxsched_get_tcb(tcb->group->tg_pid);
 
-          _alert("Segmentation fault in %s (PID %d: %s)\n",
-                 ptcb != NULL ? get_task_name(ptcb) : "<gone>",
-                 tcb->pid, get_task_name(tcb));
-          _alert("Reason: %s - %s\n", reason, desc);
+              _alert("Segmentation fault in %s (PID %d: %s)\n",
+                     ptcb != NULL ? get_task_name(ptcb) : "<gone>",
+                     tcb->pid, get_task_name(tcb));
+              _alert("Reason: %s - %s\n", reason, desc);
+            }
 
-          tcb->flags |= TCB_FLAG_FORCED_CANCEL;
+          if (resume)
+            {
+              /* Return from memcpy() or memset() to its caller */
 
-          regs[REG_ELR] = (uint64_t)_exit;
-          regs[REG_X0] = SIGSEGV;
-          regs[REG_SPSR] &= ~SPSR_MODE_MASK;
-          regs[REG_SPSR] |= SPSR_MODE_EL1H;
+              regs[REG_ELR] = regs[REG_X30];
+            }
+          else
+            {
+              tcb->flags |= TCB_FLAG_FORCED_CANCEL;
+
+              regs[REG_ELR] = (uint64_t)_exit;
+              regs[REG_X0] = SIGSEGV;
+              regs[REG_SPSR] &= ~SPSR_MODE_MASK;
+              regs[REG_SPSR] |= SPSR_MODE_EL1H;
+            }
         }
       else
         {
