@@ -43,6 +43,7 @@
 #  include <nuttx/binfmt/binfmt.h>
 #endif
 
+#include "sched/sched.h"
 #include "signal/signal.h"
 #include "pthread/pthread.h"
 #include "mqueue/mqueue.h"
@@ -236,6 +237,19 @@ void group_leave(FAR struct tcb_s *tcb)
       if (release)
         {
           /* Yes.. Release all of the resource held by the task group */
+
+#ifdef CONFIG_BUILD_KERNEL
+          /* A vfork() child uses the heap of its parent.  Free into it
+           * only when it is the current heap: the child ends itself.
+           */
+
+          if ((group->tg_flags & GROUP_FLAG_VFORK) != 0 &&
+              (tcb->addrenv_own == NULL ||
+               tcb->addrenv_own != this_task()->addrenv_curr))
+            {
+              group->tg_flags &= ~GROUP_FLAG_VFORK;
+            }
+#endif
 
           group_release(group);
         }
