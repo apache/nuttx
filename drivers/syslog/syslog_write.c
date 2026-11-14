@@ -187,18 +187,22 @@ ssize_t syslog_write_foreach(int priority, FAR const char *buffer,
                       continue;
                     }
 
-                  ret = write(channel, buffer + nwritten, head - nwritten);
-                  if (ret >= 0)
+                  if (head > nwritten)
                     {
-                      ret = write(channel, "\r\n", 2);
+                      ret = write(channel, buffer + nwritten,
+                                  head - nwritten);
+                      if (ret <= 0)
+                        {
+                          continue;
+                        }
                     }
 
-                  if (ret < 0)
-                    {
-                      continue;
-                    }
+                  /* On failure leave the '\n' to the tail write: rewinding
+                   * would duplicate the bytes already written.
+                   */
 
-                  nwritten = head + 1;
+                  ret = write(channel, "\r\n", 2);
+                  nwritten = ret > 0 ? head + 1 : head;
                 }
             }
 #endif
@@ -206,14 +210,12 @@ ssize_t syslog_write_foreach(int priority, FAR const char *buffer,
           if (nwritten < buflen)
             {
               ret = write(channel, buffer + nwritten, buflen - nwritten);
-              if (ret < 0)
+              if (ret <= 0)
                 {
                   continue;
                 }
-              else
-                {
-                  nwritten += ret;
-                }
+
+              nwritten += ret;
             }
         }
       else
