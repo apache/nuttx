@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/misc/optee.c
+ * drivers/tee/optee.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -496,7 +496,6 @@ static int optee_shm_mmap(FAR struct file *filep,
 {
   FAR struct optee_shm *shm = filep->f_priv;
   FAR struct optee_priv_data *priv = shm->priv;
-  FAR struct mm_map_entry_s *entry;
   int32_t ret = OK;
 
   if ((map->flags & MAP_PRIVATE) && (map->flags & MAP_SHARED))
@@ -529,19 +528,16 @@ static int optee_shm_mmap(FAR struct file *filep,
       shm->paddr = optee_va_to_pa(map->vaddr);
       shm->flags |= TEE_SHM_REGISTER;
 
-      entry = mm_map_find(get_current_mm(), map->vaddr, map->length);
-      DEBUGASSERT(entry != NULL);
-
-      shm->munmap = entry->munmap;
-      entry->munmap = optee_shm_munmap;
-      shm->p = entry->priv.p;
-      entry->priv.p = shm;
+      shm->munmap = map->munmap;
+      map->munmap = optee_shm_munmap;
+      shm->p = map->priv.p;
+      map->priv.p = shm;
 
       ret = optee_shm_register(priv, shm);
       if (ret < 0)
         {
-          shm->munmap(nxsched_self()->group, entry,
-                      entry->vaddr, entry->length);
+          shm->munmap(nxsched_self()->group, map,
+                      map->vaddr, map->length);
           optee_shm_free(shm);
         }
     }
@@ -940,11 +936,11 @@ optee_ioctl_close_session(FAR struct optee_priv_data *priv,
 static int optee_ioctl_version(FAR struct optee_priv_data *priv,
                                FAR struct tee_ioctl_version_data *vers)
 {
-  vers->gen_caps |= priv->capabilities;
   vers->impl_id = TEE_IMPL_ID_OPTEE;
   vers->impl_caps = TEE_OPTEE_CAP_TZ;
   vers->gen_caps = TEE_GEN_CAP_GP |
                    TEE_GEN_CAP_MEMREF_NULL;
+  vers->gen_caps |= priv->capabilities;
 
   return 0;
 }

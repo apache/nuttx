@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/misc/optee_supplicant.c
+ * drivers/tee/optee_supplicant.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

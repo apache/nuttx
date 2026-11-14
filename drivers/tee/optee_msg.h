@@ -1,13 +1,13 @@
 /****************************************************************************
- * drivers/misc/optee_msg.h
+ * drivers/tee/optee_msg.h
  *
  * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2015-2020, Linaro Limited
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_MISC_OPTEE_MSG_H
-#define __DRIVERS_MISC_OPTEE_MSG_H
+#ifndef __DRIVERS_TEE_OPTEE_MSG_H
+#define __DRIVERS_TEE_OPTEE_MSG_H
 
 /****************************************************************************
  * Included Files
@@ -486,4 +486,4 @@ struct optee_msg_arg
 
 #define OPTEE_MSG_RPC_CMD_I2C_FLAGS_TEN_BIT  BIT(0)
 
-#endif /* __DRIVERS_MISC_OPTEE_MSG_H */
+#endif /* __DRIVERS_TEE_OPTEE_MSG_H */
