@@ -56,6 +56,8 @@
 void _exit(int status)
 {
   FAR struct tcb_s *tcb = this_task();
+  bool exiting = false;
+  irqstate_t flags;
 
   /* Only the lower 8-bits of status are used */
 
@@ -78,7 +80,7 @@ void _exit(int status)
    * The IRQ state will be restored when the next task is started.
    */
 
-  enter_critical_section();
+  flags = enter_critical_section();
 
   /* Perform common task termination logic.  This will get called again later
    * through logic kicked off by up_exit().
@@ -92,7 +94,32 @@ void _exit(int status)
    * once, or does something very naughty.
    */
 
-  tcb->flags |= TCB_FLAG_EXIT_PROCESSING;
+  if (tcb->flags & TCB_FLAG_EXIT_PROCESSING)
+    {
+      exiting = true;
+    }
+  else
+    {
+      tcb->flags |= TCB_FLAG_EXIT_PROCESSING;
+    }
+
+  leave_critical_section(flags);
+
+  if (exiting)
+    {
+      /* If the TCB is already in the exiting state, we
+       * should allow the killing task to execute normally first.
+       * We stop the execution here.
+       */
+
+      nxsched_park_task(tcb);
+    }
+  else
+    {
+      nxsched_releasepid(tcb->pid);
+    }
+
+  enter_critical_section();
 
   nxtask_exithook(tcb, status);
 

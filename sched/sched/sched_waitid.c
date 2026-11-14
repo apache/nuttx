@@ -182,7 +182,7 @@ int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
        */
 
       if (rtcb->group->tg_nchildren == 0 ||
-          (idtype == P_PID && nxsched_get_tcb((pid_t)id) == NULL))
+          (idtype == P_PID && !nxsched_verify_pid((pid_t)id)))
         {
           /* We know that the child task was running okay we started,
            * so we must have lost the signal.  What can we do?
@@ -363,7 +363,7 @@ int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
 int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 {
   FAR struct tcb_s *rtcb = this_task();
-  FAR struct tcb_s *ctcb;
+  FAR struct tcb_s *ctcb = NULL;
   bool retains = false;
   int errcode = ENOSYS;
   irqstate_t flags;
@@ -423,6 +423,8 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
                 }
             }
 
+          nxsched_put_tcb(ctcb);
+
           /* Does this task retain child status? */
 
           if (retains && errcode == OK)
@@ -459,6 +461,8 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
             {
               errcode = ECHILD;
             }
+
+          nxsched_put_tcb(ctcb);
         }
 #endif
     }

@@ -80,6 +80,7 @@ static int sig_handler(FAR void *cookie)
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
       leave_critical_section(flags);
+      nxsched_put_tcb(tcb);
       return -ESRCH;
     }
 
@@ -94,6 +95,8 @@ static int sig_handler(FAR void *cookie)
     }
 
   leave_critical_section(flags);
+  nxsched_put_tcb(tcb);
+
   return OK;
 }
 #endif
@@ -1006,7 +1009,10 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread,
 
       if (stcb != NULL)
         {
-          return nxsig_tcbdispatch(stcb, info, false, source, limit);
+          int ret = nxsig_tcbdispatch(stcb, info, false, source, limit);
+
+          nxsched_put_tcb(stcb);
+          return ret;
         }
     }
 
@@ -1039,6 +1045,7 @@ bool nxsig_source_queued(pid_t pid, FAR const void *source, int signo)
   flags = enter_critical_section();
   tcb = nxsched_get_tcb(pid);
   group = tcb != NULL ? tcb->group : NULL;
+  nxsched_put_tcb(tcb);
   if (group == NULL)
     {
       leave_critical_section(flags);

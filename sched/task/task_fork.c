@@ -208,7 +208,7 @@ static void fork_restore_parent_env(void)
 FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
 {
   FAR struct tcb_s *ptcb = this_task();
-  FAR struct tcb_s *parent;
+  FAR struct tcb_s *parent = NULL;
   FAR struct tcb_s *child;
   FAR char **argv;
   size_t stack_size;
@@ -262,6 +262,8 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
   /* Initialize the task join */
 
   nxtask_joininit(child);
+
+  nxsem_init(&child->exit_sem, 0, 0);
 
   /* Allocate a new task group with the same privileges as the parent */
 
@@ -476,6 +478,11 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
 
   group_initialize(child);
   sinfo("parent=%p, returning child=%p\n", parent, child);
+  if (parent != ptcb)
+    {
+      nxsched_put_tcb(parent);
+    }
+
   return child;
 
 errout_with_tcb:
@@ -494,6 +501,11 @@ errout_with_tcb:
 
   nxsched_release_tcb((FAR struct tcb_s *)child, ttype);
 errout:
+  if (parent != ptcb)
+    {
+      nxsched_put_tcb(parent);
+    }
+
   set_errno(-ret);
   return NULL;
 }

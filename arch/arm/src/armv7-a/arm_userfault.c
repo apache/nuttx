@@ -76,6 +76,8 @@ bool arm_fault_kill(uint32_t *regs)
          ptcb != NULL ? get_task_name(ptcb) : "<gone>",
          tcb->pid, get_task_name(tcb));
 
+  nxsched_put_tcb(ptcb);
+
   tcb->flags |= TCB_FLAG_FORCED_CANCEL;
 
   regs[REG_PC]   = (uint32_t)_exit;
