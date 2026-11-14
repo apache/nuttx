@@ -281,6 +281,21 @@ struct cap_ops_s
 
   CODE int (*get_input_state)(FAR struct cap_lowerhalf_s *lower,
                               FAR uint8_t *state);
+
+  /* Get the current value of the free running counter that time stamps
+   * the captured edges (optional).
+   */
+
+  CODE int (*getcount)(FAR struct cap_lowerhalf_s *lower,
+                       FAR uint32_t *count);
+
+  /* Get the counter value latched by the hardware on the last captured
+   * edge (optional).  Called from the notification callback, it gives the
+   * time of the edge independently of the interrupt latency.
+   */
+
+  CODE int (*getcapture)(FAR struct cap_lowerhalf_s *lower,
+                         FAR uint32_t *count);
 };
 
 /* This structure provides the publicly visible representation of the
