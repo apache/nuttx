@@ -180,9 +180,8 @@ Lower-half callback table ``mdio_ops_s`` (implemented by the MAC driver):
       * by logic level rather than a one-shot pulse. value != 0 asserts
       * (into reset); value == 0 deasserts (release). The lower-half handles
       * pin polarity (active-low RESET_N handled internally) and the
-      * datasheet-specified assert/deassert settle delays; the upper-half
-      * mdio_reset() handles idempotency (skips when already at the target
-      * state).
+      * datasheet-specified assert/deassert settle delays, and any
+      * idempotency (a single bus may host several PHY addresses).
       */
      int (*reset)(FAR struct mdio_lowerhalf_s *lower, uint8_t phyaddr,
                   int value);
@@ -1058,8 +1057,10 @@ PHY hardware reset callback ``aurix_mdio_reset`` (level control):
 
      int ret;
 
-     /* 1. Register the vendor PHY driver (idempotent) */
-     phy_realtek_register();
+     /* 1. Register the vendor PHY driver once at boot (not idempotent:
+      * each call consumes a driver-table slot, so do not call repeatedly).
+      */
+     rtl8221b_register();
 
      /* 2. Fill the lower-half and register with the upper-half, get the handle */
      priv->mdio_lower.ops = &g_aurix_mdio_ops;
