@@ -1,0 +1,22 @@
+# ##############################################################################
+# boards/arm/rzv/rzv2h-evk/Kconfig
+#
+# Kconfig for the RZV2H_EVK board support package for the RZV2H MPU.
+#
+if ARCH_BOARD_RZV2H_EVK
+
+config BOARD_RZV2H_EVK
+    bool "RZV2H-EVK Board Support"
+    help
+      Enable support for the RZV2H-EVK board based on the RZV2H MPU.
+
+endif
+
+config RZV2H_EXAMPLE_SUPPORT
+    bool "RZV2H-EVK Example Support"
+    default y
+    depends on ARCH_BOARD_RZV2H_EVK
+    help
+      Enable support for various application examples for the RZV2H-EVK board.
+
+# ##############################################################################

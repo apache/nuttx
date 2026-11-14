@@ -1,0 +1,98 @@
+############################################################################
+# boards/arm/rzv2h/rzv2h-rdk/scripts/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/arch/arm/src/armv7-r/Toolchain.defs
+
+# Determine linker script based on build type
+ifeq ($(CONFIG_RZV2H_CORTEXR8_0),y)
+  LDSCRIPT = rzv2h-rdk_cr8_0.ld
+endif
+
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+
+# Compile flags
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe -Wno-undef
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+
+# Linker flags
+NXFLATLDFLAGS1 = -r -d -warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+LDNXFLATFLAGS = -e main -s 2048
+
+# ELF module flags
+LDELFFLAGS = -r -e main
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
+else
+  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
+endif
+
+# Board-specific flags
+HOSTCC = gcc
+HOSTINCLUDES = -I.
+HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
+HOSTLDFLAGS =
+
+#hal renesas include
+HAL_INDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)common$(DELIM)renesas$(DELIM)hal_renesas
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)inc
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)inc$(DELIM)instances
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)inc$(DELIM)instances$(DELIM)rzv
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)inc$(DELIM)api
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)src$(DELIM)rzv$(DELIM)bsp$(DELIM)mcu$(DELIM)rzv2h
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)src$(DELIM)rzv$(DELIM)bsp$(DELIM)mcu$(DELIM)all
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)src$(DELIM)rzv$(DELIM)bsp$(DELIM)mcu$(DELIM)all$(DELIM)cr
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)src$(DELIM)rzv$(DELIM)bsp$(DELIM)cmsis$(DELIM)Device$(DELIM)RENESAS$(DELIM)Include
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)nuttx$(DELIM)rz$(DELIM)rz_cfg$(DELIM)fsp_cfg
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)nuttx$(DELIM)rz$(DELIM)rz_cfg$(DELIM)fsp_cfg$(DELIM)bsp
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)nuttx$(DELIM)rz$(DELIM)rz_cfg$(DELIM)fsp_cfg$(DELIM)bsp$(DELIM)rzv2h
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)nuttx$(DELIM)rz$(DELIM)rz_cfg$(DELIM)fsp_cfg$(DELIM)bsp$(DELIM)rzv2h$(DELIM)cr
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)nuttx$(DELIM)rz$(DELIM)rz_cfg$(DELIM)fsp_cfg$(DELIM)rzv
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)nuttx$(DELIM)rz$(DELIM)portable$(DELIM)rzv
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)nuttx$(DELIM)rz$(DELIM)portable$(DELIM)rzv$(DELIM)cr
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)nuttx$(DELIM)cmsis
+CFLAGS += $(INCDIR_PREFIX)$(HAL_INDIR)$(DELIM)nuttx$(DELIM)cmsis$(DELIM)include$(DELIM)cr
+
+# Generate the raw image U-Boot loads at CONFIG_RAM_START before starting
+# CR8_0 from reset.  Select the SRAM sections explicitly so distant NOLOAD
+# OpenAMP regions can never create padding in the raw binary.  .vectors runs
+# from ITCM, but its load copy is the first thing in RAM and the U-Boot reset
+# trampoline in ITCM jumps to it, so it has to be in the image; without it
+# nuttx_uboot.bin would also start at .text instead of at CONFIG_RAM_START.
+
+ifeq ($(CONFIG_RZV2H_UBOOT_IMAGE),y)
+define POSTBUILD
+	@echo "CP: nuttx_uboot.bin"
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary \
+		--only-section=.vectors --only-section=.text \
+		--only-section=.init_section \
+		--only-section=.ARM.extab --only-section=.ARM.exidx \
+		--only-section=.data $(BIN) nuttx_uboot.bin
+	$(Q) echo nuttx_uboot.bin >> nuttx.manifest
+endef
+endif

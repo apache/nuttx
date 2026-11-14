@@ -3830,6 +3830,20 @@ config ARCH_BOARD_TMS570LS31X_USB_KIT
 		TI Hercules TMS570LS31xx Evaluation Kit (TMDS570ls31xx USB Kit)
 		featuring the Hercules TMS570LS3137ZWT chip.
 
+config ARCH_BOARD_RZV2H_EVK
+	bool "Renesas RZV2H-EVK"
+	depends on ARCH_CHIP_R9A09G057
+	select ARCH_HAVE_LEDS
+	---help---
+		Renesas RZV2H Evaluation Kit featuring the R9A09G057 (Cortex-R8) chip.
+
+config ARCH_BOARD_RZV2H_RDK
+	bool "Renesas RZV2H-RDK"
+	depends on ARCH_CHIP_R9A09G057
+	select ARCH_HAVE_LEDS
+	---help---
+		Renesas RZV2H Development Kit featuring the R9A09G057 (Cortex-R8) chip.
+
 config ARCH_BOARD_TWR_K60N512
 	bool "FreeScale TWR-K60N512 development board"
 	depends on ARCH_CHIP_MK60N512VMD100
@@ -4533,6 +4547,8 @@ config ARCH_BOARD
 	default "tm4c1294-launchpad"           if ARCH_BOARD_TM4C1294_LAUNCHPAD
 	default "tm4c129e-launchpad"           if ARCH_BOARD_TM4C129E_LAUNCHPAD
 	default "tms570ls31x-usb-kit"          if ARCH_BOARD_TMS570LS31X_USB_KIT
+	default "rzv2h-evk"                    if ARCH_BOARD_RZV2H_EVK
+	default "rzv2h-rdk"                    if ARCH_BOARD_RZV2H_RDK
 	default "lilygo_tbeam_lora_gps"        if ARCH_BOARD_LILYGO_TBEAM_LORA_GPS
 	default "ttgo_lora_esp32"              if ARCH_BOARD_TTGO_LORA_ESP32
 	default "ttgo_t_display_esp32"         if ARCH_BOARD_TTGO_T_DISPLAY_ESP32
@@ -5458,6 +5474,12 @@ source "boards/arm/tms570/launchxl-tms57004/Kconfig"
 endif
 if ARCH_BOARD_TMS570LS31X_USB_KIT
 source "boards/arm/tms570/tms570ls31x-usb-kit/Kconfig"
+endif
+if ARCH_BOARD_RZV2H_EVK
+source "boards/arm/rzv2h/rzv2h-evk/Kconfig"
+endif
+if ARCH_BOARD_RZV2H_RDK
+source "boards/arm/rzv2h/rzv2h-rdk/Kconfig"
 endif
 if ARCH_BOARD_RM57L843_LAUNCHXL2
 source "boards/arm/rm57/rm57l843-launchxl2/Kconfig"

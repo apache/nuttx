@@ -29,6 +29,9 @@ else ifeq ($(CONFIG_ARCH_CORTEXR5),y)
 else ifeq ($(CONFIG_ARCH_CORTEXR7),y)
   ARCHCPUFLAGS += -mcpu=cortex-r7
   LLVM_CPUTYPE := cortex-r7
+else ifeq ($(CONFIG_ARCH_CORTEXR8),y)
+  ARCHCPUFLAGS += -mcpu=cortex-r8
+  LLVM_CPUTYPE := cortex-r8
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
@@ -65,6 +68,12 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
       LDFLAGS += --cpu=Cortex-R7
     else
       LDFLAGS += --cpu=Cortex-R7.no_vfp
+    endif
+  else ifeq ($(CONFIG_ARCH_CORTEXR8),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      LDFLAGS += --cpu=Cortex-R8
+    else
+      LDFLAGS += --cpu=Cortex-R8.no_vfp
     endif
   endif
 
