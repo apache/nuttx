@@ -1362,6 +1362,13 @@ config ARCH_ARMV8R
 	select ALARM_ARCH
 	select ARM_HAVE_WFE_SEV
 
+config ARM_GIC_VERSION
+	int "GIC version"
+	default 3 if ARCH_ARMV8R
+	default 2
+	range 2 4
+	---help---
+		Version of Generic Interrupt Controller (GIC) supported.
 
 config ARCH_FAMILY
 	string

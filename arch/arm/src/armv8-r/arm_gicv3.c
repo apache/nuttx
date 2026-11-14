@@ -36,7 +36,7 @@
 #include <sched/sched.h>
 
 #include "arm_internal.h"
-#include "arm_gic.h"
+#include "gic.h"
 
 /***************************************************************************
  * Pre-processor Definitions
@@ -567,7 +567,7 @@ static void gicv3_dist_init(void)
   putreg32(0, GICD_CTLR);
   gic_wait_rwp(GIC_SPI_INT_BASE);
 
-#ifdef CONFIG_ARCH_SINGLE_SECURITY_STATE
+#ifndef CONFIG_ARCH_HAVE_TRUSTZONE
 
   /* Before configuration, we need to check whether
    * the GIC single security state mode is supported.
@@ -636,7 +636,7 @@ static void gicv3_dist_init(void)
    * it has different GIC configure with standard arrch64 A or R core
    */
 
-#ifdef CONFIG_ARCH_SINGLE_SECURITY_STATE
+#ifndef CONFIG_ARCH_HAVE_TRUSTZONE
   /* For GIC single security state(ARMv8-R), the config means
    * the GIC is under single security state which has
    * only two groups:

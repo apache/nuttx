@@ -36,7 +36,7 @@
 
 #include "arm_internal.h"
 
-#include "arm_gic.h"
+#include "gic.h"
 #include "chip.h"
 #include "fvp_boot.h"
 
@@ -83,6 +83,10 @@ void arm_el_init(void)
 void arm_boot(void)
 {
   /* MAP IO and DRAM, enable MPU. */
+
+#ifdef CONFIG_ARCH_FPU
+  arm_fpuconfig();
+#endif
 
   /* Perform board-specific device initialization. This would include
    * configuration of board specific resources such as GPIOs, LEDs, etc.

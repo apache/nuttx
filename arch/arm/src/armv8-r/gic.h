@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-r/arm_gic.h
+ * arch/arm/src/armv8-r/gic.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,8 +21,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8_R_ARM_GIC_H
-#define __ARCH_ARM_SRC_ARMV8_R_ARM_GIC_H
+#ifndef __ARCH_ARM_SRC_ARMV8_R_GIC_H
+#define __ARCH_ARM_SRC_ARMV8_R_GIC_H
 
 /****************************************************************************
  * Included Files
@@ -326,6 +326,10 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+/* redirect to arm_gic_initialize() before SMP added */
+
+#define arm_gic0_initialize  arm_gic_initialize
+
 bool arm_gic_irq_is_enabled(unsigned int intid);
 int  arm_gic_initialize(void);
 void arm_gic_irq_set_priority(unsigned int intid, unsigned int prio,
@@ -364,4 +368,4 @@ static inline uint64_t arm_get_mpid(int cpu)
 #  define arm_get_mpid(cpu) GET_MPIDR()
 #endif /* CONFIG_SMP */
 
-#endif /* __ARCH_ARM_SRC_ARMV8_R_ARM_GIC_H */
+#endif /* __ARCH_ARM_SRC_ARMV8_R_GIC_H */
