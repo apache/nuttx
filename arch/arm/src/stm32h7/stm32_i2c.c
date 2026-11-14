@@ -287,7 +287,8 @@
 #define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
 #define I2C_CR1_TXRX    (I2C_CR1_RXIE | I2C_CR1_TXIE)
-#define I2C_CR1_ALLINTS (I2C_CR1_TXRX | I2C_CR1_TCIE | I2C_CR1_ERRIE)
+#define I2C_CR1_ALLINTS (I2C_CR1_TXRX | I2C_CR1_TCIE | I2C_CR1_ERRIE | \
+                         I2C_CR1_NACKIE)
 
 /* Unused bit in I2c_ISR used to communicate a bad state has occurred in
  * the isr processing
