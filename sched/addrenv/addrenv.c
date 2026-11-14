@@ -60,6 +60,18 @@
 static FAR struct addrenv_s *g_addrenv[CONFIG_SMP_NCPUS];
 static spinlock_t g_addrenv_lock = SP_UNLOCKED;
 
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_SMP)
+/* The SMP call of addrenv_wake(): no argument, so one call data serves
+ * every CPU.
+ */
+
+static int addrenv_leave_cpu(FAR void *arg);
+static struct smp_call_data_s g_addrenv_leave_call =
+{
+  addrenv_leave_cpu
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -92,6 +104,149 @@ static void addrenv_destroy(FAR void *arg)
 
   kmm_free(addrenv);
 }
+
+/****************************************************************************
+ * Name: addrenv_switch_kernel
+ *
+ * Description:
+ *   A kernel thread runs next on this CPU.  When no task owns the address
+ *   environment of the CPU any more, select the kernel page tables and drop
+ *   the reference of the CPU, so that the memory of the process is freed.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+static void addrenv_switch_kernel(void)
+{
+  FAR struct addrenv_s *drop = NULL;
+  FAR struct addrenv_s *curr;
+  irqstate_t flags;
+  int users = 0;
+  int cpu;
+  int i;
+
+  flags = spin_lock_irqsave_nopreempt(&g_addrenv_lock);
+
+  cpu = this_cpu();
+  curr = g_addrenv[cpu];
+  if (curr != NULL)
+    {
+      /* Each CPU that has it holds a reference: when the CPUs hold all of
+       * them, no task owns it.
+       */
+
+      for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+        {
+          if (g_addrenv[i] == curr)
+            {
+              users++;
+            }
+        }
+
+      if (atomic_read(&curr->refs) == users)
+        {
+          up_addrenv_coherent(&curr->addrenv);
+          if (up_addrenv_select_kernel() >= 0)
+            {
+              g_addrenv[cpu] = NULL;
+              drop = curr;
+            }
+        }
+    }
+
+  spin_unlock_irqrestore_nopreempt(&g_addrenv_lock, flags);
+
+  /* Drop it after the lock is released, as addrenv_switch() does */
+
+  addrenv_drop(drop, true);
+}
+#endif
+
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_SMP)
+
+/****************************************************************************
+ * Name: addrenv_leave_cpu
+ *
+ * Description:
+ *   The SMP call of addrenv_wake(): leave the address environment of this
+ *   CPU at once if the CPU runs a kernel thread or the idle task.
+ *
+ * Input Parameters:
+ *   arg - Not used
+ *
+ * Returned Value:
+ *   Zero (OK)
+ *
+ ****************************************************************************/
+
+static int addrenv_leave_cpu(FAR void *arg)
+{
+  if (this_task()->addrenv_curr == NULL)
+    {
+      addrenv_switch_kernel();
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: addrenv_wake
+ *
+ * Description:
+ *   When only CPUs have the address environment now, ask them to leave it:
+ *   an idle CPU can wait long for its next context switch.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void addrenv_wake(FAR struct addrenv_s *addrenv)
+{
+  irqstate_t flags;
+  cpu_set_t cpuset;
+  int users = 0;
+  int cpu;
+
+  CPU_ZERO(&cpuset);
+
+  flags = spin_lock_irqsave(&g_addrenv_lock);
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      if (g_addrenv[cpu] == addrenv)
+        {
+          CPU_SET(cpu, &cpuset);
+          users++;
+        }
+    }
+
+  /* Read refs only while a CPU has it: a CPU clears its entry under the
+   * lock before it drops its reference.
+   */
+
+  if (users == 0 || atomic_read(&addrenv->refs) != users)
+    {
+      CPU_ZERO(&cpuset);
+    }
+
+  spin_unlock_irqrestore(&g_addrenv_lock, flags);
+
+  if (CPU_COUNT(&cpuset) > 0)
+    {
+      nxsched_smp_call_async(cpuset, &g_addrenv_leave_call);
+    }
+}
+
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -141,9 +296,12 @@ int addrenv_switch(FAR struct tcb_s *tcb)
   if (!next)
     {
       /* No... just return perhaps leaving a different address environment
-       * intact.
+       * intact.  Leave it only when its process has ended.
        */
 
+#ifdef CONFIG_BUILD_KERNEL
+      addrenv_switch_kernel();
+#endif
       return OK;
     }
 
@@ -549,6 +707,14 @@ void addrenv_drop(FAR struct addrenv_s *addrenv, bool deferred)
           addrenv_destroy(addrenv);
         }
     }
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_SMP)
+  else
+    {
+      /* Let the CPUs that still have it leave it, when no task owns it */
+
+      addrenv_wake(addrenv);
+    }
+#endif
 }
 
 #ifdef CONFIG_BUILD_KERNEL
