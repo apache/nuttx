@@ -86,6 +86,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
    */
 
   tcb->xcp.saved_regs = tcb->xcp.regs;
+  tricore_sig_change_pprs(tcb, tricore_load_pprs(tcb));
 
   /* Create a new CSA for signal delivery. The new context
    * will borrow the process stack of the current tcb.
@@ -94,5 +95,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
   tcb->xcp.regs = tricore_alloc_csa((uintptr_t)tricore_sigdeliver,
                                     STACKFRAME_ALIGN_DOWN
                                     (up_getusrsp(tcb->xcp.regs)),
-                                    PSW_IO_SUPERVISOR | PSW_CDE, true);
+                                    PSW_IO_SUPERVISOR | PSW_CDE,
+                                    true);
+  tricore_change_pprs(tcb, PSW_PRS_KERNEL_SET);
 }

@@ -24,4 +24,8 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = tc4da_boardinit.c tc4da_bringup.c
 
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  CSRCS += tc4d9_userspace.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

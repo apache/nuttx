@@ -83,6 +83,10 @@ void tricore_doirq(void)
 
   if (*running_task != tcb)
     {
+      /* Update scheduler parameters */
+
+      nxsched_switch_context(*running_task, tcb);
+
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
@@ -94,9 +98,10 @@ void tricore_doirq(void)
       tcb = this_task();
 #endif
 
-      /* Update scheduler parameters */
+      /* Updata PPRS register */
 
-      nxsched_switch_context(*running_task, tcb);
+      tricore_store_pprs(*running_task);
+      tricore_restore_pprs(tcb);
 
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
@@ -109,11 +114,14 @@ void tricore_doirq(void)
       UP_ISB();
     }
 
-  /* running_task->xcp.regs is about to become invalid
-   * and will be marked as NULL to avoid misusage.
+  /* (*running_task)->xcp.regs is about to become invalid and
+   * will be marked as NULL to avoid misusage. the same applies
+   * to (*running_task)->xcp.pprs.
    */
 
   (*running_task)->xcp.regs = NULL;
+  tricore_change_pprs(*running_task, UINT32_MAX);
+
   board_autoled_off(LED_INIRQ);
 #endif
 

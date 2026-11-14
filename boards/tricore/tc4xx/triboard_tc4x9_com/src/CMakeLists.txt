@@ -35,6 +35,7 @@ set_property(
   PROPERTY LD_SCRIPT
            "${NUTTX_BOARD_DIR}/scripts/Lcf_${toolchain}_Tricore_Tc.lsl.kernel")
 if(CONFIG_BUILD_PROTECTED)
+  target_sources(board PRIVATE tc4d9_userspace.c)
   set_property(
     GLOBAL
     PROPERTY LD_SCRIPT_USER

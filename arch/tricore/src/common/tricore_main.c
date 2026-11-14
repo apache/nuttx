@@ -42,6 +42,10 @@ static void core_main(void)
   tricore_fpuinit();
 #endif
 
+#ifdef CONFIG_ARCH_USE_MPU
+  tricore_mpuinit();
+#endif
+
   /* !!WATCHDOG0 AND SAFETY WATCHDOG ARE DISABLED HERE!!
    * Enable the watchdogs and service them periodically if it is required
    */
@@ -59,6 +63,9 @@ static void core_main(void)
   if (IfxCpu_getCoreIndex() == 0)
     {
       tricore_earlyserialinit();
+#ifdef CONFIG_BUILD_PROTECTED
+      tricore_userspace();
+#endif
       nx_start();
     }
 

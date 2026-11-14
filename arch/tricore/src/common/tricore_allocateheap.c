@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/userspace.h>
 
 #include <sys/types.h>
 #include <nuttx/debug.h>
@@ -57,17 +58,74 @@
  * Description:
  *   This function will be called to dynamically set aside the heap region.
  *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
- *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
+ *   - For the normal "flat" build, this function returns the size of the
+ *     single heap.
+ *   - For the protected build (CONFIG_BUILD_PROTECTED=y) with both kernel-
+ *     and user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function
+ *     provides the size of the user-space heap.
  *
  ****************************************************************************/
 
-void up_allocate_heap(void **heap_start, size_t *heap_size)
+void weak_function up_allocate_heap(void **heap_start, size_t *heap_size)
 {
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+
+  /* Get the unaligned size and position of the user-space heap.
+   * This heap begins after the user-space .bss section.
+   */
+
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend;
+  uintptr_t utop  = (uintptr_t)USERSPACE->us_heapend;
+
+  DEBUGASSERT(ubase <= utop);
+
+  /* Return the user-space heap settings */
+
+  *heap_start = (void *)ubase;
+  *heap_size  = utop - ubase;
+#else
+
+  /* Return the heap settings */
+
   *heap_start = _sheap;
-  *heap_size = (size_t)((uintptr_t)_eheap - (uintptr_t)_sheap);
+  *heap_size = (uintptr_t)_eheap - (uintptr_t)_sheap;
+
+#if defined(CONFIG_MM_KERNEL_HEAP)
+  *heap_start += CONFIG_MM_KERNEL_HEAPSIZE;
+  *heap_size -= CONFIG_MM_KERNEL_HEAPSIZE;
+#endif
+
+#endif
 }
+
+/****************************************************************************
+ * Name: up_allocate_kheap
+ *
+ * Description:
+ *   For the kernel build (CONFIG_BUILD_PROTECTED/KERNEL=y) with both kernel-
+ *   and user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
+ *   the kernel-space heap.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_MM_KERNEL_HEAP)
+void weak_function up_allocate_kheap(void **heap_start, size_t *heap_size)
+{
+  /* Get the unaligned size and position of the kernel-space heap.
+   * This heap begins after the kernel-space idle stack.
+   */
+
+#if defined(CONFIG_BUILD_PROTECTED)
+  DEBUGASSERT((uintptr_t)_sheap + CONFIG_MM_KERNEL_HEAPSIZE
+              <= (uintptr_t)_eheap);
+
+  /* Return the kernel heap settings */
+
+  *heap_start = _sheap;
+  *heap_size = (uintptr_t)_eheap - (uintptr_t)_sheap;
+#else
+  *heap_start = _sheap;
+  *heap_size = CONFIG_MM_KERNEL_HEAPSIZE;
+#endif
+}
+#endif

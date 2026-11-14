@@ -91,11 +91,11 @@ setjmp:
  *   the register banks are at the same depth as at setjmp time, so
  *   restoring the callee-saved registers, PSW and return address proceeds.
  *   The result passed back equals max(val, 1) per POSIX.
- *   The unwind loop forces PSW.IO = Supervisor and PSW.PRS[2] = 0 on every
- *   iteration so that the `ret'-released upper contexts do not drop the CPU
- *   into user mode while env is still being accessed.  Once the loop exits,
- *   the original PSW saved at setjmp time is restored before the indirect
- *   jump back to the setjmp call site.
+ *   In Supervisor mode, each outgoing upper context's saved PSW is rewritten
+ *   to Supervisor/PRS0 before `ret' so that the kernel unwind loop does not
+ *   drop into user mode.  User-mode longjmp keeps the original release path.
+ *   Once the loop exits, Supervisor restores the PSW saved at setjmp time
+ *   before jumping back to the setjmp call site.
  *
  *   PSW layout (TC1.6.2 / TC1.8):
  *     bit 15      = PRS[2]
@@ -111,13 +111,6 @@ setjmp:
 longjmp:
 	ld.w	%d5, [%a4]0		/* %d5 = saved PCXI                */
 .Lloop:
-	mfcr	%d3, 0xfe04		/* %d3 = current PSW               */
-	mov	%d2, 2
-	insert	%d3, %d3, %d2, 10, 4	/* PSW.IO = 2 (supervisor)         */
-	mov	%d2, 0
-	insert	%d3, %d3, %d2, 15, 1	/* clear PSW.PRS[2]                */
-	mtcr	0xfe04, %d3
-	isync
 	mfcr	%d2, 0xfe00		/* %d2 = current PCXI              */
 	jne	%d2, %d5, .Lrelease	/* depth mismatch -> unwind one    */
 
@@ -138,9 +131,12 @@ longjmp:
 	ld.w	%d13, [%a4]52
 	ld.w	%d14, [%a4]56
 	ld.w	%d15, [%a4]60
+	mfcr	%d3, 0xfe04
+	jz.t	%d3, 11, .Lreturn	/* only Supervisor may write PSW   */
 	ld.w	%d3, [%a4]4		/* saved PSW                       */
 	mtcr	0xfe04, %d3
 	isync
+.Lreturn:
 	ji	%a2			/* return to setjmp call site      */
 
 .Lrelease:
@@ -158,9 +154,28 @@ longjmp:
 	j	.Lloop
 
 .Lupper:
-	/* Release one upper context via `ret' (restores the upper context
-	 * from CSA and jumps through %a11).  Point %a11 back at .Lloop so
-	 * we re-enter the depth check after the release.
+	/* In Supervisor mode, rewrite the outgoing upper context's PSW so that
+	 * ret restores Supervisor/PRS0 instead of the discarded frame's PSW.
+	 */
+
+	mfcr	%d3, 0xfe04
+	jz.t	%d3, 11, .Lreleaseupper
+	mov	%d0, 0
+	insert	%d0, %d0, %d2, 6, 16
+	extr.u	%d1, %d2, 16, 4
+	insert	%d0, %d0, %d1, 28, 4
+	mov.a	%a2, %d0		/* %a2 = current upper CSA         */
+	ld.w	%d3, [%a2]4
+	mov	%d0, 2
+	insert	%d3, %d3, %d0, 10, 4	/* PSW.IO = 2, PSW.PRS[1:0] = 0    */
+	mov	%d0, 0
+	insert	%d3, %d3, %d0, 15, 1	/* PSW.PRS[2] = 0                  */
+	st.w	[%a2]4, %d3
+	dsync
+
+.Lreleaseupper:
+	/* Point %a11 back at .Lloop so ret re-enters the depth check after
+	 * releasing the upper context.
 	 */
 
 	movh.a	%a11, hi:.Lloop
