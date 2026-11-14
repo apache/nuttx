@@ -32,8 +32,8 @@
  *                                           PHYSICAL         VIRTUAL
  *   NAME    DESCRIPTION                 SIZE    START    SIZE    START
  *  -------- -------------------------- ----- ----------- ------- -----------
- *   locked  Pages locked in memory.     48Kb 0x1102 8000  48Kb   0x1102 8000
- *   paged   Pages in nonvolatile store. 96Kb 0x1103 4000 384Kb   0x1103 4000
+ *   locked  Pages locked in memory.     49Kb 0x1102 8000  49Kb   0x1102 8000
+ *   paged   Pages in nonvolatile store. 95Kb 0x1103 4000 384Kb   0x1103 4000
  *   data    .data/.bss/heap.            32Kb 0x1104 c000  32Kb   0x1109 4000
  *           Reserved for page table     16Kb 0x1105 4000  16Kb   0x1109 c000
  *  -------- -------------------------- ----- ----------- ------- -----------
@@ -55,8 +55,8 @@
 
 MEMORY
 {
-  locked (rx) : ORIGIN = 0x11029080, LENGTH = 52K - 4224
-  paged  (rx) : ORIGIN = 0x11035000, LENGTH = 380K
+  locked (rx) : ORIGIN = 0x11029080, LENGTH = 53K - 4224
+  paged  (rx) : ORIGIN = 0x11035400, LENGTH = 379K
   data   (rw) : ORIGIN = 0x11094000, LENGTH = 44K
 }
 
