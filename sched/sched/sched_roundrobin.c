@@ -72,10 +72,11 @@ static int nxsched_roundrobin_handler(FAR void *cookie)
   tcb = nxsched_get_tcb(pid);
 
   if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
-      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+      (atomic_read(&tcb->flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
+      nxsched_put_tcb(tcb);
       leave_critical_section(flags);
       return OK;
     }
@@ -86,6 +87,7 @@ static int nxsched_roundrobin_handler(FAR void *cookie)
       up_switch_context(this_task(), tcb);
     }
 
+  nxsched_put_tcb(tcb);
   leave_critical_section(flags);
   return OK;
 }

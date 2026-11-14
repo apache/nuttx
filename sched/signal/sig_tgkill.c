@@ -86,7 +86,10 @@ int nxsig_tgkill(pid_t pid, pid_t tid, int signo)
 
   if (signo == 0)
     {
-      return (nxsched_get_tcb(tid) != NULL) ? 0 : -ESRCH;
+      FAR struct tcb_s *stcb = nxsched_get_tcb(tid);
+
+      nxsched_put_tcb(stcb);
+      return (stcb != NULL) ? 0 : -ESRCH;
     }
 
 #ifdef CONFIG_DISABLE_ALL_SIGNALS

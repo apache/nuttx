@@ -36,46 +36,24 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsched_verify_tcb
+ * Name: nxsched_verify_pid
  *
  * Description:
- *   Return true if the tcb refers to an active task; false if it is a stale
- *   TCB handle.
+ *   Given a task ID, this function will check whether the
+ *   TCB corresponding to the PID exists.
  *
  ****************************************************************************/
 
-bool nxsched_verify_tcb(FAR struct tcb_s *tcb)
+bool nxsched_verify_pid(pid_t pid)
 {
-  /* Return true if the PID hashes to this TCB.  This will catch the case
-   * where the task associated with the TCB has terminated (note that
-   * sched_releasedtcb() will nullify the TCB field in that case).  The
-   * following logic will also detect the case where the task associated
-   * with the TCB has terminated and another task has been started with a
-   * different TCB but with a PID hashing to the same entry.
-   *
-   * NOTE: In the event that the TCB has terminated, the 'tcb' parameter
-   * will point at either a stale or a re-allocated memory allocation.  The
-   * PID fetched by the use of the bad pointer(tcb->pid) should not cause
-   * any memory faults because we do at least know that the pointer refers
-   * to valid memory in the kernel address space and that the hash macro,
-   * PIDHASH(), will return a valid, in-range index into the g_pidhash[]
-   * table.
-   *
-   * REVISIT:  This logic will not, however, catch the case where the task
-   * originally associated with the TCB has terminated, but a new task was
-   * started reusing the same memory allocation for its TDB that was freed
-   * by the terminated task.  In this case, a false positive value will be
-   * returned:  The TCB is valid but does not refer to the same task as
-   * before.  This case is not detectable with the limited amount of
-   * information available.
-   */
+  FAR struct tcb_s *ret;
 
-  irqstate_t flags;
-  bool valid;
+  ret = nxsched_get_tcb(pid);
+  if (ret)
+    {
+      nxsched_put_tcb(ret);
+      return true;
+    }
 
-  flags = enter_critical_section();
-  valid = tcb == g_pidhash[PIDHASH(tcb->pid)];
-  leave_critical_section(flags);
-
-  return valid;
+  return false;
 }

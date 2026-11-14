@@ -96,7 +96,8 @@ int nxtask_delete(pid_t pid)
    * (The semantics of the call should be sufficient to prohibit this).
    */
 
-  DEBUGASSERT((dtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+  DEBUGASSERT((atomic_read(&dtcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+              TCB_FLAG_TTYPE_PTHREAD);
 
   /* Non-privileged tasks and pthreads may not delete privileged kernel
    * threads.
@@ -105,9 +106,12 @@ int nxtask_delete(pid_t pid)
    * permissions are supported and a user task might also be privileged.
    */
 
-  if (((rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&
-      ((dtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL))
+  if (((atomic_read(&rtcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+      TCB_FLAG_TTYPE_KERNEL) &&
+      ((atomic_read(&dtcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_KERNEL))
     {
+      nxsched_put_tcb(dtcb);
       return -EACCES;
     }
 
@@ -119,6 +123,7 @@ int nxtask_delete(pid_t pid)
        * don't bother to unlock the TCB since it will be going away.
        */
 
+      nxsched_put_tcb(dtcb);
       _exit(EXIT_SUCCESS);
     }
 
@@ -126,8 +131,11 @@ int nxtask_delete(pid_t pid)
 
   if (nxnotify_cancellation(dtcb))
     {
+      nxsched_put_tcb(dtcb);
       return OK;
     }
+
+  nxsched_put_tcb(dtcb);
 
   /* Otherwise, perform the asynchronous cancellation, letting
    * nxtask_terminate() do all of the heavy lifting.
@@ -169,6 +177,7 @@ int nxtask_delete(pid_t pid)
 int task_delete(pid_t pid)
 {
   int ret = nxtask_delete(pid);
+
   if (ret < 0)
     {
       set_errno(-ret);

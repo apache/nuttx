@@ -67,22 +67,25 @@ static int restart_handler(FAR void *cookie)
 
   tcb = nxsched_get_tcb(arg->pid);
   if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
-      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+      (atomic_read(&tcb->flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
       leave_critical_section(flags);
+      nxsched_put_tcb(tcb);
       return -ESRCH;
     }
 
   if (arg->need_restore)
     {
-      tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
+      atomic_and(&tcb->flags, ~TCB_FLAG_CPU_LOCKED);
     }
 
   nxsched_remove_readytorun(tcb);
 
   leave_critical_section(flags);
+
+  nxsched_put_tcb(tcb);
 
   return OK;
 }
@@ -190,7 +193,7 @@ static void nxtask_reset_task(FAR struct tcb_s *tcb, bool remove)
 static int nxtask_restart(pid_t pid)
 {
   FAR struct tcb_s *rtcb;
-  FAR struct tcb_s *tcb;
+  FAR struct tcb_s *tcb = NULL;
   irqstate_t flags;
   int ret;
 
@@ -218,7 +221,7 @@ static int nxtask_restart(pid_t pid)
 
   tcb = nxsched_get_tcb(pid);
 #ifndef CONFIG_DISABLE_PTHREAD
-  if (!tcb || (tcb->flags & TCB_FLAG_TTYPE_MASK) ==
+  if (!tcb || (atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) ==
       TCB_FLAG_TTYPE_PTHREAD)
 #else
   if (!tcb)
@@ -235,24 +238,27 @@ static int nxtask_restart(pid_t pid)
       tcb->cpu != this_cpu())
     {
       struct restart_arg_s arg;
+      int cpu = tcb->cpu;
 
-      if ((tcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
+      arg.pid = tcb->pid;
+      if (atomic_or(&tcb->flags, TCB_FLAG_CPU_LOCKED) &
+          TCB_FLAG_CPU_LOCKED)
         {
-          arg.pid = tcb->pid;
           arg.need_restore = false;
         }
       else
         {
           arg.pid = tcb->pid;
           arg.need_restore = true;
-          tcb->flags |= TCB_FLAG_CPU_LOCKED;
+          atomic_or(&tcb->flags, TCB_FLAG_CPU_LOCKED);
         }
 
-      nxsched_smp_call_single(tcb->cpu, restart_handler, &arg);
+      nxsched_put_tcb(tcb);
+      nxsched_smp_call_single(cpu, restart_handler, &arg);
 
       tcb = nxsched_get_tcb(pid);
       if (!tcb || tcb->task_state != TSTATE_TASK_INVALID ||
-          (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+          (atomic_read(&tcb->flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
         {
           ret = -ESRCH;
           goto errout_with_lock;
@@ -265,7 +271,7 @@ static int nxtask_restart(pid_t pid)
       /* Activate the task. */
 
       nxtask_activate(tcb);
-
+      nxsched_put_tcb(tcb);
       return OK;
     }
 #endif /* CONFIG_SMP */
@@ -276,9 +282,11 @@ static int nxtask_restart(pid_t pid)
   /* Activate the task. */
 
   nxtask_activate(tcb);
+  nxsched_put_tcb(tcb);
   return OK;
 
 errout_with_lock:
+  nxsched_put_tcb(tcb);
   leave_critical_section(flags);
   return ret;
 }

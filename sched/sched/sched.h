@@ -319,6 +319,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *rtrtcb);
 bool nxsched_remove_readytorun(FAR struct tcb_s *rtrtcb);
 void nxsched_remove_self(FAR struct tcb_s *rtrtcb);
 void nxsched_add_blocked(FAR struct tcb_s *btcb, tstate_t task_state);
+void nxsched_park_task(FAR struct tcb_s *tcb);
 void nxsched_remove_blocked(FAR struct tcb_s *btcb);
 int  nxsched_set_priority(FAR struct tcb_s *tcb, int sched_priority);
 void nxsched_releasepid(pid_t pid);
@@ -336,6 +337,17 @@ void nxtask_resume_vfork(FAR struct tcb_s *child);
 bool nxsched_merge_pending(void);
 bool nxsched_reprioritize_rtr(FAR struct tcb_s *tcb, int priority);
 #endif
+
+/****************************************************************************
+ * Name:  nxsched_releasepid
+ *
+ * Description:
+ *   When a task is destroyed, this function must be called to make its
+ *   process ID available for reuse.
+ *
+ ****************************************************************************/
+
+void nxsched_releasepid(pid_t pid);
 
 /* Priority inheritance support */
 
@@ -472,8 +484,6 @@ bool nxsched_may_control(pid_t pid);
 #endif
 
 /* TCB operations */
-
-bool nxsched_verify_tcb(FAR struct tcb_s *tcb);
 
 /* Obtain TLS from kernel */
 

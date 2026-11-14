@@ -63,6 +63,7 @@
 #include <nuttx/lib/lib.h>
 
 #include "fs_heap.h"
+#include "sched/sched.h"
 
 #if !defined(CONFIG_SCHED_CPULOAD_NONE) || defined(CONFIG_SCHED_CRITMONITOR)
 #  include <nuttx/clock.h>
@@ -517,7 +518,8 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
                              "Type:",
-                             g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK)
+                             g_ttypenames[(atomic_read(&tcb->flags) &
+                                          TCB_FLAG_TTYPE_MASK)
                              >>  TCB_FLAG_TTYPE_SHIFT]);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
@@ -618,7 +620,8 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
                           "%-12s%c\n", "Flags:",
-                          tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-');
+                          atomic_read(&tcb->flags) &
+                          TCB_FLAG_EXIT_PROCESSING ? 'P' : '-');
 
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
@@ -656,7 +659,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   /* Show the scheduler policy */
 
-  policy     = g_policy[(tcb->flags & TCB_FLAG_POLICY_MASK) >>
+  policy     = g_policy[(atomic_read(&tcb->flags) & TCB_FLAG_POLICY_MASK) >>
                         TCB_FLAG_POLICY_SHIFT];
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
                                "Scheduler:", policy);
@@ -1003,7 +1006,8 @@ static ssize_t proc_heap(FAR struct proc_file_s *procfile,
   task.seqmin = 0;
   task.seqmax = ULONG_MAX;
 #ifdef CONFIG_MM_KERNEL_HEAP
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_KERNEL)
     {
       info = kmm_mallinfo_task(&task);
     }
@@ -1050,7 +1054,7 @@ static ssize_t proc_heapcheck(FAR struct proc_file_s *procfile,
   size_t totalsize = 0;
   size_t heapcheck = 0;
 
-  if (tcb->flags & TCB_FLAG_HEAP_CHECK)
+  if (atomic_read(&tcb->flags) & TCB_FLAG_HEAP_CHECK)
     {
       heapcheck = 1;
     }
@@ -1072,10 +1076,10 @@ static ssize_t proc_heapcheck_write(FAR struct proc_file_s *procfile,
   switch (buffer[0])
     {
       case '0':
-        tcb->flags &= ~TCB_FLAG_HEAP_CHECK;
+        atomic_and(&tcb->flags, ~TCB_FLAG_HEAP_CHECK);
         break;
       case '1':
-        tcb->flags |= TCB_FLAG_HEAP_CHECK;
+        atomic_or(&tcb->flags, TCB_FLAG_HEAP_CHECK);
         break;
       default:
         ferr("ERROR: invalid argument\n");
@@ -1625,7 +1629,6 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct proc_file_s *procfile;
   FAR const struct proc_node_s *node;
-  FAR struct tcb_s *tcb;
   FAR char *ptr;
   unsigned long tmp;
   pid_t pid;
@@ -1671,9 +1674,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
   /* Now verify that a task with this task/thread ID exists */
 
   pid = (pid_t)tmp;
-
-  tcb = nxsched_get_tcb(pid);
-  if (tcb == NULL)
+  if (!nxsched_verify_pid(pid))
     {
       ferr("ERROR: PID %d is no longer valid\n", pid);
       return -ENOENT;
@@ -1826,6 +1827,8 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
 
   leave_critical_section(flags);
 
+  nxsched_put_tcb(tcb);
+
   /* Update the file offset */
 
   if (ret > 0)
@@ -1877,6 +1880,7 @@ static ssize_t proc_write(FAR struct file *filep, FAR const char *buffer,
         break;
     }
 
+  nxsched_put_tcb(tcb);
   return ret;
 }
 
@@ -1932,7 +1936,6 @@ static int proc_opendir(FAR const char *relpath,
 {
   FAR struct proc_dir_s *procdir;
   FAR const struct proc_node_s *node;
-  FAR struct tcb_s *tcb;
   unsigned long tmp;
   FAR char *ptr;
   pid_t pid;
@@ -1982,9 +1985,7 @@ static int proc_opendir(FAR const char *relpath,
   /* Now verify that a task with this task/thread ID exists */
 
   pid = (pid_t)tmp;
-
-  tcb = nxsched_get_tcb(pid);
-  if (tcb == NULL)
+  if (!nxsched_verify_pid(pid))
     {
       ferr("ERROR: PID %d is not valid\n", pid);
       return -ENOENT;
@@ -2074,7 +2075,6 @@ static int proc_readdir(FAR struct fs_dirent_s *dir,
 {
   FAR struct proc_dir_s *procdir;
   FAR const struct proc_node_s *node = NULL;
-  FAR struct tcb_s *tcb;
   unsigned int index;
   pid_t pid;
   int ret;
@@ -2102,9 +2102,7 @@ static int proc_readdir(FAR struct fs_dirent_s *dir,
       /* Verify that the pid still refers to an active task/thread */
 
       pid = procdir->pid;
-
-      tcb = nxsched_get_tcb(pid);
-      if (tcb == NULL)
+      if (!nxsched_verify_pid(pid))
         {
           ferr("ERROR: PID %d is no longer valid\n", pid);
           return -ENOENT;
@@ -2176,10 +2174,12 @@ static int proc_rewinddir(struct fs_dirent_s *dir)
 static int proc_stat(const char *relpath, struct stat *buf)
 {
   FAR const struct proc_node_s *node;
-  FAR struct tcb_s *tcb;
   unsigned long tmp;
   FAR char *ptr;
   pid_t pid;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  FAR struct tcb_s *tcb;
+#endif
 
   /* Two path forms are accepted:
    *
@@ -2220,9 +2220,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
   /* Now verify that a task with this task/thread ID exists */
 
   pid = (pid_t)tmp;
-
-  tcb = nxsched_get_tcb(pid);
-  if (tcb == NULL)
+  if (!nxsched_verify_pid(pid))
     {
       ferr("ERROR: PID %d is no longer valid\n", pid);
       return -ENOENT;
@@ -2237,10 +2235,16 @@ static int proc_stat(const char *relpath, struct stat *buf)
    * the task group.
    */
 
-  if (tcb->group != NULL)
+  tcb = nxsched_get_tcb(pid);
+  if (tcb != NULL)
     {
-      buf->st_uid = tcb->group->tg_euid;
-      buf->st_gid = tcb->group->tg_egid;
+      if (tcb->group != NULL)
+        {
+          buf->st_uid = tcb->group->tg_euid;
+          buf->st_gid = tcb->group->tg_egid;
+        }
+
+      nxsched_put_tcb(tcb);
     }
 #endif
 

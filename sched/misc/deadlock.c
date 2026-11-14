@@ -181,15 +181,21 @@ static void collect_deadlock(FAR struct tcb_s *tcb, FAR void *arg)
   current = entry;
   do
     {
+      FAR struct tcb_s *prev = current;
+
       if (info->holdercnt >= info->arraylen)
         {
+          nxsched_put_tcb(current);
           return;
         }
 
       info->holders[info->holdercnt++] = current->pid;
       current = deadlock_next(current);
+      nxsched_put_tcb(prev);
     }
   while (current != entry);
+
+  nxsched_put_tcb(current);
 }
 
 /****************************************************************************

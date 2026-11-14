@@ -233,11 +233,13 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
       return ENOMEM;
     }
 
-  ptcb->flags |= TCB_FLAG_FREE_TCB;
+  atomic_or(&ptcb->flags, TCB_FLAG_FREE_TCB);
 
   /* Initialize the task join */
 
   nxtask_joininit(ptcb);
+
+  nxsem_init(&ptcb->exit_sem, 0, 0);
 
   /* Bind the parent's group to the new TCB (we have not yet joined the
    * group).
@@ -257,7 +259,7 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   if (attr->detachstate == PTHREAD_CREATE_DETACHED)
     {
-      ptcb->flags |= TCB_FLAG_DETACHED;
+      atomic_or(&ptcb->flags, TCB_FLAG_DETACHED);
     }
 
   if (attr->stackaddr)
@@ -435,25 +437,26 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   /* Set the appropriate scheduling policy in the TCB */
 
-  ptcb->flags &= ~TCB_FLAG_POLICY_MASK;
+  atomic_and(&ptcb->flags, ~TCB_FLAG_POLICY_MASK);
+
   switch (policy)
     {
       default:
       case SCHED_FIFO:
-        ptcb->flags    |= TCB_FLAG_SCHED_FIFO;
+        atomic_or(&ptcb->flags, TCB_FLAG_SCHED_FIFO);
         break;
 
 #if CONFIG_RR_INTERVAL > 0
       case SCHED_OTHER:
       case SCHED_RR:
-        ptcb->flags    |= TCB_FLAG_SCHED_RR;
+        atomic_or(&ptcb->flags, TCB_FLAG_SCHED_RR);
         ptcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
         break;
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
       case SCHED_SPORADIC:
-        ptcb->flags    |= TCB_FLAG_SCHED_SPORADIC;
+        atomic_or(&ptcb->flags, TCB_FLAG_SCHED_SPORADIC);
         break;
 #endif
     }

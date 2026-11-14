@@ -98,7 +98,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
         }
     }
   else if (!sq_is_singular(&tcb->group->tg_members) &&
-           (tcb->flags & TCB_FLAG_DETACHED) == 0)
+           (atomic_read(&tcb->flags) & TCB_FLAG_DETACHED) == 0)
     {
       ret = pthread_findjoininfo(tcb->group, pid, &join, true);
       if (ret == OK)
@@ -107,10 +107,11 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
         }
     }
 
-  tcb->flags |= TCB_FLAG_JOIN_COMPLETED;
+  atomic_or(&tcb->flags, TCB_FLAG_JOIN_COMPLETED);
 
   nxrmutex_unlock(&group->tg_mutex);
 
+  nxsched_put_tcb(tcb);
   return ret;
 }
 

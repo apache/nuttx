@@ -53,7 +53,9 @@ void nxsched_releasepid(pid_t pid)
 {
   irqstate_t flags = enter_critical_section();
   int hash_ndx = PIDHASH(pid);
+  FAR struct tcb_s *tcb = g_pidhash[hash_ndx];
 
+  DEBUGASSERT(tcb);
 #ifndef CONFIG_SCHED_CPULOAD_NONE
   /* Decrement the total CPU load count held by this thread from the
    * total for all threads.
@@ -68,8 +70,17 @@ void nxsched_releasepid(pid_t pid)
    */
 
   g_pidhash[hash_ndx] = NULL;
+  DEBUGASSERT(atomic_read(&tcb->refs) > 0);
+  atomic_sub(&tcb->refs, 1);
 
   leave_critical_section(flags);
+
+  /* Wait tcb->refs to be 0 */
+
+  while (atomic_read(&tcb->refs))
+    {
+      nxsem_wait(&tcb->exit_sem);
+    }
 }
 
 /****************************************************************************
@@ -113,17 +124,6 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
       timer_deleteall(tcb->pid);
 #endif
-
-      /* Release the task's process ID if one was assigned.  PID
-       * zero is reserved for the IDLE task.  The TCB of the IDLE
-       * task is never release so a value of zero simply means that
-       * the process ID was never allocated to this TCB.
-       */
-
-      if (tcb->pid)
-        {
-          nxsched_releasepid(tcb->pid);
-        }
 
       /* Delete the thread's stack if one has been allocated */
 
@@ -179,9 +179,11 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
       nxtask_resume_vfork(tcb);
 #endif
 
+      nxsem_destroy(&tcb->exit_sem);
+
       /* And, finally, release the TCB itself */
 
-      if (tcb->flags & TCB_FLAG_FREE_TCB)
+      if (atomic_read(&tcb->flags) & TCB_FLAG_FREE_TCB)
         {
           kmm_free(tcb);
         }

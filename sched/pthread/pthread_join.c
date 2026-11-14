@@ -86,7 +86,8 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
   nxrmutex_lock(&group->tg_mutex);
 
   tcb = nxsched_get_tcb((pid_t)thread);
-  if (tcb == NULL || (tcb->flags & TCB_FLAG_JOIN_COMPLETED) != 0)
+  if (tcb == NULL ||
+      (atomic_read(&tcb->flags) & TCB_FLAG_JOIN_COMPLETED) != 0)
     {
       ret = pthread_findjoininfo(group, (pid_t)thread, &join, false);
       if (ret == OK)
@@ -105,6 +106,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
           ret = ESRCH;
         }
 
+      nxsched_put_tcb(tcb);
       goto errout;
     }
 
@@ -114,6 +116,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
   if (tcb == rtcb)
     {
+      nxsched_put_tcb(tcb);
       ret = EDEADLK;
       goto errout;
     }
@@ -121,8 +124,9 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
   /* Task was detached or not a pthread, return EINVAL */
 
   if ((tcb->group != group) ||
-      (tcb->flags & TCB_FLAG_DETACHED) != 0)
+      (atomic_read(&tcb->flags) & TCB_FLAG_DETACHED) != 0)
     {
+      nxsched_put_tcb(tcb);
       ret = EINVAL;
       goto errout;
     }
@@ -136,6 +140,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
   sq_addfirst(&rtcb->join_entry, &tcb->join_queue);
 
+  nxsched_put_tcb(tcb);
   nxrmutex_unlock(&group->tg_mutex);
 
   /* Take the thread's thread exit semaphore.  We will sleep here

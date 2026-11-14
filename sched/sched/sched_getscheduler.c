@@ -91,9 +91,15 @@ int nxsched_get_scheduler(pid_t pid)
        * interpretable values are 1 based; the TCB values are zero-based.
        */
 
-      policy = (tcb->flags & TCB_FLAG_POLICY_MASK) >> TCB_FLAG_POLICY_SHIFT;
+      policy = (atomic_read(&tcb->flags) & TCB_FLAG_POLICY_MASK) >>
+               TCB_FLAG_POLICY_SHIFT;
 
       ret = policy + 1;
+    }
+
+  if (pid != 0 && tcb != NULL)
+    {
+      nxsched_put_tcb(tcb);
     }
 
   return ret;
@@ -126,6 +132,7 @@ int nxsched_get_scheduler(pid_t pid)
 int sched_getscheduler(pid_t pid)
 {
   int ret = nxsched_get_scheduler(pid);
+
   if (ret < 0)
     {
       set_errno(-ret);

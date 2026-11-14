@@ -73,7 +73,8 @@ int pthread_detach(pthread_t thread)
   nxrmutex_lock(&group->tg_mutex);
 
   tcb = nxsched_get_tcb((pid_t)thread);
-  if (tcb == NULL || (tcb->flags & TCB_FLAG_JOIN_COMPLETED) != 0)
+  if (tcb == NULL ||
+      (atomic_read(&tcb->flags) & TCB_FLAG_JOIN_COMPLETED) != 0)
     {
       /* Destroy the join information */
 
@@ -91,13 +92,13 @@ int pthread_detach(pthread_t thread)
     }
 
   if ((group != tcb->group) ||
-      (tcb->flags & TCB_FLAG_DETACHED) != 0)
+      (atomic_read(&tcb->flags) & TCB_FLAG_DETACHED) != 0)
     {
       ret = EINVAL;
     }
   else
     {
-      tcb->flags |= TCB_FLAG_DETACHED;
+      atomic_or(&tcb->flags, TCB_FLAG_DETACHED);
       ret = OK;
     }
 
@@ -105,5 +106,6 @@ errout:
   nxrmutex_unlock(&group->tg_mutex);
 
   sinfo("Returning %d\n", ret);
+  nxsched_put_tcb(tcb);
   return ret;
 }

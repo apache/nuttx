@@ -435,11 +435,11 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
          , tcb->cpu
 #endif
          , tcb->sched_priority
-         , g_policy[(tcb->flags & TCB_FLAG_POLICY_MASK) >>
+         , g_policy[(atomic_read(&tcb->flags) & TCB_FLAG_POLICY_MASK) >>
                     TCB_FLAG_POLICY_SHIFT]
-         , g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK)
+         , g_ttypenames[(atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK)
                         >> TCB_FLAG_TTYPE_SHIFT]
-         , tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-'
+         , atomic_read(&tcb->flags) & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-'
          , state
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
          , SIGSET_ELEM(&tcb->sigprocmask)
@@ -581,9 +581,12 @@ static void dump_tasks(void)
 static void dump_lockholder(pid_t tid)
 {
   char buf[BACKTRACE_BUFFER_SIZE(CONFIG_LIBC_MUTEX_BACKTRACE)];
+  FAR struct tcb_s *tcb;
   FAR mutex_t *mutex;
 
-  mutex = (FAR mutex_t *)nxsched_get_tcb(tid)->waitobj;
+  tcb = nxsched_get_tcb(tid);
+  mutex = (FAR mutex_t *)tcb->waitobj;
+  nxsched_put_tcb(tcb);
 
   backtrace_format(buf, sizeof(buf), mutex->backtrace,
                    CONFIG_LIBC_MUTEX_BACKTRACE);
@@ -703,7 +706,8 @@ static void dump_assert_info(FAR struct tcb_s *rtcb,
   struct utsname name;
 
   if (rtcb->group &&
-      (rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      (atomic_read(&rtcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+       TCB_FLAG_TTYPE_KERNEL)
     {
       ptcb = nxsched_get_tcb(rtcb->group->tg_pid);
     }
@@ -729,6 +733,8 @@ static void dump_assert_info(FAR struct tcb_s *rtcb,
          get_task_name(rtcb),
          ptcb ? get_task_name(ptcb) : "Kernel",
          rtcb->entry.main);
+
+  nxsched_put_tcb(ptcb);
 
   /* Dump current CPU registers, running task stack and backtrace. */
 
@@ -868,7 +874,8 @@ void _assert(FAR const char *filename, int linenum,
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
   if (up_interrupt_context() ||
-      (rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+      (atomic_read(&rtcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_KERNEL)
 #endif
     {
       /* Fatal error, enter panic state. */
