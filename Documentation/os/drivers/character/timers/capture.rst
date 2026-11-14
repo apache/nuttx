@@ -356,6 +356,24 @@ When ``CONFIG_CAPTURE_NOTIFY`` is enabled:
 * Ideal for event-driven applications like tachometers, encoders, and
   frequency counters
 
+Edge Time Stamps
+~~~~~~~~~~~~~~~~
+
+A lower half whose timer counter runs freely can also implement two optional
+operations:
+
+* ``getcount()`` reads the current value of the counter.
+* ``getcapture()`` returns the counter value latched by the hardware on the
+  last notified edge. It is called from the notification callback set by
+  ``bind()``, so the time of the edge does not depend on the interrupt
+  latency.
+
+They are used by kernel drivers built on a capture lower half, such as the
+PPS disciplined PTP clock (``CONFIG_PTP_PPS``, see
+:doc:`/os/drivers/special/ptp`). The STM32 timer capture
+(``arch/arm/src/common/stm32/stm32_capture_m3m4_v1_lowerhalf.c``) implements
+them.
+
 Fake Capture Driver
 ~~~~~~~~~~~~~~~~~~~
 
