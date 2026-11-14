@@ -265,13 +265,30 @@ int nxsig_clockwait(int clockid, int flags,
 
   if (!own_unbinfo)
     {
+      /* Loop because the pending-set snapshot may be stale:
+       * nxsig_pendingset() releases tg_lock before
+       * nxsig_remove_pendingsignal() re-acquires it.  On SMP, another CPU
+       * may consume the signal in that window, causing remove() to return
+       * NULL even though the snapshot was non-empty.  Re-read and retry.
+       * Bounded because pending signals are finite.
+       */
+
       intersection = nxsig_pendingset(rtcb);
       sigandset(&intersection, &intersection, &rtcb->sigwaitmask);
-      if (!sigisemptyset(&intersection))
+      while (!sigisemptyset(&intersection))
         {
           sigpend = nxsig_remove_pendingsignal(rtcb,
                                                nxsig_lowest(&intersection));
-          DEBUGASSERT(sigpend != NULL);
+          if (sigpend == NULL)
+            {
+              /* Snapshot was stale on SMP: another CPU consumed the signal
+               * between pendingset() and remove().  Re-read and retry.
+               */
+
+              intersection = nxsig_pendingset(rtcb);
+              sigandset(&intersection, &intersection, &rtcb->sigwaitmask);
+              continue;
+            }
 
           memcpy(rtcb->sigunbinfo, &sigpend->info, sizeof(siginfo_t));
           sigemptyset(&rtcb->sigwaitmask);

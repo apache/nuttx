@@ -34,6 +34,8 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 
+#include <string.h>
+
 #include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mm/mm.h>
@@ -192,6 +194,13 @@ static inline void nxtask_sigchild(pid_t ppid, FAR struct tcb_s *ctcb,
        * for now.
        */
 
+      /* Zero the whole siginfo first: sigaction-queued signals carry a
+       * si_user field that only the sigaction queue path assigns, so a
+       * stack-garbage si_user here would be memcpy'd into the pending
+       * entry and handed back to a wait() consumer.
+       */
+
+      memset(&info, 0, sizeof(siginfo_t));
       info.si_signo           = SIGCHLD;
       info.si_code            = CLD_EXITED;
       info.si_errno           = OK;
@@ -246,6 +255,13 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
        * for now.
        */
 
+      /* Zero the whole siginfo first: sigaction-queued signals carry a
+       * si_user field that only the sigaction queue path assigns, so a
+       * stack-garbage si_user here would be memcpy'd into the pending
+       * entry and handed back to a wait() consumer.
+       */
+
+      memset(&info, 0, sizeof(siginfo_t));
       info.si_signo           = SIGCHLD;
       info.si_code            = CLD_EXITED;
       info.si_errno           = OK;

@@ -117,8 +117,8 @@ int ppoll(FAR struct pollfd *fds, nfds_t nfds,
 
       if (timeout_ts)
         {
-          timeout = timeout_ts->tv_sec * MSEC_PER_SEC +
-                    NSEC2MSEC(timeout_ts->tv_nsec);
+          timeout = (int)(timeout_ts->tv_sec * MSEC_PER_SEC +
+                          timeout_ts->tv_nsec / NSEC_PER_MSEC);
         }
 
       ret = poll(fds, nfds, timeout);
