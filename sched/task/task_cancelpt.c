@@ -158,12 +158,21 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
       if (tls->tl_cpcount > 0)
         {
           /* If the thread is blocked waiting for a semaphore, then the
-           * thread must be unblocked to handle the cancellation.
+           * thread must be unblocked to handle the cancellation.  As for a
+           * signal, not an uninterruptible wait in a system call: its
+           * memory can still be in use.  The wait of pthread_join() still
+           * ends.  Else the cancellation acts when the thread leaves the
+           * cancellation point.
            */
 
           if (tcb->task_state == TSTATE_WAIT_SEM)
             {
-              nxsem_wait_irq(tcb, ECANCELED);
+              if ((tcb->flags & TCB_FLAG_SYSCALL) == 0 ||
+                  (tcb->flags & TCB_FLAG_UNINTERRUPTIBLE) == 0 ||
+                  tcb->waitobj == &tcb->join_sem)
+                {
+                  nxsem_wait_irq(tcb, ECANCELED);
+                }
             }
 
           /* If the thread is blocked waiting on a signal, then the
