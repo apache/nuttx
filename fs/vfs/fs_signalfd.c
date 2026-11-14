@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <stdio.h>
+#include <string.h>
 #include <poll.h>
 #include <assert.h>
 #include <errno.h>
@@ -151,17 +152,24 @@ static ssize_t signalfd_file_read(FAR struct file *filep,
                                   FAR char *buffer, size_t len)
 {
   FAR struct signalfd_priv_s *dev = filep->f_priv;
-  FAR struct signalfd_siginfo *siginfo;
+  struct signalfd_siginfo siginfo;
   struct siginfo info;
   sigset_t pendmask;
+  size_t nread = 0;
   ssize_t ret;
   int count;
 
-  count = len / sizeof(struct signalfd_siginfo);
-  if (buffer == NULL || count == 0)
+  if (buffer == NULL)
+    {
+      return -EFAULT;
+    }
+
+  if (len < sizeof(struct signalfd_siginfo))
     {
       return -EINVAL;
     }
+
+  count = len / sizeof(struct signalfd_siginfo);
 
   pendmask = nxsig_pendingset(NULL);
   sigandset(&pendmask, &pendmask, &dev->sigmask);
@@ -177,7 +185,6 @@ static ssize_t signalfd_file_read(FAR struct file *filep,
         }
     }
 
-  siginfo = (FAR struct signalfd_siginfo *)buffer;
   do
     {
       ret = nxsig_timedwait(&pendmask, &info, NULL);
@@ -186,26 +193,28 @@ static ssize_t signalfd_file_read(FAR struct file *filep,
           goto errout;
         }
 
-      memset(siginfo, 0, sizeof(*siginfo));
-      siginfo->ssi_signo  = info.si_signo;
-      siginfo->ssi_errno  = info.si_errno;
-      siginfo->ssi_code   = info.si_code;
+      memset(&siginfo, 0, sizeof(siginfo));
+      siginfo.ssi_signo  = info.si_signo;
+      siginfo.ssi_errno  = info.si_errno;
+      siginfo.ssi_code   = info.si_code;
 #ifdef CONFIG_SCHED_HAVE_PARENT
-      siginfo->ssi_pid    = info.si_pid;
-      siginfo->ssi_uid    = info.si_uid;
-      siginfo->ssi_status = info.si_status;
+      siginfo.ssi_pid    = info.si_pid;
+      siginfo.ssi_uid    = info.si_uid;
+      siginfo.ssi_status = info.si_status;
 #endif
-      siginfo->ssi_int    = info.si_value.sival_int;
-      siginfo->ssi_ptr    = (uint64_t)(uintptr_t)info.si_value.sival_ptr;
-      siginfo++;
+      siginfo.ssi_int    = info.si_value.sival_int;
+      siginfo.ssi_ptr    = (uint64_t)(uintptr_t)info.si_value.sival_ptr;
+
+      memcpy(buffer + nread, &siginfo, sizeof(siginfo));
+      nread += sizeof(siginfo);
+
       pendmask = nxsig_pendingset(NULL);
       sigandset(&pendmask, &pendmask, &dev->sigmask);
     }
   while (--count != 0 && !sigisemptyset(&pendmask));
 
 errout:
-  len = (FAR char *)siginfo - buffer;
-  return len > 0 ? len : ret;
+  return nread > 0 ? (ssize_t)nread : ret;
 }
 
 static int signalfd_file_poll(FAR struct file *filep,
@@ -345,7 +354,7 @@ void signalfd_notify(FAR struct task_group_s *group, int signo)
 
   /* A group that never set up a signalfd poll has no waiter array. */
 
-  if (group->tg_sigfds == NULL)
+  if (group == NULL || group->tg_sigfds == NULL)
     {
       return;
     }
@@ -421,6 +430,12 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
   FAR struct file *filep = NULL;
   int ret = EINVAL;
 
+  if (mask == NULL)
+    {
+      ret = EFAULT;
+      goto errout;
+    }
+
   if (flags & ~(SFD_CLOEXEC | SFD_NONBLOCK))
     {
       goto errout;
@@ -455,7 +470,8 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
           goto errout;
         }
 
-      if (filep->f_inode->u.i_ops != &g_signalfd_fileops)
+      if (filep->f_inode == NULL ||
+          filep->f_inode->u.i_ops != &g_signalfd_fileops)
         {
           file_put(filep);
           goto errout;
