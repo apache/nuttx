@@ -4487,6 +4487,7 @@ config ARCH_BOARD
 	default "rtl8730e_evb"                     if ARCH_BOARD_RTL8730E_EVB
 	default "qemu-armv7r"                  if ARCH_BOARD_QEMU_ARMV7R
 	default "qemu-armv8a"                  if ARCH_BOARD_QEMU_ARMV8A
+	default "qemu-armv8r-aarch32"          if ARCH_BOARD_QEMU_ARMV8R_AARCH32
 	default "pinephone"                    if ARCH_BOARD_PINEPHONE
 	default "pinephonepro"                 if ARCH_BOARD_PINEPHONE_PRO
 	default "orangepi-5-pro"               if ARCH_BOARD_ORANGEPI_5_PRO
