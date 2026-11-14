@@ -22,6 +22,10 @@
 
 CSRCS += task_getinfo.c tls_getinfo.c
 
+ifeq ($(CONFIG_TLS_EMUTLS),y)
+CSRCS += tls_emutls.c
+endif
+
 ifneq ($(CONFIG_TLS_TASK_NELEM),0)
 CSRCS += task_tls.c task_tls_destruct.c
 endif
