@@ -61,12 +61,19 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
       return -EBADF;
     }
 
+#ifdef CONFIG_FS_IOCTL_FILEPATH
   /* A driver may return OK without filling the path buffer */
 
   if (req == FIOC_FILEPATH && arg != 0)
     {
       *(FAR char *)(uintptr_t)arg = '\0';
     }
+#else
+  if (req == FIOC_FILEPATH)
+    {
+      return -ENOTTY;
+    }
+#endif
 
   /* Does the driver support the ioctl method? */
 
@@ -97,12 +104,14 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
           }
         break;
 
+#ifdef CONFIG_FS_IOCTL_FILEPATH
       case FIOC_FILEPATH:
         if (ret == -ENOTTY && !INODE_IS_MOUNTPT(inode))
           {
             ret = inode_getpath(inode, (FAR char *)(uintptr_t)arg, PATH_MAX);
           }
         break;
+#endif
 
       case FIOC_GETLK:
         if (ret == -ENOTTY)

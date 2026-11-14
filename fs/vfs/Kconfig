@@ -69,6 +69,7 @@ endif # SIGNAL_FD
 config FS_NOTIFY
 	bool "FS Notify System"
 	default n
+	select FS_IOCTL_FILEPATH
 	---help---
 		The Fsnotify System
 
