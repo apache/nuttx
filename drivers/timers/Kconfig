@@ -831,4 +831,59 @@ config PTP_CLOCK_DUMMY
 	---help---
 		The dummy test driver.
 
+config PTP_PPS
+	bool "PPS disciplined software PTP clock"
+	default n
+	depends on CAPTURE_NOTIFY
+	select PTP_CLOCK
+	---help---
+		A PTP hardware clock (/dev/ptpX) built on top of a capture
+		lower half (struct cap_lowerhalf_s) whose free running 32-bit
+		counter latches the edges of its input in hardware, for
+		example a timer input capture channel connected to the PPS
+		output of a GNSS receiver.
+
+		The clock is read, stepped and frequency adjusted through the
+		standard clock_gettime(), clock_settime() and clock_adjtime()
+		interfaces, and the captured edges are delivered to the
+		application as struct ptp_extts_event records read from
+		/dev/ptpX.  The gnsspps application in nuttx-apps uses them
+		to discipline the clock to GNSS time, so that boards that
+		each have a GNSS receiver share the same time scale.
+
+		The capture lower half must implement the getcount,
+		getcapture, bind and unbind operations, and the board calls
+		ptp_pps_register() with it.
+
+if PTP_PPS
+
+config PTP_PPS_MAX_ADJ
+	int "Maximum frequency adjustment (ppb)"
+	default 500000
+	range 1000 10000000
+	---help---
+		Largest frequency correction, in parts per billion, that the
+		clock accepts through clock_adjtime(ADJ_FREQUENCY).  It must
+		cover the tolerance of the oscillator that drives the
+		counter.  The default of 500 ppm covers any crystal.
+
+config PTP_PPS_FAKE
+	bool "PPS disciplined clock on a fake capture"
+	default n
+	depends on FAKE_CAPTURE
+	---help---
+		Register a PPS disciplined clock on a fake capture lower half
+		(see FAKE_CAPTURE) that simulates a 1 Hz PPS.  Set the
+		frequency error of its counter and the jitter of the PPS with
+		FAKE_CAPTURE_ERROR_PPB and FAKE_CAPTURE_JITTER_NS, so that the
+		complete chain (driver, EXTTS events and the gnsspps servo) can
+		be tested on the simulator without any hardware.
+
+config PTP_PPS_FAKE_DEVNO
+	int "Device number (/dev/ptpX)"
+	default 0
+	depends on PTP_PPS_FAKE
+
+endif # PTP_PPS
+
 endmenu # Timer Driver Support

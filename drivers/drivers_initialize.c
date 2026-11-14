@@ -56,6 +56,7 @@
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/thermal.h>
 #include <nuttx/timers/ptp_clock_dummy.h>
+#include <nuttx/timers/ptp_pps.h>
 #include <nuttx/timers/capture.h>
 #include <nuttx/trace.h>
 #include <nuttx/usrsock/usrsock_rpmsg.h>
@@ -339,6 +340,12 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_FAKE_CAPTURE
   fake_capture_initialize(2);
+#endif
+
+#ifdef CONFIG_PTP_PPS_FAKE
+  ptp_pps_register(fake_capture_create(1, 10),
+                   CONFIG_FAKE_CAPTURE_COUNTER_FREQ,
+                   CONFIG_PTP_PPS_FAKE_DEVNO);
 #endif
 
 #ifdef CONFIG_DMABUF_HEAPS
