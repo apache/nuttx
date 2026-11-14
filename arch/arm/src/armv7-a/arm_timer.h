@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include <nuttx/timers/oneshot.h>
 
-#include <arch/armv7-a/cp15.h>
+#include <arch/arm_a_r/cp15.h>
 
 /****************************************************************************
  * Pre-processor Definitions
