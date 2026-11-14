@@ -32,6 +32,7 @@
 #include <stdint.h>
 #include <poll.h>
 #include <errno.h>
+#include <sched.h>
 #include <string.h>
 #include <nuttx/debug.h>
 
@@ -42,10 +43,19 @@
 #include <nuttx/list.h>
 #include <nuttx/mutex.h>
 #include <nuttx/signal.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/tls.h>
 
 #include "inode/inode.h"
 #include "fs_heap.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_EPOLL_NPOLLWAITERS
+#  define CONFIG_EPOLL_NPOLLWAITERS 2
+#endif
 
 /****************************************************************************
  * Private Types
@@ -67,7 +77,7 @@ struct epoll_head_s
 {
   int                   size;
   int                   crefs;
-  mutex_t               lock;
+  rmutex_t              lock;
   sem_t                 sem;
   struct list_node      setup;    /* The setup list, store all the setuped
                                    * epoll node.
@@ -90,6 +100,8 @@ struct epoll_head_s
                                    * first node, used to free the malloced
                                    * memory in epoll_do_close().
                                    */
+  spinlock_t            poll_lock;
+  FAR struct pollfd_s  *fds[CONFIG_EPOLL_NPOLLWAITERS];
 };
 
 typedef struct epoll_head_s epoll_head_t;
@@ -105,6 +117,7 @@ static int epoll_do_poll(FAR struct file *filep,
 static int epoll_setup(FAR epoll_head_t *eph);
 static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
                           int maxevents);
+static void epoll_cleanup(FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -143,11 +156,18 @@ static FAR epoll_head_t *epoll_head_from_fd(int fd, FAR struct file **filep)
 {
   int ret;
 
+  /* Push a cancellation point onto the stack.  This will be called if
+   * the thread is canceled.
+   */
+
+  tls_cleanup_push(tls_get_info(), epoll_cleanup, filep);
+
   /* Get file pointer by file descriptor */
 
   ret = file_get(fd, filep);
   if (ret < 0)
     {
+      tls_cleanup_pop(tls_get_info(), 0);
       set_errno(-ret);
       return NULL;
     }
@@ -158,6 +178,7 @@ static FAR epoll_head_t *epoll_head_from_fd(int fd, FAR struct file **filep)
       (*filep)->f_inode->u.i_ops != &g_epoll_ops)
     {
       file_put(*filep);
+      tls_cleanup_pop(tls_get_info(), 0);
       set_errno(EBADF);
       return NULL;
     }
@@ -165,19 +186,25 @@ static FAR epoll_head_t *epoll_head_from_fd(int fd, FAR struct file **filep)
   return (*filep)->f_priv;
 }
 
+static void epoll_filep_close(FAR struct file *filep)
+{
+  file_put(filep);
+  tls_cleanup_pop(tls_get_info(), 0);
+}
+
 static int epoll_do_open(FAR struct file *filep)
 {
   FAR epoll_head_t *eph = filep->f_priv;
   int ret;
 
-  ret = nxmutex_lock(&eph->lock);
+  ret = nxrmutex_lock(&eph->lock);
   if (ret < 0)
     {
       return ret;
     }
 
   eph->crefs++;
-  nxmutex_unlock(&eph->lock);
+  nxrmutex_unlock(&eph->lock);
   return ret;
 }
 
@@ -188,7 +215,7 @@ static int epoll_do_close(FAR struct file *filep)
   FAR epoll_node_t *tmp;
   int ret;
 
-  ret = nxmutex_lock(&eph->lock);
+  ret = nxrmutex_lock(&eph->lock);
   if (ret < 0)
     {
       return ret;
@@ -218,23 +245,132 @@ static int epoll_do_close(FAR struct file *filep)
           fs_heap_free(epn);
         }
 
-      nxmutex_unlock(&eph->lock);
-      nxmutex_destroy(&eph->lock);
+      nxrmutex_unlock(&eph->lock);
+      nxrmutex_destroy(&eph->lock);
       nxsem_destroy(&eph->sem);
       fs_heap_free(eph);
     }
   else
     {
-      nxmutex_unlock(&eph->lock);
+      nxrmutex_unlock(&eph->lock);
     }
 
   return ret;
 }
 
+/****************************************************************************
+ * Name: epoll_notify
+ ****************************************************************************/
+
+static void epoll_notify(FAR epoll_head_t *eph, pollevent_t eventset)
+{
+  irqstate_t flags;
+  int i;
+
+  /* Called for every member notification; most epoll fds are never
+   * polled themselves, so skip the locking when no one waits.
+   */
+
+  for (i = 0; i < CONFIG_EPOLL_NPOLLWAITERS; i++)
+    {
+      if (eph->fds[i] != NULL)
+        {
+          break;
+        }
+    }
+
+  if (i == CONFIG_EPOLL_NPOLLWAITERS)
+    {
+      return;
+    }
+
+  sched_lock();
+  flags = spin_lock_irqsave(&eph->poll_lock);
+  poll_notify(eph->fds, CONFIG_EPOLL_NPOLLWAITERS, eventset);
+  spin_unlock_irqrestore(&eph->poll_lock, flags);
+  sched_unlock();
+}
+
 static int epoll_do_poll(FAR struct file *filep,
                          FAR struct pollfd_s *fds, bool setup)
 {
-  return OK;
+  FAR epoll_head_t *eph = filep->f_priv;
+  irqstate_t flags;
+  int ret = OK;
+  int i;
+
+  flags = spin_lock_irqsave(&eph->poll_lock);
+  if (setup)
+    {
+      FAR epoll_node_t *epn;
+      pollevent_t eventset = 0;
+
+      for (i = 0; i < CONFIG_EPOLL_NPOLLWAITERS; i++)
+        {
+          if (eph->fds[i] == NULL)
+            {
+              eph->fds[i] = fds;
+              fds->priv   = &eph->fds[i];
+              break;
+            }
+        }
+
+      if (i == CONFIG_EPOLL_NPOLLWAITERS)
+        {
+          fds->priv = NULL;
+          ret       = -EBUSY;
+          goto errout;
+        }
+
+      spin_unlock_irqrestore(&eph->poll_lock, flags);
+
+      nxrmutex_lock(&eph->lock);
+
+      list_for_every_entry(&eph->setup, epn, epoll_node_t, node)
+        {
+          /* Only check the notified fd */
+
+          if (!epn->notified)
+            {
+              continue;
+            }
+
+          if (epn->pfd.revents != 0)
+            {
+              eventset |= POLLIN;
+            }
+        }
+
+      nxrmutex_unlock(&eph->lock);
+
+      epoll_notify(eph, eventset);
+    }
+  else
+    {
+      /* This is a request to tear down the poll. */
+
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
+
+#ifdef CONFIG_DEBUG_FEATURES
+      if (slot == NULL)
+        {
+          ret = -EIO;
+          goto errout;
+        }
+#endif
+
+      /* Remove all memory of the poll setup */
+
+      *slot     = NULL;
+      fds->priv = NULL;
+      spin_unlock_irqrestore(&eph->poll_lock, flags);
+    }
+
+  return ret;
+
+errout:
+  spin_unlock_irqrestore(&eph->poll_lock, flags);
+  return ret;
 }
 
 static int epoll_do_create(int size, int flags)
@@ -262,8 +398,9 @@ static int epoll_do_create(int size, int flags)
     }
 
   eph->size = size;
-  nxmutex_init(&eph->lock);
+  nxrmutex_init(&eph->lock);
   nxsem_init(&eph->sem, 0, 0);
+  spin_lock_init(&eph->poll_lock);
 
   /* List initialize */
 
@@ -286,7 +423,7 @@ static int epoll_do_create(int size, int flags)
   fd = file_allocate_from_inode(&g_epoll_inode, flags, 0, eph, 0);
   if (fd < 0)
     {
-      nxmutex_destroy(&eph->lock);
+      nxrmutex_destroy(&eph->lock);
       nxsem_destroy(&eph->sem);
       fs_heap_free(eph);
       set_errno(-fd);
@@ -316,7 +453,7 @@ static int epoll_setup(FAR epoll_head_t *eph)
   FAR epoll_node_t *epn;
   int ret;
 
-  ret = nxmutex_lock(&eph->lock);
+  ret = nxrmutex_lock(&eph->lock);
   if (ret < 0)
     {
       return ret;
@@ -342,7 +479,7 @@ static int epoll_setup(FAR epoll_head_t *eph)
       list_add_tail(&eph->setup, &epn->node);
     }
 
-  nxmutex_unlock(&eph->lock);
+  nxrmutex_unlock(&eph->lock);
   return ret;
 }
 
@@ -369,9 +506,15 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
 {
   FAR epoll_node_t *tepn;
   FAR epoll_node_t *epn;
+  bool pending = false;
   int i = 0;
+  int ret;
 
-  nxmutex_lock(&eph->lock);
+  ret = nxrmutex_lock(&eph->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   list_for_every_entry_safe(&eph->setup, epn, tepn, epoll_node_t, node)
     {
@@ -382,31 +525,88 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
           continue;
         }
 
-      /* Teradown all the notified fd */
+      /* Edge-triggered mode: do not teardown the poll registration.
+       * Keep the node in the setup list so only NEW events from the
+       * driver will trigger notification. Reset notified flag so
+       * epoll_wait won't report stale events.
+       */
 
-      file_poll(epn->filep, &epn->pfd, false);
-      list_delete(&epn->node);
-
-      if (epn->pfd.revents != 0 && i < maxevents)
+      if ((epn->pfd.events & EPOLLET) != 0)
         {
-          evs[i].data     = epn->data;
-          evs[i++].events = epn->pfd.revents;
-          if ((epn->pfd.events & EPOLLONESHOT) != 0)
+          if (epn->pfd.revents == 0)
             {
-              list_add_tail(&eph->oneshot, &epn->node);
+              /* A POLLALWAYS notification with nothing to report.  The
+               * registration is still valid; leaving the flag set would
+               * strand this node, never reported nor registered again.
+               */
+
+              epn->notified = false;
+            }
+          else if (i < maxevents)
+            {
+              evs[i].data      = epn->data;
+              evs[i++].events  = epn->pfd.revents;
+              epn->notified    = false;
+              epn->pfd.revents = 0;
+              if ((epn->pfd.events & EPOLLONESHOT) != 0)
+                {
+                  file_poll(epn->filep, &epn->pfd, false);
+                  list_delete(&epn->node);
+                  list_add_tail(&eph->oneshot, &epn->node);
+                }
+            }
+          else
+            {
+              /* Array full.  An ET node stays registered, so the driver
+               * will not notify again; post the semaphore below or the
+               * next epoll_wait() blocks with this event pending.
+               */
+
+              pending = true;
+            }
+        }
+      else
+        {
+          /* Level-triggered mode: teardown the poll and move to
+           * teardown list. epoll_setup will re-register and re-check.
+           */
+
+          file_poll(epn->filep, &epn->pfd, false);
+          list_delete(&epn->node);
+
+          if (epn->pfd.revents != 0 && i < maxevents)
+            {
+              evs[i].data     = epn->data;
+              evs[i++].events = epn->pfd.revents;
+              if ((epn->pfd.events & EPOLLONESHOT) != 0)
+                {
+                  list_add_tail(&eph->oneshot, &epn->node);
+                }
+              else
+                {
+                  list_add_tail(&eph->teardown, &epn->node);
+                }
             }
           else
             {
               list_add_tail(&eph->teardown, &epn->node);
             }
         }
-      else
+    }
+
+  nxrmutex_unlock(&eph->lock);
+
+  if (pending)
+    {
+      int semcount = 0;
+
+      nxsem_get_value(&eph->sem, &semcount);
+      if (semcount < 1)
         {
-          list_add_tail(&eph->teardown, &epn->node);
+          nxsem_post(&eph->sem);
         }
     }
 
-  nxmutex_unlock(&eph->lock);
   return i;
 }
 
@@ -420,7 +620,7 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
 
 static void epoll_cleanup(FAR void *arg)
 {
-  file_put(arg);
+  file_put(*(FAR struct file **)arg);
 }
 
 /****************************************************************************
@@ -451,6 +651,8 @@ static void epoll_default_cb(FAR struct pollfd_s *fds)
         {
           nxsem_post(&epn->eph->sem);
         }
+
+      epoll_notify(epn->eph, POLLIN);
     }
 }
 
@@ -533,7 +735,7 @@ void epoll_close(int epfd)
 int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
 {
   FAR struct list_node *extend;
-  FAR struct file *filep;
+  FAR struct file *filep = NULL;
   FAR epoll_head_t *eph;
   FAR epoll_node_t *epn;
   int ret;
@@ -558,7 +760,7 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
       return ERROR;
     }
 
-  ret = nxmutex_lock(&eph->lock);
+  ret = nxrmutex_lock(&eph->lock);
   if (ret < 0)
     {
       goto err_without_lock;
@@ -774,13 +976,13 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
     }
 
 out:
-  nxmutex_unlock(&eph->lock);
-  file_put(filep);
+  nxrmutex_unlock(&eph->lock);
+  epoll_filep_close(filep);
   return OK;
 err:
-  nxmutex_unlock(&eph->lock);
+  nxrmutex_unlock(&eph->lock);
 err_without_lock:
-  file_put(filep);
+  epoll_filep_close(filep);
   set_errno(-ret);
   return ERROR;
 }
@@ -792,7 +994,7 @@ err_without_lock:
 int epoll_pwait(int epfd, FAR struct epoll_event *evs,
                 int maxevents, int timeout, FAR const sigset_t *sigmask)
 {
-  FAR struct file *filep;
+  FAR struct file *filep = NULL;
   FAR epoll_head_t *eph;
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   sigset_t oldsigmask;
@@ -830,12 +1032,6 @@ retry:
   nxsig_procmask(SIG_SETMASK, sigmask, &oldsigmask);
 #endif
 
-  /* Push a cancellation point onto the stack.  This will be called if
-   * the thread is canceled.
-   */
-
-  tls_cleanup_push(tls_get_info(), epoll_cleanup, filep);
-
   if (timeout == 0)
     {
       ret = -ETIMEDOUT;
@@ -848,10 +1044,6 @@ retry:
     {
       ret = nxsem_wait(&eph->sem);
     }
-
-  /* Pop the cancellation point */
-
-  tls_cleanup_pop(tls_get_info(), 0);
 
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   nxsig_procmask(SIG_SETMASK, &oldsigmask, NULL);
@@ -872,11 +1064,12 @@ retry:
       ret = num;
     }
 
-  file_put(filep);
+  epoll_filep_close(filep);
+
   return ret;
 
 err:
-  file_put(filep);
+  epoll_filep_close(filep);
   set_errno(-ret);
 out:
   ferr("epoll wait failed:%d, timeout:%d\n", errno, timeout);
@@ -897,7 +1090,7 @@ out:
 int epoll_wait(int epfd, FAR struct epoll_event *evs,
                int maxevents, int timeout)
 {
-  FAR struct file *filep;
+  FAR struct file *filep = NULL;
   FAR epoll_head_t *eph;
   int ret;
 
@@ -926,12 +1119,6 @@ retry:
       goto err;
     }
 
-  /* Push a cancellation point onto the stack.  This will be called if
-   * the thread is canceled.
-   */
-
-  tls_cleanup_push(tls_get_info(), epoll_cleanup, filep);
-
   /* Wait the poll ready */
 
   if (timeout == 0)
@@ -946,10 +1133,6 @@ retry:
     {
       ret = nxsem_wait(&eph->sem);
     }
-
-  /* Pop the cancellation point */
-
-  tls_cleanup_pop(tls_get_info(), 0);
 
   if (ret < 0 && ret != -ETIMEDOUT)
     {
@@ -967,11 +1150,12 @@ retry:
       ret = num;
     }
 
-  file_put(filep);
+  epoll_filep_close(filep);
+
   return ret;
 
 err:
-  file_put(filep);
+  epoll_filep_close(filep);
   set_errno(-ret);
 out:
   ferr("epoll wait failed:%d, timeout:%d\n", errno, timeout);

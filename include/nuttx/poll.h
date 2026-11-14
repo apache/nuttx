@@ -36,8 +36,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* POLLALWAYS: call the poll callback whether or not the driver reported an
- * event that the waiter asked for (events only, kernel only).
+/* POLLALWAYS: call the poll callback even when the notified event is not
+ * one the waiter asked for.  Kernel only.  Both sides must agree:  the
+ * waiter sets it in events to accept a callback carrying no event (epoll
+ * does, to re-run poll setup), and the driver sets it in the notified
+ * eventset to ask for one, which only a driver whose poll registration goes
+ * stale on an internal state change needs to do.
  */
 
 #define POLLALWAYS   (0x10000) /* Does not conflict with Linux */
