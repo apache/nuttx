@@ -231,6 +231,30 @@ After flashing and reboot your board you should see in your dmesg logs::
 
 You may need to press **ENTER** 3 times before the NSH show up.
 
+lwl
+---
+
+Configures the NuttShell (nsh) with the console over the Lightweight Link
+(LWL): the console goes through the SWD probe (e.g. STLink-V2) instead of a
+UART, so only the SWD wires are needed. The host raises the CRS interrupt
+(IRQ 160, unused by NuttX) as a doorbell, so the console uses no CPU time
+while it is idle.
+
+Flash the board as described in `SWD`_, leave OpenOCD running::
+
+    $ openocd -f interface/stlink.cfg -f target/stm32h7x.cfg
+
+and start the terminal in another shell::
+
+    $ ./tools/lwl/ocdconsole.py --elf nuttx
+    ==Link Activated
+
+    NuttShell (NSH)
+    nsh>
+
+Press ``Ctrl-]`` to quit the terminal. See :doc:`/guides/drivers/lwl` for
+details.
+
 sdcard
 ------
 
