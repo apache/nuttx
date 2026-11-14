@@ -29,6 +29,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <nuttx/debug.h>
 
 #include <arch/irq.h>
@@ -230,11 +231,32 @@ int pkt_sendmsg_is_valid(FAR struct socket *psock,
 {
   FAR struct sockaddr_ll *addr = msg->msg_name;
 
+  /* POSIX: fail with EMSGSIZE if msg_iovlen <= 0 or > IOV_MAX */
+
+  if (msg->msg_iovlen == 0 || msg->msg_iovlen > IOV_MAX)
+    {
+      return -EMSGSIZE;
+    }
+
   /* Only single iov supported */
 
   if (msg->msg_iovlen != 1)
     {
       return -ENOTSUP;
+    }
+
+  /* An iov must be provided */
+
+  if (msg->msg_iov == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Elements of the iov must not be NULL if length is non-zero */
+
+  if (msg->msg_iov[0].iov_len > 0 && msg->msg_iov[0].iov_base == NULL)
+    {
+      return -EINVAL;
     }
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
