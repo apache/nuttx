@@ -82,6 +82,9 @@ struct rptun_priv_s
   bool                        rreset;
   bool                        stop;
   pid_t                       pid;
+#if defined(CONFIG_BOARDCTL_RESET) || defined(CONFIG_BOARDCTL_POWEROFF)
+  struct work_s               work;
+#endif
 };
 
 struct rptun_store_s
@@ -152,8 +155,10 @@ static void rptun_unmap_buf(FAR struct virtio_device *vdev,
 static void rptun_set_status(FAR struct rptun_priv_s *priv,
                              unsigned long reason);
 
+#ifndef CONFIG_RPTUN_AUTO_RESET_DISABLE
 static int rptun_notifier(FAR struct notifier_block *block,
                           unsigned long action, void *data);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -202,16 +207,21 @@ static const struct virtio_memory_ops g_rptun_mmops =
 static dq_queue_t g_rptun_priv;
 static rmutex_t g_rptun_lock = NXRMUTEX_INITIALIZER;
 
+#ifdef CONFIG_RPTUN_AUTO_RESET_IN_PANIC_NOTIFIER
 static struct notifier_block g_rptun_panic_nb =
 {
   .notifier_call = rptun_notifier,
+  .priority = INT_MIN, /* Panic notifier should be called at the last */
 };
+#endif
 
+#ifndef CONFIG_RPTUN_AUTO_RESET_DISABLE
 static struct notifier_block g_rptun_reboot_nb =
 {
   .notifier_call = rptun_notifier,
   .priority = INT_MIN, /* Reboot notifier should be called at the last */
 };
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -603,9 +613,9 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
   FAR struct virtio_device *vdev;
   FAR struct metal_list *node;
   FAR char *rsc = rproc->rsc_table;
-  FAR char *shmbase;
+  FAR char *shmbase = NULL;
   unsigned int role;
-  size_t shmlen;
+  size_t shmlen = 0;
   size_t off;
   int ret = OK;
 
@@ -899,6 +909,20 @@ static void rptun_set_status(FAR struct rptun_priv_s *priv,
   rptun_notify(&priv->rproc, RPTUN_NOTIFY_ALL);
 }
 
+#if defined(CONFIG_BOARDCTL_RESET) || defined(CONFIG_BOARDCTL_POWEROFF)
+static void rptun_boardctl_work(FAR void *arg)
+{
+  if ((unsigned long)arg == BOARDIOC_SOFTRESETCAUSE_POWEROFF)
+    {
+      boardctl(BOARDIOC_POWEROFF, 0u);
+    }
+  else
+    {
+      boardctl(BOARDIOC_RESET, (unsigned long)arg);
+    }
+}
+#endif
+
 static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
 {
   uint32_t status;
@@ -912,17 +936,34 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
 
   if (RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_PANIC))
     {
-      syslog(LOG_EMERG,
-             "FATAL: Panic by remote core: %s\n",
+      syslog(LOG_EMERG, "FATAL: Panic by remote core: %s\n",
              RPTUN_GET_CPUNAME(priv->dev));
       PANIC();
     }
-#ifdef CONFIG_BOARDCTL_RESET
   else if(status != 0u)
     {
-      boardctl(BOARDIOC_RESET, RPTUN_REASON_GET(status));
-    }
+      syslog(LOG_EMERG, "FATAL: Reset by remote core: %s reason: %u\n",
+             RPTUN_GET_CPUNAME(priv->dev), RPTUN_REASON_GET(status));
+      if (RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_POWEROFF))
+        {
+#ifdef CONFIG_BOARDCTL_POWEROFF
+          work_queue(HPWORK, &priv->work, rptun_boardctl_work,
+            (FAR void *)(uintptr_t)BOARDIOC_SOFTRESETCAUSE_POWEROFF, 0);
+#else
+          rptun_set_status(priv,
+                           (unsigned long)BOARDIOC_SOFTRESETCAUSE_POWEROFF);
 #endif
+        }
+      else
+        {
+#ifdef CONFIG_BOARDCTL_RESET
+          work_queue(HPWORK, &priv->work, rptun_boardctl_work,
+                     (FAR void *)(uintptr_t)RPTUN_REASON_GET(status), 0);
+#else
+          rptun_set_status(priv, (unsigned long)RPTUN_REASON_GET(status));
+#endif
+        }
+    }
 }
 
 static int rptun_callback(FAR void *arg, uint32_t vqid)
@@ -1098,6 +1139,7 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
 
 static int rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
 {
+  int timeout = CONFIG_RPTUN_STATUS_TIMEOUT_MS;
   int ret = -ENOTSUP;
 
   if (priv->rproc.rsc_table == NULL)
@@ -1107,13 +1149,35 @@ static int rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
 
   if (priv->dev->ops->reset)
     {
+      syslog(LOG_EMERG, "Rptun driver reset remote %s reason: %lu\n",
+             RPTUN_GET_CPUNAME(priv->dev), val);
       ret = priv->dev->ops->reset(priv->dev, val);
+      syslog(LOG_EMERG, "Rptun driver reset remote %s ret %d\n",
+             RPTUN_GET_CPUNAME(priv->dev), ret);
     }
 
   if (ret == -ENOTSUP)
     {
       rptun_set_status(priv, val);
-      ret = OK;
+
+      ret = -ETIMEDOUT;
+      while (timeout-- > 0)
+        {
+          if (RPTUN_STATUS_CHECK(rptun_get_peer_status(priv), val))
+            {
+              ret = OK;
+              break;
+            }
+
+          if (up_interrupt_context())
+            {
+              up_udelay(1000);
+            }
+          else
+            {
+              nxsig_usleep(1000);
+            }
+        }
     }
 
   return ret;
@@ -1322,24 +1386,40 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
   return pa;
 }
 
+#ifndef CONFIG_RPTUN_AUTO_RESET_DISABLE
 static int rptun_notifier(FAR struct notifier_block *block,
                           unsigned long action, void *data)
 {
+  unsigned long val;
+
   if (block == &g_rptun_reboot_nb)
     {
-      if (action == SYS_RESTART || action == SYS_POWER_OFF)
+      if (action == SYS_POWER_OFF)
         {
-          rptun_ioctl_foreach(NULL, RPTUNIOC_STOP, (unsigned long)data);
+          val = BOARDIOC_SOFTRESETCAUSE_POWEROFF;
         }
+      else if (action == SYS_HALT)
+        {
+          val = BOARDIOC_SOFTRESETCAUSE_PANIC;
+        }
+      else
+        {
+          val = (unsigned long)data;
+        }
+
+      rptun_ioctl_foreach(NULL, RPTUNIOC_RESET, val);
     }
+#ifdef CONFIG_RPTUN_AUTO_RESET_IN_PANIC_NOTIFIER
   else if (action == PANIC_KERNEL_FINAL)
     {
       rptun_ioctl_foreach(NULL, RPTUNIOC_RESET,
                           (unsigned long)BOARDIOC_SOFTRESETCAUSE_PANIC);
     }
+#endif
 
   return 0;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -1375,8 +1455,12 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 
           if (ret >= 0)
             {
+#ifdef CONFIG_RPTUN_AUTO_RESET_IN_PANIC_NOTIFIER
               panic_notifier_chain_register(&g_rptun_panic_nb);
+#endif
+#ifndef CONFIG_RPTUN_AUTO_RESET_DISABLE
               register_reboot_notifier(&g_rptun_reboot_nb);
+#endif
 
               nxrmutex_lock(&g_rptun_lock);
               dq_addlast(&priv->entry, &g_rptun_priv);

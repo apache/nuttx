@@ -12,6 +12,29 @@ menuconfig RPTUN
 
 if RPTUN
 
+choice RPTUN_AUTO_RESET
+	prompt "rptun auto reset peer"
+	default RPTUN_AUTO_RESET_IN_PANIC_NOTIFIER
+
+config RPTUN_AUTO_RESET_DISABLE
+	bool "rptun auto reset feature disabled"
+
+config RPTUN_AUTO_RESET_IN_PANIC_NOTIFIER
+	bool "rptun panic other core in panic notifier"
+	---help---
+		Panic peer in the panic notifier and Reboot/Poweroff peer in
+		the reboot notifier. This mode is used for the case that the
+		main core do the coredump after panic all the peer cores.
+
+config RPTUN_AUTO_RESET_IN_REBOOT_NOTIFIER
+	bool "rptun panic other core in reboot notifier"
+	---help---
+		Panic/Reboot/Poweroff peer all in the reboot notifier.
+		This mode is used for the case that all the core do its
+		coredump by itself.
+
+endchoice # RPTUN_AUTO_RESET
+
 config RPTUN_BMP
 	bool "rptun bmp support"
 	default n
