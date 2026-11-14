@@ -151,7 +151,7 @@
 
 /* Hardware filter code (ACR) and mask (AMR) registers */
 #define MPFS_CAN_ACR_AMR_ID_SHIFT                   (3)        /* Identifier bits shift */
-#define MPFS_CAN_ACR_AMR_ID                         (0x1fffffff << MPFS_CAN_RX_MSG_AMR_ID_SHIFT)
+#define MPFS_CAN_ACR_AMR_ID                         (0x1fffffff << MPFS_CAN_ACR_AMR_ID_SHIFT)
                                                                /* Identifier bits [31:3] */
 #define MPFS_CAN_ACR_AMR_IDE                        (1 << 2)   /* IDE bit; 0: Check against ACR, 1: Don't care */
 #define MPFS_CAN_ACR_AMR_RTR                        (1 << 1)   /* RTR bit; 0: Check against ACR, 1: Don't care */
