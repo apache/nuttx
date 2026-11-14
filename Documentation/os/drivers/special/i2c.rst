@@ -219,8 +219,8 @@ An I2C controller can be exposed over a VirtIO transport.
 ``CONFIG_DRIVERS_VIRTIO_I2C`` enables the frontend (client), which probes a
 VirtIO I2C adapter device (device id 34) and exposes a
 ``struct i2c_master_s`` retrievable with ``virtio_i2c_get_master(index)``.
-Board code may then pass it to device drivers or register it with
-``i2c_register()`` as ``/dev/i2cN``. ``CONFIG_DRIVERS_VHOST_I2C`` enables
+With ``CONFIG_I2C_DRIVER`` the probe also registers it as ``/dev/i2cN``.
+``CONFIG_DRIVERS_VHOST_I2C`` enables
 the device-side backend (server), which serves the request virtqueue and
 forwards transfers to the local I2C device node named in its config space.
 
