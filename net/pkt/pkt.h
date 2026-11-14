@@ -76,6 +76,9 @@ struct pkt_conn_s
   uint8_t    crefs;    /* Reference counts on this instance */
   uint16_t   type;     /* The Ethernet type of the packet */
 
+#if CONFIG_NET_RECV_BUFSIZE > 0
+  int32_t    rcvbufs;  /* Maximum amount of bytes queued in recv */
+#endif
 #ifdef CONFIG_NET_PKT_WRITE_BUFFERS
   /* Write buffering
    *
@@ -166,12 +169,20 @@ void pkt_free(FAR struct pkt_conn_s *conn);
  *   Find a connection structure that is the appropriate connection to be
  *   used with the provided network device
  *
+ * Input Parameters:
+ *   dev  - The device driver structure containing the received packet
+ *   conn - A pointer to the PKT connection structure
+ *   loopback - Indicate whether it is a loopback packet
+ *
+ *
  * Assumptions:
  *   This function is called from network logic at with the network locked.
  *
  ****************************************************************************/
 
-FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev);
+FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev,
+                                  FAR struct pkt_conn_s *conn,
+                                  bool loopback);
 
 /****************************************************************************
  * Name: pkt_nextconn()
