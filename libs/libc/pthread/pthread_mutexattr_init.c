@@ -61,18 +61,18 @@ int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
     }
   else
     {
-      attr->pshared = 0;
+      attr->pshared = PTHREAD_PROCESS_PRIVATE;
 
 #ifdef CONFIG_PRIORITY_PROTECT
-      attr->proto   = PTHREAD_PRIO_NONE;
+      attr->prio    = PTHREAD_PRIO_NONE;
       attr->ceiling = sched_get_priority_min(SCHED_FIFO);
 #endif
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
 #  ifdef CONFIG_PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT
-      attr->proto   = PTHREAD_PRIO_INHERIT;
+      attr->prio    = PTHREAD_PRIO_INHERIT;
 #  else
-      attr->proto   = PTHREAD_PRIO_NONE;
+      attr->prio    = PTHREAD_PRIO_NONE;
 #  endif
 #endif /* CONFIG_PRIORITY_INHERITANCE */
 

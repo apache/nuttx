@@ -32,6 +32,8 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -62,7 +64,12 @@ int pthread_attr_setinheritsched(FAR pthread_attr_t *attr,
 
   linfo("inheritsched=%d\n", inheritsched);
 
-  if (!attr ||
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_attr_setinheritsched(attr, inheritsched)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_ATTR_IS_VALID(attr) ||
       (inheritsched != PTHREAD_INHERIT_SCHED &&
        inheritsched != PTHREAD_EXPLICIT_SCHED))
     {

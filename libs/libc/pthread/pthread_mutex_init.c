@@ -62,7 +62,16 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 
   sinfo("mutex=%p attr=%p\n", mutex, attr);
 
-  if (!mutex)
+  /* If the implementation detects that the mutex attributes object
+   * specified by attr is invalid:
+   * a call to pthread_mutex_init(mutex, attr) returns EINVAL
+   * without modifying the state of the mutex.
+   */
+
+  if (!mutex ||
+      (attr &&
+       attr->pshared != PTHREAD_PROCESS_PRIVATE &&
+       attr->pshared != PTHREAD_PROCESS_SHARED))
     {
       return EINVAL;
     }
@@ -94,7 +103,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
   if (attr)
     {
       status = mutex_set_protocol(&mutex->mutex,
-                                  SEM_TYPE_MUTEX | attr->proto);
+                                  SEM_TYPE_MUTEX | attr->prio);
       if (status < 0)
         {
           mutex_destroy(&mutex->mutex);
@@ -102,7 +111,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
         }
 
 #  ifdef CONFIG_PRIORITY_PROTECT
-      if (attr->proto == PTHREAD_PRIO_PROTECT)
+      if (attr->prio == PTHREAD_PRIO_PROTECT)
         {
           status = mutex_setprioceiling(&mutex->mutex, attr->ceiling, NULL);
           if (status < 0)

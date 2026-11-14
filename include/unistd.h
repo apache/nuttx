@@ -145,6 +145,26 @@
 #  define _POSIX_SPIN_LOCKS -1
 #endif
 
+/* For the PSE52 certification, define the following macros.
+ * _POSIX_THREAD_ATTR_STACKADDR and _POSIX_THREAD_ATTR_STACKSIZE are
+ * defined above.  The priority protocols are only supported when they are
+ * built in.
+ */
+
+#if defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_DISABLE_PTHREAD)
+#  define _POSIX_THREAD_PRIO_INHERIT 200112L
+#else
+#  define _POSIX_THREAD_PRIO_INHERIT -1
+#endif
+
+#if defined(CONFIG_PRIORITY_PROTECT) && !defined(CONFIG_DISABLE_PTHREAD)
+#  define _POSIX_THREAD_PRIO_PROTECT 200112L
+#else
+#  define _POSIX_THREAD_PRIO_PROTECT -1
+#endif
+
+#define _POSIX_THREAD_SAFE_FUNCTIONS 200112L
+
 #ifdef CONFIG_FS_AIO
 #  define _POSIX_ASYNCHRONOUS_IO _POSIX_VERSION
 #else

@@ -189,7 +189,16 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 
           switch (policy)
             {
+              case SCHED_OTHER:
+#if CONFIG_RR_INTERVAL > 0
+                policy = SCHED_RR;
+#else
+                policy = SCHED_FIFO;
+#endif
               case SCHED_FIFO:
+#if CONFIG_RR_INTERVAL > 0
+              case SCHED_RR:
+#endif
 #ifdef CONFIG_SCHED_SPORADIC
                 /* Cancel any on-going sporadic scheduling */
 
@@ -200,35 +209,23 @@ int nxsched_set_scheduler(pid_t pid, int policy,
                   }
 #endif
 
-                /* Save the FIFO scheduling parameters */
+                /* Set the new policy flag */
 
-                tcb->flags     &= ~TCB_FLAG_POLICY_MASK;
-                tcb->flags     |= TCB_FLAG_SCHED_FIFO;
+                tcb->flags &= ~TCB_FLAG_POLICY_MASK;
+                tcb->flags |= policy << TCB_FLAG_POLICY_SHIFT;
+
+                /* Configure timeslice based on policy */
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-                tcb->timeslice  = 0;
-#endif
-                break;
-
-#if CONFIG_RR_INTERVAL > 0
-              case SCHED_OTHER:
-              case SCHED_RR:
-#  ifdef CONFIG_SCHED_SPORADIC
-                /* Cancel any on-going sporadic scheduling */
-
-                if ((tcb->flags & TCB_FLAG_POLICY_MASK) ==
-                    TCB_FLAG_SCHED_SPORADIC)
+                if (policy == SCHED_FIFO)
                   {
-                    DEBUGVERIFY(nxsched_stop_sporadic(tcb));
+                    tcb->timeslice = 0;
                   }
-#  endif
-
-                /* Save the round robin scheduling parameters */
-
-                tcb->flags     &= ~TCB_FLAG_POLICY_MASK;
-                tcb->flags     |= TCB_FLAG_SCHED_RR;
-                tcb->timeslice  = MSEC2TICK(CONFIG_RR_INTERVAL);
-                break;
+                else
+                  {
+                    tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
+                  }
 #endif
+                break;
 
 #ifdef CONFIG_SCHED_SPORADIC
               case SCHED_SPORADIC:

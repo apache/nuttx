@@ -30,6 +30,8 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -53,11 +55,14 @@
 int pthread_mutexattr_getprotocol(FAR const pthread_mutexattr_t *attr,
                                   FAR int *protocol)
 {
-  DEBUGASSERT(attr != NULL && protocol != NULL);
+  if (!PTHREAD_MUTEXATTR_IS_VALID(attr) || protocol == NULL)
+    {
+      return EINVAL;
+    }
 
 #if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
-  linfo("Returning %d\n", attr->proto);
-  *protocol = attr->proto;
+  linfo("Returning %d\n", attr->prio);
+  *protocol = attr->prio;
 #else
   linfo("Returning %d\n", PTHREAD_PRIO_NONE);
   *protocol = PTHREAD_PRIO_NONE;

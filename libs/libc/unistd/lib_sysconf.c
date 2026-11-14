@@ -511,18 +511,13 @@ long sysconf(int name)
 #endif
 
       case _SC_THREAD_PRIO_INHERIT:
-#if defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_DISABLE_PTHREAD)
-        return _POSIX_VERSION;
-#else
-        return -1;
-#endif
+        return _POSIX_THREAD_PRIO_INHERIT;
 
       case _SC_THREAD_PRIO_PROTECT:
-#if defined(CONFIG_PRIORITY_PROTECT) && !defined(CONFIG_DISABLE_PTHREAD)
-        return _POSIX_VERSION;
-#else
-        return -1;
-#endif
+        return _POSIX_THREAD_PRIO_PROTECT;
+
+      case _SC_THREAD_SAFE_FUNCTIONS:
+        return _POSIX_THREAD_SAFE_FUNCTIONS;
 
       case _SC_THREAD_ROBUST_PRIO_INHERIT:
 #if defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_DISABLE_PTHREAD) && \
@@ -593,7 +588,6 @@ long sysconf(int name)
       case _SC_SHELL:
       case _SC_SPAWN:
       case _SC_SS_REPL_MAX:
-      case _SC_THREAD_SAFE_FUNCTIONS:
       case _SC_THREAD_THREADS_MAX:
       case _SC_TRACE:
       case _SC_TRACE_EVENT_FILTER:

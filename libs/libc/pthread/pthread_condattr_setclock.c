@@ -29,6 +29,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -52,7 +54,12 @@
 int pthread_condattr_setclock(FAR pthread_condattr_t *attr,
                               clockid_t clock_id)
 {
-  if (!attr ||
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_condattr_setclock(attr, clock_id)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_CONDATTR_IS_VALID(attr) ||
       (clock_id != CLOCK_MONOTONIC &&
        clock_id != CLOCK_REALTIME))
     {

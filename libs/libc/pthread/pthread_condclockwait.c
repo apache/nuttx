@@ -43,6 +43,7 @@
 #include <nuttx/cancelpt.h>
 #include <nuttx/pthread.h>
 #include <nuttx/atomic.h>
+#include <nuttx/sched.h>
 
 #include "pthread.h"
 
@@ -86,7 +87,7 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 
   /* Make sure that non-NULL references were provided. */
 
-  if (!cond || !mutex)
+  if (!PTHREAD_COND_IS_VALID(cond) || !PTHREAD_MUTEX_IS_VALID(mutex))
     {
       ret = EINVAL;
     }
@@ -107,11 +108,24 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
       ret = pthread_cond_wait(cond, mutex);
     }
 
+  /* When abstime is invalid, then pthread_cond_timedwait fails and
+   * returns EINVAL without modifying the state of the condition variable
+   * specified by cond or the mutex specified by mutex.
+   */
+
+  else if (abstime && (abstime->tv_nsec < 0 ||
+           abstime->tv_nsec >= NSEC_PER_SEC))
+    {
+      ret = EINVAL;
+    }
+
   else
     {
       unsigned int nlocks;
 
       sinfo("Give up mutex...\n");
+
+      sched_lock();
 
       atomic_add(COND_WAIT_COUNT(cond), 1);
 
@@ -128,12 +142,23 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
             }
         }
 
+      sched_unlock();
+
       /* Reacquire the mutex (retaining the ret). */
 
       sinfo("Re-locking...\n");
 
       status = pthread_mutex_restorelock(mutex, nlocks);
-      if (ret == 0)
+
+      /* When the wait times out (ETIMEDOUT), we must decrement
+       * wait_count to maintain proper accounting.
+       */
+
+      if (ret == ETIMEDOUT)
+        {
+          atomic_sub(COND_WAIT_COUNT(cond), 1);
+        }
+      else if (ret == 0)
         {
           ret = status;
         }

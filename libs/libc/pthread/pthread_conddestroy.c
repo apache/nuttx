@@ -30,6 +30,10 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 
+#include <nuttx/atomic.h>
+
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -60,13 +64,21 @@ int pthread_cond_destroy(FAR pthread_cond_t *cond)
 
   sinfo("cond=%p\n", cond);
 
-  if (!cond)
+  if (!PTHREAD_COND_IS_VALID(cond))
     {
       ret = EINVAL;
     }
 
-  /* Destroy the semaphore contained in the structure */
+  /* If the implementation detects an attempt to destroy the condition
+   * variable referenced by cond while it is referenced by another thread:
+   * a call to pthread_cond_destroy(cond) returns EBUSY without modifying
+   * the state of the condition variable.
+   */
 
+  else if (atomic_read(COND_WAIT_COUNT(cond)) > 0)
+    {
+      ret = EBUSY;
+    }
   else
     {
       ret = nxsem_get_value(&cond->sem, &sval);
@@ -81,6 +93,10 @@ int pthread_cond_destroy(FAR pthread_cond_t *cond)
       else
         {
           ret = -nxsem_destroy(&cond->sem);
+          if (ret == OK)
+            {
+              cond->clockid = 0;
+            }
         }
     }
 
