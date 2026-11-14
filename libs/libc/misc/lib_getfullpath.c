@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
@@ -96,11 +97,12 @@ int lib_getfullpath(int dirfd, FAR const char *path,
       /* Get real directory path by dirfd */
 
       ret = fcntl(dirfd, F_GETPATH, fullpath);
-      if (ret >= 0)
+      if (ret < 0)
         {
-          strlcat(fullpath, path, fulllen);
+          return -get_errno();
         }
 
+      strlcat(fullpath, path, fulllen);
       return 0;
     }
 }

@@ -119,6 +119,16 @@ config DISABLE_DIRECTORY_OPERATIONS
 		available either.  Useful for small systems that never list a
 		directory; the directory file layer is not built at all.
 
+config FS_IOCTL_FILEPATH
+	bool "Support FIOC_FILEPATH ioctl and F_GETPATH fcntl"
+	default !DEFAULT_SMALL
+	---help---
+		Enable the FIOC_FILEPATH ioctl and F_GETPATH fcntl command to resolve
+		the path of an open file descriptor from its inode tree.
+		When disabled, file_ioctl(FIOC_FILEPATH) returns -ENOTTY, saving Flash
+		space on memory-constrained systems by eliminating path reconstruction
+		machinery (inode_getpath).
+
 config PSEUDOFS_ATTRIBUTES
 	bool "Pseudo-filesystem attributes"
 	default n

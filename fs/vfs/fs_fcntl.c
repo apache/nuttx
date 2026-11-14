@@ -178,6 +178,7 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * of size PATH_MAX or greater.
          */
 
+#ifdef CONFIG_FS_IOCTL_FILEPATH
         {
           FAR char *path = va_arg(ap, FAR char *);
 
@@ -189,6 +190,9 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 
           ret = file_ioctl(filep, FIOC_FILEPATH, path);
         }
+#else
+        ret = -ENOTTY;
+#endif
         break;
 
       case F_SETPIPE_SZ:
