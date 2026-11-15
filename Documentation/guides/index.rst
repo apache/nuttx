@@ -16,6 +16,7 @@ Guides
    build/integrate_newlib.rst
    build/nix_flake.rst
    build/platform_directories.rst
+   pgo_instrumentation.rst
 
 .. toctree::
    :maxdepth: 1

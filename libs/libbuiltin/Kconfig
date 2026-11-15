@@ -75,7 +75,7 @@ config COVERAGE_GCOV_DUMP_REBOOT
 
 config COVERAGE_DEFAULT_PREFIX_STRIP
 	string "Default gcov dump path prefix strip"
-	default "0"
+	default "99"
 	---help---
 		The default prefix strip of the gcov data
 
@@ -121,6 +121,16 @@ config COVERAGE_ALL
 		-fcoverage-mapping' parameter to all module.
 		The data can then be printed nsh run "gcov dump -d /xxx/xxx"
 
+
+config GCOV_COUNTER_POOL_SIZE
+	int "GCOV counter pool size"
+	default 8192
+	depends on ARCH_TOOLCHAIN_GCC && COVERAGE_PGO
+	---help---
+		PGO profile collection may occur before the memory subsystem is
+		initialized, so we need to define a memory block for counter
+		allocation. This can also replace dynamic memory allocation to
+		improve performance.
 
 config PROFILE_ALL
 	bool "Enable gprof call graph for all modules"
