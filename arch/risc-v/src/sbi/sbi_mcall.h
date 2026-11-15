@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/nuttsbi/sbi_ipi.c
+ * arch/risc-v/src/sbi/sbi_mcall.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,39 +20,22 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISC_V_SRC_NUTTSBI_SBI_MCALL_H
+#define __ARCH_RISC_V_SRC_NUTTSBI_SBI_MCALL_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <nuttx/irq.h>
-
-#include <arch/barriers.h>
 
 #include <stdint.h>
-
-#include "riscv_internal.h"
-
-#include "sbi_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+#define SBI_EXT_FIRMWARE              0x0A000000
+#define SBI_EXT_FIRMWARE_GET_MTIME    0x0
 
-void sbi_send_ipi(uintptr_t hmask, uintptr_t hbase)
-{
-  uintptr_t i;
-
-  for (i = hbase; hmask; i++, hmask >>= 1)
-    {
-      if (hmask & 1)
-        {
-          putreg32(1, IPI_BASE + 4 * i);
-        }
-    }
-}
+#endif /* __ARCH_RISC_V_SRC_NUTTSBI_SBI_MCALL_H */

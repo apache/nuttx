@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/nuttsbi/sbi_mscratch.c
+ * arch/risc-v/src/sbi/sbi_mscratch.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
