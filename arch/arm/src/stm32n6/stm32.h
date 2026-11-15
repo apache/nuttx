@@ -41,6 +41,7 @@
 #include "stm32_lowputc.h"
 #include "stm32_pwr.h"
 #include "stm32_rcc.h"
+#include "stm32_spi.h"
 #include "stm32_uart.h"
 
 #endif /* __ARCH_ARM_SRC_STM32N6_STM32_H */
