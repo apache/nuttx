@@ -38,6 +38,10 @@ ifeq ($(CONFIG_DRIVERS_VHOST_I2C),y)
   CSRCS += vhost-i2c.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_VHOST_SPI),y)
+  CSRCS += vhost-spi.c
+endif
+
 ifeq ($(CONFIG_DRIVERS_VHOST_RPMB),y)
   CSRCS += vhost-rpmb.c
 endif

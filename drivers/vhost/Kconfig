@@ -33,6 +33,18 @@ config DRIVERS_VHOST_I2C
 		one NuttX instance export an I2C bus to a remote VirtIO I2C frontend,
 		the native-VirtIO counterpart of the RPMSG I2C server.
 
+config DRIVERS_VHOST_SPI
+	bool "Virtual Host SPI Device Support"
+	depends on SPI && SPI_EXCHANGE
+	default n
+	select DRIVERS_VHOST
+	---help---
+		Enable the vhost (device-side) SPI backend.  When an rptun resource
+		table exposes a VirtIO SPI device (device ID 45) in the device role,
+		this driver serves the request virtqueue, decodes each transfer with
+		the Linux-compatible VirtIO SPI wire format, and forwards it to the
+		local SPI device node named in the device config space.
+
 config DRIVERS_VHOST_BLK
 	bool "Virtual Host Blk Device Support"
 	default n
