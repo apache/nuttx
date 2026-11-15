@@ -69,10 +69,24 @@
 void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
                         siginfo_t *info, void *ucontext)
 {
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* The system calls of the handler change xcp.saved_ursp.  Put it back:
+   * the next handler of this delivery must also go under the stack of the
+   * interrupted code, not under the stack of this handler.
+   */
+
+  struct tcb_s *rtcb = nxsched_self();
+  uint64_t ursp = rtcb->xcp.saved_ursp;
+#endif
+
   /* Let sys_call4() do all of the work */
 
   sys_call4(SYS_signal_handler, (uintptr_t)sighand, (uintptr_t)signo,
             (uintptr_t)info, (uintptr_t)ucontext);
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  rtcb->xcp.saved_ursp = ursp;
+#endif
 }
 
 #endif
