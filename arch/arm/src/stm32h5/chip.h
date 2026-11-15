@@ -62,6 +62,15 @@
  * ICACHE implementation, pg 367, Table 85.
  */
 
+/* SPI kernel clock and SPI clock limits (DS14258) */
+
+#if defined(CONFIG_STM32_STM32H50XXX)
+#  define STM32_SPI_MAX_KER_CK 250000000
+#else
+#  define STM32_SPI_MAX_KER_CK 125000000
+#endif
+#define STM32_SPI_CLK_MAX      120000000UL
+
 #define ARMV8M_ICACHE_LINESIZE 16   /* 16 bytes */
 #define ARMV8M_DCACHE_LINESIZE 16   /* 16 bytes */
 

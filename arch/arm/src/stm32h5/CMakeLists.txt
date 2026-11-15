@@ -56,10 +56,6 @@ if(CONFIG_STM32H5_EFUSE)
   list(APPEND SRCS stm32_efuse.c)
 endif()
 
-if(CONFIG_STM32_SPI)
-  list(APPEND SRCS stm32_spi.c)
-endif()
-
 if(CONFIG_STM32_QSPI1)
   list(APPEND SRCS stm32_qspi.c)
 endif()

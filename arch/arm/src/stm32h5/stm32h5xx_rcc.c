@@ -60,6 +60,32 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
 
 #define HSE_DIVISOR (STM32_HSE_FREQUENCY + 500000) / 1000000
 
+/* The SPI kernel clocks are selected by board.h */
+
+#if defined(CONFIG_STM32_SPI1) && !defined(STM32_RCC_CCIPR3_SPI1SEL)
+#  error Must define STM32_RCC_CCIPR3_SPI1SEL in board.h
+#endif
+
+#if defined(CONFIG_STM32_SPI2) && !defined(STM32_RCC_CCIPR3_SPI2SEL)
+#  error Must define STM32_RCC_CCIPR3_SPI2SEL in board.h
+#endif
+
+#if defined(CONFIG_STM32_SPI3) && !defined(STM32_RCC_CCIPR3_SPI3SEL)
+#  error Must define STM32_RCC_CCIPR3_SPI3SEL in board.h
+#endif
+
+#if defined(CONFIG_STM32_SPI4) && !defined(STM32_RCC_CCIPR3_SPI4SEL)
+#  error Must define STM32_RCC_CCIPR3_SPI4SEL in board.h
+#endif
+
+#if defined(CONFIG_STM32_SPI5) && !defined(STM32_RCC_CCIPR3_SPI5SEL)
+#  error Must define STM32_RCC_CCIPR3_SPI5SEL in board.h
+#endif
+
+#if defined(CONFIG_STM32_SPI6) && !defined(STM32_RCC_CCIPR3_SPI6SEL)
+#  error Must define STM32_RCC_CCIPR3_SPI6SEL in board.h
+#endif
+
 /* Determine if board wants to use HSI48 as 48 MHz oscillator. */
 
 #if defined(CONFIG_STM32_HAVE_HSI48) && defined(STM32_USE_CLK48)

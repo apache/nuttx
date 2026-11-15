@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_spi.c
+ * arch/arm/src/common/stm32/stm32_spi_v5.c
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -67,19 +69,23 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "chip.h"
-#include "stm32_rcc.h"
-#include "stm32_gpio.h"
+#include "stm32.h"
 #include "stm32_spi.h"
 
 #ifdef CONFIG_STM32_SPI_DMA
 #include "stm32_dma.h"
 #endif
 
-#if defined(CONFIG_STM32_STM32H50XXX)
-#  define SPI_MAX_KER_CK 250000000
-#else
-#  define SPI_MAX_KER_CK 125000000
+/* The maximum SPI kernel clock and the maximum SPI clock come from the
+ * family chip.h.
+ */
+
+#ifndef STM32_SPI_MAX_KER_CK
+#  error "STM32_SPI_MAX_KER_CK must be defined in chip.h"
+#endif
+
+#ifndef STM32_SPI_CLK_MAX
+#  error "STM32_SPI_CLK_MAX must be defined in chip.h"
 #endif
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
@@ -185,12 +191,9 @@
 #  ifndef STM32_SPI1_FREQUENCY
 #    error Must define STM32_SPI1_FREQUENCY in board.h
 #  else
-#    if STM32_SPI1_FREQUENCY > SPI_MAX_KER_CK
+#    if STM32_SPI1_FREQUENCY > STM32_SPI_MAX_KER_CK
 #      error Not supported SPI1 frequency
 #    endif
-#  endif
-#  ifndef STM32_RCC_CCIPR3_SPI1SEL
-#    error Must define STM32_RCC_CCIPR3_SPI1SEL in board.h
 #  endif
 #endif /* SPI1 */
 
@@ -198,12 +201,9 @@
 #  ifndef STM32_SPI2_FREQUENCY
 #    error Must define STM32_SPI2_FREQUENCY in board.h
 #  else
-#    if STM32_SPI2_FREQUENCY > SPI_MAX_KER_CK
+#    if STM32_SPI2_FREQUENCY > STM32_SPI_MAX_KER_CK
 #      error Not supported SPI2 frequency
 #    endif
-#  endif
-#  ifndef STM32_RCC_CCIPR3_SPI2SEL
-#    error Must define STM32_RCC_CCIPR3_SPI2SEL in board.h
 #  endif
 #endif /* SPI2 */
 
@@ -211,12 +211,9 @@
 #  ifndef STM32_SPI3_FREQUENCY
 #    error Must define STM32_SPI3_FREQUENCY in board.h
 #  else
-#    if STM32_SPI3_FREQUENCY > SPI_MAX_KER_CK
+#    if STM32_SPI3_FREQUENCY > STM32_SPI_MAX_KER_CK
 #      error Not supported SPI3 frequency
 #    endif
-#  endif
-#  ifndef STM32_RCC_CCIPR3_SPI3SEL
-#    error Must define STM32_RCC_CCIPR3_SPI3SEL in board.h
 #  endif
 #endif /* SPI3 */
 
@@ -224,12 +221,9 @@
 #  ifndef STM32_SPI4_FREQUENCY
 #    error Must define STM32_SPI4_FREQUENCY in board.h
 #  else
-#    if STM32_SPI4_FREQUENCY > SPI_MAX_KER_CK
+#    if STM32_SPI4_FREQUENCY > STM32_SPI_MAX_KER_CK
 #      error Not supported SPI4 frequency
 #    endif
-#  endif
-#  ifndef STM32_RCC_CCIPR3_SPI4SEL
-#    error Must define STM32_RCC_CCIPR3_SPI4SEL in board.h
 #  endif
 #endif /* SPI4 */
 
@@ -237,12 +231,9 @@
 #  ifndef STM32_SPI5_FREQUENCY
 #    error Must define STM32_SPI5_FREQUENCY in board.h
 #  else
-#    if STM32_SPI5_FREQUENCY > SPI_MAX_KER_CK
+#    if STM32_SPI5_FREQUENCY > STM32_SPI_MAX_KER_CK
 #      error Not supported SPI5 frequency
 #    endif
-#  endif
-#  ifndef STM32_RCC_CCIPR3_SPI5SEL
-#    error Must define STM32_RCC_CCIPR3_SPI5SEL in board.h
 #  endif
 #endif /* SPI5 */
 
@@ -250,12 +241,9 @@
 #  ifndef STM32_SPI6_FREQUENCY
 #    error Must define STM32_SPI6_FREQUENCY in board.h
 #  else
-#    if STM32_SPI6_FREQUENCY > SPI_MAX_KER_CK
+#    if STM32_SPI6_FREQUENCY > STM32_SPI_MAX_KER_CK
 #      error Not supported SPI6 frequency
 #    endif
-#  endif
-#  ifndef STM32_RCC_CCIPR3_SPI6SEL
-#    error Must define STM32_RCC_CCIPR3_SPI6SEL in board.h
 #  endif
 #endif /* SPI6 */
 
