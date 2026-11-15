@@ -37,6 +37,10 @@ if(CONFIG_DRIVERS_VHOST_I2C)
   list(APPEND SRCS vhost-i2c.c)
 endif()
 
+if(CONFIG_DRIVERS_VHOST_SPI)
+  list(APPEND SRCS vhost-spi.c)
+endif()
+
 if(CONFIG_DRIVERS_VHOST_RPMB)
   list(APPEND SRCS vhost-rpmb.c)
 endif()
