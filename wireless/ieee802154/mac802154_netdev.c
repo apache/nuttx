@@ -945,6 +945,12 @@ static int macnet_ioctl(FAR struct net_driver_s *dev, int cmd,
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
               case MAC802154IOC_NOTIFY_REGISTER:
                 {
+                  ret = nxsig_event_valid(&netmac->u.event);
+                  if (ret < 0)
+                    {
+                      break;
+                    }
+
                   /* Save the notification events */
 
                   priv->md_notify_event       = netmac->u.event;

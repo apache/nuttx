@@ -341,6 +341,12 @@ int lio_listio(int mode, FAR struct aiocb *restrict const list[restrict],
       return ERROR;
     }
 
+  if (mode == LIO_NOWAIT && sig != NULL && nxsig_event_valid(sig) < 0)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
   DEBUGASSERT(list);
 
   nqueued = 0;    /* No I/O operations yet queued */

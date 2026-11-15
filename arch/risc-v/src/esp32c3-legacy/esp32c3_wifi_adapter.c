@@ -4745,6 +4745,11 @@ int esp_wifi_notify_subscribe(pid_t pid, struct sigevent *event)
 
   wlinfo("PID=%d event=%p\n", pid, event);
 
+  if (nxsig_event_valid(event) < 0)
+    {
+      return -EINVAL;
+    }
+
   esp_wifi_lock(true);
 
   if (event->sigev_notify == SIGEV_SIGNAL)

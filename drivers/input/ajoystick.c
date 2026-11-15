@@ -560,7 +560,7 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct ajoy_notify_s *notify =
             (FAR struct ajoy_notify_s *)((uintptr_t)arg);
 
-          if (notify)
+          if (notify && nxsig_event_valid(&notify->an_event) == OK)
             {
               /* Save the notification events */
 
