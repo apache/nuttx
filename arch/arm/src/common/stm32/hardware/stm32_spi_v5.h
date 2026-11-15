@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/hardware/stm32h5xxx_spi.h
+ * arch/arm/src/common/stm32/hardware/stm32_spi_v5.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32H5XXX_SPI_H
-#define __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32H5XXX_SPI_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V5_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V5_H
 
 /****************************************************************************
  * Included Files
@@ -29,17 +29,9 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32_STM32H5XXXX)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Maximum allowed speed as per data sheet for all SPIs
- * See Table 115 in DS14258 Rev 3
- */
-
-#  define STM32_SPI_CLK_MAX      120000000UL
 
 /* Register Offsets *********************************************************/
 
@@ -489,5 +481,4 @@
 #define SPI_I2SCFGR_ODD            (1 << 24) /* Bit 24: Odd Factor for the Prescaler */
 #define SPI_I2SCFGR_MCKOE          (1 << 25) /* Bit 24: Master Clock Output Enable */
 
-#endif /* CONFIG_STM32_STM32H5XXX */
-#endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32H5XXX_SPI_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V5_H */

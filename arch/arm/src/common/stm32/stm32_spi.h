@@ -32,7 +32,8 @@
 #if !(defined(CONFIG_STM32_HAVE_IP_SPI_V1) || \
       defined(CONFIG_STM32_HAVE_IP_SPI_V2) || \
       defined(CONFIG_STM32_HAVE_IP_SPI_V3) || \
-      defined(CONFIG_STM32_HAVE_IP_SPI_V4))
+      defined(CONFIG_STM32_HAVE_IP_SPI_V4) || \
+      defined(CONFIG_STM32_HAVE_IP_SPI_V5))
 #  error "Unsupported STM32 SPI"
 #endif
 

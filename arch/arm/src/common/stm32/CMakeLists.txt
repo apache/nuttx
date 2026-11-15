@@ -91,6 +91,10 @@ if(CONFIG_STM32_I2C AND CONFIG_STM32_HAVE_IP_I2C_M33M55_V2)
   list(APPEND SRCS stm32_i2c_m33m55_v2.c)
 endif()
 
+if(CONFIG_STM32_SPI AND CONFIG_STM32_HAVE_IP_SPI_V5)
+  list(APPEND SRCS stm32_spi_v5.c)
+endif()
+
 if(CONFIG_STM32_COMMON_M33)
   list(APPEND SRCS stm32_allocateheap_m33_v1.c stm32_irq_m33_v1.c
        stm32_start_m33_v1.c)
