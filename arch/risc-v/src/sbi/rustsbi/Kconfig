@@ -1,0 +1,16 @@
+config RUSTSBI_DIR
+	string "RustSBI source directory"
+	default "../rustsbi"
+	---help---
+		Path to the RustSBI checkout, relative to the NuttX source root.
+
+config RUSTSBI_TARGET
+	string "Rust target triple"
+	default "riscv64gc-unknown-none-elf"
+
+config RUSTSBI_CONFIG
+	string "RustSBI platform configuration"
+	default "firmware/prototyper/config/default.toml"
+	---help---
+		Path to the RustSBI Prototyper configuration, relative to the
+		RustSBI source directory.

@@ -54,6 +54,19 @@ For stability, it is also recommended to use the latest QEMU and OpenSBI.
 
 For users who wish to use their own OpenSBI, please refer to `OpenSBI repository <https://github.com/riscv-software-src/opensbi>`_.
 
+RustSBI
+-------
+
+Enable ``CONFIG_RUSTSBI`` in the ``knsh64`` configuration to build RustSBI
+firmware. ``CONFIG_RUSTSBI_DIR`` points to the RustSBI source directory,
+which defaults to ``../rustsbi``. See RustSBI's ``firmware/README.md`` for
+build dependencies.
+
+Run NuttX with the generated firmware using QEMU's default CLINT::
+
+    $ qemu-system-riscv64 -semihosting -M virt -cpu rv64 -smp 1 \
+      -bios nuttx-rustsbi.elf -kernel nuttx -nographic
+
 Configurations
 ==============
 
