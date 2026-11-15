@@ -215,7 +215,7 @@
 #define atomic_ptr_try_cmpxchg_relaxed(obj, expected, desired) \
   atomic64_try_cmpxchg_relaxed(obj, expected, desired)
 
-#else /* UINTPTR_MAX <= UINT32_MAX */
+#elif UINTPTR_MAX > UINT16_MAX
 
 #define atomic_ptr_set(obj, val)            atomic_set(obj, val)
 #define atomic_ptr_set_release(obj, val)    atomic_set_release(obj, val)
@@ -266,6 +266,62 @@
 #define atomic_ptr_try_cmpxchg_relaxed(obj, expected, desired) \
   atomic_try_cmpxchg_relaxed(obj, expected, desired)
 
+#else /* UINTPTR_MAX <= UINT16_MAX */
+
+/* A pointer is 16 bits, as on AVR.  These are GCC builtins: where the CPU
+ * has no atomic instructions, they call the __atomic_*_2 functions of
+ * libs/libc/machine/arch_atomic.c.
+ */
+
+#define atomic_ptr_set(obj, val)            __atomic_store_n(obj, val, __ATOMIC_RELAXED)
+#define atomic_ptr_set_release(obj, val)    __atomic_store_n(obj, val, __ATOMIC_RELEASE)
+#define atomic_ptr_read(obj)                __atomic_load_n(obj, __ATOMIC_RELAXED)
+#define atomic_ptr_read_acquire(obj)        __atomic_load_n(obj, __ATOMIC_ACQUIRE)
+#define atomic_ptr_add(obj, val)            __atomic_fetch_add(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_ptr_add_acquire(obj, val)    __atomic_fetch_add(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_ptr_add_release(obj, val)    __atomic_fetch_add(obj, val, __ATOMIC_RELEASE)
+#define atomic_ptr_add_relaxed(obj, val)    __atomic_fetch_add(obj, val, __ATOMIC_RELAXED)
+#define atomic_ptr_sub(obj, val)            __atomic_fetch_sub(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_ptr_sub_acquire(obj, val)    __atomic_fetch_sub(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_ptr_sub_release(obj, val)    __atomic_fetch_sub(obj, val, __ATOMIC_RELEASE)
+#define atomic_ptr_sub_relaxed(obj, val)    __atomic_fetch_sub(obj, val, __ATOMIC_RELAXED)
+#define atomic_ptr_and(obj, val)            __atomic_fetch_and(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_ptr_and_acquire(obj, val)    __atomic_fetch_and(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_ptr_and_release(obj, val)    __atomic_fetch_and(obj, val, __ATOMIC_RELEASE)
+#define atomic_ptr_and_relaxed(obj, val)    __atomic_fetch_and(obj, val, __ATOMIC_RELAXED)
+#define atomic_ptr_or(obj, val)             __atomic_fetch_or(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_ptr_or_acquire(obj, val)     __atomic_fetch_or(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_ptr_or_release(obj, val)     __atomic_fetch_or(obj, val, __ATOMIC_RELEASE)
+#define atomic_ptr_or_relaxed(obj, val)     __atomic_fetch_or(obj, val, __ATOMIC_RELAXED)
+#define atomic_ptr_xor(obj, val)            __atomic_fetch_xor(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_ptr_xor_acquire(obj, val)    __atomic_fetch_xor(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_ptr_xor_release(obj, val)    __atomic_fetch_xor(obj, val, __ATOMIC_RELEASE)
+#define atomic_ptr_xor_relaxed(obj, val)    __atomic_fetch_xor(obj, val, __ATOMIC_RELAXED)
+#define atomic_ptr_xchg(obj, val)           __atomic_exchange_n(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_ptr_xchg_acquire(obj, val)   __atomic_exchange_n(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_ptr_xchg_release(obj, val)   __atomic_exchange_n(obj, val, __ATOMIC_RELEASE)
+#define atomic_ptr_xchg_relaxed(obj, val)   __atomic_exchange_n(obj, val, __ATOMIC_RELAXED)
+#define atomic_ptr_cmpxchg(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, (FAR int16_t *)expected, desired, false, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)
+#define atomic_ptr_cmpxchg_acquire(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, (FAR int16_t *)expected, desired, false, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
+#define atomic_ptr_cmpxchg_release(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, (FAR int16_t *)expected, desired, false, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+#define atomic_ptr_cmpxchg_release_acquire(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, (FAR int16_t *)expected, desired, false, __ATOMIC_RELEASE, __ATOMIC_ACQUIRE)
+#define atomic_ptr_cmpxchg_relaxed(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, (FAR int16_t *)expected, desired, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
+#define atomic_ptr_try_cmpxchg(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, (FAR int16_t *)expected, desired, true, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)
+#define atomic_ptr_try_cmpxchg_acquire(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, (FAR int16_t *)expected, desired, true, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
+#define atomic_ptr_try_cmpxchg_release(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, (FAR int16_t *)expected, desired, true, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+#define atomic_ptr_try_cmpxchg_release_acquire(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, (FAR int16_t *)expected, desired, true, __ATOMIC_RELEASE, __ATOMIC_ACQUIRE)
+#define atomic_ptr_try_cmpxchg_relaxed(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, (FAR int16_t *)expected, desired, true, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
+
 #endif /* UINTPTR_MAX > UINT32_MAX */
 
 /****************************************************************************
@@ -277,8 +333,10 @@ typedef __Atomic(int64_t) atomic64_t;
 
 #if UINTPTR_MAX > UINT32_MAX
 typedef atomic64_t atomic_ptr_t;
-#else
+#elif UINTPTR_MAX > UINT16_MAX
 typedef atomic_t atomic_ptr_t;
+#else
+typedef __Atomic(int16_t) atomic_ptr_t;
 #endif
 
 /****************************************************************************
