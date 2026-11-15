@@ -165,7 +165,8 @@ static int netlink_setup(FAR struct socket *psock)
        * dup'ed
        */
 
-      conn->crefs = 1;
+      conn->crefs    = 1;
+      conn->protocol = proto;
 
       /* Attach the connection instance to the socket */
 

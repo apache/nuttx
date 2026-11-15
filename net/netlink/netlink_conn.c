@@ -326,23 +326,26 @@ int netlink_add_terminator(NETLINK_HANDLE handle,
 }
 
 /****************************************************************************
- * Name: netlink_add_broadcast
+ * Name: netlink_add_protocol_broadcast
  *
  * Description:
- *   Add broadcast data to all interested netlink connections.
+ *   Add broadcast data to the netlink connections of one protocol that are
+ *   bound to the group.  The group numbers of the protocols overlap.
  *
  *   Note:  The network will be momentarily locked to support exclusive
  *   access to the pending response list.
  *
  * Input Parameters:
- *   group - The broadcast group index.
- *   data  - The broadcast data.  The memory referenced by 'data'
- *           must have been allocated via kmm_malloc().  It will be freed
- *           using kmm_free() after it has been consumed.
+ *   protocol - The protocol of the sockets that get it (NETLINK_xxx).
+ *   group    - The broadcast group index.
+ *   data     - The broadcast data.  The memory referenced by 'data'
+ *              must have been allocated via kmm_malloc().  It will be freed
+ *              using kmm_free() after it has been consumed.
  *
  ****************************************************************************/
 
-void netlink_add_broadcast(int group, FAR struct netlink_response_s *data)
+void netlink_add_protocol_broadcast(int protocol, int group,
+                                    FAR struct netlink_response_s *data)
 {
   FAR struct netlink_conn_s *conn = NULL;
   int first = 1;
@@ -353,7 +356,8 @@ void netlink_add_broadcast(int group, FAR struct netlink_response_s *data)
 
   while ((conn = netlink_nextconn(conn)) != NULL)
     {
-      if ((conn->groups & (1 << (group - 1))) == 0)
+      if (conn->protocol != protocol ||
+          (conn->groups & (1 << (group - 1))) == 0)
         {
           continue;
         }
@@ -395,6 +399,26 @@ void netlink_add_broadcast(int group, FAR struct netlink_response_s *data)
     {
       kmm_free(data);
     }
+}
+
+/****************************************************************************
+ * Name: netlink_add_broadcast
+ *
+ * Description:
+ *   Add broadcast data to the NETLINK_ROUTE connections that are bound to
+ *   the group.
+ *
+ * Input Parameters:
+ *   group - The broadcast group index.
+ *   data  - The broadcast data.  The memory referenced by 'data'
+ *           must have been allocated via kmm_malloc().  It will be freed
+ *           using kmm_free() after it has been consumed.
+ *
+ ****************************************************************************/
+
+void netlink_add_broadcast(int group, FAR struct netlink_response_s *data)
+{
+  netlink_add_protocol_broadcast(NETLINK_ROUTE, group, data);
 }
 
 /****************************************************************************

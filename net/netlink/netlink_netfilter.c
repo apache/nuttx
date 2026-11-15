@@ -699,7 +699,7 @@ void netlink_conntrack_notify(uint8_t type, uint8_t domain,
 
   if (resp != NULL)
     {
-      netlink_add_broadcast(group, resp);
+      netlink_add_protocol_broadcast(NETLINK_NETFILTER, group, resp);
     }
 }
 
