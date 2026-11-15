@@ -64,4 +64,9 @@
 #define STM32_DMA2_NCHAN       16
 #define STM32_DMA2_IRQ_FIRST   STM32_IRQ_HPDMA1_CH0
 
+/* SPI kernel clock and SPI clock limits (RM0486 / DS14791) */
+
+#define STM32_SPI_MAX_KER_CK   200000000UL
+#define STM32_SPI_CLK_MAX      100000000UL
+
 #endif /* __ARCH_ARM_SRC_STM32N6_CHIP_H */
