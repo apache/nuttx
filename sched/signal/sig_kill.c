@@ -127,6 +127,76 @@ static int nxsig_kill_pgrp(pid_t pid, int signo, bool check)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsig_kill_target
+ *
+ * Description:
+ *   Tell if the process (or thread) pid exists, as kill() sees it.  A
+ *   thread in its exit exists until it leaves its group: the exit can
+ *   still block there (in a close(), for example).  But the exit wakes the
+ *   parent first: a process that a wait of its parent has reported does
+ *   not exist any more, also when its TCB is still in the table.  A
+ *   process that has ended and that its parent has not waited for yet (a
+ *   zombie: the parent has a record of it) exists, also when its TCB is
+ *   gone.
+ *
+ * Input Parameters:
+ *   pid - The process or thread ID
+ *
+ * Returned Value:
+ *   1 if the thread pid runs, 0 if pid exists but ends (a zombie, or a
+ *   thread in its exit), -ESRCH if it does not exist.
+ *
+ ****************************************************************************/
+
+int nxsig_kill_target(pid_t pid)
+{
+  FAR struct tcb_s *tcb;
+  irqstate_t flags;
+  int ret = -ESRCH;
+  int tflags;
+#ifdef CONFIG_SCHED_CHILD_STATUS
+  int ndx;
+#endif
+
+  flags = enter_critical_section();
+  tcb = nxsched_get_tcb(pid);
+  if (tcb != NULL)
+    {
+      /* A wait that reported the exit marks the TCB (nxsched_reaped()) */
+
+      tflags = atomic_read(&tcb->shared_flags);
+      if ((tflags & TCB_FLAG_EXIT_PROCESSING) == 0)
+        {
+          ret = 1;
+        }
+      else if ((tflags & TCB_FLAG_REAPED) == 0 && tcb->group != NULL)
+        {
+          ret = 0;
+        }
+    }
+
+#ifdef CONFIG_SCHED_CHILD_STATUS
+  /* The record of the child stays in its parent until the parent waits
+   * for it.
+   */
+
+  for (ndx = 0; ndx < g_npidhash && ret < 0; ndx++)
+    {
+      tcb = g_pidhash[ndx];
+      if (tcb != NULL && tcb->group != NULL &&
+          tcb->pid == tcb->group->tg_pid &&
+          group_find_child(tcb->group, pid) != NULL)
+        {
+          ret = 0;
+        }
+    }
+#endif
+
+  leave_critical_section(flags);
+  return ret;
+}
+
+/****************************************************************************
  * Name: nxsig_kill
  *
  * Description:
@@ -161,6 +231,9 @@ static int nxsig_kill_pgrp(pid_t pid, int signo, bool check)
  *    ESRCH  The pid or process group does not exist.
  *    ENOSYS pid is -1: a signal to all processes is not supported.
  *
+ *   A process that has ended and that its parent has not waited for yet
+ *   (a zombie) exists: a signal to it succeeds and has no effect.
+ *
  ****************************************************************************/
 
 int nxsig_kill(pid_t pid, int signo)
@@ -172,6 +245,7 @@ int nxsig_kill(pid_t pid, int signo)
   siginfo_t info;
   int ret = -EINVAL;
 #endif
+  int target;
 
 #ifdef CONFIG_SCHED_PROCESS_GROUPS
   /* pid 0 is the process group of the caller, -pid the process group pid.
@@ -208,9 +282,10 @@ int nxsig_kill(pid_t pid, int signo)
       pid = -pid;
     }
 
+  target = nxsig_kill_target(pid);
   if (signo == 0)
     {
-      return (nxsched_get_tcb(pid) != NULL) ? 0 : -ESRCH;
+      return target < 0 ? target : 0;
     }
 
 #ifdef CONFIG_DISABLE_ALL_SIGNALS
@@ -220,6 +295,13 @@ int nxsig_kill(pid_t pid, int signo)
 
   if (GOOD_SIGNO(signo))
     {
+      /* A thread in its exit and a zombie get no signal */
+
+      if (target <= 0)
+        {
+          return target;
+        }
+
       /* Zero the whole siginfo first: sigaction-queued signals carry a
        * si_user field that only the sigaction queue path assigns, so a
        * stack-garbage si_user here would be memcpy'd into the pending
