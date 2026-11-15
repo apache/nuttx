@@ -36,6 +36,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/hashtable.h>
+#include <nuttx/random.h>
 
 /****************************************************************************
  * Private Functions
@@ -115,6 +116,14 @@ void arc4random_buf(FAR void *bytes, size_t nbytes)
     {
       return;
     }
+#endif
+
+#if defined(CONFIG_CRYPTO_RANDOM_POOL) && \
+    (defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__))
+  /* No random device could be read: use the entropy pool */
+
+  up_rngbuf(bytes, nbytes);
+  return;
 #endif
 
   /* Fallback to hash of clock_systime_ticks(), minus nbytes to avoid getting
