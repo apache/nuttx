@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/nuttsbi/sbi_machine_vectors.S
+ * arch/risc-v/src/sbi/sbi_machine_vectors.S
  *
  * SPDX-License-Identifier: Apache-2.0
  *

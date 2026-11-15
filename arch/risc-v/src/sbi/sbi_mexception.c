@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/nuttsbi/sbi_mcall.h
+ * arch/risc-v/src/sbi/sbi_mexception.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,22 +20,25 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISC_V_SRC_NUTTSBI_SBI_MCALL_H
-#define __ARCH_RISC_V_SRC_NUTTSBI_SBI_MCALL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <nuttx/debug.h>
 #include <stdint.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
-#define SBI_EXT_FIRMWARE              0x0A000000
-#define SBI_EXT_FIRMWARE_GET_MTIME    0x0
+void sbi_mexception(uintreg_t mcause, uintreg_t *mepc, uintreg_t tval)
+{
+  sinfo("cauz=%"PRIxREG" epc=%p tval=0x%"PRIxREG"\n", mcause, mepc, tval);
 
-#endif /* __ARCH_RISC_V_SRC_NUTTSBI_SBI_MCALL_H */
+  while (1)
+    {
+      __asm__ __volatile__("wfi");
+    }
+}

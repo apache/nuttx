@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/nuttsbi/sbi_mtimer.c
+ * arch/risc-v/src/sbi/sbi_mtimer.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

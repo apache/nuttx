@@ -982,7 +982,7 @@ endchoice # LITEX Core Selection
 endif # ARCH_CHIP_LITEX
 
 source "arch/risc-v/src/opensbi/Kconfig"
-source "arch/risc-v/src/nuttsbi/Kconfig"
+source "arch/risc-v/src/sbi/Kconfig"
 
 if ARCH_CHIP_FE310
 source "arch/risc-v/src/fe310/Kconfig"

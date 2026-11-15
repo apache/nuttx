@@ -1,5 +1,5 @@
 ############################################################################
-# arch/risc-v/src/nuttsbi/Make.defs
+# arch/risc-v/src/sbi/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -28,8 +28,8 @@ SBI_ASRCS += sbi_mtrap.S sbi_vectors.S sbi_head.S
 SBI_CSRCS += sbi_mscratch.c sbi_mcall.c sbi_start.c
 SBI_CSRCS += sbi_mexception.c sbi_mtimer.c sbi_ipi.c
 
-INCLUDES  += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)nuttsbi
+INCLUDES  += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)sbi
 
-SBI_DIR   := nuttsbi
+SBI_DIR   := sbi
 
 endif

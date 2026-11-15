@@ -25,7 +25,7 @@ include chip/Make.defs
 ifeq ($(CONFIG_OPENSBI),y)
 include opensbi/Make.defs
 else ifeq ($(CONFIG_NUTTSBI),y)
-include nuttsbi/Make.defs
+include sbi/Make.defs
 endif
 
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src

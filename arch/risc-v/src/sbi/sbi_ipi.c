@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/nuttsbi/sbi_mexception.c
+ * arch/risc-v/src/sbi/sbi_ipi.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,20 +25,34 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
+#include <nuttx/irq.h>
 
-#include <nuttx/debug.h>
+#include <arch/barriers.h>
+
 #include <stdint.h>
+
+#include "riscv_internal.h"
+
+#include "sbi_internal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void sbi_mexception(uintreg_t mcause, uintreg_t *mepc, uintreg_t tval)
+void sbi_send_ipi(uintptr_t hmask, uintptr_t hbase)
 {
-  sinfo("cauz=%"PRIxREG" epc=%p tval=0x%"PRIxREG"\n", mcause, mepc, tval);
+  uintptr_t i;
 
-  while (1)
+  for (i = hbase; hmask; i++, hmask >>= 1)
     {
-      __asm__ __volatile__("wfi");
+      if (hmask & 1)
+        {
+          putreg32(1, IPI_BASE + 4 * i);
+        }
     }
 }

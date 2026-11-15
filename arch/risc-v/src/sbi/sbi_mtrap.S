@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/nuttsbi/sbi_machine_trap.S
+ * arch/risc-v/src/sbi/sbi_machine_trap.S
  *
  * SPDX-License-Identifier: Apache-2.0
  *

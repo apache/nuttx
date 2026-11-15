@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/risc-v/src/nuttsbi/CMakeLists.txt
+# arch/risc-v/src/sbi/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
