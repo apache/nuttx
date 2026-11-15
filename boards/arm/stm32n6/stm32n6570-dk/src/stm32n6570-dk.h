@@ -61,6 +61,11 @@
 #define GPIO_BTN_TAMP  (GPIO_INPUT | GPIO_PULLDOWN | GPIO_EXTI | \
                         GPIO_PORTE | GPIO_PIN0)
 
+/* SPI5 chip select on PA3 (Arduino D10), active low */
+
+#define GPIO_SPI5_CS   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHZ | \
+                        GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN3)
+
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
@@ -82,6 +87,30 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+/****************************************************************************
+ * Name: stm32_spiinitialize
+ *
+ * Description:
+ *   Initialize the SPI buses and their chip select GPIOs.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_SPI
+void stm32_spiinitialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_spiregister
+ *
+ * Description:
+ *   Register the SPI character drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_DRIVER
+void stm32_spiregister(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32N6_STM32N6570_DK_SRC_STM32N6570_DK_H */

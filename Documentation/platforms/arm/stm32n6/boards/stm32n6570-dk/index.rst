@@ -147,6 +147,14 @@ USART1 ttyS0  PE5 TX, PE6 RX                           ST-LINK VCP, console
 USART2 ttyS1  PD5 TX, PF6 RX, PG5 CTS, PG14 RTS        STMod+ connector
 ====== ====== ======================================== ====================
 
+SPI
+===
+
+SPI5 is wired to the Arduino connector: PE15 SCK (D13), PH8 MISO (D12),
+PG2 MOSI (D11) and PA3 as chip select (D10).  It is registered as
+``/dev/spi5`` and can be exercised with the ``spi`` tool; shorting D11
+to D12 loops the transmitted bytes back.
+
 Clocking
 ========
 
