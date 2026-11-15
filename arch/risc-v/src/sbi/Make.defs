@@ -24,4 +24,6 @@ ifeq ($(CONFIG_OPENSBI),y)
 include sbi/opensbi/Make.defs
 else ifeq ($(CONFIG_NUTTSBI),y)
 include sbi/nuttsbi/Make.defs
+else ifeq ($(CONFIG_RUSTSBI),y)
+include sbi/rustsbi/Make.defs
 endif

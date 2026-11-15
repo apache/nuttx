@@ -24,5 +24,39 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+choice
+	prompt "SBI implementation"
+	optional
+
+config NUTTSBI
+	bool "Use NuttX native SBI"
+	depends on ARCH_USE_S_MODE
+	---help---
+		Use NuttX minimalistic SBI
+
+config OPENSBI
+	bool "OpenSBI support"
+	depends on ALLOW_BSD_COMPONENTS
+	---help---
+		Enable Open Source Supervisor Binary Interface (OpenSBI) features
+		for RISC-V.
+
+config RUSTSBI
+	bool "Build RustSBI firmware"
+	depends on ARCH_USE_S_MODE && BUILD_KERNEL
+	---help---
+		Build RustSBI Prototyper as a separate M-mode firmware image.
+
+endchoice
+
+if OPENSBI
 source "arch/risc-v/src/sbi/opensbi/Kconfig"
+endif
+
+if NUTTSBI
 source "arch/risc-v/src/sbi/nuttsbi/Kconfig"
+endif
+
+if RUSTSBI
+source "arch/risc-v/src/sbi/rustsbi/Kconfig"
+endif

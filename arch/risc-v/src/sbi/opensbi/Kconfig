@@ -24,15 +24,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config OPENSBI
-	bool "OpenSBI support"
-	depends on ARCH_RISCV && ALLOW_BSD_COMPONENTS
-	default n
-	---help---
-		Enable or disable Open Source Supervisor Binary Interface (OpenSBI) features
-		for RISC-V.
-
 config OPENSBI_DOMAINS
 	bool "Support multiple OpenSBI boot domains"
-	depends on OPENSBI
 	default n
