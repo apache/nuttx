@@ -29,7 +29,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
-#include <arch/armv8-r/cp15.h>
+#include <arch/arm_a_r/cp15.h>
 #include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
