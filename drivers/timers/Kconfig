@@ -129,9 +129,42 @@ config CAPTURE_NOTIFY
 config FAKE_CAPTURE
 	bool "Fake Capture Driver"
 	default n
-	depends on CAPTURE_NSIGNALS > 0
+	depends on CAPTURE_NOTIFY
 	---help---
-		Enables a fake capture driver for testing purposes.
+		Enables a fake capture driver for testing purposes.  It
+		simulates a 10 Hz square wave with a 50% duty cycle on
+		/dev/fake_capture0 and /dev/fake_capture1.  Its edges are time
+		stamped by a simulated free running counter (getcount and
+		getcapture), derived from perf_gettime(), which is used as the
+		"true" time.  perf_gettime() must have a good resolution for
+		the time stamps to be meaningful (it is in nanoseconds on the
+		simulator).
+
+if FAKE_CAPTURE
+
+config FAKE_CAPTURE_COUNTER_FREQ
+	int "Simulated counter frequency (Hz)"
+	default 100000000
+	range 1000000 1000000000
+
+config FAKE_CAPTURE_ERROR_PPB
+	int "Simulated counter frequency error (ppb)"
+	default 0
+	range -400000 400000
+	---help---
+		Frequency error of the oscillator of the simulated counter, in
+		parts per billion, as a real crystal would have.
+
+config FAKE_CAPTURE_JITTER_NS
+	int "Simulated edge jitter (ns, peak)"
+	default 0
+	range 0 1000000
+	---help---
+		Uniformly distributed jitter added to the time stamp of every
+		simulated edge.  Typical GNSS receivers have a PPS jitter of a
+		few nanoseconds to some tens of nanoseconds.
+
+endif # FAKE_CAPTURE
 
 endif # CAPTURE
 
