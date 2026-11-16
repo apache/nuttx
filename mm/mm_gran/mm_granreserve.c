@@ -54,7 +54,7 @@ FAR void *gran_reserve(GRAN_HANDLE handle, uintptr_t start, size_t size)
       return NULL;
     }
 
-  /* align down/up start/ending addresses */
+  /* The granules that hold the first and the last byte */
 
   end = END_RSRV(gran, start, size);
   if (!GRAN_INRANGE(gran, end))

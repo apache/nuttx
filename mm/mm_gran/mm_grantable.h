@@ -56,7 +56,7 @@
 /* gran_reserve related */
 
 #define MEM_RSRV(g, m)      ALIGNDN(g, m)
-#define END_RSRV(g, m, s)   ALIGNUP(g, (((size_t)m) + s - 1))
+#define END_RSRV(g, m, s)   ALIGNDN(g, (((size_t)m) + s - 1))
 #define NUM_RSRV(g, m, s)   (((END_RSRV(g, m, s) - MEM_RSRV(g, m)) \
                                  >> g->log2gran) + 1)
 #define LEN_RSRV(g, m, s)   ((size_t)(NUM_RSRV(g, m, s) << g->log2gran))
