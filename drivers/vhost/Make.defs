@@ -42,6 +42,10 @@ ifeq ($(CONFIG_DRIVERS_VHOST_SPI),y)
   CSRCS += vhost-spi.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_VHOST_GPIO),y)
+  CSRCS += vhost-gpio.c
+endif
+
 ifeq ($(CONFIG_DRIVERS_VHOST_RPMB),y)
   CSRCS += vhost-rpmb.c
 endif

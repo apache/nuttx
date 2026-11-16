@@ -66,6 +66,20 @@ config DRIVERS_VHOST_SPI
 		the Linux-compatible VirtIO SPI wire format, and forwards it to the
 		local SPI device node named in the device config space.
 
+config DRIVERS_VHOST_GPIO
+	bool "Virtual Host GPIO Device Support"
+	depends on IOEXPANDER
+	default n
+	select DRIVERS_VHOST
+	---help---
+		Enable the vhost GPIO backend.  It bridges a VirtIO GPIO device
+		(device ID 41) to a local ioexpander, forwarding pin requests and
+		interrupt events over the guest request/event virtqueues.
+
+		With IOEXPANDER_INT_ENABLE the device also offers VIRTIO_GPIO_F_IRQ
+		and forwards local pin interrupts over the eventq; without it the
+		feature is not offered and the device is polled only.
+
 config DRIVERS_VHOST_BLK
 	bool "Virtual Host Blk Device Support"
 	default n

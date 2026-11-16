@@ -44,6 +44,7 @@
 
 #include "vhost-blk.h"
 #include "vhost-can.h"
+#include "vhost-gpio.h"
 #include "vhost-i2c.h"
 #include "vhost-spi.h"
 #include "vhost-serial.h"
@@ -687,6 +688,14 @@ void vhost_register_drivers(void)
   if (ret < 0)
     {
       vhosterr("vhost_register_spi_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VHOST_GPIO
+  ret = vhost_register_gpio_driver();
+  if (ret < 0)
+    {
+      vhosterr("vhost_register_gpio_driver failed, ret=%d\n", ret);
     }
 #endif
 

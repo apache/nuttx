@@ -41,6 +41,10 @@ if(CONFIG_DRIVERS_VHOST_SPI)
   list(APPEND SRCS vhost-spi.c)
 endif()
 
+if(CONFIG_DRIVERS_VHOST_GPIO)
+  list(APPEND SRCS vhost-gpio.c)
+endif()
+
 if(CONFIG_DRIVERS_VHOST_RPMB)
   list(APPEND SRCS vhost-rpmb.c)
 endif()
