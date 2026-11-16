@@ -126,6 +126,10 @@ takes a ``struct audio_buf_desc_s`` and has two distinct modes, selected by the
   ``AUDIOIOC_FREEBUFFER``.  On success the ioctl returns
   ``sizeof(struct audio_buf_desc_s)``.
 
+  The lower half can hold only a limited number of enqueued buffers: use the
+  count that ``AUDIOIOC_GETBUFFERINFO`` reports.  virtio-snd fails
+  ``AUDIOIOC_ENQUEUEBUFFER`` with ``-ENOSPC`` when its virtqueue is full.
+
   This is the mode used by ``nxplayer``, ``nxrecorder`` and ``nxlooper``.
 
 **Shared ring buffers** (``u.pbuffer == NULL``)
