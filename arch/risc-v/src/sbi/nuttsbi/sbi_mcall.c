@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/sbi/sbi_mtimer.c
+ * arch/risc-v/src/sbi/nuttsbi/sbi_mcall.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,79 +25,71 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 #include <nuttx/irq.h>
-
-#include <arch/barriers.h>
 
 #include <stdint.h>
 
 #include "riscv_internal.h"
+#include "riscv_sbi.h"
 
-#include "sbi_internal.h"
 #include "sbi_mcall.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* Memory mapped register base addresses */
-
-static volatile uintptr_t g_mtimecmp locate_data(".noinit");
-static volatile uintptr_t g_mtime    locate_data(".noinit");
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "sbi_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void sbi_init_mtimer(uintptr_t mtime, uintptr_t mtimecmp)
+/****************************************************************************
+ * Name: sbi_mcall_handle
+ *
+ * Description:
+ *   Handle environment call to machine mode
+ *
+ * Input Parameters:
+ *   regs - User context
+ *
+ ****************************************************************************/
+
+void sbi_mcall_handle(uintptr_t *regs)
 {
-  /* Set the memory mapped register bases */
+  /* Check the environment call number */
 
-  g_mtimecmp = mtimecmp;
-  g_mtime    = mtime;
-}
-
-uint64_t sbi_get_mtime(void)
-{
-#if CONFIG_ARCH_RV_MMIO_BITS == 64
-  return getreg64(g_mtime);
-#else
-  uint32_t hi;
-  uint32_t lo;
-
-  do
+  switch (regs[REG_A7])
     {
-      hi = getreg32(g_mtime + 4);
-      lo = getreg32(g_mtime);
-    }
-  while (getreg32(g_mtime + 4) != hi);
-
-  return ((uint64_t)hi << 32) | lo;
-#endif
-}
-
-void sbi_set_mtimecmp(uint64_t value)
-{
-  uintptr_t mtimecmp = g_mtimecmp +
-                       READ_CSR(CSR_MHARTID) * sizeof(uintptr_t);
-#if CONFIG_ARCH_RV_MMIO_BITS == 64
-  putreg64(value, mtimecmp);
+      case SBI_EXT_IPI:
+        sbi_send_ipi(regs[REG_A0], regs[REG_A1]);
+        break;
+      case SBI_EXT_TIME:
+        switch (regs[REG_A6])
+          {
+            case SBI_EXT_TIME_SET_TIMER:
+#ifdef CONFIG_ARCH_RV64
+              sbi_set_mtimecmp(regs[REG_A0]);
 #else
-  putreg32(UINT32_MAX, mtimecmp + 4);
-  putreg32(value, mtimecmp);
-  putreg32(value >> 32, mtimecmp + 4);
+              sbi_set_mtimecmp(regs[REG_A0] +
+                               ((uint64_t)regs[REG_A1] << 32));
 #endif
+              CLEAR_CSR(CSR_MIP, MIP_STIP);
+              SET_CSR(CSR_MIE, MIE_MTIE);
+              break;
+            default:
+              break;
+          }
+        break;
+      case SBI_EXT_FIRMWARE:
+#ifdef CONFIG_ARCH_RV64
+        regs[REG_A0]    = sbi_get_mtime();
+#else
+        {
+          uint64_t time = sbi_get_mtime();
 
-  /* Make sure it sticks */
+          regs[REG_A0]  = (uint32_t)time;
+          regs[REG_A1]  = (uint32_t)(time >> 32);
+        }
+#endif
+        break;
 
-  UP_DSB();
+      default:
+        break;
+    }
 }

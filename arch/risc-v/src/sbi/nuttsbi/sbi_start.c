@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/nuttsbi/sbi_start.c
+ * arch/risc-v/src/sbi/nuttsbi/sbi_start.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -132,6 +132,7 @@ void sbi_start(void)
   /* Then jump to the S-mode start function */
 
   register long r0 asm("a0") = (long) hartid;
+
   __asm__ __volatile__("mret" : : "r"(r0));
 
   PANIC();

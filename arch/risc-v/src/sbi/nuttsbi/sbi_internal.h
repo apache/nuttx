@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/sbi/sbi_internal.h
+ * arch/risc-v/src/sbi/nuttsbi/sbi_internal.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISC_V_SRC_SBI_SBI_INTERNAL_H
-#define __ARCH_RISC_V_SRC_SBI_SBI_INTERNAL_H
+#ifndef __ARCH_RISC_V_SRC_SBI_NUTTSBI_SBI_INTERNAL_H
+#define __ARCH_RISC_V_SRC_SBI_NUTTSBI_SBI_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -176,4 +176,4 @@ void sbi_late_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISC_V_SRC_SBI_SBI_INTERNAL_H */
+#endif /* __ARCH_RISC_V_SRC_SBI_NUTTSBI_SBI_INTERNAL_H */

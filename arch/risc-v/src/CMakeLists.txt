@@ -25,7 +25,6 @@ add_subdirectory(common)
 
 if(CONFIG_BUILD_KERNEL)
   add_subdirectory(sbi)
-  target_include_directories(arch BEFORE PUBLIC ${NUTTX_CHIP_ABS_DIR} sbi)
 endif()
 
 # Include directories (before system ones) as PUBLIC so that it can be exposed

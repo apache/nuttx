@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/sbi/sbi_mcall.h
+ * arch/risc-v/src/sbi/nuttsbi/sbi_mcall.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISC_V_SRC_NUTTSBI_SBI_MCALL_H
-#define __ARCH_RISC_V_SRC_NUTTSBI_SBI_MCALL_H
+#ifndef __ARCH_RISC_V_SRC_SBI_NUTTSBI_SBI_MCALL_H
+#define __ARCH_RISC_V_SRC_SBI_NUTTSBI_SBI_MCALL_H
 
 /****************************************************************************
  * Included Files
@@ -38,4 +38,4 @@
 #define SBI_EXT_FIRMWARE              0x0A000000
 #define SBI_EXT_FIRMWARE_GET_MTIME    0x0
 
-#endif /* __ARCH_RISC_V_SRC_NUTTSBI_SBI_MCALL_H */
+#endif /* __ARCH_RISC_V_SRC_SBI_NUTTSBI_SBI_MCALL_H */

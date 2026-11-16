@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/sbi/sbi_mscratch.c
+ * arch/risc-v/src/sbi/nuttsbi/sbi_mtimer.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 #include <nuttx/irq.h>
 
 #include <arch/barriers.h>
@@ -34,54 +35,69 @@
 #include "riscv_internal.h"
 
 #include "sbi_internal.h"
+#include "sbi_mcall.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STACK_SIZE  (STACKFRAME_ALIGN_DOWN(MMODE_IRQSTACK))
-
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
-extern uintptr_t g_mintstacktop;
-extern uintptr_t g_mintstackalloc;
+/* Memory mapped register base addresses */
+
+static volatile uintptr_t g_mtimecmp locate_data(".noinit");
+static volatile uintptr_t g_mtime    locate_data(".noinit");
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: sbi_mscratch_assign
- *
- * Description:
- *   Assign the mscratch register for hartid. Sets the M-mode interrupt stack
- *   which is a must because M-mode deals with flat addressing and cannot
- *   share the user stack for exception handling.
- *
- * Input Parameters:
- *   hartid - Hartid
- *
- ****************************************************************************/
-
-void sbi_mscratch_assign(uintptr_t hartid)
+void sbi_init_mtimer(uintptr_t mtime, uintptr_t mtimecmp)
 {
-  uintptr_t stack_top;
-#if MMODE_HART_CNT > 1
-  /* Calculate offset first (stack size * hartid) */
+  /* Set the memory mapped register bases */
 
-  /* REVISIT: This requires that hartID is sequential, and starts from 0 */
+  g_mtimecmp = mtimecmp;
+  g_mtime    = mtime;
+}
 
-  stack_top = (uintptr_t)&g_mintstacktop - hartid * STACK_SIZE;
+uint64_t sbi_get_mtime(void)
+{
+#if CONFIG_ARCH_RV_MMIO_BITS == 64
+  return getreg64(g_mtime);
 #else
-  UNUSED(hartid);
-  stack_top = (uintptr_t)&g_mintstacktop;
+  uint32_t hi;
+  uint32_t lo;
+
+  do
+    {
+      hi = getreg32(g_mtime + 4);
+      lo = getreg32(g_mtime);
+    }
+  while (getreg32(g_mtime + 4) != hi);
+
+  return ((uint64_t)hi << 32) | lo;
+#endif
+}
+
+void sbi_set_mtimecmp(uint64_t value)
+{
+  uintptr_t mtimecmp = g_mtimecmp +
+                       READ_CSR(CSR_MHARTID) * sizeof(uintptr_t);
+#if CONFIG_ARCH_RV_MMIO_BITS == 64
+  putreg64(value, mtimecmp);
+#else
+  putreg32(UINT32_MAX, mtimecmp + 4);
+  putreg32(value, mtimecmp);
+  putreg32(value >> 32, mtimecmp + 4);
 #endif
 
-  WRITE_CSR(CSR_MSCRATCH, stack_top);
-
-  /* Make sure mscratch is updated before continuing */
+  /* Make sure it sticks */
 
   UP_DSB();
 }
