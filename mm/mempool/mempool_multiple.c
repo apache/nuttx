@@ -643,7 +643,7 @@ int mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
   blk = (FAR char *)blk - (((FAR char *)kasan_clear_tag(blk) -
                             ((FAR char *)kasan_clear_tag(dict->addr) +
                              mpool->minpoolsize)) %
-                           MEMPOOL_REALBLOCKSIZE(dict->pool));
+                           MEMPOOL_REALBLOCKSIZE(dict->pool->blocksize));
   mempool_release(dict->pool, blk);
   return 0;
 }

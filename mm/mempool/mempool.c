@@ -134,7 +134,7 @@ static void mempool_foreach(FAR struct mempool_s *pool,
                             mempool_callback_t callback,
                             FAR const void *input, FAR void *output)
 {
-  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool->blocksize);
   FAR struct mempool_backtrace_s *buf;
   FAR sq_entry_t *entry;
   FAR char *base ;
@@ -171,7 +171,7 @@ static void mempool_info_task_callback(FAR struct mempool_s *pool,
                                        FAR const void *input,
                                        FAR void *output)
 {
-  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool->blocksize);
   FAR const struct malltask *task = input;
   FAR struct mallinfo_task *info = output;
 
@@ -192,7 +192,7 @@ static void mempool_memdump_callback(FAR struct mempool_s *pool,
                                      FAR struct mempool_backtrace_s *buf,
                                      FAR const void *input, FAR void *output)
 {
-  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool->blocksize);
   size_t overhead = blocksize - pool->blocksize;
   FAR const struct mm_memdump_s *dump = input;
 
@@ -232,7 +232,7 @@ mempool_memdump_free_callback(FAR struct mempool_s *pool,
                               FAR struct mempool_backtrace_s *buf,
                               FAR const void *input, FAR void *output)
 {
-  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool->blocksize);
   size_t overhead = blocksize - pool->blocksize;
 
   if (buf->magic == MEMPOOL_MAGIC_FREE)
@@ -266,7 +266,7 @@ mempool_memdump_free_callback(FAR struct mempool_s *pool,
 
 int mempool_init(FAR struct mempool_s *pool)
 {
-  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool->blocksize);
 
   sq_init(&pool->queue);
   sq_init(&pool->iqueue);
@@ -390,7 +390,7 @@ retry:
         }
       else
         {
-          size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+          size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool->blocksize);
 
           spin_unlock_irqrestore(&pool->lock, flags);
           if (pool->expandsize >= blocksize + MEMPOOL_HEADER_SIZE)
@@ -569,7 +569,7 @@ size_t mempool_navail(FAR struct mempool_s *pool)
 
 int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
 {
-  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool->blocksize);
   irqstate_t flags;
 
   DEBUGASSERT(pool != NULL && info != NULL);
@@ -606,7 +606,7 @@ struct mallinfo_task
 mempool_info_task(FAR struct mempool_s *pool,
                   FAR const struct malltask *task)
 {
-  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool->blocksize);
   struct mallinfo_task info =
     {
       0, 0
@@ -669,7 +669,7 @@ void mempool_memdump(FAR struct mempool_s *pool,
       mempool_foreach(pool, mempool_memdump_callback, dump, NULL);
     }
 #else
-  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool->blocksize);
   size_t overhead = blocksize - pool->blocksize;
 
   /* Avoid race condition */
@@ -691,7 +691,7 @@ void mempool_memdump(FAR struct mempool_s *pool,
 
 int mempool_deinit(FAR struct mempool_s *pool)
 {
-  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
+  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool->blocksize);
   FAR sq_entry_t *blk;
   size_t count = 0;
 
