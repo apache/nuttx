@@ -979,7 +979,9 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
           eventset |= POLLHUP;
         }
 
-      /* Change POLLOUT to POLLERR, if no readers and policy 0. */
+      /* POLLERR with POLLOUT, if no readers and policy 0 (write() gives
+       * EPIPE at once, as on Linux).
+       */
 
       if ((eventset & POLLOUT) &&
           PIPE_IS_POLICY_0(dev->d_flags) &&
