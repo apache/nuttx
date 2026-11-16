@@ -177,7 +177,8 @@ uintptr_t mm_pgalloc(unsigned int npages);
  *
  * Input Parameters:
  *   npages - The number of pages to allocate, each of size CONFIG_MM_PGSIZE.
- *   align  - The number of pages to align, each of size CONFIG_MM_PGSIZE.
+ *   align  - The alignment in pages, each of size CONFIG_MM_PGSIZE: a
+ *            power of two, or zero for none.
  *
  * Returned Value:
  *   On success, a non-zero, physical address of the allocated page memory
