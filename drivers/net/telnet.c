@@ -318,7 +318,7 @@ static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
 
   if (signo != 0)
     {
-      nxsig_kill(priv->td_pid, signo);
+      nxsig_kill_foreground(priv->td_pid, signo);
     }
 }
 #endif
@@ -713,7 +713,7 @@ static void telnet_winch(FAR struct telnet_dev_s *priv)
 {
   if (priv->td_pid > 0)
     {
-      nxsig_kill(priv->td_pid, SIGWINCH);
+      nxsig_kill_foreground(priv->td_pid, SIGWINCH);
     }
 }
 #endif

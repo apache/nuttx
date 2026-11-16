@@ -845,7 +845,8 @@ config SCHED_PROCESS_GROUPS
 		and getsid() move from the C library to the kernel.  kill() with
 		a pid of 0 or less than -1, and killpg(), send the signal to each
 		process of the process group.  posix_spawn() supports
-		POSIX_SPAWN_SETPGROUP and POSIX_SPAWN_SETSID.
+		POSIX_SPAWN_SETPGROUP and POSIX_SPAWN_SETSID.  A terminal sends
+		SIGINT, SIGTSTP and SIGWINCH to its foreground process group.
 
 		A task that a user task starts gets the process group and the
 		session of that task, and exec() keeps them.  A task that the

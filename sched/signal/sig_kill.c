@@ -248,6 +248,37 @@ int nxsig_kill(pid_t pid, int signo)
 }
 
 /****************************************************************************
+ * Name: nxsig_kill_foreground
+ *
+ * Description:
+ *   Send a signal of a terminal to its foreground process group pgrp.  If
+ *   no process is in the process group pgrp, the process pgrp gets it:
+ *   the TIOCSCTTY ioctl of NSH saves the ID of a process.
+ *
+ * Returned Value:
+ *   As nxsig_kill().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+int nxsig_kill_foreground(pid_t pgrp, int signo)
+{
+  int ret;
+
+  if (pgrp > 0)
+    {
+      ret = nxsig_kill_pgrp(-pgrp, signo, false);
+      if (ret != -ESRCH)
+        {
+          return ret;
+        }
+    }
+
+  return nxsig_kill(pgrp, signo);
+}
+#endif
+
+/****************************************************************************
  * Name: kill
  *
  * Description:
