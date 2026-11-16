@@ -47,6 +47,8 @@ struct virtio_blk_priv_s
 {
   FAR struct virtio_device     *vdev;           /* Virtio device */
   spinlock_t                    lock;           /* Lock */
+  sem_t                         waitsem;        /* Wait for descriptors */
+  unsigned int                  nwait;          /* Number of the waiters */
   uint64_t                      nsectors;       /* Sectore numbers */
   uint32_t                      block_size;     /* Block size */
   char                          name[NAME_MAX]; /* Device name */
@@ -149,6 +151,56 @@ static void virtio_blk_wait_complete(FAR struct virtqueue *vq,
     {
       nxsem_wait_uninterruptible(respsem);
     }
+}
+
+/****************************************************************************
+ * Name: virtio_blk_wait_desc
+ *
+ * Description:
+ *   virtqueue_add_buffer() does not check the number of free descriptors:
+ *   wait until the queue has enough of them.  Called with priv->lock held,
+ *   returns with it held.
+ *
+ ****************************************************************************/
+
+static int virtio_blk_wait_desc(FAR struct virtio_blk_priv_s *priv,
+                                FAR struct virtqueue *vq, int needed,
+                                FAR irqstate_t *flags)
+{
+  FAR sem_t *sem;
+  int ret;
+
+  while (vq->vq_free_cnt < needed)
+    {
+      if (up_interrupt_context() || OSINIT_IS_PANIC())
+        {
+          /* No wait here: complete the finished requests by polling */
+
+          sem = virtqueue_get_buffer(vq, NULL, NULL);
+          if (sem != NULL)
+            {
+              nxsem_post(sem);
+            }
+
+          for (; priv->nwait > 0; priv->nwait--)
+            {
+              nxsem_post(&priv->waitsem);
+            }
+
+          continue;
+        }
+
+      priv->nwait++;
+      spin_unlock_irqrestore(&priv->lock, *flags);
+      ret = nxsem_wait_uninterruptible(&priv->waitsem);
+      *flags = spin_lock_irqsave(&priv->lock);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -256,7 +308,12 @@ static ssize_t virtio_blk_rdwr_one(FAR struct virtio_blk_priv_s *priv,
       virtqueue_disable_cb(vq);
     }
 
-  ret = virtqueue_add_buffer(vq, vb, readnum, 3 - readnum, &respsem);
+  ret = virtio_blk_wait_desc(priv, vq, nitems(vb), &flags);
+  if (ret >= 0)
+    {
+      ret = virtqueue_add_buffer(vq, vb, readnum, 3 - readnum, &respsem);
+    }
+
   if (ret < 0)
     {
       if (up_interrupt_context())
@@ -500,7 +557,12 @@ static int virtio_blk_flush(FAR struct virtio_blk_priv_s *priv)
   vb[1].len = VIRTIO_BLK_RESP_HEADER_SIZE;
 
   flags = spin_lock_irqsave(&priv->lock);
-  ret = virtqueue_add_buffer(vq, vb, 1, 1, &respsem);
+  ret = virtio_blk_wait_desc(priv, vq, nitems(vb), &flags);
+  if (ret >= 0)
+    {
+      ret = virtqueue_add_buffer(vq, vb, 1, 1, &respsem);
+    }
+
   if (ret < 0)
     {
       spin_unlock_irqrestore(&priv->lock, flags);
@@ -568,6 +630,8 @@ static void virtio_blk_done(FAR struct virtqueue *vq)
 {
   FAR struct virtio_blk_priv_s *priv = vq->vq_dev->priv;
   FAR sem_t *respsem;
+  irqstate_t flags;
+  unsigned int nwait;
 
   for (; ; )
     {
@@ -578,6 +642,18 @@ static void virtio_blk_done(FAR struct virtqueue *vq)
         }
 
       nxsem_post(respsem);
+    }
+
+  /* The replies gave descriptors back: the waiting requests try again */
+
+  flags = spin_lock_irqsave(&priv->lock);
+  nwait = priv->nwait;
+  priv->nwait = 0;
+  spin_unlock_irqrestore(&priv->lock, flags);
+
+  while (nwait-- > 0)
+    {
+      nxsem_post(&priv->waitsem);
     }
 }
 
@@ -595,6 +671,7 @@ static int virtio_blk_init(FAR struct virtio_blk_priv_s *priv,
   priv->vdev = vdev;
   vdev->priv = priv;
   spin_lock_init(&priv->lock);
+  nxsem_init(&priv->waitsem, 0, 0);
 
   /* Initialize the virtio device */
 
@@ -690,6 +767,7 @@ static int virtio_blk_probe(FAR struct virtio_device *vdev)
 err_with_init:
   virtio_blk_uninit(priv);
 err_with_priv:
+  nxsem_destroy(&priv->waitsem);
   kmm_free(priv);
   return ret;
 }
@@ -723,6 +801,7 @@ static void virtio_blk_remove(FAR struct virtio_device *vdev)
 
   unregister_driver(priv->name);
   virtio_blk_uninit(priv);
+  nxsem_destroy(&priv->waitsem);
   kmm_free(priv);
 }
 
