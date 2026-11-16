@@ -243,6 +243,8 @@ int unload_module(FAR struct binary_s *bin);
  *
  * Description:
  *   Execute a module that has been loaded into memory by load_module().
+ *   The new task takes the address environment of the module.  On failure
+ *   the caller releases a binp->addrenv that is not NULL.
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that

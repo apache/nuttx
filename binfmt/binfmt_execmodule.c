@@ -367,6 +367,10 @@ int exec_module(FAR struct binary_s *binp,
       berr("ERROR: addrenv_attach() failed: %d\n", ret);
       goto errout_with_tcbinit;
     }
+
+  /* The task has the address environment now: the caller does not drop it */
+
+  binp->addrenv = NULL;
 #endif
 
 #ifdef CONFIG_SCHED_USER_IDENTITY

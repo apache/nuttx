@@ -32,6 +32,7 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
 #include <nuttx/binfmt/binfmt.h>
@@ -192,6 +193,11 @@ static int exec_internal(FAR const char *filename,
 
 errout_with_lock:
   unload_module(bin);
+#ifdef CONFIG_ARCH_ADDRENV
+  /* No task got the address environment of the program: release it */
+
+  addrenv_drop(bin->addrenv, false);
+#endif
 errout_with_bin:
 #ifdef CONFIG_BINFMT_LOADABLE
   kmm_free(bin);
