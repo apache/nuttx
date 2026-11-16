@@ -49,3 +49,9 @@ jumbo
 Enables additional build and runtime coverage with OS tests, user LEDs,
 buttons, C++, libm, tmpfs, work queues and scheduler monitoring.
 Run ``ostest``, ``leds`` or ``buttons`` from the NSH prompt.
+
+netnsh
+------
+
+NSH with Ethernet on the LAN8742A PHY (RMII): DHCP client, ``ping``,
+``telnetd`` and ``mdio``.
