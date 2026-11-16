@@ -44,6 +44,43 @@
 #include "tls/tls.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxtask_drop_child
+ *
+ * Description:
+ *   Remove the child entry that nxtask_setup_scheduler() added to the
+ *   group of the caller, for a new task that never ran.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_HAVE_PARENT
+static void nxtask_drop_child(FAR struct tcb_s *tcb)
+{
+  FAR struct task_group_s *pgrp = this_task()->group;
+#  ifndef CONFIG_SCHED_CHILD_STATUS
+  irqstate_t flags;
+#  endif
+
+#  ifdef CONFIG_SCHED_CHILD_STATUS
+  group_free_child(group_remove_child(pgrp, tcb->pid));
+#  else
+  flags = spin_lock_irqsave(&pgrp->tg_lock);
+  if (pgrp->tg_nchildren > 0)
+    {
+      pgrp->tg_nchildren--;
+    }
+
+  spin_unlock_irqrestore(&pgrp->tg_lock, flags);
+#  endif
+}
+#else
+#  define nxtask_drop_child(tcb)
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -231,6 +268,7 @@ errout_with_group:
       dq_rem((FAR dq_entry_t *)tcb, list_inactivetasks());
       leave_critical_section(flags);
 
+      nxtask_drop_child(tcb);
       nxsched_releasepid(tcb->pid);
       tcb->pid = 0;
     }
@@ -288,6 +326,10 @@ errout_with_group:
 
 void nxtask_uninit(FAR struct tcb_s *tcb)
 {
+  /* The task never ran: the caller has no child to wait for */
+
+  nxtask_drop_child(tcb);
+
   /* Release all resources associated with the TCB... Including the TCB
    * itself.
    */
