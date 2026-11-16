@@ -97,6 +97,29 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+typedef CODE int (*can_rx_cb_t)(FAR void *arg, FAR const void *frame);
+
+/****************************************************************************
+ * Name: can_set_rx_callback
+ *
+ * Description:
+ *   register rx sync callback to the can connection structures.
+ *
+ * Input Parameters:
+ *   psock    - The socket structure of the CAN connection
+ *   callback - The callback function to be called when a frame is received
+ *   args     - The argument to be passed to the callback function
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
+ *   returned.
+ *
+ ****************************************************************************/
+
+struct socket; /* Forward reference */
+int can_set_rx_callback(FAR struct socket *psock, can_rx_cb_t callback,
+                        FAR void *args);
+
 /****************************************************************************
  * Name: can_input
  *

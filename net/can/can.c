@@ -318,7 +318,23 @@ static int can_input_conn(FAR struct net_driver_s *dev,
 
   /* Perform the application callback */
 
-  flags = conn->input(conn, dev);
+  if (conn->rxcb != NULL)
+    {
+      /* Synchronous receive callback: deliver the frame directly.  A
+       * return of OK means the callback consumed the frame.
+       */
+
+      flags = CAN_NEWDATA;
+      ret = conn->rxcb(conn->rxarg, dev->d_buf);
+      if (ret == OK)
+        {
+          flags = 0;
+        }
+    }
+  else
+    {
+      flags = conn->input(conn, dev);
+    }
 
   /* If the operation was successful, the CAN_NEWDATA flag is removed
    * and thus the packet can be deleted (OK will be returned).

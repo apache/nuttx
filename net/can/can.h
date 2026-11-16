@@ -34,6 +34,7 @@
 
 #include <nuttx/semaphore.h>
 #include <nuttx/can.h>
+#include <nuttx/net/can.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
@@ -128,11 +129,17 @@ struct can_conn_s
 
   /* Protocol hooks used by can_input():
    *
+   *   rxcb  - Optional synchronous receive callback.  When set, a received
+   *           frame is delivered to it instead of the normal input hook;
+   *           returning OK consumes the frame.
+   *   rxarg - User argument passed to rxcb.
    *   match - Return true if the received frame in dev is for conn.
    *   input - Deliver the received frame in dev to conn and return the
    *           remaining event flags.
    */
 
+  can_rx_cb_t rxcb;
+  FAR void   *rxarg;
   CODE bool (*match)(FAR struct can_conn_s *conn,
                      FAR struct net_driver_s *dev);
   CODE uint32_t (*input)(FAR struct can_conn_s *conn,
