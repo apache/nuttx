@@ -51,33 +51,6 @@
  * Macros
  ****************************************************************************/
 
-#define CFI_UNWIND_REGS(reg, offst)             \
-	.cfi_def_cfa    %##reg, (offst);            \
-	.cfi_rel_offset %rip, (REG_RIP * 8);        \
-	.cfi_rel_offset %rsp, (REG_RSP * 8);        \
-	.cfi_rel_offset %rbp, (REG_RBP * 8);        \
-	.cfi_rel_offset %rsi, (REG_RSI * 8);        \
-	.cfi_rel_offset %rdi, (REG_RDI * 8);        \
-	.cfi_rel_offset %rdx, (REG_RDX * 8);        \
-	.cfi_rel_offset %rcx, (REG_RCX * 8);        \
-	.cfi_rel_offset %r8, (REG_R8 * 8);          \
-	.cfi_rel_offset %r9, (REG_R9 * 8);          \
-	.cfi_rel_offset %r15, (REG_R15 * 8);        \
-	.cfi_rel_offset %r14, (REG_R14 * 8);        \
-	.cfi_rel_offset %r13, (REG_R13 * 8);        \
-	.cfi_rel_offset %r12, (REG_R12 * 8);        \
-	.cfi_rel_offset %r11, (REG_R11 * 8);        \
-	.cfi_rel_offset %r10, (REG_R10 * 8);        \
-	.cfi_rel_offset %rbx, (REG_RBX * 8);        \
-	.cfi_rel_offset %rax, (REG_RAX * 8);        \
-	.cfi_rel_offset %rflags, (REG_RFLAGS * 8);  \
-	.cfi_rel_offset %cs, (REG_CS * 8);          \
-	.cfi_rel_offset %ss, (REG_SS * 8);          \
-	.cfi_rel_offset %ds, (REG_DS * 8);          \
-	.cfi_rel_offset %es, (REG_ES * 8);          \
-	.cfi_rel_offset %fs, (REG_FS * 8);          \
-	.cfi_rel_offset %gs, (REG_GS * 8);
-
 	/* This macro creates a stub for an ISR which does NOT pass it's own
 	 * error code (adds a dummy errcode byte).
 	 */
@@ -742,8 +715,26 @@ irq_common:
 
 	.cfi_startproc
 
+	/* Unwind through the frame the CPU and the vector stub pushed on this
+	 * stack: rsi, rdi, error code, then RIP, CS, RFLAGS, RSP, SS of the
+	 * interrupted code.  Unlike the TCB save area it is always part of a
+	 * stack dump, and it stays valid when an exception interrupts IRQ code.
+	 * Marking it a signal frame lets the debugger follow the switch to the
+	 * interrupted stack wherever that stack lies in memory.
+	 */
+
+	.cfi_signal_frame
+	.cfi_def_cfa    %rsp, 64
+	.cfi_offset     %rsi, -64
+	.cfi_offset     %rdi, -56
+	.cfi_offset     %rip, -40
+	.cfi_offset     %rflags, -24
+	.cfi_offset     %rsp, -16
+
 	pushq   %rax
+	.cfi_adjust_cfa_offset 8
 	pushq   %rdx
+	.cfi_adjust_cfa_offset 8
 	call    irq_xcp_regs
 	movq    %rax, %rdi
 
@@ -753,7 +744,9 @@ irq_common:
 	 */
 
 	popq    (8*REG_RDX)(%rdi)
+	.cfi_adjust_cfa_offset -8
 	popq    (8*REG_RAX)(%rdi)
+	.cfi_adjust_cfa_offset -8
 	movq    %rcx, (8*REG_RCX)(%rdi)
 	movq    %r8,  (8*REG_R8)(%rdi)
 	movq    %r9,  (8*REG_R9)(%rdi)
@@ -815,13 +808,15 @@ irq_common:
 	 * that we don't lose the correct stack alignment for vector operations
 	 */
 
-	CFI_UNWIND_REGS(rdi, 0)
-
 	pushq   %rdi
+	.cfi_adjust_cfa_offset 8
 	pushq   $0
+	.cfi_adjust_cfa_offset 8
 	call    irq_handler
 	add     $8, %rsp
+	.cfi_adjust_cfa_offset -8
 	popq    %rdi
+	.cfi_adjust_cfa_offset -8
 
 	.cfi_endproc
 

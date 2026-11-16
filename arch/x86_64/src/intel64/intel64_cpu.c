@@ -162,13 +162,19 @@ void x86_64_cpu_tss_init(int cpu)
   memcpy((void *)&g_gdt64[X86_GDT_ISTH_SEL_NUM + 2 * cpu],
          &tss_h, sizeof(g_gdt64[0]));
 
-  /* Stack for IRQ0-IRQ15 */
+  /* Hardware IRQs (X86_GDT_IST_IRQ) run on the stack that
+   * up_get_intstackbase() reports, so assert, coredump and backtrace see
+   * the stack an interrupt handler actually uses.
+   */
 
-  ist64->IST1 = (uintptr_t)(g_isrstackalloc + ((cpu + 1) * IRQ_STACK_SIZE));
+  ist64->IST1 = (uintptr_t)(g_intstackalloc + ((cpu + 1) * IRQ_STACK_SIZE));
 
-  /* Stack for the rest IRQ */
+  /* CPU exceptions (X86_GDT_IST_ISR) need a stack of their own: an IST
+   * entry always reloads the same stack top, so a fault raised by IRQ code
+   * on a shared stack would overwrite the live IRQ frames.
+   */
 
-  ist64->IST2 = (uintptr_t)(g_intstackalloc + ((cpu + 1) * IRQ_STACK_SIZE));
+  ist64->IST2 = (uintptr_t)(g_isrstackalloc + ((cpu + 1) * IRQ_STACK_SIZE));
 
   /* Now load TSS */
 

@@ -130,11 +130,19 @@ int up_backtrace(struct tcb_s *tcb,
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
           void *istackbase = (void *)up_get_intstackbase(this_cpu());
+          void *isrbase = (void *)x86_64_get_isrstackbase(this_cpu());
+          void *rbp = __builtin_frame_address(0);
+
+          /* Exception handlers run on their own stack, IRQs on this one */
+
+          if (rbp >= isrbase && rbp < isrbase + IRQ_STACK_SIZE)
+            {
+              istackbase = isrbase;
+            }
 
           ret = backtrace(istackbase,
                           istackbase + IRQ_STACK_SIZE,
-                          (void *)__builtin_frame_address(0),
-                          NULL, buffer, size, &skip);
+                          rbp, NULL, buffer, size, &skip);
 #else
           ret = backtrace(rtcb->stack_base_ptr,
                           rtcb->stack_base_ptr + rtcb->adj_stack_size,

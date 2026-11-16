@@ -478,6 +478,8 @@ static inline void x86_64_color_intstack(void)
 {
   x86_64_stack_color((void *)up_get_intstackbase(this_cpu()),
                      IRQ_STACK_SIZE);
+  x86_64_stack_color((void *)x86_64_get_isrstackbase(this_cpu()),
+                     IRQ_STACK_SIZE);
 }
 #else
 #  define x86_64_color_intstack()
