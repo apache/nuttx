@@ -230,6 +230,40 @@ that the chip Kconfig ``select``-s next to its timer IP-core selector.  The
 16-bit cases - TIM2 on STM32F10xx/STM32L15xx/STM32L0 and TIM5 on
 STM32F10xx/STM32F30xx - simply leave them unset.
 
+Ethernet drivers
+================
+
+The Ethernet MAC drivers of F1, F2, F4 (``common/stm32/stm32_eth_m3m4_v1.c``),
+F7 (``stm32f7/stm32_ethernet.c``) and H5, H7, N6
+(``common/stm32/stm32_eth_v2.c``) are lower half drivers of the network upper
+half (``include/nuttx/net/netdev_lowerhalf.h``, see
+:ref:`Network Drivers <netdriver>`).  New STM32 network drivers must use this
+interface too.
+
+The drivers send and receive the IOBs of the network in place.  Each DMA
+descriptor holds one IOB and a frame spans ``NSEGS`` descriptors, where
+``NSEGS`` is ``CONFIG_NET_ETH_PKTSIZE + 4`` divided by ``CONFIG_IOB_BUFSIZE``,
+rounded up.  The frames are received in the interrupt work
+(``NETDEV_RX_DIRECT``).  When no IOB is free, the received frame waits in
+the ring until an IOB is freed (``CONFIG_IOB_NOTIFIER``) and the MAC drops
+the next frames.  ``CONFIG_STM32_ETH_NRXDESC`` and
+``CONFIG_STM32_ETH_NTXDESC`` are the number of RX and TX frames.  The build
+fails if the IOB pool is too small for the rings.  All STM32 Ethernet
+configurations use:
+
+- ``CONFIG_IOB_NBUFFERS=100``: the rings hold ``(NRXDESC + 1) * NSEGS +
+  NTXDESC`` IOBs, 76 with the default 8 RX and 4 TX frames of up to 1514
+  bytes, and the network keeps the others,
+- ``CONFIG_IOB_THROTTLE=8``: the IOBs that the driver needs to refill the
+  RX ring for one frame.  Without this reserve the TCP receive window takes
+  all free IOBs and received frames are dropped.
+
+With the D-Cache (``CONFIG_ARMV7M_DCACHE`` or ``CONFIG_ARMV8M_DCACHE``),
+also in the write-through mode, ``CONFIG_IOB_ALIGNMENT`` and
+``CONFIG_IOB_BUFSIZE`` must be multiples of the D-Cache line size, for
+example ``CONFIG_IOB_ALIGNMENT=32`` and ``CONFIG_IOB_BUFSIZE=224``: the RX
+DMA corrupts other data in the D-Cache lines of its buffers.
+
 Family peripheral inventory
 ===========================
 
