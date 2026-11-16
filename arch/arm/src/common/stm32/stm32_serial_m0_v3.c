@@ -892,6 +892,8 @@ static void stm32serial_setformat(struct uart_dev_s *dev)
 {
   struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
   uint32_t regval;
+  uint32_t cr1_ue;
+  irqstate_t flags;
 
   /* This first implementation is for U[S]ARTs that support oversampling
    * by 8 in additional to the standard oversampling by 16.
@@ -900,6 +902,16 @@ static void stm32serial_setformat(struct uart_dev_s *dev)
   uint32_t usartdiv8;
   uint32_t cr1;
   uint32_t brr;
+
+  flags = enter_critical_section();
+
+  /* Disable UE: the baud rate, parity and word length bits can not be
+   * written while UE = 1.
+   */
+
+  cr1 = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  cr1_ue = cr1 & USART_CR1_UE;
+  cr1 &= ~USART_CR1_UE;
 
   /* In case of oversampling by 8, the equation is:
    *
@@ -919,7 +931,6 @@ static void stm32serial_setformat(struct uart_dev_s *dev)
 
   /* Use oversamply by 8 only if the divisor is small.  But what is small? */
 
-  cr1 = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
   if (usartdiv8 > 100)
     {
       /* Use usartdiv16 */
@@ -1020,6 +1031,13 @@ static void stm32serial_setformat(struct uart_dev_s *dev)
 #endif
 
   stm32serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
+
+  /* Restore UE */
+
+  regval = stm32serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  stm32serial_putreg(priv, STM32_USART_CR1_OFFSET, regval | cr1_ue);
+
+  leave_critical_section(flags);
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
