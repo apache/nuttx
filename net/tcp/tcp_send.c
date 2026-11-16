@@ -110,12 +110,15 @@ static inline FAR struct tcp_hdr_s *tcp_header(FAR struct net_driver_s *dev)
  * Description:
  *   Fill in the sequence and acknowledgment numbers, the ports, the receive
  *   window and the urgent pointer of an outgoing TCP header, and start the
- *   retransmission timer if there is unacknowledged data.
+ *   retransmission timer if there is unacknowledged data and the segment
+ *   takes sequence space.
  *
  * Input Parameters:
- *   dev  - The device driver structure to use in the send operation
- *   conn - The TCP connection structure holding connection information
- *   tcp  - The TCP header to fill in
+ *   dev   - The device driver structure to use in the send operation
+ *   conn  - The TCP connection structure holding connection information
+ *   tcp   - The TCP header to fill in
+ *   timer - True if the segment carries data, SYN or FIN.  A segment
+ *           without them (an ACK) does not restart the timer.
  *
  * Returned Value:
  *   None
@@ -127,7 +130,7 @@ static inline FAR struct tcp_hdr_s *tcp_header(FAR struct net_driver_s *dev)
 
 void tcp_fill_header(FAR struct net_driver_s *dev,
                      FAR struct tcp_conn_s *conn,
-                     FAR struct tcp_hdr_s *tcp)
+                     FAR struct tcp_hdr_s *tcp, bool timer)
 {
   /* Set TCP sequence numbers and port numbers */
 
@@ -150,7 +153,13 @@ void tcp_fill_header(FAR struct net_driver_s *dev,
     }
   else
     {
-      if (conn->tx_unacked != 0)
+      /* Restart the retransmission timer with a segment that takes
+       * sequence space.  An ACK does not: while the peer sends data, each
+       * of its segments gets an ACK, and a lost segment of ours would never
+       * be sent again.
+       */
+
+      if (conn->tx_unacked != 0 && timer)
         {
           conn->timeout = false;
           tcp_update_retrantimer(conn, conn->rto);
@@ -208,9 +217,9 @@ void tcp_fill_header(FAR struct net_driver_s *dev,
 
 static void tcp_sendcommon(FAR struct net_driver_s *dev,
                            FAR struct tcp_conn_s *conn,
-                           FAR struct tcp_hdr_s *tcp)
+                           FAR struct tcp_hdr_s *tcp, bool timer)
 {
-  tcp_fill_header(dev, conn, tcp);
+  tcp_fill_header(dev, conn, tcp, timer);
 
   /* Update device buffer length before setup the IP header */
 
@@ -368,7 +377,9 @@ void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       tcp->tcpoffset = (TCP_HDRLEN / 4) << 4;
     }
 
-  tcp_sendcommon(dev, conn, tcp);
+  tcp_sendcommon(dev, conn, tcp,
+                 len > tcpip_hdrsize(conn) ||
+                 (flags & (TCP_SYN | TCP_FIN)) != 0);
 
 #if defined(CONFIG_NET_STATISTICS) && \
     defined(CONFIG_NET_TCP_DEBUG_DROP_SEND)
@@ -714,7 +725,7 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   /* Complete the common portions of the TCP message */
 
-  tcp_sendcommon(dev, conn, tcp);
+  tcp_sendcommon(dev, conn, tcp, (ack & (TCP_SYN | TCP_FIN)) != 0);
 }
 
 /****************************************************************************

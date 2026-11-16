@@ -230,7 +230,7 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
 
   ipv6tcp->tcp.tcpoffset = (TCP_HDRLEN / 4) << 4; /* No optdata */
   ipv6tcp->tcp.flags     = TCP_ACK | TCP_PSH;     /* No urgent data */
-  tcp_fill_header(dev, conn, &ipv6tcp->tcp);
+  tcp_fill_header(dev, conn, &ipv6tcp->tcp, buflen > 0);
 
   /* Calculate TCP checksum. */
 

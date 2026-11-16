@@ -1318,6 +1318,21 @@ found:
           goto skip_rtt;
         }
 
+      if ((conn->tcpstateflags & TCP_STATE_MASK) >= TCP_ESTABLISHED &&
+          !TCP_SEQ_GT(ackseq, conn->snd_wl2))
+        {
+          /* The segment acknowledges no new data (a duplicate ACK: not
+           * beyond snd_wl2, the highest ACK so far): it gives no RTT
+           * sample, does not restart the retransmission timer (RFC 6298,
+           * section 5.3; else a peer that sends data keeps the timer from
+           * expiring) and does not reset the count of retransmissions
+           * (the backoff of section 5.5).
+           */
+
+          flags |= TCP_ACKDATA;
+          goto skip_rtt;
+        }
+
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 #ifdef CONFIG_NET_SENDFILE
       if (!conn->sendfile)
