@@ -690,7 +690,7 @@ static ssize_t pty_write(FAR struct file *filep,
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
           if (sig != NULL)
             {
-              nxsig_kill(pid, signo);
+              nxsig_kill_foreground(pid, signo);
               return ntotal + 1;
             }
 #endif
@@ -1073,7 +1073,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   if (winchpid > 0)
     {
-      nxsig_kill(winchpid, SIGWINCH);
+      nxsig_kill_foreground(winchpid, SIGWINCH);
     }
 #endif
 

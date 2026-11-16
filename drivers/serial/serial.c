@@ -2120,7 +2120,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
                   if (dev->pid > 0)
                     {
-                      nxsig_kill(dev->pid, SIGWINCH);
+                      nxsig_kill_foreground(dev->pid, SIGWINCH);
                     }
 #endif
                 }
