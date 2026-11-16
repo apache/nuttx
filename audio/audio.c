@@ -89,6 +89,7 @@ struct audio_upperhalf_s
 {
   struct audio_info_s          info;     /* Record the last playing audio format */
   mutex_t                      lock;     /* Supports mutual exclusion */
+  mutex_t                      mqlock;   /* Keeps the opens for a thread that sends */
   uint8_t                      nbuffers; /* Max ap buffers number */
   spinlock_t                   spinlock; /* Supports spin lock */
   uint8_t                      periods;  /* Ap buffers number */
@@ -265,11 +266,13 @@ static int audio_open(FAR struct file *filep)
         }
     }
 
+  nxmutex_lock(&upper->mqlock);
   flags = spin_lock_irqsave(&upper->spinlock);
   priv->flink = upper->head;
   filep->f_priv = priv;
   upper->head = priv;
   spin_unlock_irqrestore(&upper->spinlock, flags);
+  nxmutex_unlock(&upper->mqlock);
   ret = OK;
 
 errout:
@@ -309,6 +312,7 @@ static int audio_close(FAR struct file *filep)
       return ret;
     }
 
+  nxmutex_lock(&upper->mqlock);
   flags = spin_lock_irqsave(&upper->spinlock);
 
   /* find and drop priv from list */
@@ -337,6 +341,7 @@ static int audio_close(FAR struct file *filep)
     }
 
   spin_unlock_irqrestore(&upper->spinlock, flags);
+  nxmutex_unlock(&upper->mqlock);
 
   /* Shut down and free outside the spinlock: both can sleep */
 
@@ -1220,7 +1225,9 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_REGISTERMQ\n");
 
+          nxmutex_lock(&upper->mqlock);
           ret = audio_registermq(priv, arg);
+          nxmutex_unlock(&upper->mqlock);
         }
         break;
 
@@ -1233,7 +1240,9 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_UNREGISTERMQ\n");
 
+          nxmutex_lock(&upper->mqlock);
           audio_unregistermq(priv);
+          nxmutex_unlock(&upper->mqlock);
           ret = OK;
         }
         break;
@@ -1573,11 +1582,22 @@ static inline void audio_sendmsg(FAR struct audio_upperhalf_s *upper,
   FAR struct audio_openpriv_s *priv;
   pollevent_t eventset;
   irqstate_t flags;
+  bool intr = up_interrupt_context();
+
+  /* In a thread, file_mq_send() can wait for room in a full queue and can
+   * allocate the message: send under the mutex, not under the spinlock.
+   * In an interrupt handler it never waits.
+   */
+
+  if (!intr)
+    {
+      nxmutex_lock(&upper->mqlock);
+    }
 
   flags = spin_lock_irqsave_nopreempt(&upper->spinlock);
   for (priv = upper->head; priv != NULL; priv = priv->flink)
     {
-      if (priv->usermq != NULL)
+      if (intr && priv->usermq != NULL)
         {
           file_mq_send(priv->usermq, (FAR const char *)msg, sizeof(*msg),
                        CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
@@ -1597,6 +1617,20 @@ static inline void audio_sendmsg(FAR struct audio_upperhalf_s *upper,
     }
 
   spin_unlock_irqrestore_nopreempt(&upper->spinlock, flags);
+
+  if (!intr)
+    {
+      for (priv = upper->head; priv != NULL; priv = priv->flink)
+        {
+          if (priv->usermq != NULL)
+            {
+              file_mq_send(priv->usermq, (FAR const char *)msg,
+                           sizeof(*msg), CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+            }
+        }
+
+      nxmutex_unlock(&upper->mqlock);
+    }
 }
 
 /****************************************************************************
@@ -2037,6 +2071,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
    */
 
   nxmutex_init(&upper->lock);
+  nxmutex_init(&upper->mqlock);
   spin_lock_init(&upper->spinlock);
   upper->dev = dev;
 
@@ -2126,6 +2161,7 @@ int audio_unregister(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
     }
 
   nxmutex_destroy(&upper->lock);
+  nxmutex_destroy(&upper->mqlock);
   kmm_free(upper);
   dev->priv = NULL;
   return 0;
