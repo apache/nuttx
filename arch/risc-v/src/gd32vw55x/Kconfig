@@ -1,4 +1,4 @@
-# ##############################################################################
+############################################################################
 # arch/risc-v/src/gd32vw55x/Kconfig
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -18,7 +18,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-# ##############################################################################
+############################################################################
 
 comment "GD32VW55x Configuration Options"
 
