@@ -42,10 +42,12 @@
  ****************************************************************************/
 
 #define RPMSG_PING_EPT_NAME         "rpmsg-ping"
+#define RPMSG_PING_EPT_RT_NAME      "rpmsg-ping-rt"
 
 #define RPMSG_PING_ACK_MASK         0x00000001
 #define RPMSG_PING_CHECK_MASK       0x00000002
 #define RPMSG_PING_RANDOMLEN_MASK   0x00000004
+#define RPMSG_PING_RT_MASK          0x00000008
 
 #define RPMSG_PING_CMD_MASK         0x000000f0
 #  define RPMSG_PING_CMD_REQ        0x00000000
@@ -213,9 +215,10 @@ static void rpmsg_ping_logout_rate(uint64_t len, clock_t avg)
  * Public Functions
  ****************************************************************************/
 
-int rpmsg_ping(FAR struct rpmsg_endpoint *ept,
+int rpmsg_ping(FAR struct rpmsg_ping_dev_s *dev,
                FAR const struct rpmsg_ping_s *ping)
 {
+  FAR struct rpmsg_endpoint *ept;
   clock_t min = CLOCK_MAX;
   clock_t max = 0;
   uint64_t total = 0;
@@ -223,9 +226,18 @@ int rpmsg_ping(FAR struct rpmsg_endpoint *ept,
   int send_len = 0;
   int i;
 
-  if (!ept || !ping || ping->times <= 0)
+  if (!dev || !ping || ping->times <= 0)
     {
       return -EINVAL;
+    }
+
+  if ((ping->cmd & RPMSG_PING_RT_MASK) != 0)
+    {
+      ept = &dev->ept_rt;
+    }
+  else
+    {
+      ept = &dev->ept;
     }
 
   for (i = 0; i < ping->times; i++)
@@ -262,14 +274,32 @@ int rpmsg_ping(FAR struct rpmsg_endpoint *ept,
 }
 
 int rpmsg_ping_init(FAR struct rpmsg_device *rdev,
-                    FAR struct rpmsg_endpoint *ept)
+                    FAR struct rpmsg_ping_dev_s *dev)
 {
-  return rpmsg_create_ept(ept, rdev, RPMSG_PING_EPT_NAME,
-                          RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                          rpmsg_ping_ept_cb, NULL);
+  int ret;
+
+  ret = rpmsg_create_ept(&dev->ept, rdev, RPMSG_PING_EPT_NAME,
+                         RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
+                         rpmsg_ping_ept_cb, NULL);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  rpmsg_set_priority(&dev->ept_rt, RPMSG_PRIO_RT);
+  ret = rpmsg_create_ept(&dev->ept_rt, rdev, RPMSG_PING_EPT_RT_NAME,
+                         RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
+                         rpmsg_ping_ept_cb, NULL);
+  if (ret < 0)
+    {
+      rpmsg_destroy_ept(&dev->ept);
+    }
+
+  return ret;
 }
 
-void rpmsg_ping_deinit(FAR struct rpmsg_endpoint *ept)
+void rpmsg_ping_deinit(FAR struct rpmsg_ping_dev_s *dev)
 {
-  rpmsg_destroy_ept(ept);
+  rpmsg_destroy_ept(&dev->ept_rt);
+  rpmsg_destroy_ept(&dev->ept);
 }

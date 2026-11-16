@@ -55,7 +55,7 @@ struct rpmsg_s
   char                         cpuname[RPMSG_NAME_SIZE];
   FAR const struct rpmsg_ops_s *ops;
 #ifdef CONFIG_RPMSG_PING
-  struct rpmsg_endpoint        ping;
+  struct rpmsg_ping_dev_s      ping;
 #endif
 #ifdef CONFIG_RPMSG_TEST
   struct rpmsg_endpoint        test;
