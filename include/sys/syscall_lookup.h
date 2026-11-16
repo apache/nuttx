@@ -443,3 +443,14 @@ SYSCALL_LOOKUP(signal,                     2)
 
 SYSCALL_LOOKUP(getdomainname,              2)
 SYSCALL_LOOKUP(setdomainname,              2)
+
+/* Process groups and sessions.  They are at the end, so that the numbers
+ * of the other system calls do not depend on CONFIG_SCHED_PROCESS_GROUPS.
+ */
+
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+  SYSCALL_LOOKUP(setpgid,                  2)
+  SYSCALL_LOOKUP(getpgid,                  1)
+  SYSCALL_LOOKUP(setsid,                   0)
+  SYSCALL_LOOKUP(getsid,                   1)
+#endif

@@ -24,6 +24,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <unistd.h>
 
 #include <nuttx/sched.h>
@@ -42,11 +44,16 @@
  *   None
  *
  * Returned Value:
- *   The getpgrp will return current process ID directly
+ *   The process group ID of the caller.  Without process groups
+ *   (CONFIG_SCHED_PROCESS_GROUPS), it is the process ID of the caller.
  *
  ****************************************************************************/
 
 pid_t getpgrp(void)
 {
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+  return getpgid(0);
+#else
   return _SCHED_GETPID();
+#endif
 }

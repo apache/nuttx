@@ -35,6 +35,10 @@ if(NOT CONFIG_DISABLE_ALL_SIGNALS)
   list(APPEND SRCS group_signal.c)
 endif()
 
+if(CONFIG_SCHED_PROCESS_GROUPS)
+  list(APPEND SRCS group_pgrp.c)
+endif()
+
 if(CONFIG_SCHED_HAVE_PARENT)
   if(CONFIG_SCHED_CHILD_STATUS)
     list(APPEND SRCS group_childstatus.c)

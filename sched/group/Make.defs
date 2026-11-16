@@ -28,6 +28,10 @@ ifneq ($(CONFIG_DISABLE_ALL_SIGNALS),y)
 CSRCS += group_signal.c
 endif
 
+ifeq ($(CONFIG_SCHED_PROCESS_GROUPS),y)
+CSRCS += group_pgrp.c
+endif
+
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
 ifeq ($(CONFIG_SCHED_CHILD_STATUS),y)
 CSRCS += group_childstatus.c

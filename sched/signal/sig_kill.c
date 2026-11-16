@@ -38,7 +38,89 @@
 #include <nuttx/signal.h>
 
 #include "sched/sched.h"
+#include "group/group.h"
 #include "signal/signal.h"
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+struct nxsig_pgrp_s
+{
+  pid_t pgid;   /* The process group ID */
+  int   signo;  /* The signal number, or 0 */
+  bool  check;  /* Signal only the processes that the caller may control */
+  int   ret;    /* OK if one process got the signal, else the last error */
+};
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+/****************************************************************************
+ * Name: nxsig_kill_member
+ *
+ * Description:
+ *   The nxsched_foreach() function of nxsig_kill_pgrp().
+ *
+ ****************************************************************************/
+
+static void nxsig_kill_member(FAR struct tcb_s *tcb, FAR void *arg)
+{
+  FAR struct nxsig_pgrp_s *pgrp = arg;
+  int ret;
+
+  if (!group_in_pgrp(tcb, pgrp->pgid))
+    {
+      return;
+    }
+
+  if (pgrp->check && !nxsched_may_control(tcb->pid))
+    {
+      ret = -EPERM;
+    }
+  else
+    {
+      ret = nxsig_kill(tcb->pid, pgrp->signo);
+    }
+
+  if (pgrp->ret != OK)
+    {
+      pgrp->ret = ret;
+    }
+}
+
+/****************************************************************************
+ * Name: nxsig_kill_pgrp
+ *
+ * Description:
+ *   Send a signal to each process of a process group.  pid is the pid of
+ *   kill(): 0 is the process group of the caller, -pid the process group
+ *   pid.  If check is true, only the processes that the caller may control
+ *   get the signal.
+ *
+ ****************************************************************************/
+
+static int nxsig_kill_pgrp(pid_t pid, int signo, bool check)
+{
+  struct nxsig_pgrp_s pgrp;
+
+  if (signo != 0 && !GOOD_SIGNO(signo))
+    {
+      return -EINVAL;
+    }
+
+  pgrp.pgid  = pid == 0 ? this_task()->group->tg_pgid : -pid;
+  pgrp.signo = signo;
+  pgrp.check = check;
+  pgrp.ret   = -ESRCH;
+  nxsched_foreach(nxsig_kill_member, &pgrp);
+  return pgrp.ret;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -55,14 +137,16 @@
  *   the POSIX standard kill() function but does not modify the application
  *   errno variable.
  *
- *   A process group is one process in NuttX: a process group ID is the
- *   ID of its only process.  A signal to all processes (pid -1) is not
- *   supported.
+ *   With CONFIG_SCHED_PROCESS_GROUPS, each process of the process group
+ *   gets the signal.  Without it, a process group is one process: a
+ *   process group ID is the ID of its only process.  A signal to all
+ *   processes (pid -1) is not supported.
  *
  * Input Parameters:
  *   pid - The id of the task to receive the signal.  The POSIX nxsig_kill
  *     specification encodes process group information as zero and
- *     negative pid values: 0 is the caller and -pid is the process pid.
+ *     negative pid values: 0 is the process group of the caller and -pid
+ *     is the process group pid.
  *   signo - The signal number to send.  If signo is zero, no signal is
  *     sent, but all error checking is performed.
  *
@@ -88,7 +172,18 @@ int nxsig_kill(pid_t pid, int signo)
   siginfo_t info;
 #endif
 
-  /* NuttX has no process group with more than one process: the process
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+  /* pid 0 is the process group of the caller, -pid the process group pid.
+   * INT_MIN is no process group (-INT_MIN does not fit).
+   */
+
+  if (pid == 0 || (pid < -1 && pid != INT_MIN))
+    {
+      return nxsig_kill_pgrp(pid, signo, false);
+    }
+#endif
+
+  /* Without process groups, a process group is one process: the process
    * group of a process is the process itself (getpgid(), setpgid() and
    * killpg() say so).  So pid 0 (the process group of the caller) is the
    * caller, and -pid (the process group pid) is the process pid.  All the
@@ -159,14 +254,16 @@ int nxsig_kill(pid_t pid, int signo)
  *   The kill() system call can be used to send any signal to any task
  *   group.
  *
- *   A process group is one process in NuttX: a process group ID is the
- *   ID of its only process.  A signal to all processes (pid -1) is not
- *   supported.
+ *   With CONFIG_SCHED_PROCESS_GROUPS, each process of the process group
+ *   gets the signal.  Without it, a process group is one process: a
+ *   process group ID is the ID of its only process.  A signal to all
+ *   processes (pid -1) is not supported.
  *
  * Input Parameters:
  *   pid - The id of the task to receive the signal.  The POSIX kill
  *     specification encodes process group information as zero and
- *     negative pid values: 0 is the caller and -pid is the process pid.
+ *     negative pid values: 0 is the process group of the caller and -pid
+ *     is the process group pid.
  *   signo - The signal number to send.  If signo is zero, no signal is
  *     sent, but all error checking is performed.
  *
@@ -186,6 +283,22 @@ int nxsig_kill(pid_t pid, int signo)
 int kill(pid_t pid, int signo)
 {
   int ret;
+
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+  /* A process group: nxsig_kill_pgrp() checks each process */
+
+  if (pid == 0 || (pid < -1 && pid != INT_MIN))
+    {
+      ret = nxsig_kill_pgrp(pid, signo, signo != 0);
+      if (ret < 0)
+        {
+          set_errno(-ret);
+          ret = ERROR;
+        }
+
+      return ret;
+    }
+#endif
 
   if (signo != 0 && !nxsched_may_control(pid))
     {

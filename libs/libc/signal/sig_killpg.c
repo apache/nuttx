@@ -24,6 +24,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <errno.h>
 #include <signal.h>
 
@@ -51,9 +53,7 @@
  *    EINVAL An invalid signal was specified.
  *    EPERM  The thread does not have permission to send the
  *           signal to the target thread.
- *    ESRCH  No thread could be found corresponding to that
- *           specified by the given thread ID
- *    ENOSYS Do not support sending signals to process groups.
+ *    ESRCH  No process is in the process group pgrp.
  *
  ****************************************************************************/
 
@@ -65,7 +65,11 @@ int killpg(pid_t pgrp, int signo)
       return ERROR;
     }
 
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+  return kill(-pgrp, signo);
+#else
   /* Nuttx do not support process group, we use kill process instead */
 
   return kill(pgrp, signo);
+#endif
 }

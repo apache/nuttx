@@ -341,6 +341,9 @@ errout_with_group:
 void group_initialize(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+  FAR struct tcb_s *rtcb;
+#endif
 
   DEBUGASSERT(tcb && tcb->group);
   group = tcb->group;
@@ -369,4 +372,25 @@ void group_initialize(FAR struct tcb_s *tcb)
     }
 
   group->tg_info->ta_pid = group->tg_pid;
+
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+  /* A task that a user task creates gets the process group and the
+   * session of that task.  A task that the kernel creates (the init task,
+   * a task that a kernel thread starts) is the leader of a new session.
+   * The kernel threads share one group with the IDs 0.
+   */
+
+  rtcb = this_task();
+  if (group != &g_kthread_group && rtcb->group != NULL &&
+      (rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+    {
+      group->tg_pgid = rtcb->group->tg_pgid;
+      group->tg_sid  = rtcb->group->tg_sid;
+    }
+  else
+    {
+      group->tg_pgid = group->tg_pid;
+      group->tg_sid  = group->tg_pid;
+    }
+#endif
 }
