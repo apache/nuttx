@@ -144,6 +144,7 @@ int procfs_snprintf(FAR char *buf, size_t size,
 {
   va_list ap;
   int n;
+
   va_start(ap, format);
   n = vsnprintf(buf, size, format, ap);
   va_end(ap);
