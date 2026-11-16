@@ -220,7 +220,7 @@ about it. It is sometimes a pain because you have to remember to
 handle the ``EINTR`` return value even when you don't care about it.
 
 The POSIX signal definition includes some support that would make this 
-easier for you. This support is not currently implemented in NuttX. 
+easier for you. 
 The ``kill()`` interface for example 
 (http://pubs.opengroup.org/onlinepubs/009695399/functions/kill.html) 
 supports this behavior:
@@ -239,9 +239,9 @@ an unspecified set of system processes) whose process group ID is equal to
 the absolute value of pid, and for which the process has permission to send 
 a signal."
 
-NuttX does not currently support process groups. But that might be a good 
-RTOS extension. If you and others think that would be useful I could 
-probably add the basics of such a feature in a day or so.
+With ``CONFIG_SCHED_PROCESS_GROUPS``, NuttX supports process groups: a pid
+of 0 or less than -1 sends the signal to each process of the process group.
+A pid of -1 (all processes) is not supported.
 
 ``poll()``
 ==========

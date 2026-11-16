@@ -543,9 +543,12 @@ Equivalent to sigtimedwait() with a NULL timeout parameter. (see below).
 
   :param pid: The id of the task to receive the signal. The POSIX
     ``kill()`` specification encodes process group information as zero
-    and negative pid values. A process group is one process in NuttX:
-    ``0`` is the caller and ``-pid`` is the process ``pid``. ``-1`` (all
-    processes) is not supported and gives ``ENOSYS``.
+    and negative pid values. With ``CONFIG_SCHED_PROCESS_GROUPS``, ``0``
+    is the process group of the caller and ``-pid`` is the process group
+    ``pid``: each process of the group that the caller may control gets
+    the signal. Without it, a process group is one process: ``0`` is the
+    caller and ``-pid`` is the process ``pid``. ``-1`` (all processes) is
+    not supported and gives ``ENOSYS``.
   :param signo: The signal number to send. If signo is zero, no signal is
     sent, but all error checking is performed.
 
@@ -556,9 +559,9 @@ Equivalent to sigtimedwait() with a NULL timeout parameter. (see below).
 
   -  Default action is to ignore signals.
   -  Signals are processed one at a time in order
-  -  A process group is one process, so a signal to a process group goes
-     to that process. A signal to all processes (``pid`` -1) is not
-     supported.
+  -  Without ``CONFIG_SCHED_PROCESS_GROUPS``, a process group is one
+     process, so a signal to a process group goes to that process. A
+     signal to all processes (``pid`` -1) is not supported.
 
 .. c:function:: int pause(void);
 
