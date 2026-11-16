@@ -37,6 +37,7 @@
 #include <nuttx/spawn.h>
 #include <nuttx/fs/fs.h>
 
+#include "group/group.h"
 #include "task/spawn.h"
 #include "task/task.h"
 
@@ -160,6 +161,32 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
       if (tcb)
         {
           tcb->sigprocmask = attr->sigmask;
+        }
+    }
+#endif
+
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+  /* The new task leads a new session and a new process group */
+
+  if ((attr->flags & POSIX_SPAWN_SETSID) != 0u)
+    {
+      FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
+
+      if (tcb != NULL)
+        {
+          tcb->group->tg_pgid = tcb->group->tg_pid;
+          tcb->group->tg_sid  = tcb->group->tg_pid;
+        }
+    }
+
+  /* Then it joins a process group, as setpgid(pid, pgroup) in the caller */
+
+  if ((attr->flags & POSIX_SPAWN_SETPGROUP) != 0u)
+    {
+      ret = group_setpgid(pid, attr->pgroup);
+      if (ret < 0)
+        {
+          return ret;
         }
     }
 #endif
