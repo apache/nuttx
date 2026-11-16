@@ -362,7 +362,17 @@ int fdlist_dup3(FAR struct fdlist *list, int fd1, int fd2, int flags)
   FAR struct fd *fdp1;
   int ret;
 
+  if (list == NULL)
+    {
+      return -EINVAL;
+    }
+
   if (fd1 == fd2)
+    {
+      return -EINVAL;
+    }
+
+  if ((flags & ~O_CLOEXEC) != 0)
     {
       return -EINVAL;
     }
@@ -371,11 +381,15 @@ int fdlist_dup3(FAR struct fdlist *list, int fd1, int fd2, int flags)
   fd2 = fdcheck_restore(fd2);
 #endif
 
-  /* Get the file descriptor list.  It should not be NULL in this context. */
-
   if (fd2 < 0 || fd2 >= fdlist_limit(list))
     {
       return -EBADF;
+    }
+
+  ret = fdlist_get2(list, fd1, &filep1, &fdp1);
+  if (ret < 0)
+    {
+      return ret;
     }
 
   if (fd2 >= fdlist_count(list))
@@ -384,14 +398,9 @@ int fdlist_dup3(FAR struct fdlist *list, int fd1, int fd2, int flags)
                           fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + 1);
       if (ret < 0)
         {
+          file_put(filep1);
           return ret;
         }
-    }
-
-  ret = fdlist_get2(list, fd1, &filep1, &fdp1);
-  if (ret < 0)
-    {
-      return ret;
     }
 
   fdlist_install(list, fd2, filep1, fdp1, flags, false);
@@ -992,7 +1001,7 @@ int fdlist_dup2(FAR struct fdlist *list, int fd1, int fd2)
       FAR struct file *filep;
       int ret;
 
-      ret = file_get(fd1, &filep);
+      ret = fdlist_get2(list, fd1, &filep, NULL);
       if (ret < 0)
         {
           return ret;
