@@ -211,13 +211,11 @@ CHIP_CSRCS += stm32_pmstop_m3m4_v1.c
 CHIP_CSRCS += stm32_pmstandby_m3m4_v1.c
 CHIP_CSRCS += stm32_pmsleep_m3m4_v1.c
 
-ifeq ($(CONFIG_STM32_USART),y)
 ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_USART_V1) \
             $(CONFIG_STM32_HAVE_IP_USART_V2) \
             $(CONFIG_STM32_HAVE_IP_USART_V3) \
             $(CONFIG_STM32_HAVE_IP_USART_V4)),)
 CHIP_CSRCS += stm32_serial_m3m4_v1v2v3v4.c
-endif
 endif
 
 ifeq ($(CONFIG_STM32_DMA),y)
