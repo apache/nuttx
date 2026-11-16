@@ -87,6 +87,13 @@ int group_continue(FAR struct tcb_s *tcb);
 
 FAR struct task_group_s *task_getgroup(pid_t pid);
 
+/* Process groups and sessions */
+
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+bool group_in_pgrp(FAR struct tcb_s *tcb, pid_t pgid);
+int  group_setpgid(pid_t pid, pid_t pgid);
+#endif
+
 /* Signaling group members */
 
 int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo,

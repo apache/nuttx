@@ -34,10 +34,16 @@ CSRCS += lib_getpagesize.c lib_setpriority.c lib_getpriority.c
 CSRCS += lib_futimes.c lib_lutimes.c lib_gethostname.c lib_sethostname.c
 CSRCS += lib_domainname.c
 CSRCS += lib_fchownat.c lib_linkat.c lib_readlinkat.c lib_symlinkat.c
-CSRCS += lib_unlinkat.c lib_usleep.c lib_getpgrp.c lib_getpgid.c
-CSRCS += lib_getsid.c lib_setpgid.c lib_setpgrp.c lib_setsid.c
+CSRCS += lib_unlinkat.c lib_usleep.c lib_getpgrp.c lib_setpgrp.c
 CSRCS += lib_lockf.c lib_flock.c lib_getpass.c
 CSRCS += lib_chdir.c lib_fchdir.c lib_confstr.c lib_ulimit.c
+
+# With process groups, the kernel has getpgid(), getsid(), setpgid() and
+# setsid().
+
+ifneq ($(CONFIG_SCHED_PROCESS_GROUPS),y)
+CSRCS += lib_getpgid.c lib_getsid.c lib_setpgid.c lib_setsid.c
+endif
 
 ifeq ($(CONFIG_SCHED_WAITPID),y)
 CSRCS += lib_wait.c

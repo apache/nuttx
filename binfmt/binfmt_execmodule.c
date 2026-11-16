@@ -442,6 +442,14 @@ int exec_module(FAR struct binary_s *binp,
     }
 #endif
 
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+  /* After an exec(), the parent cannot change the process group of the
+   * process.
+   */
+
+  tcb->group->tg_flags |= GROUP_FLAG_EXECED;
+#endif
+
   /* Then activate the task at the provided priority */
 
   nxtask_activate(tcb);

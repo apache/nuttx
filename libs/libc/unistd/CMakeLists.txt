@@ -64,11 +64,7 @@ set(SRCS
     lib_unlinkat.c
     lib_usleep.c
     lib_getpgrp.c
-    lib_getpgid.c
-    lib_getsid.c
-    lib_setpgid.c
     lib_setpgrp.c
-    lib_setsid.c
     lib_lockf.c
     lib_flock.c
     lib_getpass.c
@@ -76,6 +72,13 @@ set(SRCS
     lib_fchdir.c
     lib_confstr.c
     lib_ulimit.c)
+
+# With process groups, the kernel has getpgid(), getsid(), setpgid() and
+# setsid().
+
+if(NOT CONFIG_SCHED_PROCESS_GROUPS)
+  list(APPEND SRCS lib_getpgid.c lib_getsid.c lib_setpgid.c lib_setsid.c)
+endif()
 
 if(CONFIG_SCHED_WAITPID)
   list(APPEND SRCS lib_wait.c)

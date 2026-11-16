@@ -125,6 +125,7 @@
 #define GROUP_FLAG_SECURE_EXEC     (1 << 5)                      /* Bit 5: Secure (setuid/setgid) executable */
 #define GROUP_FLAG_DUMPABLE        (1 << 6)                      /* Bit 6: Process may be traced / coredumped */
 #define GROUP_FLAG_VFORK           (1 << 7)                      /* Bit 7: In the address environment of the vfork() parent */
+#define GROUP_FLAG_EXECED          (1 << 8)                      /* Bit 8: The process image came from exec() */
 
 /* Values for struct child_status_s ch_flags */
 
@@ -462,11 +463,18 @@ struct task_group_s
 {
   pid_t tg_pid;                     /* The ID of the task within the group      */
   pid_t tg_ppid;                    /* This is the ID of the parent thread      */
-  uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
+  uint16_t tg_flags;                /* See GROUP_FLAG_* definitions             */
 #ifdef CONFIG_SCHED_CAPABILITIES
   uint8_t tg_caps;                  /* See PR_CAP_* definitions                 */
 #endif
   mode_t  tg_umask;                 /* File mode creation mask (umask())        */
+
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+  /* Process group and session (setpgid() and setsid()) *********************/
+
+  pid_t   tg_pgid;                  /* Process group ID                         */
+  pid_t   tg_sid;                   /* Session ID                               */
+#endif
 
   /* Resource limits (getrlimit() and setrlimit()) **************************/
 
