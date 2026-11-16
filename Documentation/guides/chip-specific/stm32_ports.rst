@@ -230,6 +230,39 @@ that the chip Kconfig ``select``-s next to its timer IP-core selector.  The
 16-bit cases - TIM2 on STM32F10xx/STM32L15xx/STM32L0 and TIM5 on
 STM32F10xx/STM32F30xx - simply leave them unset.
 
+Ethernet drivers
+================
+
+The Ethernet MAC drivers of F1, F2, F4 (``common/stm32/stm32_eth_m3m4_v1.c``),
+F7 (``stm32f7/stm32_ethernet.c``) and H5, H7, N6
+(``common/stm32/stm32_eth_v2.c``) are lower half drivers of the network upper
+half (``include/nuttx/net/netdev_lowerhalf.h``, see
+:ref:`Network Drivers <netdriver>`).  New STM32 network drivers must use this
+interface too.
+
+The drivers send and receive the IOBs of the network in place.  Each DMA
+descriptor holds one IOB and a frame spans ``NSEGS`` descriptors, where
+``NSEGS`` is ``CONFIG_NET_ETH_PKTSIZE + 4`` divided by the IOB data size
+that the DMA can use, rounded up.  The frames are received in the interrupt work
+(``NETDEV_RX_DIRECT``).  When no IOB is free, the received frame is
+dropped.  ``CONFIG_STM32_ETH_NRXDESC`` and
+``CONFIG_STM32_ETH_NTXDESC`` are the number of RX and TX frames (H5, H7 and
+N6 only, the other families use 8 and 4).  The build fails if the IOB pool
+is too small for the rings.  Recommended settings:
+
+- ``CONFIG_IOB_NBUFFERS=100``: the rings hold ``(NRXDESC + 1) * NSEGS +
+  NTXDESC`` IOBs, 76 with the default 8 RX and 4 TX frames of up to 1514
+  bytes, and the network keeps the others,
+- ``CONFIG_IOB_THROTTLE=8``: the IOBs that the driver needs to refill the
+  RX ring for one frame.  Without this reserve the TCP receive window takes
+  all free IOBs and received frames are dropped.
+
+With the D-Cache (``CONFIG_ARMV7M_DCACHE`` or ``CONFIG_ARMV8M_DCACHE``),
+also in the write-through mode, ``CONFIG_IOB_ALIGNMENT`` and
+``CONFIG_IOB_BUFSIZE`` must be multiples of the D-Cache line size, for
+example ``CONFIG_IOB_ALIGNMENT=32`` and ``CONFIG_IOB_BUFSIZE=224``: the RX
+DMA corrupts other data in the D-Cache lines of its buffers.
+
 Family peripheral inventory
 ===========================
 
@@ -349,7 +382,7 @@ CRC           to be done     not supported
 DAC           v1             arch/arm/src/common/stm32/stm32_dac_m3m4_v1.c          
 DBGMCU        v1             not supported                                          
 DMA           v1             arch/arm/src/common/stm32/stm32_dma_m3m4_v1_8ch.c      
-ETH           to be done     arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c          
+ETH           v1             arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c          
 EXTI          v1             arch/arm/src/common/stm32/stm32_exti_gpio_m3m4_v1v2.c  
 FLASH         F1/F3          arch/arm/src/common/stm32/stm32_flash_m3m4_f1f3.c      
 FSMC          v1             arch/arm/src/common/stm32/stm32_fsmc_m3m4_v1.c         
@@ -378,7 +411,7 @@ CAN/FDCAN     bxCAN         arch/arm/src/common/stm32/stm32_can_m3m4_v1.c
 CRYP          v1            arch/arm/src/common/stm32/stm32_aes_m3m4_v1.c          
 DAC           v1            arch/arm/src/common/stm32/stm32_dac_m3m4_v1.c          
 DMA           v2            arch/arm/src/common/stm32/stm32_dma_m3m4_v2_stream.c   
-ETH           to be done    arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c          
+ETH           v1            arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c          
 EXTI          v1            arch/arm/src/common/stm32/stm32_exti_gpio_m3m4_v1v2.c  
 FLASH         F2/F4         arch/arm/src/common/stm32/stm32_flash_m3m4_f2f4.c      
 FSMC          v1            arch/arm/src/common/stm32/stm32_fsmc_m3m4_v1.c         
@@ -439,7 +472,7 @@ CRYP          v1            arch/arm/src/common/stm32/stm32_aes_m3m4_v1.c
 DAC           v1            arch/arm/src/common/stm32/stm32_dac_m3m4_v1.c         
 DMA           v2            arch/arm/src/common/stm32/stm32_dma_m3m4_v2_stream.c  
 DMA2D         v1            arch/arm/src/common/stm32/stm32_dma2d_v1.c       
-ETH           to be done    arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c         
+ETH           v1            arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c         
 EXTI          v1            arch/arm/src/common/stm32/stm32_exti_gpio_m3m4_v1v2.c 
 FLASH         F2/F4         arch/arm/src/common/stm32/stm32_flash_m3m4_f2f4.c     
 FMC/FSMC      v1            arch/arm/src/common/stm32/stm32_fmc_m3m4_v1.c         

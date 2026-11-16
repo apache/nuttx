@@ -196,6 +196,13 @@ are nearly identical. Only changes that are a direct consequence of the
 STM32 F7 D-Cache were required to make the driver work on the STM32 F7. 
 Those changes are summarized below.
 
+.. note::
+
+   Both drivers now send and receive the IOBs of the network in place (see
+   :doc:`stm32_ports`): the RX and TX packet buffers described below are
+   gone.  The F7 driver keeps the padded descriptors, cleans the TX IOBs
+   and invalidates the RX IOBs.
+
 Reorganize DMA Data Structure
 -----------------------------
 
