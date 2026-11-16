@@ -246,6 +246,13 @@ canceled, ``nxsem_wait()`` will return ``-ECANCELED`` and the correct behavior
 to let the error ripple back to the cancellation point where the thread/task
 will be canceled after all resources have been cleaned up.
 
+There is one exception.  In a system call of a protected or a kernel build, a
+deferred cancellation does not end an uninterruptible wait, as a signal does
+not end it.  The memory of such a wait can still be in use, for example a
+request that a device completes into the kernel stack of the thread.  The
+cancellation stays pending and acts when the thread leaves the cancellation
+point, after the wait is complete.  The wait of ``pthread_join()`` still ends.
+
 Many internal OS functions use ``nxsem_wait_uninterruptible()`` for waiting.
 ``nxsem_wait_uninterruptible()`` is defined in ``include/nuttx/semaphore.h``.
 ``nxsem_wait_uninterruptible()`` wraps a call to ``nxsem_wait()`` in
