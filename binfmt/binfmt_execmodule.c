@@ -208,6 +208,7 @@ int exec_module(FAR struct binary_s *binp,
   FAR struct arch_addrenv_s *addrenv = &binp->addrenv->addrenv;
   FAR void *vheap;
   char name[PATH_MAX];
+  posix_spawnattr_t kattr;
 #endif
   FAR void *stackaddr = NULL;
 #if defined(CONFIG_BINFMT_LOADABLE) && defined(CONFIG_BUILD_FLAT)
@@ -269,6 +270,16 @@ int exec_module(FAR struct binary_s *binp,
       filename = name;
     }
 
+  /* spawn_execattrs() runs in the address environment of the new task:
+   * copy the attributes of the caller.
+   */
+
+  if (attr != NULL)
+    {
+      kattr = *attr;
+      attr  = &kattr;
+    }
+
   /* Instantiate the address environment containing the user heap */
 
   ret = addrenv_select(binp->addrenv, &binp->oldenv);
@@ -326,6 +337,9 @@ int exec_module(FAR struct binary_s *binp,
   binfmt_freeactions(actions);
   binfmt_freeargv(argv, binp->argv);
   binfmt_freeenv(envp);
+  actions = NULL;
+  argv    = NULL;
+  envp    = NULL;
 
   /* The task has its arguments: the list of the loader is not needed */
 
@@ -391,17 +405,6 @@ int exec_module(FAR struct binary_s *binp,
 
   pid = tcb->pid;
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-  /* Restore the address environment of the caller */
-
-  ret = addrenv_restore(binp->oldenv);
-  if (ret < 0)
-    {
-      berr("ERROR: addrenv_restore() failed: %d\n", ret);
-      goto errout_with_tcbinit;
-    }
-#endif
-
   /* Set the attributes */
 
   if (attr)
@@ -412,6 +415,12 @@ int exec_module(FAR struct binary_s *binp,
           goto errout_with_tcbinit;
         }
     }
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+  /* Restore the address environment of the caller */
+
+  addrenv_restore(binp->oldenv);
+#endif
 
 #ifdef CONFIG_BINFMT_LOADABLE
   tcb->group->tg_bininfo = binp;
@@ -442,6 +451,10 @@ errout_with_tcbinit:
       tcb->stack_alloc_ptr = NULL;
     }
 #endif
+
+  /* nxtask_uninit() releases the TCB and its address environment.  The
+   * copied lists are already released.
+   */
 
   nxtask_uninit(tcb);
   tcb = NULL;
