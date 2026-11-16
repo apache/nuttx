@@ -435,7 +435,18 @@ static int virtio_snd_send_pcm(FAR struct virtio_snd_dev_s *sdev,
       vb[1].len = sizeof(*(buf->status));
     }
 
+  /* virtqueue_add_buffer() does not check the number of free descriptors.
+   * This can run in the completion interrupt, so do not wait: the caller
+   * keeps the buffer.
+   */
+
   flags = spin_lock_irqsave(&priv->lock);
+  if (vq->vq_free_cnt < nitems(vb))
+    {
+      spin_unlock_irqrestore(&priv->lock, flags);
+      return -ENOSPC;
+    }
+
   virtqueue_add_buffer(vq, vb, 1, 1, buf);
   virtqueue_kick(vq);
   sdev->cache_buffers++;
