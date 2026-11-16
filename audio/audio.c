@@ -297,6 +297,7 @@ static int audio_close(FAR struct file *filep)
   FAR struct audio_openpriv_s *priv = filep->f_priv;
   FAR struct audio_openpriv_s *curr;
   FAR struct audio_openpriv_s *prev;
+  FAR struct audio_status_s *status = NULL;
   irqstate_t flags;
   int ret;
 
@@ -325,10 +326,21 @@ static int audio_close(FAR struct file *filep)
     }
 
   /*  If the reference head decrement to NULL,
-   *  then uninitialize the driver.
+   *  then uninitialize the driver.  A completion after this sees no status
+   *  and is dropped.
    */
 
   if (upper->head == NULL)
+    {
+      status = upper->status;
+      upper->status = NULL;
+    }
+
+  spin_unlock_irqrestore(&upper->spinlock, flags);
+
+  /* Shut down and free outside the spinlock: both can sleep */
+
+  if (status != NULL)
     {
       FAR struct audio_lowerhalf_s *lower = upper->dev;
 
@@ -338,11 +350,8 @@ static int audio_close(FAR struct file *filep)
       audinfo("calling shutdown\n");
 
       lower->ops->shutdown(lower);
-      kumm_free(upper->status);
-      upper->status = NULL;
+      kumm_free(status);
     }
-
-  spin_unlock_irqrestore(&upper->spinlock, flags);
 
   /* Clean up message queue */
 
