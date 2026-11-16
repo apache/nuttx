@@ -32,13 +32,23 @@
 #ifdef CONFIG_RPMSG_PING
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct rpmsg_ping_dev_s
+{
+  struct rpmsg_endpoint ept;
+  struct rpmsg_endpoint ept_rt;
+};
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 int rpmsg_ping_init(FAR struct rpmsg_device *rdev,
-                    FAR struct rpmsg_endpoint *ept);
-void rpmsg_ping_deinit(FAR struct rpmsg_endpoint *ept);
-int rpmsg_ping(FAR struct rpmsg_endpoint *ept,
+                    FAR struct rpmsg_ping_dev_s *dev);
+void rpmsg_ping_deinit(FAR struct rpmsg_ping_dev_s *dev);
+int rpmsg_ping(FAR struct rpmsg_ping_dev_s *dev,
                FAR const struct rpmsg_ping_s *ping);
 
 #endif /* CONFIG_RPMSG_PING */
