@@ -20,16 +20,8 @@
 #
 ############################################################################
 
-# If NuttX SBI is needed
-
-ifeq ($(CONFIG_NUTTSBI),y)
-
-SBI_ASRCS += sbi_mtrap.S sbi_vectors.S sbi_head.S
-SBI_CSRCS += sbi_mscratch.c sbi_mcall.c sbi_start.c
-SBI_CSRCS += sbi_mexception.c sbi_mtimer.c sbi_ipi.c
-
-INCLUDES  += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)sbi
-
-SBI_DIR   := sbi
-
+ifeq ($(CONFIG_OPENSBI),y)
+include sbi/opensbi/Make.defs
+else ifeq ($(CONFIG_NUTTSBI),y)
+include sbi/nuttsbi/Make.defs
 endif

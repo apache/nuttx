@@ -1,5 +1,5 @@
 ############################################################################
-# arch/risc-v/src/opensbi/Kconfig
+# arch/risc-v/src/sbi/nuttsbi/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,20 +19,11 @@
 # under the License.
 #
 ############################################################################
-#
-# For a description of the syntax of this configuration file,
-# see the file kconfig-language.txt in the NuttX tools repository.
-#
 
-config OPENSBI
-	bool "OpenSBI support"
-	depends on ARCH_RISCV && ALLOW_BSD_COMPONENTS
-	default n
-	---help---
-		Enable or disable Open Source Supervisor Binary Interface (OpenSBI) features
-		for RISC-V.
+SBI_ASRCS += sbi_mtrap.S sbi_vectors.S sbi_head.S
+SBI_CSRCS += sbi_mscratch.c sbi_mcall.c sbi_start.c
+SBI_CSRCS += sbi_mexception.c sbi_mtimer.c sbi_ipi.c
 
-config OPENSBI_DOMAINS
-	bool "Support multiple OpenSBI boot domains"
-	depends on OPENSBI
-	default n
+INCLUDES  += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)sbi$(DELIM)nuttsbi
+
+SBI_DIR   := sbi/nuttsbi

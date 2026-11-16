@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/sbi/sbi_head.S
+ * arch/risc-v/src/sbi/nuttsbi/sbi_head.S
  *
  * SPDX-License-Identifier: Apache-2.0
  *

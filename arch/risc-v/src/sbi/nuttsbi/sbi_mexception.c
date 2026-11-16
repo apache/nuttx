@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/sbi/sbi_machine_vectors.S
+ * arch/risc-v/src/sbi/nuttsbi/sbi_mexception.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,18 +24,21 @@
  * Included Files
  ****************************************************************************/
 
-  .section .text
-  .balign  8
-  .global  __mtrap_vec
+#include <nuttx/config.h>
+
+#include <nuttx/debug.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Name: __mtrap_vec
- *
- * Description:
- *   All M-mode exceptions and interrupts will be handled from here.
- *
+ * Public Functions
  ****************************************************************************/
 
-__mtrap_vec:
-  j    machine_trap
-  nop
+void sbi_mexception(uintreg_t mcause, uintreg_t *mepc, uintreg_t tval)
+{
+  sinfo("cauz=%"PRIxREG" epc=%p tval=0x%"PRIxREG"\n", mcause, mepc, tval);
+
+  while (1)
+    {
+      __asm__ __volatile__("wfi");
+    }
+}

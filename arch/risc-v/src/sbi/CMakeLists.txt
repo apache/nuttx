@@ -20,14 +20,8 @@
 #
 # ##############################################################################
 
-if(CONFIG_NUTTSBI)
-
-  set(SRCS sbi_head.S sbi_mtrap.S sbi_vectors.S sbi_start.c)
-
-  list(APPEND SRCS sbi_mtimer.c sbi_mexception.c sbi_mcall.c sbi_mscratch.c)
-
-  list(APPEND SRCS sbi_ipi.c)
-
-  target_sources(arch PRIVATE ${SRCS})
-
+if(CONFIG_OPENSBI)
+  add_subdirectory(opensbi)
+elseif(CONFIG_NUTTSBI)
+  add_subdirectory(nuttsbi)
 endif()
