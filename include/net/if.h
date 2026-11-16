@@ -237,6 +237,19 @@ struct can_ioctl_state_s
   enum can_ioctl_state_e state;
 };
 
+enum can_ioctl_transv_state_e
+{
+  CAN_TRANSV_SLEEP   = 0,     /* The can/lin transceiver sleep state */
+  CAN_TRANSV_STANDBY = 1,     /* The can/lin transceiver standby state */
+  CAN_TRANSV_NORMAL  = 2,     /* The can/lin transceiver normal state */
+};
+
+struct can_ioctl_transv_state_s
+{
+  uintptr_t priv;             /* This is private data. */
+  enum can_ioctl_transv_state_e state;
+};
+
 /* Fault confinement and error counters, SIOCGCANERRORS ioctl command.
  * WARNING is error-active with either error counter at or above 96;
  * PASSIVE and BUSOFF follow the controller's own state.
@@ -284,6 +297,10 @@ struct lifreq
     struct can_ioctl_filter_s  lifru_can_filter;     /* CAN filter request data */
     struct can_ioctl_state_s   lifru_can_state;      /* CAN/LIN controller state */
     struct can_ioctl_errors_s  lifru_can_errors;     /* CAN error counters */
+
+    /* CAN/LIN transceiver state */
+
+    struct can_ioctl_transv_state_s lifru_can_transv_state;
   } lifr_ifru;
 };
 
@@ -343,6 +360,10 @@ struct ifreq
     struct can_ioctl_filter_s  ifru_can_filter;     /* CAN filter request data */
     struct can_ioctl_state_s   ifru_can_state;      /* CAN/LIN controller state */
     struct can_ioctl_errors_s  ifru_can_errors;     /* CAN error counters */
+
+    /* CAN/LIN transceiver state */
+
+    struct can_ioctl_transv_state_s ifru_can_transv_state;
     FAR void                  *ifru_data;           /* For use by interface */
   } ifr_ifru;
 };
