@@ -17,7 +17,8 @@ Permissions
 
 When ``CONFIG_FS_PERMISSION`` is enabled, tmpfs stores per-object owner, group,
 and mode and enforces them on path operations inside the volume.  It also
-implements the optional ``mountpt_operations.permission`` hook.
+implements the optional ``mountpt_operations.permission`` hook.  The root
+directory of a new volume has the mode 01777 (``drwxrwxrwt``).
 
 Access into the mount from the pseudoFS is gated by the VFS (parent and
 mountpoint ``X_OK``).  See :ref:`file-permission`.
