@@ -160,6 +160,21 @@ FAR void *up_vhost_iomap(uint64_t pa, FAR size_t *avail);
 
 void vhost_register_drivers(void);
 
+/****************************************************************************
+ * Name: vhost_gpio_get_ioe
+ *
+ * Description:
+ *   Return the local ioexpander for the bus index carried in a vhost GPIO
+ *   device's config space (struct vhost_gpio_config_s bus), or NULL.
+ *   Implemented by board logic.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DRIVERS_VHOST_GPIO
+struct ioexpander_dev_s;
+FAR struct ioexpander_dev_s *vhost_gpio_get_ioe(int index);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
