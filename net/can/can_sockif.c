@@ -68,4 +68,39 @@ can_sockif(sa_family_t family, int type, int protocol)
   return &g_can_raw_sockif;
 }
 
+/****************************************************************************
+ * Name: can_set_rx_callback
+ *
+ * Description:
+ *   register rx sync callback to the can connection structures.
+ *
+ * Input Parameters:
+ *   psock    - The socket structure of the CAN connection
+ *   callback - The callback function to be called when a frame is received
+ *   args     - The argument to be passed to the callback function
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
+ *   returned.
+ *
+ ****************************************************************************/
+
+int can_set_rx_callback(FAR struct socket *psock, can_rx_cb_t callback,
+                        FAR void *args)
+{
+  FAR struct can_conn_s *conn;
+
+  if (psock == NULL || psock->s_conn == NULL || callback == NULL)
+    {
+      return -EBADF;
+    }
+
+  conn = psock->s_conn;
+
+  conn->rxcb  = callback;
+  conn->rxarg = args;
+
+  return OK;
+}
+
 #endif /* CONFIG_NET_CAN */
