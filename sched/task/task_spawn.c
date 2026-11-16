@@ -301,8 +301,10 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
  *     It will contains these attributes, not all of which are supported by
  *     NuttX:
  *
- *     - POSIX_SPAWN_SETPGROUP:  Setting of the new task's process group is
- *       not supported.  NuttX does not support process groups.
+ *     - POSIX_SPAWN_SETPGROUP:  Set the new task's process group
+ *       (CONFIG_SCHED_PROCESS_GROUPS, else ignored).
+ *     - POSIX_SPAWN_SETSID: The new task is the leader of a new session
+ *       (CONFIG_SCHED_PROCESS_GROUPS, else ignored).
  *     - POSIX_SPAWN_SETSCHEDPARAM: Set new tasks priority to the sched_param
  *       value.
  *     - POSIX_SPAWN_SETSCHEDULER: Set the new task's scheduler policy to

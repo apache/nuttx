@@ -178,8 +178,10 @@ static int nxposix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
  *     It will contains these attributes, not all of which are supported by
  *     NuttX:
  *
- *     - POSIX_SPAWN_SETPGROUP:  Setting of the new task's process group is
- *       not supported.  NuttX does not support process groups.
+ *     - POSIX_SPAWN_SETPGROUP:  Set the new task's process group
+ *       (CONFIG_SCHED_PROCESS_GROUPS, else ignored).
+ *     - POSIX_SPAWN_SETSID: The new task is the leader of a new session
+ *       (CONFIG_SCHED_PROCESS_GROUPS, else ignored).
  *     - POSIX_SPAWN_SETSCHEDPARAM: Set new tasks priority to the sched_param
  *       value.
  *     - POSIX_SPAWN_SETSCHEDULER: Set the new task's scheduler policy to
@@ -212,7 +214,8 @@ static int nxposix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
  *     depending upon the setting of CONFIG_LIBC_ENVPATH: If
  *     CONFIG_LIBC_ENVPATH is defined, then only posix_spawnp() behavior
  *     is supported; otherwise, only posix_spawn behavior is supported.
- *   - Process groups are not supported (POSIX_SPAWN_SETPGROUP).
+ *   - Process groups need CONFIG_SCHED_PROCESS_GROUPS
+ *     (POSIX_SPAWN_SETPGROUP).
  *   - Effective user IDs are not supported (POSIX_SPAWN_RESETIDS).
  *   - Signal default actions cannot be modified in the newly task executed
  *     because NuttX does not support default signal actions

@@ -872,7 +872,8 @@ config SCHED_PROCESS_GROUPS
 		POSIX job control defines them.  setpgid(), getpgid(), setsid()
 		and getsid() move from the C library to the kernel.  kill() with
 		a pid of 0 or less than -1, and killpg(), send the signal to each
-		process of the process group.
+		process of the process group.  posix_spawn() supports
+		POSIX_SPAWN_SETPGROUP and POSIX_SPAWN_SETSID.
 
 		A task that a user task starts gets the process group and the
 		session of that task, and exec() keeps them.  A task that the

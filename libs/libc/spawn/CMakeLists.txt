@@ -46,6 +46,10 @@ if(NOT CONFIG_BUILD_KERNEL)
   list(APPEND SRCS lib_psa_getstackaddr.c lib_psa_setstackaddr.c)
 endif()
 
+if(CONFIG_SCHED_PROCESS_GROUPS)
+  list(APPEND SRCS lib_psa_getpgroup.c lib_psa_setpgroup.c)
+endif()
+
 if(CONFIG_DEBUG_FEATURES)
   list(APPEND SRCS lib_psfa_dump.c lib_psa_dump.c)
 endif()
