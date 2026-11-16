@@ -210,7 +210,7 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size);
  * Input Parameters:
  *   handle - The handle previously returned by gran_initialize
  *   size   - The size of the memory region to allocate.
- *   align  - The size of the memory region to align.
+ *   align  - The alignment in bytes: a power of two, or zero for none.
  *
  * Returned Value:
  *   On success, a non-NULL pointer to the allocated memory is returned;

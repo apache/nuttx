@@ -92,7 +92,15 @@ FAR void *gran_alloc_align(GRAN_HANDLE handle, size_t size, size_t align)
   int ret;
 
   DEBUGASSERT(gran);
-  nalign = NGRANULE(gran, align);
+
+  /* As in mm_memalign(): a power of two, or zero for no alignment */
+
+  if ((align & (align - 1)) != 0)
+    {
+      return NULL;
+    }
+
+  nalign = align ? NGRANULE(gran, align) : 1;
   ngran = NGRANULE(gran, size);
 
   naligned_up = ngran + (nalign - 1);
