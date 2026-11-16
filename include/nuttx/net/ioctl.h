@@ -129,6 +129,7 @@
 #define SIOCSCANSTATE      _SIOC(0x0042)  /* Set the LIN/CAN controller state */
 #define SIOCGCANERRORS     _SIOC(0x0045)  /* Get CAN error counters and fault
                                            * confinement state */
+#define SIOCCANOFLUSH      _SIOC(0x0048)  /* Flush data written but not transmitted */
 
 /* Network socket control ***************************************************/
 
