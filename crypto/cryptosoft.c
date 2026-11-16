@@ -1298,7 +1298,7 @@ int swcr_authenc(FAR struct cryptop *crp)
           crde->crd_skip = 0;
         }
     }
-  else
+  else if (exf->ivsize > 0)
     {
       crde->crd_flags |= CRD_F_IV_PRESENT;
       crde->crd_skip = exf->blocksize;
