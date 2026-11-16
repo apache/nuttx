@@ -788,6 +788,8 @@ static ssize_t net_ioctl_ifreq_arglen(uint8_t domain, int cmd)
       case SIOCGCANSTATE:
       case SIOCSCANSTATE:
       case SIOCGCANERRORS:
+      case SIOCGCANTRSVSTATE:
+      case SIOCSCANTRSVSTATE:
       case SIOCCANOFLUSH:
       case SIOCSIFNAME:
       case SIOCGIFNAME:
@@ -1375,6 +1377,8 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCGCANSTATE:      /* Get state from a CAN/LIN controller */
       case SIOCSCANSTATE:      /* Set the LIN/CAN controller state */
       case SIOCGCANERRORS:     /* Get CAN error counters and state */
+      case SIOCGCANTRSVSTATE:  /* Get state from CAN transceiver */
+      case SIOCSCANTRSVSTATE:  /* Set the CAN transceiver state */
       case SIOCCANOFLUSH:      /* Flush data written but not transmitted */
         if (dev->d_ioctl)
           {
