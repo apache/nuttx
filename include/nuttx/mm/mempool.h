@@ -43,11 +43,11 @@
  ****************************************************************************/
 
 #if CONFIG_MM_BACKTRACE >= 0
-#  define MEMPOOL_REALBLOCKSIZE(pool) (ALIGN_UP((pool)->blocksize + \
-                                       sizeof(struct mempool_backtrace_s), \
-                                       MM_ALIGN))
+#  define MEMPOOL_REALBLOCKSIZE(s) (ALIGN_UP((s) + \
+                                    sizeof(struct mempool_backtrace_s), \
+                                    MM_ALIGN))
 #else
-#  define MEMPOOL_REALBLOCKSIZE(pool) ((pool)->blocksize)
+#  define MEMPOOL_REALBLOCKSIZE(s) (s)
 #endif
 
 /****************************************************************************
