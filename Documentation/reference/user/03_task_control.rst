@@ -183,8 +183,8 @@ Functions
      for any task to complete execution. With
      ``CONFIG_SCHED_HAVE_PARENT``, ``waitpid()`` will use ``SIGCHLD`` and
      can, therefore, wait for any child of the parent to complete. The
-     implementation is incomplete in either case, however: NuttX does not
-     support any concept of process groups. Nor does NuttX retain the
+     implementation is incomplete in either case, however: it does not
+     support process groups. Nor does NuttX retain the
      status of exited tasks so if ``waitpid()`` is called after a task has
      exited, then no status will be available. The options argument is
      currently ignored.
@@ -323,8 +323,8 @@ Functions
      little more compliant to specifications. ``waitpid()`` simply
      supports waiting a specific child task (``P_PID`` or for any child
      task ``P_ALL`` to complete execution. ``SIGCHLD`` is used. The
-     implementation is incomplete in either case, however: NuttX does not
-     support any concept of process groups. Nor does NuttX retain the
+     implementation is incomplete in either case, however: it does not
+     support process groups. Nor does NuttX retain the
      status of exited tasks so if ``waitpid()`` is called after a task has
      exited, then no status will be available. The options argument is
      currently ignored.

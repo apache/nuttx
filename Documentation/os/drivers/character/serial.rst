@@ -38,13 +38,15 @@ Serial Device Drivers
 -  **Job control / controlling terminal**. When ``CONFIG_TTY_SIGINT``
    or ``CONFIG_TTY_SIGTSTP`` is enabled, the TTY layer can generate
    ``SIGINT`` (Ctrl-C) and ``SIGTSTP`` (Ctrl-Z) for a foreground task.
-   NuttX does not implement POSIX sessions or process groups, so the
-   foreground process group is collapsed onto a single PID stored in
-   the driver (``pgrp == pid``, one member per group); the signal is
-   delivered with ``nxsig_kill(pid, signo)``.  The driver discards the
-   character that sends the signal, so the task does not read it.
+   The driver keeps the ID of the foreground process group.  With
+   ``CONFIG_SCHED_PROCESS_GROUPS``, each process of that process group
+   gets the signal.  An ID that no process group has is a process ID
+   (NSH sets one with ``TIOCSCTTY``): that process gets the signal.
+   Without the option, a process group is one process, and the process
+   with that ID gets the signal.  The driver discards the character
+   that sends the signal, so the task does not read it.
 
-   The following terminal ``ioctl`` commands manage this PID:
+   The following terminal ``ioctl`` commands manage this ID:
 
    -  ``TIOCSCTTY`` makes the terminal the controlling terminal.  The
       ``arg`` is treated as a flag: a value of ``0`` selects the
@@ -59,20 +61,23 @@ Serial Device Drivers
       ``tcsetpgrp()`` passes it, ``arg`` points to the PID (``pid_t *``);
       a ``NULL`` pointer or a PID that is not positive gives ``EINVAL``.
 
-   The C library exposes these through ``tcgetpgrp()``, ``tcsetpgrp()``,
-   ``tcgetsid()``, ``setsid()``, ``getsid()`` and ``setpgid()``.  A process
-   group is one process, so ``kill(-pgrp, signo)`` and ``killpg()`` send
-   the signal to the process ``pgrp``, and TTY signals go to the single
-   foreground PID.
+   The C library exposes these through ``tcgetpgrp()``, ``tcsetpgrp()``
+   and ``tcgetsid()``.  With ``CONFIG_SCHED_PROCESS_GROUPS``, ``setpgid()``,
+   ``getpgid()``, ``setsid()`` and ``getsid()`` keep the process groups
+   and the sessions of POSIX, and ``kill(-pgrp, signo)`` and ``killpg()``
+   send the signal to each process of the process group.  Without it, a
+   process group is one process: ``setpgid()`` accepts only the process
+   ID as the process group ID, and ``kill(-pgrp, signo)`` and
+   ``killpg()`` send the signal to the process ``pgrp``.
 
 -  **Window size**. ``TIOCGWINSZ`` returns the terminal size in a
    ``struct winsize`` and ``TIOCSWINSZ`` sets it.  The size is 0 rows
    and 0 columns until a program sets it (for example ``openpty()`` or
    a remote login server).  A change of the size sends ``SIGWINCH`` to
-   the foreground PID when ``CONFIG_TTY_SIGINT`` or
+   the foreground process group, as above, when ``CONFIG_TTY_SIGINT`` or
    ``CONFIG_TTY_SIGTSTP`` is enabled.  A pseudo-terminal keeps one size
-   for the master and the slave; the signal goes to the foreground PID
-   of the slave.
+   for the master and the slave; the signal goes to the foreground
+   process group of the slave.
 
 -  **User Access**. Serial drivers are, ultimately, normal
    `character drivers <#chardrivers>`__ and are accessed as other

@@ -633,8 +633,11 @@ Functions
     ``spawn.h``. It will contains these attributes, not all of which are
     supported by NuttX:
 
-    -  ``POSIX_SPAWN_SETPGROUP``: Setting of the new task's process group
-       is not supported. NuttX does not support process groups.
+    -  ``POSIX_SPAWN_SETPGROUP``: The new task joins the process group of
+       ``posix_spawnattr_setpgroup()``, or a new process group if it is
+       ``0`` (with ``CONFIG_SCHED_PROCESS_GROUPS``, else ignored).
+    -  ``POSIX_SPAWN_SETSID``: The new task is the leader of a new
+       session (with ``CONFIG_SCHED_PROCESS_GROUPS``, else ignored).
     -  ``POSIX_SPAWN_SETSCHEDPARAM``: Set new tasks priority to the
        ``sched_param`` value.
     -  ``POSIX_SPAWN_SETSCHEDULER``: Set the new task's scheduler policy
@@ -679,8 +682,8 @@ Functions
      ``CONFIG_LIBC_ENVPATH`` is defined, then only ``posix_spawnp()``
      behavior is supported; otherwise, only ``posix_spawn()`` behavior is
      supported.
-  -  Process groups are not supported (See ``POSIX_SPAWN_SETPGROUP``
-     above).
+  -  Process groups need ``CONFIG_SCHED_PROCESS_GROUPS`` (See
+     ``POSIX_SPAWN_SETPGROUP`` above).
   -  Effective user IDs are not supported (See ``POSIX_SPAWN_RESETIDS``
      above).
   -  Signal default actions cannot be modified in the newly task executed
@@ -928,8 +931,11 @@ Functions
      ``spawn.h``. It will contains these attributes, not all of which are
      supported by NuttX:
 
-     -  ``POSIX_SPAWN_SETPGROUP``: Setting of the new task's process group
-        is not supported. NuttX does not support process groups.
+     -  ``POSIX_SPAWN_SETPGROUP``: The new task joins the process group of
+        ``posix_spawnattr_setpgroup()``, or a new process group if it is
+        ``0`` (with ``CONFIG_SCHED_PROCESS_GROUPS``, else ignored).
+     -  ``POSIX_SPAWN_SETSID``: The new task is the leader of a new
+        session (with ``CONFIG_SCHED_PROCESS_GROUPS``, else ignored).
      -  ``POSIX_SPAWN_SETSCHEDPARAM``: Set new tasks priority to the
         ``sched_param`` value.
      -  ``POSIX_SPAWN_SETSCHEDULER``: Set the new task's scheduler policy
