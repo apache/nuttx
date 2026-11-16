@@ -322,14 +322,25 @@ static int can_input_conn(FAR struct net_driver_s *dev,
     {
       /* Synchronous receive callback: deliver the frame directly.  A
        * return of OK means the callback consumed the frame.
+       *
+       * Detach the current buffer first so that a nested transmit from
+       * inside the callback does not reuse dev->d_iob, then restore it.
        */
 
+      FAR uint8_t *frame = dev->d_buf;
+      FAR struct iob_s *iob = dev->d_iob;
+
+      dev->d_buf = NULL;
+      dev->d_iob = NULL;
       flags = CAN_NEWDATA;
-      ret = conn->rxcb(conn->rxarg, dev->d_buf);
+      ret = conn->rxcb(conn->rxarg, frame);
       if (ret == OK)
         {
           flags = 0;
         }
+
+      netdev_iob_replace(dev, iob);
+      dev->d_buf = frame;
     }
   else
     {
