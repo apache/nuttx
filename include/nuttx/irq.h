@@ -136,6 +136,13 @@
 
 #define IRQ_WAKE_THREAD 1
 
+/* Disable/restore local interrupts from code above the arch layer */
+
+#ifndef __ASSEMBLY__
+#  define irq_save()          up_irq_save()
+#  define irq_restore(flags)  up_irq_restore(flags)
+#endif
+
 /* Scheduling monitor */
 
 #ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD
