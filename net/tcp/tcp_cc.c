@@ -175,8 +175,9 @@ void tcp_cc_update(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp)
  *   Update congestion control variables
  *
  * Input Parameters:
- *   conn   - The TCP connection of interest
- *   tcp    - The TCP header.
+ *   conn    - The TCP connection of interest
+ *   tcp     - The TCP header.
+ *   datalen - The number of data bytes in the segment
  *
  * Returned Value:
  *   None
@@ -186,11 +187,13 @@ void tcp_cc_update(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp)
  *
  ****************************************************************************/
 
-void tcp_cc_recv_ack(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp)
+void tcp_cc_recv_ack(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp,
+                     uint16_t datalen)
 {
   uint32_t ackno = tcp_getsequence(tcp->ackno);
 
   /* Its only a duplicate ack if:
+   * 0) It carries no data (RFC 5681, section 2)
    * 1) It doesn't ACK new data
    * 2) There is outstanding unacknowledged data (retransmission
    *    timer running)
@@ -210,7 +213,7 @@ void tcp_cc_recv_ack(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp)
     {
       /* Clause 2 and Clause 3 */
 
-      if (conn->timer >= 0 &&
+      if (datalen == 0 && conn->timer >= 0 &&
           conn->last_ackno == ackno)
         {
           if (++conn->dupacks > TCP_FAST_RETRANSMISSION_THRESH)

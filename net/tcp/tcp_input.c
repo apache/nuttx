@@ -1489,7 +1489,7 @@ skip_rtt:
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
       /* If the packet is ack, update the cc var. */
 
-      tcp_cc_recv_ack(conn, tcp);
+      tcp_cc_recv_ack(conn, tcp, dev->d_len);
 #endif
       if (tcp_snd_wnd_update(conn, tcp))
         {

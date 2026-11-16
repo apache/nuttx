@@ -581,8 +581,13 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                         wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb));
                 }
             }
-          else if (ackno == TCP_WBSEQNO(wrb))
+          else if (ackno == TCP_WBSEQNO(wrb) && (flags & TCP_NEWDATA) == 0)
             {
+              /* A duplicate ACK carries no data (RFC 5681, section 2): a
+               * segment with data that repeats the ACK number was sent
+               * before the peer received the segment.
+               */
+
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
               if (conn->dupacks >= TCP_FAST_RETRANSMISSION_THRESH)
 #elif defined(CONFIG_NET_TCP_FAST_RETRANSMIT)
@@ -597,40 +602,6 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                   /* Reset counter */
 
                   TCP_WBNACK(wrb) = 0;
-#endif
-
-#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
-                  if ((flags & TCP_NEWDATA) != 0)
-                    {
-                      FAR uint8_t *buf = dev->d_buf;
-                      FAR uint8_t *appdata = dev->d_appdata;
-                      uint16_t len = dev->d_len;
-#  ifdef CONFIG_NET_TCPURGDATA
-                      FAR uint8_t *urgdata = dev->d_urgdata;
-                      uint16_t urglen = dev->d_urglen;
-#  endif
-                      FAR struct iob_s *iob = dev->d_iob;
-
-                      dev->d_buf = NULL;
-                      dev->d_iob = NULL;
-
-                      /* The current receive data needs to be handled by
-                       * following tcp_recvhandler or tcp_data_event. Notify
-                       * driver to send the message and marked as rexmit
-                       */
-
-                      conn->timeout = true;
-                      netdev_txnotify_dev(conn->dev, TCP_POLL);
-                      netdev_iob_replace(dev, iob);
-                      dev->d_buf = buf;
-                      dev->d_appdata = appdata;
-                      dev->d_len = len;
-#  ifdef CONFIG_NET_TCPURGDATA
-                      dev->d_urgdata = urgdata;
-                      dev->d_urglen = urglen;
-#  endif
-                      return flags;
-                    }
 #endif
 
 #ifdef CONFIG_NET_TCP_SELECTIVE_ACK
