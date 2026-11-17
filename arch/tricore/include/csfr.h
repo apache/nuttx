@@ -41,6 +41,7 @@
 #define TRICORE_CPU_BTV             0xfe24  /* Base Trap Vector */
 #define TRICORE_CPU_ISP             0xfe28  /* Interrupt Stack Pointer */
 #define TRICORE_CPU_ICR             0xfe2c  /* Interrupt Control Register */
+#define TRICORE_CPU_PPRS            0xfe34  /* Previous PRS, TC1.8 */
 #define TRICORE_CPU_FCX             0xfe38  /* Free CSA List Head Pointer */
 #define TRICORE_CPU_LCX             0xfe3c  /* Free CSA List Limit Pointer */
 
