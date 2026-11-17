@@ -111,12 +111,12 @@ section_layout mpe:tc0:linear
 
   group traptab (ordered, run_addr = PFLS_BASE + 0x100)
   {
-    select ".text.traptab_cpu0";
+    select ".text.traptab";
   }
 
   group intvec (ordered, run_addr = PFLS_BASE + 0x1fe0)
   {
-    select ".text.intvec";
+    select ".text.inttab";
   }
 
   group text (run_addr = mem:mpe:pfls)

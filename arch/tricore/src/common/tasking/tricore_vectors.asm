@@ -19,110 +19,134 @@
 ; under the License.
 ;
 ;****************************************************************************
-;
-; TASKING (astc) version of gnu/tricore_vectors.S, same code and layout; see
-; there for the description.  astc does not run the C preprocessor, so the
-; CORE_ID offset (TRICORE_CPU_CORE_ID in arch/csfr.h) is written out.  The
-; tables are protected, as nothing references them by symbol.
-;
+
+;****************************************************************************
+; Trap vector table (BTV) in .text.traptab and interrupt vector table (BIV)
+; in .text.inttab; the linker script places both sections.
+;****************************************************************************
+
+;****************************************************************************
+; Included Files
+;****************************************************************************
+
+#include <nuttx/config.h>
+#include <arch/irq.h>
+
+;****************************************************************************
+; Pre-processor Definitions
 ;****************************************************************************
 
 	.extern	tricore_trapcall
 	.extern	tricore_svcall
+	.extern	tricore_fcutrap_recover
+	.extern	g_fcu_csa_base
 	.extern	tricore_doirq
-	.extern	tricore_fcu_recover
-	.extern	g_tricore_fcu_pool
 
 TRAPSLOT	.macro	cls, entry
 	svlcx
 	mov	d5, #cls
 	j	entry
 	.align	32
-	.endm
+.endm
 
-TRAPJUMP	.macro	entry
-	j	entry
-	.align	32
-	.endm
-
-TRAPTAB	.macro	cpu, label
-	.sdecl	".text.traptab_cpu\cpu",code,protect
-	.sect	".text.traptab_cpu\cpu"
-	.align	256
-	.global	label
-label:
-	TRAPSLOT	0, tricore_trap_entry
-	TRAPSLOT	1, tricore_trap_entry
-	TRAPSLOT	2, tricore_trap_entry
-	TRAPJUMP	tricore_ctx_entry
-	TRAPSLOT	4, tricore_trap_entry
-	TRAPSLOT	5, tricore_trap_entry
-	TRAPSLOT	6, tricore_syscall_entry
-	TRAPSLOT	7, tricore_trap_entry
-	.endm
-
-	TRAPTAB	0, tricore_trap_vectors_cpu0
-	TRAPTAB	1, tricore_trap_vectors_cpu1
-	TRAPTAB	2, tricore_trap_vectors_cpu2
-	TRAPTAB	3, tricore_trap_vectors_cpu3
-	TRAPTAB	4, tricore_trap_vectors_cpu4
-	TRAPTAB	5, tricore_trap_vectors_cpu5
-
-	.sdecl	".text.intvec",code,protect
-	.sect	".text.intvec"
-	.align	32
-	.global	tricore_int_vector
-tricore_int_vector:
+INTSLOT	.macro	handler
 	svlcx
-	j	tricore_int_entry
-
-; struct tricore_trap_s: taddr at 0, tid at 4, tclass at 5, tcpu at 6
-
-TRAPENTRY	.macro	name, handler
-	.global	name
-name:
-	sub.a	sp, #8
-	st.a	[sp]0, a11
-	st.b	[sp]4, d15
-	st.b	[sp]5, d5
-	mfcr	d4, #0xfe1c		; TRICORE_CPU_CORE_ID
-	and	d4, d4, #7
-	st.b	[sp]6, d4
-	mov.aa	a4, sp
-	movh.a	a2, #@HIS(handler)
-	lea	a2, [a2]@LOS(handler)
-	jli	a2
-	lea	sp, [sp]8
+	jl	handler
 	rslcx
 	rfe
-	.endm
+	.align	32
+.endm
 
-	.sdecl	".text.tricore_trap_entry",code
-	.sect	".text.tricore_trap_entry"
+;****************************************************************************
+; Private Functions
+;****************************************************************************
 
-	TRAPENTRY	tricore_trap_entry, tricore_trapcall
-	TRAPENTRY	tricore_syscall_entry, tricore_svcall
+;****************************************************************************
+; Tricore_trap_entry
+;****************************************************************************
 
-tricore_int_entry:
-	movh.a	a2, #@HIS(tricore_doirq)
-	lea	a2, [a2]@LOS(tricore_doirq)
-	jli	a2
+	.sdecl	".text.tricore_vectors",code
+	.sect	".text.tricore_vectors"
+	.align	2
+
+	.global	tricore_trap_entry
+tricore_trap_entry:	.type	func
+	mov.aa	a4, a11
+	mov	d4, d15
+	jl	tricore_trapcall
 	rslcx
 	rfe
+	.size	tricore_trap_entry, * - tricore_trap_entry
 
-tricore_ctx_entry:
-	jeq	d15, #4, tricore_fcu_entry
-	svlcx
-	mov	d5, #3
-	j	tricore_trap_entry
+;****************************************************************************
+; Tricore_syscall_entry
+;****************************************************************************
 
-tricore_fcu_entry:
-	movh.a	a4, #@HIS(g_tricore_fcu_pool)
-	ld.a	a4, [a4]@LOS(g_tricore_fcu_pool)
+tricore_syscall_entry:	.type	func
+	jl	tricore_svcall
+	rslcx
+	rfe
+	.size	tricore_syscall_entry, * - tricore_syscall_entry
+
+;****************************************************************************
+; Tricore_fcu_entry
+;****************************************************************************
+
+tricore_fcu_entry:	.type	func
+	movh.a	a4, #@HIS(g_fcu_csa_base)
+	ld.a	a4, [a4]@LOS(g_fcu_csa_base)
 fcu_nopool:
 	jz.a	a4, fcu_nopool
 	stucx	[a4]0
 	stlcx	[a4]64
-	j	tricore_fcu_recover
+	jl	tricore_fcutrap_recover
+	movh.a	a4, #@HIS(g_fcu_csa_base)
+	ld.a	a4, [a4]@LOS(g_fcu_csa_base)
+	ld.a	a11, [a4](REG_UA11 * 4)
+	mov	d15, #4
+	mov	d5, #3
+	j	tricore_trap_entry
+	.size	tricore_fcu_entry, * - tricore_fcu_entry
+
+;****************************************************************************
+; Public Functions
+;****************************************************************************
+
+;****************************************************************************
+; Trap vector table
+;****************************************************************************
+
+	.sdecl	".text.traptab",code,protect
+	.sect	".text.traptab"
+	.align	256
+	.global	tricore_traptab
+tricore_traptab:	.type	func
+	TRAPSLOT	0, tricore_trap_entry
+	TRAPSLOT	1, tricore_trap_entry
+	TRAPSLOT	2, tricore_trap_entry
+
+	jne	d15, #4, ctx_notfcu
+	j	tricore_fcu_entry
+ctx_notfcu:
+	TRAPSLOT	3, tricore_trap_entry
+
+	TRAPSLOT	4, tricore_trap_entry
+	TRAPSLOT	5, tricore_trap_entry
+	TRAPSLOT	6, tricore_syscall_entry
+	TRAPSLOT	7, tricore_trap_entry
+	.size	tricore_traptab, * - tricore_traptab
+
+;****************************************************************************
+; Interrupt vector table.  One entry serves all priorities; the startup
+; code sets the BIV priority bits accordingly.
+;****************************************************************************
+
+	.sdecl	".text.inttab",code,protect
+	.sect	".text.inttab"
+	.align	32
+	.global	tricore_inttab
+tricore_inttab:	.type	func
+	INTSLOT	tricore_doirq
+	.size	tricore_inttab, * - tricore_inttab
 
 	.end
