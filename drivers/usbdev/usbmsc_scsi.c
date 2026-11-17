@@ -1982,201 +1982,203 @@ static int usbmsc_cmdparsestate(FAR struct usbmsc_dev_s *priv)
 
   switch (priv->cdb[0])
     {
-    case SCSI_CMD_TESTUNITREADY:            /* 0x00 Mandatory */
-      ret = usbmsc_cmdtestunitready(priv);
-      break;
+      case SCSI_CMD_TESTUNITREADY:            /* 0x00 Mandatory */
+        ret = usbmsc_cmdtestunitready(priv);
+        break;
 
-    /* case SCSI_CMD_REZEROUNIT:               0x01 Obsolete
-     *                                         0x02 Vendor-specific
-     */
+      /* case SCSI_CMD_REZEROUNIT:               0x01 Obsolete
+       *                                         0x02 Vendor-specific
+       */
 
-    case SCSI_CMD_REQUESTSENSE:             /* 0x03 Mandatory */
-      ret = usbmsc_cmdrequestsense(priv, buf);
-      break;
+      case SCSI_CMD_REQUESTSENSE:             /* 0x03 Mandatory */
+        ret = usbmsc_cmdrequestsense(priv, buf);
+        break;
 
-    /* case SCSI_CMD_FORMAT_UNIT:              0x04 Mandatory, but not impl.
-     *                                         0x05 Vendor specific
-     *                                         0x06 Vendor specific
-     * case SCSI_CMD_REASSIGNBLOCKS:           0x07 Optional
-     */
+      /* case SCSI_CMD_FORMAT_UNIT:              0x04 Mandatory,
+       *                                         but not impl.
+       *                                         0x05 Vendor specific
+       *                                         0x06 Vendor specific
+       * case SCSI_CMD_REASSIGNBLOCKS:           0x07 Optional
+       */
 
-    case SCSI_CMD_READ6:                    /* 0x08 Mandatory */
-      ret = usbmsc_cmdread6(priv);
-      break;
+      case SCSI_CMD_READ6:                    /* 0x08 Mandatory */
+        ret = usbmsc_cmdread6(priv);
+        break;
 
-    /*                                         0x09 Vendor specific */
+      /*                                         0x09 Vendor specific */
 
-    case SCSI_CMD_WRITE6:                   /* 0x0a Optional */
-      ret = usbmsc_cmdwrite6(priv);
-      break;
+      case SCSI_CMD_WRITE6:                   /* 0x0a Optional */
+        ret = usbmsc_cmdwrite6(priv);
+        break;
 
-    /* case SCSI_CMD_SEEK6:                    0x0b Obsolete
-     *                                         0x0c-0x10 Vendor specific
-     * case SCSI_CMD_SPACE6:                   0x11 Vendor specific
-     */
+      /* case SCSI_CMD_SEEK6:                    0x0b Obsolete
+       *                                         0x0c-0x10 Vendor specific
+       * case SCSI_CMD_SPACE6:                   0x11 Vendor specific
+       */
 
-    case SCSI_CMD_INQUIRY:                  /* 0x12 Mandatory */
-      ret = usbmsc_cmdinquiry(priv, buf);
-      break;
+      case SCSI_CMD_INQUIRY:                  /* 0x12 Mandatory */
+        ret = usbmsc_cmdinquiry(priv, buf);
+        break;
 
-    /*                                         0x13-0x14 Vendor specific */
+      /*                                         0x13-0x14 Vendor specific */
 
-    case SCSI_CMD_MODESELECT6:              /* 0x15 Optional */
-      ret = usbmsc_cmdmodeselect6(priv);
-      break;
+      case SCSI_CMD_MODESELECT6:              /* 0x15 Optional */
+        ret = usbmsc_cmdmodeselect6(priv);
+        break;
 
-    /* case SCSI_CMD_RESERVE6:                 0x16 Obsolete
-     * case SCSI_CMD_RELEASE6:                 0x17 Obsolete
-     * case SCSI_CMD_COPY:                     0x18 Obsolete
-     *                                         0x19 Vendor specific
-     */
+      /* case SCSI_CMD_RESERVE6:                 0x16 Obsolete
+       * case SCSI_CMD_RELEASE6:                 0x17 Obsolete
+       * case SCSI_CMD_COPY:                     0x18 Obsolete
+       *                                         0x19 Vendor specific
+       */
 
-    case SCSI_CMD_MODESENSE6:               /* 0x1a Optional */
-      ret = usbmsc_cmdmodesense6(priv, buf);
-      break;
+      case SCSI_CMD_MODESENSE6:               /* 0x1a Optional */
+        ret = usbmsc_cmdmodesense6(priv, buf);
+        break;
 
-    case SCSI_CMD_STARTSTOPUNIT:            /* 0x1b Optional */
-      ret = usbmsc_cmdstartstopunit(priv);
-      break;
+      case SCSI_CMD_STARTSTOPUNIT:            /* 0x1b Optional */
+        ret = usbmsc_cmdstartstopunit(priv);
+        break;
 
-    /* case SCSI_CMD_RECEIVEDIAGNOSTICRESULTS: 0x1c Optional
-     * case SCSI_CMD_SENDDIAGNOSTIC:           0x1d Mandatory, but not impl.
-     */
+      /* case SCSI_CMD_RECEIVEDIAGNOSTICRESULTS: 0x1c Optional
+       * case SCSI_CMD_SENDDIAGNOSTIC:           0x1d Mandatory,
+       *                                         but not impl.
+       */
 
-    case SCSI_CMD_PREVENTMEDIAREMOVAL:      /* 0x1e Optional */
-      ret = usbmsc_cmdpreventmediumremoval(priv);
-      break;
+      case SCSI_CMD_PREVENTMEDIAREMOVAL:      /* 0x1e Optional */
+        ret = usbmsc_cmdpreventmediumremoval(priv);
+        break;
 
-    /*                                         0x20-22 Vendor specific */
+      /*                                         0x20-22 Vendor specific */
 
-    case SCSI_CMD_READFORMATCAPACITIES:     /* 0x23 Vend-spec (def. MMC spec) */
-      ret = usbmsc_cmdreadformatcapacity(priv, buf);
-      break;
+      case SCSI_CMD_READFORMATCAPACITIES:     /* 0x23 Vend-spec (def. MMC spec) */
+        ret = usbmsc_cmdreadformatcapacity(priv, buf);
+        break;
 
-    /*                                         0x24 Vendor specific */
+      /*                                         0x24 Vendor specific */
 
-    case SCSI_CMD_READCAPACITY10:           /* 0x25 Mandatory */
-      ret = usbmsc_cmdreadcapacity10(priv, buf);
-      break;
+      case SCSI_CMD_READCAPACITY10:           /* 0x25 Mandatory */
+        ret = usbmsc_cmdreadcapacity10(priv, buf);
+        break;
 
-    /*                                         0x26-27 Vendor specific */
+      /*                                         0x26-27 Vendor specific */
 
-    case SCSI_CMD_READ10:                   /* 0x28 Mandatory */
-      ret = usbmsc_cmdread10(priv);
-      break;
+      case SCSI_CMD_READ10:                   /* 0x28 Mandatory */
+        ret = usbmsc_cmdread10(priv);
+        break;
 
-    /*                                         0x29 Vendor specific */
+      /*                                         0x29 Vendor specific */
 
-    case SCSI_CMD_WRITE10:                  /* 0x2a Optional */
-      ret = usbmsc_cmdwrite10(priv);
-      break;
+      case SCSI_CMD_WRITE10:                  /* 0x2a Optional */
+        ret = usbmsc_cmdwrite10(priv);
+        break;
 
-    /* case SCSI_CMD_SEEK10:                   0x2b Obsolete
-     *                                         0x2c-2d Vendor specific
-     * case SCSI_CMD_WRITEANDVERIFY:           0x2e Optional
-     */
+      /* case SCSI_CMD_SEEK10:                   0x2b Obsolete
+       *                                         0x2c-2d Vendor specific
+       * case SCSI_CMD_WRITEANDVERIFY:           0x2e Optional
+       */
 
-    case SCSI_CMD_VERIFY10:                 /* 0x2f Opt, except Windows */
-      ret = usbmsc_cmdverify10(priv);
-      break;
+      case SCSI_CMD_VERIFY10:                 /* 0x2f Opt, except Windows */
+        ret = usbmsc_cmdverify10(priv);
+        break;
 
-    /* case SCSI_CMD_SEARCHDATAHIGH:           0x30 Obsolete
-     * case SCSI_CMD_SEARCHDATAEQUAL:          0x31 Obsolete
-     * case SCSI_CMD_SEARCHDATALOW:            0x32 Obsolete
-     * case SCSI_CMD_SETLIMITS10:              0x33 Obsolete
-     * case SCSI_CMD_PREFETCH10:               0x34 Optional
-     */
+      /* case SCSI_CMD_SEARCHDATAHIGH:           0x30 Obsolete
+       * case SCSI_CMD_SEARCHDATAEQUAL:          0x31 Obsolete
+       * case SCSI_CMD_SEARCHDATALOW:            0x32 Obsolete
+       * case SCSI_CMD_SETLIMITS10:              0x33 Obsolete
+       * case SCSI_CMD_PREFETCH10:               0x34 Optional
+       */
 
-    case SCSI_CMD_SYNCHCACHE10:             /* 0x35 Optional */
-      ret = usbmsc_cmdsynchronizecache10(priv);
-      break;
+      case SCSI_CMD_SYNCHCACHE10:             /* 0x35 Optional */
+        ret = usbmsc_cmdsynchronizecache10(priv);
+        break;
 
-    /* case SCSI_CMD_LOCKCACHE:                0x36 Obsolete
-     * case SCSI_CMD_READDEFECTDATA10:         0x37 Optional
-     * case SCSI_CMD_COMPARE:                  0x39 Obsolete
-     * case SCSI_CMD_COPYANDVERIFY:            0x3a Obsolete
-     * case SCSI_CMD_WRITEBUFFER:              0x3b Optional
-     * case SCSI_CMD_READBUFFER:               0x3c Optional
-     * case SCSI_CMD_READLONG10:               0x3e Optional
-     * case SCSI_CMD_WRITELONG10:              0x3f Optional
-     * case SCSI_CMD_CHANGEDEFINITION:         0x40 Obsolete
-     * case SCSI_CMD_WRITESAME10:              0x41 Optional
-     * case SCSI_CMD_LOGSELECT:                0x4c Optional
-     * case SCSI_CMD_LOGSENSE:                 0x4d Optional
-     * case SCSI_CMD_XDWRITE10:                0x50 Optional
-     * case SCSI_CMD_XPWRITE10:                0x51 Optional
-     * case SCSI_CMD_XDREAD10:                 0x52 Optional
-     */
+      /* case SCSI_CMD_LOCKCACHE:                0x36 Obsolete
+       * case SCSI_CMD_READDEFECTDATA10:         0x37 Optional
+       * case SCSI_CMD_COMPARE:                  0x39 Obsolete
+       * case SCSI_CMD_COPYANDVERIFY:            0x3a Obsolete
+       * case SCSI_CMD_WRITEBUFFER:              0x3b Optional
+       * case SCSI_CMD_READBUFFER:               0x3c Optional
+       * case SCSI_CMD_READLONG10:               0x3e Optional
+       * case SCSI_CMD_WRITELONG10:              0x3f Optional
+       * case SCSI_CMD_CHANGEDEFINITION:         0x40 Obsolete
+       * case SCSI_CMD_WRITESAME10:              0x41 Optional
+       * case SCSI_CMD_LOGSELECT:                0x4c Optional
+       * case SCSI_CMD_LOGSENSE:                 0x4d Optional
+       * case SCSI_CMD_XDWRITE10:                0x50 Optional
+       * case SCSI_CMD_XPWRITE10:                0x51 Optional
+       * case SCSI_CMD_XDREAD10:                 0x52 Optional
+       */
 
-    case SCSI_CMD_MODESELECT10:             /* 0x55 Optional */
-      ret = usbmsc_cmdmodeselect10(priv);
-      break;
+      case SCSI_CMD_MODESELECT10:             /* 0x55 Optional */
+        ret = usbmsc_cmdmodeselect10(priv);
+        break;
 
-    /* case SCSI_CMD_RESERVE10:                0x56 Obsolete
-     * case SCSI_CMD_RELEASE10:                0x57 Obsolete
-     */
+      /* case SCSI_CMD_RESERVE10:                0x56 Obsolete
+       * case SCSI_CMD_RELEASE10:                0x57 Obsolete
+       */
 
-    case SCSI_CMD_MODESENSE10:              /* 0x5a Optional */
-      ret = usbmsc_cmdmodesense10(priv, buf);
-      break;
+      case SCSI_CMD_MODESENSE10:              /* 0x5a Optional */
+        ret = usbmsc_cmdmodesense10(priv, buf);
+        break;
 
-    /* case SCSI_CMD_PERSISTENTRESERVEIN:      0x5e Optional
-     * case SCSI_CMD_PERSISTENTRESERVEOUT:     0x5f Optional
-     * case SCSI_CMD_32:                       0x7f Optional
-     * case SCSI_CMD_XDWRITEEXTENDED:          0x80 Obsolete
-     * case SCSI_CMD_REBUILD:                  0x81 Obsolete
-     * case SCSI_CMD_REGENERATE:               0x82 Obsolete
-     * case SCSI_CMD_EXTENDEDCOPY:             0x83 Optional
-     * case SCSI_CMD_COPYRESULTS:              0x84 Optional
-     * case SCSI_CMD_ACCESSCONTROLIN:          0x86 Optional
-     * case SCSI_CMD_ACCESSCONTROLOUT:         0x87 Optional
-     * case SCSI_CMD_READ16:                   0x88 Optional
-     * case SCSI_CMD_WRITE16:                  0x8a Optional
-     * case SCSI_CMD_READATTRIBUTE:            0x8c Optional
-     * case SCSI_CMD_WRITEATTRIBUTE:           0x8d Optional
-     * case SCSI_CMD_WRITEANDVERIFY16:         0x8e Optional
-     * case SCSI_CMD_SYNCHCACHE16:             0x91 Optional
-     * case SCSI_CMD_LOCKUNLOCKACACHE:         0x92 Optional
-     * case SCSI_CMD_WRITESAME16:              0x93 Optional
-     * case SCSI_CMD_READCAPACITY16:           0x9e Optional
-     * case SCSI_CMD_READLONG16:               0x9e Optional
-     * case SCSI_CMD_WRITELONG16               0x9f Optional
-     * case SCSI_CMD_REPORTLUNS:               0xa0 Mandatory, but no-impl
-     * case SCSI_CMD_MAINTENANCEIN:            0xa3 Optional (SCCS==0)
-     * case SCSI_CMD_MAINTENANCEOUT:           0xa4 Optional (SCCS==0)
-     * case SCSI_CMD_MOVEMEDIUM:               0xa5 ?
-     * case SCSI_CMD_MOVEMEDIUMATTACHED:       0xa7 Optional (MCHNGR==0)
-     */
+      /* case SCSI_CMD_PERSISTENTRESERVEIN:      0x5e Optional
+       * case SCSI_CMD_PERSISTENTRESERVEOUT:     0x5f Optional
+       * case SCSI_CMD_32:                       0x7f Optional
+       * case SCSI_CMD_XDWRITEEXTENDED:          0x80 Obsolete
+       * case SCSI_CMD_REBUILD:                  0x81 Obsolete
+       * case SCSI_CMD_REGENERATE:               0x82 Obsolete
+       * case SCSI_CMD_EXTENDEDCOPY:             0x83 Optional
+       * case SCSI_CMD_COPYRESULTS:              0x84 Optional
+       * case SCSI_CMD_ACCESSCONTROLIN:          0x86 Optional
+       * case SCSI_CMD_ACCESSCONTROLOUT:         0x87 Optional
+       * case SCSI_CMD_READ16:                   0x88 Optional
+       * case SCSI_CMD_WRITE16:                  0x8a Optional
+       * case SCSI_CMD_READATTRIBUTE:            0x8c Optional
+       * case SCSI_CMD_WRITEATTRIBUTE:           0x8d Optional
+       * case SCSI_CMD_WRITEANDVERIFY16:         0x8e Optional
+       * case SCSI_CMD_SYNCHCACHE16:             0x91 Optional
+       * case SCSI_CMD_LOCKUNLOCKACACHE:         0x92 Optional
+       * case SCSI_CMD_WRITESAME16:              0x93 Optional
+       * case SCSI_CMD_READCAPACITY16:           0x9e Optional
+       * case SCSI_CMD_READLONG16:               0x9e Optional
+       * case SCSI_CMD_WRITELONG16               0x9f Optional
+       * case SCSI_CMD_REPORTLUNS:               0xa0 Mandatory, but no-impl
+       * case SCSI_CMD_MAINTENANCEIN:            0xa3 Optional (SCCS==0)
+       * case SCSI_CMD_MAINTENANCEOUT:           0xa4 Optional (SCCS==0)
+       * case SCSI_CMD_MOVEMEDIUM:               0xa5 ?
+       * case SCSI_CMD_MOVEMEDIUMATTACHED:       0xa7 Optional (MCHNGR==0)
+       */
 
-    case SCSI_CMD_READ12:                   /* 0xa8 Optional */
-      ret = usbmsc_cmdread12(priv);
-      break;
+      case SCSI_CMD_READ12:                   /* 0xa8 Optional */
+        ret = usbmsc_cmdread12(priv);
+        break;
 
-    case SCSI_CMD_WRITE12:                  /* 0xaa Optional */
-      ret = usbmsc_cmdwrite12(priv);
-      break;
+      case SCSI_CMD_WRITE12:                  /* 0xaa Optional */
+        ret = usbmsc_cmdwrite12(priv);
+        break;
 
-    /* case SCSI_CMD_READMEDIASERIALNUMBER:    0xab Optional
-     * case SCSI_CMD_WRITEANDVERIFY12:         0xae Optional
-     * case SCSI_CMD_VERIFY12:                 0xaf Optional
-     * case SCSI_CMD_SETLIMITS12               0xb3 Obsolete
-     * case SCSI_CMD_READELEMENTSTATUS:        0xb4 Optional (MCHNGR==0)
-     * case SCSI_CMD_READDEFECTDATA12:         0xb7 Optional
-     * case SCSI_CMD_REDUNDANCYGROUPIN:        0xba Optional
-     * case SCSI_CMD_REDUNDANCYGROUPOUT:       0xbb Optional
-     * case SCSI_CMD_SPAREIN:                  0xbc Optional (SCCS==0)
-     * case SCSI_CMD_SPAREOUT:                 0xbd Optional (SCCS==0)
-     * case SCSI_CMD_VOLUMESETIN:              0xbe Optional (SCCS==0)
-     * case SCSI_CMD_VOLUMESETOUT:             0xbe Optional (SCCS==0)
-     *                                         0xc0-0xff Vendor specific
-     */
+      /* case SCSI_CMD_READMEDIASERIALNUMBER:    0xab Optional
+       * case SCSI_CMD_WRITEANDVERIFY12:         0xae Optional
+       * case SCSI_CMD_VERIFY12:                 0xaf Optional
+       * case SCSI_CMD_SETLIMITS12               0xb3 Obsolete
+       * case SCSI_CMD_READELEMENTSTATUS:        0xb4 Optional (MCHNGR==0)
+       * case SCSI_CMD_READDEFECTDATA12:         0xb7 Optional
+       * case SCSI_CMD_REDUNDANCYGROUPIN:        0xba Optional
+       * case SCSI_CMD_REDUNDANCYGROUPOUT:       0xbb Optional
+       * case SCSI_CMD_SPAREIN:                  0xbc Optional (SCCS==0)
+       * case SCSI_CMD_SPAREOUT:                 0xbd Optional (SCCS==0)
+       * case SCSI_CMD_VOLUMESETIN:              0xbe Optional (SCCS==0)
+       * case SCSI_CMD_VOLUMESETOUT:             0xbe Optional (SCCS==0)
+       *                                         0xc0-0xff Vendor specific
+       */
 
-    default:
-      priv->u.alloclen = 0;
-      priv->residue = priv->cbwlen;
-      priv->lun->sd = SCSI_KCQIR_INVALIDCOMMAND;
-      ret = -EINVAL;
-      break;
+      default:
+        priv->u.alloclen = 0;
+        priv->residue = priv->cbwlen;
+        priv->lun->sd = SCSI_KCQIR_INVALIDCOMMAND;
+        ret = -EINVAL;
+        break;
     }
 
   nxmutex_unlock(&priv->thlock);
@@ -2566,7 +2568,8 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
        * top and attempt to get the next read request.
        *
        * While there are still data-out bytes not yet requested (beyond the
-       * initially queued maxpacket requests, pre-accounted in priv->residue),
+       * initially queued maxpacket requests, pre-accounted in
+       * priv->residue),
        * request them in full bulkoutreqlen chunks so the controller DMA
        * coalesces many maxpacket USB packets into one completion, cutting
        * the EP_SUBMIT / completion-IRQ / worker round-trips that dominate
@@ -2613,7 +2616,8 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
 
 errout:
   /* Rebuild the CSW residue (bytes not written to the block driver) from the
-   * still-untransferred sector count.  During the data phase priv->residue is
+   * still-untransferred sector count.  During the data phase
+   * priv->residue is
    * reused to size the enlarged bulk-OUT re-submits; xfrlen * sectorsize is
    * the exact untransferred byte count to report in the CSW.
    */
@@ -2670,132 +2674,133 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
 
   switch (priv->cbwdir)
     {
-      /* Device-to-host: All but the last data buffer has been sent */
+        /* Device-to-host: All but the last data buffer has been sent */
 
-    case USBMSC_FLAGS_DIRDEVICE2HOST:
-      if (priv->cbwlen > 0)
-        {
-          bool terminated = false;
+      case USBMSC_FLAGS_DIRDEVICE2HOST:
+        if (priv->cbwlen > 0)
+          {
+            bool terminated = false;
 
-          /* On most commands (the exception is outgoing, write commands),
-           * the data has not yet been sent.
-           */
+            /* On most commands (the exception is outgoing, write commands),
+             * the data has not yet been sent.
+             */
 
-          if (priv->nreqbytes > 0)
-            {
-              struct usbdev_req_s *req;
+            if (priv->nreqbytes > 0)
+              {
+                struct usbdev_req_s *req;
 
-              /* Take a request from the wrreqlist (we've already checked
-               * that is it not NULL)
-               */
+                /* Take a request from the wrreqlist (we've already checked
+                 * that is it not NULL)
+                 */
 
-              flags = spin_lock_irqsave(&priv->spinlock);
-              privreq = (FAR struct usbmsc_req_s *)
-                sq_remfirst(&priv->wrreqlist);
-              spin_unlock_irqrestore(&priv->spinlock, flags);
+                flags = spin_lock_irqsave(&priv->spinlock);
+                privreq = (FAR struct usbmsc_req_s *)
+                  sq_remfirst(&priv->wrreqlist);
+                spin_unlock_irqrestore(&priv->spinlock, flags);
 
-              /* Send the write request */
+                /* Send the write request */
 
-              req           = privreq->req;
-              req->len      = priv->nreqbytes;
-              req->callback = usbmsc_wrcomplete;
-              req->priv     = privreq;
-              req->flags    = USBDEV_REQFLAGS_NULLPKT;
+                req           = privreq->req;
+                req->len      = priv->nreqbytes;
+                req->callback = usbmsc_wrcomplete;
+                req->priv     = privreq;
+                req->flags    = USBDEV_REQFLAGS_NULLPKT;
 
-              ret           = EP_SUBMIT(priv->epbulkin, privreq->req);
-              if (ret < 0)
-                {
-                  usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHSUBMIT),
-                           (uint16_t)-ret);
-                }
-              else
-                {
-                  /* The request was submitted with USBDEV_REQFLAGS_NULLPKT,
-                   * so the transfer ends with a short packet (or a ZLP if
-                   * the response length is an exact multiple of the packet
-                   * size).  Either way the host's Data-In phase terminates
-                   * cleanly when this request completes.
-                   */
+                ret           = EP_SUBMIT(priv->epbulkin, privreq->req);
+                if (ret < 0)
+                  {
+                    usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHSUBMIT),
+                             (uint16_t)-ret);
+                  }
+                else
+                  {
+                    /* The request was submitted with
+                     * USBDEV_REQFLAGS_NULLPKT, so the transfer ends with a
+                     * short packet (or a ZLP if the response length is an
+                     * exact multiple of the packet size).  Either way the
+                     * host's Data-In phase terminates cleanly when this
+                     * request completes.
+                     */
 
-                  terminated = true;
-                }
-             }
+                    terminated = true;
+                  }
+              }
 
-          /* If there is a residue, the host expected more data than we
-           * sent.  If the data phase was already terminated by a short
-           * packet (or ZLP), nothing more is needed: the host's transfer
-           * has completed and the residue is reported in the CSW
-           * (dCSWDataResidue).  Stalling here as well is permitted by BOT
-           * (USB MSC BOT 6.7.2), but it is gratuitous and some hosts
-           * (macOS) respond with a full Bulk-Only reset sequence to any
-           * bulk-IN halt during device probing, which costs seconds per
-           * command or aborts the probe entirely.
-           *
-           * Only halt the endpoint when nothing terminated the data
-           * phase - otherwise the host would mistake the following CSW
-           * for transfer data.
-           */
+            /* If there is a residue, the host expected more data than we
+             * sent.  If the data phase was already terminated by a short
+             * packet (or ZLP), nothing more is needed: the host's transfer
+             * has completed and the residue is reported in the CSW
+             * (dCSWDataResidue).  Stalling here as well is permitted by BOT
+             * (USB MSC BOT 6.7.2), but it is gratuitous and some hosts
+             * (macOS) respond with a full Bulk-Only reset sequence to any
+             * bulk-IN halt during device probing, which costs seconds per
+             * command or aborts the probe entirely.
+             *
+             * Only halt the endpoint when nothing terminated the data
+             * phase - otherwise the host would mistake the following CSW
+             * for transfer data.
+             */
 
-          if (priv->residue > 0 && !terminated)
-            {
+            if (priv->residue > 0 && !terminated)
+              {
 #ifndef CONFIG_USBMSC_NOT_STALL_BULKEP
-              usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHRESIDUE),
-                       (uint16_t)priv->residue);
+                usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHRESIDUE),
+                         (uint16_t)priv->residue);
 
 #ifdef USBMSC_STALL_RACEWAR
-              /* (See description of the workaround at the top of the file).
-               * First, wait for the transfer to complete, then stall the
-               * endpoint
-               */
+                /* (See description of the workaround at the top of the
+                 * file).  First, wait for the transfer to complete, then
+                 * stall the endpoint
+                 */
 
-              nxsched_usleep (100000);
-              EP_STALL(priv->epbulkin);
+                nxsched_usleep (100000);
+                EP_STALL(priv->epbulkin);
 
-              /* now wait for stall to go away .... */
+                /* now wait for stall to go away .... */
 
-              nxsched_usleep (100000);
+                nxsched_usleep (100000);
 #else
-              EP_STALL(priv->epbulkin);
+                EP_STALL(priv->epbulkin);
 #endif
 #else
-              priv->residue = 0;
+                priv->residue = 0;
 #endif
-            }
-        }
-      break;
+              }
+          }
+        break;
 
-      /* Host-to-device: We have processed all we want of the host data. */
+        /* Host-to-device: We have processed all we want of the host data. */
 
-    case USBMSC_FLAGS_DIRHOST2DEVICE:
-      if (priv->residue > 0)
-        {
-          /* Did the host stop sending unexpectedly early? */
+      case USBMSC_FLAGS_DIRHOST2DEVICE:
+        if (priv->residue > 0)
+          {
+            /* Did the host stop sending unexpectedly early? */
 
-          if (priv->shortpacket)
-            {
-              usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHSHORTPKT),
-                       (uint16_t)priv->residue);
-            }
+            if (priv->shortpacket)
+              {
+                usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHSHORTPKT),
+                         (uint16_t)priv->residue);
+              }
 
-          /* Unprocessed incoming data: STALL and cancel requests. */
+            /* Unprocessed incoming data: STALL and cancel requests. */
 
-          else
-            {
-              usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINSHSUBMIT),
-                       (uint16_t)priv->residue);
-              EP_STALL(priv->epbulkout);
-            }
+            else
+              {
+                usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINSHSUBMIT),
+                         (uint16_t)priv->residue);
+                EP_STALL(priv->epbulkout);
+              }
 
-          flags = spin_lock_irqsave(&priv->spinlock);
-          priv->theventset |= USBMSC_EVENT_ABORTBULKOUT;
-          spin_unlock_irqrestore(&priv->spinlock, flags);
-        }
-      break;
+            flags = spin_lock_irqsave(&priv->spinlock);
+            priv->theventset |= USBMSC_EVENT_ABORTBULKOUT;
+            spin_unlock_irqrestore(&priv->spinlock, flags);
+          }
+        break;
 
-    default:
-      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINSHDIR), priv->cbwdir);
-    case USBMSC_FLAGS_DIRNONE: /* Nothing to send */
-      break;
+      default:
+        usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINSHDIR), priv->cbwdir);
+      case USBMSC_FLAGS_DIRNONE: /* Nothing to send */
+        break;
     }
 
   /* Return to the IDLE state */
@@ -3104,39 +3109,39 @@ int usbmsc_scsi_main(int argc, FAR char *argv[])
         {
           switch (priv->thstate)
             {
-            case USBMSC_STATE_IDLE:        /* Started and waiting for commands */
-               ret = usbmsc_idlestate(priv);
-               break;
+              case USBMSC_STATE_IDLE:        /* Started and waiting for commands */
+                ret = usbmsc_idlestate(priv);
+                break;
 
-            case USBMSC_STATE_CMDPARSE:    /* Parsing the received a command */
-               ret = usbmsc_cmdparsestate(priv);
-               break;
+              case USBMSC_STATE_CMDPARSE:    /* Parsing the received a command */
+                ret = usbmsc_cmdparsestate(priv);
+                break;
 
-            case USBMSC_STATE_CMDREAD:     /* Continuing to process a SCSI read command */
-               ret = usbmsc_cmdreadstate(priv);
-               break;
+              case USBMSC_STATE_CMDREAD:     /* Continuing to process a SCSI read command */
+                ret = usbmsc_cmdreadstate(priv);
+                break;
 
-            case USBMSC_STATE_CMDWRITE:    /* Continuing to process a SCSI write command */
-               ret = usbmsc_cmdwritestate(priv);
-               break;
+              case USBMSC_STATE_CMDWRITE:    /* Continuing to process a SCSI write command */
+                ret = usbmsc_cmdwritestate(priv);
+                break;
 
-            case USBMSC_STATE_CMDFINISH:   /* Finish command processing */
-               ret = usbmsc_cmdfinishstate(priv);
-               break;
+              case USBMSC_STATE_CMDFINISH:   /* Finish command processing */
+                ret = usbmsc_cmdfinishstate(priv);
+                break;
 
-            case USBMSC_STATE_CMDSTATUS:   /* Processing the status phase of a command */
-              ret = usbmsc_cmdstatusstate(priv);
-              break;
+              case USBMSC_STATE_CMDSTATUS:   /* Processing the status phase of a command */
+                ret = usbmsc_cmdstatusstate(priv);
+                break;
 
-            case USBMSC_STATE_NOTSTARTED:  /* Thread has not yet been started */
-            case USBMSC_STATE_STARTED:     /* Started, but is not yet initialized */
-            case USBMSC_STATE_TERMINATED:  /* Thread has exited */
-            default:
-              usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_INVALIDSTATE),
-                       priv->thstate);
-              priv->thstate = USBMSC_STATE_IDLE;
-              ret           = OK;
-              break;
+              case USBMSC_STATE_NOTSTARTED:  /* Thread has not yet been started */
+              case USBMSC_STATE_STARTED:     /* Started, but is not yet initialized */
+              case USBMSC_STATE_TERMINATED:  /* Thread has exited */
+              default:
+                usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_INVALIDSTATE),
+                         priv->thstate);
+                priv->thstate = USBMSC_STATE_IDLE;
+                ret           = OK;
+                break;
             }
         }
       while (ret == OK);

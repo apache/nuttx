@@ -631,170 +631,174 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
 
       switch (ctrl->req)
         {
-        case USB_REQ_GETDESCRIPTOR:
-          {
-            /* The value field specifies the descriptor type in the MS byte
-             * and the descriptor index in the LS byte (order is little
-             * endian)
-             */
+          case USB_REQ_GETDESCRIPTOR:
+            {
+              /* The value field specifies the descriptor type in the MS byte
+               * and the descriptor index in the LS byte (order is little
+               * endian)
+               */
 
-            switch (ctrl->value[1])
-              {
-                /* If the mass storage device is used in as part of a
-                 * composite device, then the device descriptor is
-                 * provided by logic in the composite device implementation.
-                 */
+              switch (ctrl->value[1])
+                {
+                  /* If the mass storage device is used in as part of a
+                   * composite device, then the device descriptor is
+                   * provided by logic in the composite device
+                   * implementation.
+                   */
 
 #ifndef CONFIG_USBMSC_COMPOSITE
-              case USB_DESC_TYPE_DEVICE:
-                {
-                  ret = usbdev_copy_devdesc(ctrlreq->buf,
-                                            usbmsc_getdevdesc(),
-                                            dev->speed);
-                }
-                break;
+                  case USB_DESC_TYPE_DEVICE:
+                    {
+                      ret = usbdev_copy_devdesc(ctrlreq->buf,
+                                                usbmsc_getdevdesc(),
+                                                dev->speed);
+                    }
+                    break;
 #endif
 
-                /* If the mass storage device is used in as part of a
-                 * composite device, then the device qualifier descriptor is
-                 * provided by logic in the composite device implementation.
-                 */
+                  /* If the mass storage device is used in as part of a
+                   * composite device, then the device qualifier descriptor
+                   * is provided by logic in the composite device
+                   * implementation.
+                   */
 
 #if !defined(CONFIG_USBMSC_COMPOSITE) && defined(CONFIG_USBDEV_DUALSPEED)
-              case USB_DESC_TYPE_DEVICEQUALIFIER:
-                {
-                  ret = USB_SIZEOF_QUALDESC;
-                  memcpy(ctrlreq->buf, usbmsc_getqualdesc(), ret);
-                }
-                break;
+                  case USB_DESC_TYPE_DEVICEQUALIFIER:
+                    {
+                      ret = USB_SIZEOF_QUALDESC;
+                      memcpy(ctrlreq->buf, usbmsc_getqualdesc(), ret);
+                    }
+                    break;
 
-              case USB_DESC_TYPE_OTHERSPEEDCONFIG:
+                  case USB_DESC_TYPE_OTHERSPEEDCONFIG:
 #endif
 
-                /* If the mass storage device is used in as part of a
-                 * composite device, then the configuration descriptor is
-                 * provided by logic in the composite device implementation.
-                 */
+                  /* If the mass storage device is used in as part of a
+                   * composite device, then the configuration descriptor is
+                   * provided by logic in the composite device
+                   * implementation.
+                   */
 
 #ifndef CONFIG_USBMSC_COMPOSITE
-              case USB_DESC_TYPE_CONFIG:
-                {
-                  ret = usbmsc_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
-                                         dev->speed, ctrl->value[1]);
-                }
-                break;
+                  case USB_DESC_TYPE_CONFIG:
+                    {
+                      ret = usbmsc_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
+                                             dev->speed, ctrl->value[1]);
+                    }
+                    break;
 #endif
 
-                /* If the mass storage device is used in as part of a
-                 * composite device, then the language string descriptor is
-                 * provided by logic in the composite device implementation.
-                 */
+                  /* If the mass storage device is used in as part of a
+                   * composite device, then the language string descriptor is
+                   * provided by logic in the composite device
+                   * implementation.
+                   */
 
 #ifndef CONFIG_USBMSC_COMPOSITE
-              case USB_DESC_TYPE_STRING:
-                {
-                  /* index == language code. */
+                  case USB_DESC_TYPE_STRING:
+                    {
+                      /* index == language code. */
 
-                  ret = usbmsc_mkstrdesc(ctrl->value[0],
-                                         (FAR struct usb_strdesc_s *)
-                                         ctrlreq->buf);
-                }
-                break;
+                      ret = usbmsc_mkstrdesc(ctrl->value[0],
+                                             (FAR struct usb_strdesc_s *)
+                                             ctrlreq->buf);
+                    }
+                    break;
 #endif
 
-              default:
-                {
-                  usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_GETUNKNOWNDESC),
-                           value);
+                  default:
+                    {
+                      usbtrace(TRACE_CLSERROR
+                               (USBMSC_TRACEERR_GETUNKNOWNDESC), value);
+                    }
+                    break;
                 }
-                break;
-              }
-          }
-          break;
+            }
+            break;
 
-        case USB_REQ_SETCONFIGURATION:
-          {
-            if (ctrl->type == 0)
-              {
-                /* Signal the worker thread to instantiate the new
-                 * configuration.
-                 */
+          case USB_REQ_SETCONFIGURATION:
+            {
+              if (ctrl->type == 0)
+                {
+                  /* Signal the worker thread to instantiate the new
+                   * configuration.
+                   */
 
-                priv->theventset |= USBMSC_EVENT_CFGCHANGE;
-                priv->thvalue     = value;
-                usbmsc_scsi_signal(priv);
+                  priv->theventset |= USBMSC_EVENT_CFGCHANGE;
+                  priv->thvalue     = value;
+                  usbmsc_scsi_signal(priv);
 
-                /* Return here... the response will be provided later by the
-                 * worker thread.
-                 */
+                  /* Return here... the response will be provided later by
+                   * the worker thread.
+                   */
 
-                return OK;
-              }
-          }
-          break;
+                  return OK;
+                }
+            }
+            break;
 
-          /* If the mass storage device is used in as part of a composite
-           * device, then the overall composite class configuration is
-           * managed by logic in the composite device implementation.
-           */
+            /* If the mass storage device is used in as part of a composite
+             * device, then the overall composite class configuration is
+             * managed by logic in the composite device implementation.
+             */
 
 #ifndef CONFIG_USBMSC_COMPOSITE
-        case USB_REQ_GETCONFIGURATION:
-          {
-            if (ctrl->type == USB_DIR_IN)
-              {
-                ctrlreq->buf[0] = priv->config;
-                ret = 1;
-              }
-          }
-          break;
+          case USB_REQ_GETCONFIGURATION:
+            {
+              if (ctrl->type == USB_DIR_IN)
+                {
+                  ctrlreq->buf[0] = priv->config;
+                  ret = 1;
+                }
+            }
+            break;
 #endif
 
-        case USB_REQ_SETINTERFACE:
-          {
-            if (ctrl->type == USB_REQ_RECIPIENT_INTERFACE)
-              {
-                if (priv->config == USBMSC_CONFIGID &&
-                    index == priv->devinfo.ifnobase &&
-                    value == USBMSC_ALTINTERFACEID)
-                  {
-                    /* Signal to instantiate the interface change */
+          case USB_REQ_SETINTERFACE:
+            {
+              if (ctrl->type == USB_REQ_RECIPIENT_INTERFACE)
+                {
+                  if (priv->config == USBMSC_CONFIGID &&
+                      index == priv->devinfo.ifnobase &&
+                      value == USBMSC_ALTINTERFACEID)
+                    {
+                      /* Signal to instantiate the interface change */
 
-                    priv->theventset |= USBMSC_EVENT_IFCHANGE;
-                    usbmsc_scsi_signal(priv);
+                      priv->theventset |= USBMSC_EVENT_IFCHANGE;
+                      usbmsc_scsi_signal(priv);
 
-                    /* Return here... the response will be provided later by
-                     * the worker thread.
-                     */
+                      /* Return here... the response will be provided later
+                       * by the worker thread.
+                       */
 
-                    return OK;
-                  }
-              }
-          }
-          break;
+                      return OK;
+                    }
+                }
+            }
+            break;
 
-        case USB_REQ_GETINTERFACE:
-          {
-            if (ctrl->type == (USB_DIR_IN | USB_REQ_RECIPIENT_INTERFACE) &&
-                priv->config == USBMSC_CONFIGIDNONE)
-              {
-                if (index != priv->devinfo.ifnobase)
-                  {
-                    ret = -EDOM;
-                  }
-                else
-                  {
-                    ctrlreq->buf[0] = USBMSC_ALTINTERFACEID;
-                    ret = 1;
-                  }
-              }
-           }
-           break;
+          case USB_REQ_GETINTERFACE:
+            {
+              if (ctrl->type == (USB_DIR_IN | USB_REQ_RECIPIENT_INTERFACE) &&
+                  priv->config == USBMSC_CONFIGIDNONE)
+                {
+                  if (index != priv->devinfo.ifnobase)
+                    {
+                      ret = -EDOM;
+                    }
+                  else
+                    {
+                      ctrlreq->buf[0] = USBMSC_ALTINTERFACEID;
+                      ret = 1;
+                    }
+                }
+            }
+            break;
 
-        default:
-          usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_UNSUPPORTEDSTDREQ),
-                   ctrl->req);
-          break;
+          default:
+            usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_UNSUPPORTEDSTDREQ),
+                     ctrl->req);
+            break;
         }
     }
   else if ((ctrl->type & USB_REQ_TYPE_MASK) == USB_REQ_TYPE_CLASS)
@@ -807,67 +811,69 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
 
       if (!priv->config)
         {
-           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_NOTCONFIGURED), 0);
-           return ret;
+          usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_NOTCONFIGURED), 0);
+          return ret;
         }
 
       switch (ctrl->req)
         {
-        case USBMSC_REQ_MSRESET: /* Reset mass storage device and interface */
-          {
-            if (ctrl->type == USBMSC_TYPE_SETUPOUT && value == 0 && len == 0)
-              {
-                /* Only one interface is supported */
+          case USBMSC_REQ_MSRESET: /* Reset mass storage device and interface */
+            {
+              if (ctrl->type == USBMSC_TYPE_SETUPOUT &&
+                  value == 0 && len == 0)
+                {
+                  /* Only one interface is supported */
 
-                if (index != priv->devinfo.ifnobase)
-                  {
-                    usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_MSRESETNDX),
-                             index);
-                    ret = -EDOM;
-                  }
-                else
-                  {
-                    /* Signal to stop the current operation and reinitialize
-                     * state.
-                     */
+                  if (index != priv->devinfo.ifnobase)
+                    {
+                      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_MSRESETNDX),
+                               index);
+                      ret = -EDOM;
+                    }
+                  else
+                    {
+                      /* Signal to stop the current operation and
+                       * reinitialize state.
+                       */
 
-                    priv->theventset |= USBMSC_EVENT_RESET;
-                    usbmsc_scsi_signal(priv);
+                      priv->theventset |= USBMSC_EVENT_RESET;
+                      usbmsc_scsi_signal(priv);
 
-                    /* Return here... the response will be provided later by
-                     * the worker thread.
-                     */
+                      /* Return here... the response will be provided later
+                       * by the worker thread.
+                       */
 
-                    return OK;
-                  }
-              }
-          }
-          break;
+                      return OK;
+                    }
+                }
+            }
+            break;
 
-        case USBMSC_REQ_GETMAXLUN: /* Return number LUNs supported */
-          {
-            if (ctrl->type == USBMSC_TYPE_SETUPIN && value == 0 && len == 1)
-              {
-                /* Only one interface is supported */
+          case USBMSC_REQ_GETMAXLUN: /* Return number LUNs supported */
+            {
+              if (ctrl->type == USBMSC_TYPE_SETUPIN &&
+                  value == 0 && len == 1)
+                {
+                  /* Only one interface is supported */
 
-                if (index != priv->devinfo.ifnobase)
-                  {
-                    usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_GETMAXLUNNDX),
-                             index);
-                    ret = -EDOM;
-                  }
-                else
-                  {
-                    ctrlreq->buf[0] = priv->nluns - 1;
-                    ret = 1;
-                  }
-              }
-          }
-          break;
+                  if (index != priv->devinfo.ifnobase)
+                    {
+                      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_GETMAXLUNNDX),
+                               index);
+                      ret = -EDOM;
+                    }
+                  else
+                    {
+                      ctrlreq->buf[0] = priv->nluns - 1;
+                      ret = 1;
+                    }
+                }
+            }
+            break;
 
-        default:
-          usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_BADREQUEST), ctrl->req);
-          break;
+          default:
+            usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_BADREQUEST), ctrl->req);
+            break;
         }
     }
   else
@@ -1174,18 +1180,18 @@ void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   switch (req->result)
     {
-    case OK: /* Normal completion */
-      usbtrace(TRACE_CLASSWRCOMPLETE, req->xfrd);
-      break;
+      case OK: /* Normal completion */
+        usbtrace(TRACE_CLASSWRCOMPLETE, req->xfrd);
+        break;
 
-    case -ESHUTDOWN: /* Disconnection */
-      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRSHUTDOWN), 0);
-      break;
+      case -ESHUTDOWN: /* Disconnection */
+        usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRSHUTDOWN), 0);
+        break;
 
-    default: /* Some other error occurred */
-      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRUNEXPECTED),
-               (uint16_t)-req->result);
-      break;
+      default: /* Some other error occurred */
+        usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRUNEXPECTED),
+                 (uint16_t)-req->result);
+        break;
     };
 
   /* Inform the worker thread that a write request has been returned */
@@ -1232,52 +1238,54 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
 
   switch (req->result)
     {
-    case 0: /* Normal completion */
-      {
-        usbtrace(TRACE_CLASSRDCOMPLETE, req->xfrd);
+      case 0: /* Normal completion */
+        {
+          usbtrace(TRACE_CLASSRDCOMPLETE, req->xfrd);
 
-        /* Add the filled read request from the rdreqlist */
+          /* Add the filled read request from the rdreqlist */
 
-        flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
-        sq_addlast((FAR sq_entry_t *)privreq, &priv->rdreqlist);
+          flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
+          sq_addlast((FAR sq_entry_t *)privreq, &priv->rdreqlist);
 
-        /* Signal the worker thread that there is received data to be
-         * processed.
-         */
+          /* Signal the worker thread that there is received data to be
+           * processed.
+           */
 
-        priv->theventset |= USBMSC_EVENT_RDCOMPLETE;
-        usbmsc_scsi_signal(priv);
-        spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
-      }
-      break;
+          priv->theventset |= USBMSC_EVENT_RDCOMPLETE;
+          usbmsc_scsi_signal(priv);
+          spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
+        }
+        break;
 
-    case -ESHUTDOWN: /* Disconnection */
-      {
-        usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_RDSHUTDOWN), 0);
+      case -ESHUTDOWN: /* Disconnection */
+        {
+          usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_RDSHUTDOWN), 0);
 
-        /* Drop the read request... it will be cleaned up later */
-      }
-      break;
+          /* Drop the read request... it will be cleaned up later */
+        }
+        break;
 
-    default: /* Some other error occurred */
-      {
-        usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_RDUNEXPECTED),
-                 (uint16_t)-req->result);
+      default: /* Some other error occurred */
+        {
+          usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_RDUNEXPECTED),
+                   (uint16_t)-req->result);
 
-        /* Return the read request to the bulk out endpoint for re-filling */
+          /* Return the read request to the bulk out endpoint for
+           * re-filling
+           */
 
-        req           = privreq->req;
-        req->priv     = privreq;
-        req->callback = usbmsc_rdcomplete;
+          req           = privreq->req;
+          req->priv     = privreq;
+          req->callback = usbmsc_rdcomplete;
 
-        ret = EP_SUBMIT(priv->epbulkout, req);
-        if (ret != OK)
-          {
-            usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_RDCOMPLETERDSUBMIT),
-                     (uint16_t)-ret);
-          }
-      }
-      break;
+          ret = EP_SUBMIT(priv->epbulkout, req);
+          if (ret != OK)
+            {
+              usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_RDCOMPLETERDSUBMIT),
+                       (uint16_t)-ret);
+            }
+        }
+        break;
     }
 }
 
