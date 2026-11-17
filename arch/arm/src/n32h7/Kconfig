@@ -123,20 +123,20 @@ config N32H7_BSRAMEXCLUDE
 	default y
 
 config N32H7_IO_CONFIG_V
-    bool
-    default n
+	bool
+	default n
 
 config N32H7_IO_CONFIG_Z
-    bool
-    default n
+	bool
+	default n
 
 config N32H7_IO_CONFIG_I
-    bool
-    default n
+	bool
+	default n
 
 config N32H7_IO_CONFIG_X
-    bool
-    default n
+	bool
+	default n
 
 config N32H7_CORDIC
 	bool "CORDIC"
@@ -4989,333 +4989,333 @@ endmenu # N32H7 TIMx Outputs Configuration
 endmenu # Timer Configuration
 
 menuconfig N32H7_CAPTURE
-    bool "Timer Input Capture support"
-    select CAPTURE
-    default n
-    ---help---
-        Enable input capture support for N32H7 timers.
+	bool "Timer Input Capture support"
+	select CAPTURE
+	default n
+	---help---
+		Enable input capture support for N32H7 timers.
 
 if N32H7_CAPTURE
 
 config N32H7_ATIM1_CAP
-    bool "ATIM1 Capture"
-    default n
-    ---help---
-        Enable input capture on ATIM1.
+	bool "ATIM1 Capture"
+	default n
+	---help---
+		Enable input capture on ATIM1.
 
 if N32H7_ATIM1_CAP
 config N32H7_ATIM1_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_ATIM1_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_ATIM1_CAP
 
 config N32H7_ATIM2_CAP
-    bool "ATIM2 Capture"
-    default n
-    ---help---
-        Enable input capture on ATIM2.
+	bool "ATIM2 Capture"
+	default n
+	---help---
+		Enable input capture on ATIM2.
 
 if N32H7_ATIM2_CAP
 config N32H7_ATIM2_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_ATIM2_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_ATIM2_CAP
 
 config N32H7_ATIM3_CAP
-    bool "ATIM3 Capture"
-    default n
-    ---help---
-        Enable input capture on ATIM3.
+	bool "ATIM3 Capture"
+	default n
+	---help---
+		Enable input capture on ATIM3.
 
 if N32H7_ATIM3_CAP
 config N32H7_ATIM3_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_ATIM3_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_ATIM3_CAP
 
 config N32H7_ATIM4_CAP
-    bool "ATIM4 Capture"
-    default n
-    ---help---
-        Enable input capture on ATIM4.
+	bool "ATIM4 Capture"
+	default n
+	---help---
+		Enable input capture on ATIM4.
 
 if N32H7_ATIM4_CAP
 config N32H7_ATIM4_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_ATIM4_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_ATIM4_CAP
 
 config N32H7_GTIMA1_CAP
-    bool "GTIMA1 Capture"
-    default n
-    ---help---
-        Enable input capture on GTIMA1.
+	bool "GTIMA1 Capture"
+	default n
+	---help---
+		Enable input capture on GTIMA1.
 
 if N32H7_GTIMA1_CAP
 config N32H7_GTIMA1_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_GTIMA1_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_GTIMA1_CAP
 
 config N32H7_GTIMA2_CAP
-    bool "GTIMA2 Capture"
-    default n
-    ---help---
-        Enable input capture on GTIMA2.
+	bool "GTIMA2 Capture"
+	default n
+	---help---
+		Enable input capture on GTIMA2.
 
 if N32H7_GTIMA2_CAP
 config N32H7_GTIMA2_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_GTIMA2_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_GTIMA2_CAP
 
 config N32H7_GTIMA3_CAP
-    bool "GTIMA3 Capture"
-    default n
-    ---help---
-        Enable input capture on GTIMA3.
+	bool "GTIMA3 Capture"
+	default n
+	---help---
+		Enable input capture on GTIMA3.
 
 if N32H7_GTIMA3_CAP
 config N32H7_GTIMA3_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_GTIMA3_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_GTIMA3_CAP
 
 config N32H7_GTIMA4_CAP
-    bool "GTIMA4 Capture"
-    default n
-    ---help---
-        Enable input capture on GTIMA4.
+	bool "GTIMA4 Capture"
+	default n
+	---help---
+		Enable input capture on GTIMA4.
 
 if N32H7_GTIMA4_CAP
 config N32H7_GTIMA4_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_GTIMA4_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_GTIMA4_CAP
 
 config N32H7_GTIMA5_CAP
-    bool "GTIMA5 Capture"
-    default n
-    ---help---
-        Enable input capture on GTIMA5.
+	bool "GTIMA5 Capture"
+	default n
+	---help---
+		Enable input capture on GTIMA5.
 
 if N32H7_GTIMA5_CAP
 config N32H7_GTIMA5_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_GTIMA5_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_GTIMA5_CAP
 
 config N32H7_GTIMA6_CAP
-    bool "GTIMA6 Capture"
-    default n
-    ---help---
-        Enable input capture on GTIMA6.
+	bool "GTIMA6 Capture"
+	default n
+	---help---
+		Enable input capture on GTIMA6.
 
 if N32H7_GTIMA6_CAP
 config N32H7_GTIMA6_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_GTIMA6_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_GTIMA6_CAP
 
 config N32H7_GTIMA7_CAP
-    bool "GTIMA7 Capture"
-    default n
-    ---help---
-        Enable input capture on GTIMA7.
+	bool "GTIMA7 Capture"
+	default n
+	---help---
+		Enable input capture on GTIMA7.
 
 if N32H7_GTIMA7_CAP
 config N32H7_GTIMA7_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_GTIMA7_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_GTIMA7_CAP
 
 config N32H7_GTIMB1_CAP
-    bool "GTIMB1 Capture"
-    default n
-    ---help---
-        Enable input capture on GTIMB1.
+	bool "GTIMB1 Capture"
+	default n
+	---help---
+		Enable input capture on GTIMB1.
 
 if N32H7_GTIMB1_CAP
 config N32H7_GTIMB1_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_GTIMB1_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_GTIMB1_CAP
 
 config N32H7_GTIMB2_CAP
-    bool "GTIMB2 Capture"
-    default n
-    ---help---
-        Enable input capture on GTIMB2.
+	bool "GTIMB2 Capture"
+	default n
+	---help---
+		Enable input capture on GTIMB2.
 
 if N32H7_GTIMB2_CAP
 config N32H7_GTIMB2_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_GTIMB2_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_GTIMB2_CAP
 
 config N32H7_GTIMB3_CAP
-    bool "GTIMB3 Capture"
-    default n
-    ---help---
-        Enable input capture on GTIMB3.
+	bool "GTIMB3 Capture"
+	default n
+	---help---
+		Enable input capture on GTIMB3.
 
 if N32H7_GTIMB3_CAP
 config N32H7_GTIMB3_CHANNEL
-    int "Capture channel (1 or 2)"
-    default 1
-    range 1 2
-    ---help---
-        Select the input capture channel (only 1 or 2 are supported for PWM input).
+	int "Capture channel (1 or 2)"
+	default 1
+	range 1 2
+	---help---
+		Select the input capture channel (only 1 or 2 are supported for PWM input).
 
 config N32H7_GTIMB3_CLOCK
-    int "Timer counting frequency (Hz)"
-    default 1000000
-    ---help---
-        Actual clock frequency after prescaler. This affects resolution and range.
-        Higher frequency gives better resolution but shorter maximum period.
+	int "Timer counting frequency (Hz)"
+	default 1000000
+	---help---
+		Actual clock frequency after prescaler. This affects resolution and range.
+		Higher frequency gives better resolution but shorter maximum period.
 
 endif # N32H7_GTIMB3_CAP
 endif # N32H7_CAPTURE
