@@ -376,6 +376,12 @@
 #define DMA_ALIGN_UP(n)    (((n) + DMA_BUFFER_MASK) & ~DMA_BUFFER_MASK)
 #define DMA_ALIGN_DOWN(n)  ((n) & ~DMA_BUFFER_MASK)
 
+/* The RX descriptor errors that make a received frame unusable */
+
+#define RDES3_FATAL_ERRORS (ETH_RDES3_WB_RE | ETH_RDES3_WB_OE |   \
+                            ETH_RDES3_WB_RWT | ETH_RDES3_WB_GP |  \
+                            ETH_RDES3_WB_CE)
+
 #define DESC_SIZE       16
 #define DESC_PADSIZE        DMA_ALIGN_UP(DESC_SIZE)
 #define ALIGNED_BUFSIZE     DMA_ALIGN_UP(ETH_BUFSIZE)
@@ -2131,7 +2137,12 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 
           else
             {
-              bool err = ((rxdesc->des3 & ETH_RDES3_WB_ES) != 0);
+              /* A dribble bit error alone also sets the error summary,
+               * but the CRC of the frame is good: keep such frames.
+               */
+
+              bool err = ((rxdesc->des3 & ETH_RDES3_WB_ES) != 0 &&
+                          (rxdesc->des3 & RDES3_FATAL_ERRORS) != 0);
 
               priv->segments++;
 
