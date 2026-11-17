@@ -67,6 +67,27 @@ static void tcp_close_work(FAR void *param)
 }
 
 /****************************************************************************
+ * Name: tcp_close_abortive
+ *
+ * Description:
+ *   Return true if the close is abortive: SO_LINGER is on with a time of
+ *   zero.  POSIX and Linux: the connection is then reset (RST), the queued
+ *   data is dropped, and no FIN is sent.
+ *
+ ****************************************************************************/
+
+static bool tcp_close_abortive(FAR struct tcp_conn_s *conn)
+{
+#ifdef CONFIG_NET_SOLINGER
+  return _SO_GETOPT(conn->sconn.s_options, SO_LINGER) &&
+         conn->sconn.s_linger == 0;
+#else
+  UNUSED(conn);
+  return false;
+#endif
+}
+
+/****************************************************************************
  * Name: tcp_close_eventhandler
  ****************************************************************************/
 
@@ -120,10 +141,12 @@ static uint32_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
    * close, ends the connection with a RST at once (RFC 1122, section
    * 4.2.2.13), also while our own data waits to be sent: the peer may
    * wait for us to read before it reads, and the two connections would
-   * keep their buffers for ever.
+   * keep their buffers for ever.  An abortive close (SO_LINGER with a
+   * time of zero) also sends a RST at once, not a FIN.
    */
 
-  else if (conn->readahead != NULL || (flags & TCP_NEWDATA) != 0)
+  else if (conn->readahead != NULL || (flags & TCP_NEWDATA) != 0 ||
+           tcp_close_abortive(conn))
     {
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       if (conn->sndcb != NULL)
