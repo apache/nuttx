@@ -73,6 +73,7 @@ if(CONFIG_CRYPTO)
   list(APPEND SRCS siphash.c)
   list(APPEND SRCS hmac_buff.c)
   list(APPEND SRCS bn.c)
+  list(APPEND SRCS rsa.c)
 
   # Entropy pool random number generator
 

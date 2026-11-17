@@ -115,6 +115,15 @@ config CRYPTO_CRYPTODEV_HARDWARE
 	depends on CRYPTO_BACKENDS
 	default n
 
+config CRYPTO_RSA_MAX_BITS
+	int "Maximum RSA modulus size in bits"
+	default 4096
+	range 512 4096
+	---help---
+		Largest modulus the RSA core in crypto/rsa.c accepts.  The
+		per-operation heap buffers scale with this value: about 7 KB at
+		4096 bits, half of that at 2048.
+
 config CRYPTO_SW_AES
 	bool "Software AES library"
 	depends on ALLOW_BSD_COMPONENTS

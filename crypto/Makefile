@@ -76,6 +76,7 @@ CRYPTO_CSRCS += key_wrap.c
 CRYPTO_CSRCS += siphash.c
 CRYPTO_CSRCS += hmac_buff.c
 CRYPTO_CSRCS += bn.c
+CRYPTO_CSRCS += rsa.c
 
 # Entropy pool random number generator
 
