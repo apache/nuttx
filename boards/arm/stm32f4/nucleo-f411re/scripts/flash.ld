@@ -25,12 +25,48 @@
  * FLASH memory is aliased to address 0x0000:0000 where the code expects to
  * begin execution by jumping to the entry point in the 0x0800:0000 address
  * range.
+ *
+ * Several image configurations are provided for customizing the location
+ * and allowable size of flash and ram. These image configurations can be
+ * selected by passing extra flags at build time, e.g.:
+ *  make EXTRAFLAGS="-DIMAGE_CFG=2"
  */
+
+#include <nuttx/config.h>
+
+#ifndef CONFIG_NUTTX_LINKER_IMAGE_CFG
+#define FLASH_START 0x08000000
+#define FLASH_SIZE  512K
+#define RAM_START   0x20000000
+#define RAM_SIZE    128K
+#elif CONFIG_NUTTX_LINKER_IMAGE_CFG_ID == 0    /* Same as above */
+#define FLASH_START 0x08000000
+#define FLASH_SIZE  512K
+#define RAM_START   0x20000000
+#define RAM_SIZE    128K
+#elif CONFIG_NUTTX_LINKER_IMAGE_CFG_ID == 1    /* Bootloader image */
+#define FLASH_START 0x08000000
+#define FLASH_SIZE  16K
+#define RAM_START   0x20000000 - 16K
+#define RAM_SIZE    16K
+#elif CONFIG_NUTTX_LINKER_IMAGE_CFG_ID == 2    /* Image for 64kB flash block */
+#define FLASH_START 0x08000000 + 64K
+#define FLASH_SIZE  64K
+#define RAM_START   0x20000000
+#define RAM_SIZE    128K
+#elif CONFIG_NUTTX_LINKER_IMAGE_CFG_ID == 2    /* Image for 128kB flash blocks */
+#define FLASH_START 0x08000000 + 128K
+#define FLASH_SIZE  512K - 128K
+#define RAM_START   0x20000000
+#define RAM_SIZE    128K
+#else
+#error "Unsupported image configuration"
+#endif
 
 MEMORY
 {
-  flash (rx) : ORIGIN = 0x08000000, LENGTH = 512K
-  sram (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
+  flash (rx) : ORIGIN = FLASH_START, LENGTH = FLASH_SIZE
+  sram (rwx) : ORIGIN = RAM_START, LENGTH = RAM_SIZE
 }
 
 OUTPUT_ARCH(arm)
