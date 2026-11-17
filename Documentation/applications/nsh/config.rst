@@ -206,6 +206,11 @@ Configuration                        Description
  ``CONFIG_NSH_FILEIOSIZE``           Size of a static I/O buffer used for file access (ignored if there
                                      is no file system). Default is 1024.
 
+ ``CONFIG_NSH_TOP_TASKBUF_SIZE``     Size of the per-task buffer used by the ``top`` command. ``top``
+                                     keeps one buffer per task while it collects and sorts the
+                                     tasks, so peak heap usage is about (number of tasks) * this
+                                     value. Longer per-task output is truncated. Default is 512.
+
  ``CONFIG_NSH_STRERROR``             ``strerror(errno)`` makes more readable output but
                                      ``strerror()`` is very large and will not be used unless this
                                      setting is *y*. This setting depends upon the ``strerror()``
