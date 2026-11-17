@@ -216,6 +216,47 @@ int crypto_newsession(FAR uint64_t *sid,
   return err;
 }
 
+/* Clone a running session, intermediate state included, on the driver
+ * that owns it.
+ */
+
+int crypto_clonesession(uint64_t src, FAR uint64_t *sid)
+{
+  uint32_t hid = (src >> 32) & 0xffffffff;
+  uint32_t lid;
+  int err;
+
+  if (crypto_drivers == NULL || sid == NULL)
+    {
+      return -EINVAL;
+    }
+
+  nxmutex_lock(&g_crypto_lock);
+
+  if (hid >= crypto_drivers_num ||
+      (crypto_drivers[hid].cc_flags & CRYPTOCAP_F_CLEANUP))
+    {
+      nxmutex_unlock(&g_crypto_lock);
+      return -ENOENT;
+    }
+
+  if (crypto_drivers[hid].cc_clone == NULL)
+    {
+      nxmutex_unlock(&g_crypto_lock);
+      return -ENOTSUP;
+    }
+
+  err = crypto_drivers[hid].cc_clone(src, &lid);
+  if (err == 0)
+    {
+      *sid = ((uint64_t)hid << 32) | lid;
+      crypto_drivers[hid].cc_sessions++;
+    }
+
+  nxmutex_unlock(&g_crypto_lock);
+  return err;
+}
+
 /* Delete an existing session (or a reserved session on an unregistered
  * driver).
  */
@@ -400,6 +441,20 @@ int crypto_register(uint32_t driverid, FAR int *alg,
                     CODE int (*freeses)(uint64_t),
                     CODE int (*process)(FAR struct cryptop *))
 {
+  return crypto_register2(driverid, alg, newses, freeses, process, NULL);
+}
+
+/* Register a crypto driver with all of its symmetric methods, session
+ * cloning included.
+ */
+
+int crypto_register2(uint32_t driverid, FAR int *alg,
+                     CODE int (*newses)(FAR uint32_t *,
+                                        FAR struct cryptoini *),
+                     CODE int (*freeses)(uint64_t),
+                     CODE int (*process)(FAR struct cryptop *),
+                     CODE int (*clone)(uint64_t, FAR uint32_t *))
+{
   int i;
 
   if (driverid >= crypto_drivers_num || alg == NULL ||
@@ -423,6 +478,7 @@ int crypto_register(uint32_t driverid, FAR int *alg,
   crypto_drivers[driverid].cc_newsession = newses;
   crypto_drivers[driverid].cc_process = process;
   crypto_drivers[driverid].cc_freesession = freeses;
+  crypto_drivers[driverid].cc_clone = clone;
   crypto_drivers[driverid].cc_sessions = 0; /* Unmark */
 
   nxmutex_unlock(&g_crypto_lock);
@@ -706,6 +762,7 @@ int up_cryptoinitialize(void)
 {
 #ifdef CONFIG_CRYPTO_ALGTEST
   int ret = crypto_test();
+
   if (ret)
     {
       crypterr("ERROR: crypto test failed\n");
