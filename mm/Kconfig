@@ -77,12 +77,15 @@ config MM_KERNEL_HEAPSIZE
 
 config MM_DEFAULT_ALIGNMENT
 	int "Memory default alignment in bytes"
+	default 16 if ARCH_64BIT
 	default 8
 	range 0 64
 	---help---
 		The memory default alignment in bytes, if this value is 0, the real
 		memory default alignment is equal to sizoef(uintptr), if this value
 		is not 0, this value must be 2^n and at least sizeof(uintptr).
+		The default is 16 on 64-bit architectures: malloc() must return
+		memory aligned for every type, and alignof(max_align_t) is 16 there.
 
 config MM_NODE_GUARDSIZE
 	int "Memory node guard size"
