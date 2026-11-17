@@ -25,6 +25,7 @@ ifeq ($(CONFIG_ARCH_CHIP_TC4XX),y)
     ARCHCPUFLAGS += --misrac-version=2004 --user-mode=hypervisor
     ARCHCPUFLAGS += --default-near-size=0
     LDFLAGS      += -Ctc4dx
+    LDFLAGS      += -Wl--user-provided-initialization-code
   else
     ARCHCPUFLAGS += -mcpu=tc4DAx
     ARCHCPUFLAGS += -mtc18

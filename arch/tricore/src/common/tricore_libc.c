@@ -31,21 +31,6 @@
  * Public Functions
  ****************************************************************************/
 
-/* TODO:
- * The data copy from flash to ram reuses the implementation in tricore sdk.
- * The next update will reimplement _c_init() to abandon the copy code.
- *
- * Usage: ltc [options] files
- * -i --user-provided-initialization-code
- *
- *         the user provides his own initialization
- *         routine, do not emit the copytable
- *
- * void _c_init(void)
- * {
- * }
- */
-
 /* The implementation of libc is introduced by default in the Tricore
  * toolchain, in nuttx we made a fake libc_fpu.a library to bypass
  * this issue, but the linker will still generate markup code,

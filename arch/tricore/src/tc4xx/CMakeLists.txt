@@ -161,8 +161,7 @@ set(SDK_CSRCS
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Smm/Std/IfxSmmRst.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Smu/Std/IfxSmu.c"
     "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Vmt/Std/IfxVmt.c"
-    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Wtu/Std/IfxWtu.c"
-    "${ILLD_DIR}/Libraries/Infra/Platform/Compilers/CompilerTasking.c")
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Wtu/Std/IfxWtu.c")
 
 target_sources(nuttx PRIVATE ${SDK_CSRCS})
 
