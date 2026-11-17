@@ -81,9 +81,15 @@ static uint32_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
    *   TCP_ABORT:    The remote host has aborted the connection
    *   TCP_TIMEDOUT: The remote did not respond, the connection timed out
    *   NETDEV_DOWN:  The network device went down
+   *
+   * TCP_TXCLOSE ends the close only when the peer acknowledged our FIN in
+   * LAST_ACK (the state is TCP_CLOSED then).  The callback of shutdown()
+   * runs before this one and sets TCP_TXCLOSE to send its FIN: this
+   * callback must stay until the connection ends, or no one frees it.
    */
 
-  if ((flags & (TCP_TXCLOSE | TCP_DISCONN_EVENTS)) != 0)
+  if ((flags & TCP_DISCONN_EVENTS) != 0 ||
+      ((flags & TCP_TXCLOSE) != 0 && conn->tcpstateflags == TCP_CLOSED))
     {
       /* The disconnection is complete.  Wake up the waiting thread with an
        * appropriate result.  Success is returned in these cases:
