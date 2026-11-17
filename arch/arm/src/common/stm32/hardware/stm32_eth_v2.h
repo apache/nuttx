@@ -56,6 +56,7 @@
 
 #define STM32_ETH_MACISR_OFFSET      0x00B0 /* Ethernet MAC interrupt status register */
 #define STM32_ETH_MACIER_OFFSET      0x00B4 /* Ethernet MAC interrupt enable register */
+#define STM32_ETH_MACHWF1R_OFFSET    0x0120 /* Ethernet MAC HW feature 1 register */
 #define STM32_ETH_MACHWF2R_OFFSET    0x0124 /* Ethernet MAC HW feature 2 register */
 
 #define STM32_ETH_MACMDIOAR_OFFSET   0x0200 /* Ethernet MAC MDIO address register */
@@ -129,6 +130,7 @@
 #define STM32_ETH_MACRXQC0R          (STM32_EMAC_BASE+STM32_ETH_MACRXQC0R_OFFSET)
 #define STM32_ETH_MACISR             (STM32_EMAC_BASE+STM32_ETH_MACISR_OFFSET)
 #define STM32_ETH_MACIER             (STM32_EMAC_BASE+STM32_ETH_MACIER_OFFSET)
+#define STM32_ETH_MACHWF1R           (STM32_EMAC_BASE+STM32_ETH_MACHWF1R_OFFSET)
 #define STM32_ETH_MACHWF2R           (STM32_EMAC_BASE+STM32_ETH_MACHWF2R_OFFSET)
 
 #define STM32_ETH_MACMDIOAR          (STM32_EMAC_BASE+STM32_ETH_MACMDIOAR_OFFSET)
@@ -239,10 +241,19 @@
 #define ETH_MACRXQC0R_RXQ0EN_MASK    (3 << ETH_MACRXQC0R_RXQ0EN_SHIFT)
 #  define ETH_MACRXQC0R_RXQ0EN_GT    (2 << ETH_MACRXQC0R_RXQ0EN_SHIFT) /* Generic traffic */
 
+/* Ethernet MAC HW feature 1 register */
+
+#define ETH_MACHWF1R_RXFIFOSIZE_SHIFT (0)      /* Bits 0-4: Rx FIFO size, 128 << n bytes */
+#define ETH_MACHWF1R_RXFIFOSIZE_MASK (0x1f << ETH_MACHWF1R_RXFIFOSIZE_SHIFT)
+#define ETH_MACHWF1R_TXFIFOSIZE_SHIFT (6)      /* Bits 6-10: Tx FIFO size, 128 << n bytes */
+#define ETH_MACHWF1R_TXFIFOSIZE_MASK (0x1f << ETH_MACHWF1R_TXFIFOSIZE_SHIFT)
+
 /* Ethernet MAC HW feature 2 register */
 
 #define ETH_MACHWF2R_RXQCNT_SHIFT    (0)       /* Bits 0-3: Number of Rx queues - 1 */
 #define ETH_MACHWF2R_RXQCNT_MASK     (0xf << ETH_MACHWF2R_RXQCNT_SHIFT)
+#define ETH_MACHWF2R_TXQCNT_SHIFT    (6)       /* Bits 6-9: Number of Tx queues - 1 */
+#define ETH_MACHWF2R_TXQCNT_MASK     (0xf << ETH_MACHWF2R_TXQCNT_SHIFT)
 
 /* Ethernet MAC frame filter register */
 
@@ -487,8 +498,8 @@
 #define ETH_MTLRXQOMR_RFA_MASK   (0x7 << ETH_MTLRXQOMR_RFA_SHIFT)
 #define ETH_MTLRXQOMR_RFD_SHIFT  (14)     /* Bits 14-16: Threshold for Deactivating Flow Control */
 #define ETH_MTLRXQOMR_RFD_MASK   (0x7 << ETH_MTLRXQOMR_RFD_SHIFT)
-#define ETH_MTLRXQOMR_RQS_SHIFT  (20)     /* Bits 20-22: Receive Queue Size */
-#define ETH_MTLRXQOMR_RQS_MASK   (0x7 << ETH_MTLRXQOMR_RQS_SHIFT)
+#define ETH_MTLRXQOMR_RQS_SHIFT  (20)     /* Bits 20-23: Receive Queue Size */
+#define ETH_MTLRXQOMR_RQS_MASK   (0xf << ETH_MTLRXQOMR_RQS_SHIFT)
 
 #define ETH_MTLRXQMPOCR_OVFPKTCNT_SHIFT (0)       /* Bits 0-10: Overflow Packet Counter */
 #define ETH_MTLRXQMPOCR_OVFPKTCNT_MASK  (0x7ff << ETH_MTLRXQMPOCR_OVFPKTCNT_SHIFT)

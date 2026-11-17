@@ -34,6 +34,15 @@ config STM32_MII
 	---help---
 		Support Ethernet MII interface.
 
+config STM32_RGMII
+	bool "Use RGMII interface"
+	depends on STM32_HAVE_ETH_RGMII && !STM32_MII && NET_PHYLIB
+	---help---
+		Support the gigabit Ethernet RGMII interface.  The PHY is managed by
+		PHYLIB.  A board whose PHY adds the RGMII delays defines
+		BOARD_ETH_PHY_INTERFACE in its board.h, for example as
+		PHY_INTERFACE_RGMII_ID.
+
 config STM32_AUTONEG
 	bool "Use autonegotiation"
 	default y
@@ -209,7 +218,7 @@ config STM32_ETH_TIMESTAMP_TX
 
 config STM32_RMII
 	bool
-	default !STM32_MII
+	default !STM32_MII && !STM32_RGMII
 
 config STM32_ETHMAC_REGDEBUG
 	bool "Register-Level Debug"
