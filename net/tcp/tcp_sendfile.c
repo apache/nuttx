@@ -551,40 +551,40 @@ errout_locked:
 #endif
   conn_dev_unlock(&conn->sconn, conn->dev);
 
-  /* Return the current file position */
+  /* A timeout or a signal can end the wait after some bytes went out.
+   * Then return the count of these bytes.  Return the error only when no
+   * byte went out.
+   */
+
+  if (ret < 0 && state.snd_sent <= 0)
+    {
+      state.snd_sent = ret;
+    }
 
   if (offset)
     {
-      /* Use lseek to get the current file position */
+      /* Move *offset over the bytes sent and restore the file position */
 
-      off_t curpos = file_seek(infile, 0, SEEK_CUR);
-
-      if (curpos < 0)
+      if (state.snd_sent > 0)
         {
-          return curpos;
+          *offset += state.snd_sent;
         }
-
-      /* Return the current file position */
-
-      *offset = curpos;
-
-      /* Use lseek again to restore the original file position */
 
       startpos = file_seek(infile, startpos, SEEK_SET);
-      if (startpos < 0)
-        {
-          return startpos;
-        }
+    }
+  else if (state.snd_sent > 0)
+    {
+      /* Put the file position after the bytes sent */
+
+      startpos = file_seek(infile, startpos + state.snd_sent, SEEK_SET);
     }
 
-  if (ret < 0)
+  if (startpos < 0)
     {
-      return ret;
+      return startpos;
     }
-  else
-    {
-      return state.snd_sent;
-    }
+
+  return state.snd_sent;
 }
 
 #endif /* CONFIG_NET_SENDFILE && CONFIG_NET_TCP && NET_TCP_HAVE_STACK */
