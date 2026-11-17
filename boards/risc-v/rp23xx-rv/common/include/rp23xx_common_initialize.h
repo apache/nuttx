@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/rp23xx-rv/common/include/rp23xx_common_initialize.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
