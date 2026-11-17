@@ -38,6 +38,9 @@
 config STM32_HAVE_IP_GPIO_M33M55_V1
 	bool
 
+config STM32_HAVE_GPIO_DELAY
+	bool
+
 config STM32_HAVE_IP_EXTI_M33M55_V1
 	bool
 

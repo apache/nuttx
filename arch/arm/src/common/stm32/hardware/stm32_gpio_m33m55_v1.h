@@ -51,6 +51,10 @@
 #define STM32_GPIO_SECCFGR_OFFSET   0x0030 /* GPIO secure configuration register */
 #define STM32_GPIO_PRIVCFGR_OFFSET  0x0034 /* GPIO privilege configuration register */
 #define STM32_GPIO_RCFGLOCKR_OFFSET 0x0038 /* GPIO RIF configuration lock register */
+#define STM32_GPIO_DELAYRL_OFFSET   0x0040 /* GPIO delay register, pins 0-7 (STM32N6) */
+#define STM32_GPIO_DELAYRH_OFFSET   0x0044 /* GPIO delay register, pins 8-15 (STM32N6) */
+#define STM32_GPIO_ADVCFGRL_OFFSET  0x0048 /* GPIO advanced configuration register, pins 0-7 (STM32N6) */
+#define STM32_GPIO_ADVCFGRH_OFFSET  0x004c /* GPIO advanced configuration register, pins 8-15 (STM32N6) */
 
 /* Register Addresses *******************************************************/
 
@@ -864,5 +868,16 @@
 /* GPIO port secure configuration register */
 
 #define GPIO_SECCFGR_SET(n)           (1 << (n))
+
+/* GPIO delay and advanced configuration registers: 4 bits per pin, pins
+ * 0-7 in the L and pins 8-15 in the H register (STM32N6)
+ */
+
+#define GPIO_DELAYR_SHIFT(n)          ((n) << 2)
+#define GPIO_DELAYR_MASK(n)           (0xf << GPIO_DELAYR_SHIFT(n))
+
+#define GPIO_ADVCFGR_SHIFT(n)         ((n) << 2)
+#define GPIO_ADVCFGR_MASK(n)          (0xf << GPIO_ADVCFGR_SHIFT(n))
+#define GPIO_ADVCFGR_DLYPATH(n)       (1 << GPIO_ADVCFGR_SHIFT(n)) /* Delay on the input path */
 
 #endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_M33M55_V1_H */
