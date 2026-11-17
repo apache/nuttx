@@ -318,6 +318,13 @@ static inline void rcc_enableahb5(void)
   regval |= RCC_AHB5ENR_HPDMA1EN;
 #endif
 
+#ifdef CONFIG_STM32_ETHMAC
+  /* ETH1 bus, MAC, TX and RX clocks */
+
+  regval |= RCC_AHB5ENR_ETH1EN | RCC_AHB5ENR_ETH1MACEN |
+            RCC_AHB5ENR_ETH1TXEN | RCC_AHB5ENR_ETH1RXEN;
+#endif
+
   if (regval != 0)
     {
       putreg32(regval, STM32_RCC_AHB5ENSR);

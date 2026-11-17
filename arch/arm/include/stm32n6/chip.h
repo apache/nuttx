@@ -62,6 +62,7 @@
 #define STM32_NBTIM                    (2)   /* TIM6 and TIM7 */
 #define STM32_NI2C                     (4)   /* I2C1-4 */
 #define STM32_NSPI                     (6)   /* SPI1-6 */
+#define STM32_NETHERNET                (1)   /* ETH1 */
 
 /* NVIC priority levels *****************************************************/
 

@@ -28,6 +28,8 @@ Peripheral  Support  Notes
 GPIO        Yes
 I2C         Yes      I2C1-4 through the common I2C v2 driver.
 EXTI        Yes      GPIO interrupts through the common driver.
+ETH         Yes      ETH1 through the common Ethernet v2 driver, MII, RMII
+                     or RGMII up to 1000 Mbps.
 DMA         Yes      GPDMA1 and HPDMA1 through the common GPDMA driver.
 PWR         Yes      Supply configuration, VOS, I/O supply validity.
 RCC         Yes      HSI/HSE, PLL1-4, IC1-20, bus prescalers and kernel
@@ -43,7 +45,6 @@ USART       Yes      USART1-3, UART4-5, USART6, UART7-9, USART10 and
 ADC         No
 DCACHE      No
 DCMIPP      No
-ETH         No
 ICACHE      No
 IWDG        No
 LPTIM       No
