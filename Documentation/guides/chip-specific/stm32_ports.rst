@@ -1149,6 +1149,23 @@ The board does not pass numeric divisors for the RCC code to convert into
 register fields.  The RCC code keeps reserved register bits at their reset
 value.
 
+Board configurations
+====================
+
+* ``nsh`` is NuttShell with the ``hello`` example.  It does not enable
+  ``ostest``.
+* ``ostest`` (``CONFIG_TESTING_OSTEST``) is enabled only in the ``ostest``
+  and ``jumbo`` configurations, and only on boards with at least 256 KB of
+  flash.
+* An ``ostest`` configuration is ``nsh`` plus ``ostest``: NSH with builtin
+  applications (``CONFIG_NSH_BUILTIN_APPS``) and
+  ``CONFIG_INIT_ENTRYPOINT="nsh_main"``.  ``ostest`` is run from NSH.
+* ``kostest`` configurations (``ostest`` in the protected build) are the
+  exception and start ``ostest_main`` directly.
+* Configurations for a specific feature do not enable ``ostest``.  The
+  exception is a configuration made to run ``ostest`` with that feature, for
+  example ``stm32f4discovery:sporadic``.
+
 Next steps
 ==========
 
