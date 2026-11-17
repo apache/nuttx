@@ -1528,22 +1528,14 @@ int swcr_compdec(FAR struct cryptodesc *crd, FAR struct swcr_data *sw,
   return 0;
 }
 
-/* Generate a new software session. */
+/* Reserve a free slot in swcr_sessions, growing it if needed.
+ * Returns the slot index, or 0 on allocation failure.
+ */
 
-int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
+static uint32_t swcr_allocsid(void)
 {
   FAR struct swcr_data **swd;
-  FAR const struct auth_hash *axf;
-  FAR const struct enc_xform *txf;
-  uint8_t hmackey[HMAC_MAX_BLOCK_LEN];
-  int keylen;
-  uint32_t i;
-  int k;
-
-  if (sid == NULL || cri == NULL)
-    {
-      return -EINVAL;
-    }
+  uint32_t i = 0;
 
   if (swcr_sessions)
     {
@@ -1582,7 +1574,7 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
               swcr_sesnum /= 2;
             }
 
-          return -ENOBUFS;
+          return 0;
         }
 
       /* Copy existing sessions */
@@ -1595,6 +1587,32 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
         }
 
       swcr_sessions = swd;
+    }
+
+  return i;
+}
+
+/* Generate a new software session. */
+
+int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
+{
+  FAR struct swcr_data **swd;
+  FAR const struct auth_hash *axf;
+  FAR const struct enc_xform *txf;
+  uint8_t hmackey[HMAC_MAX_BLOCK_LEN];
+  int keylen;
+  uint32_t i;
+  int k;
+
+  if (sid == NULL || cri == NULL)
+    {
+      return -EINVAL;
+    }
+
+  i = swcr_allocsid();
+  if (i == 0)
+    {
+      return -ENOBUFS;
     }
 
   swd = &swcr_sessions[i];
@@ -1807,18 +1825,6 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
             axf->init((*swd)->sw_ictx);
             (*swd)->sw_axf = axf;
             bcopy((*swd)->sw_ictx, &(*swd)->sw_ctx, axf->ctxsize);
-
-            if (cri->cri_sid != -1)
-              {
-                if (swcr_sessions[cri->cri_sid] == NULL)
-                  {
-                    swcr_freesession(i);
-                    return -EINVAL;
-                  }
-
-                bcopy(&swcr_sessions[cri->cri_sid]->sw_ctx, &(*swd)->sw_ctx,
-                      axf->ctxsize);
-              }
             break;
 
           case CRYPTO_AES_128_GMAC:
@@ -1990,6 +1996,150 @@ int swcr_freesession(uint64_t tid)
     }
 
   return 0;
+}
+
+/* Deep-copy one session node; the xform/axf tables are shared constants. */
+
+static int swcr_clonedata(FAR struct swcr_data *dst,
+                          FAR const struct swcr_data *src)
+{
+  FAR const struct auth_hash *axf;
+  FAR const struct enc_xform *txf;
+
+  memcpy(dst, src, sizeof(*dst));
+  dst->sw_next = NULL;
+
+  switch (src->sw_alg)
+    {
+      case CRYPTO_3DES_CBC:
+      case CRYPTO_BLF_CBC:
+      case CRYPTO_CAST_CBC:
+      case CRYPTO_RIJNDAEL128_CBC:
+      case CRYPTO_AES_CTR:
+      case CRYPTO_AES_CTR_SSH:
+      case CRYPTO_AES_XTS:
+      case CRYPTO_AES_GCM_16:
+      case CRYPTO_AES_GMAC:
+      case CRYPTO_AES_CMAC:
+      case CRYPTO_AES_OFB:
+      case CRYPTO_AES_CFB_8:
+      case CRYPTO_AES_CFB_128:
+      case CRYPTO_CHACHA20:
+      case CRYPTO_CHACHA20_DJB:
+      case CRYPTO_CHACHA20_POLY1305:
+      case CRYPTO_NULL:
+        txf = src->sw_exf;
+        dst->sw_kschedule = NULL;
+        if (src->sw_kschedule == NULL || txf->ctxsize == 0)
+          {
+            return OK;
+          }
+
+        dst->sw_kschedule = kmm_malloc(txf->ctxsize);
+        if (dst->sw_kschedule == NULL)
+          {
+            return -ENOBUFS;
+          }
+
+        memcpy(dst->sw_kschedule, src->sw_kschedule, txf->ctxsize);
+        return OK;
+
+      case CRYPTO_MD5_HMAC:
+      case CRYPTO_SHA1_HMAC:
+      case CRYPTO_RIPEMD160_HMAC:
+      case CRYPTO_SHA2_224_HMAC:
+      case CRYPTO_SHA2_256_HMAC:
+      case CRYPTO_SHA2_384_HMAC:
+      case CRYPTO_SHA2_512_HMAC:
+      case CRYPTO_PBKDF2_HMAC_SHA1:
+      case CRYPTO_PBKDF2_HMAC_SHA256:
+        axf = src->sw_axf;
+        dst->sw_ictx = NULL;
+        dst->sw_octx = kmm_malloc(axf->ctxsize);
+        if (dst->sw_octx == NULL)
+          {
+            return -ENOBUFS;
+          }
+
+        memcpy(dst->sw_octx, src->sw_octx, axf->ctxsize);
+        goto ictx;
+
+      case CRYPTO_AES_128_GMAC:
+      case CRYPTO_AES_192_GMAC:
+      case CRYPTO_AES_256_GMAC:
+      case CRYPTO_AES_128_CMAC:
+      case CRYPTO_CHACHA20_POLY1305_MAC:
+      case CRYPTO_MD5:
+      case CRYPTO_POLY1305:
+      case CRYPTO_RIPEMD160:
+      case CRYPTO_SHA1:
+      case CRYPTO_SHA2_224:
+      case CRYPTO_SHA2_256:
+      case CRYPTO_SHA2_384:
+      case CRYPTO_SHA2_512:
+      case CRYPTO_CRC32:
+        axf = src->sw_axf;
+        dst->sw_octx = NULL;
+
+        ictx:
+        dst->sw_ictx = kmm_malloc(axf->ctxsize);
+        if (dst->sw_ictx == NULL)
+          {
+            return -ENOBUFS;
+          }
+
+        memcpy(dst->sw_ictx, src->sw_ictx, axf->ctxsize);
+        return OK;
+
+      default:
+        return OK;
+    }
+}
+
+/* Clone a running session, including any partially processed state. */
+
+int swcr_clone(uint64_t tid, FAR uint32_t *sid)
+{
+  FAR const struct swcr_data *src;
+  FAR struct swcr_data **dst;
+  uint32_t old = (uint32_t)tid;
+  uint32_t i;
+  int ret;
+
+  if (sid == NULL || old == 0 || old >= swcr_sesnum ||
+      swcr_sessions == NULL || swcr_sessions[old] == NULL)
+    {
+      return -EINVAL;
+    }
+
+  i = swcr_allocsid();
+  if (i == 0)
+    {
+      return -ENOBUFS;
+    }
+
+  dst = &swcr_sessions[i];
+  for (src = swcr_sessions[old]; src; src = src->sw_next)
+    {
+      *dst = kmm_zalloc(sizeof(struct swcr_data));
+      if (*dst == NULL)
+        {
+          swcr_freesession(i);
+          return -ENOBUFS;
+        }
+
+      ret = swcr_clonedata(*dst, src);
+      if (ret < 0)
+        {
+          swcr_freesession(i);
+          return ret;
+        }
+
+      dst = &(*dst)->sw_next;
+    }
+
+  *sid = i;
+  return OK;
 }
 
 /* Process a software request. */
@@ -2491,8 +2641,8 @@ void swcr_init(void)
   algs[CRYPTO_PBKDF2_HMAC_SHA256] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_ESN] = CRYPTO_ALG_FLAG_SUPPORTED;
 
-  crypto_register(swcr_id, algs, swcr_newsession,
-                  swcr_freesession, swcr_process);
+  crypto_register2(swcr_id, algs, swcr_newsession,
+                   swcr_freesession, swcr_process, swcr_clone);
 
   memset(kalgs, 0, sizeof(kalgs));
   kalgs[CRK_MOD_EXP] = CRYPTO_ALG_FLAG_SUPPORTED;

@@ -409,6 +409,7 @@ struct cryptocap
   CODE int (*cc_newsession)(FAR uint32_t *, FAR struct cryptoini *);
   CODE int (*cc_process)(FAR struct cryptop *);
   CODE int (*cc_freesession)(uint64_t);
+  CODE int (*cc_clone)(uint64_t, FAR uint32_t *);
   CODE int (*cc_kprocess)(FAR struct cryptkop *);
   FAR void *priv;
 };
@@ -484,13 +485,20 @@ extern const uint8_t hmac_opad_buffer[HMAC_MAX_BLOCK_LEN];
 #define CIOCKEY                 104
 #define CIOCKEYRET              105
 #define CIOCASYMFEAT            106
+#define CIOCCLONE               107
 
 int crypto_newsession(FAR uint64_t *, FAR struct cryptoini *, int);
+int crypto_clonesession(uint64_t, FAR uint64_t *);
 int crypto_freesession(uint64_t);
 int crypto_register(uint32_t, FAR int *,
                     CODE int (*)(FAR uint32_t *, FAR struct cryptoini *),
                     CODE int (*)(uint64_t),
                     CODE int (*)(FAR struct cryptop *));
+int crypto_register2(uint32_t, FAR int *,
+                     CODE int (*)(FAR uint32_t *, FAR struct cryptoini *),
+                     CODE int (*)(uint64_t),
+                     CODE int (*)(FAR struct cryptop *),
+                     CODE int (*)(uint64_t, FAR uint32_t *));
 int crypto_kregister(uint32_t, FAR int *,
                      CODE int (*)(FAR struct cryptkop *));
 int crypto_unregister(uint32_t, int);

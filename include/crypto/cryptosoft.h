@@ -97,6 +97,7 @@ int swcr_process(FAR struct cryptop *);
 int swcr_kprocess(FAR struct cryptkop *);
 int swcr_newsession(FAR uint32_t *, FAR struct cryptoini *);
 int swcr_freesession(uint64_t);
+int swcr_clone(uint64_t, FAR uint32_t *);
 void swcr_init(void);
 
 /* Software key management */
