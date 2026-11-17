@@ -28,6 +28,8 @@ predate it and have no tag.
    :titlesonly:
    :caption: Releases
 
+   NuttX-13.1.1
+   NuttX-13.1.0
    NuttX-13.0.1
    NuttX-13.0.0
    NuttX-12.13.0
