@@ -1143,8 +1143,17 @@ int swcr_encdec(FAR struct cryptop *crp, FAR struct cryptodesc *crd,
         }
     }
 
-  if (crp->crp_iv)
+  if (crp->crp_iv && !exf->reinit)
     {
+      /* Block-chaining modes without a reinit method track the running
+       * IV in ivp and write it back so a follow-up request can continue
+       * the chain. Ciphers that provide reinit (AES-CBC/XTS/CTR,
+       * ChaCha20, ...) keep their IV/counter state inside the key
+       * schedule, so ivp still points at the caller-supplied input IV
+       * here; copying it back is a no-op and must be skipped, otherwise
+       * a caller passing a read-only IV buffer would fault.
+       */
+
       bcopy(ivp, crp->crp_iv, ivlen);
     }
 
