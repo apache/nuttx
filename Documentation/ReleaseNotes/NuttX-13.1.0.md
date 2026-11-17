@@ -1,5 +1,5 @@
 NuttX-13.1.0
-------------
+============
 
 What's New In This Release
 Major Changes to Core OS
