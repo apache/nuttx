@@ -54,7 +54,7 @@ int chacha20_setkey(FAR void *sched, FAR uint8_t *key, int len)
   return 0;
 }
 
-void chacha20_reinit(caddr_t key, FAR uint8_t *iv)
+void chacha20_reinit(caddr_t key, FAR uint8_t *iv, uint16_t ivlen)
 {
   FAR struct chacha20_ctx *ctx = (FAR struct chacha20_ctx *)key;
 
@@ -74,7 +74,7 @@ void chacha20_crypt(caddr_t key, FAR uint8_t *data, size_t len)
   chacha_encrypt_bytes((FAR chacha_ctx *)ctx, data, data, len);
 }
 
-void chachapoly_reinit(caddr_t key, FAR uint8_t *iv)
+void chachapoly_reinit(caddr_t key, FAR uint8_t *iv, uint16_t ivlen)
 {
   FAR struct chacha20_ctx *ctx = (FAR struct chacha20_ctx *)key;
 
@@ -97,7 +97,7 @@ int chacha20_djb_setkey(FAR void *sched, FAR uint8_t *key, int len)
   return 0;
 }
 
-void chacha20_djb_reinit(caddr_t key, FAR uint8_t *iv)
+void chacha20_djb_reinit(caddr_t key, FAR uint8_t *iv, uint16_t ivlen)
 {
   FAR struct chacha20_ctx *ctx = (FAR struct chacha20_ctx *)key;
 

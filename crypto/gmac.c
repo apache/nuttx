@@ -31,6 +31,7 @@
  ****************************************************************************/
 
 #include <endian.h>
+#include <string.h>
 #include <strings.h>
 #include <sys/param.h>
 #include <crypto/aes.h>
@@ -128,17 +129,17 @@ void aes_gmac_init(FAR void *xctx)
   bzero(ctx->ghash.S, GMAC_BLOCK_LEN);
   bzero(ctx->ghash.Z, GMAC_BLOCK_LEN);
   bzero(ctx->J, GMAC_BLOCK_LEN);
+  ctx->buflen = 0;
 }
 
 void aes_gmac_setkey(FAR void *xctx, FAR const uint8_t *key, uint16_t klen)
 {
   FAR AES_GMAC_CTX *ctx = xctx;
 
-  aes_setkey(&ctx->K, key, klen - AESCTR_NONCESIZE);
+  /* Standard GCM/GMAC key (no salt) */
 
-  /* copy out salt to the counter block */
-
-  bcopy(key + klen - AESCTR_NONCESIZE, ctx->J, AESCTR_NONCESIZE);
+  aes_setkey(&ctx->K, key, klen);
+  bzero(ctx->J, AESCTR_NONCESIZE);
 
   /* prepare a hash subkey */
 
@@ -149,40 +150,39 @@ void aes_gmac_reinit(FAR void *xctx, FAR const uint8_t *iv, uint16_t ivlen)
 {
   FAR AES_GMAC_CTX *ctx = xctx;
 
-  /* copy out IV to the counter block */
-
-  bcopy(iv, ctx->J + AESCTR_NONCESIZE, ivlen);
+  aes_gcm_j0(ctx->ghash.H, iv, ivlen, ctx->J);
 }
 
 int aes_gmac_update(FAR void *xctx, FAR const uint8_t *data, size_t len)
 {
   FAR AES_GMAC_CTX *ctx = xctx;
-  uint32_t blk[4] =
-  {
-    0, 0, 0, 0
-  };
+  size_t processing;
 
-  int plen;
-
-  if (len > 0)
+  if (data)
     {
-      plen = len % GMAC_BLOCK_LEN;
-      if (len >= GMAC_BLOCK_LEN)
+      while (len > 0)
         {
-          (*ghash_update)(&ctx->ghash, (FAR uint8_t *)data,
-            len - plen);
-        }
+          processing = MIN(len, GMAC_BLOCK_LEN - ctx->buflen);
+          memcpy(ctx->buf + ctx->buflen, data, processing);
+          ctx->buflen += processing;
+          data += processing;
+          len -= processing;
 
-      if (plen)
-        {
-          memcpy((FAR uint8_t *)blk, (FAR uint8_t *)data + (len - plen),
-              plen);
-          (*ghash_update)(&ctx->ghash, (FAR uint8_t *)blk,
-              GMAC_BLOCK_LEN);
+          if (ctx->buflen == GMAC_BLOCK_LEN)
+            {
+              (*ghash_update)(&ctx->ghash, ctx->buf, GMAC_BLOCK_LEN);
+              ctx->buflen = 0;
+            }
         }
     }
+  else if (ctx->buflen > 0)
+    {
+      bzero(ctx->buf + ctx->buflen, GMAC_BLOCK_LEN - ctx->buflen);
+      (*ghash_update)(&ctx->ghash, ctx->buf, GMAC_BLOCK_LEN);
+      ctx->buflen = 0;
+    }
 
-  return (0);
+  return 0;
 }
 
 void aes_gmac_final(FAR uint8_t *digest, FAR void *xctx)
@@ -191,9 +191,17 @@ void aes_gmac_final(FAR uint8_t *digest, FAR void *xctx)
   uint8_t keystream[GMAC_BLOCK_LEN];
   int i;
 
+  /* flush any remaining buffered data (padding with zeros) */
+
+  if (ctx->buflen > 0)
+    {
+      bzero(ctx->buf + ctx->buflen, GMAC_BLOCK_LEN - ctx->buflen);
+      (*ghash_update)(&ctx->ghash, ctx->buf, GMAC_BLOCK_LEN);
+      ctx->buflen = 0;
+    }
+
   /* do one round of GCTR */
 
-  ctx->J[GMAC_BLOCK_LEN - 1] = 1;
   aes_encrypt(&ctx->K, ctx->J, keystream);
   for (i = 0; i < GMAC_DIGEST_LEN; i++)
     {
@@ -201,4 +209,45 @@ void aes_gmac_final(FAR uint8_t *digest, FAR void *xctx)
     }
 
   explicit_bzero(keystream, sizeof(keystream));
+}
+
+/* Pre-counter block J0 (NIST SP 800-38D 7.1): IV || 0^31 || 1 for a
+ * 96-bit IV, GHASH_H(IV || 0^s || 0^64 || [len(IV)]64) otherwise.
+ */
+
+void aes_gcm_j0(FAR const uint8_t *h, FAR const uint8_t *iv, size_t ivlen,
+                FAR uint8_t *j0)
+{
+  uint8_t blk[GMAC_BLOCK_LEN];
+  GHASH_CTX ghash;
+  uint64_t bits;
+  size_t off;
+  size_t n;
+
+  if (ivlen == 12)
+    {
+      memcpy(j0, iv, ivlen);
+      memset(j0 + ivlen, 0, GMAC_BLOCK_LEN - ivlen - 1);
+      j0[GMAC_BLOCK_LEN - 1] = 1;
+      return;
+    }
+
+  memset(&ghash, 0, sizeof(ghash));
+  memcpy(ghash.H, h, GMAC_BLOCK_LEN);
+
+  for (off = 0; off < ivlen; off += n)
+    {
+      n = MIN(ivlen - off, GMAC_BLOCK_LEN);
+      memset(blk, 0, sizeof(blk));
+      memcpy(blk, iv + off, n);
+      (*ghash_update)(&ghash, blk, GMAC_BLOCK_LEN);
+    }
+
+  memset(blk, 0, sizeof(blk));
+  bits = htobe64((uint64_t)ivlen * 8);
+  memcpy(blk + 8, &bits, sizeof(bits));
+  (*ghash_update)(&ghash, blk, GMAC_BLOCK_LEN);
+
+  memcpy(j0, ghash.S, GMAC_BLOCK_LEN);
+  explicit_bzero(&ghash, sizeof(ghash));
 }

@@ -68,6 +68,16 @@ void aes_cmac_update(FAR AES_CMAC_CTX *ctx,
 {
   u_int mlen;
 
+  /* Absorbing zero bytes is a no-op.  The finalization path flushes a
+   * partial block with a NULL data pointer and zero length, which must
+   * not reach memcpy.
+   */
+
+  if (len == 0)
+    {
+      return;
+    }
+
   if (ctx->m_n > 0)
     {
       mlen = MIN(16 - ctx->m_n, len);
