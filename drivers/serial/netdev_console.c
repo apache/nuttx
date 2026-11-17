@@ -36,9 +36,12 @@
 #include <nuttx/poll.h>
 #include <netinet/in.h>
 
+#include <nuttx/init.h>
+#include <nuttx/mutex.h>
 #include <nuttx/signal.h>
 #include <nuttx/net/net.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/wqueue.h>
 
 #ifdef CONFIG_NET_CAN
 #  include <nuttx/can.h>
@@ -55,6 +58,9 @@ struct netdev_consol_s
 {
   struct uart_dev_s dev;
   struct socket     psock;
+  struct work_s     txwork;
+  struct work_s     rxwork;
+  mutex_t           rxlock;
   uint16_t          rxdgram_off;
   uint16_t          rxdgram_len;
   uint8_t           rxdgram[CONFIG_CONSOLE_NETDEV_RXBUFSIZE];
@@ -92,6 +98,8 @@ static void netdev_console_txint(FAR struct uart_dev_s *dev, bool enable);
 static bool netdev_console_txready(FAR struct uart_dev_s *dev);
 static bool netdev_console_txempty(FAR struct uart_dev_s *dev);
 static void netdev_console_poll(FAR struct pollfd_s *fds);
+static void netdev_console_txwork(FAR void *arg);
+static void netdev_console_rxwork(FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -137,6 +145,7 @@ static struct netdev_consol_s g_netdev_console =
     },
     .isconsole = true
   },
+  .rxlock = NXMUTEX_INITIALIZER,
 };
 
 /****************************************************************************
@@ -321,6 +330,8 @@ static void netdev_console_detach(FAR struct uart_dev_s *dev)
 {
   FAR struct netdev_consol_s *priv = (FAR struct netdev_consol_s *)dev;
 
+  work_cancel(LPWORK, &priv->txwork);
+  work_cancel(LPWORK, &priv->rxwork);
   priv->rxdgram_off = 0;
   priv->rxdgram_len = 0;
   psock_poll(&priv->psock, &priv->fds, false);
@@ -356,26 +367,13 @@ static bool netdev_console_rxflowcontrol(FAR struct uart_dev_s *dev,
 
 static void netdev_console_dmasend(FAR struct uart_dev_s *dev)
 {
-  FAR struct netdev_consol_s *priv  = (FAR struct netdev_consol_s *)dev;
-  int                         retry = 3;
-  ssize_t                     ret;
+  FAR struct netdev_consol_s *priv = (FAR struct netdev_consol_s *)dev;
 
-  do
-    {
-      ret = psock_send(&priv->psock, dev->dmatx.buffer, dev->dmatx.length,
-                       0);
+  /* Called with the uart spinlock held, so the send, which may block, is
+   * done by netdev_console_txwork().
+   */
 
-      /* Wait for ARP */
-
-      if (ret < 0)
-        {
-          nxsig_sleep(1);
-        }
-    }
-  while (ret < 0 && retry--);
-
-  dev->dmatx.nbytes = ret > 0 ? ret : 0;
-  uart_xmitchars_done(dev);
+  work_queue(LPWORK, &priv->txwork, netdev_console_txwork, priv, 0);
 }
 
 /****************************************************************************
@@ -389,7 +387,6 @@ static void netdev_console_dmareceive(FAR struct uart_dev_s *dev)
   uint16_t                    copylen;
   uint16_t                    first;
   uint16_t                    second;
-  ssize_t                     ret;
 
   space = dev->dmarx.length + dev->dmarx.nlength;
   if (space == 0)
@@ -406,17 +403,14 @@ static void netdev_console_dmareceive(FAR struct uart_dev_s *dev)
 
   if (priv->rxdgram_off >= priv->rxdgram_len)
     {
-      ret = psock_recv(&priv->psock, priv->rxdgram, sizeof(priv->rxdgram),
-                       MSG_DONTWAIT);
-      if (ret <= 0)
-        {
-          dev->dmarx.nbytes = 0;
-          uart_recvchars_done(dev);
-          return;
-        }
+      /* Nothing buffered.  psock_recv() may block and we hold the uart
+       * spinlock here, so let netdev_console_rxwork() read the socket.
+       */
 
-      priv->rxdgram_off = 0;
-      priv->rxdgram_len = ret;
+      work_queue(LPWORK, &priv->rxwork, netdev_console_rxwork, priv, 0);
+      dev->dmarx.nbytes = 0;
+      uart_recvchars_done(dev);
+      return;
     }
 
   copylen = space;
@@ -465,7 +459,12 @@ static void netdev_console_dmarxfree(FAR struct uart_dev_s *dev)
 
 static void netdev_console_dmatxavail(FAR struct uart_dev_s *dev)
 {
-  uart_xmitchars_dma(dev);
+  /* Start a new transfer only when the previous one is done. */
+
+  if (dev->dmatx.length == 0)
+    {
+      uart_xmitchars_dma(dev);
+    }
 }
 
 /****************************************************************************
@@ -474,10 +473,30 @@ static void netdev_console_dmatxavail(FAR struct uart_dev_s *dev)
 
 static void netdev_console_send(FAR struct uart_dev_s *dev, int ch)
 {
-  FAR struct netdev_consol_s *priv = (FAR struct netdev_consol_s *)dev;
-  char                        tmp  = ch;
+  int nexthead;
 
-  psock_send(&priv->psock, &tmp, 1, 0);
+  /* Called from interrupt or idle context with the uart spinlock held, so
+   * only put the character in the xmit buffer for netdev_console_txwork().
+   * Drop it if the buffer is full, or in a panic, where the works no longer
+   * run and uart_writev() sends the xmit buffer through this function.
+   */
+
+  if (OSINIT_IS_PANIC())
+    {
+      return;
+    }
+
+  nexthead = dev->xmit.head + 1;
+  if (nexthead >= dev->xmit.size)
+    {
+      nexthead = 0;
+    }
+
+  if (nexthead != dev->xmit.tail)
+    {
+      dev->xmit.buffer[dev->xmit.head] = ch;
+      dev->xmit.head = nexthead;
+    }
 }
 
 /****************************************************************************
@@ -511,8 +530,9 @@ static bool netdev_console_txempty(FAR struct uart_dev_s *dev)
  *
  * Description:
  *   Socket poll callback.  Invoked by the network stack when the console
- *   socket becomes readable, so that the blocked reader is woken on demand
- *   rather than by periodically polling from a work queue.
+ *   socket becomes readable.  It runs with the connection locked and before
+ *   the datagram reaches the read-ahead buffer, so the receive is deferred
+ *   to netdev_console_rxwork(), which waits for that lock in psock_recv().
  *
  ****************************************************************************/
 
@@ -525,19 +545,113 @@ static void netdev_console_poll(FAR struct pollfd_s *fds)
       fds->revents &= ~POLLIN;
       if (priv->rxint)
         {
-          /* Do not pull here.  This callback runs inside the network RX
-           * path before the datagram is buffered to the socket read-ahead
-           * (the UDP layer dispatches poll notifications in the step that
-           * precedes read-ahead buffering), so a synchronous psock_recv()
-           * would read nothing and the datagram would stay stranded until
-           * the next one arrives.  Wake the reader instead; the serial
-           * read path pulls on demand in the reader thread, after the RX
-           * path has committed the data to the read-ahead buffer.
-           */
-
-          uart_datareceived(&priv->dev);
+          work_queue(LPWORK, &priv->rxwork, netdev_console_rxwork, priv, 0);
         }
     }
+}
+
+/****************************************************************************
+ * Name: netdev_console_txwork
+ *
+ * Description:
+ *   Send the buffer prepared by uart_xmitchars_dma().  This runs without the
+ *   uart spinlock, so psock_send() may block as it did in dmasend().
+ *
+ ****************************************************************************/
+
+static void netdev_console_txwork(FAR void *arg)
+{
+  FAR struct netdev_consol_s *priv = arg;
+  FAR struct uart_dev_s      *dev  = &priv->dev;
+  int                         retry = 3;
+  irqstate_t                  flags;
+  ssize_t                     ret;
+
+  /* Nothing to send when the buffer was flushed while the work was queued. */
+
+  flags = uart_spinlock(dev, true);
+  if (dev->dmatx.length == 0 && dev->dmatx.nlength == 0)
+    {
+      uart_spinunlock(dev, true, flags);
+      return;
+    }
+
+  uart_spinunlock(dev, true, flags);
+
+  do
+    {
+      ret = psock_send(&priv->psock, dev->dmatx.buffer, dev->dmatx.length,
+                       0);
+
+      /* Wait for ARP */
+
+      if (ret < 0)
+        {
+          nxsig_sleep(1);
+        }
+    }
+  while (ret < 0 && retry--);
+
+  flags = uart_spinlock(dev, true);
+
+  dev->dmatx.nbytes = ret > 0 ? ret : 0;
+  uart_xmitchars_done(dev);
+
+  /* Continue with whatever is still buffered in the xmit ring. */
+
+  if (ret > 0 && dev->xmit.head != dev->xmit.tail)
+    {
+      uart_xmitchars_dma(dev);
+    }
+
+  uart_spinunlock(dev, true, flags);
+}
+
+/****************************************************************************
+ * Name: netdev_console_rxwork
+ *
+ * Description:
+ *   Read one datagram from the console socket and hand it to the serial
+ *   upper half.  This runs without the uart spinlock, so psock_recv() may
+ *   block on the connection lock.
+ *
+ ****************************************************************************/
+
+static void netdev_console_rxwork(FAR void *arg)
+{
+  FAR struct netdev_consol_s *priv = arg;
+  FAR struct uart_dev_s      *dev  = &priv->dev;
+  irqstate_t                  flags;
+  ssize_t                     ret;
+
+  nxmutex_lock(&priv->rxlock);
+
+  flags = uart_spinlock(dev, true);
+
+  /* A previous datagram is still waiting to be drained. */
+
+  if (priv->rxdgram_off < priv->rxdgram_len)
+    {
+      uart_spinunlock(dev, true, flags);
+      nxmutex_unlock(&priv->rxlock);
+      return;
+    }
+
+  priv->rxdgram_off = 0;
+  priv->rxdgram_len = 0;
+  uart_spinunlock(dev, true, flags);
+
+  ret = psock_recv(&priv->psock, priv->rxdgram, sizeof(priv->rxdgram),
+                   MSG_DONTWAIT);
+  if (ret > 0)
+    {
+      flags = uart_spinlock(dev, true);
+      priv->rxdgram_len = ret;
+      uart_recvchars_dma(dev);
+      uart_spinunlock(dev, true, flags);
+    }
+
+  nxmutex_unlock(&priv->rxlock);
 }
 
 /****************************************************************************
