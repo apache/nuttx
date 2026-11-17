@@ -25,6 +25,7 @@ ifeq ($(CONFIG_ARCH_CHIP_TC39X),y)
     ARCHCPUFLAGS += --cpu=tc39xb
     ARCHCPUFLAGS += --default-near-size=0
     LDFLAGS      += -Ctc39xb
+    LDFLAGS      += -Wl--user-provided-initialization-code
   else
     ARCHCPUFLAGS += -mcpu=tc39xx
     ARCHCPUFLAGS += -mtc162

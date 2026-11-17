@@ -146,7 +146,6 @@ SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Smm/Std/IfxSmmRst.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Smu/Std/IfxSmu.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Vmt/Std/IfxVmt.c
 SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Wtu/Std/IfxWtu.c
-SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Platform/Compilers/CompilerTasking.c
 
 CFLAGS += $(addprefix ${INCDIR_PREFIX},$(SDK_INCDIR))
 
