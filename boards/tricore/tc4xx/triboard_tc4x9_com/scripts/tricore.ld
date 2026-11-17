@@ -94,13 +94,13 @@ SECTIONS
   .traptab ORIGIN(pfls) + 0x100 :
   {
     __TRAPTAB_CPU0 = .;
-    KEEP(*(.traptab_cpu0))
+    KEEP(*(.traptab))
   } > pfls
 
   .intvec ORIGIN(pfls) + 0x1fe0 :
   {
     __INTTAB_CPU0 = ORIGIN(pfls);
-    KEEP(*(.intvec))
+    KEEP(*(.inttab))
   } > pfls
 
   .text :
