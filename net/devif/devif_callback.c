@@ -34,6 +34,7 @@
 #include <assert.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -59,6 +60,13 @@
 #ifdef CONFIG_NET_STATISTICS
 struct net_stats_s g_netstats;
 #endif
+
+/* Protects the links and the event, priv and flags fields of the callback
+ * lists: the lists of a device are also changed by the worker of another
+ * device, when it forwards a packet to this device.
+ */
+
+spinlock_t g_devif_cblock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Data
@@ -90,6 +98,7 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
 {
   FAR struct devif_callback_s *prev;
   FAR struct devif_callback_s *curr;
+  irqstate_t flags;
 
   if (cb)
     {
@@ -112,6 +121,7 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
        * it is supposed to be in the data notification list.
        */
 
+      flags = spin_lock_irqsave(&g_devif_cblock);
       if (list_head)
         {
           prev = cb->prevconn;
@@ -156,6 +166,8 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
             }
         }
 
+      spin_unlock_irqrestore(&g_devif_cblock, flags);
+
       /* check if the callback structure has DEVIF_CB_DONT_FREE,it indicates
        * the callback can't be free immediately,setting DEVIF_CB_PEND_FREE
        * flag with the callback,it indicates the callback will be free
@@ -172,6 +184,7 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
        * it is supposed to be in the device notification list.
        */
 
+      flags = spin_lock_irqsave(&g_devif_cblock);
       if (dev != NULL)
         {
           /* Find the callback structure in the device event list */
@@ -196,6 +209,8 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
                 }
             }
         }
+
+      spin_unlock_irqrestore(&g_devif_cblock, flags);
 
       /* Free the callback structure */
 
@@ -249,6 +264,7 @@ devif_callback_alloc(FAR struct net_driver_s *dev,
                      FAR struct devif_callback_s **list_tail)
 {
   FAR struct devif_callback_s *ret;
+  irqstate_t flags;
 
   /* Verify that the device pointer is valid, i.e., that it still
    * points to a registered network device and also that the network
@@ -274,6 +290,8 @@ devif_callback_alloc(FAR struct net_driver_s *dev,
   ret = NET_BUFPOOL_TRYALLOC(g_cbprealloc);
   if (ret)
     {
+      flags = spin_lock_irqsave(&g_devif_cblock);
+
       /* Add the newly allocated instance to the head of the device event
        * list.
        */
@@ -308,6 +326,8 @@ devif_callback_alloc(FAR struct net_driver_s *dev,
 
           *list_tail = ret;
         }
+
+      spin_unlock_irqrestore(&g_devif_cblock, flags);
     }
 #ifdef CONFIG_DEBUG_FEATURES
   else
@@ -437,6 +457,10 @@ uint32_t devif_conn_event(FAR struct net_driver_s *dev, uint32_t flags,
                           FAR struct devif_callback_s *list)
 {
   FAR struct devif_callback_s *next;
+  devif_callback_event_t event;
+  irqstate_t irqflags;
+  FAR void *priv;
+  bool trigger;
 
   /* Loop for each callback in the list and while there are still events
    * set in the flags set.
@@ -453,7 +477,13 @@ uint32_t devif_conn_event(FAR struct net_driver_s *dev, uint32_t flags,
 
       /* Check if this callback handles any of the events in the flag set */
 
-      if (list->event != NULL && devif_event_trigger(flags, list->flags))
+      irqflags = spin_lock_irqsave(&g_devif_cblock);
+      event    = list->event;
+      priv     = list->priv;
+      trigger  = devif_event_trigger(flags, list->flags);
+      spin_unlock_irqrestore(&g_devif_cblock, irqflags);
+
+      if (event != NULL && trigger)
         {
           list->free_flags |= DEVIF_CB_DONT_FREE;
 
@@ -462,7 +492,7 @@ uint32_t devif_conn_event(FAR struct net_driver_s *dev, uint32_t flags,
            * beginning of the list (which will be ignored on this pass)
            */
 
-          flags = list->event(dev, list->priv, flags);
+          flags = event(dev, priv, flags);
           list->free_flags &= ~DEVIF_CB_DONT_FREE;
 
           /* update the next callback to prevent previously recorded the
@@ -508,6 +538,10 @@ uint32_t devif_dev_event(FAR struct net_driver_s *dev, uint32_t flags)
 {
   FAR struct devif_callback_s *cb;
   FAR struct devif_callback_s *next;
+  devif_callback_event_t event;
+  irqstate_t irqflags;
+  FAR void *priv;
+  bool trigger;
 
   /* Loop for each callback in the list and while there are still events
    * set in the flags set.
@@ -524,7 +558,13 @@ uint32_t devif_dev_event(FAR struct net_driver_s *dev, uint32_t flags)
 
       /* Check if this callback handles any of the events in the flag set */
 
-      if (cb->event != NULL && devif_event_trigger(flags, cb->flags))
+      irqflags = spin_lock_irqsave(&g_devif_cblock);
+      event    = cb->event;
+      priv     = cb->priv;
+      trigger  = devif_event_trigger(flags, cb->flags);
+      spin_unlock_irqrestore(&g_devif_cblock, irqflags);
+
+      if (event != NULL && trigger)
         {
           cb->free_flags |= DEVIF_CB_DONT_FREE;
 
@@ -533,7 +573,7 @@ uint32_t devif_dev_event(FAR struct net_driver_s *dev, uint32_t flags)
            * beginning of the list (which will be ignored on this pass)
            */
 
-          flags = cb->event(dev, cb->priv, flags);
+          flags = event(dev, priv, flags);
           cb->free_flags &= ~DEVIF_CB_DONT_FREE;
 
           /* update the next callback to prevent previously recorded the

@@ -944,7 +944,7 @@ static int devif_poll_connections(FAR struct net_driver_s *dev,
 
   while (!bstop)
     {
-      i = ffsl(dev->d_polltype);
+      i = ffsl(atomic_read(&dev->d_polltype));
       if (i == 0)
         {
           break;
@@ -1077,7 +1077,7 @@ static int devif_poll_connections(FAR struct net_driver_s *dev,
 
       if (!bstop)
         {
-          dev->d_polltype &= ~(1 << (i - 1));
+          atomic_and(&dev->d_polltype, ~(1 << (i - 1)));
         }
     }
 

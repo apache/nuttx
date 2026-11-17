@@ -230,20 +230,31 @@ static uint32_t netfwd_eventhandler(FAR struct net_driver_s *dev,
 
 int netfwd_forward(FAR struct net_driver_s *dev, FAR struct forward_s *fwd)
 {
+  FAR struct net_driver_s *fwddev;
+  FAR struct devif_callback_s *cb;
+  irqstate_t flags;
+
   DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
+
+  /* The worker of fwddev may free fwd as soon as the callback is set */
+
+  fwddev = fwd->f_dev;
 
   /* Set up the callback in the connection */
 
-  fwd->f_cb = netfwd_callback_alloc(fwd->f_dev);
-  if (fwd->f_cb != NULL)
+  cb = netfwd_callback_alloc(fwddev);
+  if (cb != NULL)
     {
       FAR struct iob_s *iob = dev->d_iob;
       FAR uint8_t *buf = dev->d_buf;
       int len = dev->d_len;
 
-      fwd->f_cb->flags   = (IPFWD_POLL | NETDEV_DOWN);
-      fwd->f_cb->priv    = (FAR void *)fwd;
-      fwd->f_cb->event   = netfwd_eventhandler;
+      flags = spin_lock_irqsave(&g_devif_cblock);
+      fwd->f_cb = cb;
+      cb->flags = (IPFWD_POLL | NETDEV_DOWN);
+      cb->priv  = (FAR void *)fwd;
+      cb->event = netfwd_eventhandler;
+      spin_unlock_irqrestore(&g_devif_cblock, flags);
 
       /* Save the current state of the device, avoid damaging the current
        * d_iob and other resources when forwarding recursion
@@ -255,7 +266,7 @@ int netfwd_forward(FAR struct net_driver_s *dev, FAR struct forward_s *fwd)
 
       /* Notify the device driver of the availability of TX data */
 
-      netdev_txnotify_dev(fwd->f_dev, IPFWD_POLL);
+      netdev_txnotify_dev(fwddev, IPFWD_POLL);
 
       dev->d_iob = iob;
       dev->d_buf = buf;

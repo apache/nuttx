@@ -53,6 +53,8 @@
 #include <errno.h>
 #include <arch/irq.h>
 
+#include <nuttx/spinlock.h>
+
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 
@@ -307,6 +309,10 @@ struct devif_callback_s
 extern "C"
 {
 #endif
+
+/* Protects the callback list links and the event, priv and flags fields */
+
+extern spinlock_t g_devif_cblock;
 
 /****************************************************************************
  * Public Function Prototypes

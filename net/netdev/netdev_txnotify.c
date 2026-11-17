@@ -117,7 +117,7 @@ void netdev_txnotify_dev(FAR struct net_driver_s *dev, uint32_t polltype)
 
       /* Set the poll type flags */
 
-      dev->d_polltype |= polltype;
+      atomic_or(&dev->d_polltype, polltype);
 
       /* Notify the device driver that new TX data is available. */
 

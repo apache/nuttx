@@ -55,6 +55,7 @@
 #include <net/ethernet.h>
 #include <arpa/inet.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
@@ -423,7 +424,7 @@ struct net_driver_s
 
   net_ipv6addr_t d_ipv6draddr;  /* Default router IPv6 address */
 #endif /* CONFIG_NET_IPv6 */
-  uint32_t d_polltype;          /* The collection of protocols that need to
+  atomic_t d_polltype;          /* The collection of protocols that need to
                                  * be processed in devif_poll
                                  */
 
