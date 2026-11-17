@@ -53,3 +53,9 @@ nsh:
 
 Configures the NuttShell (nsh) located at examples/nsh.  This
 configuration is focused on low level, command-line driver testing.
+
+ostest:
+-------
+
+Same as nsh, with the OS test (``apps/testing/ostest``) added as an NSH
+builtin.  Run ``ostest`` from NSH.

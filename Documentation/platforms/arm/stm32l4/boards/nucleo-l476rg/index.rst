@@ -566,3 +566,9 @@ nxdemo
 
 This is an NSH configuration that enables the NX graphics demo at
 apps/examples/nxdemo.  It uses the PCD8544 display on SPI1.
+
+ostest
+------
+
+Same as nsh, with the OS test (``apps/testing/ostest``) added as an NSH
+builtin.  Run ``ostest`` from NSH.
