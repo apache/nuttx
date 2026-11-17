@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/rp23xx-rv/raspberrypi-pico-2-rv/include/rp23xx_i2sdev.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
