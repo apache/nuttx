@@ -290,7 +290,13 @@ static uint32_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
       ret = devif_send(dev, &pstate->snd_buffer[pstate->snd_acked],
                        sndlen, tcpip_hdrsize(conn));
-      if (ret <= 0)
+      if (ret == -ENOMEM)
+        {
+          /* Out of IOBs: retry on the next timeout */
+
+          return flags;
+        }
+      else if (ret <= 0)
         {
           pstate->snd_sent = ret;
           goto end_wait;
@@ -377,7 +383,13 @@ static uint32_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
           ret = devif_send(dev, &pstate->snd_buffer[pstate->snd_sent],
                            sndlen, tcpip_hdrsize(conn));
-          if (ret <= 0)
+          if (ret == -ENOMEM)
+            {
+              /* Out of IOBs: retry on the next poll */
+
+              return flags;
+            }
+          else if (ret <= 0)
             {
               pstate->snd_sent = ret;
               goto end_wait;
