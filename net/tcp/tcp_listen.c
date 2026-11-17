@@ -274,7 +274,6 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
 
           conn_lock(&listener->sconn);
           ret = tcp_backlogadd(listener, conn);
-          conn_unlock(&listener->sconn);
           if (ret == OK)
             {
               tcp_callback(dev, listener, TCP_BACKLOG);
