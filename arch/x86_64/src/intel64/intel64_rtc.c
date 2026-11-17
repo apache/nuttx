@@ -51,6 +51,14 @@
 #  ifndef CONFIG_RTC_FREQUENCY
 #    error "CONFIG_RTC_FREQUENCY is required for CONFIG_RTC_HIRES"
 #  endif
+
+/* The RTC divides TSC cycles by the TSC frequency (g_x86_64_timer_freq).
+ * Only the TSC timers set it: with the HPET timer it is 0.
+ */
+
+#  ifndef CONFIG_ARCH_INTEL64_HAVE_TSC
+#    error "CONFIG_RTC_HIRES needs a TSC system timer"
+#  endif
 #endif
 
 #define NS_PER_USEC             1000UL
