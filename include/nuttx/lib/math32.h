@@ -212,170 +212,6 @@ extern "C"
  * (It is unfortunate that gcc doesn't perform all this internally.)
  */
 
-/* Default C implementation for umul64_const()
- *
- * Prototype: uint64_t umul64_const(uint64_t m, uint64_t n, int bias);
- * Semantic:  return ((bias ? m : 0) + m * n) >> 64
- *
- * The product is a 128-bit value, scaled down to 64 bits.
- * Assuming constant propagation to optimize away unused conditional code.
- * Architectures may provide their own optimized assembly implementation.
- */
-
-/* Due to compilation issues, use inline functions instead of macros. */
-
-#ifdef up_umul64_const
-#  define umul64_const(m, n, bias) up_umul64_const(m, n, bias)
-#else
-static inline_function uint64_t umul64_const(uint64_t m, uint64_t n,
-                                             int bias)
-{
-  uint32_t m_lo = (m) & 0xffffffff;
-  uint32_t m_hi = (m) >> 32;
-  uint32_t n_lo = (n) & 0xffffffff;
-  uint32_t n_hi = (n) >> 32;
-  uint32_t res_lo;
-  uint32_t res_hi;
-  uint32_t tmp;
-  uint64_t res;
-
-  if (!(bias))
-    {
-      res = ((uint64_t)m_lo * n_lo) >> 32;
-    }
-  else if (!((m) & ((1ULL << 63) | (1ULL << 31))))
-    {
-      res = ((m) + (uint64_t)m_lo * n_lo) >> 32;
-    }
-  else
-    {
-      res = (m) + (uint64_t)m_lo * n_lo;
-      res_lo = res >> 32;
-      res_hi = (res_lo < m_hi);
-      res = res_lo | ((uint64_t)res_hi << 32);
-    }
-
-  if (!((m) & ((1ULL << 63) | (1ULL << 31))))
-    {
-      res += (uint64_t)m_lo * n_hi;
-      res += (uint64_t)m_hi * n_lo;
-      res >>= 32;
-    }
-  else
-    {
-      res += (uint64_t)m_lo * n_hi;
-      tmp = res >> 32;
-      res += (uint64_t)m_hi * n_lo;
-      res_lo = res >> 32;
-      res_hi = (res_lo < tmp);
-      res = res_lo | ((uint64_t)res_hi << 32);
-    }
-
-  res += (uint64_t)m_hi * n_hi;
-
-  return res;
-}
-#endif
-
-static inline_function uint64_t div64_const32(uint64_t n, uint32_t b)
-{
-  uint64_t res;
-  uint64_t x;
-  uint64_t t;
-  uint64_t m;
-  uint32_t p;
-  uint32_t bias;
-
-  DEBUGASSERT(b > 1);
-
-  p = 1u << LOG2_FLOOR(b);
-  m = (~0ULL / b) * p;
-  m += (((~0ULL % b + 1u) * p) + b - 1u) / b;
-  x = ~0ULL / b * b - 1u;
-  res = ((m & 0xffffffffu) * (x & 0xffffffffu)) >> 32;
-  t = res += (m & 0xffffffffu) * (x >> 32);
-  res += (x & 0xffffffffu) * (m >> 32);
-  t = (res < t) ? (1ULL << 32) : 0u;
-  res = (res >> 32) + t;
-  res += (m >> 32) * (x >> 32);
-  res /= p;
-
-  if (~0ULL % (b / (b & -b)) == 0u)
-    {
-      n /= (b & -b);
-      m = ~0ULL / (b / (b & -b));
-      p = 1u;
-      bias = 1u;
-    }
-  else if (res != x / b)
-    {
-      bias = 1u;
-      m = (~0ULL / b) * p;
-      m += ((~0ULL % b + 1u) * p) / b;
-    }
-  else
-    {
-      uint32_t bits = -(m & -m);
-      bits |= m >> 32;
-      bits = (~bits) << 1;
-      if (!bits)
-        {
-          p /= (m & -m);
-          m /= (m & -m);
-        }
-      else
-        {
-          p >>= LOG2_FLOOR(bits);
-          m >>= LOG2_FLOOR(bits);
-        }
-
-      bias = 0u;
-    }
-
-  res = umul64_const(m, n, bias);
-  res /= p;
-
-  return res;
-}
-
-#ifdef CONFIG_DEBUG_NOOPT
-
-/* Without optimization the magic number setup is not folded at compile
- * time but runs on every call (it even contains several divisions),
- * which is far slower than a plain division.  Cast the result, not the
- * operands: div_const() must return uint64_t in every build, but the
- * division itself keeps the operands' native width.
- */
-
-#  define div64_const(n, base) ((uint64_t)((n) / (base)))
-#else
-
-/* The divisor is expected to be a compile-time constant so that the
- * magic multiplier setup below is folded away; for runtime-invariant
- * divisors use the invdiv API instead.
- */
-
-static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
-{
-  DEBUGASSERT(base > 0);
-
-  if (IS_POWER_OF_2(base))
-    {
-      n >>= LOG2_FLOOR(base);
-    }
-  else if (base <= UINT32_MAX)
-    {
-      n = div64_const32(n, (uint32_t)base);
-    }
-  else
-    {
-      n /= base;
-    }
-
-  return n;
-}
-#endif
-
 /* The div_const*() family takes non-negative arguments only,
  * negative values are outside the contract.
  */
@@ -688,6 +524,53 @@ uint64_t invdiv_u64(uint64_t n, FAR const invdiv_param64_t *ip)
 
   return (t1 + t2) >> sh2;
 }
+
+static inline_function uint64_t div64_const32(uint64_t n, uint32_t b)
+{
+  invdiv_param64_t ip;
+
+  DEBUGASSERT(b > 1);
+  invdiv_init_param(b, &ip);
+
+  return invdiv_u64(n, &ip);
+}
+
+#ifdef CONFIG_DEBUG_NOOPT
+
+/* Without optimization the magic setup is not folded and runs on every
+ * call, far slower than a plain division.  The cast is on the result,
+ * not the operands: div_const() returns uint64_t in every build while
+ * the division keeps the operands' native width.
+ */
+
+#  define div64_const(n, base) ((uint64_t)((n) / (base)))
+#else
+
+/* The divisor is expected to be a compile-time constant so the magic
+ * setup below folds away; for runtime-invariant divisors use the invdiv
+ * API instead.
+ */
+
+static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
+{
+  DEBUGASSERT(base > 0);
+
+  if (IS_POWER_OF_2(base))
+    {
+      n >>= LOG2_FLOOR(base);
+    }
+  else if (base <= UINT32_MAX)
+    {
+      n = div64_const32(n, (uint32_t)base);
+    }
+  else
+    {
+      n /= base;
+    }
+
+  return n;
+}
+#endif
 
 /****************************************************************************
  * Name: uneg64
