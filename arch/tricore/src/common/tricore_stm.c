@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/tricore/src/common/tricore_systimer.c
+ * arch/tricore/src/common/tricore_stm.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,8 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/kmalloc.h>
-
+#include <nuttx/irq.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/timers/arch_alarm.h>
 
@@ -52,9 +51,9 @@
 struct tricore_systimer_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lower;
-  int                       irq;
-  uintptr_t                 tbase;
-  uintptr_t                 freerun_tbase;
+  int                        irq;
+  uintptr_t                  tbase;
+  uintptr_t                  freerun_tbase;
 };
 
 /****************************************************************************
@@ -78,11 +77,11 @@ static uint64_t tricore_systimer_get_time(uintptr_t tbase)
   return ticks;
 }
 
-static void tricore_systimer_set_timecmp(uintptr_t tbase, uint64_t value)
+static void tricore_systimer_set_timecmp(uintptr_t tbase, uint32_t value)
 {
   /* CMP0 compares the timer bits [31:0] */
 
-  putreg32((uint32_t)value, TRICORE_STM_REG(tbase, TRICORE_STM_CMP0_OFFSET));
+  putreg32(value, TRICORE_STM_REG(tbase, TRICORE_STM_CMP0_OFFSET));
 }
 
 /****************************************************************************
@@ -128,15 +127,15 @@ static void tricore_systimer_update(struct oneshot_lowerhalf_s *lower,
 
   if (priv->freerun_tbase)
     {
-      expected = expected + current -
-                 tricore_systimer_get_time(priv->freerun_tbase);
+      expected += current - tricore_systimer_get_time(priv->freerun_tbase);
     }
 
   /* The comparator register is 32-bits. */
 
   DEBUGASSERT(expected <= current + UINT32_MAX);
 
-  tricore_systimer_set_timecmp(priv->tbase, expected);
+  tricore_systimer_set_timecmp(priv->tbase,
+                               (uint32_t)(expected & UINT32_MAX));
 
   if (tricore_systimer_get_time(priv->tbase) > expected)
     {
@@ -224,7 +223,7 @@ static void tricore_systimer_cancel(struct oneshot_lowerhalf_s *lower)
   struct tricore_systimer_lowerhalf_s *priv =
     (struct tricore_systimer_lowerhalf_s *)lower;
 
-  tricore_systimer_set_timecmp(priv->tbase, UINT64_MAX);
+  tricore_systimer_set_timecmp(priv->tbase, UINT32_MAX);
 }
 
 /****************************************************************************
@@ -326,34 +325,30 @@ tricore_systimer_initialize(uintptr_t tbase, uintptr_t fr_tbase,
 
   /* Stop the timer while the core is halted by the debugger */
 
-#ifdef TRICORE_CBS_OSTATE
   if ((getreg32(TRICORE_CBS_OSTATE) & TRICORE_CBS_OSTATE_OEN) != 0)
     {
       putreg32(TRICORE_STM_OCS_SUS_P | TRICORE_STM_OCS_SUS_HARD,
                TRICORE_STM_REG(tbase, TRICORE_STM_OCS_OFFSET));
-      regval = getreg32(TRICORE_STM_REG(tbase, TRICORE_STM_OCS_OFFSET));
-      putreg32(regval & ~TRICORE_STM_OCS_SUS_P,
-               TRICORE_STM_REG(tbase, TRICORE_STM_OCS_OFFSET));
     }
-#else
-  putreg32(TRICORE_STM_OCS_SUS_P | TRICORE_STM_OCS_SUS_HARD,
-           TRICORE_STM_REG(tbase, TRICORE_STM_OCS_OFFSET));
-#endif
 
-  /* CMP0 compares the timer bits [31:0] and raises STMIR0 */
+  /* CMP0 compares the timer bits [31:0] */
 
   regval  = getreg32(TRICORE_STM_REG(tbase, TRICORE_STM_CMCON_OFFSET));
   regval &= ~(TRICORE_STM_CMCON_MSIZE0 | TRICORE_STM_CMCON_MSTART0);
   regval |= 31 & TRICORE_STM_CMCON_MSIZE0;
   putreg32(regval, TRICORE_STM_REG(tbase, TRICORE_STM_CMCON_OFFSET));
 
+  /* CMP0 match raises STMIR0 */
+
   regval  = getreg32(TRICORE_STM_REG(tbase, TRICORE_STM_ICR_OFFSET));
   putreg32(regval & ~TRICORE_STM_ICR_CMP0OS,
            TRICORE_STM_REG(tbase, TRICORE_STM_ICR_OFFSET));
 
+  /* Drop any old request before enabling its interrupt */
+
   putreg32(TRICORE_STM_ISCR_CMP0IRR,
            TRICORE_STM_REG(tbase, TRICORE_STM_ISCR_OFFSET));
-  tricore_systimer_set_timecmp(tbase, UINT64_MAX);
+  tricore_systimer_set_timecmp(tbase, UINT32_MAX);
 
   regval = getreg32(TRICORE_STM_REG(tbase, TRICORE_STM_ICR_OFFSET));
   putreg32(regval | TRICORE_STM_ICR_CMP0EN,
