@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm64/src/bcm2711/bcm2711_spi.c
  *
- * Contributed by Matteo Golin
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

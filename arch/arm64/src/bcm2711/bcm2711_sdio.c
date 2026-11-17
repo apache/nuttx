@@ -1,8 +1,6 @@
 /****************************************************************************
  * arch/arm64/src/bcm2711/bcm2711_sdio.c
  *
- * Author: Matteo Golin <matteo.golin@gmail.com>
- *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

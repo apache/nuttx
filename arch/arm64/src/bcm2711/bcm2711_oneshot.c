@@ -1,8 +1,6 @@
 /****************************************************************************
  * arch/arm64/src/bcm2711/bcm2711_oneshot.c
  *
- * Contributed by: Matteo Golin <linguini@apache.org>
- *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
