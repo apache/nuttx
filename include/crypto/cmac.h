@@ -39,7 +39,7 @@ typedef struct _AES_CMAC_CTX
 } AES_CMAC_CTX;
 
 void aes_cmac_init(FAR AES_CMAC_CTX *);
-void aes_cmac_setkey(FAR AES_CMAC_CTX *, FAR const u_int8_t *);
+void aes_cmac_setkey(FAR AES_CMAC_CTX *, FAR const u_int8_t *, u_int16_t);
 void aes_cmac_update(FAR AES_CMAC_CTX *, FAR const u_int8_t *, u_int);
 void aes_cmac_final(FAR u_int8_t *, FAR AES_CMAC_CTX *);
 
