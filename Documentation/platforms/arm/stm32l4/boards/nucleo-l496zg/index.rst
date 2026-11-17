@@ -256,3 +256,9 @@ NOTES:
    the Virtual COM port) I have done all testing with the console
    device configured for USART3 (see instruction above under "Serial
    Consoles).
+
+ostest
+------
+
+Same as nsh, with the OS test (``apps/testing/ostest``) added as an NSH
+builtin.  Run ``ostest`` from NSH.

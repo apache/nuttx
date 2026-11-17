@@ -439,6 +439,12 @@ NOTES:
        Pin 20 GND
        Pin 8  U5V
 
+ostest:
+-------
+
+Same as nsh, with the OS test (``apps/testing/ostest``) added as an NSH
+builtin.  Run ``ostest`` from NSH.
+
 spwm
 ----
 
