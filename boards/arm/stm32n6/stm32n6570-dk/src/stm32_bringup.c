@@ -34,6 +34,7 @@
 #include <nuttx/leds/userled.h>
 #include <nuttx/input/buttons.h>
 #include <nuttx/timers/rtc.h>
+#include <nuttx/net/realtek_phy.h>
 
 #include "stm32_rtc.h"
 #include "stm32n6570-dk.h"
@@ -73,6 +74,16 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
              ret);
     }
+
+#ifdef CONFIG_NET_PHY_REALTEK_RTL8211F
+  /* Register the driver of the RTL8211F PHY of the RJ45 port */
+
+  ret = rtl8211f_register();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rtl8211f_register() failed: %d\n", ret);
+    }
+#endif
 
 #if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
   /* Register the LED driver */

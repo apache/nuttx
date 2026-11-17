@@ -155,6 +155,18 @@ PG2 MOSI (D11) and PA3 as chip select (D10).  It is registered as
 ``/dev/spi5`` and can be exercised with the ``spi`` tool; shorting D11
 to D12 loops the transmitted bytes back.
 
+Ethernet
+========
+
+The RJ45 port is driven by a Realtek RTL8211F gigabit PHY at MDIO address 1,
+connected to ETH1 over RGMII: PD1 MDC, PD12 MDIO, PF0 GTX_CLK, PF2 CLK125,
+PF7 RX_CLK, PF10 RX_CTL, PF14/PF15/PF8/PF9 RXD0-3, PF11 TX_CTL and
+PF12/PF13/PG3/PG4 TXD0-3.  The PHY is managed by PHYLIB with its RTL8211F
+driver, which adds the RGMII clock delays (``PHY_INTERFACE_RGMII_ID``), and
+its 125 MHz CLK125 output clocks the MAC.  The MAC address is derived from the unique
+device ID.  The interface is ``eth0``; check it with ``ifconfig`` and
+``ping``, and read the PHY registers with ``mdio``.
+
 Clocking
 ========
 
@@ -177,3 +189,10 @@ nsh
 
 NuttShell with the user LEDs, the USER1 button, GPDMA1 and the RTC
 enabled.
+
+netnsh
+------
+
+The ``nsh`` configuration with Ethernet: IPv4, TCP, UDP, ICMP, a DHCP
+client started by NSH, ``ping``, ``telnetd`` and ``mdio``.  The link is
+auto-negotiated up to 1000 Mbps when ``eth0`` comes up.
