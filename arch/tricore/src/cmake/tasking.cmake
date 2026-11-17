@@ -127,7 +127,6 @@ set(CMAKE_CXX_LINK_EXECUTABLE
 
 # Architecture flags
 
-add_compile_options(--lsl-core=vtc)
 add_link_options(-v)
 if(CONFIG_ARCH_CHIP_TC3XX)
   add_compile_options($<$<COMPILE_LANGUAGE:C>:--iso=11>)
@@ -224,7 +223,7 @@ add_compile_options(--fp-model=2)
 add_link_options(-lc_fpu)
 add_link_options(-lfp_fpu)
 
-add_link_options(--core=mpe:vtc)
+add_link_options(--core=mpe:tc0)
 add_link_options(--hex-format=s -mcrfiklsmnoduq)
 add_link_options(-lrt)
 

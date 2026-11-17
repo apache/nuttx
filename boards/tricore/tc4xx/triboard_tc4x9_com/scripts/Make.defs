@@ -25,7 +25,7 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/tricore/src/tc4xx/Toolchain.defs
 
 ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
-  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)Lcf_Tasking_Tricore_Tc.lsl.kernel
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)tricore.lsl
 else
   ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)tricore.ld
 endif
