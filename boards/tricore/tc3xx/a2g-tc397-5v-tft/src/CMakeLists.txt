@@ -25,19 +25,25 @@ set(SRCS tc397_boardinit.c tc397_bringup.c)
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
-  set(toolchain "Tasking")
-else()
-  set(toolchain "Gnuc")
-endif()
-
-set_property(
-  GLOBAL
-  PROPERTY LD_SCRIPT
-           "${NUTTX_BOARD_DIR}/scripts/Lcf_${toolchain}_Tricore_Tc.lsl.kernel")
-if(CONFIG_BUILD_PROTECTED)
-  target_sources(board PRIVATE tc397_userspace.c)
   set_property(
     GLOBAL
-    PROPERTY LD_SCRIPT_USER
-             "${NUTTX_BOARD_DIR}/scripts/Lcf_${toolchain}_Tricore_Tc.lsl.user")
+    PROPERTY LD_SCRIPT
+             "${NUTTX_BOARD_DIR}/scripts/Lcf_Tasking_Tricore_Tc.lsl.kernel")
+else()
+  set_property(GLOBAL PROPERTY LD_SCRIPT
+                               "${NUTTX_BOARD_DIR}/scripts/tricore.ld")
+endif()
+
+if(CONFIG_BUILD_PROTECTED)
+  target_sources(board PRIVATE tc397_userspace.c)
+  if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
+    set_property(
+      GLOBAL
+      PROPERTY LD_SCRIPT_USER
+               "${NUTTX_BOARD_DIR}/scripts/Lcf_Tasking_Tricore_Tc.lsl.user")
+  else()
+    set_property(
+      GLOBAL PROPERTY LD_SCRIPT_USER
+                      "${NUTTX_BOARD_DIR}/scripts/Lcf_Gnuc_Tricore_Tc.lsl.user")
+  endif()
 endif()
