@@ -207,6 +207,46 @@ static FAR struct iob_s *iob_allocwait(bool throttled, unsigned int timeout)
                                    iob_allocwait_gettimeout(start, timeout));
         }
 
+      if (ret < 0)
+        {
+          /* The wait ended without an IOB (for example a timeout).
+           * Unless iob_free() already counted this waiter out (it
+           * committed an IOB to it and posts the semaphore), undo the
+           * count: else the next freed IOB goes to the committed list for
+           * a waiter that is gone, and it is lost to the free count.
+           */
+
+          flags = spin_lock_irqsave(&g_iob_lock);
+#if CONFIG_IOB_THROTTLE > 0
+          if (throttled ? g_throttle_wait > 0 : g_iob_count < 0)
+#else
+          if (g_iob_count < 0)
+#endif
+            {
+#if CONFIG_IOB_THROTTLE > 0
+              if (throttled)
+                {
+                  g_throttle_wait--;
+                }
+              else
+#endif
+                {
+                  g_iob_count++;
+                }
+
+              spin_unlock_irqrestore(&g_iob_lock, flags);
+              return NULL;
+            }
+
+          /* An IOB was committed to this waiter: its post comes at once.
+           * (If this second wait fails too, the IOB stays committed and
+           * the next waiter takes it at once: it is not lost.)
+           */
+
+          spin_unlock_irqrestore(&g_iob_lock, flags);
+          ret = nxsem_wait_uninterruptible(sem);
+        }
+
       if (ret >= 0)
         {
           /* When we wake up from wait successfully, an I/O buffer was
