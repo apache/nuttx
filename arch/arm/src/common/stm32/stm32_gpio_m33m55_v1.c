@@ -339,6 +339,31 @@ int stm32_configgpio(uint32_t cfgset)
 
   putreg32(regval, base + STM32_GPIO_OTYPER_OFFSET);
 
+#ifdef CONFIG_STM32_HAVE_GPIO_DELAY
+  /* Set the I/O delay and the path that it applies to */
+
+  setting = (cfgset & GPIO_DELAY_MASK) >> GPIO_DELAY_SHIFT;
+  pos     = pin & 7;
+
+  regoffset = pin < 8 ? STM32_GPIO_DELAYRL_OFFSET :
+                        STM32_GPIO_DELAYRH_OFFSET;
+  regval    = getreg32(base + regoffset);
+  regval   &= ~GPIO_DELAYR_MASK(pos);
+  regval   |= setting << GPIO_DELAYR_SHIFT(pos);
+  putreg32(regval, base + regoffset);
+
+  regoffset = pin < 8 ? STM32_GPIO_ADVCFGRL_OFFSET :
+                        STM32_GPIO_ADVCFGRH_OFFSET;
+  regval    = getreg32(base + regoffset);
+  regval   &= ~GPIO_ADVCFGR_DLYPATH(pos);
+  if ((cfgset & GPIO_DELAY_INPUT) != 0)
+    {
+      regval |= GPIO_ADVCFGR_DLYPATH(pos);
+    }
+
+  putreg32(regval, base + regoffset);
+#endif
+
   spin_unlock_irqrestore(&g_configgpio_lock, flags);
   return OK;
 }

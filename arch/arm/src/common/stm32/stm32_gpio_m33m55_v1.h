@@ -67,6 +67,30 @@
  * Analog:                MM.. .... .... PPPP BBBB
  */
 
+/* I/O delay (STM32N6 only), above the 20-bit encoding:
+ *
+ *   Bits 20-23: Delay code, 0 for none
+ *   Bit 24:     Delay the input path instead of the output path
+ */
+
+#define GPIO_DELAY_SHIFT              (20)                       /* Bits 20-23: I/O delay */
+#define GPIO_DELAY_MASK               (15 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_NONE             (0 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_300PS            (1 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_500PS            (2 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_750PS            (3 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_1000PS           (4 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_1250PS           (5 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_1500PS           (6 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_1750PS           (7 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_2000PS           (8 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_2250PS           (9 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_2500PS           (10 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_2750PS           (11 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_3000PS           (12 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_3250PS           (13 << GPIO_DELAY_SHIFT)
+#define GPIO_DELAY_INPUT              (1 << 24)                  /* Bit 24: Delay the input path */
+
 /* Mode:
  *
  * 1111 1111 1100 0000 0000
