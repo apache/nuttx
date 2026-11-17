@@ -43,7 +43,7 @@ typedef struct aes_ctx
 {
   uint32_t sk[60];
   uint32_t sk_exp[120];
-
+  uint8_t  iv[16];
   unsigned num_rounds;
 } AES_CTX;
 
