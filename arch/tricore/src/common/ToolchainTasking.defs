@@ -80,8 +80,6 @@ endef
 	$(Q) ctc -Em $(filter -D% -U% -I%,$(subst -I ,-I,$(CFLAGS))) $< -o $@
 	$(Q) sed -i "s|^$(notdir $*)\.o *:|$(OBJPATH)$(DELIM)$*$(OBJEXT):|" $@
 
-ARCHOPTIMIZATION += --lsl-core=vtc
-LDFLAGS          += --lsl-core=vtc
 ARCHOPTIMIZATION += --iso=99
 ARCHOPTIMIZATION += --language=+gcc,+volatile,-strings,-kanji
 

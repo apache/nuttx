@@ -46,13 +46,13 @@ derivative tc4D
     {
         architecture = TC1V1.8_DPFPU;
         space_id_offset = 100;           // add 100 to all space IDs in the architecture definition
-        copytable_space = vtc:linear;    // use the copy table in the virtual core for 'bss' and initialized data sections
+        copytable_space = tc0:linear;    // use the copy table in the virtual core for 'bss' and initialized data sections
     }
 
-    core vtc
+    core tc0
     {
         architecture = TC1V1.8_DPFPU;
-        import tc;                     // add all address spaces of core tc to core vtc for linking and locating
+        import tc;                     // add all address spaces of core tc to core tc0 for linking and locating
     }
 
     bus sri
@@ -62,7 +62,7 @@ derivative tc4D
 
         // map shared addresses one-to-one to real cores and virtual cores
         map (dest=bus:tc:fpi_bus, src_offset=0, dest_offset=0, size=0xc0000000);
-        map (dest=bus:vtc:fpi_bus, src_offset=0, dest_offset=0, size=0xc0000000);
+        map (dest=bus:tc0:fpi_bus, src_offset=0, dest_offset=0, size=0xc0000000);
     }
 
     memory upfls
@@ -92,7 +92,7 @@ derivative tc4D
     }
 
     /*Section setup for the copy table*/
-    section_setup :vtc:linear
+    section_setup :tc0:linear
     {
         copytable
         (
@@ -106,13 +106,13 @@ derivative tc4D
         );
     }
 
-    section_setup :vtc:linear
+    section_setup :tc0:linear
     {
         heap "uheap" (min_size = LCF_HEAP_SIZE, align = 4);
     }
 
     /* user stack section */
-    section_layout :vtc:linear
+    section_layout :tc0:linear
     {
         group ustack(ordered, contiguous, nocopy, run_addr=mem:ustack)
         {
@@ -121,7 +121,7 @@ derivative tc4D
     }
 
     /*Sections located at absolute fixed address*/
-    section_layout :vtc:linear
+    section_layout :tc0:linear
     {
         group userspace(ordered, run_addr=LCF_PFLASH_USER_START)
         {
@@ -142,7 +142,7 @@ derivative tc4D
     }
 
     /* Data & Bss section */
-    section_layout :vtc:linear
+    section_layout :tc0:linear
     {
         group uncached_data(ordered, contiguous, align = 4, attributes=rw, run_addr = mem:cpu_udlmu/not_cached)
         {
@@ -194,7 +194,7 @@ derivative tc4D
     * an exception. Since the page size of pflash is 32 bytes, we reserve 32
     * bytes instead of 4 bytes.
     */
-    section_layout :vtc:linear
+    section_layout :tc0:linear
     {
         group flash_reserve(ordered, run_addr=LCF_PFLASH_USER_START + LCF_PFLASH_USER_SIZE - 32)
         {
