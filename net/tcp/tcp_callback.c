@@ -386,6 +386,15 @@ uint16_t tcp_datahandler(FAR struct net_driver_s *dev,
   FAR struct iob_s *iob = dev->d_iob;
   uint16_t buflen;
 
+#if CONFIG_IOB_THROTTLE > 0
+  /* Keep the throttled IOBs for sending */
+
+  if (iob_navail(false) < CONFIG_IOB_THROTTLE)
+    {
+      return 0;
+    }
+#endif
+
   if (offset > 0)
     {
       /* Remove 'bufoff' bytes from the beginning of the input I/O chain */
