@@ -998,6 +998,7 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
   FAR epoll_head_t *eph;
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   sigset_t oldsigmask;
+  irqstate_t flags;
 #endif
   int ret;
 
@@ -1019,6 +1020,20 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
       goto out;
     }
 
+  /* Set the mask for the whole wait.  Without signals, there is no mask to
+   * set.  A pending signal that the mask unblocks stops the call at once.
+   * The critical section closes the window from this test to the wait.
+   */
+
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  flags = enter_critical_section();
+  if (nxsig_waitmask_set(sigmask, &oldsigmask))
+    {
+      ret = -EINTR;
+      goto err;
+    }
+#endif
+
 retry:
   ret = epoll_setup(eph);
   if (ret < 0)
@@ -1026,11 +1041,7 @@ retry:
       goto err;
     }
 
-  /* Wait the poll ready.  Without signals, there is no mask to set. */
-
-#ifndef CONFIG_DISABLE_ALL_SIGNALS
-  nxsig_procmask(SIG_SETMASK, sigmask, &oldsigmask);
-#endif
+  /* Wait the poll ready */
 
   if (timeout == 0)
     {
@@ -1045,9 +1056,6 @@ retry:
       ret = nxsem_wait(&eph->sem);
     }
 
-#ifndef CONFIG_DISABLE_ALL_SIGNALS
-  nxsig_procmask(SIG_SETMASK, &oldsigmask, NULL);
-#endif
   if (ret < 0 && ret != -ETIMEDOUT)
     {
       goto err;
@@ -1064,11 +1072,19 @@ retry:
       ret = num;
     }
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  nxsig_waitmask_restore(&oldsigmask);
+  leave_critical_section(flags);
+#endif
   epoll_filep_close(filep);
 
   return ret;
 
 err:
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  nxsig_waitmask_restore(&oldsigmask);
+  leave_critical_section(flags);
+#endif
   epoll_filep_close(filep);
   set_errno(-ret);
 out:
