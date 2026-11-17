@@ -36,6 +36,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
+#include <sys/param.h>
+#include <time.h>
 
 #include "x86_64_internal.h"
 
@@ -45,7 +48,9 @@
 
 /* Configuration ************************************************************/
 
-/* This is a hacky implementation based on TSC, we only support Hi-RES mode */
+/* With CONFIG_RTC_HIRES, the RTC is a counter of the TSC.  Without it, the
+ * RTC is the CMOS clock of the PC (MC146818).
+ */
 
 #ifdef CONFIG_RTC_HIRES
 #  ifndef CONFIG_RTC_FREQUENCY
@@ -65,6 +70,27 @@
 #define NS_PER_MSEC             1000000UL
 #define NS_PER_SEC              1000000000UL
 
+/* CMOS clock: I/O ports, registers and bits */
+
+#define CMOS_ADDR               0x70
+#define CMOS_DATA               0x71
+
+#define CMOS_SECONDS            0x00
+#define CMOS_MINUTES            0x02
+#define CMOS_HOURS              0x04
+#define CMOS_MDAY               0x07
+#define CMOS_MONTH              0x08
+#define CMOS_YEAR               0x09
+#define CMOS_STATUS_A           0x0a
+#define CMOS_STATUS_B           0x0b
+#define CMOS_CENTURY            0x32
+
+#define CMOS_A_UIP              0x80 /* Update in progress */
+#define CMOS_B_SET              0x80 /* Updates stopped */
+#define CMOS_B_DM               0x04 /* Binary, not BCD */
+#define CMOS_B_24H              0x02 /* 24-hour mode */
+#define CMOS_HOUR_PM            0x80 /* PM in 12-hour mode */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -73,7 +99,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_RTC_HIRES
+#ifdef CONFIG_RTC
 static spinlock_t g_rtc_lock = SP_UNLOCKED;
 #endif
 
@@ -81,8 +107,13 @@ static spinlock_t g_rtc_lock = SP_UNLOCKED;
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_RTC_HIRES
+/* drivers/timers/arch_rtc.c has it with CONFIG_RTC_ARCH */
+
+#if defined(CONFIG_RTC) && !defined(CONFIG_RTC_ARCH)
 volatile bool g_rtc_enabled = false;
+#endif
+
+#ifdef CONFIG_RTC_HIRES
 
 /****************************************************************************
  * Private Functions
@@ -189,6 +220,238 @@ int up_rtc_settime(const struct timespec *tp)
 {
   /* What so ever.. */
 
+  return OK;
+}
+
+#elif defined(CONFIG_RTC)
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static uint8_t cmos_read(uint8_t reg)
+{
+  outb(reg, CMOS_ADDR);
+  return inb(CMOS_DATA);
+}
+
+static void cmos_write(uint8_t reg, uint8_t value)
+{
+  outb(reg, CMOS_ADDR);
+  outb(value, CMOS_DATA);
+}
+
+static int cmos_frombcd(uint8_t value, bool binary)
+{
+  return binary ? value : (value >> 4) * 10 + (value & 0x0f);
+}
+
+static uint8_t cmos_tobcd(int value, bool binary)
+{
+  return binary ? value : ((value / 10) << 4) | (value % 10);
+}
+
+/****************************************************************************
+ * Name: cmos_gettime
+ *
+ * Description:
+ *   Read the date and the time (UTC) from the CMOS clock.  Read the
+ *   registers when no update is in progress, and read them again until two
+ *   reads are the same: an update can start during the reads.
+ *
+ ****************************************************************************/
+
+static void cmos_gettime(struct tm *tp)
+{
+  static const uint8_t regidx[] =
+  {
+    CMOS_SECONDS, CMOS_MINUTES, CMOS_HOURS, CMOS_MDAY,
+    CMOS_MONTH, CMOS_YEAR, CMOS_CENTURY
+  };
+
+  uint8_t regs[nitems(regidx)];
+  uint8_t again[nitems(regidx)];
+  irqstate_t flags;
+  uint8_t statb;
+  bool binary;
+  int century;
+  int hour;
+  int i;
+
+  flags = spin_lock_irqsave(&g_rtc_lock);
+  statb = cmos_read(CMOS_STATUS_B);
+
+  do
+    {
+      while ((cmos_read(CMOS_STATUS_A) & CMOS_A_UIP) != 0);
+
+      for (i = 0; i < nitems(regidx); i++)
+        {
+          regs[i] = cmos_read(regidx[i]);
+        }
+
+      while ((cmos_read(CMOS_STATUS_A) & CMOS_A_UIP) != 0);
+
+      for (i = 0; i < nitems(regidx); i++)
+        {
+          again[i] = cmos_read(regidx[i]);
+        }
+    }
+  while (memcmp(regs, again, sizeof(regs)) != 0);
+
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
+
+  binary = (statb & CMOS_B_DM) != 0;
+  hour   = cmos_frombcd(regs[2] & ~CMOS_HOUR_PM, binary);
+  if ((statb & CMOS_B_24H) == 0)
+    {
+      hour %= 12;
+      if ((regs[2] & CMOS_HOUR_PM) != 0)
+        {
+          hour += 12;
+        }
+    }
+
+  /* Not every PC has the century register: take 20 when it does not give
+   * 19 or 20.
+   */
+
+  century = cmos_frombcd(regs[6], binary);
+  if (century != 19 && century != 20)
+    {
+      century = 20;
+    }
+
+  memset(tp, 0, sizeof(*tp));
+  tp->tm_sec  = cmos_frombcd(regs[0], binary);
+  tp->tm_min  = cmos_frombcd(regs[1], binary);
+  tp->tm_hour = hour;
+  tp->tm_mday = cmos_frombcd(regs[3], binary);
+  tp->tm_mon  = cmos_frombcd(regs[4], binary) - 1;
+  tp->tm_year = century * 100 + cmos_frombcd(regs[5], binary) - 1900;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_rtc_initialize
+ *
+ * Description:
+ *   Initialize the RTC.  The CMOS clock runs already.
+ *
+ * Returned Value:
+ *   Zero (OK).
+ *
+ ****************************************************************************/
+
+int up_rtc_initialize(void)
+{
+  g_rtc_enabled = true;
+  return OK;
+}
+
+#ifdef CONFIG_RTC_DATETIME
+
+/****************************************************************************
+ * Name: up_rtc_getdatetime
+ *
+ * Description:
+ *   Get the current date and time (UTC) from the CMOS clock.
+ *
+ * Input Parameters:
+ *   tp - The location to return the date and time.
+ *
+ * Returned Value:
+ *   Zero (OK).
+ *
+ ****************************************************************************/
+
+int up_rtc_getdatetime(struct tm *tp)
+{
+  cmos_gettime(tp);
+  return OK;
+}
+
+#else
+
+/****************************************************************************
+ * Name: up_rtc_time
+ *
+ * Description:
+ *   Get the current time in seconds from the CMOS clock.
+ *
+ * Returned Value:
+ *   The time in seconds since the epoch.
+ *
+ ****************************************************************************/
+
+time_t up_rtc_time(void)
+{
+  struct tm tm;
+
+  cmos_gettime(&tm);
+  return timegm(&tm);
+}
+
+#endif
+
+/****************************************************************************
+ * Name: up_rtc_settime
+ *
+ * Description:
+ *   Set the CMOS clock (UTC) to the provided time, in whole seconds.
+ *
+ * Input Parameters:
+ *   tp - The time to use.
+ *
+ * Returned Value:
+ *   Zero (OK).
+ *
+ ****************************************************************************/
+
+int up_rtc_settime(const struct timespec *tp)
+{
+  irqstate_t flags;
+  struct tm tm;
+  uint8_t statb;
+  uint8_t hour;
+  bool binary;
+
+  gmtime_r(&tp->tv_sec, &tm);
+
+  flags  = spin_lock_irqsave(&g_rtc_lock);
+  statb  = cmos_read(CMOS_STATUS_B);
+  binary = (statb & CMOS_B_DM) != 0;
+
+  if ((statb & CMOS_B_24H) != 0)
+    {
+      hour = cmos_tobcd(tm.tm_hour, binary);
+    }
+  else
+    {
+      hour = cmos_tobcd(tm.tm_hour % 12 == 0 ? 12 : tm.tm_hour % 12,
+                        binary);
+      if (tm.tm_hour >= 12)
+        {
+          hour |= CMOS_HOUR_PM;
+        }
+    }
+
+  /* Stop the updates while the registers change */
+
+  cmos_write(CMOS_STATUS_B, statb | CMOS_B_SET);
+  cmos_write(CMOS_SECONDS, cmos_tobcd(tm.tm_sec, binary));
+  cmos_write(CMOS_MINUTES, cmos_tobcd(tm.tm_min, binary));
+  cmos_write(CMOS_HOURS, hour);
+  cmos_write(CMOS_MDAY, cmos_tobcd(tm.tm_mday, binary));
+  cmos_write(CMOS_MONTH, cmos_tobcd(tm.tm_mon + 1, binary));
+  cmos_write(CMOS_YEAR, cmos_tobcd(tm.tm_year % 100, binary));
+  cmos_write(CMOS_CENTURY, cmos_tobcd((tm.tm_year + 1900) / 100, binary));
+  cmos_write(CMOS_STATUS_B, statb & ~CMOS_B_SET);
+
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
   return OK;
 }
 #endif
