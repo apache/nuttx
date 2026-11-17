@@ -116,6 +116,32 @@ static uint32_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
       goto end_wait;
     }
 
+  /* Data that the application did not read, or that comes after the
+   * close, ends the connection with a RST at once (RFC 1122, section
+   * 4.2.2.13), also while our own data waits to be sent: the peer may
+   * wait for us to read before it reads, and the two connections would
+   * keep their buffers for ever.
+   */
+
+  else if (conn->readahead != NULL || (flags & TCP_NEWDATA) != 0)
+    {
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      if (conn->sndcb != NULL)
+        {
+          conn->sndcb->flags = 0;
+          conn->sndcb->event = NULL;
+          conn->sndcb = NULL;
+        }
+#endif
+
+      /* Set TCP_ABORT to send the RST, and free the rx buffers now */
+
+      dev->d_len = 0;
+      flags = (flags & ~TCP_NEWDATA) | TCP_ABORT;
+      tcp_free_rx_buffers(conn);
+      goto end_wait;
+    }
+
   /* Check if all outstanding bytes have been ACKed.
    *
    * Note: in case of passive close, this ensures our FIN is acked.
@@ -152,9 +178,7 @@ static uint32_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
                   conn->tcpstateflags == TCP_FIN_WAIT_1 ||
                   conn->tcpstateflags == TCP_FIN_WAIT_2);
 
-      /* Drop data received in this state and make sure that TCP_TXCLOSE
-       * is set in the response
-       */
+      /* Make sure that TCP_TXCLOSE is set in the response */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       /* We don't need the send callback anymore. */
@@ -171,23 +195,7 @@ static uint32_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
 #endif
 
       dev->d_len = 0;
-      if (conn->readahead != NULL || (flags & TCP_NEWDATA) != 0)
-        {
-          /* We need to send RST when read-ahead buffer data is not consumed
-           * or new data is coming.
-           * Set TCP_ABORT flag to trigger sending RST.
-           */
-
-          flags = flags & ~TCP_NEWDATA;
-          flags |= TCP_ABORT;
-
-          /* Free rx buffers of the connection immediately */
-
-          tcp_free_rx_buffers(conn);
-
-          goto end_wait;
-        }
-      else if ((conn->shutdown & SHUT_WR) == 0)
+      if ((conn->shutdown & SHUT_WR) == 0)
         {
           flags |= TCP_TXCLOSE;
 
