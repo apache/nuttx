@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm64/src/bcm2711/bcm2711_i2c.h
  *
- * Author: Matteo Golin <matteo.golin@gmail.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
