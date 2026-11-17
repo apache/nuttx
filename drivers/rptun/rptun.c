@@ -611,13 +611,14 @@ static bool rptun_is_shm_carveout(FAR const struct fw_rsc_carveout *carv,
  *
  * Description:
  *   Place the shared memory regions of vdev index the table left at
- *   FW_RSC_U32_ADDR_ANY: cut them from the pool and write the da back, as
+ *   FW_RSC_U32_ADDR_ANY: cut them from heap and write the da back, as
  *   rptun_alloc_vrings() does, so the peer finds them once DRIVER_OK is set.
  *
  ****************************************************************************/
 
 static int rptun_alloc_shm_regions(FAR struct rptun_priv_s *priv,
-                                   unsigned int index)
+                                   unsigned int index,
+                                   FAR struct mm_heap_s *heap)
 {
   FAR struct resource_table *rsc = priv->rproc.rsc_table;
   uint32_t i;
@@ -627,7 +628,7 @@ static int rptun_alloc_shm_regions(FAR struct rptun_priv_s *priv,
       FAR struct fw_rsc_carveout *carv =
         (FAR struct fw_rsc_carveout *)((FAR char *)rsc + rsc->offset[i]);
       metal_phys_addr_t pa;
-      FAR void *va = NULL;
+      FAR void *va;
 
       if ((carv->da != 0u && carv->da != FW_RSC_U32_ADDR_ANY) ||
           !rptun_is_shm_carveout(carv, index))
@@ -635,11 +636,7 @@ static int rptun_alloc_shm_regions(FAR struct rptun_priv_s *priv,
           continue;
         }
 
-      if (priv->heap != NULL)
-        {
-          va = mm_memalign(priv->heap, rptun_map_align(), carv->len);
-        }
-
+      va = mm_memalign(heap, rptun_map_align(), carv->len);
       if (va == NULL)
         {
           rptunerr("ERROR: %s alloc failed, len=%" PRIu32 "\n",
@@ -659,13 +656,14 @@ static int rptun_alloc_shm_regions(FAR struct rptun_priv_s *priv,
  *
  * Description:
  *   Release the regions rptun_alloc_shm_regions() placed and hand their da
- *   back to FW_RSC_U32_ADDR_ANY. A region with a static da lies outside the
- *   pool and is left untouched.
+ *   back to FW_RSC_U32_ADDR_ANY. A region with a static da lies outside
+ *   heap and is left untouched.
  *
  ****************************************************************************/
 
 static void rptun_free_shm_regions(FAR struct rptun_priv_s *priv,
-                                   unsigned int index)
+                                   unsigned int index,
+                                   FAR struct mm_heap_s *heap)
 {
   FAR struct resource_table *rsc = priv->rproc.rsc_table;
   uint32_t i;
@@ -677,8 +675,7 @@ static void rptun_free_shm_regions(FAR struct rptun_priv_s *priv,
       metal_phys_addr_t pa;
       FAR void *va;
 
-      if (priv->heap == NULL || carv->da == 0u ||
-          carv->da == FW_RSC_U32_ADDR_ANY ||
+      if (carv->da == 0u || carv->da == FW_RSC_U32_ADDR_ANY ||
           !rptun_is_shm_carveout(carv, index))
         {
           continue;
@@ -686,9 +683,9 @@ static void rptun_free_shm_regions(FAR struct rptun_priv_s *priv,
 
       pa = rptun_da_to_pa(priv->dev, carv->da);
       va = metal_io_phys_to_virt(metal_io_get_region(), pa);
-      if (va != NULL && mm_heapmember(priv->heap, va))
+      if (va != NULL && mm_heapmember(heap, va))
         {
-          mm_free(priv->heap, va);
+          mm_free(heap, va);
           carv->da = FW_RSC_U32_ADDR_ANY;
         }
     }
@@ -1069,7 +1066,7 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
               ret = rptun_alloc_vrings(priv, vdev_rsc, carv->heap);
               if (ret >= 0)
                 {
-                  ret = rptun_alloc_shm_regions(priv, index);
+                  ret = rptun_alloc_shm_regions(priv, index, carv->heap);
                 }
             }
           else
@@ -1112,7 +1109,7 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
 
       if (ret < 0 && carv != NULL)
         {
-          rptun_free_shm_regions(priv, index);
+          rptun_free_shm_regions(priv, index, carv->heap);
           rptun_free_vrings(priv, vdev_rsc, carv->heap);
           rptun_free_carveout(priv, carv);
         }
@@ -1134,7 +1131,7 @@ static void rptun_remove_device(FAR struct rptun_priv_s *priv,
 
   if (carveout != NULL)
     {
-      rptun_free_shm_regions(priv, rvdev->index);
+      rptun_free_shm_regions(priv, rvdev->index, carveout->heap);
       rptun_free_vrings(priv, rvdev->vdev_rsc, carveout->heap);
       rptun_free_carveout(priv, carveout);
       vdev->mm_priv = NULL;
