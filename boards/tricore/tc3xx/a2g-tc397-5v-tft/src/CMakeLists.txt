@@ -25,10 +25,8 @@ set(SRCS tc397_boardinit.c tc397_bringup.c)
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
-  set_property(
-    GLOBAL
-    PROPERTY LD_SCRIPT
-             "${NUTTX_BOARD_DIR}/scripts/Lcf_Tasking_Tricore_Tc.lsl.kernel")
+  set_property(GLOBAL PROPERTY LD_SCRIPT
+                               "${NUTTX_BOARD_DIR}/scripts/tricore.lsl")
 else()
   set_property(GLOBAL PROPERTY LD_SCRIPT
                                "${NUTTX_BOARD_DIR}/scripts/tricore.ld")
