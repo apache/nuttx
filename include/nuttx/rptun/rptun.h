@@ -48,6 +48,11 @@
 #define RPTUNIOC_RESET        _RPTUNIOC(3)
 #define RPTUNIOC_DUMP         _RPTUNIOC(4)
 
+/* RPTUNIOC_DUMP argument: a mask of what to dump */
+
+#define RPTUN_DUMP_SYSLOG     (1 << 0)  /* The peer's syslog in the trace */
+#define RPTUN_DUMP_RSC        (1 << 1)  /* The resource table */
+
 #define RPTUN_NOTIFY_ALL      UINT32_MAX
 
 #ifdef CONFIG_OPENAMP_CACHE
