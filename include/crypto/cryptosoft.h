@@ -55,12 +55,14 @@ struct swcr_data
         uint32_t klen;
         FAR const struct auth_hash *axf;
         union authctx ctx;
+        uint32_t aadlen;
       } SWCR_AUTH;
 
       struct
       {
         FAR uint8_t *kschedule;
         FAR const struct enc_xform *exf;
+        uint32_t enclen;
       } SWCR_ENC;
 
       struct
@@ -75,7 +77,9 @@ struct swcr_data
 #define sw_klen   SWCR_UN.SWCR_AUTH.klen
 #define sw_axf    SWCR_UN.SWCR_AUTH.axf
 #define sw_ctx    SWCR_UN.SWCR_AUTH.ctx
+#define sw_aadlen SWCR_UN.SWCR_AUTH.aadlen
 #define sw_kschedule SWCR_UN.SWCR_ENC.kschedule
+#define sw_enclen SWCR_UN.SWCR_ENC.enclen
 #define sw_exf    SWCR_UN.SWCR_ENC.exf
 #define sw_size   SWCR_UN.SWCR_COMP.size
 #define sw_cxf    SWCR_UN.SWCR_COMP.cxf

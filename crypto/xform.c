@@ -80,6 +80,7 @@
 #include <crypto/rijndael.h>
 #include <crypto/aes.h>
 #include <crypto/cryptodev.h>
+#include <crypto/gmac.h>
 #include <crypto/xform.h>
 #include <crypto/gmac.h>
 #include <crypto/cmac.h>
@@ -108,6 +109,7 @@ int blf_setkey(FAR void *, FAR uint8_t *, int);
 int cast5_setkey(FAR void *, FAR uint8_t *, int);
 int aes_setkey_xform(FAR void *, FAR uint8_t *, int);
 int aes_ctr_setkey(FAR void *, FAR uint8_t *, int);
+int aes_gcm_setkey(FAR void *, FAR uint8_t *, int);
 int aes_ctr_ssh_setkey(FAR void *, FAR uint8_t *, int);
 int aes_xts_setkey(FAR void *, FAR uint8_t *, int);
 int aes_ofb_setkey(FAR void *, FAR uint8_t *, int);
@@ -135,12 +137,12 @@ void aes_cfb128_decrypt(caddr_t, FAR uint8_t *, size_t);
 void aes_ctr_crypt(caddr_t, FAR uint8_t *, size_t);
 void aes_ctr_ssh_crypt(caddr_t, FAR uint8_t *, size_t);
 
-void aes_reinit_xform(caddr_t, FAR uint8_t *);
-void aes_ctr_reinit(caddr_t, FAR uint8_t *);
-void aes_ctr_ssh_reinit(caddr_t, FAR uint8_t *);
-void aes_xts_reinit(caddr_t, FAR uint8_t *);
-void aes_gcm_reinit(caddr_t, FAR uint8_t *);
-void aes_ofb_reinit(caddr_t, FAR uint8_t *);
+void aes_reinit_xform(caddr_t, FAR uint8_t *, uint16_t);
+void aes_ctr_reinit(caddr_t, FAR uint8_t *, uint16_t);
+void aes_ctr_ssh_reinit(caddr_t, FAR uint8_t *, uint16_t);
+void aes_xts_reinit(caddr_t, FAR uint8_t *, uint16_t);
+void aes_gcm_reinit(caddr_t, FAR uint8_t *, uint16_t);
+void aes_ofb_reinit(caddr_t, FAR uint8_t *, uint16_t);
 
 void null_init(FAR void *);
 void poly1305_setkey(FAR void *, FAR const uint8_t *, uint16_t);
@@ -252,11 +254,11 @@ const struct enc_xform enc_xform_aes_ctr_ssh =
 const struct enc_xform enc_xform_aes_gcm =
 {
   CRYPTO_AES_GCM_16, "AES-GCM",
-  1, 8, 16 + 4, 32 + 4,
+  1, 12, 16, 32,
   sizeof(struct aes_ctr_ctx),
   aes_ctr_crypt,
   aes_ctr_crypt,
-  aes_ctr_setkey,
+  aes_gcm_setkey,
   aes_gcm_reinit
 };
 
@@ -435,7 +437,7 @@ const struct auth_hash auth_hash_hmac_sha2_512_256 =
 const struct auth_hash auth_hash_gmac_aes_128 =
 {
   CRYPTO_AES_128_GMAC, "GMAC-AES-128",
-  16 + 4, GMAC_BLOCK_LEN, GMAC_DIGEST_LEN, sizeof(AES_GMAC_CTX),
+  16, GMAC_BLOCK_LEN, GMAC_DIGEST_LEN, sizeof(AES_GMAC_CTX),
   AESCTR_BLOCKSIZE, aes_gmac_init, aes_gmac_setkey, aes_gmac_reinit,
   aes_gmac_update, aes_gmac_final
 };
@@ -443,7 +445,7 @@ const struct auth_hash auth_hash_gmac_aes_128 =
 const struct auth_hash auth_hash_gmac_aes_192 =
 {
   CRYPTO_AES_192_GMAC, "GMAC-AES-192",
-  24 + 4, GMAC_BLOCK_LEN, GMAC_DIGEST_LEN, sizeof(AES_GMAC_CTX),
+  24, GMAC_BLOCK_LEN, GMAC_DIGEST_LEN, sizeof(AES_GMAC_CTX),
   AESCTR_BLOCKSIZE, aes_gmac_init, aes_gmac_setkey, aes_gmac_reinit,
   aes_gmac_update, aes_gmac_final
 };
@@ -451,7 +453,7 @@ const struct auth_hash auth_hash_gmac_aes_192 =
 const struct auth_hash auth_hash_gmac_aes_256 =
 {
   CRYPTO_AES_256_GMAC, "GMAC-AES-256",
-  32 + 4, GMAC_BLOCK_LEN, GMAC_DIGEST_LEN, sizeof(AES_GMAC_CTX),
+  32, GMAC_BLOCK_LEN, GMAC_DIGEST_LEN, sizeof(AES_GMAC_CTX),
   AESCTR_BLOCKSIZE, aes_gmac_init, aes_gmac_setkey, aes_gmac_reinit,
   aes_gmac_update, aes_gmac_final
 };
@@ -663,7 +665,7 @@ int aes_setkey_xform(FAR void *sched, FAR uint8_t *key, int len)
   return aes_setkey((FAR AES_CTX *)sched, key, len);
 }
 
-void aes_reinit_xform(caddr_t key, FAR uint8_t *iv)
+void aes_reinit_xform(caddr_t key, FAR uint8_t *iv, uint16_t ivlen)
 {
   FAR AES_CTX *ctx;
 
@@ -671,7 +673,7 @@ void aes_reinit_xform(caddr_t key, FAR uint8_t *iv)
   bcopy(iv, ctx->iv, RIJNDAEL128_BLOCK_LEN);
 }
 
-void aes_ctr_reinit(caddr_t key, FAR uint8_t *iv)
+void aes_ctr_reinit(caddr_t key, FAR uint8_t *iv, uint16_t ivlen)
 {
   FAR struct aes_ctr_ctx *ctx;
 
@@ -684,17 +686,30 @@ void aes_ctr_reinit(caddr_t key, FAR uint8_t *iv)
   ctx->ac_ksoff = AESCTR_BLOCKSIZE;
 }
 
-void aes_gcm_reinit(caddr_t key, FAR uint8_t *iv)
+void aes_gcm_reinit(caddr_t key, FAR uint8_t *iv, uint16_t ivlen)
 {
   FAR struct aes_ctr_ctx *ctx;
+  uint8_t h[AESCTR_BLOCKSIZE];
 
   ctx = (FAR struct aes_ctr_ctx *)key;
-  bcopy(iv, ctx->ac_block + AESCTR_NONCESIZE, AESCTR_IVSIZE);
 
-  /* reset counter */
+  /* The tag uses J0; the payload GCTR starts at inc32(J0). */
 
-  bzero(ctx->ac_block + AESCTR_NONCESIZE + AESCTR_IVSIZE, 4);
-  ctx->ac_block[AESCTR_BLOCKSIZE - 1] = 1; /* GCM starts with 1 */
+  memset(h, 0, sizeof(h));
+  if (ivlen != 12)
+    {
+      aes_encrypt(&ctx->ac_key, h, h);
+    }
+
+  aes_gcm_j0(h, iv, ivlen, ctx->ac_block);
+  explicit_bzero(h, sizeof(h));
+
+  /* The tag uses J0; the payload GCTR starts at inc32(J0), which
+   * aes_ctr_crypt() produces by incrementing the counter block before
+   * generating each keystream block.
+   */
+
+  ctx->ac_ksoff = AESCTR_BLOCKSIZE;
 }
 
 /* Keep the unused tail of the keystream block, so that a request ending
@@ -754,6 +769,24 @@ int aes_ctr_setkey(FAR void *sched, FAR uint8_t *key, int len)
   return 0;
 }
 
+/* Unlike AES-CTR the GCM key carries no embedded nonce: the counter block
+ * is derived from the IV alone by aes_gcm_reinit().
+ */
+
+int aes_gcm_setkey(FAR void *sched, FAR uint8_t *key, int len)
+{
+  FAR struct aes_ctr_ctx *ctx;
+
+  ctx = (FAR struct aes_ctr_ctx *)sched;
+  if (aes_setkey(&ctx->ac_key, key, len) != 0)
+    {
+      return -1;
+    }
+
+  ctx->ac_ksoff = AESCTR_BLOCKSIZE;
+  return 0;
+}
+
 /* SSH AES-CTR (RFC 4344). Unlike the RFC 3686 variant above, the key holds
  * no embedded nonce and the whole 16-byte IV is the initial counter block,
  * incremented as a 128-bit big-endian integer. The counter is encrypted
@@ -800,7 +833,7 @@ int aes_ctr_ssh_setkey(FAR void *sched, FAR uint8_t *key, int len)
   return 0;
 }
 
-void aes_ctr_ssh_reinit(caddr_t key, FAR uint8_t *iv)
+void aes_ctr_ssh_reinit(caddr_t key, FAR uint8_t *iv, uint16_t ivlen)
 {
   FAR struct aes_ctr_ctx *ctx;
 
@@ -808,7 +841,7 @@ void aes_ctr_ssh_reinit(caddr_t key, FAR uint8_t *iv)
   bcopy(iv, ctx->ac_block, AESCTR_BLOCKSIZE);
 }
 
-void aes_xts_reinit(caddr_t key, FAR uint8_t *iv)
+void aes_xts_reinit(caddr_t key, FAR uint8_t *iv, uint16_t ivlen)
 {
   FAR struct aes_xts_ctx *ctx = (FAR struct aes_xts_ctx *)key;
   uint64_t blocknum;
@@ -928,7 +961,7 @@ int aes_ofb_setkey(FAR void *sched, FAR uint8_t *key, int len)
   return 0;
 }
 
-void aes_ofb_reinit(caddr_t key, FAR uint8_t *iv)
+void aes_ofb_reinit(caddr_t key, FAR uint8_t *iv, uint16_t ivlen)
 {
   FAR struct aes_ofb_ctx *ctx;
 
