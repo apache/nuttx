@@ -46,10 +46,6 @@
 #include <arch/chip/irq.h>
 #include <arch/arch.h>
 
-#ifdef CONFIG_ARCH_HAVE_PPRS
-#  include <IfxCpu.h>
-#endif
-
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
@@ -132,10 +128,10 @@
   #define PSW_PRS_USER                           (0)
   #define tricore_change_pprs(tcb, val)          (tcb)->xcp.pprs = (val)
   #define tricore_load_pprs(tcb)                 (tcb)->xcp.pprs
-  #define tricore_restore_pprs(tcb)              __mtcr(CPU_PPRS, (tcb)->xcp.pprs)
-  #define tricore_store_pprs(tcb)                (tcb)->xcp.pprs = __mfcr(CPU_PPRS)
+  #define tricore_restore_pprs(tcb)              tricore_mtcr(TRICORE_CPU_PPRS, (tcb)->xcp.pprs)
+  #define tricore_store_pprs(tcb)                (tcb)->xcp.pprs = tricore_mfcr(TRICORE_CPU_PPRS)
   #define tricore_syscall_load_pprs(tcb ,index)  (tcb)->xcp.syscall_pprs[index]
-  #define tricore_syscall_store_pprs(tcb ,index) (tcb)->xcp.syscall_pprs[index] = __mfcr(CPU_PPRS)
+  #define tricore_syscall_store_pprs(tcb ,index) (tcb)->xcp.syscall_pprs[index] = tricore_mfcr(TRICORE_CPU_PPRS)
   #define tricore_sig_change_pprs(tcb ,val)      (tcb)->xcp.saved_pprs = (val)
   #define tricore_sig_load_pprs(tcb)             (tcb)->xcp.saved_pprs
   #define tricore_pprs_to_prs(pprs)              (((pprs & 3) << 12) | ((pprs & 4) << 13))
