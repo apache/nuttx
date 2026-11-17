@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/ra4/hardware/ra_system.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -17,6 +19,7 @@
  * under the License.
  *
  ****************************************************************************/
+
 #ifndef __ARCH_ARM_SRC_RA4M1_HARDWARE_RA4M1_SYSTEM_H
 #define __ARCH_ARM_SRC_RA4M1_HARDWARE_RA4M1_SYSTEM_H
 
