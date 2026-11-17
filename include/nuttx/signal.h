@@ -315,6 +315,28 @@ int nxsig_xorset(FAR sigset_t *dest, FAR const sigset_t *left,
 sigset_t nxsig_pendingset(FAR struct tcb_s *stcb);
 
 /****************************************************************************
+ * Name: nxsig_waitmask_set
+ *
+ * Description:
+ *   Set the temporary signal mask of a call that waits, as ppoll(),
+ *   pselect() and sigsuspend() do.  The caller holds a critical section
+ *   from this call until it waits, so that no signal comes before the
+ *   wait.
+ *
+ * Input Parameters:
+ *   set   - The temporary signal mask, or NULL to keep the signal mask
+ *   saved - Location to store the signal mask to restore after the wait
+ *
+ * Returned Value:
+ *   true if the temporary mask unblocks a pending signal.  Then the caller
+ *   must not wait, and it must return EINTR.  In a system call, the handler
+ *   of the signal runs at the end of the system call.
+ *
+ ****************************************************************************/
+
+bool nxsig_waitmask_set(FAR const sigset_t *set, FAR sigset_t *saved);
+
+/****************************************************************************
  * Name: nxsig_procmask
  *
  * Description:

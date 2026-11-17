@@ -80,23 +80,12 @@ int pselect(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
   flags = enter_critical_section();
 
-  /* Save a copy of the old sigprocmask and install
-   * the new (temporary) sigprocmask
+  /* Save a copy of the old sigprocmask and install the new (temporary)
+   * sigprocmask.  Check if there is a pending signal corresponding to one
+   * of the signals that will be unblocked by the new sigprocmask.
    */
 
-  saved_sigprocmask = rtcb->sigprocmask;
-  if (sigmask)
-    {
-      rtcb->sigprocmask = *sigmask;
-    }
-
-  sigemptyset(&rtcb->sigwaitmask);
-
-  /* Check if there is a pending signal corresponding to one of the
-   * signals that will be unblocked by the new sigprocmask.
-   */
-
-  if (nxsig_unmask_pendingsignal())
+  if (nxsig_waitmask_set(sigmask, &saved_sigprocmask))
     {
       /* Dispatching one or more of the signals is sufficient to cause
        * us to not wait. Restore the original sigprocmask.
