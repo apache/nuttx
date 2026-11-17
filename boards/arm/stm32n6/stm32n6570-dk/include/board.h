@@ -244,6 +244,42 @@
 
 /* Alternate function pin selections ****************************************/
 
+/* Ethernet GPIOs ***********************************************************/
+
+/* ETH1 RGMII to the Realtek RTL8211F PHY at MDIO address 1: PD1 MDC,
+ * PD12 MDIO, PF0 GTX_CLK, PF2 CLK125, PF7 RX_CLK, PF10 RX_CTL, PF14 PF15
+ * PF8 PF9 RXD0-3, PF11 TX_CTL, PF12 PF13 PG3 PG4 TXD0-3.  The PHY drives
+ * the 125 MHz CLK125 that the MAC uses as GTX clock (the reset value of
+ * RCC CCIPR2 ETH1GTXCLKSEL).  The PHY interrupt on PD3 is not used.
+ * GTX_CLK gets a 1 ns pad delay, without it about 1% of the frames sent
+ * at 1000 Mbps are lost.
+ */
+
+#define GPIO_ETH_MDC            (GPIO_ETH_MDC_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_MDIO           (GPIO_ETH_MDIO_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RGMII_CLK125   (GPIO_ETH_RGMII_CLK125_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RGMII_GTX_CLK  (GPIO_ETH_RGMII_GTX_CLK_1 | GPIO_SPEED_100MHZ | \
+                                 GPIO_DELAY_1000PS)
+#define GPIO_ETH_RGMII_RX_CLK   (GPIO_ETH_RGMII_RX_CLK_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RGMII_RX_CTL   (GPIO_ETH_RGMII_RX_CTL_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RGMII_RXD0     (GPIO_ETH_RGMII_RXD0_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RGMII_RXD1     (GPIO_ETH_RGMII_RXD1_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RGMII_RXD2     (GPIO_ETH_RGMII_RXD2_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RGMII_RXD3     (GPIO_ETH_RGMII_RXD3_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RGMII_TX_CTL   (GPIO_ETH_RGMII_TX_CTL_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RGMII_TXD0     (GPIO_ETH_RGMII_TXD0_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RGMII_TXD1     (GPIO_ETH_RGMII_TXD1_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RGMII_TXD2     (GPIO_ETH_RGMII_TXD2_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RGMII_TXD3     (GPIO_ETH_RGMII_TXD3_1 | GPIO_SPEED_100MHZ)
+
+/* The RTL8211F adds the RGMII delays on both the TX and RX clocks */
+
+#define BOARD_ETH_PHY_INTERFACE PHY_INTERFACE_RGMII_ID
+
+/* The PTP clock is HCLK, as the Ethernet driver assumes */
+
+#define STM32_RCC_CCIPR2_ETH1PTPSEL RCC_CCIPR2_ETH1PTPSEL_HCLK
+
 /* I2C GPIOs ****************************************************************/
 
 /* I2C1: camera connector, Arduino D15/D14 (PH9 SCL, PC1 SDA)
