@@ -620,13 +620,31 @@ static int x86_64_fault_user_isr(int irq, void *c, void *arg)
 
 /****************************************************************************
  * Name: x86_64_fault_kill_isr
+ *
+ * Description:
+ *   Send SIGFPE to the task that raised a divide error or an x87 FPU
+ *   error.  The handler returns to the instruction that faulted, so a fault
+ *   of the kernel itself (a kernel thread, the idle task, or ring 0 code in
+ *   a build with a user mode) panics instead of looping on that instruction.
+ *
  ****************************************************************************/
 
 static int x86_64_fault_kill_isr(int irq, void *c, void *arg)
 {
+  struct tcb_s *tcb = this_task();
+
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL
+#ifndef CONFIG_BUILD_FLAT
+      || (tcb->xcp.regs[REG_CS] & X86_GDT_PL_MASK) != X86_GDT_RPL_USER
+#endif
+     )
+    {
+      return x86_64_fault_panic_isr(irq, c, arg);
+    }
+
   __asm__ volatile("fnclex":::"memory");
 
-  nxsig_kill(running_task()->pid, SIGFPE);
+  nxsig_kill(tcb->pid, SIGFPE);
 
   return 0;
 }
