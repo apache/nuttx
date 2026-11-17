@@ -44,6 +44,10 @@ Clock source
 
 TSC DEADLINE timer, APIC timer or HPET can be used as system clock.
 
+``CONFIG_RTC_HIRES`` needs the TSC DEADLINE timer or the APIC timer: the
+high resolution RTC counts the TSC and needs its frequency, which only these
+two timers set.
+
 SMP
 ---
 
