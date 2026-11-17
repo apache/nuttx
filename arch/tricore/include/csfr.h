@@ -38,6 +38,7 @@
 #define TRICORE_CPU_PC              0xfe08  /* Program Counter */
 #define TRICORE_CPU_CORE_ID         0xfe1c  /* Core Identification */
 #define TRICORE_CPU_ICR             0xfe2c  /* Interrupt Control Register */
+#define TRICORE_CPU_PPRS            0xfe34  /* Previous PRS, TC1.8 */
 #define TRICORE_CPU_FCX             0xfe38  /* Free CSA List Head Pointer */
 #define TRICORE_CPU_LCX             0xfe3c  /* Free CSA List Limit Pointer */
 

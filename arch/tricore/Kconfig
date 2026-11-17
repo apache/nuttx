@@ -150,7 +150,7 @@ config ARCH_MPU_CODE_NREGIONS
 
 config ARCH_HAVE_PPRS
 	bool
-	--help--
+	---help---
 		The saving process for MPU PRS differs between TC1V6 and TC1V8.TC1V6
 		saves PRS in the PSW, while TC1V8 saves PRS in the PPRS register.
 
