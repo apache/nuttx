@@ -1,0 +1,14 @@
+config:
+  cwd: './'
+
+product:
+  name: "mps2-an500"
+  cores:
+    core0:
+      name: 'main'
+      device: 'qemu'
+      line_buffered: true
+      exec_path: 'qemu-system-arm'
+      exec_args: '-M mps2-an500 -nographic -kernel ./nuttx'
+      conf_path: './.config'
+      elf_path: './nuttx'
