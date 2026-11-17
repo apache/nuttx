@@ -196,6 +196,27 @@
 #define GPIO_USART1_TX   (GPIO_USART1_TX_3 | GPIO_SPEED_50MHZ)
 #define GPIO_USART1_RX   (GPIO_USART1_RX_3 | GPIO_SPEED_50MHZ)
 
+/* Ethernet GPIOs ***********************************************************/
+
+/* ETH1 RMII to the LAN8742A PHY at MDIO address 0: PG11 MDC, PF4 MDIO,
+ * PF7 REF_CLK, PF10 CRS_DV, PF14 PF15 RXD0-1, PF11 TX_EN, PF12 PF13
+ * TXD0-1.  The PHY drives the 50 MHz REF_CLK.
+ */
+
+#define GPIO_ETH_MDC            (GPIO_ETH_MDC_2 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_MDIO           (GPIO_ETH_MDIO_2 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RMII_REF_CLK   (GPIO_ETH_RMII_REF_CLK_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RMII_CRS_DV    (GPIO_ETH_RMII_CRS_DV_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RMII_RXD0      (GPIO_ETH_RMII_RXD0_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RMII_RXD1      (GPIO_ETH_RMII_RXD1_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RMII_TX_EN     (GPIO_ETH_RMII_TX_EN_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RMII_TXD0      (GPIO_ETH_RMII_TXD0_1 | GPIO_SPEED_100MHZ)
+#define GPIO_ETH_RMII_TXD1      (GPIO_ETH_RMII_TXD1_1 | GPIO_SPEED_100MHZ)
+
+/* The PTP clock is HCLK, as the Ethernet driver assumes */
+
+#define STM32_RCC_CCIPR2_ETH1PTPSEL RCC_CCIPR2_ETH1PTPSEL_HCLK
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
