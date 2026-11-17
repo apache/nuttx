@@ -337,6 +337,24 @@ sigset_t nxsig_pendingset(FAR struct tcb_s *stcb);
 bool nxsig_waitmask_set(FAR const sigset_t *set, FAR sigset_t *saved);
 
 /****************************************************************************
+ * Name: nxsig_waitmask_restore
+ *
+ * Description:
+ *   Restore the signal mask that nxsig_waitmask_set() saved.  In a system
+ *   call, the temporary mask stays until the end of the system call, so
+ *   that the handlers of the signals that it unblocks run.
+ *
+ * Input Parameters:
+ *   saved - The signal mask from nxsig_waitmask_set()
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsig_waitmask_restore(FAR const sigset_t *saved);
+
+/****************************************************************************
  * Name: nxsig_procmask
  *
  * Description:

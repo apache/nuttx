@@ -211,3 +211,13 @@ bool nxsig_waitmask_set(FAR const sigset_t *set, FAR sigset_t *saved)
   sigemptyset(&rtcb->sigwaitmask);
   return nxsig_unmask_pendingsignal();
 }
+
+/****************************************************************************
+ * Name: nxsig_waitmask_restore
+ ****************************************************************************/
+
+void nxsig_waitmask_restore(FAR const sigset_t *saved)
+{
+  nxsig_restoremask(this_task(), saved);
+  nxsig_unmask_pendingsignal();
+}
