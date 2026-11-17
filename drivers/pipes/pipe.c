@@ -190,6 +190,18 @@ int file_pipe(FAR struct file *filep[2], size_t bufsize, int flags)
   int nonblock = !!(flags & O_NONBLOCK);
   int ret;
 
+  /* Check parameters */
+
+  if (filep == NULL || filep[0] == NULL || filep[1] == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if ((flags & ~(O_CLOEXEC | O_NONBLOCK)) != 0)
+    {
+      return -EINVAL;
+    }
+
   /* Register a new pipe device */
 
   ret = pipe_register(bufsize, flags, devname, sizeof(devname));
@@ -262,6 +274,20 @@ int pipe2(int fd[2], int flags)
   char devname[32];
   int nonblock = !!(flags & O_NONBLOCK);
   int ret;
+
+  /* Check parameters */
+
+  if (fd == NULL)
+    {
+      set_errno(EFAULT);
+      return ERROR;
+    }
+
+  if ((flags & ~(O_CLOEXEC | O_NONBLOCK)) != 0)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
 
   /* Register a new pipe device */
 
