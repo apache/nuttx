@@ -161,6 +161,13 @@ void tcp_fill_header(FAR struct net_driver_s *dev,
       uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
       uint32_t recvwndo = tcp_get_recvwindow(dev, conn);
 
+      /* Do not shrink the window (RFC 9293 SHLD-14) */
+
+      if (TCP_SEQ_LT(rcvseq + recvwndo, conn->rcv_adv))
+        {
+          recvwndo = TCP_SEQ_SUB(conn->rcv_adv, rcvseq);
+        }
+
       /* Update the Receiver Window */
 
       conn->rcv_adv = rcvseq + recvwndo;
