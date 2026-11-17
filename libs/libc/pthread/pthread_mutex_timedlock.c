@@ -88,6 +88,8 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
 
   if (mutex != NULL)
     {
+      pthread_mutex_checkinit(mutex);
+
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
       /* All mutex types except for NORMAL (and DEFAULT) will return
        * an error if the caller does not hold the mutex.

@@ -27,14 +27,23 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <string.h>
 #include <pthread.h>
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/pthread.h>
 
 #include "pthread.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static mutex_t g_lazyinit_lock = NXMUTEX_INITIALIZER;
+static const pthread_mutex_t g_mutex_initializer = PTHREAD_MUTEX_INITIALIZER;
 
 /****************************************************************************
  * Public Functions
@@ -125,4 +134,36 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 #endif
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: pthread_mutex_lazyinit
+ *
+ * Description:
+ *   Initialize a zero-filled mutex as if it had been set to
+ *   PTHREAD_MUTEX_INITIALIZER.  The holder field is stored last, so other
+ *   threads keep coming here until the rest of the mutex is set up.
+ *
+ * Input Parameters:
+ *   mutex - A reference to the zero-filled mutex
+ *
+ ****************************************************************************/
+
+void pthread_mutex_lazyinit(FAR pthread_mutex_t *mutex)
+{
+  pthread_mutex_t init = g_mutex_initializer;
+  FAR sem_t *sem = PTHREAD_MUTEX_SEM(mutex);
+
+  nxmutex_lock(&g_lazyinit_lock);
+
+  /* Zero flags tells a zero-filled mutex apart from one held by TID 0 */
+
+  if (sem->flags == 0)
+    {
+      PTHREAD_MUTEX_SEM(&init)->val.mholder = 0;
+      memcpy(mutex, &init, sizeof(init));
+      atomic_set_release(NXSEM_MHOLDER(sem), NXSEM_NO_MHOLDER);
+    }
+
+  nxmutex_unlock(&g_lazyinit_lock);
 }
