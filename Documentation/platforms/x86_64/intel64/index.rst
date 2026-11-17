@@ -42,7 +42,8 @@ IRQs are managed by LAPIC(X2APIC) and IOAPIC.
 Clock source
 ------------
 
-TSC DEADLINE timer, APIC timer or HPET can be used as system clock.
+TSC DEADLINE timer, APIC timer or HPET can be used as system clock. The APIC
+timer does not support ``CONFIG_SCHED_TICKLESS``.
 
 SMP
 ---
