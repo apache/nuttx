@@ -504,41 +504,25 @@ do \
 } \
 while(0)
 
-/* UMULH: high 64 bits of a * b.  Architectures may override it with a
- * native or assembly implementation via up_umulh64(), which must
- * evaluate both arguments.
+/* UMULH: high 64 bits of a * b.  One instruction inline when the
+ * compiler has a native 128-bit multiply; otherwise one out-of-line copy
+ * per image from libs/libc/machine (the architecture form, or the weak
+ * fallback).
  */
 
-#ifdef up_umulh64
-#  define umulh64(a, b) up_umulh64(a, b)
-#else
+#ifdef __INT128_DEFINED
 
-static inline_function uint64_t umulh64(uint64_t a, uint64_t b)
+static inline_function uint64_t up_umulh64(uint64_t a, uint64_t b)
 {
-#ifndef __INT128_DEFINED
-  /* If the compiler do not support _uint128_t */
-
-  uint64_t al = a & UINT32_MAX;
-  uint64_t ah = a >> 32;
-  uint64_t bl = b & UINT32_MAX;
-  uint64_t bh = b >> 32;
-
-  uint64_t m1 = al * bl;
-  uint64_t m2 = ah * bl;
-  uint64_t m3 = al * bh;
-  uint64_t m4 = ah * bh;
-
-  uint64_t c = (m1 >> 32) + (m2 & UINT32_MAX) + (m3 & UINT32_MAX);
-
-  return m4 + (m2 >> 32) + (m3 >> 32) + (c >> 32);
-#else
   /* Compiles to a single UMULH instruction on x86_64 and AArch64. */
 
   _uint128_t a128 = a;
   _uint128_t res128 = a128 * b;
   return res128 >> 64;
-#endif
 }
+
+#else
+uint64_t up_umulh64(uint64_t a, uint64_t b);
 #endif
 
 /****************************************************************************
@@ -618,10 +602,10 @@ uint64_t invdiv_u64(uint64_t n, FAR const invdiv_param64_t *ip)
   uint8_t  sh2 = ip->shift;
 
   /* t1 is the high half of the 128-bit product n * m.  Both operands
-   * are runtime values here, so umulh64() is the right primitive.
+   * are runtime values here, so up_umulh64() is the right primitive.
    */
 
-  t1 = umulh64(n, m);
+  t1 = up_umulh64(n, m);
   t2 = (n - t1) >> sh1;
 
   return (t1 + t2) >> sh2;

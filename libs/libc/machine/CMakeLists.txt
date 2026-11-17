@@ -31,3 +31,9 @@ endif()
 if(CONFIG_MM_KASAN)
   target_sources(c PRIVATE arch_libc.c)
 endif()
+
+# The weak up_umulh64() fallback must come after the per-architecture sources:
+# libc.a members are scanned in order and a weak definition satisfies the
+# reference before the strong one is reached.
+
+target_sources(c PRIVATE up_umulh64.c)
