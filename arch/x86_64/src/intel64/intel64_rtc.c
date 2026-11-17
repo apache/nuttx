@@ -92,17 +92,21 @@ static unsigned long rtc_read(void)
   uint64_t  tmr = rdtscp();
   irqstate_t flags;
 
+  /* The 64-bit TSC does not wrap.  A smaller value comes from a CPU whose
+   * TSC is behind the TSC of the CPU that read last: keep the last value.
+   */
+
   flags = spin_lock_irqsave(&g_rtc_lock);
   if (tmr < rtc_last)
     {
-      tmr += (0xffffffffffffffffull - rtc_last);
+      tmr = rtc_last;
     }
 
   rtc_last = tmr;
   spin_unlock_irqrestore(&g_rtc_lock, flags);
-  tmr = (tmr / (g_x86_64_timer_freq / 1000000ul)) * 1000l;
 
-  return tmr;
+  return tmr / g_x86_64_timer_freq * NS_PER_SEC +
+         tmr % g_x86_64_timer_freq * NS_PER_SEC / g_x86_64_timer_freq;
 }
 
 /****************************************************************************
