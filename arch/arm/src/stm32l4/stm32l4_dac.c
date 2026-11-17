@@ -339,8 +339,10 @@ struct stm32_chan_s
 
 /* DAC Register access */
 
+#ifdef CONFIG_STM32_DAC_LL_OPS
 static uint32_t dac_getreg(struct stm32_chan_s *priv, int offset);
 static void     dac_dumpregs(struct stm32_chan_s *priv);
+#endif
 
 #ifdef HAVE_DMA
 static inline void tim_putreg(struct stm32_chan_s *chan, int offset,
@@ -491,6 +493,8 @@ static struct stm32_dac_s g_dacblock;
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_DAC_LL_OPS
+
 /****************************************************************************
  * Name: dac_getreg
  *
@@ -510,6 +514,7 @@ static uint32_t dac_getreg(struct stm32_chan_s *priv, int offset)
 {
   return getreg32(STM32_DAC_BASE + offset);
 }
+#endif
 
 /****************************************************************************
  * Name: stm32_dac_modify_cr
@@ -579,6 +584,8 @@ static inline void stm32_dac_modify_mcr(struct stm32_chan_s *chan,
   modifyreg32(STM32_DAC_MCR, clearbits << shift, setbits << shift);
 }
 
+#ifdef CONFIG_STM32_DAC_LL_OPS
+
 /****************************************************************************
  * Name: dac_dumpregs
  ****************************************************************************/
@@ -594,6 +601,7 @@ static void dac_dumpregs(struct stm32_chan_s *priv)
         dac_getreg(priv, STM32_DAC_SR_OFFSET),
         dac_getreg(priv, STM32_DAC_MCR_OFFSET));
 }
+#endif
 
 /****************************************************************************
  * Name: tim_putreg
