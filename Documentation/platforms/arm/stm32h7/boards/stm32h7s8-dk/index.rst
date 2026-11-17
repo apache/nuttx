@@ -118,14 +118,14 @@ console is the ST-LINK virtual COM port on USART4.
 nsh-xip
 -------
 
-Provides NuttShell, common diagnostic commands, and ``ostest``.  The image is
+Provides NuttShell and common diagnostic commands.  The image is
 linked for execution from XSPI2 flash at ``0x70000000`` and requires an XIP
 bootloader in internal flash.
 
 jumbo-xip
 ---------
 
-Much as ``nsh-xip``, but adds Ethernet networking. The IP address is obtained by DHCP.
+Much as ``nsh-xip``, but adds ``ostest`` and Ethernet networking. The IP address is obtained by DHCP.
 
 .. note::
    ``jumbo-xip`` enables CONFIG_STM32_ETH_GPIO_MDIO to communicate via
