@@ -320,7 +320,7 @@ void oneshot_count_init(FAR struct oneshot_lowerhalf_s *lower,
 
   ASSERT(frequency > 1);
 
-  invdiv_init_param64(frequency, &lower->invdiv_freq);
+  invdiv_init_param(frequency, &lower->invdiv_freq);
 #  endif
 }
 

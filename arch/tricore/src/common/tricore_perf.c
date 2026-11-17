@@ -81,7 +81,7 @@ void up_perf_init(void *arg)
 {
   g_cpu_freq = (unsigned long)(uintptr_t)arg;
 
-  invdiv_init_param64(g_cpu_freq, &g_invdiv_param);
+  invdiv_init_param(g_cpu_freq, &g_invdiv_param);
 
   tricore_reset_ccnt();
 }

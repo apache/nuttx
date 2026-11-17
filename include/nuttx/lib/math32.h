@@ -78,8 +78,13 @@
  * As with FLS(), n is evaluated multiple times.
  */
 
-#define LOG2_CEIL(n)  (FLS((n) - 1))
 #define LOG2_FLOOR(n) (FLS(n) - 1)
+
+#ifdef CONFIG_HAVE_BUILTIN_CLZ
+#  define LOG2_CEIL(n) log2ceil(n)
+#else
+#  define LOG2_CEIL(n) (FLS((n) - 1))
+#endif
 
 /****************************************************************************
  * Public Types
@@ -396,11 +401,33 @@ static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
  * into multiplication and right-shifting.
  *
  * Usage:
- * If you want to do n/d division where d is an invariant integer,
- * initialize the parameters with invdiv_init_param32() /
- * invdiv_init_param64() first, then do the division with
- * invdiv_u32() / invdiv_u64().
+ * For n/d where d is an invariant integer, fill the parameter block
+ * with invdiv_init_param(d, &ip), then divide with invdiv_u32() or
+ * invdiv_u64() to match the block width.
  */
+
+/****************************************************************************
+ * Name: invdiv_init_param
+ *
+ * Description:
+ *   Fill an invdiv_param32_t or an invdiv_param64_t block with the
+ *   invariant-division parameters of d; the width of ip->mult selects
+ *   the initializer.  d may be a constant or a run-time value.
+ *
+ * Input Parameters:
+ *   d  - The divisor, d > 1.
+ *   ip - The parameter block; its type selects the initializer.
+ *
+ ****************************************************************************/
+
+/* Dispatch on the multiplier width of the parameter block: d may be a
+ * runtime value or a constant, either way l is computed inside.
+ */
+
+#define invdiv_init_param(d, ip) \
+  sizeof((ip)->mult) == sizeof(uint32_t) ? \
+    invdiv_init_param32((d), (FAR invdiv_param32_t *)(ip)) : \
+    invdiv_init_param64((d), (FAR invdiv_param64_t *)(ip))
 
 /****************************************************************************
  * Name: invdiv_init_param32
@@ -420,7 +447,7 @@ static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
 static inline_function
 void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *ip)
 {
-  int      l  = log2ceil(d);
+  int      l  = LOG2_CEIL(d);
   uint64_t t1 = (uint64_t)1 << 32;
   uint64_t t2 = (uint64_t)1 << l;
 
@@ -591,18 +618,15 @@ uint64_t up_umulh64(uint64_t a, uint64_t b);
  * Name: invdiv_init_param64
  *
  * Description:
- *   Calculate the invariant-division parameters from the divisor: the
- *   multiplier is floor((2^l - d) * 2^64 / d) + 1
- *   through the single 128-by-64 division invdiv_udiv128(), with
- *   l = ceil(log2 d).  The division's normalizer s = clz(d) is the
- *   branch-free 64 - l - (((d - 1) & d) == 0): l is one more than
- *   floor(log2 d) exactly when d is not a power of two (d >= 2 makes
- *   the bare bit test exact).
+ *   Calculate the invariant-division parameters from the divisor, with
+ *   l = ceil(log2 d) and the multiplier floor((2^l - d) * 2^64 / d) + 1
+ *   from one 128-by-64 division.  The normalizer s = clz(d) is derived
+ *   from l without a branch.
  *
  * Input Parameters:
- *   d - The divisor (unsigned integer), d != 0 and d != 1 is required;
- *       d > 2^63 keeps the pre-existing undefined behavior of the
- *       1 << l setup (d == 2^63 is in contract).
+ *   d - The divisor (unsigned integer), d != 0 and d != 1 is required,
+ *       and d <= 2^63 is asserted: the 1 << l setup is undefined for
+ *       larger divisors.
  *
  * Output Parameters:
  *   ip    - The invariant division parameter to be cached.
@@ -612,10 +636,10 @@ uint64_t up_umulh64(uint64_t a, uint64_t b);
 static inline_function
 void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *ip)
 {
-  int      l = log2ceil(d);
+  int      l = LOG2_CEIL(d);
   uint64_t t = ((uint64_t)1 << l) - d;
 
-  DEBUGASSERT(d > 1);
+  DEBUGASSERT(d > 1 && d <= ((uint64_t)1 << 63));
 
 #ifdef __INT128_DEFINED
   _uint128_t one128 = 1;
