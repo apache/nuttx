@@ -25,7 +25,6 @@
  ****************************************************************************/
 
 #include <nuttx/irq.h>
-#include <nuttx/kmalloc.h>
 
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/timers/arch_alarm.h>
@@ -49,9 +48,11 @@
 void up_timer_initialize(void)
 {
   struct oneshot_lowerhalf_s *lower;
+  int cpu = up_cpu_index();
 
-  lower = tricore_systimer_initialize(TRICORE_STM0_BASE, 0,
-                                      TRICORE_STM0_IRQ, SCU_FREQUENCY);
+  lower = tricore_systimer_initialize(TRICORE_STM_BASE(cpu), 0,
+                                      TRICORE_SRC2IRQ(TRICORE_STM_SRC(cpu)),
+                                      SCU_FREQUENCY);
 
   DEBUGASSERT(lower != NULL);
 

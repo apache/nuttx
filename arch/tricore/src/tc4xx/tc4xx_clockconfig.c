@@ -53,7 +53,7 @@
 
 /* CPU0 STM timer, 100 MHz while the clocks are set up */
 
-#define TC4XX_STM0_ABS  (TRICORE_STM0_BASE + TRICORE_STM_ABS_OFFSET)
+#define TC4XX_STM0_ABS  (TRICORE_STM_BASE(0) + TRICORE_STM_ABS_OFFSET)
 #define TC4XX_STM_TICKS_PER_US     100
 
 /* Loop counts before a wait gives up */

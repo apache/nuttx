@@ -43,7 +43,7 @@
 
 /* STM0 timer bits [31:0], for the waits of the PLL ramp up */
 
-#define TC3XX_STM0_TIM0  (TRICORE_STM0_BASE + TRICORE_STM_TIM0_OFFSET)
+#define TC3XX_STM0_TIM0  (TRICORE_STM_BASE(0) + TRICORE_STM_TIM0_OFFSET)
 
 /* Loop counts before a wait gives up */
 
