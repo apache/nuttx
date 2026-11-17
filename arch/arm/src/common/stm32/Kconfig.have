@@ -362,6 +362,12 @@ config STM32_HAVE_IP_ETHMAC_M3M4_V1
 config STM32_HAVE_IP_ETHMAC_V2
 	bool
 
+config STM32_HAVE_ETH_RGMII
+	bool
+
+config STM32_HAVE_ETH_AXI
+	bool
+
 config STM32_HAVE_ETHRNET
 	bool
 
