@@ -428,6 +428,23 @@ config NUTTX_USERSPACE
 		expect to find and instance of struct userspace_s at this location.
 
 endif # Build 2-pass
+
+config NUTTX_LINKER_IMAGE_CFG
+	bool "Use linker defined image configuration"
+	---help---
+		Enables the selection of image configurations defined in the linker
+		file (when provided).
+
+if NUTTX_LINKER_IMAGE_CFG
+
+config NUTTX_LINKER_IMAGE_CFG_ID
+	int "Linker image identifier"
+	default 0
+	---help---
+		Selects the linker image configuration.
+
+endif
+
 endmenu # Build Setup
 
 menu "Binary Output Formats"
