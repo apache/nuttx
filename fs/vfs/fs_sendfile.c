@@ -46,8 +46,9 @@ static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
   FAR uint8_t *iobuffer;
   FAR uint8_t *wrbuffer;
   off_t startpos = 0;
-  ssize_t nbytesread;
+  ssize_t nbytesread = 0;
   ssize_t nbyteswritten;
+  ssize_t ret = 0;
   size_t  ntransferred;
   bool endxfr;
 
@@ -124,10 +125,12 @@ static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
 
               if (nbytesread != -EINTR || ntransferred == 0)
                 {
-                  /* Read error.  Break out and return the error condition. */
+                  /* Read error.  Break out and return the error condition
+                   * if nothing was transferred.
+                   */
 
-                  ntransferred = nbytesread;
-                  endxfr       = true;
+                  ret    = nbytesread;
+                  endxfr = true;
                   break;
                 }
             }
@@ -184,11 +187,11 @@ static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
                   if (nbyteswritten != -EINTR || ntransferred == 0)
                     {
                       /* Write error.  Break out and return the error
-                       * condition.
+                       * condition if nothing was transferred.
                        */
 
-                      ntransferred = nbyteswritten;
-                      endxfr       = true;
+                      ret    = nbyteswritten;
+                      endxfr = true;
                       break;
                     }
                 }
@@ -205,18 +208,9 @@ static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
 
   if (offset)
     {
-      /* Use file_seek to get the current file position */
+      /* Return the file position after the last byte transferred */
 
-      off_t curpos = file_seek(infile, 0, SEEK_CUR);
-
-      if (curpos < 0)
-        {
-          return curpos;
-        }
-
-      /* Return the current file position */
-
-      *offset = curpos;
+      *offset += ntransferred;
 
       /* Use file_seek again to restore the original file position */
 
@@ -226,12 +220,25 @@ static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
           return startpos;
         }
     }
+  else if (nbytesread > 0)
+    {
+      /* Give back the bytes read but not written.  An input that cannot
+       * seek loses them.
+       */
+
+      file_seek(infile, -nbytesread, SEEK_CUR);
+    }
 
   /* Finally return the number of bytes actually transferred (or ERROR
-   * if any failure occurred).
+   * if no data was transferred).
    */
 
-  return ntransferred;
+  if (ntransferred > 0)
+    {
+      return ntransferred;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
