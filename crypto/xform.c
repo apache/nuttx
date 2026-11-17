@@ -1119,12 +1119,14 @@ void crc32setkey(FAR void *ctx, FAR const uint8_t *key, uint16_t len)
 {
   FAR uint32_t *val = (FAR uint32_t *)key;
   uint32_t tmp = (*val) ^ CRC32_XOR_VALUE;
+
   memcpy(ctx, &tmp, len);
 }
 
 int crc32update(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 {
   FAR uint32_t *startval = (FAR uint32_t *)ctx;
+
   *startval = crc32part(buf, len, *startval);
   return 0;
 }
@@ -1133,5 +1135,6 @@ void crc32final(FAR uint8_t *digest, FAR void *ctx)
 {
   FAR uint32_t *val = (FAR uint32_t *)ctx;
   uint32_t result = (*val) ^ CRC32_XOR_VALUE;
+
   memcpy(digest, &result, sizeof(uint32_t));
 }
