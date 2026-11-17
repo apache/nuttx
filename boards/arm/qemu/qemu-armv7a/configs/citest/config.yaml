@@ -1,0 +1,18 @@
+config:
+  cwd: './'
+
+product:
+  name: "qemu-armv7a"
+  cores:
+    core0:
+      name: 'main'
+      device: 'qemu'
+      line_buffered: true
+      exec_path: 'qemu-system-arm'
+      exec_args: '-cpu cortex-a7 -nographic
+                 -machine virt,virtualization=off,gic-version=2
+                 -net none -chardev stdio,id=con,mux=on
+                 -serial chardev:con -mon chardev=con,mode=readline
+                 -kernel ./nuttx'
+      conf_path: './.config'
+      elf_path: './nuttx'
