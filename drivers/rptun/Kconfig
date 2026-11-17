@@ -159,4 +159,11 @@ config RPTUN_TRACE_DUMP
 		Print the remote core's syslog buffer (its RSC_TRACE entry) on
 		halt and on RPTUNIOC_DUMP.
 
+config RPTUN_RSC_DUMP
+	bool "rptun dump the resource table"
+	default n
+	---help---
+		Let RPTUNIOC_DUMP with RPTUN_DUMP_RSC print the resource table
+		through rptun_dump_resource().
+
 endif # RPTUN

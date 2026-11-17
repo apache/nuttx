@@ -1369,10 +1369,20 @@ static int rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
   return ret;
 }
 
-static void rptun_dev_dump(FAR struct rptun_priv_s *priv)
+static void rptun_dev_dump(FAR struct rptun_priv_s *priv,
+                           unsigned long arg)
 {
+  UNUSED(arg);
+
+#ifdef CONFIG_RPTUN_RSC_DUMP
+  if (arg & RPTUN_DUMP_RSC)
+    {
+      rptun_dump_resource(priv->rproc.rsc_table);
+    }
+#endif
+
 #if defined(CONFIG_SYSLOG_RPMSG_SERVER) && defined(CONFIG_RPTUN_TRACE_DUMP)
-  if (priv->trace_va != NULL)
+  if ((arg & RPTUN_DUMP_SYSLOG) && priv->trace_va != NULL)
     {
       _emerg("Dump %s's trace\n", RPTUN_GET_CPUNAME(priv->dev));
       syslog_rpmsg_dump(priv->trace_va);
@@ -1408,7 +1418,7 @@ static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
         ret = rptun_dev_reset(priv, arg);
         break;
       case RPTUNIOC_DUMP:
-        rptun_dev_dump(priv);
+        rptun_dev_dump(priv, arg);
         break;
       default:
         ret = -ENOTTY;
@@ -1688,7 +1698,7 @@ static int rptun_notifier(FAR struct notifier_block *block,
 
       if (action == SYS_HALT)
         {
-          rptun_ioctl_foreach(NULL, RPTUNIOC_DUMP, 0);
+          rptun_ioctl_foreach(NULL, RPTUNIOC_DUMP, RPTUN_DUMP_SYSLOG);
         }
     }
   else if (action == PANIC_KERNEL)
