@@ -284,12 +284,12 @@ static inline_function
 void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *ip)
 {
   int      l  = LOG2_CEIL(d);
-  uint64_t t1 = (uint64_t)1 << 32;
-  uint64_t t2 = (uint64_t)1 << l;
+  uint64_t t1 = (uint64_t)1u << 32;
+  uint64_t t2 = (uint64_t)1u << l;
 
-  DEBUGASSERT(d > 1);
+  DEBUGASSERT(d > 1u);
 
-  ip->mult  = (t1 * (t2 - d)) / d + 1;
+  ip->mult  = (t1 * (t2 - d)) / d + 1u;
 #if ULONG_MAX == 4294967295UL
   ip->shift = l - 1;
 #else
@@ -473,18 +473,18 @@ static inline_function
 void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *ip)
 {
   int      l = LOG2_CEIL(d);
-  uint64_t t = ((uint64_t)1 << l) - d;
+  uint64_t t = ((uint64_t)1u << l) - d;
 
-  DEBUGASSERT(d > 1 && d <= ((uint64_t)1 << 63));
+  DEBUGASSERT(d > 1u && d <= ((uint64_t)1u << 63));
 
 #ifdef __INT128_DEFINED
-  _uint128_t one128 = 1;
+  _uint128_t one128 = 1u;
 
-  ip->mult = (one128 << 64) * t / d + 1;
+  ip->mult = (one128 << 64) * t / d + 1u;
 #else
-  int s = 64 - l - (((d - 1) & d) == 0);   /* = clz(d) */
+  int s = 64 - l - (((d - 1u) & d) == 0u);  /* = clz(d) */
 
-  ip->mult = invdiv_udiv128_soft(t, 0, d, s) + 1;
+  ip->mult = invdiv_udiv128_soft(t, 0, d, s) + 1u;
 #endif
   ip->shift = l - 1;
 }
@@ -512,7 +512,7 @@ uint64_t invdiv_u64(uint64_t n, FAR const invdiv_param64_t *ip)
   uint64_t t1;
   uint64_t t2;
   uint64_t m   = ip->mult;
-  uint8_t  sh1 = 1;
+  uint8_t  sh1 = 1u;
   uint8_t  sh2 = ip->shift;
 
   /* t1 is the high half of the 128-bit product n * m.  Both operands
@@ -529,7 +529,7 @@ static inline_function uint64_t div64_const32(uint64_t n, uint32_t b)
 {
   invdiv_param64_t ip;
 
-  DEBUGASSERT(b > 1);
+  DEBUGASSERT(b > 1u);
   invdiv_init_param(b, &ip);
 
   return invdiv_u64(n, &ip);
@@ -553,7 +553,7 @@ static inline_function uint64_t div64_const32(uint64_t n, uint32_t b)
 
 static inline_function uint64_t div64_const(uint64_t n, uint64_t base)
 {
-  DEBUGASSERT(base > 0);
+  DEBUGASSERT(base > 0u);
 
   if (IS_POWER_OF_2(base))
     {
