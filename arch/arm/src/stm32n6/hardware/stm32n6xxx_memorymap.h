@@ -135,6 +135,7 @@
 #define STM32_TAMP_BASE       0x56004400
 #define STM32_IWDG_BASE       0x56004800
 #define STM32_BSEC_BASE       0x56009000
+#define STM32_SYSMEM_UID      0x56009014    /* 96-bit unique ID (BSEC OTP 5-7) */
 #define STM32_DTS_BASE        0x5600a000
 
 /* AHB4 peripherals *********************************************************/
@@ -184,6 +185,7 @@
 #define STM32_DMA2_BASE       STM32_HPDMA1_BASE
 #define STM32_XSPI2_BASE      0x5802A000    /* XSPI2 controller (AHB5, Secure) */
 #define STM32_XSPIM_BASE      0x5802B400    /* XSPIM IO Manager (AHB5, Secure) */
+#define STM32_EMAC_BASE       0x58036000    /* ETH1 MAC (AHB5, Secure) */
 #define STM32_USB1_HS_PHYC_BASE 0x5803FC00  /* USB1 HS PHY controller (Secure) */
 #define STM32_USB1_OTG_HS_BASE  0x58040000  /* USB1 OTG HS (Secure) */
 #define STM32_USB2_OTG_HS_BASE  0x58080000  /* USB2 OTG HS (Secure) */

@@ -41,6 +41,7 @@
 #include "stm32.h"
 #include "stm32_gpio.h"
 #include "stm32_pwr.h"
+#include "stm32_rif.h"
 #include "stm32_start.h"
 #include "hardware/stm32n6xxx_bsec.h"
 #include "hardware/stm32n6xxx_ramcfg.h"
@@ -248,6 +249,10 @@ void __start_c(void)
   stm32_enable_lob();
 
   stm32_clockconfig();
+
+  /* Give the enabled bus masters access to Secure memory */
+
+  stm32_rifconfig();
 
   /* Per ES0620, BSECEN must remain set or WFI/sleep fails.  Set it via
    * the atomic SET register, together with SYSCFGEN which we need below.
