@@ -1294,6 +1294,7 @@ int swcr_authenc(FAR struct cryptop *crp)
           case CRYPTO_AES_192_GMAC:
           case CRYPTO_AES_256_GMAC:
           case CRYPTO_AES_128_CMAC:
+          case CRYPTO_AES_256_CMAC:
           case CRYPTO_CHACHA20_POLY1305_MAC:
             swa = sw;
             crda = crd;
@@ -1853,6 +1854,10 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
             axf = &auth_hash_cmac_aes_128;
             goto auth4common;
 
+          case CRYPTO_AES_256_CMAC:
+            axf = &auth_hash_cmac_aes_256;
+            goto auth4common;
+
           case CRYPTO_POLY1305:
             axf = &auth_hash_poly1305;
             goto auth4common;
@@ -1983,6 +1988,7 @@ int swcr_freesession(uint64_t tid)
           case CRYPTO_AES_192_GMAC:
           case CRYPTO_AES_256_GMAC:
           case CRYPTO_AES_128_CMAC:
+          case CRYPTO_AES_256_CMAC:
           case CRYPTO_CHACHA20_POLY1305_MAC:
           case CRYPTO_MD5:
           case CRYPTO_POLY1305:
@@ -2296,6 +2302,7 @@ int swcr_process(struct cryptop *crp)
           case CRYPTO_AES_192_GMAC:
           case CRYPTO_AES_256_GMAC:
           case CRYPTO_AES_128_CMAC:
+          case CRYPTO_AES_256_CMAC:
           case CRYPTO_CHACHA20_POLY1305:
           case CRYPTO_CHACHA20_POLY1305_MAC:
             crp->crp_etype = swcr_authenc(crp);
@@ -2791,6 +2798,7 @@ void swcr_init(void)
   algs[CRYPTO_CRC32] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_AES_CMAC] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_AES_128_CMAC] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_AES_256_CMAC] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_PBKDF2_HMAC_SHA1] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_PBKDF2_HMAC_SHA256] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_ESN] = CRYPTO_ALG_FLAG_SUPPORTED;

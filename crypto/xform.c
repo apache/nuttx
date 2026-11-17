@@ -478,6 +478,16 @@ const struct auth_hash auth_hash_cmac_aes_128 =
   (void (*) (FAR uint8_t *, FAR void *)) aes_cmac_final
 };
 
+const struct auth_hash auth_hash_cmac_aes_256 =
+{
+  CRYPTO_AES_256_CMAC, "CMAC-AES-256",
+  32, AES_CMAC_KEY_LENGTH, AES_CMAC_DIGEST_LENGTH, sizeof(AES_CMAC_CTX),
+  AESCTR_BLOCKSIZE, (void (*)(FAR void *)) aes_cmac_init,
+  (void (*)(FAR void *, FAR const uint8_t *, uint16_t)) aes_cmac_setkey,
+  NULL, (int (*)(FAR void *, FAR const uint8_t *, size_t)) aes_cmac_update,
+  (void (*) (FAR uint8_t *, FAR void *)) aes_cmac_final
+};
+
 const struct auth_hash auth_hash_md5 =
 {
   CRYPTO_MD5, "MD5",

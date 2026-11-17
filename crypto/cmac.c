@@ -57,9 +57,9 @@ void aes_cmac_init(FAR AES_CMAC_CTX *ctx)
 }
 
 void aes_cmac_setkey(FAR AES_CMAC_CTX *ctx,
-                     FAR const uint8_t *key)
+                     FAR const uint8_t *key, uint16_t len)
 {
-  aes_setkey(&ctx->aesctx, key, 16);
+  aes_setkey(&ctx->aesctx, key, len);
 }
 
 void aes_cmac_update(FAR AES_CMAC_CTX *ctx,
