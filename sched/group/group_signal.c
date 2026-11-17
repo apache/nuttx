@@ -48,10 +48,10 @@ struct group_signal_s
   FAR siginfo_t *siginfo; /* Signal to be dispatched */
   FAR const void *source; /* The POSIX timer of the signal, or NULL */
   bool limit;             /* Apply SIGQUEUE_MAX (sigqueue()) */
-  FAR struct tcb_s *dtcb; /* Default, valid TCB */
-  FAR struct tcb_s *utcb; /* TCB with this signal unblocked */
-  FAR struct tcb_s *atcb; /* This TCB was awakened */
-  FAR struct tcb_s *ptcb; /* This TCB received the signal */
+  pid_t dpid;             /* Default, valid pid */
+  pid_t upid;             /* pid with this signal unblocked */
+  pid_t apid;             /* This pid was awakened */
+  pid_t ppid;             /* This pid received the signal */
 };
 #endif
 
@@ -82,7 +82,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
   FAR sigactq_t *sigact;
 #endif
-  int ret;
+  int ret = 0;
 
   /* Get the TCB associated with the group member */
 
@@ -93,9 +93,9 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
    * default.
    */
 
-  if (!info->dtcb)
+  if (!info->dpid)
     {
-      info->dtcb = tcb;
+      info->dpid = pid;
     }
 
   /* Is the thread waiting for this signal (in this case, the signal is
@@ -103,7 +103,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
    */
 
   ret = nxsig_ismember(&tcb->sigwaitmask, info->siginfo->si_signo);
-  if (ret == 1 && (!info->atcb || info->siginfo->si_signo == SIGCHLD))
+  if (ret == 1 && (!info->apid || info->siginfo->si_signo == SIGCHLD))
     {
       /* Yes.. This means that the task is suspended, waiting for this
        * signal to occur. Stop looking and use this TCB.  The
@@ -117,31 +117,32 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
                               info->limit);
       if (ret < 0)
         {
-          return ret;
+          goto errout;
         }
 
       /* Limit to one thread */
 
-      info->atcb = tcb;
+      info->apid = pid;
 
-      if (info->ptcb != NULL && info->siginfo->si_signo != SIGCHLD)
+      if (info->ppid != 0 && info->siginfo->si_signo != SIGCHLD)
         {
-          return 1; /* Terminate the search */
+          ret = 1; /* Terminate the search */
+          goto errout;
         }
     }
 
   /* Is this signal unblocked on this thread? */
 
   if ((nxsig_ismember(&tcb->sigprocmask, info->siginfo->si_signo) != 1) &&
-      !info->ptcb && tcb != info->atcb)
+      !info->ppid && pid != info->apid)
     {
       /* Yes.. remember this TCB if we have not encountered any
        * other threads that have the signal unblocked.
        */
 
-      if (!info->utcb)
+      if (!info->upid)
         {
-          info->utcb = tcb;
+          info->upid = pid;
         }
 
       /* Is there also a action associated with the task group? */
@@ -160,21 +161,24 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
                                   info->limit);
           if (ret < 0)
             {
-              return ret;
+              goto errout;
             }
 
           /* Limit to one thread */
 
-          info->ptcb = tcb;
-          if (info->atcb != NULL)
+          info->ppid = pid;
+          if (info->apid != 0)
             {
-              return 1; /* Terminate the search */
+              ret = 1; /* Terminate the search */
+              goto errout;
             }
         }
 #endif
     }
 
-  return 0; /* Keep searching */
+errout:
+  nxsched_put_tcb(tcb);
+  return ret;
 }
 #endif
 
@@ -209,6 +213,7 @@ int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo,
 #ifdef HAVE_GROUP_MEMBERS
   struct group_signal_s info;
   FAR struct tcb_s *tcb;
+  pid_t pid;
   int ret;
 
   DEBUGASSERT(group && siginfo);
@@ -216,10 +221,10 @@ int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo,
   info.siginfo = siginfo;
   info.source  = source;
   info.limit   = limit;
-  info.dtcb    = NULL;     /* Default, valid TCB */
-  info.utcb    = NULL;     /* TCB with this signal unblocked */
-  info.atcb    = NULL;     /* This TCB was awakened */
-  info.ptcb    = NULL;     /* This TCB received the signal */
+  info.dpid    = 0;       /* Default, valid pid */
+  info.upid    = 0;       /* pid with this signal unblocked */
+  info.apid    = 0;       /* This pid was awakened */
+  info.ppid    = 0;       /* This pid received the signal */
 
   /* Make sure that pre-emption is disabled to that we signal all of the
    * members of the group before any of them actually run. (This does
@@ -245,11 +250,11 @@ int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo,
    * signal unblocked, then use that thread.
    */
 
-  if (info.atcb == NULL && info.ptcb == NULL)
+  if (info.apid == 0 && info.ppid == 0)
     {
-      if (info.utcb)
+      if (info.upid)
         {
-          tcb = info.utcb;
+          pid = info.upid;
         }
 
       /* Otherwise use the default TCB.  There should always be a default
@@ -257,9 +262,9 @@ int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo,
        * signal to a pending state.
        */
 
-      else if (info.dtcb)
+      else if (info.dpid)
         {
-          tcb = info.dtcb;
+          pid = info.dpid;
         }
       else
         {
@@ -269,7 +274,17 @@ int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo,
 
       /* Now deliver the signal to the selected group member */
 
-      ret = nxsig_tcbdispatch(tcb, siginfo, true, source, limit);
+      tcb = nxsched_get_tcb(pid);
+      if (tcb)
+        {
+          ret = nxsig_tcbdispatch(tcb, siginfo, true, source, limit);
+        }
+      else
+        {
+          ret = -ESRCH;
+        }
+
+      nxsched_put_tcb(tcb);
     }
 
 errout:

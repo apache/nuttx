@@ -160,6 +160,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
       if (tcb)
         {
           tcb->sigprocmask = attr->sigmask;
+          nxsched_put_tcb(tcb);
         }
     }
 #endif

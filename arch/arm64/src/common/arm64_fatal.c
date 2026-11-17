@@ -682,6 +682,8 @@ uint64_t *arm64_fatal_handler(uint64_t *regs)
                  tcb->pid, get_task_name(tcb));
           _alert("Reason: %s - %s\n", reason, desc);
 
+          nxsched_put_tcb(ptcb);
+
           tcb->flags |= TCB_FLAG_FORCED_CANCEL;
 
           regs[REG_ELR] = (uint64_t)_exit;

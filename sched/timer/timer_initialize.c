@@ -211,6 +211,8 @@ FAR struct posix_timer_s *timer_gethandle(timer_t timerid)
         {
           timer = NULL;
         }
+
+      nxsched_put_tcb(owner);
     }
 
   return timer;

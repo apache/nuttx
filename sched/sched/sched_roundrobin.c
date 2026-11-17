@@ -76,6 +76,7 @@ static int nxsched_roundrobin_handler(FAR void *cookie)
     {
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
+      nxsched_put_tcb(tcb);
       leave_critical_section(flags);
       return OK;
     }
@@ -86,6 +87,7 @@ static int nxsched_roundrobin_handler(FAR void *cookie)
       up_switch_context(this_task(), tcb);
     }
 
+  nxsched_put_tcb(tcb);
   leave_critical_section(flags);
   return OK;
 }

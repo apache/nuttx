@@ -100,6 +100,7 @@
            { \
              tmp->backtrace[0] = NULL; \
            } \
+         nxsched_put_tcb(tcb); \
          MM_INCSEQNO(tmp); \
        } \
      while (0)

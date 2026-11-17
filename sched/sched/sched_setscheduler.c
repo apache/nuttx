@@ -252,6 +252,7 @@ int nxsched_set_scheduler(pid_t pid, int policy,
       ret = nxsched_reprioritize(tcb, param->sched_priority);
     }
 
+  nxsched_put_tcb(tcb);
   sched_unlock();
   return ret;
 }
