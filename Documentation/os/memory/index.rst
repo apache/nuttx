@@ -37,8 +37,9 @@ Memory Models
 
      * Overhead:  Either 8- or 4-bytes per allocation for large and small
        models, respectively.
-     * Alignment:  All allocations are aligned to 8- or 4-bytes for large
-       and small models, respectively.
+     * Alignment:  All allocations are aligned to
+       ``CONFIG_MM_DEFAULT_ALIGNMENT`` bytes.  The default is 16 on 64-bit
+       architectures and 8 on the others.
 
 Multiple Heaps
 ~~~~~~~~~~~~~~
