@@ -40,9 +40,9 @@ Features
 
    This is the initial NuttX port for the STM32N6 family. The supported
    peripheral set is intentionally minimal: USART1 (the ST-LINK VCOM
-   console), GPIO, RCC, PWR, the SysTick-based timer, and the three
-   on-board user LEDs. Other on-chip peripherals and on-board features
-   (XSPI flash boot, networking, user button, USB, MIPI, NPU, etc) are
+   console), GPIO, RCC, PWR, the SysTick-based timer, the three
+   on-board user LEDs and Ethernet. Other on-chip peripherals and on-board features
+   (XSPI flash boot, user button, USB, MIPI, NPU, etc) are
    not yet wired up. The CPU is currently clocked at 200 MHz from PLL1.
    Raising it to the standard 600 / 800 MHz operating points is deferred
    to a follow-up change.
@@ -182,6 +182,12 @@ the userled lower-half driver and ``apps/examples/leds`` enabled, so
 the three on-board LEDs are exposed at ``/dev/userleds`` and can be
 exercised from userspace.  Run ``leds`` from the NSH prompt to spawn
 the daemon that cycles through the LEDs.
+
+netnsh
+------
+
+NSH with Ethernet on the LAN8742A PHY (RMII): DHCP client, ``ping``,
+``telnetd`` and ``mdio``.
 
 License Exceptions
 ==================
