@@ -671,6 +671,35 @@ static void tcp_clear_zero_probe(FAR struct tcp_conn_s *conn,
 }
 
 /****************************************************************************
+ * Name: tcp_input_dropack
+ *
+ * Description:
+ *   Drop the data of a segment.  A new ACK in the segment is passed to the
+ *   application first, as the ACK has already been accounted.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static void tcp_input_dropack(FAR struct net_driver_s *dev,
+                              FAR struct tcp_conn_s *conn,
+                              uint32_t flags, uint16_t tcpiplen)
+{
+  if ((flags & TCP_ACKDATA) != 0)
+    {
+      dev->d_len    = 0;
+      dev->d_sndlen = 0;
+      tcp_appsend(dev, conn, tcp_callback(dev, conn, TCP_ACKDATA) |
+                             TCP_SNDACK);
+    }
+  else
+    {
+      tcp_send(dev, conn, TCP_ACK, tcpiplen);
+    }
+}
+
+/****************************************************************************
  * Name: tcp_input
  *
  * Description:
@@ -1403,7 +1432,7 @@ skip_rtt:
                    * E.g. a keep-alive segment.
                    */
 
-                  tcp_send(dev, conn, TCP_ACK, tcpiplen);
+                  tcp_input_dropack(dev, conn, flags, tcpiplen);
                   return;
                 }
             }
@@ -1414,7 +1443,7 @@ skip_rtt:
 
               tcp_input_ofosegs(dev, conn, iplen);
 #endif
-              tcp_send(dev, conn, TCP_ACK, tcpiplen);
+              tcp_input_dropack(dev, conn, flags, tcpiplen);
               return;
             }
         }
