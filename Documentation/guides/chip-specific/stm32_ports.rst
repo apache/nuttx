@@ -1159,7 +1159,9 @@ Board configurations
   flash.
 * An ``ostest`` configuration is ``nsh`` plus ``ostest``: NSH with builtin
   applications (``CONFIG_NSH_BUILTIN_APPS``) and
-  ``CONFIG_INIT_ENTRYPOINT="nsh_main"``.  ``ostest`` is run from NSH.
+  ``CONFIG_INIT_ENTRYPOINT="nsh_main"``, built with full optimization and LTO
+  (``CONFIG_DEBUG_FULLOPT``, ``CONFIG_LTO_FULL``).  ``ostest`` is run from
+  NSH.
 * ``kostest`` configurations (``ostest`` in the protected build) are the
   exception and start ``ostest_main`` directly.
 * Configurations for a specific feature do not enable ``ostest``.  The
