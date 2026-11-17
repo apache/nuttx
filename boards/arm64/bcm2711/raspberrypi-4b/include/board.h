@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm64/bcm2711/raspberrypi-4b/include/board.h
  *
- * Author: Matteo Golin <matteo.golin@gmail.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

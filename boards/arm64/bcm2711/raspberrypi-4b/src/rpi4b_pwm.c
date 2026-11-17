@@ -1,8 +1,6 @@
 /****************************************************************************
  * boards/arm64/bcm2711/raspberrypi-4b/src/rpi4b_pwm.c
  *
- * Contributed by: Matteo Golin <linguini@apache.org>
- *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
