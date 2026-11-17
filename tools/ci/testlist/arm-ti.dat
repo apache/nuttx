@@ -5,4 +5,5 @@
 
 -eagle100:thttpd
 -launchxl-cc1310:nsh
+-,lm3s6965-ek:.+
 -tms570ls31x-usb-kit:nsh
