@@ -53,6 +53,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/net/netconfig.h>
@@ -62,6 +63,7 @@
 #include <nuttx/net/tcp.h>
 
 #include "devif/devif.h"
+#include "socket/socket.h"
 #include "utils/utils.h"
 #include "tcp/tcp.h"
 
@@ -1126,6 +1128,19 @@ found:
 
           tcp_conn_list_unlock();
 #endif
+
+          /* A RST before the FIN of the peer: the next receive or send
+           * gives ECONNRESET.  In TCP_SYN_SENT the RST refuses the
+           * connection (ECONNREFUSED).  After the FIN of the peer a
+           * receive gives end-of-file and a send EPIPE.
+           */
+
+          if ((conn->tcpstateflags & TCP_STATE_MASK) >= TCP_ESTABLISHED &&
+              (conn->tcpstateflags & TCP_STATE_MASK) <= TCP_FIN_WAIT_2)
+            {
+              conn->flags |= TCP_RESET | TCP_RESETERR;
+              _SO_CONN_SETERRNO(conn, ECONNRESET);
+            }
 
           nwarn("WARNING: RESET TCP state: TCP_CLOSED\n");
           conn->tcpstateflags = TCP_CLOSED;

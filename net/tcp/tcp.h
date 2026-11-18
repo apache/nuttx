@@ -100,13 +100,15 @@
 #define TCP_SEQ_ADD(a, b)   ((uint32_t)((a) + (b)))
 #define TCP_SEQ_SUB(a, b)   ((uint32_t)((a) - (b)))
 
-/* The error of a send on a TCP socket that is not connected: -EPIPE if the
- * connection was closed (POSIX: the socket is no longer connected), else
- * -ENOTCONN.
+/* The error of a send on a TCP socket that is not connected: -ECONNRESET
+ * if the peer reset the connection and this is not yet reported, -EPIPE if
+ * the connection was closed (POSIX: the socket is no longer connected),
+ * else -ENOTCONN.
  */
 
 #define TCP_NOTCONN_ERROR(conn) \
-  (_SS_ISCLOSED((conn)->sconn.s_flags) ? -EPIPE : -ENOTCONN)
+  (tcp_reset_pending(conn) ? -ECONNRESET : \
+   _SS_ISCLOSED((conn)->sconn.s_flags) ? -EPIPE : -ENOTCONN)
 
 /* The TCP options flags */
 
@@ -121,6 +123,9 @@
 #define TCP_INFT              0x10U /* The flag in Fast Transmitted */
 
 #endif
+
+#define TCP_RESET             0x20U /* The peer reset the connection */
+#define TCP_RESETERR          0x40U /* ECONNRESET of it not yet reported */
 
 /* The Max Range count of TCP Selective ACKs */
 
@@ -854,6 +859,42 @@ void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint32_t flags);
 
 void tcp_lost_connection(FAR struct tcp_conn_s *conn,
                          FAR struct devif_callback_s *cb, uint32_t flags);
+
+/****************************************************************************
+ * Name: tcp_reset_pending
+ *
+ * Description:
+ *   Tell if the ECONNRESET of a reset of the peer is not yet reported (by a
+ *   receive, a send or getsockopt(SO_ERROR)).
+ *
+ * Input Parameters:
+ *   conn - The TCP connection
+ *
+ * Returned Value:
+ *   true if a receive or send must give ECONNRESET.
+ *
+ ****************************************************************************/
+
+bool tcp_reset_pending(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Name: tcp_reset_report
+ *
+ * Description:
+ *   Give the result of a receive or send that returns now.  If it is
+ *   -ECONNRESET, the reset is reported: the next receive gives end-of-file,
+ *   the next send EPIPE and SO_ERROR 0.
+ *
+ * Input Parameters:
+ *   conn - The TCP connection
+ *   ret  - The result that the receive or send returns
+ *
+ * Returned Value:
+ *   ret
+ *
+ ****************************************************************************/
+
+ssize_t tcp_reset_report(FAR struct tcp_conn_s *conn, ssize_t ret);
 
 /****************************************************************************
  * Name: tcp_close

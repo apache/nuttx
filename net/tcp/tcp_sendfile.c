@@ -432,7 +432,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: Not connected\n");
-      return TCP_NOTCONN_ERROR(conn);
+      return tcp_reset_report(conn, TCP_NOTCONN_ERROR(conn));
     }
 
   /* Make sure that we have the IP address mapping */
@@ -584,7 +584,7 @@ errout_locked:
       return startpos;
     }
 
-  return state.snd_sent;
+  return tcp_reset_report(conn, state.snd_sent);
 }
 
 #endif /* CONFIG_NET_SENDFILE && CONFIG_NET_TCP && NET_TCP_HAVE_STACK */
