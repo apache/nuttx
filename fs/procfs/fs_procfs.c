@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/mman.h>
 #include <sys/statfs.h>
 #include <sys/stat.h>
 
@@ -245,6 +246,8 @@ static int     procfs_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                  bool setup);
 static int     procfs_ioctl(FAR struct file *filep, int cmd,
                  unsigned long arg);
+static int     procfs_mmap(FAR struct file *filep,
+                 FAR struct mm_map_entry_s *map);
 
 static int     procfs_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
@@ -293,7 +296,7 @@ const struct mountpt_operations g_procfs_operations =
   procfs_write,      /* write */
   NULL,              /* seek */
   procfs_ioctl,      /* ioctl */
-  NULL,              /* mmap */
+  procfs_mmap,       /* mmap */
   NULL,              /* truncate */
   procfs_poll,       /* poll */
   NULL,              /* readv */
@@ -572,6 +575,27 @@ static int procfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   finfo("cmd: %d arg: %08lx\n", cmd, arg);
 
   /* No IOCTL commands supported */
+
+  return -ENOTTY;
+}
+
+/****************************************************************************
+ * Name: procfs_mmap
+ *
+ * Description:
+ *   procfs content is generated on read and has no backing store to share,
+ *   so a MAP_SHARED mapping is refused.  -ENOTTY lets file_mmap_() give a
+ *   private mapping a copy through rammap().
+ *
+ ****************************************************************************/
+
+static int procfs_mmap(FAR struct file *filep,
+                       FAR struct mm_map_entry_s *map)
+{
+  if ((map->flags & MAP_SHARED) != 0)
+    {
+      return -ENODEV;
+    }
 
   return -ENOTTY;
 }
