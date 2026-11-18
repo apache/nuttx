@@ -79,5 +79,41 @@
     "map_file": "nuttx.map",
     "linker_vars": "",
     "config_overrides": ""
+  },
+  {
+    "target_name": "mps2-an500-citest",
+    "board_config": "mps2-an500:citest",
+    "elf": "nuttx",
+    "ld": "boards/arm/mps/mps2-an500/scripts/flash.ld",
+    "map_file": "nuttx.map",
+    "linker_vars": "",
+    "config_overrides": ""
+  },
+  {
+    "target_name": "mps2-an500-citest-protected",
+    "board_config": "mps2-an500:citest_protected",
+    "elf": "nuttx",
+    "ld": "boards/arm/mps/mps2-an500/scripts/flash.ld",
+    "map_file": "nuttx.map",
+    "linker_vars": "",
+    "config_overrides": ""
+  },
+  {
+    "target_name": "qemu-armv7a-citest",
+    "board_config": "qemu-armv7a:citest",
+    "elf": "nuttx",
+    "ld": "boards/arm/qemu/qemu-armv7a/scripts/dramboot.ld.tmp",
+    "map_file": "nuttx.map",
+    "linker_vars": "",
+    "config_overrides": ""
+  },
+  {
+    "target_name": "qemu-armv7a-citest-knsh",
+    "board_config": "qemu-armv7a:citest_knsh",
+    "elf": "nuttx",
+    "ld": "boards/arm/qemu/qemu-armv7a/scripts/dramboot.ld.tmp",
+    "map_file": "nuttx.map",
+    "linker_vars": "",
+    "config_overrides": ""
   }
 ]
