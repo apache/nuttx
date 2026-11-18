@@ -43,6 +43,12 @@
 #include "rpmsg.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define RPMSG_CHAR_NAME_PREFIX     "rpmsg-raw-"
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -515,6 +521,7 @@ static void rpmsg_eptdev_device_created(FAR struct rpmsg_device *rdev,
   FAR struct rpmsg_eptdev_s *eptdev = (FAR struct rpmsg_eptdev_s *)priv;
   FAR struct rpmsg_endpoint_info *info = &eptdev->info;
   FAR struct rpmsg_char_s *chr = eptdev->chr;
+  char name[RPMSG_NAME_SIZE];
   char path[PATH_MAX];
   int ret;
 
@@ -524,7 +531,10 @@ static void rpmsg_eptdev_device_created(FAR struct rpmsg_device *rdev,
       eptdev->ept.priv = eptdev;
       eptdev->ept.release_cb = rpmsg_eptdev_release_cb;
       eptdev->ept.ns_bound_cb = rpmsg_eptdev_ns_bound_cb;
-      ret = rpmsg_create_ept(&eptdev->ept, rdev, info->name, info->src,
+      strlcpy(name, RPMSG_CHAR_NAME_PREFIX, RPMSG_NAME_SIZE);
+      strlcat(name, info->name, RPMSG_NAME_SIZE);
+
+      ret = rpmsg_create_ept(&eptdev->ept, rdev, name, info->src,
                              info->dst, rpmsg_eptdev_ept_cb,
                              rpmsg_eptdev_ns_unbind_cb);
       if (ret >= 0)
