@@ -285,7 +285,6 @@
 #define NVIC_ITCMCR_OFFSET              0x0f90 /* Instruction Tightly-Coupled Memory Control Register */
 #define NVIC_DTCMCR_OFFSET              0x0f94 /* Data Tightly-Coupled Memory Control Registers */
 #define NVIC_AHBPCR_OFFSET              0x0f98 /* AHBP Control Register */
-#define NVIC_CACR_OFFSET                0x0f9c /* L1 Cache Control Register */
 #define NVIC_AHBSCR_OFFSET              0x0fa0 /* AHB Slave Control Register */
 #define NVIC_ABFSR_OFFSET               0x0fa8 /* Auxiliary Bus Fault Status */
 
@@ -301,6 +300,10 @@
 #define NVIC_CID1_OFFSET                0x0ff4 /* Component identification register bits 15:8 (CID0) */
 #define NVIC_CID2_OFFSET                0x0ff8 /* Component identification register bits 23:16 (CID0) */
 #define NVIC_CID3_OFFSET                0x0ffc /* Component identification register bits 23:16 (CID0) */
+
+/* Cortex-M55 and Cortex-M85 implementation defined registers */
+
+#define NVIC_CACR_OFFSET                0x10008 /* L1 Cache Control Register */
 
 /* NVIC register addresses **************************************************/
 
