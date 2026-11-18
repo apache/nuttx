@@ -56,6 +56,7 @@ void group_free(FAR struct task_group_s *group, FAR void *mem)
   if (!group)
     {
       FAR struct tcb_s *tcb = this_task();
+
       DEBUGASSERT(tcb && tcb->group);
       group = tcb->group;
     }
