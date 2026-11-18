@@ -53,11 +53,14 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
       return NULL;
     }
 
+  nxmutex_init(&object->lock);
+
   if (length > 0)
     {
       object->paddr = shmfs_alloc_buffer(length);
       if (object->paddr == NULL)
         {
+          nxmutex_destroy(&object->lock);
           fs_heap_free(object);
           return NULL;
         }
@@ -159,6 +162,7 @@ void shmfs_free_object(FAR struct shmfs_object_s *object)
   if (object != NULL)
     {
       shmfs_free_buffer(object);
+      nxmutex_destroy(&object->lock);
       fs_heap_free(object);
     }
 }

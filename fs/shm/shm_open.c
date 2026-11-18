@@ -43,6 +43,7 @@
 static int file_shm_open(FAR struct file *shm, FAR const char *name,
                          int oflags, mode_t mode)
 {
+  FAR struct shmfs_object_s *object;
   FAR struct inode *inode;
   struct inode_search_s desc;
   char fullpath[sizeof(CONFIG_FS_SHMFS_VFS_PATH) + CONFIG_NAME_MAX + 2];
@@ -130,8 +131,10 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
 
       if ((oflags & O_TRUNC) == O_TRUNC && inode->i_private != NULL)
         {
-          shmfs_free_object(inode->i_private);
-          inode->i_private = NULL;
+          object = inode->i_private;
+          nxmutex_lock(&object->lock);
+          shmfs_free_buffer(object);
+          nxmutex_unlock(&object->lock);
           inode->i_size = 0;
         }
     }
@@ -147,17 +150,30 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
           goto errout_with_lock;
         }
 
+      /* The object lives from shm_open() until the last reference after
+       * unlink, so the file operations always find it.  ftruncate()
+       * allocates its backing store.
+       */
+
+      object = shmfs_alloc_object(0);
+      if (object == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout_with_lock;
+        }
+
       /* Create an inode in the pseudo-filesystem at this path */
 
       ret = inode_reserve(fullpath, mode, &inode);
       if (ret < 0)
         {
+          shmfs_free_object(object);
           goto errout_with_lock;
         }
 
       INODE_SET_SHM(inode);
       inode->u.i_ops = &g_shmfs_operations;
-      inode->i_private = NULL;
+      inode->i_private = object;
       inode_addref(inode);
     }
 
