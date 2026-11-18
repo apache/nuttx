@@ -1902,7 +1902,7 @@ int u16550_interrupt(int irq, FAR void *context, FAR void *arg)
         }
     }
 
-  return OK;
+  return passes > 0;
 }
 
 /****************************************************************************

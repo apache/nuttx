@@ -444,6 +444,9 @@ int u16550_bind(FAR uart_dev_t *dev);
  * Description:
  *   Handle UART 16550 interrupt.
  *
+ * Returned Value:
+ *   Nonzero if the UART had an interrupt pending.
+ *
  ****************************************************************************/
 
 int u16550_interrupt(int irq, FAR void *context, FAR void *arg);
