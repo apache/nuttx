@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -76,6 +77,7 @@ int pthread_cancel(pthread_t thread)
 
   if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
+      nxsched_put_tcb(tcb);
       return ESRCH;
     }
 
@@ -88,6 +90,7 @@ int pthread_cancel(pthread_t thread)
 
   if (nxnotify_cancellation(tcb))
     {
+      nxsched_put_tcb(tcb);
       return OK;
     }
 
@@ -99,12 +102,15 @@ int pthread_cancel(pthread_t thread)
 
   if (tcb == this_task())
     {
+      nxsched_put_tcb(tcb);
       pthread_exit(PTHREAD_CANCELED);
     }
 
   /* Refer to tls_get_info() */
 
   tls_cleanup_popall(tcb->stack_alloc_ptr);
+
+  nxsched_put_tcb(tcb);
 
   /* Complete pending join operations */
 

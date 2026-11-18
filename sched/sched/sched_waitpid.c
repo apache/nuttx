@@ -211,7 +211,13 @@ pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options)
               mystat = true;
             }
 
-          /* Then wait for the task to exit */
+          /* Then wait for the task to exit.  The reference on ctcb was
+           * taken to resolve the group; the group waiter count now keeps
+           * the group alive for the duration of the wait.
+           */
+
+          nxsched_put_tcb(ctcb);
+          ctcb = NULL;
 
           if ((options & WNOHANG) != 0)
             {
@@ -256,6 +262,7 @@ pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options)
         }
     }
 
+  nxsched_put_tcb(ctcb);
   leave_critical_section(flags);
 
   return ret;

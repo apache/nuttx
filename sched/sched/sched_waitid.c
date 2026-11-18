@@ -179,7 +179,7 @@ static bool child_running(FAR struct tcb_s *rtcb, idtype_t idtype, pid_t id)
 
   if (idtype == P_PID)
     {
-      return nxsched_get_tcb(id) != NULL;
+      return nxsched_verify_pid(id);
     }
 #endif
 
@@ -275,11 +275,20 @@ static int check_children(FAR struct tcb_s *rtcb, idtype_t idtype, pid_t id)
 
   if (idtype == P_PID)
     {
+      bool child;
+
       ctcb = nxsched_get_tcb(id);
-      if (ctcb == NULL || ctcb->group == NULL ||
-          ctcb->group->tg_ppid != rtcb->group->tg_pid ||
-          (atomic_read(&ctcb->shared_flags) &
-           TCB_FLAG_EXIT_PROCESSING) != 0)
+      if (ctcb == NULL)
+        {
+          return -ECHILD;
+        }
+
+      child = ctcb->group != NULL &&
+              ctcb->group->tg_ppid == rtcb->group->tg_pid &&
+              (atomic_read(&ctcb->shared_flags)
+               & TCB_FLAG_EXIT_PROCESSING) == 0;
+      nxsched_put_tcb(ctcb);
+      if (!child)
         {
           return -ECHILD;
         }

@@ -127,6 +127,7 @@
 #define TCB_FLAG_DETACHED          (1 << 5)                      /* Bit 5: Pthread detached */
 #define TCB_FLAG_FORCED_CANCEL     (1 << 6)                      /* Bit 6: Pthread cancel is forced */
 #define TCB_FLAG_JOIN_COMPLETED    (1 << 7)                      /* Bit 7: Pthread join completed */
+#define TCB_FLAG_KILL_PROCESSING   (1 << 8)                      /* Bit 8: tcb is killed */
 
 /* Values for struct task_group tg_flags */
 
@@ -691,6 +692,14 @@ struct tcb_s
   cpu_set_t affinity;                    /* Bit set of permitted CPUs       */
 #endif
   atomic_t shared_flags;                 /* Flags written by other tasks    */
+
+  /* The total number that we are referenced by other tasks */
+
+  atomic_t refs;
+
+  /* When we exit, we need post this sem. */
+
+  sem_t    exit_sem;
   int16_t  lockcount;                    /* 0=preemptible (not-locked)      */
 #ifdef CONFIG_IRQCOUNT
   int16_t  irqcount;                     /* 0=Not in critical section       */
@@ -1030,6 +1039,28 @@ void nxsched_foreach(nxsched_foreach_t handler, FAR void *arg);
  ****************************************************************************/
 
 FAR struct tcb_s *nxsched_get_tcb(pid_t pid);
+
+/****************************************************************************
+ * Name: nxsched_verify_pid
+ *
+ * Description:
+ *   Given a task ID, this function will check whether the TCB
+ *   corresponding to the PID exists.
+ *
+ ****************************************************************************/
+
+bool nxsched_verify_pid(pid_t pid);
+
+/****************************************************************************
+ * Name: nxsched_put_tcb
+ *
+ * Description:
+ *   Drop a reference taken with nxsched_get_tcb(); each successful
+ *   get must be paired with a put.
+ *
+ ****************************************************************************/
+
+void nxsched_put_tcb(FAR struct tcb_s *tcb);
 
 /****************************************************************************
  * Name:  nxsched_releasepid

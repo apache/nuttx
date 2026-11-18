@@ -49,26 +49,17 @@
  * Private Functions
  ****************************************************************************/
 
-static int terminat_handler(FAR void *cookie)
+static int terminate_handler(FAR void *cookie)
 {
-  pid_t pid = (pid_t)(uintptr_t)cookie;
-  FAR struct tcb_s *tcb;
+  FAR struct tcb_s *tcb = (FAR struct tcb_s *)(uintptr_t)cookie;
   irqstate_t flags;
 
+  /* tcb is valid here */
+
   flags = enter_critical_section();
-  tcb = nxsched_get_tcb(pid);
-
-  if (!tcb)
-    {
-      /* There is no TCB with this pid or, if there is, it is not a task. */
-
-      leave_critical_section(flags);
-      return -ESRCH;
-    }
-
   nxsched_remove_readytorun(tcb);
-
   leave_critical_section(flags);
+
   return OK;
 }
 #endif
@@ -117,17 +108,22 @@ int nxtask_terminate(pid_t pid)
   uint8_t task_state;
   irqstate_t flags;
 
-  flags = enter_critical_section();
-
   /* Find for the TCB associated with matching PID */
 
   dtcb = nxsched_get_tcb(pid);
-  if (!dtcb || (atomic_or(&dtcb->shared_flags, TCB_FLAG_EXIT_PROCESSING) &
-                TCB_FLAG_EXIT_PROCESSING) != 0)
+  if (!dtcb || (atomic_or(&dtcb->shared_flags,
+                TCB_FLAG_EXIT_PROCESSING) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
-      leave_critical_section(flags);
       return -ESRCH;
     }
+
+  /* Even if we decrease the reference count here, dtcb won't be released
+   * elsewhere, because it already has TCB_FLAG_EXIT_PROCESSING.
+   */
+
+  nxsched_put_tcb(dtcb);
+
+  flags = enter_critical_section();
 
   /* Remove dtcb from tasklist, let remove_readtorun() do the job */
 
@@ -141,8 +137,8 @@ int nxtask_terminate(pid_t pid)
 
       tcb_flags = atomic_or(&dtcb->shared_flags, TCB_FLAG_CPU_LOCKED);
 
-      ret = nxsched_smp_call_single(dtcb->cpu, terminat_handler,
-                                    (FAR void *)(uintptr_t)pid);
+      ret = nxsched_smp_call_single(dtcb->cpu, terminate_handler,
+                                    (FAR void *)(uintptr_t)dtcb);
 
       if (ret < 0)
         {

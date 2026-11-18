@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
 
 #include <sched.h>
 
@@ -62,7 +63,10 @@ FAR struct task_group_s *task_getgroup(pid_t pid)
 
   if (tcb)
     {
-      return tcb->group;
+      struct task_group_s *group = tcb->group;
+
+      nxsched_put_tcb(tcb);
+      return group;
     }
 
   return NULL;

@@ -51,6 +51,7 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
   FAR struct tcb_s *ctcb;
   int pid = tcb->pid;
   int count;
+  int ret;
   int fd;
 
   if (tcb->group == NULL)
@@ -69,10 +70,13 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
       ctcb = nxsched_get_tcb(pid);
       if (ctcb == NULL || ctcb->group == NULL || ctcb != tcb)
         {
+          nxsched_put_tcb(ctcb);
           return;
         }
 
-      if (fdlist_get(&ctcb->group->tg_fdlist, fd, &filep) >= 0)
+      ret = fdlist_get(&ctcb->group->tg_fdlist, fd, &filep);
+      nxsched_put_tcb(ctcb);
+      if (ret >= 0)
         {
           file_fsync(filep);
           file_put(filep);

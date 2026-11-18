@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -245,6 +246,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
           ret = ESRCH;
         }
 
+      nxsched_put_tcb(tcb);
       goto errout;
     }
 
@@ -254,6 +256,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
   if (tcb == rtcb)
     {
+      nxsched_put_tcb(tcb);
       ret = EDEADLK;
       goto errout;
     }
@@ -263,6 +266,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
   if ((tcb->group != group) ||
       (atomic_read(&tcb->shared_flags) & TCB_FLAG_DETACHED) != 0)
     {
+      nxsched_put_tcb(tcb);
       ret = EINVAL;
       goto errout;
     }
@@ -280,11 +284,13 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
   if (is_thread_deadlock_for_join(rtcb, tcb))
     {
       sq_rem(&rtcb->join_entry, &tcb->join_queue);
+      nxsched_put_tcb(tcb);
       ret = EDEADLK;
       goto errout;
     }
 #endif
 
+  nxsched_put_tcb(tcb);
   nxrmutex_unlock(&group->tg_mutex);
 
   /* Take the thread's thread exit semaphore.  We will sleep here

@@ -91,6 +91,11 @@ int nxsched_get_scheduler(pid_t pid)
       ret = nxsched_get_policy(tcb) >> TCB_FLAG_POLICY_SHIFT;
     }
 
+  if (pid != 0 && tcb != NULL)
+    {
+      nxsched_put_tcb(tcb);
+    }
+
   return ret;
 }
 

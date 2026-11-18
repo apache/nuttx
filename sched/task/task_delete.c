@@ -108,6 +108,7 @@ int nxtask_delete(pid_t pid)
   if (((rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&
       ((dtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL))
     {
+      nxsched_put_tcb(dtcb);
       return -EACCES;
     }
 
@@ -119,6 +120,7 @@ int nxtask_delete(pid_t pid)
        * don't bother to unlock the TCB since it will be going away.
        */
 
+      nxsched_put_tcb(dtcb);
       _exit(EXIT_SUCCESS);
     }
 
@@ -126,8 +128,11 @@ int nxtask_delete(pid_t pid)
 
   if (nxnotify_cancellation(dtcb))
     {
+      nxsched_put_tcb(dtcb);
       return OK;
     }
+
+  nxsched_put_tcb(dtcb);
 
   /* Otherwise, perform the asynchronous cancellation, letting
    * nxtask_terminate() do all of the heavy lifting.

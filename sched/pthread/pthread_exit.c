@@ -36,6 +36,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 #include <nuttx/signal.h>
 
 #include "sched/sched.h"
@@ -68,6 +69,7 @@ void nx_pthread_exit(FAR void *exit_value)
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   sigset_t set;
 #endif
+  irqstate_t flags;
   int status;
 
   sinfo("exit_value=%p\n", exit_value);
@@ -97,9 +99,30 @@ void nx_pthread_exit(FAR void *exit_value)
       _exit(EXIT_FAILURE);
     }
 
+  flags = enter_critical_section();
+  if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      leave_critical_section(flags);
+
+      /* If the TCB is already in the exiting state, we
+       * should allow the killing task to execute normally first.
+       * We stop the execution here.
+       */
+
+      for (; ; )
+        {
+          usleep(1000);
+        }
+    }
+
+  atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING);
+  leave_critical_section(flags);
+
   /* Make sure that we are in a critical section with local interrupts.
    * The IRQ state will be restored when the next task is started.
    */
+
+  nxsched_releasepid(tcb->pid);
 
   enter_critical_section();
 

@@ -2201,6 +2201,7 @@ FAR char *note_get_taskname(pid_t pid, FAR char *buf, size_t len)
   if (tcb != NULL)
     {
       strlcpy(buf, tcb->name, len);
+      nxsched_put_tcb(tcb);
       return buf;
     }
 

@@ -133,7 +133,7 @@ static bool timer_cpu_getclockid(FAR clockid_t *clockid)
       return true;
     }
 
-  return nxsched_get_tcb(pid) != NULL;
+  return nxsched_verify_pid(pid);
 }
 #else
 #  define timer_cpu_getclockid(c) false

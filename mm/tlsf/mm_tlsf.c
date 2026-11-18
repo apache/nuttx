@@ -32,6 +32,7 @@
 #include <nuttx/debug.h>
 #include <execinfo.h>
 #include <sched.h>
+#include <nuttx/sched.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/param.h>
@@ -1389,6 +1390,7 @@ void mm_memdump(FAR struct mm_heap_s *heap,
                            tcb->stack_alloc_ptr, tcb->adj_stack_size, name);
         }
 
+      nxsched_put_tcb(tcb);
       memdump_info_pool(&priv, heap);
     }
   else if (pid == PID_MM_FREE)

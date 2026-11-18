@@ -50,7 +50,7 @@
 #  define FS_ADD_BACKTRACE(fd) \
      do \
        { \
-          FAR struct tcb_s *tcb = nxsched_get_tcb(nxsched_gettid()); \
+          FAR struct tcb_s *tcb = this_task(); \
           if (tcb != NULL && tcb->group != NULL && \
               (tcb->group->tg_flags & GROUP_FLAG_FD_BACKTRACE) != 0) \
             { \

@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
 
 #include <sys/types.h>
 #include <stdbool.h>
@@ -106,5 +107,6 @@ errout:
   nxrmutex_unlock(&group->tg_mutex);
 
   sinfo("Returning %d\n", ret);
+  nxsched_put_tcb(tcb);
   return ret;
 }

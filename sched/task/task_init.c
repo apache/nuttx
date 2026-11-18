@@ -173,6 +173,8 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
   nxtask_joininit(tcb);
 #endif
 
+  nxsem_init(&tcb->exit_sem, 0, 0);
+
   /* Duplicate the parent tasks environment */
 
   ret = env_dup(tcb->group->tg_info, envp);
@@ -299,6 +301,8 @@ errout_with_group:
 
   nxtask_joindestroy(tcb);
 
+  nxsem_destroy(&tcb->exit_sem);
+
   group_leave(tcb);
 
   sched_trace_end();
@@ -333,6 +337,15 @@ void nxtask_uninit(FAR struct tcb_s *tcb)
   /* Release all resources associated with the TCB... Including the TCB
    * itself.
    */
+
+  /* The pid hash slot still holds the only reference: release it
+   * before the TCB, nxsched_release_tcb() no longer does it.
+   */
+
+  if (tcb->pid)
+    {
+      nxsched_releasepid(tcb->pid);
+    }
 
   nxsched_release_tcb(tcb, tcb->flags & TCB_FLAG_TTYPE_MASK);
 }

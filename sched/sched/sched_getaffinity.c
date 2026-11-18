@@ -101,6 +101,11 @@ int nxsched_get_affinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
       ret = OK;
     }
 
+  if (pid != 0)
+    {
+      nxsched_put_tcb(tcb);
+    }
+
   leave_critical_section(flags);
   return ret;
 }

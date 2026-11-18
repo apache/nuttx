@@ -1164,6 +1164,7 @@ int coredump(FAR const struct memory_region_s *regions,
 
   elf_flush(&cinfo);
 
+  nxsched_put_tcb(cinfo.tcb);
   leave_critical_section(flags);
 
   return OK;
