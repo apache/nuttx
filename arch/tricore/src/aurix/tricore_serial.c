@@ -49,6 +49,9 @@
 #  include "tc3x_wdt.h"
 #elif defined(CONFIG_ARCH_CHIP_FAMILY_TC4X)
 #  include "hardware/tc4x_port.h"
+#  ifdef CONFIG_SMP
+#    include "hardware/tc4x_cpu.h"
+#  endif
 #endif
 
 #include <chip.h>
@@ -359,6 +362,11 @@ static void asclin_init(struct up_dev_s *priv)
   asclin_modify(ASCLIN_REG(priv, CLC), ASCLIN_CLC_DISR, 0);
 #ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
   tc3x_wdt_cpu_endinit(true);
+#endif
+
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_CHIP_FAMILY_TC4X)
+  asclin_modify(ASCLIN_REG(priv, ACCEN_WRA), 0,
+                TC4X_CPU_TAGS_ALL(CONFIG_SMP_NCPUS));
 #endif
 
   /* Clock off, initialise mode, bit timing and baud rate */

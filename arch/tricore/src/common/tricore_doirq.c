@@ -41,6 +41,10 @@
 
 #include "tricore_internal.h"
 
+#ifdef CONFIG_SMP
+#  include "tricore_smp.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -111,6 +115,10 @@ void tricore_doirq(void)
        */
 
       *running_task = tcb;
+
+#ifdef CONFIG_SMP
+      tricore_csa_switch_balance();
+#endif
 
       tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
       UP_ISB();

@@ -29,6 +29,9 @@
 #ifdef CONFIG_ARCH_CHIP_FAMILY_TC4X
 #  include "hardware/tc4x_vmt.h"
 #endif
+#ifdef CONFIG_SMP
+#  include "tricore_smp.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -36,6 +39,18 @@
 
 #define TRICORE_PSW_RESET  0x980   /* Supervisor, call depth counting on */
 #define TRICORE_BIV_VECTOR 0x1fe0  /* Single interrupt vector at INTTAB + 0x1fe0 */
+
+/* DCON0: with SMP the data cache stays bypassed, as data in a cached
+ * segment would not be coherent between the CPUs
+ */
+
+#define TRICORE_DCON0_DCBYP 0x2
+
+#ifdef CONFIG_SMP
+#  define TRICORE_DCON0_BOOT TRICORE_DCON0_DCBYP
+#else
+#  define TRICORE_DCON0_BOOT 0
+#endif
 
 #ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
 #  define TC3X_WDTCPU0_CON0 0xf003624c   /* CPU0 watchdog CON0, 0xc apart per CPU */
@@ -136,6 +151,7 @@ tricore_head:
 	mov	%d15, 0
 	mtcr	TRICORE_CPU_PCON0, %d15
 	isync
+	mov	%d15, TRICORE_DCON0_BOOT
 	mtcr	TRICORE_CPU_DCON0, %d15
 	isync
 
@@ -250,6 +266,112 @@ tricore_head:
 	movh.a	%a15, hi:tricore_start
 	lea	%a15, [%a15]lo:tricore_start
 	ji	%a15
+
+#ifdef CONFIG_SMP
+/****************************************************************************
+ * Name: __start_secondary
+ *
+ * Description:
+ *   Entry of CPU1 and up with SMP, where up_cpu_start() releases them from
+ *   the boot halt once the kernel runs on CPU0.  Set up the core registers
+ *   like tricore_head, with the CSA pool, the interrupt stack and the idle
+ *   stack at the start of the data scratchpad RAM of this core (see
+ *   tricore_smp.h), disable the watchdog of this CPU and call
+ *   tricore_cpu_boot.  .data, .bss and the clocks are already set up.
+ *   Only CPU0 has the hypervisor context, so the virtualization is left
+ *   alone here.
+ *
+ ****************************************************************************/
+
+	.global	__start_secondary
+	.type	__start_secondary, %function
+__start_secondary:
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
+	jl	tc3x_endinit_clear
+#endif
+
+	/* D12 is the base of the data scratchpad RAM of this core */
+
+	mfcr	%d12, TRICORE_CPU_CORE_ID
+	extr.u	%d12, %d12, 0, 3
+	rsub	%d12, %d12, TRICORE_SMP_DSPR_SEG_TOP
+	sh	%d12, %d12, TRICORE_SMP_SEG_SHIFT
+
+	movh.a	%a15, hi:__TRAPTAB_CPU0
+	lea	%a15, [%a15]lo:__TRAPTAB_CPU0
+	mov.d	%d15, %a15
+	mtcr	TRICORE_CPU_BTV, %d15
+	isync
+
+	mov	%d15, 0
+	mtcr	TRICORE_CPU_PCON0, %d15
+	isync
+	mov	%d15, TRICORE_DCON0_BOOT
+	mtcr	TRICORE_CPU_DCON0, %d15
+	isync
+
+	movh.a	%a15, hi:__INTTAB_CPU0
+	lea	%a15, [%a15]lo:__INTTAB_CPU0
+	lea	%a15, [%a15]TRICORE_BIV_VECTOR
+	mov.d	%d15, %a15
+	mtcr	TRICORE_CPU_BIV, %d15
+	isync
+
+	movh	%d15, hi:TRICORE_SMP_ISTACK_TOP
+	addi	%d15, %d15, lo:TRICORE_SMP_ISTACK_TOP
+	add	%d15, %d15, %d12
+	mtcr	TRICORE_CPU_ISP, %d15
+	isync
+
+	/* Free CSA list over the pool of this core, LCX at the third last */
+
+	mov.a	%a15, %d12
+	movh	%d15, hi:TRICORE_SMP_CSA_SIZE
+	addi	%d15, %d15, lo:TRICORE_SMP_CSA_SIZE
+	add	%d15, %d15, %d12
+	mov.a	%a14, %d15
+	mov.d	%d15, %a15
+	tricore_csa_link %d15, %d14, %d13
+	mtcr	TRICORE_CPU_FCX, %d15
+	isync
+1:
+	addi	%d15, %d15, 1
+	st.w	[%a15], %d15
+	lea	%a15, [%a15]TRICORE_SMP_CSA_FRAME
+	jne.a	%a15, %a14, 1b
+	mov	%d14, 0
+	st.w	[%a15]-TRICORE_SMP_CSA_FRAME, %d14
+	addi	%d15, %d15, -TRICORE_SMP_CSA_RESERVE
+	mtcr	TRICORE_CPU_LCX, %d15
+	isync
+
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
+	jl	tc3x_endinit_set
+#endif
+
+	movh	%d15, hi:TRICORE_SMP_USTACK_TOP
+	addi	%d15, %d15, lo:TRICORE_SMP_USTACK_TOP
+	add	%d15, %d15, %d12
+	mov.a	%sp, %d15
+	dsync
+
+	movh.a	%a1, hi:__a1_mem
+	lea	%a1, [%a1]lo:__a1_mem
+	movh.a	%a0, hi:__a0_mem
+	lea	%a0, [%a0]lo:__a0_mem
+	movh.a	%a8, hi:__a8_mem
+	lea	%a8, [%a8]lo:__a8_mem
+	movh.a	%a9, hi:__a9_mem
+	lea	%a9, [%a9]lo:__a9_mem
+
+	mov	%d0, TRICORE_PSW_RESET
+	mtcr	TRICORE_CPU_PSW, %d0
+	isync
+
+	call	tricore_wdt_disable
+	call	tricore_cpu_boot
+	debug
+#endif
 
 #ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
 /****************************************************************************

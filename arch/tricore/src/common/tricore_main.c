@@ -50,6 +50,7 @@
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SMP
 static void tricore_core_sync(volatile uint32_t *sync)
 {
   uint32_t core = tricore_core_id();
@@ -78,6 +79,7 @@ static void tricore_core_sync(volatile uint32_t *sync)
 #endif
     }
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -94,7 +96,9 @@ static void tricore_core_sync(volatile uint32_t *sync)
 
 void tricore_main(void)
 {
+#ifndef CONFIG_SMP
   static volatile uint32_t g_sync_event;
+#endif
 
 #ifdef CONFIG_ARCH_HAVE_FPU
   tricore_fpuinit();
@@ -110,7 +114,9 @@ void tricore_main(void)
 
   /* Wait for CPU sync event */
 
+#ifndef CONFIG_SMP
   tricore_core_sync(&g_sync_event);
+#endif
 
   if (tricore_core_index() == 0)
     {

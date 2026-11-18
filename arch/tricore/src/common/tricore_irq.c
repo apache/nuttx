@@ -77,6 +77,16 @@ static inline void tricore_color_intstack(void)
 #  define TRICORE_IRQ_ROUTED_WORDS  (NR_IRQS / TRICORE_IRQ_ROUTED_BITS)
 #endif
 
+/* GPSR groups, one per sending CPU, set up for each receiving CPU.  With
+ * SMP only the CPUs of the kernel send.
+ */
+
+#ifdef CONFIG_SMP
+#  define TRICORE_GPSR_NSRC         CONFIG_SMP_NCPUS
+#else
+#  define TRICORE_GPSR_NSRC         6
+#endif
+
 #define TRICORE_SRC_TOS_GET(regval) \
   (((regval) & TRICORE_SRC_TOS_MASK) >> TRICORE_SRC_TOS_SHIFT)
 
@@ -189,7 +199,7 @@ static void tricore_gpsrinit_cpu(int cpu)
 
   /* Cpux gpsr init */
 
-  for (i = 0; i < 6; i++)
+  for (i = 0; i < TRICORE_GPSR_NSRC; i++)
     {
       irq = TRICORE_GPSR_IRQNUM(i, cpu);
       tricore_src_init(TRICORE_IRQ2SRC(irq), tos, IRQ_TO_NDX(irq));
@@ -200,7 +210,7 @@ static void tricore_gpsrinit_cpu(int cpu)
 
   /* Cpucs gpsr init */
 
-#ifndef CONFIG_ARCH_CHIP_FAMILY_TC3X
+#if !defined(CONFIG_ARCH_CHIP_FAMILY_TC3X) && !defined(CONFIG_SMP)
   tricore_src_init(TRICORE_IRQ2SRC(TRICORE_GPSR_IRQNUM(6, cpu)), tos,
                    IRQ_TO_NDX(TRICORE_GPSR_IRQNUM(6, cpu)));
 #endif

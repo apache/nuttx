@@ -31,6 +31,10 @@
 
 #include "tricore_internal.h"
 
+#ifdef CONFIG_SMP
+#  include "tricore_smp.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -64,7 +68,7 @@ void up_initialize(void)
   up_enable_icache();
 #endif
 
-#ifdef CONFIG_ARCH_DCACHE
+#if defined(CONFIG_ARCH_DCACHE) && !defined(CONFIG_SMP)
   up_enable_dcache();
 #endif
 
@@ -76,5 +80,9 @@ void up_initialize(void)
 
 #ifdef CONFIG_ARCH_HAVE_DEBUG
   tricore_init_dbgmonitor();
+#endif
+
+#ifdef CONFIG_SMP
+  tricore_smp_initialize();
 #endif
 }

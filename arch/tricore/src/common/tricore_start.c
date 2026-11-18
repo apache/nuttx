@@ -35,22 +35,28 @@
  * Public Data
  ****************************************************************************/
 
-/* Entries of the other cores, provided by the linker script */
+/* Entries of the other cores, provided by the linker script.  With SMP the
+ * other cores run this image instead, up_cpu_start() starts them.
+ */
 
+#ifndef CONFIG_SMP
 extern uintptr_t __start1[];
 extern uintptr_t __start2[];
 extern uintptr_t __start3[];
 extern uintptr_t __start4[];
 extern uintptr_t __start5[];
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+#ifndef CONFIG_SMP
 static uintptr_t * const g_tricore_entry[] =
 {
   __start1, __start2, __start3, __start4, __start5
 };
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -70,6 +76,7 @@ static uintptr_t * const g_tricore_entry[] =
 
 void tricore_start(void)
 {
+#ifndef CONFIG_SMP
   int cpu;
 
   for (cpu = 1; cpu <= TRICORE_START_CORES; cpu++)
@@ -84,6 +91,7 @@ void tricore_start(void)
                    TRICORE_START_HALT(cpu));
         }
     }
+#endif
 
   tricore_main();
 }

@@ -164,6 +164,12 @@
 #define FCX_FCXS_MASK   (0xf    << FCX_FCXS)
 #define FCX_FREE        (FCX_FCXS_MASK | FCX_FCXO_MASK) /* Free CSA manipulation */
 
+/* CORE_ID: the core number, CPU5 of TC3x has the core ID 6 */
+
+#define TRICORE_CORE_ID_MASK       0x7
+#define TRICORE_TC3X_CORE_ID_CPU5  6
+#define TRICORE_TC3X_CPU5          5
+
 #define TRICORE_SRCNUM_PER_GPSR  8
 #define TRICORE_SRC2IRQ(src_addr) \
   (((uintptr_t)(src_addr) - TRICORE_SRC_BASE) / 4)
@@ -259,7 +265,19 @@ struct xcptcontext
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_MULTICPU
-int up_cpu_index(void) noinstrument_function;
+noinstrument_function static inline_function int up_cpu_index(void)
+{
+  int id = tricore_mfcr(TRICORE_CPU_CORE_ID) & TRICORE_CORE_ID_MASK;
+
+#ifdef CONFIG_ARCH_CHIP_FAMILY_TC3X
+  if (id == TRICORE_TC3X_CORE_ID_CPU5)
+    {
+      id = TRICORE_TC3X_CPU5;
+    }
+#endif
+
+  return id;
+}
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************

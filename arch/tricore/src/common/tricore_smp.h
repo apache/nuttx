@@ -29,7 +29,9 @@
 
 #include <nuttx/config.h>
 
-#include <limits.h>
+#ifndef __ASSEMBLY__
+#  include <limits.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
