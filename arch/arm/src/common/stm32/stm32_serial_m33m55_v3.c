@@ -40,6 +40,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/cache.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/spinlock.h>
@@ -93,9 +94,8 @@
  * When streaming data, the generic serial layer will be called
  * every time the FIFO receives half this number of bytes.
  *
- * On a device with D-cache, the buffer size
- * should be an even multiple of ARMV7M_DCACHE_LINESIZE, so that it
- * can be individually invalidated.
+ * On a device with D-cache, the buffer size and alignment are a multiple
+ * of ARMV8M_DCACHE_LINESIZE, so that it can be individually invalidated.
  */
 
 #  if !defined(CONFIG_STM32_SERIAL_RXDMA_BUFFER_SIZE) || \
@@ -103,6 +103,12 @@
 #    define RXDMA_BUFFER_SIZE 32
 #  else
 #    define RXDMA_BUFFER_SIZE ((CONFIG_STM32_SERIAL_RXDMA_BUFFER_SIZE + 31) & ~31)
+#  endif
+
+#  ifdef CONFIG_ARMV8M_DCACHE
+#    define RXDMA_BUF_ALIGN aligned_data(ARMV8M_DCACHE_LINESIZE)
+#  else
+#    define RXDMA_BUF_ALIGN
 #  endif
 
 #endif
@@ -225,6 +231,9 @@ struct stm32_serial_s
   bool              rxdmasusp; /* Rx DMA suspended */
 #endif
   uint32_t          rxdmanext; /* Next byte in the DMA buffer to be read */
+#ifdef CONFIG_ARMV8M_DCACHE
+  uint32_t          rxdmaavail; /* Bytes readable without invalidation */
+#endif
   uint16_t          rxdma_req; /* DMA request number */
   char          *const rxfifo; /* Receive DMA buffer */
 #endif
@@ -348,7 +357,8 @@ static const struct uart_ops_s g_uart_dma_ops =
 static char g_lpuart1rxbuffer[CONFIG_LPUART1_RXBUFSIZE];
 static char g_lpuart1txbuffer[CONFIG_LPUART1_TXBUFSIZE];
 #  ifdef CONFIG_LPUART1_RXDMA
-static char g_lpuart1rxfifo[RXDMA_BUFFER_SIZE];
+static char g_lpuart1rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -356,7 +366,8 @@ static char g_lpuart1rxfifo[RXDMA_BUFFER_SIZE];
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 #  ifdef CONFIG_USART1_RXDMA
-static char g_usart1rxfifo[RXDMA_BUFFER_SIZE];
+static char g_usart1rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -364,7 +375,8 @@ static char g_usart1rxfifo[RXDMA_BUFFER_SIZE];
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #  ifdef CONFIG_USART2_RXDMA
-static char g_usart2rxfifo[RXDMA_BUFFER_SIZE];
+static char g_usart2rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -372,7 +384,8 @@ static char g_usart2rxfifo[RXDMA_BUFFER_SIZE];
 static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
 static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 #  ifdef CONFIG_USART3_RXDMA
-static char g_usart3rxfifo[RXDMA_BUFFER_SIZE];
+static char g_usart3rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -380,7 +393,8 @@ static char g_usart3rxfifo[RXDMA_BUFFER_SIZE];
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 #  ifdef CONFIG_UART4_RXDMA
-static char g_uart4rxfifo[RXDMA_BUFFER_SIZE];
+static char g_uart4rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -388,7 +402,8 @@ static char g_uart4rxfifo[RXDMA_BUFFER_SIZE];
 static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
 static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 #  ifdef CONFIG_UART5_RXDMA
-static char g_uart5rxfifo[RXDMA_BUFFER_SIZE];
+static char g_uart5rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -396,7 +411,8 @@ static char g_uart5rxfifo[RXDMA_BUFFER_SIZE];
 static char g_usart6rxbuffer[CONFIG_USART6_RXBUFSIZE];
 static char g_usart6txbuffer[CONFIG_USART6_TXBUFSIZE];
 #  ifdef CONFIG_USART6_RXDMA
-static char g_usart6rxfifo[RXDMA_BUFFER_SIZE];
+static char g_usart6rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -404,7 +420,8 @@ static char g_usart6rxfifo[RXDMA_BUFFER_SIZE];
 static char g_uart7rxbuffer[CONFIG_UART7_RXBUFSIZE];
 static char g_uart7txbuffer[CONFIG_UART7_TXBUFSIZE];
 #  ifdef CONFIG_UART7_RXDMA
-static char g_uart7rxfifo[RXDMA_BUFFER_SIZE];
+static char g_uart7rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -412,7 +429,8 @@ static char g_uart7rxfifo[RXDMA_BUFFER_SIZE];
 static char g_uart8rxbuffer[CONFIG_UART8_RXBUFSIZE];
 static char g_uart8txbuffer[CONFIG_UART8_TXBUFSIZE];
 #  ifdef CONFIG_UART8_RXDMA
-static char g_uart8rxfifo[RXDMA_BUFFER_SIZE];
+static char g_uart8rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -420,7 +438,8 @@ static char g_uart8rxfifo[RXDMA_BUFFER_SIZE];
 static char g_uart9rxbuffer[CONFIG_UART9_RXBUFSIZE];
 static char g_uart9txbuffer[CONFIG_UART9_TXBUFSIZE];
 #  ifdef CONFIG_UART9_RXDMA
-static char g_uart9rxfifo[RXDMA_BUFFER_SIZE];
+static char g_uart9rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -428,7 +447,8 @@ static char g_uart9rxfifo[RXDMA_BUFFER_SIZE];
 static char g_usart10rxbuffer[CONFIG_USART10_RXBUFSIZE];
 static char g_usart10txbuffer[CONFIG_USART10_TXBUFSIZE];
 #  ifdef CONFIG_USART10_RXDMA
-static char g_usart10rxfifo[RXDMA_BUFFER_SIZE];
+static char g_usart10rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -436,7 +456,8 @@ static char g_usart10rxfifo[RXDMA_BUFFER_SIZE];
 static char g_usart11rxbuffer[CONFIG_USART11_RXBUFSIZE];
 static char g_usart11txbuffer[CONFIG_USART11_TXBUFSIZE];
 #  ifdef CONFIG_USART11_RXDMA
-static char g_usart11rxfifo[RXDMA_BUFFER_SIZE];
+static char g_usart11rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -444,7 +465,8 @@ static char g_usart11rxfifo[RXDMA_BUFFER_SIZE];
 static char g_uart12rxbuffer[CONFIG_UART12_RXBUFSIZE];
 static char g_uart12txbuffer[CONFIG_UART12_TXBUFSIZE];
 #  ifdef CONFIG_UART12_RXDMA
-static char g_uart12rxfifo[RXDMA_BUFFER_SIZE];
+static char g_uart12rxfifo[RXDMA_BUFFER_SIZE]
+  RXDMA_BUF_ALIGN;
 #  endif
 #endif
 
@@ -2246,6 +2268,9 @@ static int stm32serial_dmasetup(struct uart_dev_s *dev)
   stm32_dmasetup(priv->rxdma, &dmacfg);
 
   priv->rxdmanext = 0;
+#ifdef CONFIG_ARMV8M_DCACHE
+  priv->rxdmaavail = 0;
+#endif
 
   regval  = stm32serial_getreg(priv, STM32_USART_CR3_OFFSET);
   regval |= USART_CR3_DMAR;
@@ -3335,6 +3360,30 @@ static int stm32serial_dmareceive(struct uart_dev_s *dev,
 
   if (next != priv->rxdmanext)
     {
+#ifdef CONFIG_ARMV8M_DCACHE
+      /* Invalidate the bytes that the DMA wrote since the last
+       * invalidation.
+       */
+
+      if (priv->rxdmaavail == 0)
+        {
+          uintptr_t addr = (uintptr_t)&priv->rxfifo[priv->rxdmanext];
+
+          if (next > priv->rxdmanext)
+            {
+              priv->rxdmaavail = next - priv->rxdmanext;
+            }
+          else
+            {
+              priv->rxdmaavail = RXDMA_BUFFER_SIZE - priv->rxdmanext;
+            }
+
+          up_invalidate_dcache(addr, addr + priv->rxdmaavail);
+        }
+
+      priv->rxdmaavail--;
+#endif
+
       ch = priv->rxfifo[priv->rxdmanext++];
 
       /* 4) End-of-buffer wrap or flow-control pause */
@@ -3388,6 +3437,9 @@ static void stm32serial_dmareenable(struct stm32_serial_s *priv)
    */
 
   priv->rxdmanext = 0;
+#ifdef CONFIG_ARMV8M_DCACHE
+  priv->rxdmaavail = 0;
+#endif
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->iflow)
