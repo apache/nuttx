@@ -86,26 +86,29 @@ static void tcp_close_connection(FAR struct tcp_conn_s *conn, uint32_t flags)
    *  _SF_CONNECTED==0 && _SF_CLOSED==0 - the socket was rudely disconnected
    */
 
-  /* The loss of connection was less than graceful.  This will
-   * (eventually) be reported as an ENOTCONN error.
+  /* The loss of an established connection becomes the pending error of
+   * the socket, reported once by the next send, receive or SO_ERROR.  A
+   * connect in progress keeps the error of the connect.
    */
+
+  if (_SS_ISCONNECTED(conn->sconn.s_flags) &&
+      (flags & (TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)) != 0)
+    {
+      _SO_CONN_SETERRNO(conn, (flags & TCP_ABORT) != 0 ? ECONNRESET :
+                              (flags & NETDEV_DOWN) != 0 ? ENETDOWN :
+                              ETIMEDOUT);
+    }
 
   if ((flags & TCP_ABORT) != 0)
     {
-      /* The peer gracefully closed the connection.  Marking the
-       * connection as disconnected will suppress some subsequent
-       * ENOTCONN errors from receive.  A graceful disconnection is
-       * not handle as an error but as an "end-of-file"
-       */
+      /* The peer reset the connection */
 
       conn->sconn.s_flags &= ~_SF_CONNECTED;
       conn->sconn.s_flags |= _SF_CLOSED;
     }
   else if ((flags & (TCP_TIMEDOUT | NETDEV_DOWN)) != 0)
     {
-      /* The loss of connection was less than graceful.  This will
-       * (eventually) be reported as an ENOTCONN error.
-       */
+      /* The connection timed out or the device went down */
 
       conn->sconn.s_flags &= ~(_SF_CONNECTED | _SF_CLOSED);
     }
@@ -410,6 +413,38 @@ void tcp_lost_connection(FAR struct tcp_conn_s *conn,
   /* Then stop the network monitor for all sockets. */
 
   tcp_shutdown_monitor(conn, flags);
+}
+
+/****************************************************************************
+ * Name: tcp_pending_error
+ *
+ * Description:
+ *   Report the pending error of a lost connection once: return it as a
+ *   negated errno value and clear it.  If no error is pending, return err.
+ *
+ * Input Parameters:
+ *   conn - The TCP connection of interest
+ *   err  - The negated errno value to return if no error is pending
+ *
+ * Returned Value:
+ *   The negated pending error, or err.
+ *
+ * Assumptions:
+ *   The caller holds the connection lock.
+ *
+ ****************************************************************************/
+
+int tcp_pending_error(FAR struct tcp_conn_s *conn, int err)
+{
+  int pending = conn->sconn.s_error;
+
+  if (pending != 0)
+    {
+      conn->sconn.s_error = 0;
+      return -pending;
+    }
+
+  return err;
 }
 
 #endif /* NET_TCP_HAVE_STACK */

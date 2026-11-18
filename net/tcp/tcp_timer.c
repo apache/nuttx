@@ -757,7 +757,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                        */
 
                       conn->zero_probe = false;
-                      tcp_stop_monitor(conn, TCP_ABORT);
+                      tcp_stop_monitor(conn, TCP_TIMEDOUT);
                     }
                   else
                     {

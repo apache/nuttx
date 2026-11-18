@@ -100,13 +100,15 @@
 #define TCP_SEQ_ADD(a, b)   ((uint32_t)((a) + (b)))
 #define TCP_SEQ_SUB(a, b)   ((uint32_t)((a) - (b)))
 
-/* The error of a send on a TCP socket that is not connected: -EPIPE if the
- * connection was closed (POSIX: the socket is no longer connected), else
+/* The error of a send on a TCP socket that is not connected: the pending
+ * error of the lost connection, reported once, then -EPIPE if the peer
+ * reset the connection (POSIX: the socket is no longer connected), else
  * -ENOTCONN.
  */
 
 #define TCP_NOTCONN_ERROR(conn) \
-  (_SS_ISCLOSED((conn)->sconn.s_flags) ? -EPIPE : -ENOTCONN)
+  tcp_pending_error((conn), _SS_ISCLOSED((conn)->sconn.s_flags) ? \
+                            -EPIPE : -ENOTCONN)
 
 /* The TCP options flags */
 
@@ -854,6 +856,27 @@ void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint32_t flags);
 
 void tcp_lost_connection(FAR struct tcp_conn_s *conn,
                          FAR struct devif_callback_s *cb, uint32_t flags);
+
+/****************************************************************************
+ * Name: tcp_pending_error
+ *
+ * Description:
+ *   Report the pending error of a lost connection once: return it as a
+ *   negated errno value and clear it.  If no error is pending, return err.
+ *
+ * Input Parameters:
+ *   conn - The TCP connection of interest
+ *   err  - The negated errno value to return if no error is pending
+ *
+ * Returned Value:
+ *   The negated pending error, or err.
+ *
+ * Assumptions:
+ *   The caller holds the connection lock.
+ *
+ ****************************************************************************/
+
+int tcp_pending_error(FAR struct tcp_conn_s *conn, int err);
 
 /****************************************************************************
  * Name: tcp_close

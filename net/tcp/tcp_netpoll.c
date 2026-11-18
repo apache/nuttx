@@ -101,38 +101,39 @@ static uint32_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
       if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
 #ifdef CONFIG_NET_SOCKOPTS
-          int reason;
-
-          /* TCP_TIMEDOUT: Connection aborted due to too many
-           *               retransmissions.
+          /* The loss of an established connection is recorded by the
+           * connection monitor, only a connect in progress is handled
+           * here.
            */
 
-          if ((flags & TCP_TIMEDOUT) != 0)
+          if (!_SS_ISCONNECTED(info->conn->sconn.s_flags) &&
+              !_SS_ISCLOSED(info->conn->sconn.s_flags))
             {
-              /* Indicate that the connection timedout?) */
+              int reason;
 
-              reason = ETIMEDOUT;
+              if ((flags & TCP_TIMEDOUT) != 0)
+                {
+                  /* Too many retransmissions */
+
+                  reason = ETIMEDOUT;
+                }
+              else if ((flags & NETDEV_DOWN) != 0)
+                {
+                  /* The network device went down.  Indicate that the
+                   * remote host is unreachable.
+                   */
+
+                  reason = ENETUNREACH;
+                }
+              else
+                {
+                  /* TCP_ABORT: the remote host refused the connection */
+
+                  reason = ECONNREFUSED;
+                }
+
+              _SO_CONN_SETERRNO(info->conn, reason);
             }
-
-          else if ((flags & NETDEV_DOWN) != 0)
-            {
-              /* The network device went down.  Indicate that the remote host
-               * is unreachable.
-               */
-
-              reason = ENETUNREACH;
-            }
-
-          /* TCP_ABORT: The remote host has aborted the connection */
-
-          else
-            {
-              /* Indicate that remote host refused the connection */
-
-              reason = ECONNREFUSED;
-            }
-
-          _SO_CONN_SETERRNO(info->conn, reason);
 #endif
 
           /* Mark that the connection has been lost */
@@ -368,11 +369,9 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
        * exceptional event.
        */
 
-      if (_SS_ISCLOSED(conn->sconn.s_flags))
-        {
-          _SO_CONN_SETERRNO(conn, ECONNREFUSED);
-        }
-      else
+      /* The loss of the connection already recorded the pending error */
+
+      if (conn->sconn.s_error == 0 && !_SS_ISCLOSED(conn->sconn.s_flags))
         {
           _SO_CONN_SETERRNO(conn, ENOTCONN);
         }

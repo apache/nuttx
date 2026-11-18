@@ -97,32 +97,27 @@
 
 /* Macro to set socket errors */
 
-#ifdef CONFIG_NET_SOCKOPTS
-#  define _SO_CONN_SETERRNO(c,e) \
-    do \
-      { \
-        if ((c) != NULL) \
-          { \
-            FAR struct socket_conn_s *_conn = \
-              (FAR struct socket_conn_s *)(c); \
-            _conn->s_error = (int16_t)e; \
-          } \
-      } \
-    while (0)
+#define _SO_CONN_SETERRNO(c,e) \
+  do \
+    { \
+      if ((c) != NULL) \
+        { \
+          FAR struct socket_conn_s *_conn = \
+            (FAR struct socket_conn_s *)(c); \
+          _conn->s_error = (int16_t)e; \
+        } \
+    } \
+  while (0)
 
-#  define _SO_SETERRNO(s,e) \
-    do \
-      { \
-        if (s != NULL) \
-          { \
-            _SO_CONN_SETERRNO((s)->s_conn, e); \
-          } \
-      } \
-    while (0)
-#else
-#  define _SO_CONN_SETERRNO(c,e)
-#  define _SO_SETERRNO(s,e)
-#endif /* CONFIG_NET_SOCKOPTS */
+#define _SO_SETERRNO(s,e) \
+  do \
+    { \
+      if (s != NULL) \
+        { \
+          _SO_CONN_SETERRNO((s)->s_conn, e); \
+        } \
+    } \
+  while (0)
 
 /****************************************************************************
  * Public Data

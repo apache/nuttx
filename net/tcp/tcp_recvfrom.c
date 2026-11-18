@@ -505,12 +505,14 @@ static uint32_t tcp_recvhandler(FAR struct net_driver_s *dev,
               tcp_lost_connection(conn, pstate->ir_cb, flags);
             }
 
-          /* Report a timed out connection (too many retransmissions or
-           * unanswered keep-alive probes) as ETIMEDOUT.
+          /* Report the pending error of the lost connection: ECONNRESET,
+           * ETIMEDOUT (too many retransmissions or unanswered keep-alive
+           * probes) or ENETDOWN.
            */
 
-          pstate->ir_result = (flags & TCP_TIMEDOUT) != 0 ? -ETIMEDOUT :
-                                                            -ENOTCONN;
+          pstate->ir_result =
+            tcp_pending_error(conn, (flags & TCP_TIMEDOUT) != 0 ?
+                                    -ETIMEDOUT : -ENOTCONN);
 
           /* Wake up the waiting thread */
 
@@ -726,20 +728,20 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
        * time that recvfrom() is called.
        *
        * If no data was received (i.e.,  ret == 0  -- it will not be
-       * negative) and the connection was gracefully closed by the remote
-       * peer, then return success.  If ir_recvlen is zero, the caller of
-       * recvfrom() will get an end-of-file indication.
+       * negative) and the receive side was shut down, then return
+       * success.  If ir_recvlen is zero, the caller of recvfrom() will
+       * get an end-of-file indication.
        */
 
-      if (ret <= 0 && !_SS_ISCLOSED(conn->sconn.s_flags) &&
-          (conn->shutdown & SHUT_RD) == 0)
+      if (ret <= 0 && (conn->shutdown & SHUT_RD) == 0)
         {
           /* Nothing was previously received from the read-ahead buffers.
-           * The SOCK_STREAM must be (re-)connected in order to receive
-           * any additional data.
+           * Report the pending error of the lost connection once.  The
+           * SOCK_STREAM must be (re-)connected in order to receive any
+           * additional data.
            */
 
-          ret = -ENOTCONN;
+          ret = tcp_pending_error(conn, -ENOTCONN);
         }
     }
 
