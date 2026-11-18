@@ -88,6 +88,8 @@ config STM32_AUTONEG_10FD_ONLY
 		detection, which cannot detect duplex and will pick half --
 		a genuine mismatch that stalls bulk traffic completely.
 
+if !NET_PHYLIB || !STM32_HAVE_IP_ETHMAC_V2
+
 config STM32_PHYSR
 	int "PHY Status Register Address (decimal)"
 	---help---
@@ -166,6 +168,8 @@ config STM32_PHYSR_100FD
 		under the bit mask that represents the 100Mbps, full duplex setting.
 
 endif # STM32_PHYSR_ALTCONFIG
+
+endif # !NET_PHYLIB || !STM32_HAVE_IP_ETHMAC_V2
 
 endif # STM32_AUTONEG
 
