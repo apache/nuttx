@@ -76,6 +76,11 @@ int nxsched_get_affinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
 
   DEBUGASSERT(cpusetsize == sizeof(cpu_set_t) && mask != NULL);
 
+  if (mask == NULL || cpusetsize != sizeof(cpu_set_t))
+    {
+      return -EINVAL;
+    }
+
   /* Verify that the PID corresponds to a real task */
 
   flags = enter_critical_section();
