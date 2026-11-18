@@ -29,8 +29,9 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32_HAVE_IP_LTDC_M3M4_V1)
-#  include "stm32_ltdc_m3m4_v1.h"
+#if defined(CONFIG_STM32_HAVE_IP_LTDC_V1) || \
+    defined(CONFIG_STM32_HAVE_IP_LTDC_V2)
+#  include "stm32_ltdc_v1v2.h"
 #else
 #  error "Unsupported STM32 stm32_ltdc"
 #endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_ltdc_m3m4_v1.h
+ * arch/arm/src/common/stm32/stm32_ltdc_v1v2.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_LTDC_H
-#define __ARCH_ARM_SRC_COMMON_STM32_STM32_LTDC_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_LTDC_V1V2_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_LTDC_V1V2_H
 
 /****************************************************************************
  * Included Files
@@ -29,7 +29,8 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32_HAVE_IP_LTDC_M3M4_V1)
+#if defined(CONFIG_STM32_HAVE_IP_LTDC_V1) || \
+    defined(CONFIG_STM32_HAVE_IP_LTDC_V2)
 
 #include <stdbool.h>
 
@@ -102,5 +103,5 @@ struct fb_vtable_s *stm32_ltdcgetvplane(int vplane);
 void stm32_backlight(bool blon);
 #endif
 
-#endif /* CONFIG_STM32_HAVE_IP_LTDC_M3M4_V1 */
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_LTDC_H */
+#endif
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_LTDC_V1V2_H */

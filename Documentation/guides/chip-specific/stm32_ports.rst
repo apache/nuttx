@@ -448,7 +448,7 @@ HASH          to be done    not supported
 I2C           v1            arch/arm/src/common/stm32/stm32_i2c_m3m4_v1.c         
 IWDG          v1            arch/arm/src/common/stm32/stm32_iwdg.c
 LPTIM         v1            arch/arm/src/common/stm32/stm32_lptim.c
-LTDC          v1            arch/arm/src/common/stm32/stm32_ltdc_m3m4_v1.c        
+LTDC          v1            arch/arm/src/common/stm32/stm32_ltdc_v1v2.c           
 QUADSPI       to be done    not supported                                         
 RCC           to be done    arch/arm/src/stm32f4/stm32_rcc.c                      
 RNG           v1            arch/arm/src/common/stm32/stm32_rng_v1.c         

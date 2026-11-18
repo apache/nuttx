@@ -56,6 +56,43 @@
 #define STM32_LTDC_CDSR_OFFSET      0x0048 /* LTDC Current Display Status Register */
                                            /* 0x004c-0x0080 Reserved */
 
+#ifdef CONFIG_STM32_HAVE_IP_LTDC_V2
+
+/* LTDC v2 (STM32N6): each layer has its own 0x100 register block with
+ * a per-layer reload register and additional planar, scaler and
+ * flexible pixel format registers.
+ */
+
+#  define STM32_LTDC_L1RCR_OFFSET     0x0108 /* L1 Reload Control */
+#  define STM32_LTDC_L1CR_OFFSET      0x010c /* L1 Control */
+#  define STM32_LTDC_L1WHPCR_OFFSET   0x0110 /* L1 Window Horiz Pos Config */
+#  define STM32_LTDC_L1WVPCR_OFFSET   0x0114 /* L1 Window Vert Pos Config */
+#  define STM32_LTDC_L1CKCR_OFFSET    0x0118 /* L1 Color Keying Config */
+#  define STM32_LTDC_L1PFCR_OFFSET    0x011c /* L1 Pixel Format Config */
+#  define STM32_LTDC_L1CACR_OFFSET    0x0120 /* L1 Constant Alpha Config */
+#  define STM32_LTDC_L1DCCR_OFFSET    0x0124 /* L1 Default Color Config */
+#  define STM32_LTDC_L1BFCR_OFFSET    0x0128 /* L1 Blending Factors Config */
+#  define STM32_LTDC_L1CFBAR_OFFSET   0x0134 /* L1 Frame Buffer Address */
+#  define STM32_LTDC_L1CFBLR_OFFSET   0x0138 /* L1 Frame Buffer Length */
+#  define STM32_LTDC_L1CFBLNR_OFFSET  0x013c /* L1 Frame Buffer Line Number */
+#  define STM32_LTDC_L1CLUTWR_OFFSET  0x0150 /* L1 CLUT Write */
+
+#  define STM32_LTDC_L2RCR_OFFSET     0x0208 /* L2 Reload Control */
+#  define STM32_LTDC_L2CR_OFFSET      0x020c /* L2 Control */
+#  define STM32_LTDC_L2WHPCR_OFFSET   0x0210 /* L2 Window Horiz Pos Config */
+#  define STM32_LTDC_L2WVPCR_OFFSET   0x0214 /* L2 Window Vert Pos Config */
+#  define STM32_LTDC_L2CKCR_OFFSET    0x0218 /* L2 Color Keying Config */
+#  define STM32_LTDC_L2PFCR_OFFSET    0x021c /* L2 Pixel Format Config */
+#  define STM32_LTDC_L2CACR_OFFSET    0x0220 /* L2 Constant Alpha Config */
+#  define STM32_LTDC_L2DCCR_OFFSET    0x0224 /* L2 Default Color Config */
+#  define STM32_LTDC_L2BFCR_OFFSET    0x0228 /* L2 Blending Factors Config */
+#  define STM32_LTDC_L2CFBAR_OFFSET   0x0234 /* L2 Frame Buffer Address */
+#  define STM32_LTDC_L2CFBLR_OFFSET   0x0238 /* L2 Frame Buffer Length */
+#  define STM32_LTDC_L2CFBLNR_OFFSET  0x023c /* L2 Frame Buffer Line Number */
+#  define STM32_LTDC_L2CLUTWR_OFFSET  0x0250 /* L2 CLUT Write */
+
+#else
+
 #define STM32_LTDC_L1CR_OFFSET      0x0084 /* LTDC Layer 1 Control Register */
 #define STM32_LTDC_L1WHPCR_OFFSET   0x0088 /* LTDC Layer 1 Window Horiz Pos Config Register */
 #define STM32_LTDC_L1WVPCR_OFFSET   0x008c /* LTDC Layer 1 Window Vert Pos Config Register */
@@ -86,6 +123,8 @@
                                            /* 0x0138-0x0130 Reserved */
 #define STM32_LTDC_L2CLUTWR_OFFSET  0x0144 /* LTDC Layer 2 CLUT Write Register */
                                            /* 0x0148-0x03ff Reserved */
+
+#endif /* CONFIG_STM32_HAVE_IP_LTDC_V2 */
 
 /* LTDC Register Addresses **************************************************/
 
@@ -205,21 +244,36 @@
 /* LTDC Interrupt Enable Register */
 
 #define LTDC_IER_LIE                (1 << 0)  /* Bit 0:  Line Interrupt Enable */
-#define LTDC_IER_FUIE               (1 << 1)  /* Bit 1:  FIFO Underrun Interrupt Enable */
+#ifdef CONFIG_STM32_HAVE_IP_LTDC_V2
+#  define LTDC_IER_FUWIE            (1 << 1)  /* Bit 1:  FIFO Underrun Warning Interrupt Enable */
+#  define LTDC_IER_FUIE             (1 << 6)  /* Bit 6:  FIFO Underrun Interrupt Enable */
+#else
+#  define LTDC_IER_FUIE             (1 << 1)  /* Bit 1:  FIFO Underrun Interrupt Enable */
+#endif
 #define LTDC_IER_TERRIE             (1 << 2)  /* Bit 2:  Transfer Error Interrupt Enable */
 #define LTDC_IER_RRIE               (1 << 3)  /* Bit 3:  Register Reload Interrupt Enable */
 
 /* LTDC Interrupt Status Register */
 
 #define LTDC_ISR_LIF                (1 << 0)  /* Bit 0:  Line Interrupt Flag */
-#define LTDC_ISR_FUIF               (1 << 1)  /* Bit 1:  FIFO Underrun Interrupt Flag */
-#define LTDC_IER_TERRIF             (1 << 2)  /* Bit 2:  Transfer Error Interrupt Flag */
+#ifdef CONFIG_STM32_HAVE_IP_LTDC_V2
+#  define LTDC_ISR_FUWIF            (1 << 1)  /* Bit 1:  FIFO Underrun Warning Interrupt Flag */
+#  define LTDC_ISR_FUIF             (1 << 6)  /* Bit 6:  FIFO Underrun Interrupt Flag */
+#else
+#  define LTDC_ISR_FUIF             (1 << 1)  /* Bit 1:  FIFO Underrun Interrupt Flag */
+#endif
+#define LTDC_ISR_TERRIF             (1 << 2)  /* Bit 2:  Transfer Error Interrupt Flag */
 #define LTDC_ISR_RRIF               (1 << 3)  /* Bit 3:  Register Reload Interrupt Flag */
 
 /* LTDC Interrupt Clear Register */
 
 #define LTDC_ICR_CLIF               (1 << 0)  /* Bit 0:  Clear Line Interrupt Flag */
-#define LTDC_ICR_CFUIF              (1 << 1)  /* Bit 1:  Clear FIFO Underrun Interrupt Flag */
+#ifdef CONFIG_STM32_HAVE_IP_LTDC_V2
+#  define LTDC_ICR_CFUWIF           (1 << 1)  /* Bit 1:  Clear FIFO Underrun Warning Interrupt Flag */
+#  define LTDC_ICR_CFUIF            (1 << 6)  /* Bit 6:  Clear FIFO Underrun Interrupt Flag */
+#else
+#  define LTDC_ICR_CFUIF            (1 << 1)  /* Bit 1:  Clear FIFO Underrun Interrupt Flag */
+#endif
 #define LTDC_ICR_CTERRIF            (1 << 2)  /* Bit 2:  Clear Transfer Error Interrupt Flag */
 #define LTDC_ICR_CRRIF              (1 << 3)  /* Bit 3:  Clear Register Reload Interrupt Flag */
 
@@ -287,14 +341,31 @@
 #define LTDC_LXPFCR_PF_MASK         (0x7 << LTDC_LXPFCR_PF_SHIFT)
 #  define LTDC_LXPFCR_PF(n)         ((uint32_t)(n) << LTDC_LXPFCR_PF_SHIFT)
 
-#define LTDC_PF_ARGB8888            0
-#define LTDC_PF_RGB888              1
-#define LTDC_PF_RGB565              2
-#define LTDC_PF_ARGB1555            3
-#define LTDC_PF_ARGB4444            4
-#define LTDC_PF_L8                  5     /* 8-bit Luninance (CLUT lookup) */
-#define LTDC_PF_AL44                6     /* 4-bit Alpha, 4-bit Luminance */
-#define LTDC_PF_AL88                7     /* 8-bit Alpha, 8-bit Luminance */
+#ifdef CONFIG_STM32_HAVE_IP_LTDC_V2
+
+/* LTDC v2 predefined formats.  ARGB1555, ARGB4444, L8, AL44 and AL88 are
+ * only available through the flexible pixel format (PF = 7), which is not
+ * supported.
+ */
+
+#  define LTDC_PF_ARGB8888          0
+#  define LTDC_PF_ABGR8888          1
+#  define LTDC_PF_RGBA8888          2
+#  define LTDC_PF_BGRA8888          3
+#  define LTDC_PF_RGB565            4
+#  define LTDC_PF_BGR565            5
+#  define LTDC_PF_RGB888            6
+#  define LTDC_PF_FLEX              7     /* Flexible pixel format */
+#else
+#  define LTDC_PF_ARGB8888          0
+#  define LTDC_PF_RGB888            1
+#  define LTDC_PF_RGB565            2
+#  define LTDC_PF_ARGB1555          3
+#  define LTDC_PF_ARGB4444          4
+#  define LTDC_PF_L8                5     /* 8-bit Luninance (CLUT lookup) */
+#  define LTDC_PF_AL44              6     /* 4-bit Alpha, 4-bit Luminance */
+#  define LTDC_PF_AL88              7     /* 8-bit Alpha, 8-bit Luminance */
+#endif
 
 /* LTDC Layer x Constant Alpha Configuration Register */
 
@@ -339,6 +410,14 @@
 #define LTDC_LXCFBLR_CFBP_SHIFT     (16)       /* Bits 16-28: Color Frame Buffer Pitch */
 #define LTDC_LXCFBLR_CFBP_MASK      (0x1fff << LTDC_LXCFBLR_CFBP_SHIFT)
 #  define LTDC_LXCFBLR_CFBP(n)      ((uint32_t)(n) << LTDC_LXCFBLR_CFBP_SHIFT)
+
+/* The line length is the active line size in bytes plus this value */
+
+#ifdef CONFIG_STM32_HAVE_IP_LTDC_V2
+#  define LTDC_LXCFBLR_CFBLL_EXTRA  7
+#else
+#  define LTDC_LXCFBLR_CFBLL_EXTRA  3
+#endif
 
 /* LTDC Layer x Color Frame Buffer Line Number Register */
 

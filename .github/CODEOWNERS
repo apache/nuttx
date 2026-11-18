@@ -1794,8 +1794,8 @@ arch/arm/src/common/stm32/stm32_lse_m0_v1.c alin.jerpelea@sony.com macscomp@gmai
 arch/arm/src/common/stm32/stm32_lse_m3m4_v1.c alin.jerpelea@sony.com macscomp@gmail.com xiaoxiang@xiaomi.com raiden00@railab.me
 arch/arm/src/common/stm32/stm32_lsi.c alin.jerpelea@sony.com raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
 arch/arm/src/common/stm32/stm32_ltdc.h yamamoto@midokura.com masayuki.ishikawa@gmail.com anchao@xiaomi.com 53337780+aenrbes@users.noreply.github.com mijung@gmx.net
-arch/arm/src/common/stm32/stm32_ltdc_m3m4_v1.c ocram.lhark@gmail.com xiaoxiang@xiaomi.com yamamoto@midokura.com anjiahao@xiaomi.com peter.barada@gmail.com
-arch/arm/src/common/stm32/stm32_ltdc_m3m4_v1.h ocram.lhark@gmail.com alin.jerpelea@sony.com raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
+arch/arm/src/common/stm32/stm32_ltdc_v1v2.c ocram.lhark@gmail.com xiaoxiang@xiaomi.com yamamoto@midokura.com anjiahao@xiaomi.com peter.barada@gmail.com
+arch/arm/src/common/stm32/stm32_ltdc_v1v2.h ocram.lhark@gmail.com alin.jerpelea@sony.com raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
 arch/arm/src/common/stm32/stm32_mpuinit.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com raiden00@railab.me
 arch/arm/src/common/stm32/stm32_mpuinit_m3m4_v1.c alin.jerpelea@sony.com gustavo.nihei@espressif.com petro.karashchenko@gmail.com David.Sidrane@NscDg.com raiden00@railab.me
 arch/arm/src/common/stm32/stm32_oneshot.c macscomp@gmail.com mark@mjs.pw alin.jerpelea@sony.com xiaoxiang@xiaomi.com max.kriegleder@gmail.com
