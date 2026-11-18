@@ -159,9 +159,16 @@ static ssize_t shmfs_read(FAR struct file *filep, FAR char *buffer,
 
   sho = filep->f_inode->i_private;
 
+  nread = nxmutex_lock(&sho->lock);
+  if (nread < 0)
+    {
+      return nread;
+    }
+
   if (filep->f_pos > sho->length)
     {
-      return 0;
+      nread = 0;
+      goto out;
     }
 
   /* Handle attempts to read beyond the end of the file. */
@@ -188,6 +195,8 @@ static ssize_t shmfs_read(FAR struct file *filep, FAR char *buffer,
       DEBUGASSERT(sho->length == 0 && nread == 0);
     }
 
+out:
+  nxmutex_unlock(&sho->lock);
   return nread;
 }
 
@@ -207,6 +216,12 @@ static ssize_t shmfs_write(FAR struct file *filep, FAR const char *buffer,
 
   sho = filep->f_inode->i_private;
 
+  nwritten = nxmutex_lock(&sho->lock);
+  if (nwritten < 0)
+    {
+      return nwritten;
+    }
+
   /* Handle attempts to write beyond the end of the file */
 
   startpos = filep->f_pos;
@@ -217,7 +232,8 @@ static ssize_t shmfs_write(FAR struct file *filep, FAR const char *buffer,
 
   if (endpos > sho->length)
     {
-      return -EFBIG;
+      nwritten = -EFBIG;
+      goto out;
     }
 
   /* Copy data from the user buffer to the memory object */
@@ -232,6 +248,8 @@ static ssize_t shmfs_write(FAR struct file *filep, FAR const char *buffer,
       DEBUGASSERT(sho->length == 0 && nwritten == 0);
     }
 
+out:
+  nxmutex_unlock(&sho->lock);
   return nwritten;
 }
 
@@ -275,26 +293,33 @@ static int shmfs_close(FAR struct file *filep)
 static int shmfs_truncate(FAR struct file *filep, off_t length)
 {
   FAR struct shmfs_object_s *object;
-  int ret = 0;
+  int ret;
 
   if (length == 0)
     {
       return -EINVAL;
     }
 
-  inode_lock();
   object = filep->f_inode->i_private;
-  if (!object)
+  DEBUGASSERT(object != NULL);
+
+  ret = nxmutex_lock(&object->lock);
+  if (ret < 0)
     {
-      filep->f_inode->i_private = shmfs_alloc_object(length);
-      if (!filep->f_inode->i_private)
+      return ret;
+    }
+
+  if (object->paddr == NULL)
+    {
+      object->paddr = shmfs_alloc_buffer(length);
+      if (object->paddr != NULL)
         {
-          filep->f_inode->i_size = 0;
-          ret = -EFAULT;
+          object->length = length;
+          filep->f_inode->i_size = length;
         }
       else
         {
-          filep->f_inode->i_size = length;
+          ret = -ENOMEM;
         }
     }
   else if (object->length != length)
@@ -304,7 +329,7 @@ static int shmfs_truncate(FAR struct file *filep, off_t length)
       ret = -EINVAL;
     }
 
-  inode_unlock();
+  nxmutex_unlock(&object->lock);
   return ret;
 }
 
@@ -403,36 +428,52 @@ static int shmfs_mmap(FAR struct file *filep,
   FAR struct shmfs_object_s *object;
   int ret = -EINVAL;
 
-  /* We don't support offset at the moment, just mapping the whole object
-   * object is NULL if it hasn't been truncated yet
-   */
+  /* We don't support offset at the moment, just mapping the whole object */
 
   if (entry->offset != 0)
     {
       return ret;
     }
 
+  object = filep->f_inode->i_private;
+  DEBUGASSERT(object != NULL);
+
   /* Keep the inode when mmapped, increase refcount */
 
   inode_addref(filep->f_inode);
-  object = filep->f_inode->i_private;
-  if (object)
-    {
-#ifndef CONFIG_BUILD_KERNEL
-      /* Without an MMU mapping the object address is returned directly, so
-       * a mapping longer than the page-rounded backing would expose
-       * adjacent heap memory.
-       */
 
-      if (entry->length > ALIGN_UP(object->length, sysconf(_SC_PAGESIZE)))
-        {
-          inode_release(filep->f_inode);
-          return -EINVAL;
-        }
+  ret = nxmutex_lock(&object->lock);
+  if (ret < 0)
+    {
+      inode_release(filep->f_inode);
+      return ret;
+    }
+
+  /* Not truncated yet */
+
+  if (object->paddr == NULL)
+    {
+      ret = -EINVAL;
+      goto out;
+    }
+
+#ifndef CONFIG_BUILD_KERNEL
+  /* Without an MMU mapping the object address is returned directly, so
+   * a mapping longer than the page-rounded backing would expose adjacent
+   * heap memory.
+   */
+
+  if (entry->length > ALIGN_UP(object->length, sysconf(_SC_PAGESIZE)))
+    {
+      ret = -EINVAL;
+      goto out;
+    }
 #endif
 
-      ret = shmfs_map_object(object, &entry->vaddr);
-    }
+  ret = shmfs_map_object(object, &entry->vaddr);
+
+out:
+  nxmutex_unlock(&object->lock);
 
   if (ret < 0 ||
       (ret = shmfs_add_map(entry, filep->f_inode)) < 0)
