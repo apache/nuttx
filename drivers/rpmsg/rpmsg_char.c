@@ -64,6 +64,8 @@ struct rpmsg_eptdev_s
   sem_t                      rxsem;
   FAR struct pollfd_s       *fds[CONFIG_RPMSG_CHAR_NPOLLWAITERS];
   bool                       created;
+  FAR char                  *rdbuf;
+  size_t                     rdlen;
 };
 
 struct rpmsg_eptdev_buf_s
@@ -279,6 +281,8 @@ static ssize_t rpmsg_eptdev_read(FAR struct file *filep, FAR char *buffer,
           break;
         }
 
+      eptdev->rdbuf = buffer;
+      eptdev->rdlen = buflen;
       spin_unlock_irqrestore(&eptdev->lock, flags);
       ret = nxsem_wait(&eptdev->rxsem);
       flags = spin_lock_irqsave(&eptdev->lock);
@@ -293,16 +297,32 @@ static ssize_t rpmsg_eptdev_read(FAR struct file *filep, FAR char *buffer,
         {
           break;
         }
+
+      if (eptdev->rdbuf == NULL)
+        {
+          ret = eptdev->rdlen;
+          break;
+        }
     }
 
-  buf = list_remove_head_type(&eptdev->rxbuf, struct rpmsg_eptdev_buf_s,
-                              node);
-  spin_unlock_irqrestore(&eptdev->lock, flags);
-  if (buf != NULL)
+  eptdev->rdbuf = NULL;
+  eptdev->rdlen = 0;
+
+  if (ret == 0)
     {
-      ret = MIN(buflen, buf->len);
-      memcpy(buffer, buf->data, ret);
-      kmm_free(buf);
+      buf = list_remove_head_type(&eptdev->rxbuf, struct rpmsg_eptdev_buf_s,
+                                  node);
+      spin_unlock_irqrestore(&eptdev->lock, flags);
+      if (buf != NULL)
+        {
+          ret = MIN(buflen, buf->len);
+          memcpy(buffer, buf->data, ret);
+          kmm_free(buf);
+        }
+    }
+  else
+    {
+      spin_unlock_irqrestore(&eptdev->lock, flags);
     }
 
   return ret;
@@ -491,22 +511,28 @@ static int rpmsg_eptdev_ept_cb(FAR struct rpmsg_endpoint *ept,
   irqstate_t flags;
   int ret = OK;
 
-  buf = kmm_malloc(sizeof(*buf) + len - 1);
-  if (buf != NULL)
+  flags = spin_lock_irqsave_nopreempt(&eptdev->lock);
+  if (eptdev->rdbuf != NULL)
     {
+      eptdev->rdlen = MIN(eptdev->rdlen, len);
+      memcpy(eptdev->rdbuf, data, eptdev->rdlen);
+      eptdev->rdbuf = NULL;
+    }
+  else
+    {
+      spin_unlock_irqrestore_nopreempt(&eptdev->lock, flags);
+      buf = kmm_malloc(sizeof(*buf) + len - 1);
+      DEBUGASSERT(buf);
+
       buf->len = len;
       memcpy(buf->data, data, len);
       flags = spin_lock_irqsave_nopreempt(&eptdev->lock);
       list_add_tail(&eptdev->rxbuf, &buf->node);
-      rpmsg_eptdev_wakeup_rx(eptdev);
-      poll_notify(eptdev->fds, CONFIG_RPMSG_CHAR_NPOLLWAITERS, POLLIN);
-      spin_unlock_irqrestore_nopreempt(&eptdev->lock, flags);
     }
-  else
-    {
-      rpmsgerr("Failed to allocate buffer\n");
-      ret = -ENOMEM;
-    }
+
+  rpmsg_eptdev_wakeup_rx(eptdev);
+  poll_notify(eptdev->fds, CONFIG_RPMSG_CHAR_NPOLLWAITERS, POLLIN);
+  spin_unlock_irqrestore_nopreempt(&eptdev->lock, flags);
 
   return ret;
 }
