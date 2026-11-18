@@ -22,7 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = fs_initialize.c fs_heap.c
+CSRCS = fs_initialize.c fs_reboot.c fs_heap.c
 
 ifneq ($(CONFIG_FS_HEAPBUF_SECTION),"")
   CFLAGS += ${DEFINE_PREFIX}FS_HEAPBUF_SECTION=CONFIG_FS_HEAPBUF_SECTION
