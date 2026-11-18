@@ -120,6 +120,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_STM32_SDMMC2) && defined(CONFIG_MMCSD_SDIO)
+  /* Initialize the microSD slot */
+
+  ret = stm32_sdio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_sdio_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_STM32_SPI
   /* Initialize the SPI buses and their chip selects */
 

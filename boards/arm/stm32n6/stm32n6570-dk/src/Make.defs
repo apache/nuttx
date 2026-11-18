@@ -47,6 +47,10 @@ ifeq ($(CONFIG_VIDEO_VL53L5CX),y)
 CSRCS += stm32_camera.c stm32_tof.c
 endif
 
+ifeq ($(CONFIG_STM32_SDMMC2),y)
+CSRCS += stm32_sdmmc.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

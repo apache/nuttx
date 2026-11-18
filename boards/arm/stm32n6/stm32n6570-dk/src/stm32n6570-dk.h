@@ -109,6 +109,18 @@
 #define TOF_I2C_ADDR   0x29
 #define TOF_DEVPATH    "/dev/video1"
 
+/* microSD slot: card detect on PN12 (low when a card is inserted) and
+ * card power enable on PQ7 (active high).
+ */
+
+#define GPIO_SDMMC2_NCD    (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | \
+                            GPIO_PORTN | GPIO_PIN12)
+#define GPIO_SDMMC2_PWR_EN (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+                            GPIO_OUTPUT_CLEAR | GPIO_PORTQ | GPIO_PIN7)
+
+#define SDIO_SLOTNO    0
+#define SDIO_MINOR     0
+
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
@@ -177,6 +189,18 @@ void stm32_camera_power(void);
 
 #ifdef CONFIG_VIDEO_VL53L5CX
 int stm32_tof_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_sdio_initialize
+ *
+ * Description:
+ *   Initialize the microSD slot and register /dev/mmcsd0.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_SDMMC2) && defined(CONFIG_MMCSD_SDIO)
+int stm32_sdio_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
