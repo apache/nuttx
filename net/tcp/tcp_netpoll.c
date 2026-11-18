@@ -123,6 +123,13 @@ static uint32_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
               reason = ENETUNREACH;
             }
 
+          /* TCP_ABORT: a reset of the peer */
+
+          else if ((info->conn->flags & TCP_RESET) != 0)
+            {
+              reason = ECONNRESET;
+            }
+
           /* TCP_ABORT: The remote host has aborted the connection */
 
           else
@@ -134,6 +141,13 @@ static uint32_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 
           _SO_CONN_SETERRNO(info->conn, reason);
 #endif
+
+          /* After a reset of the peer, a receive does not block */
+
+          if ((info->conn->flags & TCP_RESET) != 0)
+            {
+              eventset |= POLLIN;
+            }
 
           /* Mark that the connection has been lost */
 
@@ -368,16 +382,24 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
        * exceptional event.
        */
 
-      if (_SS_ISCLOSED(conn->sconn.s_flags))
+      /* After a reset of the peer: POLLHUP and end-of-file to read, and
+       * POLLERR while its ECONNRESET is not yet reported (SO_ERROR has it).
+       */
+
+      if ((conn->flags & TCP_RESET) != 0)
         {
-          _SO_CONN_SETERRNO(conn, ECONNREFUSED);
+          eventset |= POLLHUP | POLLRDNORM;
+          if (tcp_reset_pending(conn))
+            {
+              eventset |= POLLERR;
+            }
         }
       else
         {
-          _SO_CONN_SETERRNO(conn, ENOTCONN);
+          _SO_CONN_SETERRNO(conn, (_SS_ISCLOSED(conn->sconn.s_flags) ?
+                                   ECONNREFUSED : ENOTCONN));
+          eventset |= POLLERR | POLLHUP;
         }
-
-      eventset |= POLLERR | POLLHUP;
     }
   else if (_SS_ISCONNECTED(conn->sconn.s_flags) &&
            psock_tcp_cansend(conn) >= 0)

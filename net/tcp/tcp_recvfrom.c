@@ -506,11 +506,22 @@ static uint32_t tcp_recvhandler(FAR struct net_driver_s *dev,
             }
 
           /* Report a timed out connection (too many retransmissions or
-           * unanswered keep-alive probes) as ETIMEDOUT.
+           * unanswered keep-alive probes) as ETIMEDOUT, and a reset of the
+           * peer as ECONNRESET (end-of-file once that is reported).
            */
 
-          pstate->ir_result = (flags & TCP_TIMEDOUT) != 0 ? -ETIMEDOUT :
-                                                            -ENOTCONN;
+          if ((flags & TCP_TIMEDOUT) != 0)
+            {
+              pstate->ir_result = -ETIMEDOUT;
+            }
+          else if ((conn->flags & TCP_RESET) != 0)
+            {
+              pstate->ir_result = tcp_reset_pending(conn) ? -ECONNRESET : 0;
+            }
+          else
+            {
+              pstate->ir_result = -ENOTCONN;
+            }
 
           /* Wake up the waiting thread */
 
@@ -729,10 +740,17 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
        * negative) and the connection was gracefully closed by the remote
        * peer, then return success.  If ir_recvlen is zero, the caller of
        * recvfrom() will get an end-of-file indication.
+       *
+       * A reset of the peer gives ECONNRESET, after the data that came
+       * before it, until psock_tcp_recvfrom() returns it.
        */
 
-      if (ret <= 0 && !_SS_ISCLOSED(conn->sconn.s_flags) &&
-          (conn->shutdown & SHUT_RD) == 0)
+      if (ret <= 0 && tcp_reset_pending(conn))
+        {
+          ret = -ECONNRESET;
+        }
+      else if (ret <= 0 && !_SS_ISCLOSED(conn->sconn.s_flags) &&
+               (conn->shutdown & SHUT_RD) == 0)
         {
           /* Nothing was previously received from the read-ahead buffers.
            * The SOCK_STREAM must be (re-)connected in order to receive
@@ -911,8 +929,13 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
         }
     }
 
+  /* Data that came before a reset of the peer goes first: its ECONNRESET
+   * stays for the next receive.
+   */
+
+  ret = nrecv ? nrecv : tcp_reset_report(conn, ret);
   conn_dev_unlock(&conn->sconn, conn->dev);
-  return nrecv ? nrecv : ret;
+  return ret;
 }
 
 #endif /* CONFIG_NET_TCP */

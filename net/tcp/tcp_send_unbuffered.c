@@ -521,7 +521,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: Not connected\n");
-      ret = TCP_NOTCONN_ERROR(conn);
+      ret = tcp_reset_report(conn, TCP_NOTCONN_ERROR(conn));
       goto errout;
     }
 
@@ -578,8 +578,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: No longer connected\n");
+      ret = tcp_reset_report(conn, TCP_NOTCONN_ERROR(conn));
       conn_dev_unlock(&conn->sconn, conn->dev);
-      ret = TCP_NOTCONN_ERROR(conn);
       goto errout;
     }
 
@@ -667,7 +667,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (state.snd_sent < 0)
     {
-      ret = state.snd_sent;
+      ret = tcp_reset_report(conn, state.snd_sent);
       goto errout;
     }
 

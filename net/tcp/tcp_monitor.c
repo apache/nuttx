@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include <assert.h>
+#include <errno.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/net/tcp.h>
@@ -410,6 +411,67 @@ void tcp_lost_connection(FAR struct tcp_conn_s *conn,
   /* Then stop the network monitor for all sockets. */
 
   tcp_shutdown_monitor(conn, flags);
+}
+
+/****************************************************************************
+ * Name: tcp_reset_pending
+ *
+ * Description:
+ *   Tell if the ECONNRESET of a reset of the peer is not yet reported (by a
+ *   receive, a send or getsockopt(SO_ERROR)).
+ *
+ * Input Parameters:
+ *   conn - The TCP connection
+ *
+ * Returned Value:
+ *   true if a receive or send must give ECONNRESET.
+ *
+ ****************************************************************************/
+
+bool tcp_reset_pending(FAR struct tcp_conn_s *conn)
+{
+#ifdef CONFIG_NET_SOCKOPTS
+  /* getsockopt(SO_ERROR) reads and clears the same error */
+
+  return (conn->flags & TCP_RESETERR) != 0 &&
+         conn->sconn.s_error == ECONNRESET;
+#else
+  return (conn->flags & TCP_RESETERR) != 0;
+#endif
+}
+
+/****************************************************************************
+ * Name: tcp_reset_report
+ *
+ * Description:
+ *   Give the result of a receive or send that returns now.  If it is
+ *   -ECONNRESET, the reset is reported: the next receive gives end-of-file,
+ *   the next send EPIPE and SO_ERROR 0.
+ *
+ * Input Parameters:
+ *   conn - The TCP connection
+ *   ret  - The result that the receive or send returns
+ *
+ * Returned Value:
+ *   ret
+ *
+ ****************************************************************************/
+
+ssize_t tcp_reset_report(FAR struct tcp_conn_s *conn, ssize_t ret)
+{
+  if (ret == -ECONNRESET)
+    {
+      conn_dev_lock(&conn->sconn, conn->dev);
+      if (tcp_reset_pending(conn))
+        {
+          conn->flags &= ~TCP_RESETERR;
+          _SO_CONN_SETERRNO(conn, OK);
+        }
+
+      conn_dev_unlock(&conn->sconn, conn->dev);
+    }
+
+  return ret;
 }
 
 #endif /* NET_TCP_HAVE_STACK */

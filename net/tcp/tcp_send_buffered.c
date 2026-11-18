@@ -1346,7 +1346,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: Not connected\n");
-      ret = TCP_NOTCONN_ERROR(conn);
+      ret = tcp_reset_report(conn, TCP_NOTCONN_ERROR(conn));
       goto errout;
     }
 
@@ -1414,6 +1414,13 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
         {
           nerr("ERROR: No longer connected\n");
           ret = TCP_NOTCONN_ERROR(conn);
+          if (result == 0)
+            {
+              /* No byte of this send was queued: it returns the error */
+
+              tcp_reset_report(conn, ret);
+            }
+
           goto errout_with_lock;
         }
 
