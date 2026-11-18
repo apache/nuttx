@@ -49,6 +49,7 @@ set(SRCS
     fs_write.c
     fs_fsync.c
     fs_syncfs.c
+    fs_sync.c
     fs_truncate.c
     fs_link.c)
 
