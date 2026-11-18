@@ -215,6 +215,7 @@ static void mpu_reset_internal(void)
 {
   int region;
   int regions;
+
   regions = (getreg32(MPU_TYPE) & MPU_TYPE_DREGION_MASK)
                                   >> MPU_TYPE_DREGION_SHIFT;
 
@@ -436,7 +437,7 @@ void mpu_control(bool enable, bool hfnmiena, bool privdefena)
 
       if (hfnmiena)
         {
-           regval |= MPU_CTRL_HFNMIENA; /* Enable MPU during hard fault, NMI, and FAULTMAS */
+          regval |= MPU_CTRL_HFNMIENA; /* Enable MPU during hard fault, NMI, and FAULTMAS */
         }
 
       if (privdefena)
@@ -489,10 +490,20 @@ void mpu_modify_region(unsigned int region, uintptr_t base, size_t size,
    * aligns with the size of the selected region."
    */
 
-  alignedbase  = base & MPU_RBAR_ADDR_MASK;
-  l2size       = mpu_log2regionceil(size + base - alignedbase);
-  alignedbase &= ~((1 << l2size) - 1);
-  l2size       = mpu_log2regionceil(size + base - alignedbase);
+  alignedbase = base & MPU_RBAR_ADDR_MASK;
+  l2size      = mpu_log2regionceil(size + base - alignedbase);
+
+  /* Aligning the base down makes the region larger, which can need a
+   * larger l2size and so a stricter alignment.  Repeat until the base is
+   * aligned to the region size.  l2size only grows, so this ends.  A 4 GiB
+   * region (l2size 32) is always at address 0.
+   */
+
+  while (l2size < 32 && (alignedbase & ((1u << l2size) - 1)) != 0)
+    {
+      alignedbase &= ~((1u << l2size) - 1);
+      l2size       = mpu_log2regionceil(size + base - alignedbase);
+    }
 
   DEBUGASSERT(alignedbase + (1 << l2size) >= base + size);
   DEBUGASSERT(l2size == 5 ||
@@ -545,6 +556,7 @@ unsigned int mpu_configure_region(uintptr_t base, size_t size,
                                   uint32_t flags)
 {
   unsigned int region = mpu_allocregion();
+
   mpu_modify_region(region, base, size, flags);
   return region;
 }
