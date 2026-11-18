@@ -490,6 +490,29 @@ static inline void rcc_enableapb4(void)
 }
 
 /****************************************************************************
+ * Name: rcc_enableapb5
+ *
+ * Description:
+ *   Enable selected APB5 peripherals.
+ *
+ ****************************************************************************/
+
+static inline void rcc_enableapb5(void)
+{
+  uint32_t regval = 0;
+
+#ifdef CONFIG_STM32_LTDC
+  regval |= RCC_APB5ENR_LTDCEN;
+#endif
+
+  if (regval != 0)
+    {
+      putreg32(regval, STM32_RCC_APB5ENSR);
+      putreg32(regval, STM32_RCC_APB5LPENSR);
+    }
+}
+
+/****************************************************************************
  * Name: rcc_enablehse
  *
  * Description:
@@ -911,6 +934,7 @@ void stm32_rcc_enableperipherals(void)
   rcc_enableapb1();
   rcc_enableapb2();
   rcc_enableapb4();
+  rcc_enableapb5();
   rcc_enableccip();
 }
 

@@ -89,5 +89,8 @@
 #define RIFSC_PERIPH_BIT(p)         (1 << ((p) & 31))
 
 #define RIFSC_PERIPH_ETH1           (1 * 32 + 28)
+#define RIFSC_PERIPH_LTDC           (3 * 32 + 6)
+#define RIFSC_PERIPH_LTDCL1         (3 * 32 + 7)
+#define RIFSC_PERIPH_LTDCL2         (3 * 32 + 8)
 
 #endif /* __ARCH_ARM_SRC_STM32N6_HARDWARE_STM32N6XXX_RIFSC_H */
