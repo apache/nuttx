@@ -182,6 +182,19 @@ config TRICORE_TRAP_ALERT
 
 source "arch/tricore/src/common/aurix/Kconfig"
 
+if SMP
+
+config TRICORE_SMP_CSA_COUNT
+	int "CSA frames of each secondary CPU"
+	default 512
+	---help---
+		CPU1 and up build their pool of context save areas at the start
+		of their own data scratchpad RAM, followed by their interrupt
+		stack and their idle stack.  CPU0 keeps the pool of the linker
+		script.
+
+endif # SMP
+
 if ARCH_CHIP_TC3X
 source "arch/tricore/src/tc3x/Kconfig"
 endif

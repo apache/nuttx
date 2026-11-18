@@ -37,6 +37,216 @@
 
 #include "tricore_internal.h"
 
+#ifdef CONFIG_SMP
+#  include <nuttx/spinlock.h>
+#  include "tricore_smp.h"
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* A CSA frame belongs to the CPU whose data scratchpad RAM holds it.  When
+ * a task moves to another CPU, or a CPU builds the first context of a task
+ * for another CPU, frames of one CPU end up in the free list of another.
+ * Such frames are handed back to their owner through its return list.
+ */
+
+#ifdef CONFIG_SMP
+static spinlock_t g_csa_return_lock[CONFIG_SMP_NCPUS];
+static uintptr_t g_csa_return_head[CONFIG_SMP_NCPUS];
+static uintptr_t g_csa_return_tail[CONFIG_SMP_NCPUS];
+static volatile bool g_csa_reclaim_req[CONFIG_SMP_NCPUS];
+static uint32_t g_csa_switches[CONFIG_SMP_NCPUS];
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+
+/****************************************************************************
+ * Name: tricore_csa_owner
+ *
+ * Description:
+ *   Return the CPU that owns the CSA frame of a link word, or -1.
+ *
+ ****************************************************************************/
+
+static int tricore_csa_owner(uintptr_t link)
+{
+  int cpu;
+
+  cpu = TRICORE_SMP_CPU_OF_CORE(TRICORE_SMP_DSPR_SEG_TOP -
+                                (int)((link & FCX_FCXS_MASK) >> FCX_FCXS));
+  if (cpu < 0 || cpu >= CONFIG_SMP_NCPUS)
+    {
+      return -1;
+    }
+
+  return cpu;
+}
+
+/****************************************************************************
+ * Name: tricore_csa_take_returns
+ *
+ * Description:
+ *   Put the frames that other CPUs gave back to this CPU on its free list.
+ *
+ ****************************************************************************/
+
+static void tricore_csa_take_returns(int me)
+{
+  irqstate_t flags;
+  uintptr_t head;
+  uintptr_t tail;
+
+  if (g_csa_return_head[me] == 0)
+    {
+      return;
+    }
+
+  flags = spin_lock_irqsave(&g_csa_return_lock[me]);
+  head = g_csa_return_head[me];
+  tail = g_csa_return_tail[me];
+  g_csa_return_head[me] = 0;
+  g_csa_return_tail[me] = 0;
+
+  if (head != 0)
+    {
+      tricore_csa2addr(tail)[0] = tricore_mfcr(TRICORE_CPU_FCX) & FCX_FREE;
+      tricore_mtcr(TRICORE_CPU_FCX, head);
+      UP_ISB();
+    }
+
+  spin_unlock_irqrestore(&g_csa_return_lock[me], flags);
+}
+
+/****************************************************************************
+ * Name: tricore_csa_give_foreign
+ *
+ * Description:
+ *   Take the frames of other CPUs out of the first "limit" own frames of
+ *   the free list and queue them on the return lists of their owners.
+ *   Return true if fewer than "limit" own frames are free.
+ *
+ ****************************************************************************/
+
+static bool tricore_csa_give_foreign(int me, unsigned int limit)
+{
+  uintptr_t head[CONFIG_SMP_NCPUS];
+  uintptr_t tail[CONFIG_SMP_NCPUS];
+  uintptr_t *prev;
+  uintptr_t *addr;
+  uintptr_t link;
+  uintptr_t next;
+  uintptr_t lcx;
+  unsigned int count;
+  irqstate_t flags;
+  int owner;
+  int cpu;
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      head[cpu] = 0;
+      tail[cpu] = 0;
+    }
+
+  flags = up_irq_save();
+
+  prev  = NULL;
+  link  = tricore_mfcr(TRICORE_CPU_FCX) & FCX_FREE;
+  lcx   = tricore_mfcr(TRICORE_CPU_LCX) & FCX_FREE;
+  count = 0;
+
+  while (link != 0 && link != lcx && count < limit)
+    {
+      addr  = tricore_csa2addr(link);
+      next  = addr[0] & FCX_FREE;
+      owner = tricore_csa_owner(link);
+
+      if (owner >= 0 && owner != me)
+        {
+          if (prev == NULL)
+            {
+              tricore_mtcr(TRICORE_CPU_FCX, next);
+              UP_ISB();
+            }
+          else
+            {
+              prev[0] = next;
+            }
+
+          addr[0] = head[owner];
+          head[owner] = link;
+          if (tail[owner] == 0)
+            {
+              tail[owner] = link;
+            }
+        }
+      else
+        {
+          prev = addr;
+          count++;
+        }
+
+      link = next;
+    }
+
+  up_irq_restore(flags);
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      if (head[cpu] == 0)
+        {
+          continue;
+        }
+
+      flags = spin_lock_irqsave(&g_csa_return_lock[cpu]);
+      tricore_csa2addr(tail[cpu])[0] = g_csa_return_head[cpu];
+      if (g_csa_return_tail[cpu] == 0)
+        {
+          g_csa_return_tail[cpu] = tail[cpu];
+        }
+
+      g_csa_return_head[cpu] = head[cpu];
+      spin_unlock_irqrestore(&g_csa_return_lock[cpu], flags);
+    }
+
+  return count < limit;
+}
+
+/****************************************************************************
+ * Name: tricore_csa_ask_reclaim
+ *
+ * Description:
+ *   Ask the other CPUs to give back the frames of this CPU.
+ *
+ ****************************************************************************/
+
+static void tricore_csa_ask_reclaim(int me)
+{
+  cpu_set_t cpuset = 0;
+  int cpu;
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      if (cpu != me && !g_csa_reclaim_req[cpu])
+        {
+          g_csa_reclaim_req[cpu] = true;
+          cpuset |= (cpu_set_t)1 << cpu;
+        }
+    }
+
+  if (cpuset != 0)
+    {
+      up_trigger_irq(TRICORE_SMP_IPI_IRQ(me, me), cpuset);
+    }
+}
+
+#endif /* CONFIG_SMP */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -153,3 +363,77 @@ void tricore_reclaim_csa(uintptr_t pcxi)
 
   tricore_mtcr(TRICORE_CPU_FCX, head);
 }
+
+#ifdef CONFIG_SMP
+
+/****************************************************************************
+ * Name: tricore_csa_balance
+ *
+ * Description:
+ *   Take back the own frames and give back all foreign ones.  Called by
+ *   the idle loop.
+ *
+ ****************************************************************************/
+
+void tricore_csa_balance(void)
+{
+  int me = this_cpu();
+
+  tricore_csa_take_returns(me);
+  tricore_csa_give_foreign(me, TRICORE_SMP_CSA_SCAN_ALL);
+}
+
+/****************************************************************************
+ * Name: tricore_csa_switch_balance
+ *
+ * Description:
+ *   Called at every context switch: take back the own frames and give back
+ *   the foreign ones among the first few free frames.  Every
+ *   TRICORE_SMP_CSA_LOW_EVERY switches check the low water mark and, when
+ *   below it, ask the other CPUs to give back the frames of this CPU.
+ *
+ ****************************************************************************/
+
+void tricore_csa_switch_balance(void)
+{
+  int me = this_cpu();
+
+  tricore_csa_take_returns(me);
+
+  g_csa_switches[me]++;
+  if ((g_csa_switches[me] % TRICORE_SMP_CSA_LOW_EVERY) != 0)
+    {
+      tricore_csa_give_foreign(me, TRICORE_SMP_CSA_SWITCH_SCAN);
+
+      return;
+    }
+
+  if (tricore_csa_give_foreign(me, TRICORE_SMP_CSA_LOW_WATER))
+    {
+      tricore_csa_ask_reclaim(me);
+    }
+}
+
+/****************************************************************************
+ * Name: tricore_csa_reclaim_ipi
+ *
+ * Description:
+ *   Called from the inter-CPU interrupt: give back foreign frames if
+ *   another CPU asked for them.
+ *
+ ****************************************************************************/
+
+void tricore_csa_reclaim_ipi(void)
+{
+  int me = this_cpu();
+
+  if (!g_csa_reclaim_req[me])
+    {
+      return;
+    }
+
+  g_csa_reclaim_req[me] = false;
+  tricore_csa_balance();
+}
+
+#endif /* CONFIG_SMP */
