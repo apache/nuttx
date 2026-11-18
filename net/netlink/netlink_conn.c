@@ -42,6 +42,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netlink.h>
 #include <nuttx/tls.h>
+#include <nuttx/mm/mempool.h>
 
 #include "utils/utils.h"
 #include "netlink/netlink.h"
@@ -62,9 +63,15 @@
 
 /* The array containing all NetLink connections. */
 
-NET_BUFPOOL_DECLARE(g_netlink_connections, sizeof(struct netlink_conn_s),
-                    CONFIG_NETLINK_PREALLOC_CONNS,
-                    CONFIG_NETLINK_ALLOC_CONNS, CONFIG_NETLINK_MAX_CONNS);
+MEMPOOL_DEFINE(g_netlink_connections, sizeof(struct netlink_conn_s),
+               CONFIG_NETLINK_PREALLOC_CONNS, CONFIG_NETLINK_MAX_CONNS,
+               CONFIG_NETLINK_ALLOC_CONNS);
+
+/* The list of all allocated NetLink connections is protected by this
+ * rmutex.
+ */
+
+static rmutex_t g_netlink_connections_lock = NXRMUTEX_INITIALIZER;
 
 /* A list of all allocated NetLink connections */
 
@@ -157,9 +164,9 @@ FAR struct netlink_conn_s *netlink_alloc(void)
 
   /* The free list is protected by a mutex. */
 
-  NET_BUFPOOL_LOCK(g_netlink_connections);
+  nxrmutex_lock(&g_netlink_connections_lock);
 
-  conn = NET_BUFPOOL_TRYALLOC(g_netlink_connections);
+  conn = mempool_allocate(&g_netlink_connections, 0);
   if (conn != NULL)
     {
       /* Use conn_init to initialize the connection structure */
@@ -171,7 +178,7 @@ FAR struct netlink_conn_s *netlink_alloc(void)
       dq_addlast(&conn->sconn.s_node, &g_active_netlink_connections);
     }
 
-  NET_BUFPOOL_UNLOCK(g_netlink_connections);
+  nxrmutex_unlock(&g_netlink_connections_lock);
   return conn;
 }
 
@@ -192,7 +199,7 @@ void netlink_free(FAR struct netlink_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  NET_BUFPOOL_LOCK(g_netlink_connections);
+  nxrmutex_lock(&g_netlink_connections_lock);
 
   /* Remove the connection from the active list */
 
@@ -207,9 +214,9 @@ void netlink_free(FAR struct netlink_conn_s *conn)
 
   /* Free the connection */
 
-  NET_BUFPOOL_FREE(g_netlink_connections, conn);
+  mempool_release(&g_netlink_connections, conn);
 
-  NET_BUFPOOL_UNLOCK(g_netlink_connections);
+  nxrmutex_unlock(&g_netlink_connections_lock);
 }
 
 /****************************************************************************
