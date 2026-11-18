@@ -130,7 +130,7 @@ static inline_function clock_t wd_expiration(clock_t ticks)
        * re-evaluate after updating current ticks if needed
        */
 
-      if (!clock_compare(wdog->expired, ticks))
+      if (!clock_compare(wdog->expired, ticks + WDOG_ADJUST_TICKS))
         {
           next_ticks = wdog->expired;
           break;

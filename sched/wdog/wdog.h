@@ -140,6 +140,13 @@ static inline_function void wd_timer_cancel(void)
   hrtimer_cancel(&g_wdtimer);
 }
 #elif defined(CONFIG_SCHED_TICKLESS)
+/* Watchdogs that expire within this many ticks are processed now.  The
+ * timer is armed this much earlier (see wd_adjust_next_tick()), so a
+ * watchdog that is not yet due when that interrupt arrives must still run.
+ */
+
+#  define WDOG_ADJUST_TICKS (CONFIG_TIMER_ADJUST_NSEC / NSEC_PER_TICK)
+
 static inline_function clock_t wd_adjust_next_tick(clock_t tick)
 {
   clock_t next_tick = tick;
@@ -164,7 +171,7 @@ static inline_function clock_t wd_adjust_next_tick(clock_t tick)
    * interrupt, which may result in a much larger timer interrupt latency.
    */
 
-  next_tick -= CONFIG_TIMER_ADJUST_NSEC / NSEC_PER_TICK;
+  next_tick -= WDOG_ADJUST_TICKS;
 #endif
 
   return next_tick;
@@ -194,6 +201,10 @@ static inline_function void wd_timer_cancel(void)
 #else
 #  define wd_timer_start(next_tick, in_expiration)
 #  define wd_timer_cancel()
+#endif
+
+#ifndef WDOG_ADJUST_TICKS
+#  define WDOG_ADJUST_TICKS 0
 #endif
 
 static inline_function clock_t wd_next_expire(void)

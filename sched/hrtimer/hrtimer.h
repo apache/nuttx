@@ -722,9 +722,11 @@ static inline_function void hrtimer_process(uint64_t now)
 
       /* The earliest timer has not expired: arm the hardware for it.
        * An empty queue exits the loop without touching the hardware.
+       * hrtimer_reprogram() arms the hardware CONFIG_TIMER_ADJUST_NSEC
+       * early, so a timer that expires within that time is processed now.
        */
 
-      if (!HRTIMER_TIME_BEFORE_EQ(expired, now))
+      if (!HRTIMER_TIME_BEFORE_EQ(expired, now + CONFIG_TIMER_ADJUST_NSEC))
         {
           hrtimer_reprogram(expired);
           break;
