@@ -69,12 +69,13 @@ config RPMSG_WQUEUE_NUMBER
 
 config RPMSG_RECURSIVE_LIMIT
 	int "rpmsg recursive limit"
+	default 8 if ARCH_SIM
 	default 2 if RPMSG_WQUEUE_STACKSIZE <= 4096
-	default 3 if RPMSG_WQUEUE_STACKSIZE <= 6144
-	default 4 if RPMSG_WQUEUE_STACKSIZE <= 8192
-	default 5 if RPMSG_WQUEUE_STACKSIZE <= 10240
-	default 6 if RPMSG_WQUEUE_STACKSIZE <= 12288
-	default 7 if RPMSG_WQUEUE_STACKSIZE <= 14336
+	default 3 if RPMSG_WQUEUE_STACKSIZE <= 5120
+	default 4 if RPMSG_WQUEUE_STACKSIZE <= 6144
+	default 5 if RPMSG_WQUEUE_STACKSIZE <= 7168
+	default 6 if RPMSG_WQUEUE_STACKSIZE <= 8192
+	default 7 if RPMSG_WQUEUE_STACKSIZE <= 9216
 	default 8
 	---help---
 		This macro sets the maximum recursion depth allowed in the
