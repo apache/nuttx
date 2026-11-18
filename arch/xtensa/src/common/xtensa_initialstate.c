@@ -115,6 +115,14 @@ void up_initial_state(struct tcb_s *tcb)
 
       xtensa_stack_color(tcb->stack_alloc_ptr, 0);
 #endif /* CONFIG_STACK_COLORATION */
+
+#ifdef CONFIG_SMP
+      if (tcb->cpu != 0)
+        {
+          goto init_regs;
+        }
+
+#endif
       return;
     }
 
@@ -134,6 +142,9 @@ void up_initial_state(struct tcb_s *tcb)
   else
 #endif
     {
+#ifdef CONFIG_SMP
+init_regs:
+#endif
       xcp->regs = (void *)((uintptr_t)tcb->stack_base_ptr +
                                      tcb->adj_stack_size -
                                      XCPTCONTEXT_SIZE);

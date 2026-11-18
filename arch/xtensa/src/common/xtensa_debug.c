@@ -451,7 +451,15 @@ uint32_t *xtensa_debug_handler(uint32_t *regs)
     {
       xtensa_breakpoint_handler(regs[REG_PC]);
     }
-  else if(cause & XCHAL_DEBUGCAUSE_DBREAK_MASK)
+  else if (cause & XCHAL_DEBUGCAUSE_BREAK_MASK)
+    {
+      regs[REG_PC] += 3;
+    }
+  else if (cause & XCHAL_DEBUGCAUSE_BREAKN_MASK)
+    {
+      regs[REG_PC] += 2;
+    }
+  else if (cause & XCHAL_DEBUGCAUSE_DBREAK_MASK)
     {
       /* The DBNUM field of the DEBUGCAUSE register records which of the
        * possible DBREAK registers raised the exception
