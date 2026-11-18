@@ -144,6 +144,18 @@ static uint32_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
        *   NETWORK_DOWN event is processed further.
        */
 
+      if ((flags & NETDEV_DOWN) != 0)
+        {
+          /* No socket refers to the connection and its device sends
+           * nothing more.  Close it now: tcp_close_work() frees only a
+           * connection in TCP_CLOSED, and after this callback is freed no
+           * one frees it.  A connection in TIME_WAIT, for example, would
+           * become TCP_CLOSED later and stay in the active list.
+           */
+
+          conn->tcpstateflags = TCP_CLOSED;
+        }
+
       goto end_wait;
     }
 
