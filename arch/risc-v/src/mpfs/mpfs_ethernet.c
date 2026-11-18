@@ -464,6 +464,7 @@ static int mpfs_interrupt_0(int irq, void *context, void *arg)
 {
   struct mpfs_ethmac_s *priv = (struct mpfs_ethmac_s *)arg;
   uint32_t isr;
+
   UNUSED(irq);
   UNUSED(context);
 
@@ -505,6 +506,7 @@ static int mpfs_interrupt_0(int irq, void *context, void *arg)
 static int mpfs_interrupt_1(int irq, void *context, void *arg)
 {
   struct mpfs_ethmac_s *priv = (struct mpfs_ethmac_s *)arg;
+
   UNUSED(priv);
   UNUSED(irq);
   UNUSED(context);
@@ -516,6 +518,7 @@ static int mpfs_interrupt_1(int irq, void *context, void *arg)
 static int mpfs_interrupt_2(int irq, void *context, void *arg)
 {
   struct mpfs_ethmac_s *priv = (struct mpfs_ethmac_s *)arg;
+
   UNUSED(priv);
   UNUSED(irq);
   UNUSED(context);
@@ -527,6 +530,7 @@ static int mpfs_interrupt_2(int irq, void *context, void *arg)
 static int mpfs_interrupt_3(int irq, void *context, void *arg)
 {
   struct mpfs_ethmac_s *priv = (struct mpfs_ethmac_s *)arg;
+
   UNUSED(priv);
   UNUSED(irq);
   UNUSED(context);
@@ -948,7 +952,7 @@ static void mpfs_receive(struct mpfs_ethmac_s *priv, unsigned int queue)
         }
     }
 
-    ninfo("receive done.\n");
+  ninfo("receive done.\n");
 }
 
 /****************************************************************************
@@ -1092,6 +1096,7 @@ static void mpfs_interrupt_work(void *arg)
   if (rsr != 0)
     {
       uint32_t rx_error = 0;
+
       ninfo("RX: rsr=0x%X\n", rsr);
 
       /* Check for Receive Overrun */
@@ -1333,6 +1338,7 @@ static void mpfs_rxreset(struct mpfs_ethmac_s *priv)
 static uint16_t mpfs_txinuse(struct mpfs_ethmac_s *priv, unsigned int queue)
 {
   uint32_t txhead32 = priv->queue[queue].txhead;
+
   if (priv->queue[queue].txtail > txhead32)
     {
       txhead32 += CONFIG_MPFS_ETHMAC_NTXBUFFERS;
@@ -1806,6 +1812,7 @@ static int mpfs_addmac(struct net_driver_s *dev, const uint8_t *mac)
   uint32_t regoffset;
   uint32_t regval;
   unsigned int ndx;
+
   UNUSED(priv);
 
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
@@ -1869,6 +1876,7 @@ static int mpfs_rmmac(struct net_driver_s *dev, const uint8_t *mac)
   uint32_t regaddr1;
   uint32_t regaddr2;
   unsigned int ndx;
+
   UNUSED(priv);
 
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
@@ -2681,6 +2689,7 @@ static int mpfs_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
                   (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
           req->phy_id = priv->phyaddr;
           ret = OK;
         }
@@ -3259,6 +3268,7 @@ static int mpfs_macenable(struct mpfs_ethmac_s *priv)
   /* enable queue-0 DMA */
 
   uint32_t r = *priv->queue[0].rx_q_ptr & ~1u;
+
   *priv->queue[0].rx_q_ptr = r;
 
   /* enable global irqs */
@@ -3472,6 +3482,7 @@ static int mpfs_phyreset(struct mpfs_ethmac_s *priv)
       mcr = GMII_MCR_RESET;
       int result = mpfs_phyread(priv, priv->phyaddr,
                                 GMII_MCR, &mcr);
+
       if (result < 0)
         {
           nerr("ERROR: Failed to read the MCR register: %d\n", ret);
