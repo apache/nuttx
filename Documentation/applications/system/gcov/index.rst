@@ -90,11 +90,12 @@ Examples of applicable platforms
      ```
      $ ./tools/configure.sh sim:nsh
      nsh: poweroff
-     $ ./nuttx/tools/gcov.py -t gcov
-     Then open ./gcov/result/index.html with your browser
+     $ ./tools/gcov.py -e nuttx -s .
+     Then open the report link printed by the tool
+     (file://<abs path>/gcov/report/index.html) with your browser
      ```
 
-2. Applicable to device
+     ``-a`` defaults to the current directory and ``-o`` to ``gcov``.
 
 2. Applicable to device
 
@@ -135,18 +136,20 @@ Examples of applicable platforms
 
         Run the following command to generate coverage report
 
-        # By default, it is generated in the root directory of the vela project. Add parameters to specify the report generation location
-        # The -t parameter specifies the gcov version, which needs to match the gcc version
+        # The toolchain (gcc or clang) and the target architecture are
+        # detected from the ELF passed with -e, so the same command works
+        # on sim and on cross targets. -s is the directory holding the
+        # \*.gcno files (the build directory), -a the exported data.
 
-        # sim
-        ./tools/gcov.py -t gcov
+        # sim / arm / other targets
+        ./tools/gcov.py -e nuttx -s . -a path_to_exported_data
 
-        # arm platform
-        ./tools/gcov.py -t arm-none-eabi-gcov
+        # If the sources were built in another tree, map the recorded
+        # paths, e.g. -b /build/root=/home/me/nuttx
 
     5. Impact and precautions
        ```
-       1. Before using the .tools/gcov.sh tool, you need to ensure that *.gcno and *.gcda files exist
+       1. Before using the tools/gcov.py tool, you need to ensure that *.gcno and *.gcda files exist
        2. If *.gcno does not exist, recompile the code after distclean.
        3. If *.gcda does not exist, please check and use poweroff to exit Vela normally
        ```
@@ -211,13 +214,15 @@ Examples of applicable platforms
 
     5. Generate Report
 
-      Please execute the following command, where
+      The same command as for GCC produces the report: the ELF given with
+      -e tells gcov.py that the data is clang source-based coverage, the
+      exported \*.profraw files are passed with -a, and llvm-profdata and
+      llvm-cov are driven automatically.
 
-      1. xxxfile: the file for exporting data on the device
-      2. xxxelf: the ELF file corresponding to the device
+      ```
+      $ ./tools/gcov.py -e nuttx -a path_to_exported_data
+      ```
 
-      # Convert the exported coverage data file
-      llvm-profdata merge -sparse xxxfile -o result.profdata
-
-      # Generate a visualization html file
-      llvm-cov show -format=html xxxelf -instr-profile=result.profdata -output-dir=./coverage/html
+      Pass ``--llvm-html`` to render with ``llvm-cov show`` instead of
+      genhtml, which keeps region-level highlighting at the cost of a
+      report that differs from the GCC one.
