@@ -262,6 +262,9 @@ static inline void nxtask_save_parent(FAR struct tcb_s *tcb, uint8_t ttype)
       /* Get the TCB of the parent task.  In this case, the calling task. */
 
       FAR struct tcb_s *rtcb = this_task();
+#ifndef CONFIG_SCHED_CHILD_STATUS
+      irqstate_t flags;
+#endif
 
       DEBUGASSERT(rtcb != NULL && rtcb->group != NULL);
 
@@ -320,7 +323,9 @@ static inline void nxtask_save_parent(FAR struct tcb_s *tcb, uint8_t ttype)
        */
 
       DEBUGASSERT(rtcb->group->tg_nchildren < UINT16_MAX);
+      flags = spin_lock_irqsave(&rtcb->group->tg_lock);
       rtcb->group->tg_nchildren++;
+      spin_unlock_irqrestore(&rtcb->group->tg_lock, flags);
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
     }

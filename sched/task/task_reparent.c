@@ -69,6 +69,9 @@ int task_reparent(pid_t ppid, pid_t chpid)
   FAR struct task_group_s *pgrp;
   FAR struct tcb_s *tcb;
   irqstate_t flags;
+#ifndef CONFIG_SCHED_CHILD_STATUS
+  irqstate_t tgflags;
+#endif
   pid_t opid;
   int ret;
 
@@ -186,8 +189,17 @@ int task_reparent(pid_t ppid, pid_t chpid)
 
   DEBUGASSERT(ogrp->tg_nchildren > 0);
 
-  ogrp->tg_nchildren--;  /* The original parent now has one few children */
-  pgrp->tg_nchildren++;  /* The new parent has one additional child */
+  /* The original parent now has one few children */
+
+  tgflags = spin_lock_irqsave(&ogrp->tg_lock);
+  ogrp->tg_nchildren--;
+  spin_unlock_irqrestore(&ogrp->tg_lock, tgflags);
+
+  /* The new parent has one additional child */
+
+  tgflags = spin_lock_irqsave(&pgrp->tg_lock);
+  pgrp->tg_nchildren++;
+  spin_unlock_irqrestore(&pgrp->tg_lock, tgflags);
   ret = OK;
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
@@ -212,6 +224,9 @@ int task_reparent(pid_t ppid, pid_t chpid)
   FAR struct tcb_s *otcb;
   pid_t opid;
   irqstate_t flags;
+#ifndef CONFIG_SCHED_CHILD_STATUS
+  irqstate_t tgflags;
+#endif
   int ret;
 
   /* Disable interrupts so that nothing can change in the relationship of
@@ -310,8 +325,17 @@ int task_reparent(pid_t ppid, pid_t chpid)
 
   DEBUGASSERT(otcb->group != NULL && otcb->group->tg_nchildren > 0);
 
-  otcb->group->tg_nchildren--;  /* The original parent now has one few children */
-  ptcb->group->tg_nchildren++;  /* The new parent has one additional child */
+  /* The original parent now has one few children */
+
+  tgflags = spin_lock_irqsave(&otcb->group->tg_lock);
+  otcb->group->tg_nchildren--;
+  spin_unlock_irqrestore(&otcb->group->tg_lock, tgflags);
+
+  /* The new parent has one additional child */
+
+  tgflags = spin_lock_irqsave(&ptcb->group->tg_lock);
+  ptcb->group->tg_nchildren++;
+  spin_unlock_irqrestore(&ptcb->group->tg_lock, tgflags);
   ret = OK;
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */

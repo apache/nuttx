@@ -245,8 +245,12 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
        * children from this parent.
        */
 
+      irqstate_t flags;
+
       DEBUGASSERT(ptcb->group != NULL && ptcb->group->tg_nchildren > 0);
+      flags = spin_lock_irqsave(&ptcb->group->tg_lock);
       ptcb->group->tg_nchildren--;
+      spin_unlock_irqrestore(&ptcb->group->tg_lock, flags);
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 
