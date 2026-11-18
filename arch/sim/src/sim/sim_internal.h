@@ -485,6 +485,10 @@ int sim_camera_initialize(void);
 int sim_decoder_initialize(void);
 #endif
 
+#ifdef CONFIG_SIM_JPEG_DECODER
+int sim_jpeg_decoder_initialize(void);
+#endif
+
 #ifdef CONFIG_SIM_VIDEO_ENCODER
 int sim_encoder_initialize(void);
 #endif
