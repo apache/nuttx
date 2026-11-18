@@ -134,6 +134,23 @@ const struct mountpt_operations g_wzipfs_operations =
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: wzipfs_convert_result
+ *
+ * Description:
+ *   Convert a libarchive return code to a negated errno value. ARCHIVE_RETRY
+ *   becomes -EAGAIN, ARCHIVE_WARN becomes -ENOEXEC, ARCHIVE_FAILED becomes
+ *   -EINVAL and ARCHIVE_FATAL becomes -EPERM. Any other value, such as
+ *   ARCHIVE_OK, ARCHIVE_EOF or a byte count, is returned unchanged.
+ *
+ * Input Parameters:
+ *   ret - The value that a libarchive function returned.
+ *
+ * Returned Value:
+ *   The negated errno value for a libarchive error, otherwise ret.
+ *
+ ****************************************************************************/
+
 static int wzipfs_convert_result(int ret)
 {
   switch (ret)
@@ -156,12 +173,27 @@ static int wzipfs_convert_result(int ret)
  * Name: wzipfs_parse_options
  *
  * Description:
- *   Parse a NuttX mount "-o" options string.
- *   Accepted keys: src=<path>, fd=<N>, method=store|deflate.
- *   Legacy positional path (no '=' and no ',') is accepted as src.
- *   src= and fd= are mutually exclusive.
+ *   Parse the mount option string. The accepted options are src=<path>,
+ *   fd=<N> and method=store|deflate, separated by commas. A string without =
+ *   and , is accepted as the path of the backing target, as src=. One of
+ *   src= and fd= is required, and they exclude each other.
  *
- * Returns 0 on success, negative errno on failure.
+ * Input Parameters:
+ *   data    - The mount option string.
+ *   src     - Buffer to return the path of the backing target. It is empty
+ *             when fd= is used.
+ *   len     - Size of the buffer src.
+ *   fd      - Location to return the file descriptor number of fd=, or -1.
+ *   deflate - Location to return true for method=deflate, otherwise false.
+ *
+ * Returned Value:
+ *   Zero on success. -ENODEV if data is NULL or empty, or if neither src=
+ *   nor fd= is given. -ENAMETOOLONG if a path without src= does not fit in
+ *   src. -EINVAL if src= does not fit in src, the value of fd= is not valid,
+ *   the method or the option is unknown, or both src= and fd= are given.
+ *   -ENOTSUP for method=deflate when CONFIG_FS_ZIPFS_WRITE_DEFLATE is not
+ *   set.
+ *
  ****************************************************************************/
 
 static int wzipfs_parse_options(FAR const void *data,
@@ -269,6 +301,23 @@ static int wzipfs_parse_options(FAR const void *data,
   return 0;
 }
 
+/****************************************************************************
+ * Name: wzipfs_write_cb
+ *
+ * Description:
+ *   libarchive write callback. Write the data to the backing file.
+ *
+ * Input Parameters:
+ *   a           - The libarchive handle. Not used.
+ *   client_data - The struct wzipfs_priv_s of the mount.
+ *   buff        - The data to write.
+ *   len         - Number of bytes to write.
+ *
+ * Returned Value:
+ *   The number of bytes written, or the negated errno value of file_write().
+ *
+ ****************************************************************************/
+
 static la_ssize_t wzipfs_write_cb(FAR struct archive *a,
                                   FAR void *client_data,
                                   FAR const void *buff,
@@ -282,10 +331,23 @@ static la_ssize_t wzipfs_write_cb(FAR struct archive *a,
 /****************************************************************************
  * Name: wzipfs_init_entry
  *
- * Prepare the reusable archive_entry in priv->entry for a header write.
- * Size is intentionally left unset: for regular files this triggers the
- * streaming (data descriptor) write path; for directories the ZIP writer
- * forces size to 0 internally.
+ * Description:
+ *   Prepare the reusable archive_entry in priv->entry for a header write:
+ *   set the name, the mode, the modification time (now) and the file type,
+ *   which is a directory if mode is a directory and a regular file
+ *   otherwise. The size is left unset on purpose: for a regular file this
+ *   selects the streaming (data descriptor) write of libarchive, and for a
+ *   directory the ZIP writer sets the size to 0.
+ *
+ * Input Parameters:
+ *   priv - The state of the mount.
+ *   path - Name of the entry. The name of a directory ends with /.
+ *   mode - File type and permission bits, S_IFREG or S_IFDIR with the
+ *          permissions.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 static void wzipfs_init_entry(FAR struct wzipfs_priv_s *priv,
@@ -302,16 +364,24 @@ static void wzipfs_init_entry(FAR struct wzipfs_priv_s *priv,
 /****************************************************************************
  * Name: wzipfs_create_backing
  *
- * Open the backing target.  Accepted cases:
- *   - backing does not exist (ENOENT)    -- create new regular file
- *   - backing is a FIFO or socket        -- stream unconditionally
- *   - backing is a regular file of zero size -- create fresh archive
+ * Description:
+ *   Open the backing target for writing, and create it if it does not exist.
+ *   A regular file must be empty: one with a size greater than zero is
+ *   rejected. Any other target, such as a FIFO or a socket, is used without
+ *   a check. On failure the backing file is closed.
  *
- * Rejected cases:
- *   - regular file with st_size > 0      -- returns -EEXIST
+ * Input Parameters:
+ *   priv - The state of the mount. priv->backing is opened.
+ *   src  - Path of the backing target.
  *
- * Callers that want to replace an existing archive should unlink/truncate
- * the backing file before mounting.
+ * Returned Value:
+ *   Zero on success, -EEXIST for a regular file that is not empty, or the
+ *   negated errno value of file_open() or file_fstat().
+ *
+ * Assumptions/Limitations:
+ *   To replace an existing archive, remove or truncate the backing file
+ *   before mounting.
+ *
  ****************************************************************************/
 
 static int wzipfs_create_backing(FAR struct wzipfs_priv_s *priv,
@@ -348,8 +418,24 @@ static int wzipfs_create_backing(FAR struct wzipfs_priv_s *priv,
 /****************************************************************************
  * Name: wzipfs_create_archive
  *
- * Allocate the libarchive writer + reusable entry, set mount-time
- * compression method, and open the write stream onto priv->backing.
+ * Description:
+ *   Create the libarchive writer and the reusable archive_entry, select the
+ *   zip format with UTF-8 names, select the compression of the whole mount,
+ *   and open the write stream on priv->backing. libarchive uses DEFLATE when
+ *   it is not told otherwise and zlib is built in, so STORE is selected
+ *   explicitly.
+ *
+ * Input Parameters:
+ *   priv    - The state of the mount. priv->a and priv->entry are set.
+ *   deflate - True to compress with DEFLATE, false to store. DEFLATE needs
+ *             CONFIG_FS_ZIPFS_WRITE_DEFLATE.
+ *
+ * Returned Value:
+ *   Zero on success, -ENOMEM if memory runs out, -ENOTSUP for DEFLATE
+ *   without CONFIG_FS_ZIPFS_WRITE_DEFLATE, or the negated errno value
+ *   converted from a libarchive error. On failure the writer and the entry
+ *   are freed and priv->a and priv->entry are NULL.
+ *
  ****************************************************************************/
 
 static int wzipfs_create_archive(FAR struct wzipfs_priv_s *priv,
@@ -446,6 +532,26 @@ err:
 
 /****************************************************************************
  * Name: wzipfs_open
+ *
+ * Description:
+ *   Start a new entry of the archive. Only one file can be open for writing
+ *   at a time: this function waits until the previous file is closed. The
+ *   header of the entry is written with archive_write_header(). The file
+ *   must be opened for writing with O_CREAT.
+ *
+ * Input Parameters:
+ *   filep   - The file structure. The state of the mount is in the i_private
+ *             field of its inode.
+ *   relpath - Name of the entry, relative to the mount point.
+ *   oflags  - Open flags.
+ *   mode    - Permission bits of the entry.
+ *
+ * Returned Value:
+ *   Zero on success. -EACCES if the file is opened read only, -ENOSYS if
+ *   O_CREAT is not set, -EINVAL if relpath is empty, or the negated errno
+ *   value of the wait or of writing the header. If writing the header fails,
+ *   the lock is released before the function returns.
+ *
  ****************************************************************************/
 
 static int wzipfs_open(FAR struct file *filep, FAR const char *relpath,
@@ -491,6 +597,18 @@ static int wzipfs_open(FAR struct file *filep, FAR const char *relpath,
 
 /****************************************************************************
  * Name: wzipfs_close
+ *
+ * Description:
+ *   Finish the current entry with archive_write_finish_entry() and release
+ *   the lock that wzipfs_open() took, so that the next file can be opened.
+ *
+ * Input Parameters:
+ *   filep - The file structure.
+ *
+ * Returned Value:
+ *   Zero on success, otherwise the negated errno value converted from a
+ *   libarchive error. The lock is released in both cases.
+ *
  ****************************************************************************/
 
 static int wzipfs_close(FAR struct file *filep)
@@ -510,6 +628,22 @@ static int wzipfs_close(FAR struct file *filep)
 
 /****************************************************************************
  * Name: wzipfs_write
+ *
+ * Description:
+ *   Append data to the current entry with archive_write_data(). libarchive
+ *   collects what the zip writer produces in blocks (10240 bytes by default)
+ *   and calls wzipfs_write_cb() for each full block, so the data reaches the
+ *   backing target block by block. The rest is written when the archive is
+ *   closed at unmount.
+ *
+ * Input Parameters:
+ *   filep  - The file structure.
+ *   buffer - The data to write.
+ *   buflen - Number of bytes to write.
+ *
+ * Returned Value:
+ *   The number of bytes written, or a negated errno value.
+ *
  ****************************************************************************/
 
 static ssize_t wzipfs_write(FAR struct file *filep,
@@ -531,10 +665,18 @@ static ssize_t wzipfs_write(FAR struct file *filep,
 /****************************************************************************
  * Name: wzipfs_sync
  *
- * Flush the backing file.  Only the bytes already emitted by libarchive
- * (through the write callback) are guaranteed to be persisted; libarchive
- * retains its own block buffer internally with no public flush hook, so
- * data descriptors for an in-progress entry may still be pending in RAM.
+ * Description:
+ *   Flush the backing file with file_fsync(). Only the bytes that libarchive
+ *   already passed to the write callback are persisted. libarchive keeps its
+ *   own block buffer and has no public way to flush it, so the data
+ *   descriptors of an entry that is being written can still be in memory.
+ *
+ * Input Parameters:
+ *   filep - The file structure.
+ *
+ * Returned Value:
+ *   Zero on success, otherwise the negated errno value of file_fsync().
+ *
  ****************************************************************************/
 
 static int wzipfs_sync(FAR struct file *filep)
@@ -546,6 +688,29 @@ static int wzipfs_sync(FAR struct file *filep)
 
 /****************************************************************************
  * Name: wzipfs_bind
+ *
+ * Description:
+ *   Mount: parse the options, allocate the state of the mount, and open the
+ *   backing target. With fd=, the file descriptor is duplicated into the
+ *   state of the mount, and with src= the path is opened with
+ *   wzipfs_create_backing(). Then the libarchive writer is created with
+ *   wzipfs_create_archive(). No block driver is used.
+ *
+ * Input Parameters:
+ *   driver - Not used.
+ *   data   - The mount option string, see wzipfs_parse_options().
+ *   handle - Location to return the state of the mount.
+ *
+ * Returned Value:
+ *   Zero on success, otherwise a negated errno value: an error of
+ *   wzipfs_parse_options(), -ENOMEM, an error of file_get() or file_dup2()
+ *   for fd=, or an error of wzipfs_create_backing() or
+ *   wzipfs_create_archive(). On failure the state of the mount is freed.
+ *
+ * Assumptions/Limitations:
+ *   With fd=, the caller keeps its own file descriptor and has to keep it
+ *   open until the file system is unmounted.
+ *
  ****************************************************************************/
 
 static int wzipfs_bind(FAR struct inode *driver, FAR const void *data,
@@ -607,6 +772,21 @@ err:
 
 /****************************************************************************
  * Name: wzipfs_unbind
+ *
+ * Description:
+ *   Unmount: close the archive with archive_write_close(), which writes the
+ *   central directory, free the writer and the entry, close the backing
+ *   file, and free the state of the mount.
+ *
+ * Input Parameters:
+ *   handle - The state of the mount that wzipfs_bind() returned.
+ *   driver - Not used.
+ *   flags  - Not used.
+ *
+ * Returned Value:
+ *   Zero on success, or the negated errno value converted from the error of
+ *   archive_write_close(). The resources are released in both cases.
+ *
  ****************************************************************************/
 
 static int wzipfs_unbind(FAR void *handle, FAR struct inode **driver,
@@ -643,6 +823,18 @@ static int wzipfs_unbind(FAR void *handle, FAR struct inode **driver,
 
 /****************************************************************************
  * Name: wzipfs_statfs
+ *
+ * Description:
+ *   Return information about the file system: the structure is cleared,
+ *   f_type is set to ZIPFS_MAGIC and f_namelen to NAME_MAX.
+ *
+ * Input Parameters:
+ *   mountpt - The mountpoint inode. Not used.
+ *   buf     - Location to return the information.
+ *
+ * Returned Value:
+ *   Zero always.
+ *
  ****************************************************************************/
 
 static int wzipfs_statfs(FAR struct inode *mountpt,
@@ -656,6 +848,25 @@ static int wzipfs_statfs(FAR struct inode *mountpt,
 
 /****************************************************************************
  * Name: wzipfs_mkdir
+ *
+ * Description:
+ *   Add a directory entry to the archive. The name is relpath followed by /,
+ *   and its header is written and finished at once.
+ *
+ * Input Parameters:
+ *   mountpt - The mountpoint inode. The state of the mount is in its
+ *             i_private field.
+ *   relpath - Name of the directory, relative to the mount point.
+ *   mode    - Permission bits of the directory.
+ *
+ * Returned Value:
+ *   Zero on success, -EINVAL if relpath is empty or too long, otherwise the
+ *   negated errno value converted from a libarchive error.
+ *
+ * Assumptions/Limitations:
+ *   It does not take the lock that wzipfs_open() takes. Call it only when no
+ *   file of the mount is open for writing.
+ *
  ****************************************************************************/
 
 static int wzipfs_mkdir(FAR struct inode *mountpt,
@@ -700,8 +911,18 @@ static int wzipfs_mkdir(FAR struct inode *mountpt,
  * Name: wzipfs_stat
  *
  * Description:
- *   Minimal stat for wzipfs. Always reports path as a writable directory
- *   so that rpmsgfs can verify the mount root without blocking.
+ *   Minimal stat of wzipfs: whatever the path is, report a directory with
+ *   mode 0755, so that rpmsgfs can verify the root of the mount without
+ *   blocking. wzipfs does not keep information about the entries that were
+ *   written.
+ *
+ * Input Parameters:
+ *   mountpt - The mountpoint inode. Not used.
+ *   relpath - Not used.
+ *   buf     - Location to return the stat. It is cleared first.
+ *
+ * Returned Value:
+ *   Zero always.
  *
  ****************************************************************************/
 
