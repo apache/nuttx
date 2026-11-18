@@ -40,6 +40,10 @@
 
 #include "tricore_internal.h"
 
+#ifdef CONFIG_SMP
+#  include "tricore_smp.h"
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -126,6 +130,10 @@ void tricore_svcall(volatile void *trap)
 
       case SYS_restore_context:
         *running_task = tcb;
+#ifdef CONFIG_SMP
+        tricore_csa_switch_balance();
+        restore_critical_section(tcb, this_cpu());
+#endif
         tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
         UP_ISB();
         break;
