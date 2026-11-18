@@ -99,4 +99,16 @@ void stm32_rifconfig(void)
   rif_setslave_secpriv(RIFSC_PERIPH_LTDCL1);
   rif_setslave_secpriv(RIFSC_PERIPH_LTDCL2);
 #endif
+
+#ifdef CONFIG_STM32_SDMMC1
+  /* The SDMMC IDMA reads and writes buffers in Secure AXISRAM */
+
+  rif_setmaster(RIFSC_MASTER_SDMMC1, RIF_MASTER_CID1_SEC_PRIV);
+  rif_setslave_secpriv(RIFSC_PERIPH_SDMMC1);
+#endif
+
+#ifdef CONFIG_STM32_SDMMC2
+  rif_setmaster(RIFSC_MASTER_SDMMC2, RIF_MASTER_CID1_SEC_PRIV);
+  rif_setslave_secpriv(RIFSC_PERIPH_SDMMC2);
+#endif
 }
