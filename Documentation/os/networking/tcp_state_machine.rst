@@ -149,6 +149,19 @@ sends FIN and transitions:
 		-> TCP_TIME_WAIT           (FIN from peer)
 		-> TCP_CLOSED              (timer expiry)
 
+The FIN goes after the data that the application queued before ``close()``
+or ``shutdown(SHUT_WR)``.  A ``close()`` with received data that the
+application did not read, or with ``SO_LINGER`` on and a time of zero, sends
+a RST instead and drops the queued data (RFC 1122, section 4.2.2.13).
+
+After ``close()`` the connection keeps one callback (``tcp_close.c``) until it
+ends; it is then freed.  When the device of the connection goes down, the
+connection is closed at once.  When ``socket()`` or a new connection from a
+listener finds no free connection structure, or ``close()`` finds no free
+callback, the oldest connection that no socket uses and that only waits for
+the end of its close (for example in ``TCP_TIME_WAIT``) is freed to make room
+(``tcp_reclaim()`` in ``tcp_conn.c``).
+
 Simultaneous close
 ------------------
 
