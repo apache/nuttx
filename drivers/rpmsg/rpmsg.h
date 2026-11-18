@@ -95,6 +95,9 @@ struct rpmsg_ops_s
   CODE void (*dump)(FAR struct rpmsg_s *rpmsg, bool verbose);
   CODE int (*get_timestamp)(FAR struct rpmsg_s *rpmsg, FAR const void *data,
                             FAR struct rpmsg_timestamp_s *ts);
+  CODE FAR void *(*alloc_buf)(FAR struct rpmsg_s *rpmsg, size_t size,
+                              size_t align);
+  CODE void (*free_buf)(FAR struct rpmsg_s *rpmsg, FAR void *addr);
 };
 
 CODE typedef int (*rpmsg_foreach_t)(FAR struct rpmsg_s *rpmsg,

@@ -474,6 +474,36 @@ int rpmsg_get_timestamp(FAR struct rpmsg_device *rdev, FAR const void *data,
   return rpmsg->ops->get_timestamp(rpmsg, data, ts);
 }
 
+bool rpmsg_support_alloc_buf(FAR struct rpmsg_device *rdev)
+{
+  FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
+
+  return rpmsg && rpmsg->ops->alloc_buf && rpmsg->ops->free_buf;
+}
+
+FAR void *rpmsg_alloc_buf(FAR struct rpmsg_device *rdev, size_t size,
+                          size_t align)
+{
+  FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
+
+  if (!rpmsg || !rpmsg->ops->alloc_buf)
+    {
+      return NULL;
+    }
+
+  return rpmsg->ops->alloc_buf(rpmsg, size, align);
+}
+
+void rpmsg_free_buf(FAR struct rpmsg_device *rdev, FAR void *addr)
+{
+  FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
+
+  if (rpmsg && rpmsg->ops->free_buf)
+    {
+      rpmsg->ops->free_buf(rpmsg, addr);
+    }
+}
+
 #if CONFIG_RPMSG_POOL_COUNT > 0
 FAR void *rpmsg_pool_alloc(size_t size)
 {
