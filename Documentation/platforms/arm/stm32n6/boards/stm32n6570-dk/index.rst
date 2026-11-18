@@ -182,6 +182,15 @@ The GT911 touch controller on I2C2 (interrupt on PQ4) is reset at bring-up
 with PQ4 held low, which selects address 0x5d, and registered as
 ``/dev/input0``; ``tc`` prints the touch coordinates.
 
+Time-of-flight sensor
+=====================
+
+The VL53L5CX on the camera module (MB1854) is on I2C1 at 0x29, with INT on
+PQ0 and LPn on PQ5.  The board powers the module through PD2 with the
+IMX335 held in reset (PC8) and registers the sensor as the V4L2 depth
+camera ``/dev/video1`` (Z16, 8x8 or 4x4).  INT uses EXTI0, so the TAMP
+button has no interrupt when the sensor is enabled.
+
 Clocking
 ========
 

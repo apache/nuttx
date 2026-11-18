@@ -153,6 +153,14 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_VIDEO_VL53L5CX
+  ret = stm32_tof_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_tof_initialize() failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
