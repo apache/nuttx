@@ -25,6 +25,7 @@ The following list indicates peripherals supported in NuttX:
 ==========  =======  ===============================================
 Peripheral  Support  Notes
 ==========  =======  ===============================================
+Cache       Yes      L1 I- and D-cache.
 GPIO        Yes
 I2C         Yes      I2C1-4 through the common I2C v2 driver.
 LTDC        Yes      Common LTDC driver (v2 register layout), RGB565,
@@ -46,9 +47,7 @@ USART       Yes      USART1-3, UART4-5, USART6, UART7-9, USART10 and
                      LPUART1 through the common U(S)ART driver.
 
 ADC         No
-DCACHE      No
 DCMIPP      No
-ICACHE      No
 IWDG        No
 LPTIM       No
 MPU         No
