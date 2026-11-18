@@ -120,9 +120,16 @@ static void tcp_path(FAR struct tcp_conn_s *conn, FAR char *buf, size_t len)
 
 int tcp_ioctl(FAR struct tcp_conn_s *conn, int cmd, unsigned long arg)
 {
+  FAR struct net_driver_s *dev = conn->dev;
   int ret = OK;
 
-  conn_lock(&conn->sconn);
+  /* The input path changes the read-ahead and the write queues with only
+   * the device locked (an ACK frees a write buffer): take the device lock
+   * too, as the send path does, before FIONREAD, FIONSPACE or the path
+   * look at them.
+   */
+
+  conn_dev_lock(&conn->sconn, dev);
 
   switch (cmd)
     {
@@ -154,7 +161,7 @@ int tcp_ioctl(FAR struct tcp_conn_s *conn, int cmd, unsigned long arg)
         break;
     }
 
-  conn_unlock(&conn->sconn);
+  conn_dev_unlock(&conn->sconn, dev);
 
   return ret;
 }
