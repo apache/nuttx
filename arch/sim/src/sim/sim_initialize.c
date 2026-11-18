@@ -326,6 +326,10 @@ void up_initialize(void)
   sim_decoder_initialize();
 #endif
 
+#ifdef CONFIG_SIM_JPEG_DECODER
+  sim_jpeg_decoder_initialize();
+#endif
+
 #ifdef CONFIG_SIM_VIDEO_ENCODER
   sim_encoder_initialize();
 #endif

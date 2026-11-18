@@ -351,6 +351,12 @@ ifeq ($(CONFIG_SIM_VIDEO_DECODER),y)
   CSRCS += sim_openh264dec.c
 endif
 
+ifeq ($(CONFIG_SIM_JPEG_DECODER),y)
+  CSRCS += sim_jpeg_decoder.c
+  CSRCS += sim_jpegdec.c
+  STDLIBS += -ljpeg
+endif
+
 ifeq ($(CONFIG_SIM_VIDEO_ENCODER),y)
   CSRCS += sim_encoder.c
   CSRCS += sim_x264encoder.c

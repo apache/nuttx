@@ -532,6 +532,19 @@ config SIM_VIDEO_ENCODER_DEV_PATH
 	depends on SIM_VIDEO_ENCODER
 	default "/dev/video2"
 
+config SIM_JPEG_DECODER
+	bool "JPEG decoder support on sim"
+	depends on VIDEO
+	default n
+	---help---
+		v4l2m2m simulator JPEG decoder, uses the standard libjpeg
+		API from the host libjpeg library.
+
+config SIM_JPEG_DECODER_DEV_PATH
+	string "JPEG decoder device path"
+	depends on SIM_JPEG_DECODER
+	default "/dev/video3"
+
 endmenu
 
 menu "Simulated Graphics/Input"
