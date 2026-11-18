@@ -47,7 +47,6 @@
 #include <nuttx/circbuf.h>
 #include <nuttx/sched_note.h>
 
-#include <nuttx/mutex.h>
 #ifdef CONFIG_VIDEO_FB_SPLASHSCREEN
 #  include <nuttx/signal.h>
 #endif
@@ -121,9 +120,8 @@ struct fb_chardev_s
   uint8_t                  plane;          /* Video plan number              */
   clock_t                  vsyncoffset;    /* VSync offset ticks             */
   FAR struct fb_priv_s    *head;
-  FAR struct fb_paninfo_s *paninfo;        /* Pan info array                 */
-  size_t                   paninfo_count;  /* Pan info count                 */
-  mutex_t                  lock;           /* Framebuffer device lock        */
+  FAR struct fb_paninfo_s *paninfo;       /* Pan info array                  */
+  size_t                   paninfo_count; /* Pan info count                  */
 };
 
 struct fb_panelinfo_s
@@ -256,9 +254,7 @@ static int fb_splashscreen(FAR struct fb_videoinfo_s *vinfo,
   FAR uint8_t                      *dst;
   unsigned int                      row;
   unsigned int                      nrun;
-  unsigned int                      width;
   FAR fb_pixel_t                    *buf;
-  FAR fb_pixel_t                    *bufp;
   FAR fb_pixel_t                    colour;
   int                               ret = OK;
 
@@ -303,7 +299,8 @@ static int fb_splashscreen(FAR struct fb_videoinfo_s *vinfo,
 
   for (row = 0; row < g_splscr.height; row++)
     {
-      bufp = buf; /* Start address of the buffer */
+      unsigned int width;
+      FAR fb_pixel_t *bufp = buf; /* Start address of the buffer */
 
       /* Process each run-length encoded pixel in the image */
 
@@ -600,7 +597,6 @@ static ssize_t fb_read(FAR struct file *filep, FAR char *buffer, size_t len)
   priv  = filep->f_priv;
 
   DEBUGASSERT(fb->vtable != NULL && priv != NULL);
-  nxmutex_lock(&fb->lock);
   paninfo = fb_get_paninfo(fb, priv->overlay);
 
   /* Get the start and size of the transfer */
@@ -608,7 +604,6 @@ static ssize_t fb_read(FAR struct file *filep, FAR char *buffer, size_t len)
   start = filep->f_pos;
   if (start >= paninfo->fblen)
     {
-      nxmutex_unlock(&fb->lock);
       return 0;  /* Return end-of-file */
     }
 
@@ -631,7 +626,6 @@ static ssize_t fb_read(FAR struct file *filep, FAR char *buffer, size_t len)
     }
 
   filep->f_pos += size;
-  nxmutex_unlock(&fb->lock);
   return size;
 }
 
@@ -661,7 +655,6 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
   priv  = filep->f_priv;
 
   DEBUGASSERT(fb->vtable != NULL && priv != NULL);
-  nxmutex_lock(&fb->lock);
   paninfo = fb_get_paninfo(fb, priv->overlay);
 
   /* Get the start and size of the transfer */
@@ -669,7 +662,6 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
   start = filep->f_pos;
   if (start >= paninfo->fblen)
     {
-      nxmutex_unlock(&fb->lock);
       return -EFBIG;  /* Cannot extend the framebuffer */
     }
 
@@ -692,7 +684,6 @@ static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
     }
 
   filep->f_pos += size;
-  nxmutex_unlock(&fb->lock);
   return size;
 }
 
@@ -811,9 +802,7 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          nxmutex_lock(&fb->lock);
           ret = fb->vtable->getvideoinfo(fb->vtable, vinfo);
-          nxmutex_unlock(&fb->lock);
         }
         break;
 
@@ -823,9 +812,7 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             (FAR struct fb_planeinfo_s *)((uintptr_t)arg);
 
           DEBUGASSERT(pinfo != NULL);
-          nxmutex_lock(&fb->lock);
           ret = fb_get_planeinfo(fb, pinfo, pinfo->display);
-          nxmutex_unlock(&fb->lock);
         }
         break;
 
@@ -907,9 +894,7 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          nxmutex_lock(&fb->lock);
           ret = fb->vtable->updatearea(fb->vtable, area);
-          nxmutex_unlock(&fb->lock);
         }
         break;
 #endif
@@ -1185,19 +1170,16 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           DEBUGASSERT(pinfo != NULL && fb->vtable != NULL);
           memcpy(&paninfo, pinfo, sizeof(*pinfo));
 
-          nxmutex_lock(&fb->lock);
           if (fb->vtable->pandisplay != NULL)
             {
               ret = fb->vtable->pandisplay(fb->vtable, pinfo);
               if (ret < 0)
                 {
-                  nxmutex_unlock(&fb->lock);
                   break;
                 }
             }
 
           ret = fb_add_paninfo(fb, &paninfo, FB_NO_OVERLAY);
-          nxmutex_unlock(&fb->lock);
         }
         break;
 
@@ -1227,18 +1209,15 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          nxmutex_lock(&fb->lock);
           ret = fb->vtable->getvideoinfo(fb->vtable, &vinfo);
           if (ret < 0)
             {
-              nxmutex_unlock(&fb->lock);
               break;
             }
 
           ret = fb_get_planeinfo(fb, &pinfo, 0);
           if (ret < 0)
             {
-              nxmutex_unlock(&fb->lock);
               break;
             }
 
@@ -1310,8 +1289,6 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 varinfo->transp.length = 8;
                 break;
             }
-
-          nxmutex_unlock(&fb->lock);
         }
         break;
 
@@ -1329,18 +1306,15 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          nxmutex_lock(&fb->lock);
           ret = fb->vtable->getvideoinfo(fb->vtable, &vinfo);
           if (ret < 0)
             {
-              nxmutex_unlock(&fb->lock);
               break;
             }
 
           ret = fb_get_planeinfo(fb, &pinfo, 0);
           if (ret < 0)
             {
-              nxmutex_unlock(&fb->lock);
               break;
             }
 
@@ -1357,15 +1331,12 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           fixinfo->visual      = FB_ISMONO(vinfo.fmt) ?
                                  FB_VISUAL_MONO10 : FB_VISUAL_TRUECOLOR;
           fixinfo->line_length = pinfo.stride;
-          nxmutex_unlock(&fb->lock);
         }
         break;
 
       case FBIOGET_PANINFOCNT:
         {
-          nxmutex_lock(&fb->lock);
           ret = fb_paninfo_count(fb->vtable, (int)arg);
-          nxmutex_unlock(&fb->lock);
         }
         break;
 
@@ -1417,13 +1388,11 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
   priv  = filep->f_priv;
 
   DEBUGASSERT(fb->vtable != NULL && priv != NULL);
-  nxmutex_lock(&fb->lock);
   paninfo = fb_get_paninfo(fb, priv->overlay);
 
   if (map->offset < 0 || map->length == 0 ||
       map->offset + map->length > paninfo->fblen)
     {
-      nxmutex_unlock(&fb->lock);
       return -EINVAL;
     }
 
@@ -1432,7 +1401,6 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
   addr = fb_map_region(paninfo, map->offset, map->length, &rest);
   if (map->length > rest)
     {
-      nxmutex_unlock(&fb->lock);
       return -EINVAL;
     }
 
@@ -1445,7 +1413,6 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 #else
   map->vaddr = addr;
 #endif
-  nxmutex_unlock(&fb->lock);
   return OK;
 }
 
@@ -1984,7 +1951,6 @@ int fb_register_device(int display, int plane,
   DEBUGASSERT(vtable != NULL);
   fb->plane  = plane;
   fb->vtable = vtable;
-  nxmutex_init(&fb->lock);
 
   /* Initialize the frame buffer instance. */
 
@@ -2151,7 +2117,6 @@ errout_with_paninfo:
 
   kmm_free(fb->paninfo);
 errout_with_fb:
-  nxmutex_destroy(&fb->lock);
   kmm_free(fb);
   return ret;
 }
