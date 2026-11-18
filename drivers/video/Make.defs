@@ -64,6 +64,29 @@ ifeq ($(CONFIG_VIDEO_GC0308),y)
   CSRCS += gc0308.c
 endif
 
+ifeq ($(CONFIG_VIDEO_VL53L5CX),y)
+  CSRCS += vl53l5cx.c
+
+# ST firmware and default data (BSD-3-Clause) from the VL53L5CX ULD in
+# X-CUBE-TOF1.  Files already present are not downloaded again.
+
+VL53L5CX_ULD_URL = https://raw.githubusercontent.com/STMicroelectronics/x-cube-tof1/v3.4.3/Drivers/BSP/Components/vl53l5cx
+VL53L5CX_DIR     = $(TOPDIR)$(DELIM)drivers$(DELIM)video$(DELIM)vl53l5cx
+VL53L5CX_FILES   = $(VL53L5CX_DIR)$(DELIM)vl53l5cx_buffers.h
+VL53L5CX_FILES  += $(VL53L5CX_DIR)$(DELIM)LICENSE.md
+
+$(VL53L5CX_DIR)$(DELIM)vl53l5cx_buffers.h:
+	$(call DOWNLOAD,$(VL53L5CX_ULD_URL)/modules,vl53l5cx_buffers.h,$@)
+
+$(VL53L5CX_DIR)$(DELIM)LICENSE.md:
+	$(call DOWNLOAD,$(VL53L5CX_ULD_URL),LICENSE.md,$@)
+
+context:: $(VL53L5CX_FILES)
+
+distclean::
+	$(call DELFILE, $(VL53L5CX_FILES))
+endif
+
 endif
 
 ifeq ($(CONFIG_GOLDFISH_FB),y)

@@ -519,6 +519,27 @@ config VIDEO_GC0308
 	---help---
 		GC0308 VGA CMOS image sensor with DVP interface.
 
+config VIDEO_VL53L5CX
+	bool "VL53L5CX multizone ToF sensor"
+	default n
+	depends on VIDEO_STREAM && I2C && SCHED_LPWORK && ALLOW_BSD_COMPONENTS
+	---help---
+		ST VL53L5CX 8x8 multizone time-of-flight sensor as a V4L2 depth
+		capture device (V4L2_PIX_FMT_Z16).  The sensor firmware is ST
+		code under the BSD-3-Clause license, downloaded at build time.
+
+if VIDEO_VL53L5CX
+
+config VIDEO_VL53L5CX_I2C_FREQUENCY
+	int "I2C frequency"
+	default 1000000
+	range 100000 1000000
+	---help---
+		I2C clock in Hz, up to 1 MHz (Fast-mode Plus).  Most of the
+		first stream start is the 86 KB firmware write at this rate.
+
+endif # VIDEO_VL53L5CX
+
 config GOLDFISH_CAMERA
 	bool "Goldfish camera support"
 	depends on VIDEO

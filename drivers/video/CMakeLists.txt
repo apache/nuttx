@@ -54,6 +54,33 @@ if(CONFIG_DRIVERS_VIDEO)
       list(APPEND SRCS gc0308.c)
     endif()
 
+    if(CONFIG_VIDEO_VL53L5CX)
+      list(APPEND SRCS vl53l5cx.c)
+
+      # ST firmware and default data (BSD-3-Clause) from the VL53L5CX ULD in
+      # X-CUBE-TOF1.  Files already present are not downloaded again.
+
+      set(VL53L5CX_ULD_URL
+          https://raw.githubusercontent.com/STMicroelectronics/x-cube-tof1/v3.4.3/Drivers/BSP/Components/vl53l5cx
+      )
+      set(VL53L5CX_DIR ${CMAKE_CURRENT_LIST_DIR}/vl53l5cx)
+      foreach(file modules/vl53l5cx_buffers.h LICENSE.md)
+        get_filename_component(name ${file} NAME)
+        if(NOT EXISTS ${VL53L5CX_DIR}/${name})
+          message(STATUS "Downloading: VL53L5CX ULD ${name}")
+          file(DOWNLOAD ${VL53L5CX_ULD_URL}/${file} ${VL53L5CX_DIR}/${name}.tmp
+               STATUS VL53L5CX_DL_STATUS)
+          list(GET VL53L5CX_DL_STATUS 0 VL53L5CX_DL_ERROR)
+          if(VL53L5CX_DL_ERROR)
+            file(REMOVE ${VL53L5CX_DIR}/${name}.tmp)
+            message(
+              FATAL_ERROR "Failed to download ${VL53L5CX_ULD_URL}/${file}")
+          endif()
+          file(RENAME ${VL53L5CX_DIR}/${name}.tmp ${VL53L5CX_DIR}/${name})
+        endif()
+      endforeach()
+    endif()
+
   endif()
 
   if(CONFIG_GOLDFISH_FB)

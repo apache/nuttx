@@ -82,3 +82,36 @@ sensor framework (``SENSOR_TYPE_PROXIMITY``).  The frame is
 per pixel, 0 when the pixel has no valid target.  The resolutions and
 the frame rates are V4L2 frame sizes and frame intervals; an interval
 entry that sets a size or a format only applies to it.
+
+vl53l5cx
+--------
+
+ST VL53L5CX multizone time-of-flight sensor (``CONFIG_VIDEO_VL53L5CX``) on
+I2C, address 0x29.  The driver provides both the ``imgsensor`` and
+``imgdata`` ops; ``vl53l5cx_register()`` checks the device ID and
+registers its own capture device with ``capture_register()``.  The one
+format is ``V4L2_PIX_FMT_Z16`` in the sensor's zone order:
+
+=====  ==========  ==============
+Size   Frame rate  Default
+=====  ==========  ==============
+8x8    1-15 Hz     yes, at 15 Hz
+4x4    1-60 Hz
+=====  ==========  ==============
+
+A zone is 0 when its target status is not 5 or 9; in the first frame
+after a start all zones have status 6 (no wrap-around check yet).  A
+frame that fails the integrity check is returned zeroed with
+``V4L2_BUF_FLAG_ERROR``; a frame with no queued buffer is dropped and the
+sensor keeps ranging.  Frame intervals are rounded to whole frames per
+second.  The first ``VIDIOC_STREAMON`` boots the sensor and writes its
+firmware (about 1.1 s at 1 MHz I2C); the last close puts it to sleep.
+The sensor INT output starts each frame read on the low priority work
+queue; the board passes the INT handling and the I2C address in
+``struct vl53l5cx_config_s``.
+
+The sensor keeps its firmware in RAM.  The build downloads the firmware
+and default data, ``vl53l5cx_buffers.h`` from ST's VL53L5CX Ultra Lite
+Driver (X-CUBE-TOF1 v3.4.3), to ``drivers/video/vl53l5cx``.  It is under
+the BSD-3-Clause license, so the driver depends on
+``CONFIG_ALLOW_BSD_COMPONENTS``.
