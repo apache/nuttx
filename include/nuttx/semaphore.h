@@ -84,8 +84,8 @@
   do \
     { \
       (tcb) = nxsched_self(); \
-      (flags) = (tcb)->flags & TCB_FLAG_UNINTERRUPTIBLE; \
-      (tcb)->flags |= TCB_FLAG_UNINTERRUPTIBLE; \
+      (flags) = atomic_read(&(tcb)->flags) & TCB_FLAG_UNINTERRUPTIBLE; \
+      atomic_or(&(tcb)->flags, TCB_FLAG_UNINTERRUPTIBLE); \
     } \
   while (0)
 
@@ -94,7 +94,7 @@
     { \
       if ((flags) == 0) \
         { \
-          (tcb)->flags &= ~TCB_FLAG_UNINTERRUPTIBLE; \
+          atomic_and(&(tcb)->flags, ~TCB_FLAG_UNINTERRUPTIBLE); \
         } \
     } \
   while (0)

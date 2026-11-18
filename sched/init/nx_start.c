@@ -414,7 +414,7 @@ static void idle_group_initialize(void)
       /* Allocate the IDLE group */
 
       DEBUGVERIFY(
-        group_allocate(tcb, tcb->flags));
+        group_allocate(tcb, atomic_read(&tcb->flags)));
 
       /* Initialize the task join */
 

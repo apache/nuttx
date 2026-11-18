@@ -490,7 +490,8 @@ int inode_chstat(FAR struct inode *inode,
 
 #ifdef CONFIG_SCHED_USER_IDENTITY
   rtcb = nxsched_self();
-  if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL &&
+  if ((atomic_read(&rtcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+      TCB_FLAG_TTYPE_KERNEL &&
       rtcb->group != NULL)
     {
       euid = rtcb->group->tg_euid;

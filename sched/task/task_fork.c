@@ -89,7 +89,7 @@ static void fork_inherit_stack(FAR struct tcb_s *parent,
   child->stack_alloc_ptr = parent->stack_alloc_ptr;
   child->stack_base_ptr  = parent->stack_base_ptr;
   child->adj_stack_size  = parent->adj_stack_size;
-  child->flags          &= ~TCB_FLAG_FREE_STACK;
+  atomic_and(&child->flags, ~TCB_FLAG_FREE_STACK);
 }
 
 /****************************************************************************
@@ -556,7 +556,8 @@ pid_t nxtask_start_fork(FAR struct tcb_s *child, bool vfork)
    */
 
   if (!vfork &&
-      (child->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      (atomic_read(&child->flags) & TCB_FLAG_TTYPE_MASK) !=
+       TCB_FLAG_TTYPE_KERNEL)
     {
       fork_restore_parent_env();
     }

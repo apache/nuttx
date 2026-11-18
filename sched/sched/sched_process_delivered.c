@@ -104,7 +104,7 @@ void nxsched_process_delivered(int cpu)
 
       if (tcb)
         {
-          int target_cpu = tcb->flags & TCB_FLAG_CPU_LOCKED ?
+          int target_cpu = atomic_read(&tcb->flags) & TCB_FLAG_CPU_LOCKED ?
             tcb->cpu : nxsched_select_cpu(tcb->affinity);
 
           if (target_cpu != cpu &&

@@ -125,7 +125,7 @@ pid_t ceva_fork(const uint32_t *regs)
   /* Allocate the stack for the TCB */
 
   ret = up_create_stack(child, stacksize + argsize,
-                        parent->flags & TCB_FLAG_TTYPE_MASK);
+                        atomic_read(&parent->flags) & TCB_FLAG_TTYPE_MASK);
   if (ret != OK)
     {
       serr("ERROR: up_create_stack failed: %d\n", ret);

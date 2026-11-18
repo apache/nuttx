@@ -160,7 +160,7 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Create a new task group */
 
-  ret = group_allocate(tcb, tcb->flags);
+  ret = group_allocate(tcb, atomic_read(&tcb->flags));
   if (ret < 0)
     {
       sched_trace_end();

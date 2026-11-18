@@ -646,8 +646,9 @@ uint64_t *arm64_fatal_handler(uint64_t *regs)
 
   if (ret != 0)
     {
-      if (((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&
-          ((tcb->flags & TCB_FLAG_SYSCALL) == 0) &&
+      if (((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+          TCB_FLAG_TTYPE_KERNEL) &&
+          ((atomic_read(&tcb->flags) & TCB_FLAG_SYSCALL) == 0) &&
           ((regs[REG_SPSR] & SPSR_MODE_MASK) == SPSR_MODE_EL0T))
         {
           struct tcb_s *ptcb;

@@ -2586,7 +2586,7 @@ int spiflash_init_spi_flash_op_block_task(int cpu)
 
   /* Setup the task type */
 
-  tcb->flags = TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_FREE_TCB;
+  atomic_set(&tcb->flags, TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_FREE_TCB);
 
   /* Initialize the task */
 

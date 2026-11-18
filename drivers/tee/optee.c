@@ -209,7 +209,7 @@ static bool optee_is_valid_range(FAR const void *va, size_t size)
     }
 
   tcb = nxsched_self();
-  ttype = tcb->flags & TCB_FLAG_TTYPE_MASK;
+  ttype = atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK;
 
   if (ttype == TCB_FLAG_TTYPE_KERNEL)
     {

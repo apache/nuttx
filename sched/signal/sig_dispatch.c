@@ -682,7 +682,8 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
    */
 
   if (masked == 0 &&
-      (stcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      (atomic_read(&stcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+       TCB_FLAG_TTYPE_KERNEL)
     {
       ignored = nxsig_find_action(stcb->group, info->si_signo) == NULL;
     }
@@ -879,8 +880,8 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
            * block again.
            */
 
-          if ((stcb->flags & TCB_FLAG_SYSCALL) == 0 ||
-              (stcb->flags & TCB_FLAG_UNINTERRUPTIBLE) == 0)
+          if ((atomic_read(&stcb->flags) & TCB_FLAG_SYSCALL) == 0 ||
+              (atomic_read(&stcb->flags) & TCB_FLAG_UNINTERRUPTIBLE) == 0)
             {
               nxsem_wait_irq(stcb, EINTR);
             }

@@ -64,8 +64,9 @@ bool arm_fault_kill(uint32_t *regs)
   struct tcb_s *tcb = this_task();
   struct tcb_s *ptcb;
 
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL ||
-      (tcb->flags & TCB_FLAG_SYSCALL) != 0 ||
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_KERNEL ||
+      (atomic_read(&tcb->flags) & TCB_FLAG_SYSCALL) != 0 ||
       (regs[REG_CPSR] & PSR_MODE_MASK) != PSR_MODE_USR)
     {
       return false;

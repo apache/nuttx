@@ -85,14 +85,16 @@ int group_setuptaskfiles(FAR struct tcb_s *tcb,
    */
 
   if (group != rtcb->group &&
-      (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      (atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+       TCB_FLAG_TTYPE_KERNEL)
     {
       ret = fdlist_copy(&rtcb->group->tg_fdlist,
                         &group->tg_fdlist, actions, exec);
     }
 
   if (ret >= 0 && actions != NULL &&
-      (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      (atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+       TCB_FLAG_TTYPE_KERNEL)
     {
       ret = spawn_file_actions(tcb, actions);
     }

@@ -464,7 +464,7 @@ pid_t arm_fork(bool vfork, const struct fork_s *context)
 
   if (parent->xcp.ustkptr != NULL)
     {
-      DEBUGASSERT((parent->flags & TCB_FLAG_SYSCALL) != 0);
+      DEBUGASSERT((atomic_read(&parent->flags) & TCB_FLAG_SYSCALL) != 0);
       return arm_fork_syscall(vfork, parent);
     }
 #endif

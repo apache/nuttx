@@ -134,7 +134,7 @@ void psock_sigpipe(FAR struct socket *psock, ssize_t ret, int flags)
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   if (ret == -EPIPE && (flags & MSG_NOSIGNAL) == 0 &&
       (psock->s_type == SOCK_STREAM || psock->s_type == SOCK_SEQPACKET) &&
-      (nxsched_self()->flags & TCB_FLAG_TTYPE_MASK) !=
+      (atomic_read(&nxsched_self()->flags) & TCB_FLAG_TTYPE_MASK) !=
       TCB_FLAG_TTYPE_KERNEL)
     {
       nxsig_tgkill(nxsched_getpid(), nxsched_gettid(), SIGPIPE);

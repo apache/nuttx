@@ -71,7 +71,8 @@ int fs_checkmode(uid_t owner, gid_t group, mode_t mode, int amode)
   uid_t uid;
 
   rtcb = nxsched_self();
-  if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((atomic_read(&rtcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_KERNEL)
     {
       return OK;
     }

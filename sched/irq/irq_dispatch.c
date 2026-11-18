@@ -151,7 +151,7 @@ void irq_dispatch(int irq, FAR void *context)
 
 #ifdef CONFIG_DEBUG_MM
   if ((atomic_read(&rtcb->flags) & TCB_FLAG_HEAP_CHECK) ||
-      (this_task()->flags & TCB_FLAG_HEAP_CHECK))
+      (atomic_read(&this_task()->flags) & TCB_FLAG_HEAP_CHECK))
     {
       kmm_checkcorruption();
     }
