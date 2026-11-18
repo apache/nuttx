@@ -2225,11 +2225,18 @@ static int up_dma_setup(struct uart_dev_s *dev)
     }
 
 #if defined(SERIAL_HAVE_TXDMA)
-  /* Acquire the Tx DMA channel.  This should always succeed. */
+  /* Acquire the Tx DMA channel.  This fails if all streams of the DMA
+   * controller are taken.
+   */
 
   if (priv->txdma_channel != INVALID_SERIAL_DMA_CHANNEL)
     {
       priv->txdma = stm32_dmachannel(priv->txdma_channel);
+      if (priv->txdma == NULL)
+        {
+          result = -EBUSY;
+          goto errout;
+        }
 
       /* Enable receive Tx DMA for the UART */
 
@@ -2239,11 +2246,18 @@ static int up_dma_setup(struct uart_dev_s *dev)
 #endif
 
 #if defined(SERIAL_HAVE_RXDMA)
-  /* Acquire the Rx DMA channel.  This should always succeed. */
+  /* Acquire the Rx DMA channel.  This fails if all streams of the DMA
+   * controller are taken.
+   */
 
   if (priv->rxdma_channel != INVALID_SERIAL_DMA_CHANNEL)
     {
       priv->rxdma = stm32_dmachannel(priv->rxdma_channel);
+      if (priv->rxdma == NULL)
+        {
+          result = -EBUSY;
+          goto errout;
+        }
 
       /* Configure for circular DMA reception into the RX FIFO */
 
@@ -2278,6 +2292,24 @@ static int up_dma_setup(struct uart_dev_s *dev)
 #endif
 
   return OK;
+
+errout:
+#if defined(SERIAL_HAVE_TXDMA)
+  if (priv->txdma != NULL)
+    {
+      modifyreg32(priv->usartbase + STM32_USART_CR3_OFFSET,
+                  USART_CR3_DMAT, 0);
+      stm32_dmafree(priv->txdma);
+      priv->txdma = NULL;
+    }
+#endif
+
+  if (!dev->isconsole)
+    {
+      up_shutdown(dev);
+    }
+
+  return result;
 }
 #endif
 
