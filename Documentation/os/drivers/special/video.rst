@@ -6,6 +6,27 @@ Video Device Drivers
    needed to work with video drivers are provided in this header
    file.
 
+V4L2 capture
+------------
+
+``drivers/video/v4l2_cap.c`` implements ``/dev/videoN`` on top of an
+image sensor (``imgsensor_register()``, ``include/nuttx/video/imgsensor.h``)
+for the formats and the controls and an image data interface
+(``imgdata_register()``, ``include/nuttx/video/imgdata.h``) that writes
+the frames to memory.  ``V4L2_CID_GAIN`` is the sensor gain in driver
+units, ``V4L2_CID_EXPOSURE_ABSOLUTE`` the exposure time in 100 us units.
+
+imx335
+------
+
+Sony IMX335 5 MP sensor (``CONFIG_VIDEO_IMX335``): I2C address 0x1a,
+2592x1944 RAW10 RGGB on two MIPI CSI-2 lanes at 30 frames per second,
+input clock 6, 18, 24, 27 or 74.25 MHz.  It supports
+``V4L2_CID_EXPOSURE_ABSOLUTE`` and ``V4L2_CID_GAIN`` (0.3 dB steps, 0-240
+for 0-72 dB); the initial values are ``CONFIG_VIDEO_IMX335_EXPOSURE`` and
+``CONFIG_VIDEO_IMX335_GAIN``.  It
+needs a capture interface with an image signal processor.
+
 max7456
 -------
 

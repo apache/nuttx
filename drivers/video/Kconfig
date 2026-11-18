@@ -540,6 +540,35 @@ config VIDEO_VL53L5CX_I2C_FREQUENCY
 
 endif # VIDEO_VL53L5CX
 
+config VIDEO_IMX335
+	bool "IMX335 image sensor"
+	default n
+	select I2C
+	---help---
+		Sony IMX335 5 MP image sensor with a 2-lane MIPI CSI-2 RAW10
+		output.  It needs a capture interface with an image signal
+		processor, such as the STM32N6 DCMIPP.
+
+if VIDEO_IMX335
+
+config VIDEO_IMX335_GAIN
+	int "Gain (0.3 dB steps)"
+	default 67
+	range 0 240
+	---help---
+		Initial gain in 0.3 dB steps (67 = 20 dB, 240 = 72 dB).  It can
+		be changed with V4L2_CID_GAIN.
+
+config VIDEO_IMX335_EXPOSURE
+	int "Exposure time (100 us units)"
+	default 333
+	range 1 333
+	---help---
+		Initial exposure time in 100 us units at 30 frames per second.
+		It can be changed with V4L2_CID_EXPOSURE_ABSOLUTE.
+
+endif # VIDEO_IMX335
+
 config GOLDFISH_CAMERA
 	bool "Goldfish camera support"
 	depends on VIDEO
