@@ -81,6 +81,10 @@ if(CONFIG_DRIVERS_VIDEO)
       endforeach()
     endif()
 
+    if(CONFIG_VIDEO_IMX335)
+      list(APPEND SRCS imx335.c)
+    endif()
+
   endif()
 
   if(CONFIG_GOLDFISH_FB)

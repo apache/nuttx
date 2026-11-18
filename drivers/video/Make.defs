@@ -87,6 +87,10 @@ distclean::
 	$(call DELFILE, $(VL53L5CX_FILES))
 endif
 
+ifeq ($(CONFIG_VIDEO_IMX335),y)
+  CSRCS += imx335.c
+endif
+
 endif
 
 ifeq ($(CONFIG_GOLDFISH_FB),y)
