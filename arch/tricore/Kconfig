@@ -188,6 +188,19 @@ config TRICORE_FCU_CSA_NUM
 		in the trap unless the board passes its own pool to
 		tricore_fcu_register_pool.  At least 20 are needed.
 
+if SMP
+
+config TRICORE_SMP_CSA_COUNT
+	int "CSA frames of each secondary CPU"
+	default 512
+	---help---
+		CPU1 and up build their pool of context save areas at the start
+		of their own data scratchpad RAM, followed by their interrupt
+		stack and their idle stack.  CPU0 keeps the pool of the linker
+		script.
+
+endif # SMP
+
 source "arch/tricore/src/aurix/Kconfig"
 
 if ARCH_CHIP_FAMILY_TC3X
