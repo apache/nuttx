@@ -45,14 +45,14 @@
  *
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 #if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE)
 .macro  setintstack tmp0, tmp1
   csrr    \tmp0, CSR_SCRATCH
   REGLOAD sp, RISCV_PERCPU_IRQSTACK(\tmp0)
 .endm
 #endif /* !defined(CONFIG_SMP) && defined(CONFIG_ARCH_USE_S_MODE) */
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
+#endif /* defined(CONFIG_ARCH_INTERRUPTSTACK) */
 
 #endif /* __ASSEMBLY__  */
 

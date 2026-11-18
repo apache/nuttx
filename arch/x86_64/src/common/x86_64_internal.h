@@ -111,7 +111,7 @@
 
 /* ISR/IRQ stack size */
 
-#if CONFIG_ARCH_INTERRUPTSTACK == 0
+#ifndef CONFIG_ARCH_INTERRUPTSTACK
 #  define IRQ_STACK_SIZE 0x2000
 #else
 #  define IRQ_STACK_SIZE CONFIG_ARCH_INTERRUPTSTACK
@@ -153,7 +153,7 @@ extern const uintptr_t g_idle_topstack;
 
 /* Address of the saved user stack pointer */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 extern uint8_t g_intstackalloc[];
 extern uint8_t g_isrstackalloc[];
 #endif

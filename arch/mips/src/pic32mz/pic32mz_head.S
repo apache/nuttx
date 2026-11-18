@@ -85,7 +85,7 @@
 #define PIC32MZ_STACK_BASE      _ebss
 #define PIC32MZ_STACK_TOP       _ebss + CONFIG_IDLETHREAD_STACKSIZE
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 #  define PIC32MZ_INTSTACK_BASE PIC32MZ_STACK_TOP
 #  define PIC32MZ_INTSTACK_SIZE (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 #  define PIC32MZ_INTSTACK_TOP  PIC32MZ_STACK_TOP + PIC32MZ_INTSTACK_SIZE
@@ -181,7 +181,7 @@
 #ifndef CONFIG_ARCH_CHIP_PIC32MZW1
 	.global	devcfg
 #endif
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	.global g_intstackalloc
 	.global g_intstacktop
 #ifdef CONFIG_PIC32MZ_NESTED_INTERRUPTS
@@ -975,7 +975,7 @@ devcfg:
 
 /* Interrupt stack variables */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 
 /* g_instacktop is a pointer to the final, aligned word of the interrupt
  * stack.

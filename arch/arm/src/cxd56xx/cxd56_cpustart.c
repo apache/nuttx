@@ -98,7 +98,7 @@ static void appdsp_boot(void)
   cpu = this_cpu();
   DPRINTF("cpu = %d\n", cpu);
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   /* Initializes the stack pointer */
 
   arm_initialize_stack();
@@ -207,6 +207,7 @@ int up_cpu_start(int cpu)
   for (i = 0; i < 12; i++)
     {
       uint32_t val = getreg32(CXD56_ACNV_P0_DST0 + (4 * i));
+
       putreg32(val, CXD56_ACNV_P0_DST0 + (4 * i) + (cpu * 0x20));
     }
 

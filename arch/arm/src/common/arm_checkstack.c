@@ -60,7 +60,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 void arm_color_intstack(void)
 {
   arm_stack_color((void *)up_get_intstackbase(this_cpu()), INTSTACK_SIZE);
@@ -244,7 +244,7 @@ size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
   return size;
 }
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 size_t up_check_intstack(int cpu, size_t check_size)
 {
   if (check_size == 0)

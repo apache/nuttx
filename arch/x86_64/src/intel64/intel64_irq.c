@@ -473,7 +473,7 @@ static inline void up_idtinit(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
+#if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 static inline void x86_64_color_intstack(void)
 {
   x86_64_stack_color((void *)up_get_intstackbase(this_cpu()),

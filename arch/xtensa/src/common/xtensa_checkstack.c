@@ -57,7 +57,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 void xtensa_color_intstack(void)
 {
   int cpu;
@@ -141,6 +141,7 @@ size_t xtensa_stack_check(uintptr_t alloc, size_t size)
           for (j = 0; j < 64; j++)
             {
               int ch;
+
               if (*ptr++ == STACK_COLOR)
                 {
                   ch = '.';
@@ -184,7 +185,7 @@ size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
   return xtensa_stack_check((uintptr_t)tcb->stack_base_ptr, check_size);
 }
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 size_t up_check_intstack(int cpu, size_t check_size)
 {
   if (check_size == 0)

@@ -157,7 +157,7 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
 
   if (up_interrupt_context())
     {
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
       pdump->info.stacks.interrupt.sp = sp;
 #endif
       pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT |
@@ -178,7 +178,7 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
                                           tcb->adj_stack_size;
   pdump->info.stacks.user.size = (uint32_t)tcb->adj_stack_size;
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   /* Get the limits on the interrupt stack memory */
 
   pdump->info.stacks.interrupt.top =
@@ -192,6 +192,7 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
   if ((pdump->info.flags & INTSTACK_PRESENT) != 0)
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.interrupt.sp;
+
       copy_reverse(pdump->istack, &ps[nitems(pdump->istack) / 2],
                    nitems(pdump->istack));
     }
@@ -213,6 +214,7 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
   if ((pdump->info.flags & USERSTACK_PRESENT) != 0)
     {
       stack_word_t *ps = (stack_word_t *) pdump->info.stacks.user.sp;
+
       copy_reverse(pdump->ustack, &ps[nitems(pdump->ustack) / 2],
                    nitems(pdump->ustack));
     }

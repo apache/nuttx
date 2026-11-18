@@ -57,7 +57,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
+#if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 static inline void arm64_color_intstack(void)
 {
 #ifdef CONFIG_SMP

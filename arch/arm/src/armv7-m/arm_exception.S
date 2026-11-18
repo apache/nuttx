@@ -70,7 +70,7 @@
    * no privileged task has run.
    */
 
-#  if defined(CONFIG_BUILD_PROTECTED) && CONFIG_ARCH_INTERRUPTSTACK < 8
+#  if defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_ARCH_INTERRUPTSTACK)
 #    error Interrupt stack must be used with high priority interrupts in protected mode
 #  endif
 #endif
@@ -177,7 +177,7 @@ exception_common:
 	 *   R1 = The top of the stack points to the saved state
 	 */
 
-#if CONFIG_ARCH_INTERRUPTSTACK < 7
+#ifndef CONFIG_ARCH_INTERRUPTSTACK
 	/* If CONFIG_ARCH_INTERRUPTSTACK is not defined, we will reuse the
 	 * interrupted thread's stack.  That may mean using either MSP or PSP
 	 * stack for interrupt level processing (in kernel mode).
@@ -253,7 +253,7 @@ exception_common:
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 	.bss
 	.global	g_intstackalloc
 	.global	g_intstacktop

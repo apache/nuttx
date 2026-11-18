@@ -142,7 +142,7 @@ exception_common:
 	 * Otherwise, we will use the stack that was current when the interrupt was taken.
 	 */
 
-#if CONFIG_ARCH_INTERRUPTSTACK < 3
+#ifndef CONFIG_ARCH_INTERRUPTSTACK
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
 	 * that signal processing can have a separate xcpcontext to handle
 	 * signal context (reference: arm_schedulesigaction.c):
@@ -233,7 +233,7 @@ exception_common:
  *
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	.bss
 	.global	g_intstackalloc
 	.global	g_intstacktop

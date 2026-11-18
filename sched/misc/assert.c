@@ -256,7 +256,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 
   UNUSED(cpu);
 #endif
-#if CONFIG_ARCH_INTERRUPTSTACK > 0
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   uintptr_t intstack_base = up_get_intstackbase(cpu);
   size_t intstack_size = CONFIG_ARCH_INTERRUPTSTACK;
   uintptr_t intstack_top = intstack_base + intstack_size;
@@ -274,7 +274,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
   uintptr_t tcbstack_sp = 0;
   bool force = false;
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 0
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   if (sp >= intstack_base && sp < intstack_top)
     {
       intstack_sp = sp;
@@ -298,7 +298,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
       sp_out_of_range(sp);
     }
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 0
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   if (intstack_sp != 0 || force)
     {
       dump_stackinfo("IRQ",
@@ -491,7 +491,7 @@ static void dump_fdlist(FAR struct tcb_s *tcb, FAR void *arg)
 static void dump_tasks(void)
 {
 #ifdef CONFIG_SCHED_DUMP_TASKS
-#if CONFIG_ARCH_INTERRUPTSTACK > 0
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   int cpu;
 #endif
 
@@ -514,7 +514,7 @@ static void dump_tasks(void)
 #endif
          "   COMMAND\n");
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 0
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
 #  ifdef CONFIG_STACK_COLORATION

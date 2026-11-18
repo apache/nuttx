@@ -57,7 +57,7 @@
 
 #define INTC_EN(n) (CXD56_INTC_BASE + 0x10 + (((n) >> 5) << 2))
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 #  define INTSTACK_ALLOC (CONFIG_SMP_NCPUS * INTSTACK_SIZE)
 #endif
 
@@ -70,7 +70,7 @@ static volatile int8_t g_cpu_for_irq[CXD56_IRQ_NIRQS];
 extern void up_send_irqreq(int idx, int irq, int cpu);
 #endif
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 /* In the SMP configuration, we will need custom interrupt stacks.
  * These definitions provide the aligned stack allocations.
  */
@@ -98,7 +98,7 @@ const uint32_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
 #endif /* CONFIG_SMP_NCPUS > 2 */
 #endif /* CONFIG_SMP_NCPUS > 1 */
 };
-#endif /* defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7 */
+#endif /* defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK) */
 
 /****************************************************************************
  * Private Data
@@ -264,6 +264,7 @@ void up_irqinitialize(void)
 
 #ifdef CONFIG_SMP
   int i;
+
   for (i = 0; i < CXD56_IRQ_NIRQS; i++)
     {
       g_cpu_for_irq[i] = -1;
@@ -413,6 +414,7 @@ void up_disable_irq(int irq)
 #endif
 
       irqstate_t flags = spin_lock_irqsave(&g_cxd56_lock);
+
       irq -= CXD56_IRQ_EXTINT;
       bit  = 1 << (irq & 0x1f);
 
@@ -468,6 +470,7 @@ void up_enable_irq(int irq)
 #endif
 
       irqstate_t flags = spin_lock_irqsave(&g_cxd56_lock);
+
       irq -= CXD56_IRQ_EXTINT;
       bit  = 1 << (irq & 0x1f);
 
@@ -571,7 +574,7 @@ int up_prioritize_irq(int irq, int priority)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 uintptr_t up_get_intstackbase(int cpu)
 {
   return g_cpu_intstack_top[cpu] - INTSTACK_SIZE;

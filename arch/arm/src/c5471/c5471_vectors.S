@@ -146,7 +146,7 @@ arm_vectorirq:
 	mov	fp, #0			/* Init frame pointer */
 	mov	r1, sp			/* Get r1=xcp */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	ldr	sp, .Lirqstacktop	/* SP = interrupt stack top */
 	str	r1, [sp, #-4]!		/* Save the xcp address at SP-4 then update SP */
 	bl	arm_doirq		/* Call the handler */
@@ -179,7 +179,7 @@ arm_vectorirq:
 
 .Lirqtmp:
 	.word	g_irqtmp
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 .Lirqstacktop:
 	.word	g_intstacktop
 #endif
@@ -473,7 +473,7 @@ arm_vectoraddrexcptn:
  *
  ****************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	.bss
 	.balign	4
 	.global	g_intstackalloc

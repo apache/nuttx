@@ -160,7 +160,7 @@ static uint64_t g_iram_count[CONFIG_SMP_NCPUS][NR_IRQS];
  * Public Data
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 /* In the SMP configuration, we will need custom interrupt stacks.
  * These definitions provide the aligned stack allocations.
  */
@@ -178,7 +178,7 @@ uintptr_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
   (uintptr_t)g_intstackalloc + (2 * INTSTACK_SIZE),
 #endif /* CONFIG_SMP_NCPUS > 1 */
 };
-#endif /* defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15 */
+#endif /* defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK) */
 
 /****************************************************************************
  * Private Functions
@@ -983,7 +983,7 @@ IRAM_ATTR int esp_get_cpuint(int cpu, int irq)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 uintptr_t up_get_intstackbase(int cpu)
 {
   return g_cpu_intstack_top[cpu] - INTSTACK_SIZE;

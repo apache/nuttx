@@ -195,7 +195,7 @@ static int backtrace_stack(uintptr_t *base, uintptr_t *limit,
       sp = (uintptr_t *)*(sp - 3);
 
       if (!(xtensa_ptr_exec(ra) && xtensa_sp_sane((uintptr_t)sp))
-#if CONFIG_ARCH_INTERRUPTSTACK < 15
+#ifndef CONFIG_ARCH_INTERRUPTSTACK
           || sp >= limit || sp < base
 #endif
          )
@@ -263,7 +263,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
     {
       if (up_interrupt_context())
         {
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
           void *istackbase = (void *)up_get_intstackbase(this_cpu());
 
           xtensa_window_spill();

@@ -427,7 +427,7 @@ hc_fullcontextrestore:
  *
  ************************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 1
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	.comm	.g_intstackalloc:, CONFIG_ARCH_INTERRUPTSTACK, 1
 g_intstacktop:
 	.size	g_intstackalloc, .-g_intstackalloc

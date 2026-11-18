@@ -79,8 +79,9 @@ void up_irqinitialize(void)
   WRITE_CSR(CSR_IE, 0);
   putreg32(0, ERBIUM_PLIC_ENABLE1);
 
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
-  riscv_stack_color(g_intstackalloc, CONFIG_ARCH_INTERRUPTSTACK & ~15);
+#if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_ARCH_INTERRUPTSTACK)
+  riscv_stack_color(g_intstackalloc,
+                    STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 #endif
 
   for (id = 1; id <= ERBIUM_PLIC_NDEV; id++)

@@ -287,7 +287,7 @@ avr32_common:
 	/* stack pointer into a preserved register (r7) and set the interrupt   */
 	/* stack pointer.                                                       */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	mov		r7, sp
 	lddpc	sp, .Linstacktopptr
 #endif
@@ -300,7 +300,7 @@ avr32_common:
 	/*     07 06 05 04 03 02 01 00 SP SR PC LR 12 11 10 09 08               */
 	/*     ^sp                                                              */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	mov		sp, r7
 #endif
 
@@ -336,7 +336,7 @@ avr32_common:
 .Lfullcontextrestoreptr:
 	.word	avr_fullcontextrestore
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 .Linstacktopptr:
 	.word	g_intstacktop
 #endif
@@ -346,7 +346,7 @@ avr32_common:
  *  Name: up_interruptstack
  ************************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	.bss
 	.align	4
 	.globl	g_intstackalloc

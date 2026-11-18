@@ -90,6 +90,7 @@ static int __m0ic_interrupt(int irq, void *context, void *arg)
   /* Check status_0 for interrupt source */
 
   int m0_extirq = ffs(status_0) - 1;
+
   if (m0_extirq < 0)
     {
       /* Source not in status_0. Check status_1 */
@@ -157,8 +158,9 @@ void up_irqinitialize(void)
 
   /* Colorize the interrupt stack for debug purposes */
 
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
-  size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
+#if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_ARCH_INTERRUPTSTACK)
+  size_t intstack_size = STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
+
   riscv_stack_color(g_intstackalloc, intstack_size);
 #endif
 
@@ -313,6 +315,7 @@ irqstate_t up_irq_enable(void)
   putreg32(0xffffffff, BL808_M0IC_MASK(1));
 
   int ret = irq_attach(BL808_IRQ_M0IC, __m0ic_interrupt, NULL);
+
   if (ret == OK)
     {
       up_enable_irq(BL808_IRQ_M0IC);

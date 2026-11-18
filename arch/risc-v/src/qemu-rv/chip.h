@@ -47,7 +47,7 @@
 
 #ifdef __ASSEMBLY__
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 
 /****************************************************************************
  * Name: setintstack_bounds
@@ -133,7 +133,7 @@
 .endm
 #endif /* defined(CONFIG_SMP) */
 
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */
+#endif /* defined(CONFIG_ARCH_INTERRUPTSTACK) */
 
 #endif /* __ASSEMBLY__  */
 #endif /* __ARCH_RISCV_SRC_QEMU_RV_CHIP_H */

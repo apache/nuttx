@@ -31,6 +31,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <nuttx/arch.h>
+#  include <nuttx/irq.h>
 #  include <sys/types.h>
 #  include <stdint.h>
 #  include <stdbool.h>
@@ -82,7 +83,7 @@
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
-#define INTSTACK_SIZE (CONFIG_ARCH_INTERRUPTSTACK & ~STACKFRAME_ALIGN_MASK)
+#define INTSTACK_SIZE STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
 
 /* This is the value used to mark the stack for subsequent stack monitoring
  * logic.
@@ -121,7 +122,7 @@ extern uint32_t g_idle_topstack;
 
 /* Address of the saved user stack pointer */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 extern uint8_t g_intstackalloc[]; /* Allocated stack base */
 extern uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
 #endif
@@ -239,7 +240,7 @@ void sparc_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #if defined(CONFIG_STACK_COLORATION) && \
-    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 7
+    defined(CONFIG_ARCH_INTERRUPTSTACK)
 void sparc_color_intstack(void);
 #else
 #  define sparc_color_intstack()

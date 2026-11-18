@@ -230,7 +230,7 @@ handle_irq:
   REGLOAD    s0, REG_X8(sp)
 #endif
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 
   /* Switch to interrupt stack */
 
@@ -375,7 +375,7 @@ riscv_jump_to_user:
 
 #define STACK_ALLOC_SIZE (INT_STACK_SIZE * CONFIG_SMP_NCPUS)
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   .bss
   .balign 16
   .global g_intstackalloc

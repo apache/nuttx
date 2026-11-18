@@ -49,7 +49,7 @@
 
 #include "hardware/rp2040_memorymap.h"
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 3
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 #  include "hardware/rp2040_sio.h"
 #endif
 

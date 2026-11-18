@@ -86,9 +86,9 @@
 
 #ifdef __ASSEMBLY__
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
   .global g_cpu_intstack_top
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 15 */
+#endif /* CONFIG_SMP && defined(CONFIG_ARCH_INTERRUPTSTACK) */
 
 #endif /* __ASSEMBLY__ */
 
@@ -118,7 +118,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
     .macro setintstack tmp1 tmp2
     getcoreid \tmp1                     /* tmp1 = Core ID (0 or 1) */
     movi  \tmp2, g_cpu_intstack_top     /* tmp2 = Array of stack pointers */

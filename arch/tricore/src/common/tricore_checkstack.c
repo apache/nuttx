@@ -34,6 +34,7 @@
 
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
+#include <nuttx/irq.h>
 
 #include "sched/sched.h"
 #include "tricore_internal.h"
@@ -142,12 +143,12 @@ size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
   return size;
 }
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 size_t up_check_intstack(int cpu, size_t check_size)
 {
   if (check_size == 0)
     {
-      check_size = CONFIG_ARCH_INTERRUPTSTACK & ~15;
+      check_size = STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
     }
 
   return tricore_stack_check((uintptr_t)g_intstackalloc, check_size);

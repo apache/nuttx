@@ -52,7 +52,7 @@
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 #ifdef __ghs__
 	.macro	setirqstack tmp1 tmp2
 	ldr		sp, .Lirqstacktop		/* SP = IRQ stack top */
@@ -73,7 +73,7 @@
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 #ifdef __ghs__
 	.macro	setfiqstack tmp1 tmp2
 	ldr		sp, .Lfiqstacktop		/* SP = FIQ stack top */
@@ -258,7 +258,7 @@ arm_vectorirq:
 
 	mov		r4, sp				/* Save the SP in a preserved register */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	/* Call arm_decodeirq() on the interrupt stack */
 
 	setirqstack	r1, r3				/* SP = interrupt stack top */
@@ -308,7 +308,7 @@ arm_vectorirq:
 
 	rfeia		r14
 
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 .Lirqstacktop:
 	.word	g_intstacktop
 #endif
@@ -378,7 +378,7 @@ arm_vectorsvc:
 
 	mov		r4, sp				/* Save the SP in a preserved register */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	/* Call arm_syscall() on the interrupt stack */
 
 	setirqstack	r1, r3				/* SP = interrupt stack top */
@@ -770,7 +770,7 @@ arm_vectorfiq:
 
 	mov		r4, sp				/* Save the SP in a preserved register */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	/* Call arm_decodefiq() on the interrupt stack */
 
 	setfiqstack	r1, r3				/* SP = interrupt stack top */
@@ -808,7 +808,7 @@ arm_vectorfiq:
 
 	rfeia		r14
 
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 .Lfiqstacktop:
 	.word	g_fiqstacktop
 #endif
@@ -843,7 +843,7 @@ arm_vectoraddrexcptn:
  *  Name: g_intstackalloc/g_intstacktop
  ****************************************************************************/
 
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if !defined(CONFIG_SMP) && defined(CONFIG_ARCH_INTERRUPTSTACK)
 	.bss
 	.balign	8
 
@@ -891,5 +891,5 @@ g_fiqstacktop:
 	.size	g_fiqstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
 #endif
 
-#endif /* !CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
+#endif /* !CONFIG_SMP && defined(CONFIG_ARCH_INTERRUPTSTACK) */
 	.end

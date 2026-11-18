@@ -324,7 +324,7 @@ _up_vector:
 
 	/* Switch to the interrupt stack */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	mov.l	.Lirqstacktop, r15	/* SP = interrupt stack top */
 	mov.l	r5, @r15		/* Save the user stack pointer (pre-decremented) */
 
@@ -396,7 +396,7 @@ _up_vector:
 	rte			/* 20-21: pc and sr */
 	nop
 	.align	2
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 .Lirqstacktop:
 	.long	_g_intstacktop
 #endif
@@ -495,7 +495,7 @@ _renesas_fullcontextrestore:
  *
  ************************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
 	.bss
 	.align	2
 	.globl	_g_intstackalloc

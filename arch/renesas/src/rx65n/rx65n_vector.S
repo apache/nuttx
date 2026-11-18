@@ -786,7 +786,7 @@ _uprx65_groupal1_handler:
   .bss
   .align  2
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   .bss
   .align  2
   .global  _g_intstackalloc

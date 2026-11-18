@@ -61,7 +61,7 @@ volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 void up_initialize(void)
 {
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef CONFIG_ARCH_INTERRUPTSTACK
   /* Reinitializes the stack pointer */
 
   arm_initialize_stack();
