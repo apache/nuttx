@@ -31,9 +31,25 @@
 #include <nuttx/board.h>
 
 #include "arm_internal.h"
+#include "mpu.h"
 #include "stm32n6570-dk.h"
 
 #include <arch/board/board.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The LTDC reads the framebuffer from memory, so with the D-cache it must
+ * not be cacheable.
+ */
+
+#if defined(CONFIG_STM32_LTDC) && defined(CONFIG_ARMV8M_DCACHE)
+#  ifndef CONFIG_ARM_MPU
+#    error "The LTDC framebuffer with the D-cache needs CONFIG_ARM_MPU"
+#  endif
+#  define HAVE_FB_MPU 1
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -52,6 +68,17 @@
 
 void stm32_board_initialize(void)
 {
+#ifdef HAVE_FB_MPU
+  /* Map the framebuffer as normal non-cacheable memory, keep the default
+   * memory map for everything else.
+   */
+
+  mpu_configure_region(CONFIG_STM32_LTDC_FB_BASE, CONFIG_STM32_LTDC_FB_SIZE,
+                       MPU_RBAR_XN | MPU_RBAR_AP_RWRW | MPU_RBAR_SH_NO,
+                       MPU_RLAR_NONCACHEABLE);
+  mpu_control(true, false, true);
+#endif
+
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
