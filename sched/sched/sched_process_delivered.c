@@ -101,10 +101,12 @@ void nxsched_process_delivered(int cpu)
        */
 
       FAR struct tcb_s *tcb = (FAR struct tcb_s *)dq_peek(list_readytorun());
+
       if (tcb)
         {
           int target_cpu = tcb->flags & TCB_FLAG_CPU_LOCKED ?
             tcb->cpu : nxsched_select_cpu(tcb->affinity);
+
           if (target_cpu != cpu &&
               current_task(target_cpu)->sched_priority < tcb->sched_priority)
             {

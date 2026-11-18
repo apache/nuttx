@@ -66,6 +66,7 @@ void arm64_sigdeliver(void)
 
   irqstate_t  flags;
   int16_t saved_irqcount;
+
   flags = (rtcb->xcp.saved_regs[REG_SPSR] & SPSR_DAIF_MASK);
 #endif
 
