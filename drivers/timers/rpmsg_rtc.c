@@ -294,11 +294,11 @@ static int rpmsg_rtc_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
 
   switch (header->command)
     {
-    case RPMSG_RTC_ALARM_FIRE:
-      rpmsg_rtc_alarm_fire_handler(ept, data, len, src, priv);
-      break;
+      case RPMSG_RTC_ALARM_FIRE:
+        rpmsg_rtc_alarm_fire_handler(ept, data, len, src, priv);
+        break;
 
-    case RPMSG_RTC_SYNC:
+      case RPMSG_RTC_SYNC:
         {
           struct rpmsg_rtc_set_s *msg = data;
 
@@ -322,15 +322,15 @@ static int rpmsg_rtc_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
           clock_synchronize(&tp);
 #endif
         }
-      break;
+        break;
 
-    default:
-      if (cookie)
-        {
-          memcpy(cookie->msg, data, len);
-          nxsem_post(&cookie->sem);
-        }
-      break;
+      default:
+        if (cookie)
+          {
+            memcpy(cookie->msg, data, len);
+            nxsem_post(&cookie->sem);
+          }
+        break;
     }
 
   return 0;
@@ -378,6 +378,7 @@ static int rpmsg_rtc_rdtime(FAR struct rtc_lowerhalf_s *lower,
   if (ret >= 0)
     {
       time_t time = msg.sec;
+
       gmtime_r(&time, (FAR struct tm *)rtctime);
       rtctime->tm_nsec = msg.nsec;
     }
@@ -654,68 +655,69 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
 
   switch (header->command)
     {
-    case RPMSG_RTC_GET:
-      {
-        FAR struct rpmsg_rtc_get_s *msg = data;
-        struct rtc_time rtctime =
-          {
-            0
-          };
+      case RPMSG_RTC_GET:
+        {
+          FAR struct rpmsg_rtc_get_s *msg = data;
+          struct rtc_time rtctime =
+            {
+              0
+            };
 
-        header->result = rpmsg_rtc_server_rdtime(priv, &rtctime);
+          header->result = rpmsg_rtc_server_rdtime(priv, &rtctime);
 
-        msg->sec = timegm((FAR struct tm *)&rtctime);
-        msg->nsec = rtctime.tm_nsec;
-        return rpmsg_send(ept, msg, sizeof(*msg));
-      }
+          msg->sec = timegm((FAR struct tm *)&rtctime);
+          msg->nsec = rtctime.tm_nsec;
+          return rpmsg_send(ept, msg, sizeof(*msg));
+        }
 
-    case RPMSG_RTC_SET:
-      {
-        FAR struct rpmsg_rtc_set_s *msg = data;
-        struct rtc_time rtctime =
-          {
-            0
-          };
+      case RPMSG_RTC_SET:
+        {
+          FAR struct rpmsg_rtc_set_s *msg = data;
+          struct rtc_time rtctime =
+            {
+              0
+            };
 
-        time_t time = msg->sec;
+          time_t time = msg->sec;
 
-        gmtime_r(&time, (FAR struct tm *)&rtctime);
-        rtctime.tm_nsec = msg->nsec;
+          gmtime_r(&time, (FAR struct tm *)&rtctime);
+          rtctime.tm_nsec = msg->nsec;
 
-        header->result = rpmsg_rtc_server_settime(priv, &rtctime);
-        return rpmsg_send(ept, msg, sizeof(*msg));
-      }
+          header->result = rpmsg_rtc_server_settime(priv, &rtctime);
+          return rpmsg_send(ept, msg, sizeof(*msg));
+        }
 
 #ifdef CONFIG_RTC_ALARM
-    case RPMSG_RTC_ALARM_SET:
-      {
-        FAR struct rpmsg_rtc_client_s *client = container_of(ept,
+      case RPMSG_RTC_ALARM_SET:
+        {
+          FAR struct rpmsg_rtc_client_s *client = container_of(ept,
                                             struct rpmsg_rtc_client_s, ept);
-        FAR struct rpmsg_rtc_alarm_set_s *msg = data;
-        time_t time = msg->sec;
-        struct lower_setalarm_s alarminfo;
+          FAR struct rpmsg_rtc_alarm_set_s *msg = data;
+          time_t time = msg->sec;
+          struct lower_setalarm_s alarminfo;
 
-        alarminfo.id = msg->id;
-        alarminfo.cb = rpmsg_rtc_server_alarm_cb;
-        alarminfo.priv = client;
+          alarminfo.id = msg->id;
+          alarminfo.cb = rpmsg_rtc_server_alarm_cb;
+          alarminfo.priv = client;
 
-        gmtime_r(&time, (FAR struct tm *)&alarminfo.time);
-        alarminfo.time.tm_nsec = msg->nsec;
-        header->result = rpmsg_rtc_server_setalarm(priv, &alarminfo);
-        return rpmsg_send(ept, msg, sizeof(*msg));
-      }
+          gmtime_r(&time, (FAR struct tm *)&alarminfo.time);
+          alarminfo.time.tm_nsec = msg->nsec;
+          header->result = rpmsg_rtc_server_setalarm(priv, &alarminfo);
+          return rpmsg_send(ept, msg, sizeof(*msg));
+        }
 
-    case RPMSG_RTC_ALARM_CANCEL:
-      {
-        FAR struct rpmsg_rtc_alarm_cancel_s *msg = data;
-        header->result = rpmsg_rtc_server_cancelalarm(priv, msg->id);
-        return rpmsg_send(ept, msg, sizeof(*msg));
-      }
+      case RPMSG_RTC_ALARM_CANCEL:
+        {
+          FAR struct rpmsg_rtc_alarm_cancel_s *msg = data;
+
+          header->result = rpmsg_rtc_server_cancelalarm(priv, msg->id);
+          return rpmsg_send(ept, msg, sizeof(*msg));
+        }
 #endif
 
-    default:
-      header->result = -ENOSYS;
-      return rpmsg_send(ept, header, sizeof(*header));
+      default:
+        header->result = -ENOSYS;
+        return rpmsg_send(ept, header, sizeof(*header));
     }
 }
 
