@@ -106,7 +106,7 @@ static void shmfs_copy(FAR struct shmfs_object_s *sho, off_t pos,
                        FAR char *buffer, size_t len, bool write)
 {
 #ifdef CONFIG_BUILD_KERNEL
-  FAR uintptr_t *pages = (FAR uintptr_t *)&sho->paddr;
+  FAR uintptr_t *pages = (FAR uintptr_t *)sho->paddr;
   FAR char *vaddr;
   size_t offset;
   size_t n;
@@ -343,7 +343,7 @@ static int shmfs_map_object(FAR struct shmfs_object_s *object,
 
   FAR struct tcb_s *tcb = this_task();
   FAR struct task_group_s *group = tcb->group;
-  FAR uintptr_t *pages = (FAR uintptr_t *)&object->paddr;
+  FAR uintptr_t *pages = (FAR uintptr_t *)object->paddr;
   uintptr_t mapaddr;
   unsigned int npages;
 
