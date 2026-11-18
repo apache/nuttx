@@ -74,6 +74,10 @@
 
 #define is_idle_task(t)          ((t)->pid < CONFIG_SMP_NCPUS)
 
+/* This set of all CPUs */
+
+#define SCHED_ALL_CPUS           ((cpu_set_t)((1 << CONFIG_SMP_NCPUS) - 1))
+
 /* This macro returns the running task which may different from this_task()
  * during interrupt level context switches.
  */

@@ -426,6 +426,15 @@ config SMP_DEFAULT_CPUSET
 		Set the Default CPU bits. The way to use the unset CPU is to call the
 		sched_setaffinity function to bind a task to the CPU. bit0 means CPU0.
 
+config BMP
+	bool "Bound multi-processing (BMP)"
+	default n
+	---help---
+		Bound multi-processing on top of SMP: a new task or thread runs on
+		the CPU of its creator, or on the single CPU named in its creation
+		attributes.  An affinity mask must name exactly one CPU, and once
+		a task has started its CPU can no longer be changed.
+
 endif # SMP
 
 choice
