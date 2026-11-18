@@ -43,6 +43,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/mm/mempool.h>
 
 #include "utils/utils.h"
 #include "udp/udp.h"
@@ -53,9 +54,9 @@
 
 /* This is the state of the global write buffer resource */
 
-NET_BUFPOOL_DECLARE(g_wrbuffer, sizeof(struct udp_wrbuffer_s),
-                    CONFIG_NET_UDP_NWRBCHAINS,
-                    CONFIG_NET_UDP_ALLOC_WRBCHAINS, 0);
+MEMPOOL_DEFINE(g_wrbuffer, sizeof(struct udp_wrbuffer_s),
+               CONFIG_NET_UDP_NWRBCHAINS, 0,
+               CONFIG_NET_UDP_ALLOC_WRBCHAINS);
 
 /****************************************************************************
  * Public Functions
@@ -90,7 +91,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_timedalloc(unsigned int timeout)
    * buffer
    */
 
-  wrb = NET_BUFPOOL_TIMEDALLOC(g_wrbuffer, timeout);
+  wrb = mempool_allocate(&g_wrbuffer, timeout);
   if (wrb == NULL)
     {
       return NULL;
@@ -148,7 +149,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(void)
    * buffer
    */
 
-  wrb = NET_BUFPOOL_TRYALLOC(g_wrbuffer);
+  wrb = mempool_allocate(&g_wrbuffer, 0);
   if (wrb == NULL)
     {
       return NULL;
@@ -199,7 +200,7 @@ void udp_wrbuffer_release(FAR struct udp_wrbuffer_s *wrb)
 
   /* Then free the write buffer structure */
 
-  NET_BUFPOOL_FREE(g_wrbuffer, wrb);
+  mempool_release(&g_wrbuffer, wrb);
 }
 
 /****************************************************************************
@@ -247,7 +248,7 @@ uint32_t udp_wrbuffer_inqueue_size(FAR struct udp_conn_s *conn)
 
 int udp_wrbuffer_test(void)
 {
-  return NET_BUFPOOL_TEST(g_wrbuffer);
+  return (mempool_navail(&g_wrbuffer) > 0 ? OK : -ENOSPC);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP && CONFIG_NET_UDP_WRITE_BUFFERS */
