@@ -36,6 +36,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
+#include <nuttx/mm/mempool.h>
 #include <nuttx/mutex.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/rwsem.h>
@@ -123,6 +124,11 @@ static const struct file_operations g_rpmsg_dev_ops =
   NULL,             /* seek */
   rpmsg_dev_ioctl,  /* ioctl */
 };
+
+#if CONFIG_RPMSG_POOL_COUNT > 0
+MEMPOOL_DEFINE(g_rpmsg_pool, CONFIG_RPMSG_POOL_SIZE,
+               CONFIG_RPMSG_POOL_COUNT, CONFIG_RPMSG_POOL_COUNT, 0);
+#endif
 
 #ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
 static struct rpmsg_wqueue_s g_rpmsg_wqueues[CONFIG_RPMSG_WQUEUE_NUMBER];
@@ -467,6 +473,19 @@ int rpmsg_get_timestamp(FAR struct rpmsg_device *rdev, FAR const void *data,
 
   return rpmsg->ops->get_timestamp(rpmsg, data, ts);
 }
+
+#if CONFIG_RPMSG_POOL_COUNT > 0
+FAR void *rpmsg_pool_alloc(size_t size)
+{
+  DEBUGASSERT(size <= CONFIG_RPMSG_POOL_SIZE);
+  return mempool_allocate(&g_rpmsg_pool, UINT_MAX);
+}
+
+void rpmsg_pool_free(FAR void *addr)
+{
+  mempool_release(&g_rpmsg_pool, addr);
+}
+#endif
 
 int rpmsg_register_callback(FAR void *priv,
                             rpmsg_dev_cb_t device_created,
