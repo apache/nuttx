@@ -21,10 +21,26 @@
 #ifndef __ARCH_TRICORE_INCLUDE_BARRIERS_H
 #define __ARCH_TRICORE_INCLUDE_BARRIERS_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 #define UP_DSB() __asm__ __volatile__ ("dsync" : : : "memory")
-#define UP_DMB() __asm__ __volatile__ ("" : : : "memory")
-#define UP_RMB() __asm__ __volatile__ ("" : : : "memory")
-#define UP_WMB() __asm__ __volatile__ ("" : : : "memory")
+#ifdef CONFIG_SMP
+#  define UP_DMB() __asm__ __volatile__ ("dsync" : : : "memory")
+#  define UP_RMB() __asm__ __volatile__ ("dsync" : : : "memory")
+#  define UP_WMB() __asm__ __volatile__ ("dsync" : : : "memory")
+#else
+#  define UP_DMB() __asm__ __volatile__ ("" : : : "memory")
+#  define UP_RMB() __asm__ __volatile__ ("" : : : "memory")
+#  define UP_WMB() __asm__ __volatile__ ("" : : : "memory")
+#endif
 #define UP_ISB() __asm__ __volatile__ ("isync" : : : "memory")
 
 #endif /* __ARCH_TRICORE_INCLUDE_BARRIERS_H */
