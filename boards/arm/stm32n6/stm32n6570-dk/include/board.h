@@ -57,8 +57,9 @@
  *     IC2  /6 = 400 MHz  \
  *     IC6  /8 = 300 MHz   > SYSCLK components (SYSSW IC2_IC6_IC11)
  *     IC11 /6 = 400 MHz  /
+ *     IC4  /12 = 200 MHz -> SDMMC2 kernel clock
  *     IC16 /96 = 25 MHz  -> LTDC pixel clock
- *   PLL2 = HSI / 2 * 48  = 1536 MHz   (audio and SDMMC kernel clocks)
+ *   PLL2 = HSI / 2 * 48  = 1536 MHz   (audio kernel clocks)
  *   PLL3 = HSE / 3 * 125 = 2000 MHz   (LTDC)
  *   PLL4 = HSI / 4 * 75  = 1200 MHz   (I2C, LTDC)
  *   HPRE /2   = 200 MHz -> HCLK
@@ -110,6 +111,11 @@
 #define STM32_IC16_SRC          RCC_ICCFGR_SEL_PLL1
 #define STM32_IC16_DIV          96
 
+/* IC4 = PLL1 / 12 = 200 MHz -> SDMMC kernel clock */
+
+#define STM32_IC4_SRC           RCC_ICCFGR_SEL_PLL1
+#define STM32_IC4_DIV           12
+
 #define STM32_CPUCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC1_DIV)
 #define STM32_SYSCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC2_DIV)
 #define STM32_RCC_CFGR2_HPRE    RCC_CFGR2_HPRE_SYSCLKd2
@@ -125,6 +131,7 @@
  *     IC2  /8  = 100 MHz  \
  *     IC6  /12 = 66.7 MHz  > SYSCLK components (SYSSW IC2_IC6_IC11)
  *     IC11 /8  = 100 MHz  /
+ *     IC4  /4  = 200 MHz  -> SDMMC2 kernel clock
  *   HPRE /2   = 50 MHz   -> HCLK
  *   PPREx /1  = 50 MHz   -> PCLK1/2/4/5
  *   TIMPRE /1 = 100 MHz  -> timer kernel clock
@@ -150,6 +157,11 @@
 
 #define STM32_IC16_SRC          RCC_ICCFGR_SEL_PLL1
 #define STM32_IC16_DIV          32
+
+/* IC4 = PLL1 / 4 = 200 MHz -> SDMMC kernel clock */
+
+#define STM32_IC4_SRC           RCC_ICCFGR_SEL_PLL1
+#define STM32_IC4_DIV           4
 
 #define STM32_CPUCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC1_DIV)
 #define STM32_SYSCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC2_DIV)
@@ -211,6 +223,10 @@
 
 #define BOARD_PWR_VDDIO  (PWR_SVMCR3_VDDIO2SV    | PWR_SVMCR3_VDDIO3SV | \
                           PWR_SVMCR3_VDDIO2VRSEL | PWR_SVMCR3_VDDIO3VRSEL)
+
+/* VDDIO5 supplies the microSD pads (SDMMC2) in its 3.3 V range */
+
+#define BOARD_PWR_VDDIO5 PWR_SVMCR2_VDDIO5SV
 
 /* LED definitions **********************************************************/
 
@@ -387,6 +403,32 @@
 #define BOARD_LTDC_GCR_DEPOL     0 /* DE active low */
 #define BOARD_LTDC_GCR_VSPOL     0 /* VSYNC active low */
 #define BOARD_LTDC_GCR_HSPOL     0 /* HSYNC active low */
+
+/* SDMMC2 GPIOs *************************************************************/
+
+/* microSD slot: PC2 CK, PC3 CMD, PC4 D0, PC5 D1, PC0 D2, PE4 D3 (AF11).
+ * The kernel clock is IC4 (200 MHz):
+ *
+ *   SDMMC_CK = 200 MHz / (2 * CLKDIV)
+ *     init  CLKDIV 250 -> 400 kHz
+ *     xfer  CLKDIV 4   -> 25 MHz (default speed)
+ *     HS    CLKDIV 2   -> 50 MHz (CONFIG_SDMMC2_SD_HS_MODE)
+ */
+
+#define GPIO_SDMMC2_CK    (GPIO_SDMMC2_CK_1 | GPIO_SPEED_100MHZ)
+#define GPIO_SDMMC2_CMD   (GPIO_SDMMC2_CMD_2 | GPIO_SPEED_100MHZ)
+#define GPIO_SDMMC2_D0    (GPIO_SDMMC2_D0_2 | GPIO_SPEED_100MHZ)
+#define GPIO_SDMMC2_D1    (GPIO_SDMMC2_D1_1 | GPIO_SPEED_100MHZ)
+#define GPIO_SDMMC2_D2    (GPIO_SDMMC2_D2_2 | GPIO_SPEED_100MHZ)
+#define GPIO_SDMMC2_D3    (GPIO_SDMMC2_D3_2 | GPIO_SPEED_100MHZ)
+
+#define STM32_RCC_CCIPR8_SDMMC2SEL  RCC_CCIPR8_SDMMC2SEL_IC4
+#define STM32_SDMMC_CLK             (STM32_PLL1_FREQUENCY / STM32_IC4_DIV)
+
+#define STM32_SDMMC_INIT_CLKDIV     (250 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#define STM32_SDMMC_MMCXFR_CLKDIV   (4 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#define STM32_SDMMC_SDXFR_CLKDIV    (4 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#define STM32_SDMMC_SDXFR_HS_CLKDIV (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 
 /* USART1 GPIOs *************************************************************/
 
