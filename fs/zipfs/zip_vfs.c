@@ -153,6 +153,23 @@ const struct mountpt_operations g_zipfs_operations =
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: zipfs_convert_result
+ *
+ * Description:
+ *   Convert a libarchive return code to a negated errno value. ARCHIVE_RETRY
+ *   becomes -EAGAIN, ARCHIVE_WARN becomes -ENOEXEC, ARCHIVE_FAILED becomes
+ *   -EINVAL and ARCHIVE_FATAL becomes -EPERM. Any other value, such as
+ *   ARCHIVE_OK, ARCHIVE_EOF or a byte count, is returned unchanged.
+ *
+ * Input Parameters:
+ *   ret - The value that a libarchive function returned.
+ *
+ * Returned Value:
+ *   The negated errno value for a libarchive error, otherwise ret.
+ *
+ ****************************************************************************/
+
 static int zipfs_convert_result(int ret)
 {
   switch (ret)
@@ -171,12 +188,46 @@ static int zipfs_convert_result(int ret)
     }
 }
 
+/****************************************************************************
+ * Name: zipfs_close_cb
+ *
+ * Description:
+ *   libarchive close callback. Close the zip file that the reader reads.
+ *
+ * Input Parameters:
+ *   a           - The libarchive handle. Not used.
+ *   client_data - The struct zipfs_priv_s of the reader.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, otherwise the negated errno value of file_close().
+ *
+ ****************************************************************************/
+
 static int zipfs_close_cb(FAR struct archive *a, FAR void *client_data)
 {
   FAR struct zipfs_priv_s *priv = client_data;
 
   return file_close(&priv->file);
 }
+
+/****************************************************************************
+ * Name: zipfs_read_cb
+ *
+ * Description:
+ *   libarchive read callback. Read the next block of the zip file, at most
+ *   CONFIG_FS_ZIPFS_BUFFER_SIZE bytes, into the buffer of the reader.
+ *
+ * Input Parameters:
+ *   a           - The libarchive handle. Not used.
+ *   client_data - The struct zipfs_priv_s of the reader.
+ *   buff        - Location to return a pointer to the data that was read. It
+ *                 is set only when data was read.
+ *
+ * Returned Value:
+ *   The number of bytes read, zero at the end of the zip file, or the
+ *   negated errno value of file_read().
+ *
+ ****************************************************************************/
 
 static la_ssize_t zipfs_read_cb(FAR struct archive *a,
                                 FAR void *client_data,
@@ -196,6 +247,24 @@ static la_ssize_t zipfs_read_cb(FAR struct archive *a,
   return ret;
 }
 
+/****************************************************************************
+ * Name: zipfs_seek_cb
+ *
+ * Description:
+ *   libarchive seek callback. Set the position in the zip file.
+ *
+ * Input Parameters:
+ *   a           - The libarchive handle. Not used.
+ *   client_data - The struct zipfs_priv_s of the reader.
+ *   offset      - The new position, relative to whence.
+ *   whence      - SEEK_SET, SEEK_CUR or SEEK_END.
+ *
+ * Returned Value:
+ *   The new position in the zip file, or the negated errno value of
+ *   file_seek().
+ *
+ ****************************************************************************/
+
 static la_int64_t zipfs_seek_cb(FAR struct archive *a,
                                 FAR void *client_data,
                                 la_int64_t offset, int whence)
@@ -204,6 +273,27 @@ static la_int64_t zipfs_seek_cb(FAR struct archive *a,
 
   return file_seek(&priv->file, offset, whence);
 }
+
+/****************************************************************************
+ * Name: zipfs_skip
+ *
+ * Description:
+ *   Skip data of the current entry by reading and discarding it. The data is
+ *   read in blocks of CONFIG_FS_ZIPFS_BUFFER_SIZE bytes into a buffer that
+ *   is allocated on the first call and freed by zipfs_free().
+ *
+ * Input Parameters:
+ *   priv   - The reader, positioned in the data of an entry.
+ *   amount - The number of bytes to skip.
+ *
+ * Returned Value:
+ *   The number of bytes skipped. It is less than amount when the data ends
+ *   or a read fails after some bytes were skipped. If no byte was skipped,
+ *   the value is zero at the end of the data, -ENOMEM if the buffer cannot
+ *   be allocated, or the negated errno value converted from a libarchive
+ *   error.
+ *
+ ****************************************************************************/
 
 static off_t zipfs_skip(FAR struct zipfs_priv_s *priv, off_t amount)
 {
@@ -239,6 +329,34 @@ static off_t zipfs_skip(FAR struct zipfs_priv_s *priv, off_t amount)
 
   return next;
 }
+
+/****************************************************************************
+ * Name: zipfs_new
+ *
+ * Description:
+ *   Open the zip file with libarchive and create a reader for it. The
+ *   archive formats that are selected with CONFIG_FS_ZIPFS_FORMAT_* are
+ *   enabled. If relpath is NULL, the reader is returned before the first
+ *   entry, which is how a directory is read. Otherwise the entries are read
+ *   until one has the name relpath, and the reader is returned positioned in
+ *   the data of that entry.
+ *
+ * Input Parameters:
+ *   abspath - Path of the zip file.
+ *   relpath - Name of the entry to find, as it is stored in the archive, or
+ *             NULL.
+ *   priv    - Location to return the reader.
+ *
+ * Returned Value:
+ *   Zero (OK) on success. -ENOMEM if memory runs out, -ENOENT if no entry
+ *   has the name relpath (also when reading the archive fails during the
+ *   search), or the negated errno value of file_open() or of a libarchive
+ *   function.
+ *
+ * Assumptions/Limitations:
+ *   The caller releases the reader with zipfs_free().
+ *
+ ****************************************************************************/
 
 int zipfs_new(FAR const char *abspath, FAR const char *relpath,
               FAR struct zipfs_priv_s **priv)
@@ -474,6 +592,21 @@ err_with_priv:
   return ret;
 }
 
+/****************************************************************************
+ * Name: zipfs_free
+ *
+ * Description:
+ *   Release a reader: the skip buffer, the current entry, the libarchive
+ *   handle (which closes the zip file), the mutex and the structure itself.
+ *
+ * Input Parameters:
+ *   priv - The reader that zipfs_new() returned.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
 static void zipfs_free(FAR struct zipfs_priv_s *priv)
 {
   if (priv->seekbuf != NULL)
@@ -487,6 +620,21 @@ static void zipfs_free(FAR struct zipfs_priv_s *priv)
   archive_read_free(priv->a);
   fs_heap_free(priv);
 }
+
+/****************************************************************************
+ * Name: zipfs_stats_common
+ *
+ * Description:
+ *   Copy the stat of the current entry of the reader.
+ *
+ * Input Parameters:
+ *   priv - The reader, positioned on an entry.
+ *   buf  - Location to return the stat.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, -EINVAL if libarchive has no stat for the entry.
+ *
+ ****************************************************************************/
 
 static int zipfs_stats_common(FAR struct zipfs_priv_s *priv,
                               FAR struct stat *buf)
@@ -506,6 +654,26 @@ static int zipfs_stats_common(FAR struct zipfs_priv_s *priv,
  * Zipfs methods
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: zipfs_open
+ *
+ * Description:
+ *   Open a file of the archive. A new reader is created with zipfs_new() and
+ *   is kept in the f_priv field of the file structure.
+ *
+ * Input Parameters:
+ *   filep   - The file structure. The path of the zip file is in the
+ *             i_private field of its inode.
+ *   relpath - Name of the entry, relative to the mount point.
+ *   oflags  - Not used.
+ *   mode    - Not used.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, otherwise the negated errno value of zipfs_new(),
+ *   for example -ENOENT if the archive has no entry with that name.
+ *
+ ****************************************************************************/
+
 static int zipfs_open(FAR struct file *filep, FAR const char *relpath,
                       int oflags, mode_t mode)
 {
@@ -523,6 +691,20 @@ static int zipfs_open(FAR struct file *filep, FAR const char *relpath,
   return OK;
 }
 
+/****************************************************************************
+ * Name: zipfs_close
+ *
+ * Description:
+ *   Close a file: release its reader with zipfs_free().
+ *
+ * Input Parameters:
+ *   filep - The file structure.
+ *
+ * Returned Value:
+ *   Zero (OK) always.
+ *
+ ****************************************************************************/
+
 static int zipfs_close(FAR struct file *filep)
 {
   FAR struct zipfs_priv_s *priv = filep->f_priv;
@@ -530,6 +712,25 @@ static int zipfs_close(FAR struct file *filep)
   zipfs_free(priv);
   return OK;
 }
+
+/****************************************************************************
+ * Name: zipfs_read
+ *
+ * Description:
+ *   Read data of an open file. Up to buflen bytes of the current entry are
+ *   read with archive_read_data(), and the file position is advanced by the
+ *   number of bytes read. The reader is locked.
+ *
+ * Input Parameters:
+ *   filep  - The file structure.
+ *   buffer - Location to return the data.
+ *   buflen - Maximum number of bytes to read.
+ *
+ * Returned Value:
+ *   The number of bytes read, zero at the end of the entry, or a negated
+ *   errno value.
+ *
+ ****************************************************************************/
 
 static ssize_t zipfs_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen)
@@ -547,6 +748,27 @@ static ssize_t zipfs_read(FAR struct file *filep, FAR char *buffer,
   nxmutex_unlock(&priv->lock);
   return ret;
 }
+
+/****************************************************************************
+ * Name: zipfs_seek
+ *
+ * Description:
+ *   Set the position of an open file. A libarchive reader only moves
+ *   forward, so a forward seek reads and discards data with zipfs_skip(),
+ *   and a backward seek creates a new reader for the same entry and skips
+ *   from its beginning. SEEK_END is relative to the size of the entry.
+ *
+ * Input Parameters:
+ *   filep  - The file structure.
+ *   offset - The new position, relative to whence.
+ *   whence - SEEK_SET, SEEK_CUR or SEEK_END.
+ *
+ * Returned Value:
+ *   The new file position, or a negated errno value: -EINVAL for another
+ *   value of whence, or an error of zipfs_new() or zipfs_skip(). If a new
+ *   reader cannot be created, the old one is kept.
+ *
+ ****************************************************************************/
 
 static off_t zipfs_seek(FAR struct file *filep, off_t offset,
                         int whence)
@@ -606,6 +828,23 @@ err_with_lock:
   return ret < 0 ? ret : filep->f_pos;
 }
 
+/****************************************************************************
+ * Name: zipfs_dup
+ *
+ * Description:
+ *   Duplicate an open file. The entry of oldp is opened again with
+ *   zipfs_open(), so newp has its own reader that starts at the beginning of
+ *   the entry.
+ *
+ * Input Parameters:
+ *   oldp - The file structure to duplicate.
+ *   newp - The new file structure.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, otherwise the negated errno value of zipfs_open().
+ *
+ ****************************************************************************/
+
 static int zipfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
   FAR struct zipfs_priv_s *priv = oldp->f_priv;
@@ -614,6 +853,21 @@ static int zipfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   return zipfs_open(newp, relpath, oldp->f_oflags, 0);
 }
 
+/****************************************************************************
+ * Name: zipfs_fstat
+ *
+ * Description:
+ *   Return information about an open file: the stat of its entry.
+ *
+ * Input Parameters:
+ *   filep - The file structure.
+ *   buf   - Location to return the stat.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, -EINVAL if libarchive has no stat for the entry.
+ *
+ ****************************************************************************/
+
 static int zipfs_fstat(FAR const struct file *filep,
                        FAR struct stat *buf)
 {
@@ -621,6 +875,30 @@ static int zipfs_fstat(FAR const struct file *filep,
 
   return zipfs_stats_common(priv, buf);
 }
+
+/****************************************************************************
+ * Name: zipfs_opendir
+ *
+ * Description:
+ *   Open a directory. A reader positioned before the first entry of the
+ *   archive is created with zipfs_new() and is kept in a new directory
+ *   structure.
+ *
+ * Input Parameters:
+ *   mountpt - The mountpoint inode. The path of the zip file is in its
+ *             i_private field.
+ *   relpath - Not used.
+ *   dir     - Location to return the directory structure.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, -ENOMEM if memory runs out, or the negated errno
+ *   value of zipfs_new().
+ *
+ * Assumptions/Limitations:
+ *   relpath is not used: every directory lists all the entries of the
+ *   archive, with their full names, whichever directory is opened.
+ *
+ ****************************************************************************/
 
 static int zipfs_opendir(FAR struct inode *mountpt,
                          FAR const char *relpath,
@@ -647,6 +925,21 @@ static int zipfs_opendir(FAR struct inode *mountpt,
   return OK;
 }
 
+/****************************************************************************
+ * Name: zipfs_closedir
+ *
+ * Description:
+ *   Close a directory: release its reader and the directory structure.
+ *
+ * Input Parameters:
+ *   mountpt - The mountpoint inode.
+ *   dir     - The directory structure that zipfs_opendir() returned.
+ *
+ * Returned Value:
+ *   Zero (OK) always.
+ *
+ ****************************************************************************/
+
 static int zipfs_closedir(FAR struct inode *mountpt,
                           FAR struct fs_dirent_s *dir)
 {
@@ -656,6 +949,26 @@ static int zipfs_closedir(FAR struct inode *mountpt,
   fs_heap_free(adir);
   return OK;
 }
+
+/****************************************************************************
+ * Name: zipfs_readdir
+ *
+ * Description:
+ *   Read the next entry of the archive. The next header is read with
+ *   archive_read_next_header2(), and the full name of the entry is copied to
+ *   the d_name field of entry, truncated if it does not fit. The reader is
+ *   locked.
+ *
+ * Input Parameters:
+ *   mountpt - The mountpoint inode.
+ *   dir     - The directory structure that zipfs_opendir() returned.
+ *   entry   - Location to return the directory entry.
+ *
+ * Returned Value:
+ *   Zero (OK) when an entry was returned, EOF (-1) at the end of the
+ *   archive, or a negated errno value when reading the archive fails.
+ *
+ ****************************************************************************/
 
 static int zipfs_readdir(FAR struct inode *mountpt,
                          FAR struct fs_dirent_s *dir,
@@ -686,6 +999,27 @@ err:
   return ret;
 }
 
+/****************************************************************************
+ * Name: zipfs_rewinddir
+ *
+ * Description:
+ *   Replace the current entry of the reader of a directory with a new, empty
+ *   one.
+ *
+ * Input Parameters:
+ *   mountpt - The mountpoint inode.
+ *   dir     - The directory structure that zipfs_opendir() returned.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, -ENOMEM if the new entry cannot be allocated.
+ *
+ * Assumptions/Limitations:
+ *   The libarchive reader is not moved, because it only moves forward and no
+ *   new reader is created here. The next zipfs_readdir() continues after the
+ *   entries that were already returned.
+ *
+ ****************************************************************************/
+
 static int zipfs_rewinddir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
@@ -705,6 +1039,22 @@ static int zipfs_rewinddir(FAR struct inode *mountpt,
   return OK;
 }
 
+/****************************************************************************
+ * Name: zipfs_statfs
+ *
+ * Description:
+ *   Return information about the file system: f_type is set to ZIPFS_MAGIC
+ *   and f_namelen to NAME_MAX. The other fields are not changed.
+ *
+ * Input Parameters:
+ *   mountpt - The mountpoint inode. Not used.
+ *   buf     - Location to return the information.
+ *
+ * Returned Value:
+ *   Zero (OK) always.
+ *
+ ****************************************************************************/
+
 static int zipfs_statfs(FAR struct inode *mountpt,
                         FAR struct statfs *buf)
 {
@@ -712,6 +1062,31 @@ static int zipfs_statfs(FAR struct inode *mountpt,
   buf->f_namelen = NAME_MAX;
   return OK;
 }
+
+/****************************************************************************
+ * Name: zipfs_stat
+ *
+ * Description:
+ *   Return information about a path. For the root of the mount point, an
+ *   empty relpath, the result is a directory with mode 0555, and only
+ *   st_mode is set. For any other path the entry is looked up with
+ *   zipfs_new() and its stat is returned.
+ *
+ * Input Parameters:
+ *   mountpt - The mountpoint inode. The path of the zip file is in its
+ *             i_private field.
+ *   relpath - Name of the entry, relative to the mount point.
+ *   buf     - Location to return the stat.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, -EINVAL if libarchive has no stat for the entry,
+ *   otherwise the negated errno value of zipfs_new(), for example -ENOENT.
+ *
+ * Assumptions/Limitations:
+ *   relpath must be equal to the name stored in the archive. A directory is
+ *   stored with a trailing /, and it is not found without it.
+ *
+ ****************************************************************************/
 
 static int zipfs_stat(FAR struct inode *mountpt,
                       FAR const char *relpath,
@@ -737,6 +1112,26 @@ static int zipfs_stat(FAR struct inode *mountpt,
   zipfs_free(priv);
   return ret;
 }
+
+/****************************************************************************
+ * Name: zipfs_bind
+ *
+ * Description:
+ *   Mount a zip file. The zip file is opened once with zipfs_new() to check
+ *   that it can be read, and its path is copied to a new buffer that becomes
+ *   the mount handle. No block driver is used.
+ *
+ * Input Parameters:
+ *   driver - Not used.
+ *   data   - Path of the zip file.
+ *   handle - Location to return the mount handle, which is the copy of the
+ *            path.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, -ENODEV if data is NULL, -ENOMEM if memory runs
+ *   out, or the negated errno value of zipfs_new().
+ *
+ ****************************************************************************/
 
 static int zipfs_bind(FAR struct inode *driver, FAR const void *data,
                       FAR void **handle)
@@ -769,6 +1164,22 @@ static int zipfs_bind(FAR struct inode *driver, FAR const void *data,
   strlcpy(abspath, data, PATH_MAX);
   return OK;
 }
+
+/****************************************************************************
+ * Name: zipfs_unbind
+ *
+ * Description:
+ *   Unmount: free the mount handle.
+ *
+ * Input Parameters:
+ *   handle - The mount handle that zipfs_bind() returned.
+ *   driver - Not used.
+ *   flags  - Not used.
+ *
+ * Returned Value:
+ *   Zero (OK) always.
+ *
+ ****************************************************************************/
 
 static int zipfs_unbind(FAR void *handle, FAR struct inode **driver,
                         unsigned int flags)
