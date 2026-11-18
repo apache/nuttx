@@ -109,6 +109,9 @@ static int pci_u16550_ioctl(FAR struct u16550_s *priv, int cmd,
 static FAR struct dma_chan_s *pci_u16550_dmachan(FAR struct u16550_s *priv,
                                                  unsigned int ident);
 static int pci_u16550_interrupt(int irq, FAR void *context, FAR void *arg);
+static int pci_u16550_attach(FAR struct u16550_s *priv, FAR uart_dev_t *dev);
+static void pci_u16550_detach(FAR struct u16550_s *priv,
+                              FAR uart_dev_t *dev);
 static int pci_u16550_initialize(FAR struct pci_u16550_priv_s       *priv,
                                  FAR const struct pci_u16550_type_s *type,
                                  uintptr_t                           base,
@@ -182,22 +185,24 @@ static struct pci_driver_s g_pci_u16550_drv =
 
 static const struct u16550_ops_s g_pci_u16550_mem_ops =
 {
-  .isr     = pci_u16550_interrupt,
   .getreg  = pci_u16550_getreg_mem,
   .putreg  = pci_u16550_putreg_mem,
   .ioctl   = pci_u16550_ioctl,
   .dmachan = pci_u16550_dmachan,
+  .attach  = pci_u16550_attach,
+  .detach  = pci_u16550_detach,
 };
 
 /* UART 16550 ops for IO operations */
 
 static const struct u16550_ops_s g_pci_u16550_io_ops =
 {
-  .isr     = pci_u16550_interrupt,
   .getreg  = pci_u16550_getreg_io,
   .putreg  = pci_u16550_putreg_io,
   .ioctl   = pci_u16550_ioctl,
   .dmachan = pci_u16550_dmachan,
+  .attach  = pci_u16550_attach,
+  .detach  = pci_u16550_detach,
 };
 
 /* I/O buffers */
@@ -516,18 +521,62 @@ static FAR struct dma_chan_s *pci_u16550_dmachan(FAR struct u16550_s *priv,
  * Name: pci_u16550_interrupt
  *
  * Description:
- *   Handle PCI interrupt.
+ *   Handle the interrupt of a PCI device.  All ports of the device share
+ *   it, so service them until none has an interrupt pending: on an
+ *   edge-triggered input a port that raises its interrupt while another
+ *   port is serviced gives no new edge.
  *
  *****************************************************************************/
 
 static int pci_u16550_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct uart_dev_s *dev = (FAR struct uart_dev_s *)arg;
+  FAR struct pci_device_s      *dev = (FAR struct pci_device_s *)arg;
+  FAR struct pci_u16550_priv_s *priv;
+  bool                          pending;
+  size_t                        i;
 
-  DEBUGASSERT(dev != NULL);
-  u16550_interrupt(0, NULL, dev);
+  do
+    {
+      pending = false;
+      for (i = 0; i < nitems(g_pci_u16550_dev); i++)
+        {
+          priv = (FAR struct pci_u16550_priv_s *)g_pci_u16550_dev[i]->priv;
+          if (priv->pcidev == dev &&
+              u16550_interrupt(irq, context, g_pci_u16550_dev[i]))
+            {
+              pending = true;
+            }
+        }
+    }
+  while (pending);
 
   return OK;
+}
+
+/*****************************************************************************
+ * Name: pci_u16550_attach
+ *
+ * Description:
+ *   Empty: the device interrupt is attached once in pci_u16550_probe().
+ *
+ *****************************************************************************/
+
+static int pci_u16550_attach(FAR struct u16550_s *priv, FAR uart_dev_t *dev)
+{
+  return OK;
+}
+
+/*****************************************************************************
+ * Name: pci_u16550_detach
+ *
+ * Description:
+ *   Empty: the device interrupt stays attached for the other ports.
+ *
+ *****************************************************************************/
+
+static void pci_u16550_detach(FAR struct u16550_s *priv,
+                              FAR uart_dev_t *dev)
+{
 }
 
 /*****************************************************************************
@@ -544,6 +593,7 @@ static int pci_u16550_initialize(FAR struct pci_u16550_priv_s       *priv,
                                  FAR struct pci_device_s            *dev,
                                  bool                                mmio)
 {
+  size_t i;
   int ret = 0;
   int offset;
 
@@ -570,6 +620,22 @@ static int pci_u16550_initialize(FAR struct pci_u16550_priv_s       *priv,
   offset = (priv->common.regincr * sizeof(uart_datawidth_t) *
             UART_IER_OFFSET);
   priv->common.ops->putreg(&priv->common, offset, 0);
+
+  /* All ports of a device share its interrupt: take it from a port of the
+   * device that is already initialized.
+   */
+
+  for (i = 0; i < nitems(g_pci_u16550_dev); i++)
+    {
+      FAR struct pci_u16550_priv_s *other =
+        (FAR struct pci_u16550_priv_s *)g_pci_u16550_dev[i]->priv;
+
+      if (other != priv && other->pcidev == dev)
+        {
+          priv->common.irq = other->common.irq;
+          return OK;
+        }
+    }
 
   /* Allocate and connect MSI if supported */
 
@@ -671,6 +737,7 @@ static int pci_u16550_probe(FAR struct pci_device_s *dev)
   uint8_t                             port;
   uint8_t                             ports;
   unsigned int                        registered = 0;
+  int                                 irq = -1;
   bool                                mmio = false;
   int                                 ret;
 
@@ -768,12 +835,26 @@ static int pci_u16550_probe(FAR struct pci_device_s *dev)
           return ret;
         }
 
+      irq = priv->common.irq;
       registered++;
     }
 
   /* Fail only if no port of this device is configured */
 
-  return registered > 0 ? OK : -ENODEV;
+  if (registered == 0)
+    {
+      return -ENODEV;
+    }
+
+  /* Attach the interrupt shared by all ports of the device */
+
+  ret = irq_attach(irq, pci_u16550_interrupt, dev);
+  if (ret == OK)
+    {
+      up_enable_irq(irq);
+    }
+
+  return ret;
 }
 
 /*****************************************************************************
