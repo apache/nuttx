@@ -62,14 +62,19 @@ static uint8_t    g_fdcheck_tag = 0;
 
 int fdcheck_restore(int val)
 {
+  uint8_t tag_expect;
   uint8_t tag_store;
   int ret;
   int fd;
 
-  /* If val is a bare fd（0~255）, we should return it directly  */
+  /* If val is a bare fd (<= 2 or untagged) or negative, return it directly.
+   * Standard streams (0..2) are never protected, and assigned tags are
+   * never 0.
+   */
 
   fd = (val >> FD_SHIFT) & FD_MASK;
-  if (fd == 0 || val < 0)
+  tag_expect = (val >> TAG_SHIFT) & TAG_MASK;
+  if (fd <= 2 || tag_expect == 0 || val < 0)
     {
       return val;
     }
@@ -77,8 +82,6 @@ int fdcheck_restore(int val)
   ret = ioctl(fd, FIOC_GETTAG_FDCHECK, &tag_store);
   if (ret >= 0)
     {
-      uint8_t tag_expect = (val >> TAG_SHIFT) & TAG_MASK;
-
       if (tag_expect != tag_store)
         {
           ferr("tag_expect 0x%x tag_store 0x%x\n",
