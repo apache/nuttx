@@ -323,18 +323,20 @@ config STM32_NO_PHY
 	depends on STM32_HAVE_IP_ETHMAC_V2 && STM32_ETHMAC
 
 config STM32_ETH_NRXDESC
-	int "Number of RX descriptors"
+	int "Number of RX frames"
 	depends on STM32_HAVE_IP_ETHMAC_V2 && STM32_ETHMAC
 	default 8
 	---help---
-		Number of RX DMA descriptors to use.
+		Number of frames in the RX DMA ring.  A frame uses one DMA
+		descriptor per IOB that it spans.
 
 config STM32_ETH_NTXDESC
-	int "Number of TX descriptors"
+	int "Number of TX frames"
 	depends on STM32_HAVE_IP_ETHMAC_V2 && STM32_ETHMAC
 	default 4
 	---help---
-		Number of TX DMA descriptors to use.
+		Number of frames in the TX DMA ring.  A frame uses one DMA
+		descriptor per IOB that it spans.
 
 config STM32_ETH_TXTIMEOUT
 	int "TX watchdog timeout (seconds)"
