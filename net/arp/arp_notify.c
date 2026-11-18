@@ -35,6 +35,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/net/net.h>
 
+#include "utils/utils.h"
 #include "arp/arp.h"
 
 #ifdef CONFIG_NET_ARP_SEND
@@ -145,18 +146,19 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify)
  *   timeout occurs.
  *
  * Assumptions:
- *   This function is called from ARP send must execute with the network
- *   locked.
+ *   This function is called from ARP send with the device locked.  The
+ *   lock is released while waiting.
  *
  ****************************************************************************/
 
-int arp_wait(FAR struct arp_notify_s *notify, unsigned int timeout)
+int arp_wait(FAR struct net_driver_s *dev, FAR struct arp_notify_s *notify,
+             unsigned int timeout)
 {
   int ret;
 
   /* And wait for the ARP response (or a timeout). */
 
-  nxsem_tickwait_uninterruptible(&notify->nt_sem, MSEC2TICK(timeout));
+  conn_dev_sem_timedwait(&notify->nt_sem, false, timeout, NULL, dev);
 
   /* Then get the real result of the transfer */
 
