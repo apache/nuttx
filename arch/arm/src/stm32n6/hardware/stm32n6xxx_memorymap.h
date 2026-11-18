@@ -42,6 +42,13 @@
 #define STM32_SRAM1_BASE      0x34000000    /* SRAM1 base */
 #define STM32_SRAM2_BASE      0x34100000    /* SRAM2 base */
 
+/* AXISRAM1-6 and the CACHEAXI RAM (Secure aliases), reachable by bus
+ * masters such as the SDMMC IDMA
+ */
+
+#define STM32_AXISRAM_BASE    STM32_SRAM1_BASE
+#define STM32_AXISRAM_SIZE    0x00400000
+
 /* External Memory **********************************************************/
 
 #define STM32_XSPI1_BANK      0x90000000    /* XSPI1 memory-mapped region */
@@ -187,6 +194,8 @@
 
 #define STM32_DMA1_BASE       STM32_GPDMA1_BASE
 #define STM32_DMA2_BASE       STM32_HPDMA1_BASE
+#define STM32_SDMMC2_BASE     0x58026800    /* SDMMC2 (AHB5, Secure) */
+#define STM32_SDMMC1_BASE     0x58027000    /* SDMMC1 (AHB5, Secure) */
 #define STM32_XSPI2_BASE      0x5802A000    /* XSPI2 controller (AHB5, Secure) */
 #define STM32_XSPIM_BASE      0x5802B400    /* XSPIM IO Manager (AHB5, Secure) */
 #define STM32_EMAC_BASE       0x58036000    /* ETH1 MAC (AHB5, Secure) */

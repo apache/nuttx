@@ -88,6 +88,8 @@
 #define RIFSC_PERIPH_REG(p)         ((p) >> 5)
 #define RIFSC_PERIPH_BIT(p)         (1 << ((p) & 31))
 
+#define RIFSC_PERIPH_SDMMC1         (1 * 32 + 21)
+#define RIFSC_PERIPH_SDMMC2         (1 * 32 + 22)
 #define RIFSC_PERIPH_ETH1           (1 * 32 + 28)
 #define RIFSC_PERIPH_LTDC           (3 * 32 + 6)
 #define RIFSC_PERIPH_LTDCL1         (3 * 32 + 7)

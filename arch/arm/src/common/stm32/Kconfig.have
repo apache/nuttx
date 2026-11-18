@@ -811,7 +811,7 @@ config STM32_HAVE_IP_SDIO_M3M4_V1
 config STM32_HAVE_IP_SDMMC_V2
 	bool
 	---help---
-		SDMMC with an internal DMA (IDMA) (STM32H7).
+		SDMMC with an internal DMA (IDMA) (STM32H7, STM32N6).
 
 # SECURITY capabilities
 

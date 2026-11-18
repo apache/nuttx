@@ -134,14 +134,14 @@ config SDMMC1_SD_HS_MODE
 
 config SDMMC1_SDIO_MODE
 	bool "SDIO Card Support"
-	depends on STM32_COMMON_F7_H7_H5 && STM32_SDMMC && STM32_SDMMC1
+	depends on (STM32_COMMON_F7_H7_H5 || STM32_HAVE_IP_SDMMC_V2) && STM32_SDMMC && STM32_SDMMC1
 	---help---
 		Build in additional support needed only for SDIO cards (vs. SD
 		memory cards)
 
 config SDMMC1_SDIO_PULLUP
 	bool "Enable internal Pull-Ups"
-	depends on STM32_COMMON_F7_H7_H5 && STM32_SDMMC && STM32_SDMMC1
+	depends on (STM32_COMMON_F7_H7_H5 || STM32_HAVE_IP_SDMMC_V2) && STM32_SDMMC && STM32_SDMMC1
 	---help---
 		If you are using an external SDCard module that does not have the
 		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
@@ -150,7 +150,7 @@ config SDMMC1_SDIO_PULLUP
 
 config SDMMC2_WIDTH_D1_ONLY
 	bool "Use D1 only on SDMMC2"
-	depends on STM32_COMMON_F7_H7_H5 && STM32_SDMMC && STM32_SDMMC2
+	depends on (STM32_COMMON_F7_H7_H5 || STM32_HAVE_IP_SDMMC_V2) && STM32_SDMMC && STM32_SDMMC2
 	---help---
 		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
 
@@ -168,14 +168,14 @@ config SDMMC2_SD_HS_MODE
 
 config SDMMC2_SDIO_MODE
 	bool "SDIO Card Support"
-	depends on STM32_COMMON_F7_H7_H5 && STM32_SDMMC && STM32_SDMMC2
+	depends on (STM32_COMMON_F7_H7_H5 || STM32_HAVE_IP_SDMMC_V2) && STM32_SDMMC && STM32_SDMMC2
 	---help---
 		Build in additional support needed only for SDIO cards (vs. SD
 		memory cards)
 
 config SDMMC2_SDIO_PULLUP
 	bool "Enable internal Pull-Ups"
-	depends on STM32_COMMON_F7_H7_H5 && STM32_SDMMC && STM32_SDMMC2
+	depends on (STM32_COMMON_F7_H7_H5 || STM32_HAVE_IP_SDMMC_V2) && STM32_SDMMC && STM32_SDMMC2
 	---help---
 		If you are using an external SDCard module that does not have the
 		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
