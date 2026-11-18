@@ -2167,13 +2167,10 @@ static int qspi_command(struct qspi_dev_s *dev,
         }
 
       UP_MB();
-    }
-  else
-    {
-      ret = OK;
+      return ret;
     }
 
-  /* Wait for Transfer complete, and not busy */
+  /* Commands without data have not waited for completion yet. */
 
   qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
   qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
@@ -2315,9 +2312,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
        * info
        */
 
-      qspi_ccrconfig(priv, &xctn,
-                     QSPIMEM_ISWRITE(meminfo->flags) ? CCR_FMODE_INDWR :
-                                                       CCR_FMODE_INDRD);
+      qspi_ccrconfig(priv, &xctn, CCR_FMODE_INDWR);
 
       /* Transfer data */
 
@@ -2333,11 +2328,6 @@ static int qspi_memory(struct qspi_dev_s *dev,
           ret = qspi_receive_blocking(priv, &xctn);
         }
 
-      /* Wait for Transfer complete, and not busy */
-
-      qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
-      qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
-
       UP_MB();
     }
 
@@ -2346,9 +2336,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   /* Set up the Communications Configuration Register as per command info */
 
-  qspi_ccrconfig(priv, &xctn,
-                 QSPIMEM_ISWRITE(meminfo->flags) ? CCR_FMODE_INDWR :
-                                                   CCR_FMODE_INDRD);
+  qspi_ccrconfig(priv, &xctn, CCR_FMODE_INDWR);
 
   /* Transfer data */
 
@@ -2363,11 +2351,6 @@ static int qspi_memory(struct qspi_dev_s *dev,
     {
       ret = qspi_receive_blocking(priv, &xctn);
     }
-
-  /* Wait for Transfer complete, and not busy */
-
-  qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
-  qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
 
   UP_MB();
 
