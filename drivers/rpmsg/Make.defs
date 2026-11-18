@@ -26,6 +26,10 @@ ifeq ($(CONFIG_RPMSG),y)
 
 CSRCS += rpmsg.c
 
+ifeq ($(CONFIG_RPMSG_CHAR),y)
+CSRCS += rpmsg_char.c
+endif
+
 ifeq ($(CONFIG_RPMSG_TRACE),y)
 CSRCS += rpmsg_trace.c
 endif

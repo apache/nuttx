@@ -32,6 +32,19 @@ config RPMSG
 
 if RPMSG
 
+config RPMSG_CHAR
+	bool "rpmsg char support"
+	default n
+	---help---
+		User can use the /dev/rpmsg/<cpuname> to create the
+		endpoint and then use /dev/rpmsg-<name> to communicate with
+		remote processor.
+
+config RPMSG_CHAR_NPOLLWAITERS
+	int "rpmsg char number of the poll waiters"
+	default 2
+	depends on RPMSG_CHAR
+
 config RPMSG_WQUEUE_GLOBAL
 	bool "rpmsg global work queue"
 	default n
