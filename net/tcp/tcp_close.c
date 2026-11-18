@@ -54,16 +54,26 @@ static void tcp_close_work(FAR void *param)
 {
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)param;
 
+  /* The close event handler queues this work before tcp_appsend() acts on
+   * its result: a TCP_ABORT sets TCP_CLOSED only after the handler
+   * returns.  Look at the state under the same locks, or the work, run
+   * on another CPU at once, would see the old state, free nothing, and
+   * no one would free the connection later.
+   */
+
+  conn_dev_lock(&conn->sconn, conn->dev);
   conn->flags &= ~TCP_CLOSE_ARRANGED;
   if (conn->crefs == 0 && conn->tcpstateflags == TCP_CLOSED)
     {
       /* Stop the network monitor for all sockets */
 
-      conn_dev_lock(&conn->sconn, conn->dev);
       tcp_stop_monitor(conn, TCP_TXCLOSE);
       conn_dev_unlock(&conn->sconn, conn->dev);
       tcp_free(conn);
+      return;
     }
+
+  conn_dev_unlock(&conn->sconn, conn->dev);
 }
 
 /****************************************************************************
