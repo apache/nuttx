@@ -26,10 +26,12 @@ config STM32_LTDC_L1_RGB565
 config STM32_LTDC_L1_ARGB4444
 	bool "16 bpp ARGB 4444"
 	depends on !STM32_FB_CMAP
+	depends on !STM32_HAVE_IP_LTDC_V2
 
 config STM32_LTDC_L1_ARGB1555
 	bool "16 bpp ARGB 1555"
 	depends on !STM32_FB_CMAP
+	depends on !STM32_HAVE_IP_LTDC_V2
 
 config STM32_LTDC_L1_RGB888
 	bool "24 bpp RGB 888"
@@ -185,6 +187,7 @@ endif # STM32_LTDC_L2
 config STM32_FB_CMAP
 	bool "Color map support"
 	default y
+	depends on !STM32_HAVE_IP_LTDC_V2
 	select FB_CMAP
 	---help---
 		Enabling color map support is necessary for LTDC L8 format.

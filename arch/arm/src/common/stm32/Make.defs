@@ -98,6 +98,10 @@ CHIP_CSRCS += stm32_rtc_m3m4_v1_lowerhalf.c
 endif
 endif
 
+ifeq ($(CONFIG_STM32_LTDC)$(CONFIG_STM32_HAVE_IP_LTDC_V2),yy)
+CHIP_CSRCS += stm32_ltdc_v1v2.c
+endif
+
 ifeq ($(CONFIG_STM32_I2C)$(CONFIG_STM32_HAVE_IP_I2C_M33M55_V2),yy)
 CHIP_CSRCS += stm32_i2c_m33m55_v2.c
 endif
@@ -384,8 +388,8 @@ CHIP_CSRCS += stm32_hciuart_m3m4_v1.c
 endif
 
 ifeq ($(CONFIG_STM32_LTDC),y)
-ifeq ($(CONFIG_STM32_HAVE_IP_LTDC_M3M4_V1),y)
-CHIP_CSRCS += stm32_ltdc_m3m4_v1.c
+ifeq ($(CONFIG_STM32_HAVE_IP_LTDC_V1),y)
+CHIP_CSRCS += stm32_ltdc_v1v2.c
 endif
 endif
 
