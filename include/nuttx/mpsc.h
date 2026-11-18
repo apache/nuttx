@@ -229,11 +229,19 @@ static inline_function bool mpsc_empty(FAR struct mpsc_queue_s *q)
       return false;
     }
 
-  /* No linked successor; verify no producer is in flight. */
+  /* No linked successor. Still not empty while the consumer sits on a
+   * node it has not returned yet (head != stub), or while a producer
+   * has won the xchg but not completed the prev->next store.
+   */
+
+  if (head != &q->stub)
+    {
+      return false;
+    }
 
   tail = (FAR struct mpsc_node_s *)
          (intptr_t)atomic_ptr_read(&q->tail);
-  return head == tail;
+  return tail == &q->stub;
 }
 
 /****************************************************************************
