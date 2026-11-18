@@ -57,6 +57,7 @@
  *     IC2  /6 = 400 MHz  \
  *     IC6  /8 = 300 MHz   > SYSCLK components (SYSSW IC2_IC6_IC11)
  *     IC11 /6 = 400 MHz  /
+ *     IC16 /96 = 25 MHz  -> LTDC pixel clock
  *   PLL2 = HSI / 2 * 48  = 1536 MHz   (audio and SDMMC kernel clocks)
  *   PLL3 = HSE / 3 * 125 = 2000 MHz   (LTDC)
  *   PLL4 = HSI / 4 * 75  = 1200 MHz   (I2C, LTDC)
@@ -104,6 +105,11 @@
 #define STM32_IC11_SRC          RCC_ICCFGR_SEL_PLL1
 #define STM32_IC11_DIV          6
 
+/* IC16 = PLL1 / 96 = 25 MHz -> LTDC pixel clock */
+
+#define STM32_IC16_SRC          RCC_ICCFGR_SEL_PLL1
+#define STM32_IC16_DIV          96
+
 #define STM32_CPUCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC1_DIV)
 #define STM32_SYSCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC2_DIV)
 #define STM32_RCC_CFGR2_HPRE    RCC_CFGR2_HPRE_SYSCLKd2
@@ -139,6 +145,11 @@
 #define STM32_IC6_DIV           12
 #define STM32_IC11_SRC          RCC_ICCFGR_SEL_PLL1
 #define STM32_IC11_DIV          8
+
+/* IC16 = PLL1 / 32 = 25 MHz -> LTDC pixel clock */
+
+#define STM32_IC16_SRC          RCC_ICCFGR_SEL_PLL1
+#define STM32_IC16_DIV          32
 
 #define STM32_CPUCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC1_DIV)
 #define STM32_SYSCLK_FREQUENCY  (STM32_PLL1_FREQUENCY / STM32_IC2_DIV)
@@ -186,6 +197,10 @@
 
 #define STM32_RCC_CCIPR13_USART2SEL RCC_CCIPR13_USART2SEL_HSI
 #define STM32_USART2_FREQUENCY      STM32_HSI_FREQUENCY
+
+/* LTDC kernel clock: IC16 (25 MHz pixel clock) */
+
+#define STM32_RCC_CCIPR4_LTDCSEL RCC_CCIPR4_LTDCSEL_IC16
 
 /* I/O voltage domains ******************************************************/
 
@@ -316,6 +331,62 @@
 
 #define STM32_RCC_CCIPR9_SPI5SEL RCC_CCIPR9_SPI5SEL_PCLK2
 #define STM32_SPI5_FREQUENCY     STM32_PCLK2_FREQUENCY
+
+/* LTDC *********************************************************************/
+
+/* 5" 800x480 Rocktech RK050HR18 RGB888 panel on the LTDC.  Timings and
+ * polarities as in the Zephyr stm32n6570_dk board display-timings: syncs 4,
+ * porches 8, syncs and DE active low, pixel clock not inverted.  The 25 MHz
+ * IC16 pixel clock gives 820 x 500 clocks per frame, 61 Hz.
+ */
+
+#define GPIO_LTDC_R0     (GPIO_LTDC_R0_1 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_R1     (GPIO_LTDC_R1_2 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_R2     (GPIO_LTDC_R2_2 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_R3     (GPIO_LTDC_R3_1 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_R4     (GPIO_LTDC_R4_4 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_R5     (GPIO_LTDC_R5_1 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_R6     (GPIO_LTDC_R6_3 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_R7     (GPIO_LTDC_R7_1 | GPIO_SPEED_100MHZ)
+
+#define GPIO_LTDC_G0     (GPIO_LTDC_G0_3 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_G1     (GPIO_LTDC_G1_3 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_G2     (GPIO_LTDC_G2_1 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_G3     (GPIO_LTDC_G3_1 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_G4     (GPIO_LTDC_G4_1 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_G5     (GPIO_LTDC_G5_1 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_G6     (GPIO_LTDC_G6_1 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_G7     (GPIO_LTDC_G7_2 | GPIO_SPEED_100MHZ)
+
+#define GPIO_LTDC_B0     (GPIO_LTDC_B0_4 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_B1     (GPIO_LTDC_B1_1 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_B2     (GPIO_LTDC_B2_2 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_B3     (GPIO_LTDC_B3_3 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_B4     (GPIO_LTDC_B4_2 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_B5     (GPIO_LTDC_B5_2 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_B6     (GPIO_LTDC_B6_1 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_B7     (GPIO_LTDC_B7_1 | GPIO_SPEED_100MHZ)
+
+#define GPIO_LTDC_CLK    (GPIO_LTDC_CLK_2 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_DE     (GPIO_LTDC_DE_3 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_HSYNC  (GPIO_LTDC_HSYNC_2 | GPIO_SPEED_100MHZ)
+#define GPIO_LTDC_VSYNC  (GPIO_LTDC_VSYNC_2 | GPIO_SPEED_100MHZ)
+
+#define BOARD_LTDC_WIDTH         800
+#define BOARD_LTDC_HEIGHT        480
+
+#define BOARD_LTDC_OUTPUT_BPP    24
+#define BOARD_LTDC_HSYNC         4
+#define BOARD_LTDC_HBP           8
+#define BOARD_LTDC_HFP           8
+#define BOARD_LTDC_VSYNC         4
+#define BOARD_LTDC_VBP           8
+#define BOARD_LTDC_VFP           8
+
+#define BOARD_LTDC_GCR_PCPOL     0 /* Input pixel clock */
+#define BOARD_LTDC_GCR_DEPOL     0 /* DE active low */
+#define BOARD_LTDC_GCR_VSPOL     0 /* VSYNC active low */
+#define BOARD_LTDC_GCR_HSPOL     0 /* HSYNC active low */
 
 /* USART1 GPIOs *************************************************************/
 

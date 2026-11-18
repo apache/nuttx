@@ -66,6 +66,26 @@
 #define GPIO_SPI5_CS   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHZ | \
                         GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN3)
 
+/* LCD control: LCD_ON/OFF (PQ3) and backlight (PQ6) are active high,
+ * LCD_NRST (PE1, shared with the GT911 touch controller) is active low and
+ * starts asserted.
+ */
+
+#define GPIO_LCD_DISP  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTQ | GPIO_PIN3)
+#define GPIO_LCD_BL    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTQ | GPIO_PIN6)
+#define GPIO_LCD_NRST  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+                        GPIO_OUTPUT_CLEAR | GPIO_PORTE | GPIO_PIN1)
+
+/* GT911 touch controller on I2C2 (0x5d): interrupt on PQ4, rising edge.
+ * Its reset is LCD_NRST (PE1).
+ */
+
+#define GPIO_TOUCH_INT (GPIO_INPUT | GPIO_PULLDOWN | GPIO_EXTI | \
+                        GPIO_PORTQ | GPIO_PIN4)
+#define TOUCH_I2C_BUS  2
+
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
