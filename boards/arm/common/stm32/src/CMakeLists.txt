@@ -70,6 +70,10 @@ if(CONFIG_SENSORS_LM75)
   list(APPEND SRCS stm32_lm75.c)
 endif()
 
+if(CONFIG_INPUT_GT9XX)
+  list(APPEND SRCS stm32_gt9xx.c)
+endif()
+
 if(CONFIG_WL_NRF24L01)
   list(APPEND SRCS stm32_nrf24l01.c)
 endif()
