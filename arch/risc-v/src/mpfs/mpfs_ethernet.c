@@ -3609,7 +3609,7 @@ int mpfs_ethinitialize(int intf)
   priv->dev.d_private = priv;           /* Used to recover private state */
   priv->intf          = intf;           /* Remember the interface number */
   priv->regbase       = g_regbases[intf];
-  priv->lock          = SP_UNLOCKED;
+  spin_lock_init(&priv->lock);
   priv->mac_q_int[0]  = g_irq_numbers[intf][0];
   priv->mac_q_int[1]  = g_irq_numbers[intf][1];
   priv->mac_q_int[2]  = g_irq_numbers[intf][2];
