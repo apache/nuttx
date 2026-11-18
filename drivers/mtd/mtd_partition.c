@@ -460,6 +460,12 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           /* Erase the entire partition */
 
+          if (priv->parent->erase == NULL)
+            {
+              ret = -ENOSYS;
+              break;
+            }
+
           ret = priv->parent->erase(priv->parent,
                                     priv->firstblock / priv->blkpererase,
                                     priv->geo.neraseblocks);
@@ -471,6 +477,12 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
           /* Erase sectors as defined in mtd_erase_s structure */
 
           FAR struct mtd_erase_s *erase = (FAR struct mtd_erase_s *)arg;
+
+          if (priv->parent->erase == NULL)
+            {
+              ret = -ENOSYS;
+              break;
+            }
 
           ret = part_erase(dev, erase->startblock, erase->nblocks);
         }
