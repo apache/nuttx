@@ -2413,6 +2413,14 @@ static int  spi_exchange_dma(struct spi_dev_s *dev, const void *txbuffer,
                           SPI_CFG1_RXDMAEN, 0);
       spi_enable(priv, true);
 
+      /* Force RAM re-read */
+
+      if (rxbuffer)
+        {
+          up_invalidate_dcache((uintptr_t)rxbuffer,
+                               (uintptr_t)rxbuffer + nbytes);
+        }
+
       /* Second copy: Copy the DMA internal buffer to caller's buffer */
 
       if (orig_rxbuffer && priv->rxbuf)
