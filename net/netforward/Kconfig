@@ -56,6 +56,16 @@ config NET_IPFORWARD_BROADCAST
 		If selected, broadcast packets received on one network device will
 		be forwarded though other network devices.
 
+config NET_FORWARD_NCALLBACKS
+	int "Temporary cached forward callbacks max number"
+	default 0
+	depends on NET_FORWARD
+	---help---
+		Maximum number of forward callbacks that may be cached on the
+		callback list of one outgoing device while waiting to be sent, to
+		avoid over-consumption of the callback pool.  A packet that would
+		exceed the limit is dropped.  Zero means no limit.
+
 config NET_FORWARD_NSTRUCT
 	int "Number of pre-allocated forwarding structures"
 	default 4
