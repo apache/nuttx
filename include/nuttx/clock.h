@@ -36,6 +36,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/lib/math32.h>
+#include <nuttx/perf.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -301,6 +302,14 @@ struct cpuload_s
 #ifdef __cplusplus
 extern "C"
 {
+#endif
+
+#if defined(CONFIG_PERF_OVERFLOW_CORRECTION) && !defined(CONFIG_SMP)
+#  if defined(CONFIG_BUILD_PROTECTED)
+#    define g_perf (USERSPACE->us_data->us_perf)
+#  else
+extern struct perf_s g_perf;
+#  endif
 #endif
 
 /****************************************************************************

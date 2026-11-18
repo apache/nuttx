@@ -62,7 +62,7 @@ void up_perf_init(void *arg)
  * Name: up_perf_gettime
  ****************************************************************************/
 
-clock_t IRAM_ATTR up_perf_gettime(void)
+clock_t IRAM_ATTR noinstrument_function up_perf_gettime(void)
 {
   return READ_CSR(CSR_PCCR_MACHINE);
 }

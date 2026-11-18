@@ -233,6 +233,12 @@ void clock_initialize(void)
   cpuload_init();
 #endif
 
+#if defined(CONFIG_PERF_OVERFLOW_CORRECTION) && !defined(CONFIG_SMP)
+  /* Start the overflow watchdog once the clock is ready */
+
+  perf_setup();
+#endif
+
   sched_trace_end();
 }
 

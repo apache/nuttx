@@ -26,6 +26,15 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/seqlock.h>
+#include <nuttx/userspace.h>
+
+/* In a flat build g_perf is shared by the application and the kernel.  In a
+ * protected build it is the us_perf member of the user-space data block, so
+ * the application and the kernel still read and update the same state.
+ */
+
+#if defined(CONFIG_PERF_OVERFLOW_CORRECTION) && !defined(CONFIG_SMP)
 
 /****************************************************************************
  * Public Functions
@@ -35,7 +44,47 @@
  * perf_gettime
  ****************************************************************************/
 
-clock_t perf_gettime(void)
+clock_t noinstrument_function perf_gettime(void)
+{
+  clock_t overflow;
+  clock_t result;
+  uint32_t seq;
+
+  do
+    {
+      seq = read_seqbegin(&g_perf.lock);
+      clock_t now = up_perf_gettime();
+
+      if (now < g_perf.last)
+        {
+          overflow = g_perf.overflow + 1;
+        }
+      else
+        {
+          overflow = g_perf.overflow;
+        }
+
+      result = now | (overflow << CONFIG_ARCH_PERF_COUNT_BITWIDTH);
+    }
+  while (read_seqretry(&g_perf.lock, seq));
+
+  return result;
+}
+
+#elif !defined(CONFIG_BUILD_FLAT) && \
+  defined(CONFIG_ARCH_PERF_EVENTS_USER_ACCESS)
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * perf_gettime
+ ****************************************************************************/
+
+clock_t noinstrument_function perf_gettime(void)
 {
   return up_perf_gettime();
 }
+
+#endif

@@ -39,7 +39,14 @@ ifneq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += task_startup.c
 endif # CONFIG_BUILD_KERNEL
 
-ifeq ($(CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS),y)
+# The libc copy is used by flat builds with overflow correction and by
+# architectures that explicitly expose the hardware counter to user space.
+
+ifeq ($(CONFIG_BUILD_FLAT),y)
+ifeq ($(CONFIG_PERF_OVERFLOW_CORRECTION),y)
+  CSRCS += clock_perf.c
+endif
+else ifeq ($(CONFIG_ARCH_PERF_EVENTS_USER_ACCESS),y)
   CSRCS += clock_perf.c
 endif
 

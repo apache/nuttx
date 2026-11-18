@@ -717,7 +717,7 @@ static inline void cp15_pmu_wriecr(unsigned int iecr)
  *
  ****************************************************************************/
 
-static inline unsigned int cp15_pmu_rdccr(void)
+static inline noinstrument_function unsigned int cp15_pmu_rdccr(void)
 {
   return CP15_GET(PMCCNTR);
 }

@@ -65,7 +65,7 @@ unsigned long up_perf_getfreq(void)
   return g_cpu_freq;
 }
 
-clock_t up_perf_gettime(void)
+clock_t noinstrument_function up_perf_gettime(void)
 {
   return getreg32(DWT_CYCCNT);
 }
