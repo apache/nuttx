@@ -214,15 +214,13 @@ static uint32_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
       /* Make sure that TCP_TXCLOSE is set in the response */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      /* We don't need the send callback anymore. */
+      /* We don't need the send callback anymore.  Free it now: the
+       * connection can stay in TIME_WAIT for a long time.
+       */
 
       if (conn->sndcb != NULL)
         {
-          conn->sndcb->flags = 0;
-          conn->sndcb->event = NULL;
-
-          /* The callback will be freed by tcp_free. */
-
+          tcp_callback_free(conn, conn->sndcb);
           conn->sndcb = NULL;
         }
 #endif
@@ -287,6 +285,13 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
   /* Discard our reference to the connection */
 
   conn->crefs = 0;
+
+  /* No socket refers to the connection any more: stop the monitor now, not
+   * when the connection is freed after TIME_WAIT.  The close callback can
+   * then use its callback structure.
+   */
+
+  tcp_stop_monitor(conn, TCP_TXCLOSE);
 
   /* TCP_ESTABLISHED
    *   We need to initiate an active close and wait for its completion.
@@ -363,9 +368,6 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
     }
   else
     {
-      /* Stop the network monitor for all sockets */
-
-      tcp_stop_monitor(conn, TCP_TXCLOSE);
       conn_dev_unlock(&conn->sconn, conn->dev);
 
       /* Free network resources */
