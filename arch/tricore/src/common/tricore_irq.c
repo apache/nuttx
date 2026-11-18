@@ -31,6 +31,8 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/atomic.h>
+#include <nuttx/bits.h>
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
 
@@ -67,11 +69,32 @@ static inline void tricore_color_intstack(void)
 #endif
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_CHIP_TC3X)
+#  define TRICORE_IRQ_ROUTED_BITS   32
+#  define TRICORE_IRQ_ROUTED_WORDS  (NR_IRQS / TRICORE_IRQ_ROUTED_BITS)
+#endif
+
+#define TRICORE_SRC_TOS_GET(regval) \
+  (((regval) & TRICORE_SRC_TOS_MASK) >> TRICORE_SRC_TOS_SHIFT)
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static spinlock_t g_irqlock = SP_UNLOCKED;
 static int g_irqmap_count = 1;
+
+/* On TC3x an SRC that nobody routed still reads TOS 0, the same as one
+ * routed to CPU0, so a bitmap remembers which ones up_affinity_irq()
+ * routed.  On TC4x an SRC that nobody routed reads TOS 0xf.
+ */
+
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_CHIP_TC3X)
+static atomic_t g_irq_routed[TRICORE_IRQ_ROUTED_WORDS];
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -101,6 +124,54 @@ static void tricore_src_init(volatile uint32_t *src, int tos, int srpn)
   *src = regval | TRICORE_SRC_CLRR;
 }
 
+/****************************************************************************
+ * Name: tricore_irq_is_routed
+ *
+ * Description:
+ *   Return true if the SRC of the IRQ has a CPU chosen for it, so that
+ *   up_enable_irq() keeps its TOS instead of routing it to the caller.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static bool tricore_irq_is_routed(int irq)
+{
+  if (irq < 0 || irq >= NR_IRQS)
+    {
+      return false;
+    }
+
+#ifdef CONFIG_ARCH_CHIP_TC3X
+  return (atomic_read(&g_irq_routed[irq / TRICORE_IRQ_ROUTED_BITS]) &
+          BIT(irq % TRICORE_IRQ_ROUTED_BITS)) != 0;
+#else
+  return (*TRICORE_IRQ2SRC(irq) & TRICORE_SRC_TOS_MASK) !=
+         TRICORE_SRC_TOS_MASK;
+#endif
+}
+
+/****************************************************************************
+ * Name: tricore_irq_set_routed
+ *
+ * Description:
+ *   Remember that the SRC of the IRQ has a CPU chosen for it.
+ *
+ ****************************************************************************/
+
+static void tricore_irq_set_routed(int irq)
+{
+#ifdef CONFIG_ARCH_CHIP_TC3X
+  if (irq >= 0 && irq < NR_IRQS)
+    {
+      atomic_or(&g_irq_routed[irq / TRICORE_IRQ_ROUTED_BITS],
+                BIT(irq % TRICORE_IRQ_ROUTED_BITS));
+    }
+#else
+  UNUSED(irq);
+#endif
+}
+#endif
+
 #ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
 /****************************************************************************
  * Name: tricore_gpsrinitialize
@@ -110,19 +181,21 @@ static void tricore_src_init(volatile uint32_t *src, int tos, int srpn)
  *
  ****************************************************************************/
 
-static void tricore_gpsrinitialize(void)
+static void tricore_gpsrinit_cpu(int cpu)
 {
-  int cpu = up_cpu_index();
   int tos = TRICORE_SRC_TOS_CPU(cpu);
+  int irq;
   int i;
 
   /* Cpux gpsr init */
 
   for (i = 0; i < 6; i++)
     {
-      int irq = TRICORE_GPSR_IRQNUM(i, cpu);
-
+      irq = TRICORE_GPSR_IRQNUM(i, cpu);
       tricore_src_init(TRICORE_IRQ2SRC(irq), tos, IRQ_TO_NDX(irq));
+#ifdef CONFIG_SMP
+      tricore_irq_set_routed(irq);
+#endif
     }
 
   /* Cpucs gpsr init */
@@ -130,6 +203,20 @@ static void tricore_gpsrinitialize(void)
 #ifndef CONFIG_ARCH_CHIP_TC3X
   tricore_src_init(TRICORE_IRQ2SRC(TRICORE_GPSR_IRQNUM(6, cpu)), tos,
                    IRQ_TO_NDX(TRICORE_GPSR_IRQNUM(6, cpu)));
+#endif
+}
+
+static void tricore_gpsrinitialize(void)
+{
+#ifdef CONFIG_SMP
+  int cpu;
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      tricore_gpsrinit_cpu(cpu);
+    }
+#else
+  tricore_gpsrinit_cpu(up_cpu_index());
 #endif
 }
 #endif
@@ -183,9 +270,13 @@ void up_disable_irq(int irq)
 {
   volatile uint32_t *src = TRICORE_IRQ2SRC(irq);
 
+#ifdef CONFIG_SMP
+  *src &= ~TRICORE_SRC_SRE;
+#else
   /* Disable and clear, keep SRPN */
 
   *src = (*src & TRICORE_SRC_SRPN_MASK) | TRICORE_SRC_TOS_MASK;
+#endif
 }
 
 /****************************************************************************
@@ -199,9 +290,16 @@ void up_disable_irq(int irq)
 void up_enable_irq(int irq)
 {
   volatile uint32_t *src = TRICORE_IRQ2SRC(irq);
+  int tos = TRICORE_SRC_TOS_CPU(up_cpu_index());
 
-  tricore_src_init(src, TRICORE_SRC_TOS_CPU(up_cpu_index()),
-                   IRQ_TO_NDX(irq));
+#ifdef CONFIG_SMP
+  if (tricore_irq_is_routed(irq))
+    {
+      tos = TRICORE_SRC_TOS_GET(*src);
+    }
+#endif
+
+  tricore_src_init(src, tos, IRQ_TO_NDX(irq));
   *src |= TRICORE_SRC_SRE;
 }
 
@@ -216,7 +314,24 @@ void up_enable_irq(int irq)
 void up_affinity_irq(int irq, cpu_set_t cpuset)
 {
   volatile uint32_t *src = TRICORE_IRQ2SRC(irq);
+#ifdef CONFIG_SMP
+  uint32_t enabled;
+  int cpu;
 
+  cpu = ffs(cpuset) - 1;
+  if (irq < 0 || irq >= NR_IRQS || cpu < 0 || cpu >= CONFIG_SMP_NCPUS)
+    {
+      return;
+    }
+
+  enabled = *src & TRICORE_SRC_SRE;
+  *src &= ~TRICORE_SRC_SRE;
+  *src = (*src & ~TRICORE_SRC_TOS_MASK) |
+         ((TRICORE_SRC_TOS_CPU(cpu) << TRICORE_SRC_TOS_SHIFT) &
+          TRICORE_SRC_TOS_MASK);
+  tricore_irq_set_routed(irq);
+  *src |= enabled;
+#else
   *src &= ~TRICORE_SRC_SRE;
 
   /* Only support interrupt routing mode 0,
@@ -226,6 +341,7 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
   tricore_src_init(src, TRICORE_SRC_TOS_CPU(ffs(cpuset) - 1),
                    *src & TRICORE_SRC_SRPN_MASK);
   *src |= TRICORE_SRC_SRE;
+#endif
 }
 
 /****************************************************************************
