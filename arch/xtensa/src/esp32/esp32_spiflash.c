@@ -681,6 +681,7 @@ static inline void IRAM_ATTR esp32_spiflash_oposyield(void)
   /* Delay 1 tick */
 
   useconds_t us = TICK2USEC(1);
+
   nxsched_usleep(us);
 }
 
@@ -2342,6 +2343,7 @@ static int esp32_ioctl(struct mtd_dev_s *dev, int cmd,
       case MTDIOC_GEOMETRY:
         {
           struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
+
           if (geo)
             {
               memset(geo, 0, sizeof(*geo));
@@ -2362,6 +2364,7 @@ static int esp32_ioctl(struct mtd_dev_s *dev, int cmd,
         {
           struct partition_info_s *info =
             (struct partition_info_s *)arg;
+
           if (info != NULL)
             {
               info->numsectors  = MTD_SIZE(priv) / MTD_BLKSIZE(priv);
@@ -2376,6 +2379,7 @@ static int esp32_ioctl(struct mtd_dev_s *dev, int cmd,
       case MTDIOC_ERASESTATE:
         {
           uint8_t *result = (uint8_t *)arg;
+
           *result = SPI_FLASH_ERASED_STATE;
 
           ret = OK;
@@ -2421,6 +2425,7 @@ static int esp32_ioctl_encrypt(struct mtd_dev_s *dev, int cmd,
       case MTDIOC_GEOMETRY:
         {
           struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
+
           if (geo)
             {
               memset(geo, 0, sizeof(*geo));
@@ -2441,6 +2446,7 @@ static int esp32_ioctl_encrypt(struct mtd_dev_s *dev, int cmd,
         {
           struct partition_info_s *info =
             (struct partition_info_s *)arg;
+
           if (info != NULL)
             {
               info->sectorsize  = SPI_FLASH_ENCRYPT_MIN_SIZE;
@@ -2455,6 +2461,7 @@ static int esp32_ioctl_encrypt(struct mtd_dev_s *dev, int cmd,
       case MTDIOC_ERASESTATE:
         {
           uint8_t *result = (uint8_t *)arg;
+
           *result = SPI_FLASH_ERASED_STATE;
 
           ret = OK;
@@ -2628,6 +2635,7 @@ int spiflash_init_spi_flash_op_block_task(int cpu)
 static int esp32_set_mmu_map(int vaddr, int paddr, int num)
 {
   int ret;
+
   ret = cache_sram_mmu_set(0, 0, vaddr, paddr, 32, num);
   DEBUGASSERT(ret == 0);
   ret = cache_sram_mmu_set(1, 0, vaddr, paddr, 32, num);
@@ -2890,6 +2898,7 @@ uint32_t esp32_get_flash_address_mapped_as_text(void)
 {
   uint32_t i = MMU_ADDR2PAGE((uint32_t)&_stext - SOC_IROM_MASK_LOW)
                + IROM0_PAGES_START;
+
   return (PRO_MMU_TABLE[i] & DPORT_MMU_ADDRESS_MASK)
          * SPI_FLASH_MMU_PAGE_SIZE;
 }

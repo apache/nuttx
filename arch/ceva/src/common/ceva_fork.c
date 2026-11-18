@@ -171,6 +171,7 @@ pid_t ceva_fork(const uint32_t *regs)
       regs[REG_FP] >= (uint32_t)parent->stack_base_ptr - stacksize)
     {
       uint32_t frameutil = (uint32_t)parent->stack_base_ptr - regs[REG_FP];
+
       newfp = (uint32_t)child->stack_base_ptr - frameutil;
     }
   else
@@ -201,6 +202,7 @@ pid_t ceva_fork(const uint32_t *regs)
   if (parent->xcp.nsyscalls > 0)
     {
       int index;
+
       for (index = 0; index < parent->xcp.nsyscalls; index++)
         {
           child->xcp.syscall[index] = parent->xcp.syscall[index];
