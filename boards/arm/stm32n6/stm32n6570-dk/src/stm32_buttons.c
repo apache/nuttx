@@ -124,6 +124,15 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
       return -EINVAL;
     }
 
+#ifdef CONFIG_VIDEO_VL53L5CX
+  /* EXTI0 serves the ToF INT on PQ0 */
+
+  if (id == BUTTON_TAMP)
+    {
+      return -EBUSY;
+    }
+#endif
+
   return stm32_gpiosetevent(g_buttons[id], true, true, true,
                             irqhandler, arg);
 }

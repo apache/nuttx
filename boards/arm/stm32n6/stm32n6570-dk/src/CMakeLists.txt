@@ -40,6 +40,10 @@ if(CONFIG_STM32_LTDC)
   list(APPEND SRCS stm32_lcd.c)
 endif()
 
+if(CONFIG_VIDEO_VL53L5CX)
+  list(APPEND SRCS stm32_camera.c stm32_tof.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")
