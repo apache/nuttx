@@ -1223,6 +1223,24 @@ and decode it in the simulator to YUV 4:2:0 frames:
    nsh> cd /host
    nsh> nxcodec -d /dev/video1 -s 320x240 -f H264 -i t.h264 -f YU12 -o o.yuv
 
+**Memory-to-memory JPEG decoding**
+
+The sim JPEG decoder (``CONFIG_SIM_JPEG_DECODER``) is a V4L2
+memory-to-memory device, ``/dev/video3`` by default, that decodes JPEG
+with the host libjpeg.  It needs ``CONFIG_SIM_JPEG_DECODER`` and the
+same ``nxcodec`` setup as above:
+
+.. code:: console
+
+   nsh> mount -t hostfs -o fs=/tmp /host
+   nsh> cd /host
+   nsh> nxcodec -d /dev/video3 -s 320x240 -f JPEG -i t.jpg -f YU12 -o o.yuv
+
+Besides YUV 4:2:0 (``YU12``) the capture side accepts NV12 (``NV12``),
+RGB24 (``RGB3``), BGR24 (``BGR3``), XRGB32 (``BX24``) and XBGR32
+(``XR24``).  The packed YUV formats decode 4:2:0 and grayscale JPEG;
+the RGB formats accept any input sampling.
+
 nxdoom
 ------
 
