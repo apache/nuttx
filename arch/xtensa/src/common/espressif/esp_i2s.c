@@ -3582,6 +3582,7 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
   int ret;
   struct esp_i2s_s *priv = NULL;
   irqstate_t flags;
+  bool locked = false;
 
   i2sinfo("port: %d\n", port);
 
@@ -3612,6 +3613,7 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
     }
 
   flags = spin_lock_irqsave(&priv->slock);
+  locked = true;
 
   i2s_configure(priv);
 
@@ -3632,16 +3634,21 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
 #endif /* I2S_HAVE_TX */
 
 #ifdef I2S_HAVE_RX
-  /* Start RX channel */
+  /* RX must not be started until buffers are queued and AUDIOIOC_START is
+   * issued. Starting it during bus initialization may raise RX DMA events
+   * before the audio upper half is ready.
+   */
 
   if (priv->config->rx_en)
     {
       priv->rx_started = false;
-      i2s_rx_channel_start(priv);
     }
 #endif /* I2S_HAVE_RX */
 
+  priv->paused = false;
+
   spin_unlock_irqrestore(&priv->slock, flags);
+  locked = false;
 
   /* Enable the I2S DMA interrupts.  up_enable_irq writes the cpuint
    * back into the interrupt matrix register, which must happen after
@@ -3675,6 +3682,10 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
   /* Failure exit */
 
 err:
-  spin_unlock_irqrestore(&priv->slock, flags);
+  if (locked)
+    {
+      spin_unlock_irqrestore(&priv->slock, flags);
+    }
+
   return NULL;
 }
