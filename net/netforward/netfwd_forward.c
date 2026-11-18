@@ -227,6 +227,22 @@ static uint32_t netfwd_eventhandler(FAR struct net_driver_s *dev,
 
 static inline_function int netfwd_forward_notify(FAR struct forward_s *fwd)
 {
+#if CONFIG_NET_FORWARD_NCALLBACKS > 0
+  int n_conncb;
+
+  /* Do not let the callbacks of forwarded packets pile up on a device that
+   * cannot send them out fast enough.
+   */
+
+  n_conncb = devif_count_callbacks(fwd->f_dev->d_conncb, IPFWD_POLL);
+  if (n_conncb >= CONFIG_NET_FORWARD_NCALLBACKS)
+    {
+      nwarn("WARNING: Too many forwardings (%d >= %d)\n",
+            n_conncb, CONFIG_NET_FORWARD_NCALLBACKS);
+      return -ENOMEM;
+    }
+#endif
+
   /* Set up the callback in the connection */
 
   fwd->f_cb = netfwd_callback_alloc(fwd->f_dev);
