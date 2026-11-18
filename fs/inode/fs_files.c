@@ -600,14 +600,17 @@ int fdlist_dupfile(FAR struct fdlist *list, int oflags, int minfd,
   int i;
   int j;
 
-  DEBUGASSERT(filep);
+  if (list == NULL || filep == NULL || minfd < 0)
+    {
+      return -EINVAL;
+    }
 
 #ifdef CONFIG_FDCHECK
   minfd = fdcheck_restore(minfd);
 #endif
 
   limit = fdlist_limit(list);
-  if (minfd >= limit)
+  if (minfd < 0 || minfd >= limit)
     {
       return -EINVAL;
     }
