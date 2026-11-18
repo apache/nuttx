@@ -115,6 +115,10 @@
 #define STM32_TIM9_BASE       0x52004c00
 #define STM32_SPI5_BASE       0x52005000
 
+/* APB5 peripherals *********************************************************/
+
+#define STM32_LTDC_BASE       0x58001000
+
 /* Debug ********************************************************************/
 
 #define STM32_DBGMCU_BASE     0x54001000

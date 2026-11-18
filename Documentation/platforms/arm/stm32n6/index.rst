@@ -27,6 +27,9 @@ Peripheral  Support  Notes
 ==========  =======  ===============================================
 GPIO        Yes
 I2C         Yes      I2C1-4 through the common I2C v2 driver.
+LTDC        Yes      Common LTDC driver (v2 register layout), RGB565,
+                     RGB888 and ARGB8888 layers.  The layer bus masters
+                     are made Secure and privileged through the RIF.
 EXTI        Yes      GPIO interrupts through the common driver.
 ETH         Yes      ETH1 through the common Ethernet v2 driver, MII, RMII
                      or RGMII up to 1000 Mbps.
@@ -48,7 +51,6 @@ DCMIPP      No
 ICACHE      No
 IWDG        No
 LPTIM       No
-LTDC        No
 MPU         No
 NPU         No
 SAI         No

@@ -90,4 +90,13 @@ void stm32_rifconfig(void)
   rif_setmaster(RIFSC_MASTER_ETH1, RIF_MASTER_CID1_SEC_PRIV);
   rif_setslave_secpriv(RIFSC_PERIPH_ETH1);
 #endif
+
+#ifdef CONFIG_STM32_LTDC
+  /* Both LTDC layers fetch the framebuffer from Secure AXISRAM */
+
+  rif_setmaster(RIFSC_MASTER_LTDC1, RIF_MASTER_CID1_SEC_PRIV);
+  rif_setmaster(RIFSC_MASTER_LTDC2, RIF_MASTER_CID1_SEC_PRIV);
+  rif_setslave_secpriv(RIFSC_PERIPH_LTDCL1);
+  rif_setslave_secpriv(RIFSC_PERIPH_LTDCL2);
+#endif
 }
