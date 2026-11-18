@@ -33,6 +33,7 @@
 #include <sys/types.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/streams.h>
 #include <nuttx/reboot_notifier.h>
 
@@ -546,7 +547,11 @@ void __gcov_execle(void)
 
 pid_t __gcov_fork(void)
 {
+#ifdef CONFIG_ARCH_HAVE_FORK
   return fork();
+#else
+  return -ENOSYS;
+#endif
 }
 
 void __gcov_dump(void)
