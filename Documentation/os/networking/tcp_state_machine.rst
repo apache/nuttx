@@ -306,6 +306,21 @@ The TCP timer handler in ``net/tcp/tcp_timer.c`` drives:
 		connection is closed, the socket is notified (``TCP_TIMEDOUT``), and a
 		RST may be sent.
 
+Reset by the peer
+-----------------
+
+A RST from the peer closes the connection (``TCP_ABORT`` callback).  In
+``TCP_SYN_SENT`` it refuses the connection: ``connect()`` and ``SO_ERROR``
+give ``ECONNREFUSED``.  In ``TCP_ESTABLISHED``, ``TCP_FIN_WAIT_1`` and
+``TCP_FIN_WAIT_2`` the application gets the reset once.  The data that came
+before the RST is read first.  Then the first receive without data, the first
+send or ``getsockopt(SO_ERROR)`` gives ``ECONNRESET``.  After that a receive
+gives end-of-file and a send gives ``EPIPE`` (and ``SIGPIPE`` without
+``MSG_NOSIGNAL``).  ``poll()`` gives ``POLLHUP`` and ``POLLIN``, and
+``POLLERR`` while the ``ECONNRESET`` is not yet reported.  After the FIN of
+the peer the application already read the end of the stream: a RST does not
+change what a receive (end-of-file) or a send (``EPIPE``) gives.
+
 Deviations and Notable Simplifications
 ======================================
 
