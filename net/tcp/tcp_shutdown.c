@@ -82,15 +82,13 @@ static uint32_t tcp_shutdown_eventhandler(FAR struct net_driver_s *dev,
     }
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  /* We don't need the send callback anymore. */
+  /* We don't need the send callback anymore.  Free it now: the
+   * connection can stay in TIME_WAIT for a long time.
+   */
 
   if (conn->sndcb != NULL)
     {
-      conn->sndcb->flags = 0;
-      conn->sndcb->event = NULL;
-
-      /* The callback will be freed by tcp_free. */
-
+      tcp_callback_free(conn, conn->sndcb);
       conn->sndcb = NULL;
     }
 #endif
