@@ -116,6 +116,22 @@ config RPMSG_PANIC_DUMP_LEVEL
 		  2 - Verbose: full dump on panic
 		Manual rpmsg dump command is not affected.
 
+config RPMSG_POOL_COUNT
+	int "rpmsg pool buffer count"
+	default 0
+	---help---
+		This macro sets the count of rpmsg pool buffers, each pool
+		can be used to allocate rpmsg buffers. 0 means disable
+		rpmsg pool.
+
+config RPMSG_POOL_SIZE
+	int "rpmsg pool size"
+	depends on RPMSG_POOL_COUNT != 0
+	default 64
+	---help---
+		This macro sets the size of each rpmsg pool, which is used
+		to allocate rpmsg buffers. The default value is 64 bytes.
+
 endif # RPMSG
 
 config RPMSG_ROUTER
