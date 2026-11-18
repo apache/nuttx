@@ -202,6 +202,50 @@ static uint32_t netfwd_eventhandler(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: netfwd_forward_notify
+ *
+ * Description:
+ *   Set up the forward callback on the outgoing device and notify its
+ *   driver that TX data is available.
+ *
+ * Input Parameters:
+ *   fwd - An initialized instance of the common forwarding structure that
+ *         includes everything needed to perform the forwarding operation.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned if the
+ *   callback could not be allocated.
+ *
+ * Assumptions:
+ *   The lock of the outgoing device (fwd->f_dev) is held.
+ *
+ ****************************************************************************/
+
+static inline_function int netfwd_forward_notify(FAR struct forward_s *fwd)
+{
+  /* Set up the callback in the connection */
+
+  fwd->f_cb = netfwd_callback_alloc(fwd->f_dev);
+  if (fwd->f_cb != NULL)
+    {
+      fwd->f_cb->flags = (IPFWD_POLL | NETDEV_DOWN);
+      fwd->f_cb->priv  = (FAR void *)fwd;
+      fwd->f_cb->event = netfwd_eventhandler;
+
+      /* Notify the device driver of the availability of TX data */
+
+      netdev_txnotify_dev(fwd->f_dev, IPFWD_POLL);
+      return OK;
+    }
+
+  return -EBUSY;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -217,7 +261,14 @@ static uint32_t netfwd_eventhandler(FAR struct net_driver_s *dev,
  *   asynchronously and must return without waiting for the send to
  *   complete.
  *
+ *   The callback lists of the outgoing device are also changed by the
+ *   worker of that device, so they are only touched with the lock of the
+ *   outgoing device held.  The lock of the incoming device is released
+ *   meanwhile, to avoid an AB-BA deadlock when two devices forward packets
+ *   to each other.
+ *
  * Input Parameters:
+ *   dev - The device on which the packet was received.  Its lock is held.
  *   fwd - An initialized instance of the common forwarding structure that
  *         includes everything needed to perform the forwarding operation.
  *
@@ -230,39 +281,64 @@ static uint32_t netfwd_eventhandler(FAR struct net_driver_s *dev,
 
 int netfwd_forward(FAR struct net_driver_s *dev, FAR struct forward_s *fwd)
 {
+  FAR struct net_driver_s *fwddev;
+  FAR struct iob_s *iob;
+  FAR uint8_t *buf;
+  unsigned int count;
+  int len;
+  int ret;
+
   DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
-  /* Set up the callback in the connection */
+  /* The worker of the outgoing device may free fwd as soon as the callback
+   * is set up, so do not touch fwd after netfwd_forward_notify().
+   */
 
-  fwd->f_cb = netfwd_callback_alloc(fwd->f_dev);
-  if (fwd->f_cb != NULL)
+  fwddev = fwd->f_dev;
+
+  if (fwddev == dev)
     {
-      FAR struct iob_s *iob = dev->d_iob;
-      FAR uint8_t *buf = dev->d_buf;
-      int len = dev->d_len;
+      /* The packet goes out on the device it came in on: the lock of that
+       * device is already held, so no lock reordering is needed, and the
+       * device state does not have to be saved.
+       */
 
-      fwd->f_cb->flags   = (IPFWD_POLL | NETDEV_DOWN);
-      fwd->f_cb->priv    = (FAR void *)fwd;
-      fwd->f_cb->event   = netfwd_eventhandler;
-
+      ret = netfwd_forward_notify(fwd);
+    }
+  else
+    {
       /* Save the current state of the device, avoid damaging the current
        * d_iob and other resources when forwarding recursion
        */
+
+      iob = dev->d_iob;
+      buf = dev->d_buf;
+      len = dev->d_len;
 
       dev->d_iob = NULL;
       dev->d_buf = NULL;
       dev->d_len = 0;
 
-      /* Notify the device driver of the availability of TX data */
+      /* Release the lock of the incoming device before taking the lock of
+       * the outgoing one.
+       */
 
-      netdev_txnotify_dev(fwd->f_dev, IPFWD_POLL);
+      netdev_breaklock(dev, &count);
+      netdev_lock(fwddev);
+
+      ret = netfwd_forward_notify(fwd);
+
+      netdev_unlock(fwddev);
+      netdev_restorelock(dev, count);
+
+      /* Release the IOB that the outgoing device may have left in dev */
+
+      netdev_iob_release(dev);
 
       dev->d_iob = iob;
       dev->d_buf = buf;
       dev->d_len = len;
-
-      return OK;
     }
 
-  return -EBUSY;
+  return ret;
 }
