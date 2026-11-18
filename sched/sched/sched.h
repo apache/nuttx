@@ -78,6 +78,10 @@
 #  define current_task(cpu)      ((FAR struct tcb_s *)list_readytorun()->head)
 #endif
 
+/* This set of all CPUs */
+
+#define SCHED_ALL_CPUS           ((cpu_set_t)((1 << CONFIG_SMP_NCPUS) - 1))
+
 /* This macro returns the running task which may different from this_task()
  * during interrupt level context switches.
  */

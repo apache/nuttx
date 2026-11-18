@@ -82,7 +82,13 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
 
   /* Make sure that affinity mask is valid */
 
-  if (*mask == 0)
+#ifdef CONFIG_BMP
+  if (mask == NULL || cpusetsize != sizeof(cpu_set_t) || *mask == 0 ||
+      (*mask & ~SCHED_ALL_CPUS) != 0 || (*mask & (*mask - 1)) != 0)
+#else
+  if (mask == NULL || cpusetsize != sizeof(cpu_set_t) || *mask == 0 ||
+      (*mask & SCHED_ALL_CPUS) == 0)
+#endif
     {
       return -EINVAL;
     }
@@ -114,6 +120,15 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
       ret = -EINVAL;
       goto errout_with_csection;
     }
+
+#ifdef CONFIG_BMP
+  if (tcb->task_state != TSTATE_TASK_INACTIVE &&
+      *mask != ((cpu_set_t)1 << tcb->cpu))
+    {
+      ret = -EINVAL;
+      goto errout_with_csection;
+    }
+#endif
 
   /* Set the new affinity mask. */
 

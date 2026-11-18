@@ -216,9 +216,13 @@ retry:
 #ifdef CONFIG_SMP
 static inline void nxtask_inherit_affinity(FAR struct tcb_s *tcb)
 {
+#ifdef CONFIG_BMP
+  tcb->affinity = (cpu_set_t)1 << this_cpu();
+#else
   FAR struct tcb_s *rtcb = this_task();
 
   tcb->affinity = rtcb->affinity;
+#endif
 }
 #else
 #  define nxtask_inherit_affinity(tcb)
