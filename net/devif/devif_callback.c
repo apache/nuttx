@@ -38,6 +38,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/mm/mempool.h>
 
 #include "netdev/netdev.h"
 #include "utils/utils.h"
@@ -64,9 +65,9 @@ struct net_stats_s g_netstats;
  * Private Data
  ****************************************************************************/
 
-NET_BUFPOOL_DECLARE(g_cbprealloc, sizeof(struct devif_callback_s),
-                    CONFIG_NET_PREALLOC_DEVIF_CALLBACKS,
-                    CONFIG_NET_ALLOC_DEVIF_CALLBACKS, 0);
+MEMPOOL_DEFINE(g_cbprealloc, sizeof(struct devif_callback_s),
+               CONFIG_NET_PREALLOC_DEVIF_CALLBACKS, 0,
+               CONFIG_NET_ALLOC_DEVIF_CALLBACKS);
 
 /****************************************************************************
  * Private Functions
@@ -96,16 +97,13 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
 #ifdef CONFIG_DEBUG_FEATURES
       /* Check for double freed callbacks */
 
-      NET_BUFPOOL_LOCK(g_cbprealloc);
-      curr = (FAR struct devif_callback_s *)g_cbprealloc.freebuffers.head;
+      curr = (FAR struct devif_callback_s *)g_cbprealloc.queue.head;
 
       while (curr != NULL)
         {
           DEBUGASSERT(cb != curr);
           curr = curr->nxtconn;
         }
-
-      NET_BUFPOOL_UNLOCK(g_cbprealloc);
 #endif
 
       /* Remove the callback structure from the data notification list if
@@ -199,7 +197,7 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
 
       /* Free the callback structure */
 
-      NET_BUFPOOL_FREE(g_cbprealloc, cb);
+      mempool_release(&g_cbprealloc, cb);
     }
 }
 
@@ -307,7 +305,7 @@ devif_callback_alloc(FAR struct net_driver_s *dev,
 
   /* Get a callback structure */
 
-  ret = NET_BUFPOOL_TRYALLOC(g_cbprealloc);
+  ret = mempool_allocate(&g_cbprealloc, 0);
   if (ret)
     {
       /* Add the newly allocated instance to the head of the device event

@@ -39,6 +39,8 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
+#include <nuttx/mm/mempool.h>
+
 #include "devif/devif.h"
 #include "icmpv6/icmpv6.h"
 #include "utils/utils.h"
@@ -59,10 +61,16 @@
 
 /* The array containing all IPPROTO_ICMP socket connections */
 
-NET_BUFPOOL_DECLARE(g_icmpv6_connections, sizeof(struct icmpv6_conn_s),
-                    CONFIG_NET_ICMPv6_PREALLOC_CONNS,
-                    CONFIG_NET_ICMPv6_ALLOC_CONNS,
-                    CONFIG_NET_ICMPv6_MAX_CONNS);
+MEMPOOL_DEFINE(g_icmpv6_connections, sizeof(struct icmpv6_conn_s),
+               CONFIG_NET_ICMPv6_PREALLOC_CONNS,
+               CONFIG_NET_ICMPv6_MAX_CONNS,
+               CONFIG_NET_ICMPv6_ALLOC_CONNS);
+
+/* The list of all allocated IPPROTO_ICMP6 socket connections is protected
+ * by this rmutex.
+ */
+
+static rmutex_t g_icmpv6_connections_lock = NXRMUTEX_INITIALIZER;
 
 /* A list of all allocated IPPROTO_ICMP socket connections */
 
@@ -88,9 +96,9 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
 
   /* The free list is protected by a mutex. */
 
-  NET_BUFPOOL_LOCK(g_icmpv6_connections);
+  nxrmutex_lock(&g_icmpv6_connections_lock);
 
-  conn = NET_BUFPOOL_TRYALLOC(g_icmpv6_connections);
+  conn = mempool_allocate(&g_icmpv6_connections, 0);
   if (conn != NULL)
     {
       /* Use conn_init to initialize the connection structure */
@@ -102,7 +110,7 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
       dq_addlast(&conn->sconn.s_node, &g_active_icmpv6_connections);
     }
 
-  NET_BUFPOOL_UNLOCK(g_icmpv6_connections);
+  nxrmutex_unlock(&g_icmpv6_connections_lock);
 
   return conn;
 }
@@ -124,7 +132,7 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 
   /* Take the mutex (perhaps waiting) */
 
-  NET_BUFPOOL_LOCK(g_icmpv6_connections);
+  nxrmutex_lock(&g_icmpv6_connections_lock);
 
   /* Remove the connection from the active list */
 
@@ -136,9 +144,9 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 
   /* Free the connection. */
 
-  NET_BUFPOOL_FREE(g_icmpv6_connections, conn);
+  mempool_release(&g_icmpv6_connections, conn);
 
-  NET_BUFPOOL_UNLOCK(g_icmpv6_connections);
+  nxrmutex_unlock(&g_icmpv6_connections_lock);
 }
 
 /****************************************************************************

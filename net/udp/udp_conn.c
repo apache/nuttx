@@ -64,6 +64,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/udp.h>
+#include <nuttx/mm/mempool.h>
 
 #include "devif/devif.h"
 #include "inet/inet.h"
@@ -88,9 +89,13 @@
 
 /* The array containing all UDP connections. */
 
-NET_BUFPOOL_DECLARE(g_udp_connections, sizeof(struct udp_conn_s),
-                    CONFIG_NET_UDP_PREALLOC_CONNS,
-                    CONFIG_NET_UDP_ALLOC_CONNS, CONFIG_NET_UDP_MAX_CONNS);
+MEMPOOL_DEFINE(g_udp_connections, sizeof(struct udp_conn_s),
+               CONFIG_NET_UDP_PREALLOC_CONNS, CONFIG_NET_UDP_MAX_CONNS,
+               CONFIG_NET_UDP_ALLOC_CONNS);
+
+/* The list of all allocated UDP connections is protected by this rmutex. */
+
+static rmutex_t g_udp_connections_lock = NXRMUTEX_INITIALIZER;
 
 /* A list of all allocated UDP connections */
 
@@ -684,9 +689,9 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
 
   /* The free list is protected by a mutex. */
 
-  NET_BUFPOOL_LOCK(g_udp_connections);
+  udp_conn_list_lock();
 
-  conn = NET_BUFPOOL_TRYALLOC(g_udp_connections);
+  conn = mempool_allocate(&g_udp_connections, 0);
 
   if (conn)
     {
@@ -720,7 +725,7 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
       dq_addlast(&conn->sconn.s_node, &g_active_udp_connections);
     }
 
-  NET_BUFPOOL_UNLOCK(g_udp_connections);
+  udp_conn_list_unlock();
   return conn;
 }
 
@@ -743,7 +748,7 @@ void udp_free(FAR struct udp_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  NET_BUFPOOL_LOCK(g_udp_connections);
+  udp_conn_list_lock();
   conn->lport = 0;
 
   /* Remove the connection from the active list */
@@ -781,9 +786,9 @@ void udp_free(FAR struct udp_conn_s *conn)
 
   /* Free the connection. */
 
-  NET_BUFPOOL_FREE(g_udp_connections, conn);
+  mempool_release(&g_udp_connections, conn);
 
-  NET_BUFPOOL_UNLOCK(g_udp_connections);
+  udp_conn_list_unlock();
 }
 
 /****************************************************************************
@@ -834,7 +839,7 @@ FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
 
 void udp_conn_list_lock(void)
 {
-  NET_BUFPOOL_LOCK(g_udp_connections);
+  nxrmutex_lock(&g_udp_connections_lock);
 }
 
 /****************************************************************************
@@ -850,7 +855,7 @@ void udp_conn_list_lock(void)
 
 void udp_conn_list_unlock(void)
 {
-  NET_BUFPOOL_UNLOCK(g_udp_connections);
+  nxrmutex_unlock(&g_udp_connections_lock);
 }
 
 /****************************************************************************
