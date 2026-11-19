@@ -109,7 +109,11 @@ EM_TRICORE = 44
 GCC_CROSS_PREFIXES = {
     EM_AARCH64: ["aarch64-none-elf-gcov", "aarch64-linux-gnu-gcov"],
     EM_ARM: ["arm-none-eabi-gcov", "arm-linux-gnueabi-gcov"],
-    EM_RISCV: ["riscv64-unknown-elf-gcov", "riscv32-unknown-elf-gcov"],
+    EM_RISCV: [
+        "riscv-none-elf-gcov",
+        "riscv64-unknown-elf-gcov",
+        "riscv32-unknown-elf-gcov",
+    ],
     EM_TRICORE: ["tricore-elf-gcov"],
     EM_XTENSA: ["xtensa-esp32-elf-gcov", "xtensa-esp32s3-elf-gcov"],
     EM_X86_64: ["gcov"],
