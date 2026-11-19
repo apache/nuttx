@@ -28,7 +28,7 @@ menu "Thread Local Storage (TLS)"
 
 config TLS_EMUTLS
 	bool "Per-thread copies of emulated TLS variables"
-	default y
+	default !DEFAULT_SMALL
 	depends on BUILTIN_TOOLCHAIN
 	depends on (ARCH_TOOLCHAIN_GNU && !ARCH_TOOLCHAIN_ARMCLANG && !ARCH_TOOLCHAIN_GHS && !ARCH_SIM) || (ARCH_SIM && SIM_TOOLCHAIN_GCC && !HOST_MACOS && !WINDOWS_NATIVE)
 	---help---
@@ -42,7 +42,10 @@ config TLS_EMUTLS
 		--wrap.
 
 		With LTO every program links this code (about 800 bytes on
-		Cortex-M).  A board that has no space for it can disable it: then
+		Cortex-M).  On memory-constrained targets (DEFAULT_SMALL=y),
+		it is disabled by default to save flash and avoid pulling
+		emulation routines into minimal images.  A board that has no
+		space for it can disable it: then
 		all threads share one copy of each __thread variable, as with
 		libgcc.
 
