@@ -255,6 +255,25 @@ end_wait:
 }
 
 /****************************************************************************
+ * Name: tcp_close_waits
+ *
+ * Description:
+ *   Return true if a close of the connection must wait for its close
+ *   callback (to send the queued data and the FIN, or to see the FIN
+ *   acknowledged).
+ *
+ ****************************************************************************/
+
+static bool tcp_close_waits(FAR struct tcp_conn_s *conn)
+{
+  return conn->tcpstateflags == TCP_ESTABLISHED ||
+         conn->tcpstateflags == TCP_FIN_WAIT_1 ||
+         conn->tcpstateflags == TCP_FIN_WAIT_2 ||
+         conn->tcpstateflags == TCP_LAST_ACK ||
+         conn->tcpstateflags == TCP_CLOSE_WAIT;
+}
+
+/****************************************************************************
  * Name: tcp_close_disconnect
  *
  * Description:
@@ -274,6 +293,7 @@ end_wait:
 static inline int tcp_close_disconnect(FAR struct socket *psock)
 {
   FAR struct tcp_conn_s *conn;
+  bool reclaimed;
   int ret = OK;
 
   /* Interrupts are disabled here to avoid race conditions */
@@ -281,10 +301,6 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
   conn = psock->s_conn;
 
   conn_dev_lock(&conn->sconn, conn->dev);
-
-  /* Discard our reference to the connection */
-
-  conn->crefs = 0;
 
   /* No socket refers to the connection any more: stop the monitor now, not
    * when the connection is freed after TIME_WAIT.  The close callback can
@@ -301,12 +317,35 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
    *   retransmitting the FIN, before disposing the connection.
    */
 
-  if ((conn->tcpstateflags == TCP_ESTABLISHED ||
-       conn->tcpstateflags == TCP_FIN_WAIT_1 ||
-       conn->tcpstateflags == TCP_FIN_WAIT_2 ||
-       conn->tcpstateflags == TCP_LAST_ACK ||
-       conn->tcpstateflags == TCP_CLOSE_WAIT) &&
-      (conn->clscb = tcp_callback_alloc(conn)) != NULL)
+  if (tcp_close_waits(conn))
+    {
+      conn->clscb = tcp_callback_alloc(conn);
+      if (conn->clscb == NULL)
+        {
+          /* All callbacks are in use: free a connection that only waits
+           * for the end of its close (for example in TIME_WAIT), or this
+           * one goes without a FIN and its queued data is lost.
+           * tcp_reclaim() takes a device lock and the list lock: not with
+           * our locks held.  It does not take this connection: it has no
+           * close callback.
+           */
+
+          conn_dev_unlock(&conn->sconn, conn->dev);
+          reclaimed = tcp_reclaim(NULL);
+          conn_dev_lock(&conn->sconn, conn->dev);
+
+          if (reclaimed && tcp_close_waits(conn))
+            {
+              conn->clscb = tcp_callback_alloc(conn);
+            }
+        }
+    }
+
+  /* Discard our reference to the connection */
+
+  conn->crefs = 0;
+
+  if (conn->clscb != NULL)
     {
       /* Set up to receive TCP data event callbacks */
 
