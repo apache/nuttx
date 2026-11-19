@@ -59,7 +59,7 @@ struct netprocfs_file_s
 {
   struct procfs_file_s base;         /* Base open file structure */
   FAR struct net_driver_s *dev;      /* Current network device */
-  uint8_t lineno;                    /* Line number */
+  uint16_t lineno;                   /* Line number */
   uint8_t linesize;                  /* Number of valid characters in line[] */
   uint8_t offset;                    /* Offset to first valid character in line[] */
   uint8_t entry;                     /* Entry index of netprocfs_entry_s */
