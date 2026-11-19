@@ -117,6 +117,12 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
 void __start(void) noinstrument_function;
 #endif
 
+/* Called from __start before any clock setup, with .data and .bss in place.
+ * A bootloader can hand over to the ROM bootloader here.
+ */
+
+void stm32_preclock_hook(void) weak_function;
+
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
 /****************************************************************************
  * Name: stm32_tcmenable
@@ -243,6 +249,15 @@ void __start(void)
 #ifdef CONFIG_ARMV7M_STACKCHECK
   arm_stack_check_init();
 #endif
+
+  /* Let the board act while the chip is still as reset left it, before
+   * any clock setup.
+   */
+
+  if (stm32_preclock_hook)
+    {
+      stm32_preclock_hook();
+    }
 
   /* Configure the UART so that we can get debug output as soon as possible */
 
