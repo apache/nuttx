@@ -53,6 +53,12 @@
 #define TRICORE_SYSTIMER_MIN_DELAY \
   (40ull * SCU_FREQUENCY / TRICORE_SYSTIMER_CPU_FREQUENCY)
 
+/* Times tricore_systimer_arm() moves a compare value that the timer has
+ * already passed, doubling the minimum delay each time
+ */
+
+#define TRICORE_SYSTIMER_ARM_RETRIES 8
+
 /* STM register of the timer */
 
 #define TRICORE_STM_REG(priv, offset)  ((priv)->tbase + (offset))
@@ -138,6 +144,44 @@ static clkcnt_t tricore_systimer_max_delay(struct oneshot_lowerhalf_s *lower)
 }
 
 /****************************************************************************
+ * Name: tricore_systimer_arm
+ *
+ * Description:
+ *   Set the compare value to expected, or later if expected is too close.
+ *   The compare only matches bits [31:0] when they are equal, so a value
+ *   that the timer has already passed when it is written fires only after
+ *   the next wrap of the 32-bit compare.  Check the time after the write
+ *   and move the compare value on until the timer is still before it.
+ *
+ ****************************************************************************/
+
+static void
+tricore_systimer_arm(struct tricore_systimer_lowerhalf_s *priv,
+                     uint64_t expected)
+{
+  uint64_t margin = TRICORE_SYSTIMER_MIN_DELAY;
+  uint64_t now;
+  int retry;
+
+  for (retry = 0; retry < TRICORE_SYSTIMER_ARM_RETRIES; retry++)
+    {
+      now = tricore_systimer_get_time(priv);
+      if (expected < now + margin)
+        {
+          expected = now + margin;
+        }
+
+      tricore_systimer_set_timecmp(priv, expected);
+      if (tricore_systimer_get_time(priv) < expected)
+        {
+          return;
+        }
+
+      margin <<= 1;
+    }
+}
+
+/****************************************************************************
  * Name: tricore_systimer_start
  *
  * Description:
@@ -162,15 +206,9 @@ static void tricore_systimer_start(struct oneshot_lowerhalf_s *lower,
   struct tricore_systimer_lowerhalf_s *priv =
     (struct tricore_systimer_lowerhalf_s *)lower;
   irqstate_t flags;
-  uint64_t   mtime;
 
-  delta = delta < TRICORE_SYSTIMER_MIN_DELAY ?
-                  TRICORE_SYSTIMER_MIN_DELAY : delta;
   flags = up_irq_save();
-  mtime = tricore_systimer_get_time(priv);
-
-  tricore_systimer_set_timecmp(priv, mtime + delta);
-
+  tricore_systimer_arm(priv, tricore_systimer_get_time(priv) + delta);
   up_irq_restore(flags);
 }
 
@@ -200,14 +238,9 @@ tricore_systimer_start_absolute(struct oneshot_lowerhalf_s *lower,
   struct tricore_systimer_lowerhalf_s *priv =
     (struct tricore_systimer_lowerhalf_s *)lower;
   irqstate_t flags;
-  uint64_t   min_expected;
 
   flags = up_irq_save();
-  min_expected = tricore_systimer_get_time(priv) +
-                 TRICORE_SYSTIMER_MIN_DELAY;
-  expected = expected < min_expected ? min_expected : expected;
-  tricore_systimer_set_timecmp(priv, expected);
-
+  tricore_systimer_arm(priv, expected);
   up_irq_restore(flags);
 }
 
