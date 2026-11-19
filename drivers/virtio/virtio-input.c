@@ -77,7 +77,6 @@ struct virtio_input_priv
   union
   {
     struct mouse_report_s       mousesample;    /* Mouse event */
-    struct keyboard_event_s     keyboardsample; /* Keyboard event */
     struct touch_sample_s       touchsample;    /* Touchpad event */
   };
 };
@@ -133,16 +132,11 @@ virtio_input_send_keyboard_event(FAR struct virtio_input_priv *priv,
       uint32_t trans_key;
       bool is_special;
 
+      /* Report each key at once: one update can change several keys */
+
       trans_key = keyboard_translate_virtio_code(event->code, &is_special);
-      priv->keyboardsample.code = trans_key;
-      priv->keyboardsample.type = types[is_special][event->value & 1];
-    }
-  else if (event->type == EV_SYN && event->code == SYN_REPORT)
-    {
-      keyboard_event(&(priv->keyboardlower),
-                     priv->keyboardsample.code,
-                     priv->keyboardsample.type);
-      memset(&priv->keyboardsample, 0, sizeof(priv->keyboardsample));
+      keyboard_event(&(priv->keyboardlower), trans_key,
+                     types[is_special][event->value & 1]);
     }
 }
 
