@@ -142,5 +142,8 @@ void tricore_wdt_disable(void)
 
   cpu = cpu > 5 ? 5 : cpu;
   tc3x_wdt_disable(TC3X_SCU_WDTCPU_CON0(cpu), TC3X_SCU_WDTCPU_CON1(cpu));
-  tc3x_wdt_disable(TC3X_SCU_WDTS_CON0, TC3X_SCU_WDTS_CON1);
+  if (cpu == 0)
+    {
+      tc3x_wdt_disable(TC3X_SCU_WDTS_CON0, TC3X_SCU_WDTS_CON1);
+    }
 }

@@ -150,5 +150,8 @@ void tricore_wdt_disable(void)
 
   tc4x_wdt_disable(TC4X_WTU_WDTCPU_CTRLA(cpu),
                    TC4X_WTU_WDTCPU_CTRLB(cpu));
-  tc4x_wdt_disable(TC4X_WTU_WDTSYS_CTRLA, TC4X_WTU_WDTSYS_CTRLB);
+  if (cpu == 0)
+    {
+      tc4x_wdt_disable(TC4X_WTU_WDTSYS_CTRLA, TC4X_WTU_WDTSYS_CTRLB);
+    }
 }
