@@ -66,6 +66,7 @@
  ****************************************************************************/
 
 #include <errno.h>
+#include <stdbool.h>
 #include <string.h>
 #include <strings.h>
 #include <sys/param.h>
@@ -95,6 +96,12 @@
  ****************************************************************************/
 
 #define CRC32_XOR_VALUE 0xFFFFFFFFUL
+
+/* Reverse the bits of an 8-bit value */
+
+#define REFLECT8(data)                                  \
+  ((((data) * 0x0802U & 0x22110U) |                     \
+    ((data) * 0x8020U & 0x88440U)) * 0x10101U >> 16)
 
 /****************************************************************************
  * Public Functions
@@ -189,13 +196,13 @@ struct aes_ofb_ctx
   uint8_t iv[AESOFB_IVSIZE];
 };
 
-/* polynomial 0 selects the standard reflected CRC-32 */
-
 struct crc8_ctx
 {
   uint8_t polynomial;
   uint8_t initial;
   uint8_t xorout;
+  bool reflect_in;
+  bool reflect_out;
 };
 
 struct crc16_ctx
@@ -203,13 +210,19 @@ struct crc16_ctx
   uint16_t polynomial;
   uint16_t initial;
   uint16_t xorout;
+  bool reflect_in;
+  bool reflect_out;
 };
+
+/* polynomial 0 selects the standard reflected CRC-32 */
 
 struct crc32_ctx
 {
   uint32_t polynomial;
   uint32_t initial;
   uint32_t xorout;
+  bool reflect_in;
+  bool reflect_out;
 };
 
 /* Helper */
@@ -1170,12 +1183,7 @@ void crc8init(FAR void *ctx)
 
 void crc8setkey(FAR void *ctx, FAR const uint8_t *key, uint16_t len)
 {
-  FAR struct crc8_ctx *crc = (FAR struct crc8_ctx *)ctx;
-  FAR const uint8_t *param = (FAR const uint8_t *)key;
-
-  crc->polynomial = param[0];
-  crc->initial    = param[1];
-  crc->xorout     = param[2];
+  memcpy(ctx, key, MIN(len, sizeof(struct crc8_ctx)));
 }
 
 int crc8update(FAR void *ctx, FAR const uint8_t *buf, size_t len)
@@ -1186,7 +1194,14 @@ int crc8update(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 
   for (i = 0; i < len; i++)
     {
-      crc->initial ^= buf[i];
+      uint8_t byte = buf[i];
+
+      if (crc->reflect_in)
+        {
+          byte = REFLECT8(buf[i]);
+        }
+
+      crc->initial ^= byte;
       for (j = 0; j < 8; j++)
         {
           if (crc->initial & 0x80)
@@ -1206,9 +1221,17 @@ int crc8update(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 void crc8final(FAR uint8_t *digest, FAR void *ctx)
 {
   FAR struct crc8_ctx *crc = (FAR struct crc8_ctx *)ctx;
+  uint8_t result = crc->initial;
 
-  crc->initial ^= crc->xorout;
-  memcpy(digest, &crc->initial, sizeof(uint8_t));
+  if (crc->reflect_out)
+    {
+      result = ((result & 0xf0) >> 4) | ((result & 0x0f) << 4);
+      result = ((result & 0xcc) >> 2) | ((result & 0x33) << 2);
+      result = ((result & 0xaa) >> 1) | ((result & 0x55) << 1);
+    }
+
+  result ^= crc->xorout;
+  memcpy(digest, &result, sizeof(uint8_t));
 }
 
 void crc16init(FAR void *ctx)
@@ -1220,12 +1243,7 @@ void crc16init(FAR void *ctx)
 
 void crc16setkey(FAR void *ctx, FAR const uint8_t *key, uint16_t len)
 {
-  FAR struct crc16_ctx *crc = (FAR struct crc16_ctx *)ctx;
-  FAR const uint16_t *param = (FAR const uint16_t *)key;
-
-  crc->polynomial = param[0];
-  crc->initial    = param[1];
-  crc->xorout     = param[2];
+  memcpy(ctx, key, MIN(len, sizeof(struct crc16_ctx)));
 }
 
 int crc16update(FAR void *ctx, FAR const uint8_t *buf, size_t len)
@@ -1236,7 +1254,14 @@ int crc16update(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 
   for (i = 0; i < len; i++)
     {
-      crc->initial ^= buf[i] << 8;
+      uint16_t byte = buf[i];
+
+      if (crc->reflect_in)
+        {
+          byte = REFLECT8(buf[i]);
+        }
+
+      crc->initial ^= byte << 8;
       for (j = 0; j < 8; j++)
         {
           if (crc->initial & 0x8000)
@@ -1256,9 +1281,18 @@ int crc16update(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 void crc16final(FAR uint8_t *digest, FAR void *ctx)
 {
   FAR struct crc16_ctx *crc = (FAR struct crc16_ctx *)ctx;
+  uint16_t result = crc->initial;
 
-  crc->initial ^= crc->xorout;
-  memcpy(digest, &crc->initial, sizeof(uint16_t));
+  if (crc->reflect_out)
+    {
+      result = ((result & 0x5555) << 1) | ((result & 0xaaaa) >> 1);
+      result = ((result & 0x3333) << 2) | ((result & 0xcccc) >> 2);
+      result = ((result & 0x0f0f) << 4) | ((result & 0xf0f0) >> 4);
+      result = ((result & 0x00ff) << 8) | ((result & 0xff00) >> 8);
+    }
+
+  result ^= crc->xorout;
+  memcpy(digest, &result, sizeof(uint16_t));
 }
 
 void crc32init(FAR void *ctx)
@@ -1272,6 +1306,16 @@ void crc32setkey(FAR void *ctx, FAR const uint8_t *key, uint16_t len)
 {
   FAR struct crc32_ctx *crc = (FAR struct crc32_ctx *)ctx;
   uint32_t keyval = 0;
+
+  if (len >= sizeof(struct crc32_ctx))
+    {
+      /* Parameter form:
+       * {polynomial, initial, xorout, reflect_in, reflect_out}
+       */
+
+      memcpy(crc, key, sizeof(struct crc32_ctx));
+      return;
+    }
 
   if (len >= 3 * sizeof(uint32_t))
     {
@@ -1300,20 +1344,38 @@ void crc32setkey(FAR void *ctx, FAR const uint8_t *key, uint16_t len)
 int crc32update(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 {
   FAR struct crc32_ctx *crc = (FAR struct crc32_ctx *)ctx;
+  int i;
+  int j;
 
-  switch (crc->polynomial)
+  if (crc->polynomial == 0)
     {
-      case 0:
-        crc->initial = crc32part(buf, len, crc->initial);
-        break;
-      case 0x04c11db7:
-        crc->initial = crc32h04c11db7_part(buf, len, crc->initial);
-        break;
-      case 0xf4acfb13:
-        crc->initial = crc32hf4acfb13_part(buf, len, crc->initial);
-        break;
-      default:
-        return -EINVAL;
+      /* The legacy key form keeps the table-driven reflected CRC-32 */
+
+      crc->initial = crc32part(buf, len, crc->initial);
+      return 0;
+    }
+
+  for (i = 0; i < len; i++)
+    {
+      uint32_t byte = buf[i];
+
+      if (crc->reflect_in)
+        {
+          byte = REFLECT8(buf[i]);
+        }
+
+      crc->initial ^= byte << 24;
+      for (j = 0; j < 8; j++)
+        {
+          if (crc->initial & 0x80000000)
+            {
+              crc->initial = (crc->initial << 1) ^ crc->polynomial;
+            }
+          else
+            {
+              crc->initial = crc->initial << 1;
+            }
+        }
     }
 
   return 0;
@@ -1322,7 +1384,17 @@ int crc32update(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 void crc32final(FAR uint8_t *digest, FAR void *ctx)
 {
   FAR struct crc32_ctx *crc = (FAR struct crc32_ctx *)ctx;
+  uint32_t result = crc->initial;
 
-  crc->initial ^= crc->xorout;
-  memcpy(digest, &crc->initial, sizeof(uint32_t));
+  if (crc->reflect_out)
+    {
+      result = ((result & 0x55555555) << 1) | ((result & 0xaaaaaaaa) >> 1);
+      result = ((result & 0x33333333) << 2) | ((result & 0xcccccccc) >> 2);
+      result = ((result & 0x0f0f0f0f) << 4) | ((result & 0xf0f0f0f0) >> 4);
+      result = ((result & 0x00ff00ff) << 8) | ((result & 0xff00ff00) >> 8);
+      result = ((result & 0x0000ffff) << 16) | ((result & 0xffff0000) >> 16);
+    }
+
+  result ^= crc->xorout;
+  memcpy(digest, &result, sizeof(uint32_t));
 }
