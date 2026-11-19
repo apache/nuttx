@@ -1862,6 +1862,14 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
             axf = &auth_hash_poly1305;
             goto auth4common;
 
+          case CRYPTO_CRC8:
+            axf = &auth_hash_crc8;
+            goto auth4common;
+
+          case CRYPTO_CRC16:
+            axf = &auth_hash_crc16;
+            goto auth4common;
+
           case CRYPTO_CRC32:
             axf = &auth_hash_crc32;
             goto auth4common;
@@ -1998,6 +2006,8 @@ int swcr_freesession(uint64_t tid)
           case CRYPTO_SHA2_256:
           case CRYPTO_SHA2_384:
           case CRYPTO_SHA2_512:
+          case CRYPTO_CRC8:
+          case CRYPTO_CRC16:
           case CRYPTO_CRC32:
             axf = swd->sw_axf;
 
@@ -2095,6 +2105,8 @@ static int swcr_clonedata(FAR struct swcr_data *dst,
       case CRYPTO_SHA2_256:
       case CRYPTO_SHA2_384:
       case CRYPTO_SHA2_512:
+      case CRYPTO_CRC8:
+      case CRYPTO_CRC16:
       case CRYPTO_CRC32:
         axf = src->sw_axf;
         dst->sw_octx = NULL;
@@ -2287,6 +2299,8 @@ int swcr_process(struct cryptop *crp)
           case CRYPTO_SHA2_256:
           case CRYPTO_SHA2_384:
           case CRYPTO_SHA2_512:
+          case CRYPTO_CRC8:
+          case CRYPTO_CRC16:
           case CRYPTO_CRC32:
             if ((crp->crp_etype = swcr_hash(crp, crd, sw,
                 crp->crp_buf)) != 0)
@@ -2795,6 +2809,8 @@ void swcr_init(void)
   algs[CRYPTO_SHA2_256] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_SHA2_384] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_SHA2_512] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_CRC8] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_CRC16] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_CRC32] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_AES_CMAC] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_AES_128_CMAC] = CRYPTO_ALG_FLAG_SUPPORTED;

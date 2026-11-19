@@ -155,6 +155,14 @@ int sha224update_int(FAR void *, FAR const uint8_t *, size_t);
 int sha256update_int(FAR void *, FAR const uint8_t *, size_t);
 int sha384update_int(FAR void *, FAR const uint8_t *, size_t);
 int sha512update_int(FAR void *, FAR const uint8_t *, size_t);
+void crc8init(FAR void *);
+void crc8setkey(FAR void *, FAR const uint8_t *, uint16_t);
+int crc8update(FAR void *, FAR const uint8_t *, size_t);
+void crc8final(FAR uint8_t *, FAR void *);
+void crc16init(FAR void *);
+void crc16setkey(FAR void *, FAR const uint8_t *, uint16_t);
+int crc16update(FAR void *, FAR const uint8_t *, size_t);
+void crc16final(FAR uint8_t *, FAR void *);
 void crc32init(FAR void *);
 void crc32setkey(FAR void *, FAR const uint8_t *, uint16_t);
 int crc32update(FAR void *, FAR const uint8_t *, size_t);
@@ -182,6 +190,20 @@ struct aes_ofb_ctx
 };
 
 /* polynomial 0 selects the standard reflected CRC-32 */
+
+struct crc8_ctx
+{
+  uint8_t polynomial;
+  uint8_t initial;
+  uint8_t xorout;
+};
+
+struct crc16_ctx
+{
+  uint16_t polynomial;
+  uint16_t initial;
+  uint16_t xorout;
+};
 
 struct crc32_ctx
 {
@@ -568,6 +590,20 @@ const struct auth_hash auth_hash_sha2_512 =
   (void (*)(FAR void *)) sha512init, NULL, NULL,
   sha512update_int,
   (void (*)(FAR uint8_t *, FAR void *)) sha512final
+};
+
+const struct auth_hash auth_hash_crc8 =
+{
+  CRYPTO_CRC8, "CRC8",
+  0, 8, 0, sizeof(struct crc8_ctx), 1,
+  crc8init, crc8setkey, NULL, crc8update, crc8final
+};
+
+const struct auth_hash auth_hash_crc16 =
+{
+  CRYPTO_CRC16, "CRC16",
+  0, 16, 0, sizeof(struct crc16_ctx), 1,
+  crc16init, crc16setkey, NULL, crc16update, crc16final
 };
 
 const struct auth_hash auth_hash_crc32 =
@@ -1123,6 +1159,106 @@ int sha512update_int(FAR void *ctx, FAR const uint8_t *buf, size_t len)
 {
   sha512update(ctx, buf, len);
   return 0;
+}
+
+void crc8init(FAR void *ctx)
+{
+  FAR struct crc8_ctx *crc = (FAR struct crc8_ctx *)ctx;
+
+  memset(crc, 0, sizeof(struct crc8_ctx));
+}
+
+void crc8setkey(FAR void *ctx, FAR const uint8_t *key, uint16_t len)
+{
+  FAR struct crc8_ctx *crc = (FAR struct crc8_ctx *)ctx;
+  FAR const uint8_t *param = (FAR const uint8_t *)key;
+
+  crc->polynomial = param[0];
+  crc->initial    = param[1];
+  crc->xorout     = param[2];
+}
+
+int crc8update(FAR void *ctx, FAR const uint8_t *buf, size_t len)
+{
+  FAR struct crc8_ctx *crc = (FAR struct crc8_ctx *)ctx;
+  int i;
+  int j;
+
+  for (i = 0; i < len; i++)
+    {
+      crc->initial ^= buf[i];
+      for (j = 0; j < 8; j++)
+        {
+          if (crc->initial & 0x80)
+            {
+              crc->initial = (crc->initial << 1) ^ crc->polynomial;
+            }
+          else
+            {
+              crc->initial = crc->initial << 1;
+            }
+        }
+    }
+
+  return 0;
+}
+
+void crc8final(FAR uint8_t *digest, FAR void *ctx)
+{
+  FAR struct crc8_ctx *crc = (FAR struct crc8_ctx *)ctx;
+
+  crc->initial ^= crc->xorout;
+  memcpy(digest, &crc->initial, sizeof(uint8_t));
+}
+
+void crc16init(FAR void *ctx)
+{
+  FAR struct crc16_ctx *crc = (FAR struct crc16_ctx *)ctx;
+
+  memset(crc, 0, sizeof(struct crc16_ctx));
+}
+
+void crc16setkey(FAR void *ctx, FAR const uint8_t *key, uint16_t len)
+{
+  FAR struct crc16_ctx *crc = (FAR struct crc16_ctx *)ctx;
+  FAR const uint16_t *param = (FAR const uint16_t *)key;
+
+  crc->polynomial = param[0];
+  crc->initial    = param[1];
+  crc->xorout     = param[2];
+}
+
+int crc16update(FAR void *ctx, FAR const uint8_t *buf, size_t len)
+{
+  FAR struct crc16_ctx *crc = (FAR struct crc16_ctx *)ctx;
+  int i;
+  int j;
+
+  for (i = 0; i < len; i++)
+    {
+      crc->initial ^= buf[i] << 8;
+      for (j = 0; j < 8; j++)
+        {
+          if (crc->initial & 0x8000)
+            {
+              crc->initial = (crc->initial << 1) ^ crc->polynomial;
+            }
+          else
+            {
+              crc->initial = crc->initial << 1;
+            }
+        }
+    }
+
+  return 0;
+}
+
+void crc16final(FAR uint8_t *digest, FAR void *ctx)
+{
+  FAR struct crc16_ctx *crc = (FAR struct crc16_ctx *)ctx;
+
+  crc->initial ^= crc->xorout;
+  memcpy(digest, &crc->initial, sizeof(uint16_t));
 }
 
 void crc32init(FAR void *ctx)
