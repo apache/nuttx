@@ -39,6 +39,10 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32_idle.c)
 endif()
 
+if(CONFIG_STM32_OTGHS)
+  list(APPEND SRCS stm32_otg_phyif.c)
+endif()
+
 # Chip-specific RCC
 
 if(CONFIG_STM32_STM32N6XXXX)

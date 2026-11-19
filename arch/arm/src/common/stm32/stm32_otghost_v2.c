@@ -60,7 +60,8 @@
 #include "stm32_otg_phyif.h"
 #include "stm32_usbhost.h"
 
-#if defined(CONFIG_USBHOST) && defined(CONFIG_STM32_OTGFS)
+#if defined(CONFIG_USBHOST) && \
+    (defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,7 +78,6 @@
 #  define GPIO_OTG_SOF          GPIO_OTGFS_SOF
 #  define STM32_OTG_FIFO_SIZE   4096
 #elif defined(CONFIG_STM32_OTGHS_HOST)
-#  error OTGHS HOST role not supported yet
 #  define STM32_IRQ_OTG         STM32_IRQ_OTGHS
 #  define STM32_OTG_BASE        STM32_OTGHS_BASE
 #  define GPIO_OTG_DM           GPIO_OTGHS_DM
@@ -86,7 +86,7 @@
 #  define GPIO_OTG_SOF          GPIO_OTGHS_SOF
 #  define STM32_OTG_FIFO_SIZE   4096
 #else
-#  error Not selected USBDEV peripheral
+#  error No OTG host role selected
 #endif
 
 #if defined(CONFIG_STM32_OTGFS_HOST) && defined(CONFIG_STM32_OTGHS_HOST)
@@ -101,7 +101,8 @@
  *
  *  CONFIG_USBHOST      - Enable general USB host support
  *  CONFIG_STM32_OTGFS  - Enable the STM32 USB OTG FS block
- *  CONFIG_STM32_SYSCFG - Needed
+ *    or
+ *  CONFIG_STM32_OTGHS  - Enable the STM32 USB OTG HS block
  *
  * Options:
  *
@@ -121,10 +122,6 @@
  */
 
 /* Pre-requisites (partial) */
-
-#ifndef CONFIG_STM32_SYSCFG
-#  error "CONFIG_STM32_SYSCFG is required"
-#endif
 
 /* Default RxFIFO size */
 
@@ -3372,7 +3369,9 @@ static inline void stm32_gint_hprtisr(struct stm32_usbhost_s *priv)
 {
   uint32_t hprt;
   uint32_t newhprt;
+#ifndef STM32_OTG_EMBEDDED_HSPHY
   uint32_t hcfg;
+#endif
 
   usbhost_vtrace1(OTG_VTRACE1_GINT_HPRT, 0);
 
@@ -3431,6 +3430,7 @@ static inline void stm32_gint_hprtisr(struct stm32_usbhost_s *priv)
 
           stm32_gint_connected(priv);
 
+#ifndef STM32_OTG_EMBEDDED_HSPHY
           /* Check the Host ConFiGuration register (HCFG) */
 
           hcfg = stm32_getreg(STM32_OTG_HCFG);
@@ -3485,6 +3485,7 @@ static inline void stm32_gint_hprtisr(struct stm32_usbhost_s *priv)
                   stm32_portreset(priv);
                 }
             }
+#endif
         }
     }
 
@@ -5155,17 +5156,28 @@ static void stm32_host_initialize(struct stm32_usbhost_s *priv)
 
   regval  = stm32_getreg(STM32_OTG_HCFG);
   regval &= ~OTG_HCFG_FSLSPCS_MASK;
+#ifdef STM32_OTG_EMBEDDED_HSPHY
+  regval |= OTG_HCFG_FSLSPCS_HS3060MHz;
+#else
   regval |= OTG_HCFG_FSLSPCS_FS48MHz;
+#endif
   stm32_putreg(STM32_OTG_HCFG, regval);
 
   /* Reset the host port */
 
   stm32_portreset(priv);
 
-  /* Clear the FS-/LS-only support bit in the HCFG register */
+  /* The driver supports full and low speed only.  The embedded HS PHY is
+   * limited to them with the FS-/LS-only support bit; otherwise the bit is
+   * cleared.
+   */
 
   regval = stm32_getreg(STM32_OTG_HCFG);
+#ifdef STM32_OTG_EMBEDDED_HSPHY
+  regval |= OTG_HCFG_FSLSS;
+#else
   regval &= ~OTG_HCFG_FSLSS;
+#endif
   stm32_putreg(STM32_OTG_HCFG, regval);
 
   /* Carve up FIFO memory for the Rx FIFO and the periodic and non-periodic
@@ -5317,6 +5329,15 @@ static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv)
   uint32_t regval;
   unsigned long timeout;
 
+#ifdef STM32_OTG_EMBEDDED_HSPHY
+  /* Clear the PHYSEL bit in the GUSBCFG register to select the embedded
+   * high speed PHY on the UTMI+ interface.
+   */
+
+  regval = stm32_getreg(STM32_OTG_GUSBCFG);
+  regval &= ~OTG_GUSBCFG_PHYSEL;
+  stm32_putreg(STM32_OTG_GUSBCFG, regval);
+#else
   /* Set the PHYSEL bit in the GUSBCFG register to select the OTG FS serial
    * transceiver: "This bit is always 1 with write-only access"
    */
@@ -5324,6 +5345,7 @@ static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv)
   regval = stm32_getreg(STM32_OTG_GUSBCFG);
   regval |= OTG_GUSBCFG_PHYSEL;
   stm32_putreg(STM32_OTG_GUSBCFG, regval);
+#endif
 
   /* Reset after a PHY select and set Host mode.  First, wait for AHB master
    * IDLE state.
@@ -5355,9 +5377,17 @@ static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv)
 
   up_udelay(3);
 
+#ifdef STM32_OTG_EMBEDDED_HSPHY
+  /* The embedded HS PHY is powered through its PHY controller.  Enable the
+   * host pull-down resistors on DP and DM.
+   */
+
+  regval  = OTG_GCCFG_PULLDOWNEN;
+#else
   /* Deactivate the power down */
 
   regval  = (OTG_GCCFG_PWRDWN | OTG_GCCFG_VBDEN);
+#endif
   stm32_putreg(STM32_OTG_GCCFG, regval);
   up_mdelay(20);
 
@@ -5384,10 +5414,11 @@ static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_otgfshost_initialize
+ * Name: stm32_otgfshost_initialize / stm32_otghshost_initialize
  *
  * Description:
- *   Initialize USB host device controller hardware.
+ *   Initialize USB host device controller hardware of the OTG FS or the
+ *   OTG HS instance, as selected by the host role.
  *
  * Input Parameters:
  *   controller -- If the device supports more than USB host controller, then
@@ -5408,7 +5439,11 @@ static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_OTGHS_HOST
+struct usbhost_connection_s *stm32_otghshost_initialize(int controller)
+#else
 struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
+#endif
 {
   /* At present, there is only support for a single OTG FS host. Hence it is
    * pre-allocated as g_usbhost.  However, in most code, the private data
@@ -5462,14 +5497,16 @@ struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
    * *Pins may vary from device-to-device.
    */
 
+#ifndef STM32_OTG_EMBEDDED_HSPHY
   stm32_configgpio(GPIO_OTG_DM);
   stm32_configgpio(GPIO_OTG_DP);
   stm32_configgpio(GPIO_OTG_ID);    /* Only needed for OTG */
 
   /* SOF output pin configuration is configurable */
 
-#ifdef CONFIG_STM32_OTG_SOFOUTPUT
+#  ifdef CONFIG_STM32_OTG_SOFOUTPUT
   stm32_configgpio(GPIO_OTG_SOF);
+#  endif
 #endif
 
   /* Initialize the USB OTG FS core */
@@ -5494,4 +5531,4 @@ struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
   return &g_usbconn;
 }
 
-#endif /* CONFIG_USBHOST && CONFIG_STM32_OTGFS */
+#endif /* CONFIG_USBHOST && (CONFIG_STM32_OTGFS || CONFIG_STM32_OTGHS) */
