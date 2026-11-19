@@ -171,22 +171,32 @@ uint32_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
 
   if (niob_avail > 0)
     {
-      /* The optimal TCP window size is the amount of TCP data that we can
-       * currently buffer via TCP read-ahead buffering for the device packet
-       * buffer.  This logic here assumes that all IOBs are available for
-       * TCP buffering.
-       *
-       * Assume that all of the available IOBs are can be used for buffering
-       * on this connection.
-       *
-       * REVISIT:  In an environment with multiple, active read-ahead TCP
-       * sockets (and perhaps multiple network devices) or if there are
-       * other consumers of IOBs (such as for TCP write buffering) then the
-       * total number of IOBs will all not be available for read-ahead
-       * buffering for this connection.
+      FAR struct tcp_conn_s *cur = NULL;
+      int nconns = 0;
+      int niob_per_conn;
+
+      /* Count active TCP connections to fairly partition available IOBs
+       * and avoid oversubscribing the shared IOB pool across multiple
+       * sockets.
        */
 
-      recvwndo = tailroom + (niob_avail * CONFIG_IOB_BUFSIZE);
+      while ((cur = tcp_nextconn(cur)) != NULL)
+        {
+          nconns++;
+        }
+
+      if (nconns < 1)
+        {
+          nconns = 1;
+        }
+
+      niob_per_conn = niob_avail / nconns;
+      if (niob_per_conn < 1)
+        {
+          niob_per_conn = 1;
+        }
+
+      recvwndo = tailroom + (niob_per_conn * CONFIG_IOB_BUFSIZE);
     }
 #if CONFIG_IOB_THROTTLE > 0
   else if (conn->readahead == NULL)
