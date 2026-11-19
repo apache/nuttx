@@ -102,9 +102,18 @@ int pthread_cancel(pthread_t thread)
       pthread_exit(PTHREAD_CANCELED);
     }
 
-  /* Refer to tls_get_info() */
+  /* Refer to tls_get_info().  The end of the process runs no cleanup
+   * handler, as _exit().  The thread can also be in a system call on
+   * another CPU: the call does its own cleanup when it returns
+   * (nxtask_terminate()).
+   */
 
-  tls_cleanup_popall(tcb->stack_alloc_ptr);
+#ifdef HAVE_TASK_KCANCEL
+  if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_FORCED_CANCEL) == 0)
+#endif
+    {
+      tls_cleanup_popall(tcb->stack_alloc_ptr);
+    }
 
   /* Complete pending join operations */
 

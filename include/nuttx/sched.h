@@ -696,6 +696,11 @@ struct tcb_s
   int16_t  irqcount;                     /* 0=Not in critical section       */
 #endif
   int16_t  errcode;                      /* Used to pass error information  */
+#if defined(CONFIG_LIB_SYSCALL) && \
+    defined(CONFIG_ARCH_HAVE_SYSCALL_THREAD_RETURN)
+  uint8_t  kcancel;                      /* Canceled in a system call: ends */
+                                         /* when the call is over           */
+#endif
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
   int32_t  timeslice;                    /* RR timeslice OR Sporadic budget */

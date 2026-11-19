@@ -30,6 +30,7 @@
 
 #include "sched/sched.h"
 #include "mqueue/msg.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Private Functions
@@ -61,6 +62,15 @@ static int msgrcv_wait(FAR struct msgq_s *msgq, FAR struct msgbuf_s **rcvmsg,
       return -ECANCELED;
     }
 #endif
+
+  /* A thread that the end of its process canceled in a system call does
+   * not start the wait (nxnotify_kcancel()).
+   */
+
+  if (nxtask_kcanceled(this_task()))
+    {
+      return -ECANCELED;
+    }
 
   /* Get the message from the head of the queue */
 

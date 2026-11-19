@@ -61,6 +61,10 @@ void _exit(int status)
 
   status &= 0xff;
 
+  /* The end of the process by another thread leaves this one to its end */
+
+  nxtask_kcancel_exit(tcb);
+
 #ifdef HAVE_GROUP_MEMBERS
   /* Kill all of the children of the group, preserving only this thread.
    * exit() is normally called from the main thread of the task.  pthreads

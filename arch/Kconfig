@@ -59,6 +59,7 @@ config ARCH_ARM64
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_UCONTEXT
 	select ARCH_HAVE_SYSCALL_HOOKS
+	select ARCH_HAVE_SYSCALL_THREAD_RETURN
 	select ARCH_HAVE_RDWR_MEM_CPU_RUN
 	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_THREAD_LOCAL
@@ -128,6 +129,7 @@ config ARCH_RISCV
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_STDARG_H
 	select ARCH_HAVE_SYSCALL_HOOKS
+	select ARCH_HAVE_SYSCALL_THREAD_RETURN
 	select ARCH_HAVE_RDWR_MEM_CPU_RUN
 	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_THREAD_LOCAL
@@ -691,6 +693,16 @@ config ARCH_HAVE_SYSCALL_HOOKS
 		Indicates that the architecture supports the system call hooks as
 		required if CONFIG_SCHED_INSTRUMENTATION_SYSCALL is enabled.  Refer
 		to sched/Kconfig for additional information.
+
+config ARCH_HAVE_SYSCALL_THREAD_RETURN
+	bool
+	default n
+	---help---
+		Indicates that the architecture ends a system call in the context
+		of the calling thread: it clears TCB_FLAG_SYSCALL and calls
+		nxsig_unmask_pendingsignal() there, not in an exception handler.
+		Then a thread that the end of its process cancels in a system call
+		ends when the call is over, not inside the call.
 
 config ARCH_HAVE_BACKTRACE
 	bool

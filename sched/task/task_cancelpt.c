@@ -57,9 +57,13 @@
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
+#include <pthread.h>
+#include <stdlib.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/cancelpt.h>
+#include <nuttx/pthread.h>
 #include <nuttx/tls.h>
 
 #include "sched/sched.h"
@@ -68,6 +72,83 @@
 #include "mqueue/mqueue.h"
 #include "task/task.h"
 #include "event/event.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxnotify_kcancel
+ *
+ * Description:
+ *   Mark a thread that the end of its process cancels in a system call:
+ *   nxtask_kcancel() ends it when the call is over.  End its wait if a
+ *   signal ends it or if it is for a mutex of user code.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread to cancel.
+ *
+ * Assumptions:
+ *   Called in a critical section.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_TASK_KCANCEL
+static void nxnotify_kcancel(FAR struct tcb_s *tcb)
+{
+  tcb->kcancel |= TASK_KCANCEL;
+
+  switch (tcb->task_state)
+    {
+      case TSTATE_WAIT_SEM:
+
+        /* No signal ends a mutex wait.  A mutex of the kernel has a holder
+         * that gives it up, but a mutex of user code can have a holder
+         * that has ended with the process: that wait ends.
+         */
+
+        if (NXSEM_IS_MUTEX((FAR sem_t *)tcb->waitobj) ?
+            nxtask_kcancel_uwait(tcb) :
+            nxtask_kcancel_wait(tcb, tcb->waitobj))
+          {
+            nxsem_wait_irq(tcb, ECANCELED);
+          }
+        break;
+
+      case TSTATE_WAIT_SIG:
+        nxsig_wait_irq(tcb, SIG_CANCEL_TIMEOUT, SI_USER, ECANCELED);
+        break;
+
+#if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
+      case TSTATE_WAIT_MQNOTEMPTY:
+      case TSTATE_WAIT_MQNOTFULL:
+        nxmq_wait_irq(tcb, ECANCELED);
+        break;
+#endif
+
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+      /* A thread that SIGSTOP stopped in its system call must run to its
+       * end.
+       */
+
+      case TSTATE_TASK_STOPPED:
+        {
+          FAR struct tcb_s *rtcb = this_task();
+
+          nxsched_remove_blocked(tcb);
+          if (nxsched_add_readytorun(tcb))
+            {
+              up_switch_context(this_task(), rtcb);
+            }
+        }
+        break;
+#endif
+
+      default:
+        break;
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -100,6 +181,18 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
    */
 
   flags = enter_critical_section();
+
+  /* A thread that ends with its process (a forced cancellation) and is in a
+   * system call ends when the call is over, whatever its cancellation state
+   * is.  This is also so in a cancellation point: there, a wait that no
+   * signal ends must not end early either.
+   */
+
+  if (nxtask_kcancel_notify(tcb))
+    {
+      leave_critical_section(flags);
+      return true;
+    }
 
   /* We only notify the cancellation if (1) the thread has not disabled
    * cancellation, (2) the thread uses the deferred cancellation mode,
@@ -235,3 +328,144 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
   leave_critical_section(flags);
   return ret;
 }
+
+/****************************************************************************
+ * Name: nxtask_kcancel_notify
+ *
+ * Description:
+ *   Mark the target of a forced cancellation (the end of its process) if
+ *   it is in a system call (nxnotify_kcancel()).  A thread that runs on
+ *   another CPU is left to the SMP call of nxtask_terminate().
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread to cancel.
+ *
+ * Returned Value:
+ *   true if the thread is marked, or if it is in its own end: then the
+ *   caller must not end it.
+ *
+ * Assumptions:
+ *   Called in a critical section.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_TASK_KCANCEL
+bool nxtask_kcancel_notify(FAR struct tcb_s *tcb)
+{
+  if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_FORCED_CANCEL) == 0 ||
+      (tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+    {
+      return false;
+    }
+
+  /* A thread in its own end (_exit(), pthread_exit()) ends by itself.  It
+   * is not marked: its waits there must not end early.
+   */
+
+  if (nxtask_kcancel_exiting(tcb))
+    {
+      return true;
+    }
+
+  if ((tcb->flags & TCB_FLAG_SYSCALL) == 0)
+    {
+      return false;
+    }
+
+#ifdef CONFIG_SMP
+  /* It reads the mark without the critical section (nxtask_kcancel()) */
+
+  if (tcb->task_state == TSTATE_TASK_RUNNING && tcb->cpu != this_cpu())
+    {
+      return false;
+    }
+#endif
+
+  nxnotify_kcancel(tcb);
+  return true;
+}
+
+/****************************************************************************
+ * Name: nxtask_kcancel_wait
+ *
+ * Description:
+ *   Return true if nxnotify_kcancel() ends the wait of tcb on sem: a wait
+ *   that a signal ends, or the wait of pthread_join().
+ *
+ ****************************************************************************/
+
+bool nxtask_kcancel_wait(FAR struct tcb_s *tcb, FAR sem_t *sem)
+{
+  if ((tcb->flags & TCB_FLAG_UNINTERRUPTIBLE) == 0)
+    {
+      return true;
+    }
+
+#ifndef CONFIG_DISABLE_PTHREAD
+  return sem == &tcb->join_sem;
+#else
+  return false;
+#endif
+}
+
+/****************************************************************************
+ * Name: nxtask_kcancel
+ *
+ * Description:
+ *   End the calling thread if nxnotify_kcancel() marked it and its system
+ *   call is over.  nxsig_unmask_pendingsignal() calls it at the end of
+ *   each system call.  No cleanup handler runs, as for _exit().
+ *
+ * Returned Value:
+ *   None.  It does not return if it ends the thread.
+ *
+ ****************************************************************************/
+
+void nxtask_kcancel(void)
+{
+  FAR struct tcb_s *tcb = this_task();
+  irqstate_t flags;
+  bool cancel;
+
+  /* The mark is set only while TCB_FLAG_SYSCALL is set and this thread
+   * does not run, or on its CPU: no critical section is needed to see it.
+   * It goes before the end: nx_pthread_exit() comes here again.
+   */
+
+  if ((tcb->kcancel & TASK_KCANCEL) == 0 || up_interrupt_context())
+    {
+      return;
+    }
+
+  flags  = enter_critical_section();
+  cancel = (tcb->kcancel & TASK_KCANCEL) != 0 &&
+           (tcb->flags & TCB_FLAG_SYSCALL) == 0;
+  if (cancel)
+    {
+      tcb->kcancel = 0;
+    }
+
+  leave_critical_section(flags);
+
+  if (!cancel)
+    {
+      return;
+    }
+
+#ifndef CONFIG_DISABLE_PTHREAD
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+    {
+      nx_pthread_exit(PTHREAD_CANCELED);
+    }
+#endif
+
+  /* As _exit(), but the other threads of the group stay: a task that
+   * nxtask_delete() ends does not end its group.
+   */
+
+  enter_critical_section();
+  atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING);
+  nxtask_exithook(tcb, EXIT_SUCCESS);
+  up_exit(EXIT_SUCCESS);
+}
+#endif

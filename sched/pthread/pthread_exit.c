@@ -74,6 +74,7 @@ void nx_pthread_exit(FAR void *exit_value)
 
   DEBUGASSERT(tcb != NULL);
 
+  nxtask_kcancel_exit(tcb);
   atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING);
 
   /* Block any signal actions that would awaken us while were
