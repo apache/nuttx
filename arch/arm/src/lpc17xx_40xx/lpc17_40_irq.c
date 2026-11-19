@@ -197,13 +197,13 @@ static int lpc17_40_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
     {
       if (irq < (LPC17_40_IRQ_EXTINT + 32))
         {
-           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << (irq - LPC17_40_IRQ_EXTINT);
+          *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
+          *bit     = 1 << (irq - LPC17_40_IRQ_EXTINT);
         }
       else if (irq < LPC17_40_IRQ_NIRQS)
         {
-           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (irq - LPC17_40_IRQ_EXTINT - 32);
+          *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
+          *bit     = 1 << (irq - LPC17_40_IRQ_EXTINT - 32);
         }
       else
         {

@@ -876,8 +876,15 @@ static void smps_duty_set(struct smps_priv_s *priv,
 
       case CONVERTER_MODE_BUCK:
         {
-          if (out >= priv->v_in) out = priv->v_in;
-          if (out < 0.0) out = 0.0;
+          if (out >= priv->v_in)
+            {
+              out = priv->v_in;
+            }
+
+          if (out < 0.0)
+            {
+              out = 0.0;
+            }
 
           duty = out / priv->v_in;
 
@@ -887,7 +894,10 @@ static void smps_duty_set(struct smps_priv_s *priv,
 
           cmp = (uint16_t)(per * duty);
 
-          if (cmp > per - 30) cmp = per - 30;
+          if (cmp > per - 30)
+            {
+              cmp = per - 30;
+            }
 
           /* Set T5 duty cycle. T1 is complementary to T5 */
 
@@ -900,8 +910,15 @@ static void smps_duty_set(struct smps_priv_s *priv,
         {
           per = HRTIM_PER_GET(hrtim, HRTIM_TIMER_TIMC);
 
-          if (out < priv->v_in) out = priv->v_in;
-          if (out >= BOOST_VOLT_MAX) out = BOOST_VOLT_MAX;
+          if (out < priv->v_in)
+            {
+              out = priv->v_in;
+            }
+
+          if (out >= BOOST_VOLT_MAX)
+            {
+              out = BOOST_VOLT_MAX;
+            }
 
           duty = 1.0 - priv->v_in / out;
 
@@ -924,8 +941,15 @@ static void smps_duty_set(struct smps_priv_s *priv,
 
           per = HRTIM_PER_GET(hrtim, HRTIM_TIMER_TIMC);
 
-          if (out < priv->v_in) out = priv->v_in;
-          if (out >= BOOST_VOLT_MAX) out = BOOST_VOLT_MAX;
+          if (out < priv->v_in)
+            {
+              out = priv->v_in;
+            }
+
+          if (out >= BOOST_VOLT_MAX)
+            {
+              out = BOOST_VOLT_MAX;
+            }
 
           duty = 1.0 - priv->v_in / out;
 
@@ -945,7 +969,7 @@ static void smps_duty_set(struct smps_priv_s *priv,
           pwrerr("ERROR:  Unknown converter mode %d!\n", mode);
           break;
         }
-        }
+    }
 }
 
 /****************************************************************************
