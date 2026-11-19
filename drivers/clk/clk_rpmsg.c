@@ -676,7 +676,7 @@ static void clk_rpmsg_disable(FAR struct clk_s *clk)
   ept = clk_rpmsg_get_ept(&name);
   if (!ept)
     {
-    return;
+      return;
     }
 
   len = sizeof(*msg) + strlen(name) + 1;
