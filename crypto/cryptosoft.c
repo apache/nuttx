@@ -799,7 +799,8 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
   uint32_t pub_keyid;
   uint32_t keylen;
   uint32_t keyid;
-  int ret;
+  int ret = OK;
+  int len;
 
   /* Sanity check */
 
@@ -811,12 +812,14 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
   ctx = swkey_get_context();
   if (ctx == NULL)
     {
-      return -EINVAL;
+      ret = -EINVAL;
+      goto out;
     }
 
   if (krp->krp_param[0].crp_nbits != sizeof(uint32_t) * 8)
     {
-      return -EINVAL;
+      ret = -EINVAL;
+      goto out;
     }
 
   keyid = *(uint32_t *)krp->krp_param[0].crp_p;
@@ -846,29 +849,31 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
         krp->krp_status = swkey_delete(ctx, keyid);
         break;
       case CRK_EXPORT_KEY:
-        ret = swkey_export(ctx, keyid,
+        len = swkey_export(ctx, keyid,
                            krp->krp_param[1].crp_p,
                            krp->krp_param[1].crp_nbits / 8);
-        if (ret < 0)
+        if (len < 0)
           {
-            krp->krp_status = ret;
+            krp->krp_status = len;
           }
         else
           {
-            krp->krp_param[1].crp_nbits = ret * 8;
+            krp->krp_param[1].crp_nbits = len * 8;
           }
 
         break;
       case CRK_GENERATE_AES_KEY:
         if (krp->krp_param[1].crp_nbits != sizeof(uint32_t) * 8)
           {
-            return -EINVAL;
+            ret = -EINVAL;
+            goto out;
           }
 
         keylen = *(uint32_t *)krp->krp_param[1].crp_p;
         if (keylen != 16 && keylen != 24 && keylen != 32)
           {
-            return -EINVAL;
+            ret = -EINVAL;
+            goto out;
           }
 
         krp->krp_status = swkey_gen_aes_key(ctx, keyid, keylen);
@@ -877,7 +882,8 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
         priv_keyid = keyid;
         if (krp->krp_param[1].crp_nbits != sizeof(uint32_t) * 8)
           {
-            return -EINVAL;
+            ret = -EINVAL;
+            goto out;
           }
 
         pub_keyid = *(uint32_t *)krp->krp_param[1].crp_p;
@@ -901,7 +907,23 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
         break;
     }
 
-  return OK;
+out:
+  /* The work is already done, so an asynchronous request is completed
+   * right away.  The caller must not touch krp after this.
+   */
+
+  if ((krp->krp_flags & CRYPTO_F_CBIMM) && krp->krp_callback != NULL)
+    {
+      if (ret < 0)
+        {
+          krp->krp_status = ret;
+        }
+
+      krp->krp_callback(krp);
+      return OK;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -2319,6 +2341,16 @@ int swcr_process(struct cryptop *crp)
     }
 
 done:
+
+  /* The work is already done, so an asynchronous request is completed
+   * right away.  The caller must not touch crp after this.
+   */
+
+  if ((crp->crp_flags & CRYPTO_F_CBIMM) && crp->crp_callback != NULL)
+    {
+      crp->crp_callback(crp);
+    }
+
   return 0;
 }
 
@@ -2737,6 +2769,16 @@ int swcr_kprocess(struct cryptkop *krp)
     }
 
 done:
+
+  /* The work is already done, so an asynchronous request is completed
+   * right away.  The caller must not touch krp after this.
+   */
+
+  if ((krp->krp_flags & CRYPTO_F_CBIMM) && krp->krp_callback != NULL)
+    {
+      krp->krp_callback(krp);
+    }
+
   return 0;
 }
 

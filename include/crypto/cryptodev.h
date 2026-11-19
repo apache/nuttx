@@ -206,6 +206,7 @@ struct cryptodesc
 
 struct cryptop
 {
+  TAILQ_ENTRY(cryptop) crp_next;
   uint64_t crp_sid;  /* Session ID */
   int crp_ilen;      /* Input data total length */
   int crp_olen;      /* Result total length */
@@ -243,6 +244,7 @@ struct cryptop
   caddr_t crp_dst;
   caddr_t crp_iv;
   caddr_t crp_aad;
+  uint32_t crp_reqid;
   int crp_iter;
 };
 
@@ -452,6 +454,8 @@ struct crypt_op
  * in the authentication algorithm.
  */
 
+#define COP_FLAG_CBIMM  (1 << 2) /* Request asynchronous processing. */
+
   uint16_t flags;
   uint32_t iterations;
   unsigned len;
@@ -463,6 +467,7 @@ struct crypt_op
   caddr_t mac;        /* must be big enough for chosen MAC */
   caddr_t iv;
   caddr_t aad;
+  uint32_t reqid;     /* distinguishes tasks in asynchronous calling */
 };
 
 /* hamc buffer, software & hardware need it */
@@ -487,6 +492,7 @@ extern const uint8_t hmac_opad_buffer[HMAC_MAX_BLOCK_LEN];
 #define CIOCKEYRET              105
 #define CIOCASYMFEAT            106
 #define CIOCCLONE               107
+#define CIOCCRYPTRET            108
 
 int crypto_newsession(FAR uint64_t *, FAR struct cryptoini *, int);
 int crypto_clonesession(uint64_t, FAR uint64_t *);
