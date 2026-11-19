@@ -461,6 +461,7 @@ struct crypt_op
  */
 
 #define COP_FLAG_CBIMM  (1 << 2) /* Request asynchronous processing. */
+#define COP_FLAG_CANCEL (1 << 4) /* Cancel a pending async op by reqid. */
 
   uint16_t flags;
   uint32_t iterations;
