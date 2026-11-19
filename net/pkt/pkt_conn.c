@@ -330,14 +330,26 @@ int pkt_sendmsg_is_valid(FAR struct socket *psock,
     }
   else if (psock->s_type == SOCK_RAW)
     {
+      /* The frame of a raw socket holds its link layer header.  An
+       * address is optional: if it is given, its interface index selects
+       * the network device.
+       */
+
       if (msg->msg_name != NULL)
         {
-          return -EAFNOSUPPORT;
+          if (msg->msg_namelen < sizeof(struct sockaddr_ll))
+            {
+              return -EINVAL;
+            }
+
+          *dev = netdev_findbyindex(addr->sll_ifindex);
         }
+      else
+        {
+          /* Get the device driver that will service this transfer */
 
-      /* Get the device driver that will service this transfer */
-
-      *dev = pkt_find_device(psock->s_conn);
+          *dev = pkt_find_device(psock->s_conn);
+        }
     }
   else
     {
