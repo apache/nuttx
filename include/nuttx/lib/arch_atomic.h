@@ -45,7 +45,15 @@
  ****************************************************************************/
 
 #ifndef ARCH_ATOMIC_SPECIFIER
-#  define ARCH_ATOMIC_SPECIFIER static always_inline_function
+#  ifdef CONFIG_LIBC_ATOMIC_NOINLINE
+
+/* KASAN calls the atomic functions, so they must not be instrumented */
+
+#    define ARCH_ATOMIC_SPECIFIER \
+       noinline_function nosanitize_address noinstrument_function
+#  else
+#    define ARCH_ATOMIC_SPECIFIER static always_inline_function
+#  endif
 #endif
 
 #if !defined(CONFIG_BUILD_FLAT) && !defined(__KERNEL__)
@@ -276,6 +284,8 @@ extern struct hwspinlock_dev_s g_atomic_hwspinlock;
  * Inline Functions
  ****************************************************************************/
 
+#  if !defined(CONFIG_LIBC_ATOMIC_NOINLINE) || \
+      defined(ARCH_ATOMIC_NOINLINE_DEFINE)
 ARCH_ATOMIC_DEFINE(atomic, uint8_t, 1)
 ARCH_ATOMIC_DEFINE(atomic, uint16_t, 2)
 ARCH_ATOMIC_DEFINE(atomic, int32_t, 4)
@@ -285,6 +295,7 @@ ARCH_SYNC_DEFINE(sync, uint8_t, 1)
 ARCH_SYNC_DEFINE(sync, uint16_t, 2)
 ARCH_SYNC_DEFINE(sync, uint32_t, 4)
 ARCH_SYNC_DEFINE(sync, uint64_t, 8)
+#  endif
 #endif
 
 #endif /* __INCLUDE_NUTTX_LIB_ARCH_ATOMIC_H */

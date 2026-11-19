@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#define ARCH_ATOMIC_NOINLINE_DEFINE
 #include <nuttx/atomic.h>
 
 #undef ARCH_ATOMIC_SPECIFIER

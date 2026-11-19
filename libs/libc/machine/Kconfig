@@ -48,6 +48,19 @@ config LIBC_ATOMIC_IRQ
 	---help---
 		atomic function by irq disable/enable
 
+config LIBC_ATOMIC_NOINLINE
+	bool "Do not inline the atomic functions"
+	default n
+	depends on LIBC_ATOMIC_IRQ || LIBC_ATOMIC_HWSPINLOCK
+	---help---
+		Build the atomic functions of the IRQ and hardware spinlock
+		backends once in libc and call them, instead of inlining them at
+		each use.  This reduces the code size when the atomic functions
+		are used at many places, at the cost of a call for each atomic
+		operation.  Code that runs from RAM while the flash cannot be
+		read must also place arch_atomic.o in RAM, and loadable modules
+		that use the atomic functions need them in the symbol table.
+
 config LIBC_ATOMIC_TOOLCHAIN
 	bool
 	default y if !LIBC_ATOMIC_ARCH && !LIBC_ATOMIC_HWSPINLOCK && !LIBC_ATOMIC_IRQ
