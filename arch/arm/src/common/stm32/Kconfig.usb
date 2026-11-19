@@ -114,10 +114,10 @@ endchoice # "ULPI Selection"
 endmenu # OTG_HS Configuration
 
 menu "OTG Configuration"
-	depends on ARCH_CHIP_STM32H7 && (STM32_OTGFS || STM32_OTGHS)
+	depends on STM32_HAVE_IP_OTG_V2 && (STM32_OTGFS || STM32_OTGHS)
 
 choice
-	prompt "STM32H7 OTGFS role"
+	prompt "OTGFS role"
 	depends on STM32_OTGFS
 	default STM32_OTGFS_USBDEV if USBDEV
 	default STM32_OTGFS_HOST if !USBDEV && USBHOST
@@ -130,18 +130,27 @@ config STM32_OTGFS_HOST
 	bool "OTGFS as HOST"
 	depends on USBHOST
 
-endchoice # "STM32H7 OTGFS role"
+endchoice # "OTGFS role"
 
 choice
-	prompt "STM32H7 OTGHS role (only USBDEV supported for now)"
+	prompt "OTGHS role"
 	depends on STM32_OTGHS
 	default STM32_OTGHS_USBDEV if USBDEV
+	default STM32_OTGHS_HOST if !USBDEV && USBHOST
 
 config STM32_OTGHS_USBDEV
 	bool "OTGHS as USBDEV"
 	depends on USBDEV
+	depends on STM32_HAVE_OTGHS_USBDEV
 
-endchoice # "STM32H7 OTGHS role"
+config STM32_OTGHS_HOST
+	bool "OTGHS as HOST"
+	depends on USBHOST
+	depends on STM32_HAVE_OTGHS_HOST
+	---help---
+		The host driver runs the OTG HS core at full and low speed.
+
+endchoice # "OTGHS role"
 
 endmenu # OTG Configuration
 

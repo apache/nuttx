@@ -39,6 +39,10 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32_idle.c
 endif
 
+ifeq ($(CONFIG_STM32_OTGHS),y)
+CHIP_CSRCS += stm32_otg_phyif.c
+endif
+
 # Chip-specific RCC
 
 CHIP_CSRCS += stm32n6xx_rcc.c

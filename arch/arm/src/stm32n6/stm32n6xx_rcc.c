@@ -333,6 +333,16 @@ static inline void rcc_enableahb5(void)
             RCC_AHB5ENR_ETH1TXEN | RCC_AHB5ENR_ETH1RXEN;
 #endif
 
+#if defined(CONFIG_STM32_OTGHS) && defined(CONFIG_STM32N6_OTGHS_USB2)
+  /* USB2 OTG HS core and its embedded high speed PHY */
+
+  regval |= RCC_AHB5ENR_OTG2EN | RCC_AHB5ENR_OTGPHY2EN;
+#elif defined(CONFIG_STM32_OTGHS)
+  /* USB1 OTG HS core and its embedded high speed PHY */
+
+  regval |= RCC_AHB5ENR_OTG1EN | RCC_AHB5ENR_OTGPHY1EN;
+#endif
+
   if (regval != 0)
     {
       putreg32(regval, STM32_RCC_AHB5ENSR);

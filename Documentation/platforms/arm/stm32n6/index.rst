@@ -46,6 +46,8 @@ SPI         Yes      SPI1-6 through the common SPI v5 driver, master
                      mode, optional GPDMA.
 USART       Yes      USART1-3, UART4-5, USART6, UART7-9, USART10 and
                      LPUART1 through the common U(S)ART driver.
+USB         Yes      USB1 or USB2 OTG HS host through the common OTG v2
+                     driver, full and low speed on the embedded HS PHY.
 
 ADC         No
 DCMIPP      No
@@ -55,7 +57,7 @@ MPU         No
 NPU         No
 SAI         No
 TIM         No
-USB         No
+USB device  No
 XSPI        No
 ==========  =======  ===============================================
 

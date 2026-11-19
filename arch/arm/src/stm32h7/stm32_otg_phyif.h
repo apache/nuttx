@@ -29,8 +29,25 @@
 
 #include <nuttx/config.h>
 
+#include <arch/board/board.h>
+
 #include "arm_internal.h"
 #include "hardware/stm32_pwr.h"
+#include "stm32_rcc.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if (STM32_RCC_D2CCIP2R_USBSRC == RCC_D2CCIP2R_USBSEL_HSI48) && \
+    !defined(CONFIG_STM32_HSI48)
+#  error board.h selected HSI48 as USB clock source, but HSI48 is not \
+         enabled. Enable STM32_HSI48
+#endif
+
+#if defined(CONFIG_USBHOST) && !defined(CONFIG_STM32_SYSCFG)
+#  error "CONFIG_STM32_SYSCFG is required"
+#endif
 
 /****************************************************************************
  * Inline Functions

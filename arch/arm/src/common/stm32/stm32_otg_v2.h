@@ -39,12 +39,6 @@
 
 #if defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)
 
-#if (STM32_RCC_D2CCIP2R_USBSRC == RCC_D2CCIP2R_USBSEL_HSI48) && \
-    !defined(CONFIG_STM32_HSI48)
-#  error board.h selected HSI48 as USB clock source, but HSI48 is not \
-         enabled. Enable STM32_HSI48
-#endif
-
 #if defined(CONFIG_STM32_OTGHS) && !defined(CONFIG_STM32_OTGHS_FS) && \
     defined(CONFIG_STM32_OTGHS_NO_ULPI)
 #  error OTG HS selected but no ULPI enabled
@@ -79,10 +73,11 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32_otgfshost_initialize
+ * Name: stm32_otgfshost_initialize / stm32_otghshost_initialize
  *
  * Description:
- *   Initialize USB host device controller hardware.
+ *   Initialize USB host device controller hardware of the OTG FS or the
+ *   OTG HS instance, as selected by the host role.
  *
  * Input Parameters:
  *   controller -- If the device supports more than USB host controller, then
@@ -105,7 +100,11 @@ extern "C"
 
 #ifdef CONFIG_USBHOST
 struct usbhost_connection_s;
+#  ifdef CONFIG_STM32_OTGHS_HOST
+struct usbhost_connection_s *stm32_otghshost_initialize(int controller);
+#  else
 struct usbhost_connection_s *stm32_otgfshost_initialize(int controller);
+#  endif
 #endif
 
 /****************************************************************************
