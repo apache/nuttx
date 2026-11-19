@@ -144,7 +144,9 @@
 #define CRYPTO_CHACHA20_DJB     43
 #define CRYPTO_AES_CTR_SSH      44
 #define CRYPTO_AES_256_CMAC     45
-#define CRYPTO_ALGORITHM_MAX    45 /* Keep updated */
+#define CRYPTO_CRC8             46
+#define CRYPTO_CRC16            47
+#define CRYPTO_ALGORITHM_MAX    47 /* Keep updated */
 
 /* Algorithm flags */
 

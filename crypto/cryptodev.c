@@ -277,6 +277,8 @@ static int cryptof_ioctl(FAR struct file *filep,
             case CRYPTO_SHA2_256:
             case CRYPTO_SHA2_384:
             case CRYPTO_SHA2_512:
+            case CRYPTO_CRC8:
+            case CRYPTO_CRC16:
             case CRYPTO_CRC32:
             case CRYPTO_PBKDF2_HMAC_SHA1:
             case CRYPTO_PBKDF2_HMAC_SHA256:
