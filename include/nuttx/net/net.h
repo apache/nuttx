@@ -50,6 +50,10 @@
 
 #define SOCKCAP_NONBLOCKING (1 << 0)  /* Bit 0: Socket supports non-blocking
                                        *        operation. */
+#define SOCKCAP_CONNSTATE   (1 << 1)  /* Bit 1: The address family sets the
+                                       *        connection state of the
+                                       *        socket in accept() and
+                                       *        connect(). */
 
 /* Definitions of 8-bit socket flags */
 

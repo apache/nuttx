@@ -343,8 +343,12 @@ static sockcaps_t inet_sockcaps(FAR struct socket *psock)
   switch (psock->s_type)
     {
 #ifdef NET_TCP_HAVE_STACK
+      /* TCP sets the connection state with the device locked, where the
+       * connection events of the peer change it.
+       */
+
       case SOCK_STREAM:
-        return SOCKCAP_NONBLOCKING;
+        return SOCKCAP_NONBLOCKING | SOCKCAP_CONNSTATE;
 #endif
 
 #ifdef NET_UDP_HAVE_STACK
@@ -1478,8 +1482,19 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       return ret;
     }
 
+  /* No connection event changes the flags of the new socket before its
+   * monitor starts.
+   */
+
+  if ((flags & SOCK_NONBLOCK) != 0)
+    {
+      FAR struct tcp_conn_s *newconn = newsock->s_conn;
+
+      newconn->sconn.s_flags |= _SF_NONBLOCK;
+    }
+
   /* Begin monitoring for TCP connection events on the newly connected
-   * socket
+   * socket.  This also marks the socket connected.
    */
 
   ret = tcp_start_monitor(newsock);
