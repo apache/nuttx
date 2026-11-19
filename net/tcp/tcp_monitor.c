@@ -240,8 +240,8 @@ static void tcp_shutdown_monitor(FAR struct tcp_conn_s *conn, uint32_t flags)
  * Returned Value:
  *   On success, tcp_start_monitor returns OK; On any failure,
  *   tcp_start_monitor will return a negated errno value.  The only failure
- *   that can occur is if the socket has already been closed and, in this
- *   case, -ENOTCONN is returned.
+ *   that can occur is if the connection has already been lost:
+ *   -ECONNRESET if the peer reset it, else -ENOTCONN.
  *
  * Assumptions:
  *   The caller holds the network lock (if not, it will be locked momentarily
@@ -298,15 +298,22 @@ int tcp_start_monitor(FAR struct socket *psock)
       tcp_shutdown_monitor(conn, TCP_ABORT);
       tcp_close_connection(conn, TCP_ABORT);
 
+      /* The peer reset the connection (TCP_RESET), for example with a
+       * close with SO_LINGER {1, 0} at once after the handshake.  The
+       * caller decides: accept() gives the socket, connect() fails.  A
+       * receive gives the data that came before the RST, then ECONNRESET.
+       */
+
+      if ((conn->flags & TCP_RESET) != 0)
+        {
+          conn_dev_unlock(&conn->sconn, conn->dev);
+          return -ECONNRESET;
+        }
+
       /* If the peer closed the connection before we called accept, and
        * there is buffered read-ahead data, return OK so that the caller
        * still gets a socket from which the pending data can be drained
        * (followed by EOF).
-       *
-       * If there is no buffered data, however, the connection is dead.
-       * This happens when a peer resets the connection immediately after
-       * the handshake (for example a close with SO_LINGER {1, 0}).  Report
-       * it as not-connected.
        */
 
       if ((conn->tcpstateflags == TCP_CLOSED ||

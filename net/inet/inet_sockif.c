@@ -1498,7 +1498,17 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
    */
 
   ret = tcp_start_monitor(newsock);
-  if (ret < 0)
+  if (ret == -ECONNRESET)
+    {
+      /* The peer reset the connection before accept() returned.  As for a
+       * reset after accept(), the new socket gives the data that came
+       * before the RST, then ECONNRESET once (a receive, a send or
+       * SO_ERROR), then end-of-file.
+       */
+
+      ret = OK;
+    }
+  else if (ret < 0)
     {
       /* tcp_start_monitor() can only fail on certain race conditions where
        * the connection was lost just before this function was called.  Undo
