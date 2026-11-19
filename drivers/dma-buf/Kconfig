@@ -49,7 +49,8 @@ config DMABUF_SYSTEM_HEAP_RESERVE_SIZE
 	depends on DMABUF_HEAPS
 	---help---
 		Reserve a private region at startup for system DMA-BUF
-		allocations.  Allocations use this region first and fall back to
-		the public heap when the region has insufficient space.
+		allocations.  All system heap allocations then come from this
+		region, and an allocation fails when the region has insufficient
+		space.
 
 		A value of zero keeps the existing public heap allocation path.
