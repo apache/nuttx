@@ -198,9 +198,9 @@ uint32_t keyboard_translate_virtio_code(uint16_t keycode, bool *special)
       case KEY_P:
         return 'p';
       case KEY_LEFTBRACE:
-        return '(';
+        return '[';
       case KEY_RIGHTBRACE:
-        return ')';
+        return ']';
       case KEY_A:
         return 'a';
       case KEY_S:
