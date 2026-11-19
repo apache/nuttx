@@ -636,6 +636,15 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 static int romfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 {
+#ifdef CONFIG_BUILD_KERNEL
+  /* rm_xipbase is a kernel address that a user process cannot access.
+   * -ENOTTY makes mmap() fall back to a copy of the file.
+   */
+
+  UNUSED(filep);
+  UNUSED(map);
+  return -ENOTTY;
+#else
   FAR struct romfs_mountpt_s *rm;
   FAR struct romfs_file_s *rf;
 
@@ -660,6 +669,7 @@ static int romfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
     }
 
   return -ENOTTY;
+#endif
 }
 
 /****************************************************************************
