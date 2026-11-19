@@ -333,7 +333,9 @@ struct crypt_kop
 #define CRK_SAVE_KEY               23 /* Save key data into FLASH */
 #define CRK_LOAD_KEY               24 /* Load key data from FLASH into RAM */
 #define CRK_UNLOAD_KEY             25 /* Unload key data from RAM */
-#define CRK_ALGORITHM_MAX          25 /* Keep updated */
+#define CRK_ECDH_GEN_PUBLIC        26 /* Generate an ephemeral ECDH keypair */
+#define CRK_ECDH_COMPUTE_SHARED    27 /* Compute ECDH shared secret */
+#define CRK_ALGORITHM_MAX          27 /* Keep updated */
 
 #define CRF_MOD_EXP                (1 << CRK_MOD_EXP)
 #define CRF_MOD_EXP_CRT            (1 << CRK_MOD_EXP_CRT)
@@ -347,6 +349,8 @@ struct crypt_kop
 #define CRF_ECDSA_SECP256R1_SIGN   (1 << CRK_ECDSA_SECP256R1_SIGN)
 #define CRF_ECDSA_SECP256R1_VERIFY (1 << CRK_ECDSA_SECP256R1_VERIFY)
 #define CRF_ECDSA_SECP256R1_GENKEY (1 << CRK_ECDSA_SECP256R1_GENKEY)
+#define CRF_ECDH_GEN_PUBLIC        (1 << CRK_ECDH_GEN_PUBLIC)
+#define CRF_ECDH_COMPUTE_SHARED    (1 << CRK_ECDH_COMPUTE_SHARED)
 #define CRF_ALLOCATE_KEY           (1 << CRK_ALLOCATE_KEY)
 #define CRF_VALIDATE_KEYID         (1 << CRK_VALIDATE_KEYID)
 #define CRF_IMPORT_KEY             (1 << CRK_IMPORT_KEY)

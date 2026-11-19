@@ -667,6 +667,20 @@ static int cryptodev_key(FAR struct fcrypt *fcr, FAR struct crypt_kop *kop)
           }
 
         return -EINVAL;
+      case CRK_ECDH_GEN_PUBLIC:
+        if (in == 0 && out == 4)
+          {
+            break;
+          }
+
+        return -EINVAL;
+      case CRK_ECDH_COMPUTE_SHARED:
+        if (in == 3 && out == 1)
+          {
+            break;
+          }
+
+        return -EINVAL;
 
       /* key management */
 

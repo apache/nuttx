@@ -2759,6 +2759,67 @@ static int swcr_ecc256_verify(FAR struct cryptkop *krp)
   return OK;
 }
 
+static int swcr_ecdh256_gen_public(FAR struct cryptkop *krp)
+{
+  /* Generating an ephemeral ECDH keypair is identical to ECDSA key
+   * generation: both produce a SECP256R1 keypair in param[0]=d,
+   * param[1]=x, param[2]=y.
+   */
+
+  return swcr_ecc256_genkey(krp);
+}
+
+static int swcr_ecdh256_compute_shared(FAR struct cryptkop *krp)
+{
+  uint8_t publickey[secp256r1 + 1];
+  uint8_t privatekey[secp256r1];
+  uint8_t secret[secp256r1];
+  uint8_t x[secp256r1];
+  uint8_t y[secp256r1];
+  int ret;
+
+  /* Private key: param[0]; peer public key: param[1]=Q.X, param[2]=Q.Y. */
+
+  ret = swcr_ecc_copy(x, krp->krp_param[1].crp_p,
+                      krp->krp_param[1].crp_nbits / 8);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = swcr_ecc_copy(y, krp->krp_param[2].crp_p,
+                      krp->krp_param[2].crp_nbits / 8);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = swcr_ecc_copy(privatekey, krp->krp_param[0].crp_p,
+                      krp->krp_param[0].crp_nbits / 8);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Compress the peer public key: SEC1 prefix (0x02/0x03 by Y parity) + X */
+
+  publickey[0] = 2 + (y[secp256r1 - 1] & 0x01);
+  memcpy(publickey + 1, x, secp256r1);
+
+  if (ecdh_shared_secret(publickey, privatekey, secret) == 0)
+    {
+      ret = -EINVAL;
+    }
+  else
+    {
+      swcr_ecc_copy(krp->krp_param[3].crp_p, secret, secp256r1);
+    }
+
+  explicit_bzero(privatekey, sizeof(privatekey));
+  explicit_bzero(secret, sizeof(secret));
+  return ret;
+}
+
 int swcr_kprocess(struct cryptkop *krp)
 {
   /* Sanity check */
@@ -2816,6 +2877,20 @@ int swcr_kprocess(struct cryptkop *krp)
         break;
       case CRK_ECDSA_SECP256R1_GENKEY:
         if ((krp->krp_status = swcr_ecc256_genkey(krp)) != 0)
+          {
+            goto done;
+          }
+
+        break;
+      case CRK_ECDH_GEN_PUBLIC:
+        if ((krp->krp_status = swcr_ecdh256_gen_public(krp)) != 0)
+          {
+            goto done;
+          }
+
+        break;
+      case CRK_ECDH_COMPUTE_SHARED:
+        if ((krp->krp_status = swcr_ecdh256_compute_shared(krp)) != 0)
           {
             goto done;
           }
@@ -2907,6 +2982,8 @@ void swcr_init(void)
   kalgs[CRK_ECDSA_SECP256R1_SIGN] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_ECDSA_SECP256R1_VERIFY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_ECDSA_SECP256R1_GENKEY] = CRYPTO_ALG_FLAG_SUPPORTED;
+  kalgs[CRK_ECDH_GEN_PUBLIC] = CRYPTO_ALG_FLAG_SUPPORTED;
+  kalgs[CRK_ECDH_COMPUTE_SHARED] = CRYPTO_ALG_FLAG_SUPPORTED;
   crypto_kregister(swcr_id, kalgs, swcr_kprocess);
 }
 
