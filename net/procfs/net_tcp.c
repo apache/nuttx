@@ -55,29 +55,86 @@
  * Private Functions
  ****************************************************************************/
 
-static ssize_t netprocfs_tcpstats(FAR struct netprocfs_file_s *priv,
-                                  FAR char *buffer, size_t buflen,
-                                  uint8_t domain, int *skip)
+static int netprocfs_tcpline(FAR struct netprocfs_file_s *priv,
+                             FAR char *buffer, size_t buflen,
+                             FAR struct tcp_conn_s *conn)
 {
+  uint8_t domain = net_ip_domain_select(conn->domain, PF_INET, PF_INET6);
   int addrlen = (domain == PF_INET) ?
                 INET_ADDRSTRLEN : INET6_ADDRSTRLEN;
-  FAR struct tcp_conn_s *conn = NULL;
   char remote[INET6_ADDRSTRLEN];
   char local[INET6_ADDRSTRLEN];
-  int len = 0;
   FAR void *laddr;
   FAR void *raddr;
+  int len;
+
+  laddr = net_ip_binding_laddr(&conn->u, domain);
+  raddr = net_ip_binding_raddr(&conn->u, domain);
+
+  len = snprintf(buffer, buflen,
+                 "    %2u"
+                 ": %02" PRIx8
+                 " %3" PRIx8 " %3" PRIu8
+                 " %3" PRIu8
+                 " %4" PRIu32
+                 " %3" PRIu8
+#if CONFIG_NET_SEND_BUFSIZE > 0 && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+                 " %6" PRIu32
+#endif
+                 " %6u",
+                 priv->lines,
+                 conn->tcpstateflags,
+                 conn->sconn.s_flags,
+                 conn->crefs,
+                 conn->timer,
+                 (uint32_t)conn->tx_unacked,
+                 conn->nrtx,
+#if CONFIG_NET_SEND_BUFSIZE > 0 && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+                 tcp_wrbuffer_inqueue_size(conn),
+#endif
+                 (conn->readahead) ? conn->readahead->io_pktlen : 0);
+
+  len += snprintf(buffer + len, buflen - len,
+                  " %*s:%-6" PRIu16 " %*s:%-6" PRIu16 "\n",
+                  (domain == PF_INET6) ? addrlen / 2 : addrlen,
+                  inet_ntop(domain, laddr, local, addrlen),
+                  ntohs(conn->lport),
+                  (domain == PF_INET6) ? addrlen / 2 : addrlen,
+                  inet_ntop(domain, raddr, remote, addrlen),
+                  ntohs(conn->rport));
+
+  return len;
+}
+
+/****************************************************************************
+ * Name: netprocfs_tcpstats
+ *
+ * Description:
+ *   Write the lines of the connections after the last one written.
+ *
+ *   A read of the file to its end lists once each connection that is in
+ *   the list from the first read to the end.  The walk finds its place by
+ *   the list id of the last connection written (priv->last), not by a
+ *   count: the list ids grow from the head to the tail, so a connection
+ *   that goes away does not move the place.  A connection that comes
+ *   after the first read has a list id after priv->limit and is not
+ *   listed, so the read ends.
+ *
+ * Assumptions:
+ *   The TCP connection list is locked.
+ *
+ ****************************************************************************/
+
+static ssize_t netprocfs_tcpstats(FAR struct netprocfs_file_s *priv,
+                                  FAR char *buffer, size_t buflen)
+{
+  FAR struct tcp_conn_s *conn = NULL;
+  int len = 0;
 
   while ((conn = tcp_nextconn(conn)) != NULL)
     {
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-      if (conn->domain != domain)
-        {
-          continue;
-        }
-#endif /* CONFIG_NET_IPv4 && CONFIG_NET_IPv6 */
-
-      if (++(*skip) <= priv->offset)
+      if (!TCP_LISTID_AFTER(conn->listid, priv->last) ||
+          TCP_LISTID_AFTER(conn->listid, priv->limit))
         {
           continue;
         }
@@ -87,40 +144,9 @@ static ssize_t netprocfs_tcpstats(FAR struct netprocfs_file_s *priv,
           break;
         }
 
-      laddr = net_ip_binding_laddr(&conn->u, domain);
-      raddr = net_ip_binding_raddr(&conn->u, domain);
-
-      len += snprintf(buffer + len, buflen - len,
-                      "    %2" PRIu8
-                      ": %02" PRIx8
-                      " %3" PRIx8 " %3" PRIu8
-                      " %3" PRIu8
-                      " %4" PRIu32
-                      " %3" PRIu8
-#if CONFIG_NET_SEND_BUFSIZE > 0 && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
-                      " %6" PRIu32
-#endif
-                      " %6u",
-                      priv->offset++,
-                      conn->tcpstateflags,
-                      conn->sconn.s_flags,
-                      conn->crefs,
-                      conn->timer,
-                      (uint32_t)conn->tx_unacked,
-                      conn->nrtx,
-#if CONFIG_NET_SEND_BUFSIZE > 0 && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
-                      tcp_wrbuffer_inqueue_size(conn),
-#endif
-                      (conn->readahead) ? conn->readahead->io_pktlen : 0);
-
-      len += snprintf(buffer + len, buflen - len,
-                      " %*s:%-6" PRIu16 " %*s:%-6" PRIu16 "\n",
-                      (domain == PF_INET6) ? addrlen / 2 : addrlen,
-                      inet_ntop(domain, laddr, local, addrlen),
-                      ntohs(conn->lport),
-                      (domain == PF_INET6) ? addrlen / 2 : addrlen,
-                      inet_ntop(domain, raddr, remote, addrlen),
-                      ntohs(conn->rport));
+      len += netprocfs_tcpline(priv, buffer + len, buflen - len, conn);
+      priv->last = conn->listid;
+      priv->lines++;
     }
 
   return len;
@@ -151,41 +177,41 @@ static ssize_t netprocfs_tcpstats(FAR struct netprocfs_file_s *priv,
 ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen)
 {
-  int skip = 1;
+  FAR struct tcp_conn_s *conn;
   int len = 0;
 
   tcp_conn_list_lock();
 
-  if (tcp_nextconn(NULL) != NULL)
+  conn = tcp_nextconn(NULL);
+  if (priv->lines == 0 && conn != NULL)
     {
-      if (priv->offset == 0)
-        {
-          len = snprintf(buffer, buflen, "TCP sl  "
-                                         "st flg ref tmr uack nrt   "
+      /* The first read: the header, and the bounds of this read, the
+       * connections from the head of the list to the last one now.
+       */
+
+      priv->last  = conn->listid - 1;
+      priv->limit = tcp_conn_lastid();
+
+      len = snprintf(buffer, buflen, "TCP sl  "
+                                     "st flg ref tmr uack nrt   "
 #if CONFIG_NET_SEND_BUFSIZE > 0 && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
-                                          "txsz   "
+                                      "txsz   "
 #endif
-                                          "rxsz "
-                                          "%-*s "
-                                          "%-*s\n"
-                                          ,
-                                          INET6_ADDRSTRLEN / 2,
-                                          "local_address",
-                                          INET6_ADDRSTRLEN / 2,
-                                          "remote_address"
-                                          );
-          priv->offset = 1;
-        }
+                                      "rxsz "
+                                      "%-*s "
+                                      "%-*s\n"
+                                      ,
+                                      INET6_ADDRSTRLEN / 2,
+                                      "local_address",
+                                      INET6_ADDRSTRLEN / 2,
+                                      "remote_address"
+                                      );
+      priv->lines = 1;
+    }
 
-#ifdef CONFIG_NET_IPv4
-      len += netprocfs_tcpstats(priv, buffer + len,
-                                buflen - len, PF_INET, &skip);
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-      len += netprocfs_tcpstats(priv, buffer + len,
-                                buflen - len, PF_INET6, &skip);
-#endif /* CONFIG_NET_IPv6 */
+  if (priv->lines > 0)
+    {
+      len += netprocfs_tcpstats(priv, buffer + len, buflen - len);
     }
 
   tcp_conn_list_unlock();
