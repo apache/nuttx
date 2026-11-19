@@ -343,13 +343,20 @@ void tcp_update_keeptimer(FAR struct tcp_conn_s *conn, int timeout)
  *   None
  *
  * Assumptions:
- *   conn is not NULL.
+ *   conn is not NULL and is not in the active connection list.
  *
  ****************************************************************************/
 
 void tcp_stop_timer(FAR struct tcp_conn_s *conn)
 {
-  work_cancel_sync(LPWORK, &conn->work);
+  /* Do not wait for a tcp_timer_expiry() that runs already.  It takes the
+   * connection list lock and then the device lock, and the callers of
+   * tcp_free() can hold either of them.  It uses the connection only when
+   * it finds it in the active list, under the list lock, and tcp_free()
+   * removes the connection from that list before it stops the timer.
+   */
+
+  work_cancel(LPWORK, &conn->work);
 }
 
 /****************************************************************************

@@ -1109,7 +1109,7 @@ void tcp_update_keeptimer(FAR struct tcp_conn_s *conn, int timeout);
  *   None
  *
  * Assumptions:
- *   conn is not NULL.
+ *   conn is not NULL and is not in the active connection list.
  *
  ****************************************************************************/
 
