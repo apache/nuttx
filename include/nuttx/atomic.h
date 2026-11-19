@@ -406,6 +406,16 @@ ARCH_SYNC_DECLARE(sync, uint16_t, 2)
 ARCH_ATOMIC_DECLARE(atomic, int64_t, 8)
 ARCH_SYNC_DECLARE(sync, uint64_t, 8)
 #  endif
+#elif defined(CONFIG_LIBC_ATOMIC_NOINLINE)
+ARCH_ATOMIC_DECLARE(atomic, uint8_t, 1)
+ARCH_ATOMIC_DECLARE(atomic, uint16_t, 2)
+ARCH_ATOMIC_DECLARE(atomic, int32_t, 4)
+ARCH_ATOMIC_DECLARE(atomic, int64_t, 8)
+
+ARCH_SYNC_DECLARE(sync, uint8_t, 1)
+ARCH_SYNC_DECLARE(sync, uint16_t, 2)
+ARCH_SYNC_DECLARE(sync, uint32_t, 4)
+ARCH_SYNC_DECLARE(sync, uint64_t, 8)
 #endif
 
 #if defined(__cplusplus)
