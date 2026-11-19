@@ -350,6 +350,10 @@ static int cryptof_ioctl(FAR struct file *filep,
             crie.cri_alg = sop->cipher;
             crie.cri_klen = sop->keylen * 8;
             crie.cri_op = sop->op;
+            if (sop->flags & SOP_F_KEYID)
+              {
+                crie.cri_flags |= CRD_F_KEYID;
+              }
 
             crie.cri_key = kmm_malloc(crie.cri_klen / 8);
             if (crie.cri_key == NULL)
@@ -370,6 +374,10 @@ static int cryptof_ioctl(FAR struct file *filep,
             cria.cri_alg = sop->mac;
             cria.cri_sid = -1;
             cria.cri_klen = sop->mackeylen * 8;
+            if (sop->flags & SOP_F_KEYID)
+              {
+                cria.cri_flags |= CRD_F_KEYID;
+              }
 
             if (cria.cri_klen)
               {
