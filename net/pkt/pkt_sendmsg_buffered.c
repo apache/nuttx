@@ -235,7 +235,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
     }
 
   conn = psock->s_conn;
-  if (psock->s_type == SOCK_DGRAM)
+  if (addr != NULL)
     {
       /* Set the interface index for devif_poll can match the conn */
 
