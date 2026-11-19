@@ -1427,7 +1427,6 @@ int v9fs_client_unlink(FAR struct v9fs_client_s *client, uint32_t fid,
   struct iovec wiov[1];
   struct iovec riov[1];
   int flags = isdir ? V9FS_REMOVEDIR : 0;
-  int ret;
 
   /* size[4] Tunlinkat tag[2] dirfd[4] name[s] flags[4]
    * size[4] Runlinkat tag[2]
@@ -1448,14 +1447,8 @@ int v9fs_client_unlink(FAR struct v9fs_client_s *client, uint32_t fid,
   riov[0].iov_base = &response;
   riov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ;
 
-  ret = v9fs_client_rpc(client->transport, wiov, 1, riov, 1,
-                        request.header.tag);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  return v9fs_client_clunk(client, fid);
+  return v9fs_client_rpc(client->transport, wiov, 1, riov, 1,
+                         request.header.tag);
 }
 
 /****************************************************************************
