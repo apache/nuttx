@@ -163,6 +163,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_STM32_OTGHS) && defined(CONFIG_USBHOST)
+  /* Start the USB host on the selected connector */
+
+  ret = stm32_usbhost_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_usbhost_initialize() failed: %d\n",
+             ret);
+    }
+#endif
+
 #ifdef CONFIG_VIDEO_VL53L5CX
   ret = stm32_tof_initialize();
   if (ret < 0)

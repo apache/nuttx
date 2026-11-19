@@ -72,6 +72,7 @@
 
 #define STM32_BOARD_USEHSE
 #define STM32_HSE_FREQUENCY     48000000ul
+#define STM32_HSE_DIV2          /* hse_div2_osc_ck = HSE / 2 (USB PHYs) */
 #define STM32_BOARD_VOS_HIGH
 #define BOARD_VDDCORE_OVERDRIVE_GPIO (GPIO_OUTPUT | GPIO_PUSHPULL | \
                                       GPIO_SPEED_2MHZ | GPIO_OUTPUT_SET | \
@@ -213,6 +214,17 @@
 /* LTDC kernel clock: IC16 (25 MHz pixel clock) */
 
 #define STM32_RCC_CCIPR4_LTDCSEL RCC_CCIPR4_LTDCSEL_IC16
+
+/* USB1 and USB2 OTG HS PHY reference clocks: HSE oscillator / 2 =
+ * 24 MHz.  Not available with the HSI clock tree.
+ */
+
+#ifdef STM32_BOARD_USEHSE
+#  define STM32_RCC_CCIPR6_OTGPHY1SEL RCC_CCIPR6_OTGPHY1SEL_HSE_DIV_2_OSC
+#  define STM32_OTGPHY1_FREQUENCY     (STM32_HSE_FREQUENCY / 2)
+#  define STM32_RCC_CCIPR6_OTGPHY2SEL RCC_CCIPR6_OTGPHY2SEL_HSE_DIV_2_OSC
+#  define STM32_OTGPHY2_FREQUENCY     (STM32_HSE_FREQUENCY / 2)
+#endif
 
 /* I/O voltage domains ******************************************************/
 

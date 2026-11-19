@@ -121,6 +121,20 @@
 #define SDIO_SLOTNO    0
 #define SDIO_MINOR     0
 
+/* USB1 Type-C connector (CN18): the TCPP03 port protection switches VBUS.
+ * It is enabled by PA4 (active high) and set up over I2C2 (0x34).
+ */
+
+#define GPIO_TCPP03_EN (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+                        GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN4)
+#define TCPP03_I2C_BUS  2
+#define TCPP03_I2C_ADDR 0x34
+
+/* USB2 Type-A connector: VBUS power switch enabled by PB9 (active high) */
+
+#define GPIO_USB2_PWR_EN (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+                          GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN9)
+
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
@@ -201,6 +215,19 @@ int stm32_tof_initialize(void);
 
 #if defined(CONFIG_STM32_SDMMC2) && defined(CONFIG_MMCSD_SDIO)
 int stm32_sdio_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_usbhost_initialize
+ *
+ * Description:
+ *   Start the USB OTG HS host on the USB1 Type-C or the USB2 Type-A
+ *   connector and wait for devices.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_OTGHS) && defined(CONFIG_USBHOST)
+int stm32_usbhost_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

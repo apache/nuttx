@@ -207,6 +207,26 @@ With a FAT formatted card::
   nsh> dd if=/dev/zero of=/mnt/big.bin bs=4096 count=256
   nsh> umount /mnt
 
+USB host
+========
+
+The host runs at full speed on the embedded PHY (24 MHz reference, HSE / 2)
+of the port selected with ``CONFIG_STM32N6_OTGHS_USB1``/``USB2``:
+
+* USB2 (default in ``usbhost``): the Type-A connector, VBUS switched by PB9.
+* USB1: the Type-C connector (CN18).  VBUS comes from the TCPP03: PA4
+  enables it and the host driver closes its provider switch over I2C2
+  (0x34).  The CC lines are not driven.  Not tested on hardware.
+
+VBUS of a flash drive can exceed what the ST-LINK USB port supplies: power
+the board from CN18 when using the Type-A port.  A FAT formatted flash
+drive is ``/dev/sda``::
+
+  nsh> mount -t vfat /dev/sda /mnt
+  nsh> ls /mnt
+  nsh> echo hello > /mnt/test.txt
+  nsh> umount /mnt
+
 Clocking
 ========
 
@@ -255,3 +275,9 @@ sdcard
 
 NuttShell with the microSD slot on SDMMC2 and the FAT file system, see
 `microSD`_.
+
+usbhost
+-------
+
+The ``nsh`` configuration with the USB host on the USB2 Type-A
+connector, the mass storage class and the FAT file system, see `USB host`_.
