@@ -223,37 +223,37 @@ static int sam_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 #if SAM_IRQ_NEXTINT <= 32
       if (extint < SAM_IRQ_NEXTINT)
         {
-           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << extint;
+          *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
+          *bit     = 1 << extint;
         }
       else
 #elif SAM_IRQ_NEXTINT <= 64
       if (extint < 32)
         {
-           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << extint;
+          *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
+          *bit     = 1 << extint;
         }
       else if (extint < SAM_IRQ_NEXTINT)
         {
-           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (extint - 32);
+          *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
+          *bit     = 1 << (extint - 32);
         }
       else
 #elif SAM_IRQ_NEXTINT <= 96
       if (extint < 32)
         {
-           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << extint;
+          *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
+          *bit     = 1 << extint;
         }
       else if (extint < 64)
         {
-           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (extint - 32);
+          *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
+          *bit     = 1 << (extint - 32);
         }
       else if (extint < SAM_IRQ_NEXTINT)
         {
-           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-           *bit     = 1 << (extint - 64);
+          *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
+          *bit     = 1 << (extint - 64);
         }
       else
 #else

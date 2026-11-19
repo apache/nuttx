@@ -503,7 +503,7 @@ int up_prioritize_irq(int irq, int priority)
       regaddr = NVIC_SYSH_PRIORITY(irq);
       irq    -= 4;
     }
-  else (irq < EFM32_IRQ_NVECTORS)
+  else if (irq < EFM32_IRQ_NVECTORS)
     {
       /* NVIC_IRQ_PRIORITY() maps {0..} to one of many priority registers */
 

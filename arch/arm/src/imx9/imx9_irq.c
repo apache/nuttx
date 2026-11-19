@@ -235,71 +235,71 @@ static int imx9_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
     {
       if (extint < 32)
         {
-           *regaddr = (NVIC_IRQ_ENABLE(0) + offset);
-           *bit     = 1 << extint;
+          *regaddr = (NVIC_IRQ_ENABLE(0) + offset);
+          *bit     = 1 << extint;
         }
       else
 #if IMX9_IRQ_NEXTINT > 32
       if (extint < 64)
         {
-           *regaddr = (NVIC_IRQ_ENABLE(32) + offset);
-           *bit     = 1 << (extint - 32);
+          *regaddr = (NVIC_IRQ_ENABLE(32) + offset);
+          *bit     = 1 << (extint - 32);
         }
       else
 #endif
 #if IMX9_IRQ_NEXTINT > 64
       if (extint < 96)
         {
-           *regaddr = (NVIC_IRQ_ENABLE(64) + offset);
-           *bit     = 1 << (extint - 64);
+          *regaddr = (NVIC_IRQ_ENABLE(64) + offset);
+          *bit     = 1 << (extint - 64);
         }
       else
 #endif
 #if IMX9_IRQ_NEXTINT > 96
       if (extint < 128)
         {
-           *regaddr = (NVIC_IRQ_ENABLE(96) + offset);
-           *bit     = 1 << (extint - 96);
+          *regaddr = (NVIC_IRQ_ENABLE(96) + offset);
+          *bit     = 1 << (extint - 96);
         }
       else
 #endif
 #if IMX9_IRQ_NEXTINT > 128
       if (extint < 160)
         {
-           *regaddr = (NVIC_IRQ_ENABLE(128) + offset);
-           *bit     = 1 << (extint - 128);
+          *regaddr = (NVIC_IRQ_ENABLE(128) + offset);
+          *bit     = 1 << (extint - 128);
         }
       else
 #endif
 #if IMX9_IRQ_NEXTINT > 160
       if (extint < 192)
         {
-           *regaddr = (NVIC_IRQ_ENABLE(160) + offset);
-           *bit     = 1 << (extint - 160);
+          *regaddr = (NVIC_IRQ_ENABLE(160) + offset);
+          *bit     = 1 << (extint - 160);
         }
       else
 #endif
 #if IMX9_IRQ_NEXTINT > 192
       if (extint < 224)
         {
-           *regaddr = (NVIC_IRQ_ENABLE(192) + offset);
-           *bit     = 1 << (extint - 192);
+          *regaddr = (NVIC_IRQ_ENABLE(192) + offset);
+          *bit     = 1 << (extint - 192);
         }
       else
 #endif
 #if IMX9_IRQ_NEXTINT > 224
       if (extint < 256)
         {
-           *regaddr = (NVIC_IRQ_ENABLE(224) + offset);
-           *bit     = 1 << (extint - 224);
+          *regaddr = (NVIC_IRQ_ENABLE(224) + offset);
+          *bit     = 1 << (extint - 224);
         }
       else
 #endif
 #if IMX9_IRQ_NEXTINT > 256
       if (extint < 288)
         {
-           *regaddr = (NVIC_IRQ_ENABLE(256) + offset);
-           *bit     = 1 << (extint - 256);
+          *regaddr = (NVIC_IRQ_ENABLE(256) + offset);
+          *bit     = 1 << (extint - 256);
         }
       else
 #endif

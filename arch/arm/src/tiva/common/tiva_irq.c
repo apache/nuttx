@@ -276,31 +276,31 @@ static int tiva_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
       if (irq < TIVA_IRQ_INTERRUPTS + 32)
         {
-           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS);
+          *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
+          *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS);
         }
       else if (irq < TIVA_IRQ_INTERRUPTS + 64)
         {
-           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 32);
+          *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
+          *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 32);
         }
 #if TIVA_IRQ_NEXTINT > 63
       else if (irq < TIVA_IRQ_INTERRUPTS + 96)
         {
-           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-           *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 64);
+          *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
+          *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 64);
         }
 #if TIVA_IRQ_NEXTINT > 95
       else if (irq < TIVA_IRQ_INTERRUPTS + 128)
         {
-           *regaddr = (NVIC_IRQ96_127_ENABLE + offset);
-           *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 96);
+          *regaddr = (NVIC_IRQ96_127_ENABLE + offset);
+          *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 96);
         }
 #if TIVA_IRQ_NEXTINT > 127
       else if (irq < TIVA_IRQ_INTERRUPTS + 160)
         {
-           *regaddr = (NVIC_IRQ128_159_ENABLE + offset);
-           *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 128);
+          *regaddr = (NVIC_IRQ128_159_ENABLE + offset);
+          *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 128);
         }
 #if TIVA_IRQ_NEXTINT > 159
 #  warning Missing logic
