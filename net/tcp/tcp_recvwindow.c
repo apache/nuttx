@@ -84,6 +84,41 @@ static uint32_t tcp_calc_rcvsize(FAR struct tcp_conn_s *conn,
 }
 
 /****************************************************************************
+ * Name: tcp_promised_iobs
+ *
+ * Description:
+ *   Return the IOBs needed by the receive windows advertised to the other
+ *   connections.  A segment holds a whole frame of frameiobs IOBs.
+ *
+ ****************************************************************************/
+
+static int tcp_promised_iobs(FAR struct tcp_conn_s *conn, uint16_t mss,
+                             int frameiobs)
+{
+  FAR struct tcp_conn_s *other = NULL;
+  uint32_t segs = 0;
+  uint32_t rcvseq;
+  uint8_t state;
+
+  tcp_conn_list_lock();
+  while ((other = tcp_nextconn(other)) != NULL)
+    {
+      state  = other->tcpstateflags & TCP_STATE_MASK;
+      rcvseq = tcp_getsequence(other->rcvseq);
+      if (other != conn &&
+          (state == TCP_SYN_RCVD ||
+           (state >= TCP_ESTABLISHED && state <= TCP_FIN_WAIT_2)) &&
+          TCP_SEQ_GT(other->rcv_adv, rcvseq))
+        {
+          segs += (TCP_SEQ_SUB(other->rcv_adv, rcvseq) + mss - 1) / mss;
+        }
+    }
+
+  tcp_conn_list_unlock();
+  return segs * frameiobs;
+}
+
+/****************************************************************************
  * Name: tcp_maxrcvwin
  *
  * Description:
@@ -147,6 +182,8 @@ uint32_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
 {
   uint32_t tailroom;
   uint32_t recvwndo;
+  uint16_t mss;
+  int frameiobs;
   int niob_avail;
 
   /* Update the TCP received window based on read-ahead I/O buffer
@@ -165,11 +202,18 @@ uint32_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
       tailroom = 0;
     }
 
-  niob_avail = iob_navail(true);
+  /* A segment holds a whole frame.  Keep the IOBs of the windows of the
+   * other connections.
+   */
+
+  mss = tcp_rx_mss(dev);
+  frameiobs = (CONFIG_NET_LL_GUARDSIZE + dev->d_pktsize +
+               CONFIG_IOB_BUFSIZE - 1) / CONFIG_IOB_BUFSIZE;
+  niob_avail = iob_navail(true) - tcp_promised_iobs(conn, mss, frameiobs);
 
   /* Is there a a queue entry and IOBs available for read-ahead buffering? */
 
-  if (niob_avail > 0)
+  if (niob_avail >= frameiobs)
     {
       /* The optimal TCP window size is the amount of TCP data that we can
        * currently buffer via TCP read-ahead buffering for the device packet
@@ -186,7 +230,7 @@ uint32_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
        * buffering for this connection.
        */
 
-      recvwndo = tailroom + (niob_avail * CONFIG_IOB_BUFSIZE);
+      recvwndo = tailroom + (niob_avail / frameiobs) * mss;
     }
 #if CONFIG_IOB_THROTTLE > 0
   else if (conn->readahead == NULL)
