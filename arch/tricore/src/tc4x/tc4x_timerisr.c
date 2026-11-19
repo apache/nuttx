@@ -34,6 +34,16 @@
 #include "tricore_stm.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The STM of CPU0 counts at the system PLL frequency once
+ * tricore_clockconfig() has set up the clocks: 500 MHz.
+ */
+
+#define TC4X_STM_FREQUENCY 500000000UL
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -51,7 +61,7 @@ void up_timer_initialize(void)
   struct oneshot_lowerhalf_s *lower;
 
   lower = tricore_systimer_initialize(TRICORE_STM0_BASE, TRICORE_STM0_IRQ,
-                                      SCU_FREQUENCY);
+                                      TC4X_STM_FREQUENCY);
 
   DEBUGASSERT(lower != NULL);
 
