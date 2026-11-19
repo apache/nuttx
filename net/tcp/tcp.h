@@ -125,6 +125,12 @@
 #  define TCP_SEND_BUFSIZE  TCP_DEFAULT_BUFSIZE
 #endif
 
+/* True if the connection with list id a entered the list of active
+ * connections after the one with list id b (the ids wrap).
+ */
+
+#define TCP_LISTID_AFTER(a, b) ((int32_t)((uint32_t)(a) - (uint32_t)(b)) > 0)
+
 /* The error of a send on a TCP socket that is not connected: -ECONNRESET
  * if the peer reset the connection and this is not yet reported, -EPIPE if
  * the connection was closed (POSIX: the socket is no longer connected),
@@ -252,6 +258,8 @@ struct tcp_conn_s
                            * receive next */
   uint8_t  sndseq[4];     /* The sequence number that was last sent by us */
   uint32_t rexmit_seq;    /* The sequence number to be retrasmitted */
+  uint32_t listid;        /* The order of entry in the list of active
+                           * connections (tcp_add_active_conn()) */
   uint8_t  crefs;         /* Reference counts on this instance */
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   uint8_t  domain;        /* IP domain: PF_INET or PF_INET6 */
@@ -806,6 +814,20 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
 void tcp_add_active_conn(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
+ * Name: tcp_conn_lastid
+ *
+ * Description:
+ *   Return the list id of the connection that entered the list of active
+ *   TCP connections last.
+ *
+ * Assumptions:
+ *   The TCP connection list is locked.
+ *
+ ****************************************************************************/
+
+uint32_t tcp_conn_lastid(void);
+
+/****************************************************************************
  * Name: tcp_removeconn
  *
  * Description:
@@ -825,9 +847,17 @@ void tcp_removeconn(FAR struct tcp_conn_s *conn);
  *   This function is used to remove the currently SYN_RCVD connection
  *   created by the listener
  *
+ *   Only the connections up to the list id lastid are freed.
+ *
+ * Assumptions:
+ *   The listener is no longer in the table of listeners.  lastid is the
+ *   value of tcp_conn_lastid() when it was taken out.  The caller holds no
+ *   lock of the network.
+ *
  ****************************************************************************/
 
-void tcp_remove_syn_backlog(FAR struct tcp_conn_s *listener);
+void tcp_remove_syn_backlog(FAR struct tcp_conn_s *listener,
+                            uint32_t lastid);
 
 /****************************************************************************
  * Name: psock_tcp_connect

@@ -105,6 +105,10 @@ MEMPOOL_DEFINE(g_tcp_connections, sizeof(struct tcp_conn_s),
 
 static dq_queue_t g_active_tcp_connections;
 
+/* The list id of the connection that entered the list last */
+
+static uint32_t g_tcp_listid;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -1683,7 +1687,8 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
  * Name: tcp_add_active_conn
  *
  * Description:
- *   Add the connection to the list of active TCP connections
+ *   Add the connection to the list of active TCP connections, at its tail,
+ *   with the next list id.  So the list ids grow from the head to the tail.
  *
  * Assumptions:
  *   This function is called from normal user level code.
@@ -1693,8 +1698,27 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 void tcp_add_active_conn(FAR struct tcp_conn_s *conn)
 {
   tcp_conn_list_lock();
+  conn->listid = ++g_tcp_listid;
   dq_addlast(&conn->sconn.s_node, &g_active_tcp_connections);
   tcp_conn_list_unlock();
+}
+
+/****************************************************************************
+ * Name: tcp_conn_lastid
+ *
+ * Description:
+ *   Return the list id of the connection that entered the list of active
+ *   TCP connections last.  A connection with a later list id
+ *   (TCP_LISTID_AFTER()) entered the list after this call.
+ *
+ * Assumptions:
+ *   The TCP connection list is locked.
+ *
+ ****************************************************************************/
+
+uint32_t tcp_conn_lastid(void)
+{
+  return g_tcp_listid;
 }
 
 /****************************************************************************
@@ -1714,29 +1738,28 @@ void tcp_removeconn(FAR struct tcp_conn_s *conn)
 }
 
 /****************************************************************************
- * Name: tcp_remove_syn_backlog
+ * Name: tcp_syn_backlog_conn
  *
  * Description:
- *   This function is used to remove the currently SYN_RCVD connection
- *   created by the listener
+ *   Return the first connection in TCP_SYN_RCVD that the listener created,
+ *   or NULL.  Only connections up to the list id lastid count.
  *
  * Assumptions:
- *   This function is called from network logic with the tcp conn list
- *   locked.
+ *   The TCP connection list is locked.
  *
  ****************************************************************************/
 
-void tcp_remove_syn_backlog(FAR struct tcp_conn_s *listener)
+static FAR struct tcp_conn_s *
+tcp_syn_backlog_conn(FAR struct tcp_conn_s *listener, uint32_t lastid)
 {
   FAR struct tcp_conn_s *conn;
-  FAR struct tcp_conn_s *next;
 
-  next = (FAR struct tcp_conn_s *)g_active_tcp_connections.head;
-  while (next)
+  for (conn = (FAR struct tcp_conn_s *)g_active_tcp_connections.head;
+       conn != NULL;
+       conn = (FAR struct tcp_conn_s *)conn->sconn.s_node.flink)
     {
-      conn = next;
-      next = (FAR struct tcp_conn_s *)conn->sconn.s_node.flink;
       if (conn->tcpstateflags == TCP_SYN_RCVD &&
+          !TCP_LISTID_AFTER(conn->listid, lastid) &&
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
           tcp_conn_cmp(listener->domain,
                        (FAR const union ip_addr_u *)&listener->u,
@@ -1747,8 +1770,75 @@ void tcp_remove_syn_backlog(FAR struct tcp_conn_s *listener)
 #endif
          )
         {
+          return conn;
+        }
+    }
+
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: tcp_remove_syn_backlog
+ *
+ * Description:
+ *   This function is used to remove the currently SYN_RCVD connection
+ *   created by the listener
+ *
+ *   Only the connections up to the list id lastid are freed: the ones that
+ *   were there when the listener left the table.  A new listener on the
+ *   same address and port can come meanwhile, and its connections in
+ *   TCP_SYN_RCVD match too.
+ *
+ * Assumptions:
+ *   The listener is no longer in the table of listeners.  lastid is the
+ *   value of tcp_conn_lastid() when it was taken out.  The caller holds no
+ *   lock of the network.
+ *
+ ****************************************************************************/
+
+void tcp_remove_syn_backlog(FAR struct tcp_conn_s *listener,
+                            uint32_t lastid)
+{
+  FAR struct net_driver_s *dev;
+  FAR struct tcp_conn_s *conn;
+
+  /* tcp_free() takes the device lock of the connection, and the input path
+   * takes the list lock under the device lock.  So find the connection
+   * with the list locked, then lock its device and the list again, and
+   * free it if it is still there in TCP_SYN_RCVD on the same device.  The
+   * loop ends: each step frees a connection up to lastid, or finds that
+   * one has gone.
+   */
+
+  for (; ; )
+    {
+      tcp_conn_list_lock();
+      conn = tcp_syn_backlog_conn(listener, lastid);
+      dev  = conn != NULL ? conn->dev : NULL;
+      tcp_conn_list_unlock();
+
+      if (conn == NULL)
+        {
+          break;
+        }
+
+      if (dev != NULL)
+        {
+          netdev_lock(dev);
+        }
+
+      tcp_conn_list_lock();
+      if (tcp_syn_backlog_conn(listener, lastid) == conn &&
+          conn->dev == dev)
+        {
           conn->crefs = 0;
           tcp_free(conn);
+        }
+
+      tcp_conn_list_unlock();
+      if (dev != NULL)
+        {
+          netdev_unlock(dev);
         }
     }
 }
