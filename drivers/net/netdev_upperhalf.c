@@ -821,7 +821,8 @@ static void netdev_upper_input(FAR struct net_driver_s *dev)
  *   upper - Reference to the upper half driver structure
  *
  * Assumptions:
- *   Called with the network locked.
+ *   Called without the network device locked.  The lock is taken around
+ *   each non-VLAN frame while it is handed to the network stack.
  *
  ****************************************************************************/
 
@@ -848,8 +849,14 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
         }
 #endif
 
+      /* netdev_upper_input() requires the device lock, and the TX path
+       * takes it too, so both sides must hold it to not race on d_iob.
+       */
+
+      netdev_lock(dev);
       netpkt_put(dev, pkt, NETPKT_RX);
       netdev_upper_input(dev);
+      netdev_unlock(dev);
     }
 }
 
