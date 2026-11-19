@@ -203,7 +203,7 @@ static ssize_t devfreq_read(FAR struct file *filep,
                          " %"PRIu32"", devfreq->freq_table[i]);
         }
 
-        procfs_sprintf(buffer, buflen, &offset, "\n");
+      procfs_sprintf(buffer, buflen, &offset, "\n");
     }
 
 #ifdef CONFIG_DEVFREQ_PROCFS_QOS
