@@ -57,6 +57,7 @@ config RPMSG_WQUEUE_PRIORITY
 
 config RPMSG_WQUEUE_STACKSIZE
 	int "rpmsg work queue stack size"
+	default 8192 if ARCH_64BIT && DEFAULT_TASK_STACKSIZE < 8192
 	default DEFAULT_TASK_STACKSIZE
 
 config RPMSG_WQUEUE_NUMBER
