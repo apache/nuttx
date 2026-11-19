@@ -34,6 +34,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+#include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 
 #include "procfs/procfs.h"
@@ -107,6 +108,36 @@ static int netprocfs_tcpline(FAR struct netprocfs_file_s *priv,
 }
 
 /****************************************************************************
+ * Name: netprocfs_tcpnext
+ *
+ * Description:
+ *   Return the first connection after conn (or from the head of the list
+ *   if conn is NULL) that this read lists: its list id is after the one of
+ *   the last connection written and not after priv->limit.  NULL if there
+ *   is none.
+ *
+ * Assumptions:
+ *   The TCP connection list is locked.
+ *
+ ****************************************************************************/
+
+static FAR struct tcp_conn_s *
+netprocfs_tcpnext(FAR struct netprocfs_file_s *priv,
+                  FAR struct tcp_conn_s *conn)
+{
+  while ((conn = tcp_nextconn(conn)) != NULL)
+    {
+      if (TCP_LISTID_AFTER(conn->listid, priv->last) &&
+          !TCP_LISTID_AFTER(conn->listid, priv->limit))
+        {
+          break;
+        }
+    }
+
+  return conn;
+}
+
+/****************************************************************************
  * Name: netprocfs_tcpstats
  *
  * Description:
@@ -115,38 +146,72 @@ static int netprocfs_tcpline(FAR struct netprocfs_file_s *priv,
  *   A read of the file to its end lists once each connection that is in
  *   the list from the first read to the end.  The walk finds its place by
  *   the list id of the last connection written (priv->last), not by a
- *   count: the list ids grow from the head to the tail, so a connection
- *   that goes away does not move the place.  A connection that comes
- *   after the first read has a list id after priv->limit and is not
- *   listed, so the read ends.
+ *   count and never through a pointer kept while the list was unlocked:
+ *   the list ids grow from the head to the tail, so a connection that goes
+ *   away does not move the place.  A connection that comes after the first
+ *   read has a list id after priv->limit and is not listed, so the read
+ *   ends.
  *
  * Assumptions:
- *   The TCP connection list is locked.
+ *   The TCP connection list is locked; it may be unlocked and locked again
+ *   while a device lock is taken.
  *
  ****************************************************************************/
 
 static ssize_t netprocfs_tcpstats(FAR struct netprocfs_file_s *priv,
                                   FAR char *buffer, size_t buflen)
 {
-  FAR struct tcp_conn_s *conn = NULL;
+  FAR struct net_driver_s *held = NULL;
+  FAR struct net_driver_s *dev;
+  FAR struct tcp_conn_s *conn;
   int len = 0;
 
-  while ((conn = tcp_nextconn(conn)) != NULL)
+  conn = netprocfs_tcpnext(priv, NULL);
+  while (conn != NULL && buflen - len >= TCP_LINELEN)
     {
-      if (!TCP_LISTID_AFTER(conn->listid, priv->last) ||
-          TCP_LISTID_AFTER(conn->listid, priv->limit))
-        {
-          continue;
-        }
+      /* The input path changes the read-ahead and the write queues of a
+       * connection with only its device locked, and it locks the
+       * connection list under the device lock.  So a device lock is only
+       * tried under the list lock, and it is kept for the next lines of
+       * the same device.  If another thread holds it, the list is
+       * unlocked, the device locked and the list locked again, and the
+       * walk finds its place again by the list id.  That ends: the device
+       * of a connection in the list does not change, so after the wait the
+       * line is written, or the connection has gone.
+       */
 
-      if (buflen - len < TCP_LINELEN)
+      dev = conn->dev;
+      if (dev != NULL && dev != held)
         {
-          break;
+          if (held != NULL)
+            {
+              netdev_unlock(held);
+              held = NULL;
+            }
+
+          if (netdev_trylock(dev) != OK)
+            {
+              tcp_conn_list_unlock();
+              netdev_lock(dev);
+              tcp_conn_list_lock();
+              held = dev;
+
+              conn = netprocfs_tcpnext(priv, NULL);
+              continue;
+            }
+
+          held = dev;
         }
 
       len += netprocfs_tcpline(priv, buffer + len, buflen - len, conn);
       priv->last = conn->listid;
       priv->lines++;
+      conn = netprocfs_tcpnext(priv, conn);
+    }
+
+  if (held != NULL)
+    {
+      netdev_unlock(held);
     }
 
   return len;
