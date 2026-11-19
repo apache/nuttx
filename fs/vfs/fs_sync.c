@@ -121,6 +121,6 @@ void sync(void)
   nxsched_foreach(task_fssync, NULL);
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-  foreach_inode(mountpt_syncfs, NULL);
+  foreach_inode(mountpt_syncfs, NULL, true);
 #endif
 }
