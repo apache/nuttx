@@ -306,6 +306,21 @@ The TCP timer handler in ``net/tcp/tcp_timer.c`` drives:
 		connection is closed, the socket is notified (``TCP_TIMEDOUT``), and a
 		RST may be sent.
 
+Retransmission timer
+--------------------
+
+* The retransmission timer starts when a segment that takes sequence space
+	(data, SYN or FIN) is sent while data is unacknowledged.  A segment without
+	data (an ACK) does not restart it (RFC 6298, section 5).
+* An incoming ACK restarts the timer only when it acknowledges new data.  An
+	ACK that is not beyond the highest ACK so far gives no RTT sample and does
+	not reset the count of retransmissions.
+* At each expiry the timeout doubles (RFC 6298, section 5.5): the next timeout
+	is the initial timeout (``NET_TCP_RTO``) times 2, 4, 8 and then 16.  With
+	``NET_TCP_FIXED_RTO`` it does not change.
+* A duplicate ACK carries no data (RFC 5681, section 2).  A segment with data
+	that repeats the ACK number does not count toward a fast retransmission.
+
 Reset by the peer
 -----------------
 
