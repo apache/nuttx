@@ -149,7 +149,7 @@ uint32_t keyboard_translate_virtio_code(uint16_t keycode, bool *special)
   *special = false;
   switch (keycode)
     {
-       case KEY_ESC:
+      case KEY_ESC:
         return '\e';
       case KEY_1:
         return '1';
