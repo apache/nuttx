@@ -79,6 +79,12 @@
 #define UDPIPv4BUF ((FAR struct udp_hdr_s *)IPBUF(IPv4_HDRLEN))
 #define UDPIPv6BUF ((FAR struct udp_hdr_s *)IPBUF(IPv6_HDRLEN))
 
+/* True if the connection with list id a entered the list of UDP
+ * connections after the one with list id b (the ids wrap).
+ */
+
+#define UDP_LISTID_AFTER(a, b) ((int32_t)((uint32_t)(a) - (uint32_t)(b)) > 0)
+
 /* UDP read-ahead metadata layout:
  * |datalen|ifindex|src_addr_size|src_addr|[timestamp]|data|
  */
@@ -129,6 +135,8 @@ struct udp_conn_s
   uint8_t  flags;         /* See _UDP_FLAG_* definitions */
   uint8_t  domain;        /* IP domain: PF_INET or PF_INET6 */
   uint8_t  crefs;         /* Reference counts on this instance */
+  uint32_t listid;        /* The order of entry in the list of UDP
+                           * connections (udp_alloc()) */
 
 #if CONFIG_NET_RECV_BUFSIZE > 0
   int32_t  rcvbufs;       /* Maximum amount of bytes queued in recv */
@@ -259,6 +267,20 @@ FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn);
+
+/****************************************************************************
+ * Name: udp_conn_lastid
+ *
+ * Description:
+ *   Return the list id of the connection that entered the list of UDP
+ *   connections last.
+ *
+ * Assumptions:
+ *   The UDP connection list is locked.
+ *
+ ****************************************************************************/
+
+uint32_t udp_conn_lastid(void);
 
 /****************************************************************************
  * Name: udp_conn_list_lock

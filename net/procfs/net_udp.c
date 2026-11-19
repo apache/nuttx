@@ -55,29 +55,73 @@
  * Private Functions
  ****************************************************************************/
 
-static ssize_t netprocfs_udpstats(FAR struct netprocfs_file_s *priv,
-                                  FAR char *buffer, size_t buflen,
-                                  uint8_t domain, int *skip)
+static int netprocfs_udpline(FAR struct netprocfs_file_s *priv,
+                             FAR char *buffer, size_t buflen,
+                             FAR struct udp_conn_s *conn)
 {
+  uint8_t domain = net_ip_domain_select(conn->domain, PF_INET, PF_INET6);
   int addrlen = (domain == PF_INET) ?
                 INET_ADDRSTRLEN : INET6_ADDRSTRLEN;
-  FAR struct udp_conn_s *conn = NULL;
   char remote[INET6_ADDRSTRLEN];
   char local[INET6_ADDRSTRLEN];
-  int len = 0;
   FAR void *laddr;
   FAR void *raddr;
+  int len;
+
+  laddr = net_ip_binding_laddr(&conn->u, domain);
+  raddr = net_ip_binding_raddr(&conn->u, domain);
+
+  len = snprintf(buffer, buflen,
+                 "    %2u"
+                 ": %3" PRIx8
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
+                 " %6" PRIu32
+#endif
+                 " %6u",
+                 priv->lines,
+                 conn->sconn.s_flags,
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
+                 udp_wrbuffer_inqueue_size(conn),
+#endif
+                 (conn->readahead) ? conn->readahead->io_pktlen : 0);
+
+  len += snprintf(buffer + len, buflen - len,
+                  " %*s:%-6" PRIu16 " %*s:%-6" PRIu16 "\n",
+                  (domain == PF_INET6) ? addrlen / 2 : addrlen,
+                  inet_ntop(domain, laddr, local, addrlen),
+                  ntohs(conn->lport),
+                  (domain == PF_INET6) ? addrlen / 2 : addrlen,
+                  inet_ntop(domain, raddr, remote, addrlen),
+                  ntohs(conn->rport));
+
+  return len;
+}
+
+/****************************************************************************
+ * Name: netprocfs_udpstats
+ *
+ * Description:
+ *   Write the lines of the connections after the last one written.  The
+ *   walk finds its place by the list id of the last connection written, as
+ *   netprocfs_tcpstats() (net_tcp.c) does: a read of the file to its end
+ *   lists once each connection that is in the list from the first read to
+ *   the end, and it ends.
+ *
+ * Assumptions:
+ *   The UDP connection list is locked.
+ *
+ ****************************************************************************/
+
+static ssize_t netprocfs_udpstats(FAR struct netprocfs_file_s *priv,
+                                  FAR char *buffer, size_t buflen)
+{
+  FAR struct udp_conn_s *conn = NULL;
+  int len = 0;
 
   while ((conn = udp_nextconn(conn)) != NULL)
     {
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-      if (conn->domain != domain)
-        {
-          continue;
-        }
-#endif /* CONFIG_NET_IPv4 && CONFIG_NET_IPv6 */
-
-      if (++(*skip) <= priv->offset)
+      if (!UDP_LISTID_AFTER(conn->listid, priv->last) ||
+          UDP_LISTID_AFTER(conn->listid, priv->limit))
         {
           continue;
         }
@@ -87,31 +131,9 @@ static ssize_t netprocfs_udpstats(FAR struct netprocfs_file_s *priv,
           break;
         }
 
-      laddr = net_ip_binding_laddr(&conn->u, domain);
-      raddr = net_ip_binding_raddr(&conn->u, domain);
-
-      len += snprintf(buffer + len, buflen - len,
-                      "    %2" PRIu8
-                      ": %3" PRIx8
-#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
-                      " %6" PRIu32
-#endif
-                      " %6u",
-                      priv->offset++,
-                      conn->sconn.s_flags,
-#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
-                      udp_wrbuffer_inqueue_size(conn),
-#endif
-                      (conn->readahead) ? conn->readahead->io_pktlen : 0);
-
-      len += snprintf(buffer + len, buflen - len,
-                      " %*s:%-6" PRIu16 " %*s:%-6" PRIu16 "\n",
-                      (domain == PF_INET6) ? addrlen / 2 : addrlen,
-                      inet_ntop(domain, laddr, local, addrlen),
-                      ntohs(conn->lport),
-                      (domain == PF_INET6) ? addrlen / 2 : addrlen,
-                      inet_ntop(domain, raddr, remote, addrlen),
-                      ntohs(conn->rport));
+      len += netprocfs_udpline(priv, buffer + len, buflen - len, conn);
+      priv->last = conn->listid;
+      priv->lines++;
     }
 
   return len;
@@ -142,40 +164,40 @@ static ssize_t netprocfs_udpstats(FAR struct netprocfs_file_s *priv,
 ssize_t netprocfs_read_udpstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen)
 {
-  int skip = 1;
+  FAR struct udp_conn_s *conn;
   int len = 0;
 
   udp_conn_list_lock();
-  if (udp_nextconn(NULL) != NULL)
+  conn = udp_nextconn(NULL);
+  if (priv->lines == 0 && conn != NULL)
     {
-      if (priv->offset == 0)
-        {
-          len = snprintf(buffer, buflen, "UDP sl "
-                                         " flg   "
+      /* The first read: the header, and the bounds of this read, the
+       * connections from the head of the list to the last one now.
+       */
+
+      priv->last  = conn->listid - 1;
+      priv->limit = udp_conn_lastid();
+
+      len = snprintf(buffer, buflen, "UDP sl "
+                                     " flg   "
 #if CONFIG_NET_SEND_BUFSIZE > 0
-                                         "txsz   "
+                                     "txsz   "
 #endif
-                                         "rxsz "
-                                          "%-*s "
-                                          "%-*s\n"
-                                          ,
-                                          INET6_ADDRSTRLEN / 2,
-                                          "local_address",
-                                          INET6_ADDRSTRLEN / 2,
-                                          "remote_address"
-                                          );
-          priv->offset = 1;
-        }
+                                     "rxsz "
+                                      "%-*s "
+                                      "%-*s\n"
+                                      ,
+                                      INET6_ADDRSTRLEN / 2,
+                                      "local_address",
+                                      INET6_ADDRSTRLEN / 2,
+                                      "remote_address"
+                                      );
+      priv->lines = 1;
+    }
 
-#ifdef CONFIG_NET_IPv4
-      len += netprocfs_udpstats(priv, buffer + len,
-                                buflen - len, PF_INET, &skip);
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-      len += netprocfs_udpstats(priv, buffer + len,
-                                buflen - len, PF_INET6, &skip);
-#endif /* CONFIG_NET_IPv6 */
+  if (priv->lines > 0)
+    {
+      len += netprocfs_udpstats(priv, buffer + len, buflen - len);
     }
 
   udp_conn_list_unlock();

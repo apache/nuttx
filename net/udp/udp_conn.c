@@ -101,6 +101,10 @@ static rmutex_t g_udp_connections_lock = NXRMUTEX_INITIALIZER;
 
 static dq_queue_t g_active_udp_connections;
 
+/* The list id of the connection that entered the list last */
+
+static uint32_t g_udp_listid;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -724,8 +728,11 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
 
       sq_init(&conn->write_q);
 #endif
-      /* Enqueue the connection into the active list */
+      /* Enqueue the connection into the active list, at its tail, with the
+       * next list id.  So the list ids grow from the head to the tail.
+       */
 
+      conn->listid = ++g_udp_listid;
       dq_addlast(&conn->sconn.s_node, &g_active_udp_connections);
     }
 
@@ -883,6 +890,24 @@ FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn)
     {
       return (FAR struct udp_conn_s *)conn->sconn.s_node.flink;
     }
+}
+
+/****************************************************************************
+ * Name: udp_conn_lastid
+ *
+ * Description:
+ *   Return the list id of the connection that entered the list of UDP
+ *   connections last.  A connection with a later list id
+ *   (UDP_LISTID_AFTER()) entered the list after this call.
+ *
+ * Assumptions:
+ *   The UDP connection list is locked.
+ *
+ ****************************************************************************/
+
+uint32_t udp_conn_lastid(void)
+{
+  return g_udp_listid;
 }
 
 /****************************************************************************
