@@ -148,34 +148,44 @@ except ImportError:
 
 TOPDIR = Path(__file__).resolve().parent.parent
 DPATH = Path("defconfig")
+CMAKE_BINARY_DIR = None
 NEED_RESET = False
+os.chdir(TOPDIR)
 
 
 # Prepare environment for Kconfig
 def prepare_env():
     global NEED_RESET
-    # check if we are in the configured Kconfig environment
-    full_config_file = TOPDIR / Path(".config")
-    if not full_config_file.exists():
-        print("apps preconfig do not generate yet \nrun configure.sh first")
-        result = subprocess.run(
-            [f"{TOPDIR}/tools/configure.sh", "-e", f"{str(DPATH.parent)}"],
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode != 0:
-            print(
-                f"ERROR: {TOPDIR}/tools/configure.sh run fail\n configure path: {str(DPATH.parent)}",
-                file=sys.stderr,
+    if CMAKE_BINARY_DIR:
+        # we are in cmake env
+        os.environ["APPSDIR"] = str(TOPDIR / Path("../apps"))
+        os.environ["APPSBINDIR"] = str(CMAKE_BINARY_DIR / Path("apps"))
+        os.environ["EXTERNALDIR"] = "dummy"
+        os.environ["BINDIR"] = str(CMAKE_BINARY_DIR)
+        os.environ["KCONFIG_CONFIG"] = str(DPATH)
+    else:
+        # check if we are in the configured Kconfig environment
+        full_config_file = TOPDIR / Path(".config")
+        if not full_config_file.exists():
+            print("apps preconfig do not generate yet \nrun configure.sh first")
+            result = subprocess.run(
+                [f"{TOPDIR}/tools/configure.sh", "-e", f"{str(DPATH.parent)}"],
+                capture_output=True,
+                text=True,
             )
-            print(f"STDERROR:{result.stderr}", file=sys.stderr)
-            sys.exit(1)
-        NEED_RESET = True
-    os.environ["APPSDIR"] = "../apps"
-    os.environ["APPSBINDIR"] = "../apps"
-    os.environ["EXTERNALDIR"] = "dummy"
-    os.environ["BINDIR"] = str(TOPDIR)
-    os.environ["KCONFIG_CONFIG"] = str(DPATH)
+            if result.returncode != 0:
+                print(
+                    f"ERROR: {TOPDIR}/tools/configure.sh run fail\n configure path: {str(DPATH.parent)}",
+                    file=sys.stderr,
+                )
+                print(f"STDERROR:{result.stderr}", file=sys.stderr)
+                sys.exit(1)
+            NEED_RESET = True
+        os.environ["APPSDIR"] = "../apps"
+        os.environ["APPSBINDIR"] = "../apps"
+        os.environ["EXTERNALDIR"] = "dummy"
+        os.environ["BINDIR"] = str(TOPDIR)
+        os.environ["KCONFIG_CONFIG"] = str(DPATH)
 
 
 # Reset environment to previous
@@ -234,7 +244,8 @@ def apply_changes(kconf, changes):
             print(f"Warning: {target} not found, skipped")
             continue
         if value not in value_map:
-            print(f"Invalid value {value} for {target}, skipped")
+            sym.set_value(value)
+            print(f"Setting the value {value} for {target} directly")
             continue
         sym.set_value(value_map[value])
 
@@ -249,10 +260,18 @@ def apply_changes(kconf, changes):
     return changed
 
 
-def track_single_change(target, value):
+def track_multiple_changes(config_changes):
     kconf = Kconfig()
     kconf.load_config()
-    return apply_changes(kconf, {target: value})
+
+    # Convert list of [config, value, config, value, ...] to dictionary
+    changes_dict = {}
+    for i in range(0, len(config_changes), 2):
+        if i + 1 < len(config_changes):
+            config_name = config_changes[i]
+            config_value = config_changes[i + 1].lower()
+            changes_dict[config_name] = config_value
+    return apply_changes(kconf, changes_dict)
 
 
 def track_diff_changes(diff_path):
@@ -263,21 +282,29 @@ def track_diff_changes(diff_path):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Simulate the effects of modifying CONFIG items in NuttX"
+    )
+    parser.add_argument(
+        "-o", "--out_dir", required=False, help="Binary dir for CMake configured"
+    )
     parser.add_argument(
         "-f", "--file", required=True, help="Path to the input defconfig file"
     )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
         "-s",
-        "--single",
-        nargs=2,
+        "--set",
+        nargs="+",
         metavar=("CONFIG", "VALUE"),
-        help="Analyze single change: CONFIG_NAME y/m/n",
+        help="Analyze multiple changes: CONFIG_NAME1 y/m/n CONFIG_NAME2 y/m/n ...",
     )
     group.add_argument("-d", "--diff", help="Analyze changes from diff file")
 
     args = parser.parse_args()
+
+    if args.out_dir:
+        CMAKE_BINARY_DIR = Path(args.out_dir)
 
     DPATH = Path(args.file)
 
@@ -290,10 +317,17 @@ if __name__ == "__main__":
 
     prepare_env()
 
-    if args.single:
-        target, value = args.single
-        changes = track_single_change(target, value.lower())
-        title = f"Change report for {target}={value}"
+    if args.set:
+        # Check if we have an even number of arguments
+        if len(args.set) % 2 != 0:
+            print(
+                "ERROR: -s/--set requires an even number of arguments (config-value pairs)",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        changes = track_multiple_changes(args.set)
+        title = "Change report for config changes"
+
     elif args.diff:
         changes = track_diff_changes(args.diff)
         title = f"Change report for diff: {args.diff}"
