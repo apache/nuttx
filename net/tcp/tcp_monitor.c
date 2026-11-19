@@ -291,24 +291,22 @@ int tcp_start_monitor(FAR struct socket *psock)
   else if (!(conn->tcpstateflags == TCP_ESTABLISHED ||
              conn->tcpstateflags == TCP_SYN_RCVD || nonblock_conn))
     {
-      /* Invoke the TCP_ABORT connection event now */
+      /* Invoke the TCP_ABORT connection event now: the socket is not
+       * connected.
+       */
 
       tcp_shutdown_monitor(conn, TCP_ABORT);
+      tcp_close_connection(conn, TCP_ABORT);
 
       /* If the peer closed the connection before we called accept, and
        * there is buffered read-ahead data, return OK so that the caller
        * still gets a socket from which the pending data can be drained
        * (followed by EOF).
        *
-       * If there is no buffered data, however, the connection is dead:
-       * presenting it to the caller as a successfully-accepted socket
-       * makes accept() mark it _SF_CONNECTED (see net/socket/accept.c),
-       * and a subsequent blocking send() would then wait forever on a
-       * connection that will never post another event.  This happens when
-       * a peer resets the connection immediately after the handshake (for
-       * example a close with SO_LINGER {1, 0}).  Report it as not-connected
-       * instead so accept() fails cleanly rather than handing back a wedged
-       * socket.
+       * If there is no buffered data, however, the connection is dead.
+       * This happens when a peer resets the connection immediately after
+       * the handshake (for example a close with SO_LINGER {1, 0}).  Report
+       * it as not-connected.
        */
 
       if ((conn->tcpstateflags == TCP_CLOSED ||
@@ -346,6 +344,18 @@ int tcp_start_monitor(FAR struct socket *psock)
         {
           cb->flags |= TCP_CONNECTED;
         }
+    }
+
+  /* Mark the socket connected here, with the device locked: an event of
+   * the peer handled by the monitor after the unlock (a RST, a time-out)
+   * then changes the state for good.  accept() and connect() do not mark
+   * the socket after it (SOCKCAP_CONNSTATE).
+   */
+
+  if (!nonblock_conn)
+    {
+      conn->sconn.s_flags |= _SF_CONNECTED;
+      conn->sconn.s_flags &= ~_SF_CLOSED;
     }
 
   conn_dev_unlock(&conn->sconn, conn->dev);

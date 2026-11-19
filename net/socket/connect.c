@@ -120,6 +120,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
                   socklen_t addrlen)
 {
   FAR struct socket_conn_s *conn;
+  bool connstate;
   int ret;
 
   /* Verify that the psock corresponds to valid, allocated socket */
@@ -144,15 +145,20 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
       return -EOPNOTSUPP;
     }
 
+  /* An address family with SOCKCAP_CONNSTATE marks a connected socket
+   * itself, while it can change the state on an event of the peer.
+   */
+
+  connstate = psock_connstate(psock);
   conn = psock->s_conn;
   conn->s_flags |= _SF_CONNECTING;
   ret = psock->s_sockif->si_connect(psock, addr, addrlen);
-  if (ret >= 0 && addr->sa_family != AF_UNSPEC)
+  if (ret >= 0 && addr->sa_family != AF_UNSPEC && !connstate)
     {
       conn->s_flags |= _SF_CONNECTED;
     }
 
-  if (ret != -EINPROGRESS)
+  if (ret != -EINPROGRESS && (ret < 0 || !connstate))
     {
       conn->s_flags &= ~_SF_CONNECTING;
     }
