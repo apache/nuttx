@@ -37,6 +37,7 @@
 
 #include "sched/sched.h"
 #include "signal/signal.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Public Functions
@@ -101,10 +102,13 @@ int sigsuspend(FAR const sigset_t *set)
    * of the signals that will be unblocked by the new sigprocmask.
    */
 
-  if (nxsig_waitmask_set(set, &saved_sigprocmask))
+  if (nxsig_waitmask_set(set, &saved_sigprocmask) ||
+      nxtask_kcanceled(rtcb))
     {
       /* Dispatching one or more of the signals is sufficient to cause
-       * us to not wait. Restore the original sigprocmask.
+       * us to not wait. Restore the original sigprocmask.  A thread that
+       * the end of its process canceled in a system call does not wait
+       * either (nxnotify_kcancel()).
        */
 
       nxsig_restoremask(rtcb, &saved_sigprocmask);
