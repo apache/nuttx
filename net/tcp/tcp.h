@@ -480,6 +480,25 @@ extern "C"
 FAR struct tcp_conn_s *tcp_alloc(uint8_t domain);
 
 /****************************************************************************
+ * Name: tcp_reclaim
+ *
+ * Description:
+ *   Free the oldest connection that no socket refers to and that only
+ *   waits for the end of its close (for example in TIME_WAIT).  This gives
+ *   back the connection structure and the callbacks that it holds.
+ *
+ * Input Parameters:
+ *   dev - The device whose lock the caller holds, or NULL if it holds no
+ *         device lock and no connection lock.
+ *
+ * Returned Value:
+ *   true if a connection was freed.
+ *
+ ****************************************************************************/
+
+bool tcp_reclaim(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Name: tcp_free_rx_buffers
  *
  * Description:
