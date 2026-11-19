@@ -1,0 +1,51 @@
+From b4b107c41b8b8e977e8cbc2213eb61c8646856be Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Wed, 19 Nov 2025 11:25:40 +0800
+Subject: [PATCH 0025/25] rpmsg_virtio: add priority in the rpmsg virtio config
+
+Add a priority byte to struct fw_rsc_config, taken from the reserved
+space so the structure keeps its size, and the feature bit
+VIRTIO_RPMSG_F_PRIORITY that tells the rpmsg virtio device to read it.
+The device can use it to set the priority of the threads that handle
+the rpmsg messages.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/remoteproc.h   | 7 ++++++-
+ lib/include/openamp/rpmsg_virtio.h | 1 +
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/lib/include/openamp/remoteproc.h open-amp/lib/include/openamp/remoteproc.h
+index 62ae76a380..9b2c1e4d7f 100644
+--- a/lib/include/openamp/remoteproc.h
++++ open-amp/lib/include/openamp/remoteproc.h
+@@ -386,9 +386,14 @@ struct fw_rsc_config {
+ 
+ 	uint8_t remote_cpuname[VIRTIO_RPMSG_CPUNAME_SIZE];
+ 
++	/** The rpmsg virtio device priority (if VIRTIO_RPMSG_F_PRIORITY) */
++
++	uint8_t priority;
++
+ 	/* Reserve for the future use */
+ 
+-	uint32_t reserved[6];
++	uint8_t reserved1[3];
++	uint32_t reserved2[5];
+ 
+ 	/** Put the customize config here */
+ } METAL_PACKED_END;
+diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
+index 5eef8b7c6a..7d1a2f3b4c 100644
+--- a/lib/include/openamp/rpmsg_virtio.h
++++ open-amp/lib/include/openamp/rpmsg_virtio.h
+@@ -33,6 +33,7 @@ extern "C" {
+ #define VIRTIO_RPMSG_F_BUFSZ	2 /* RP supports get buffer size from config space */
+ #define VIRTIO_RPMSG_F_CPUNAME	3 /* RP supports get local and peer cpu name */
+ #define VIRTIO_RPMSG_F_BUFADDR	4 /* RP supports get buffer address from config space */
++#define VIRTIO_RPMSG_F_PRIORITY	5 /* RP supports get priority from config space */
+ 
+ #if defined(VIRTIO_USE_DCACHE)
+ #define BUFFER_FLUSH(x, s)		metal_cache_flush(x, s)
+-- 
+2.34.1
