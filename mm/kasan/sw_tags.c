@@ -36,8 +36,6 @@
 
 #define KASAN_TAG_SHIFT 56
 
-#define kasan_random_tag() (1 + rand() % ((1 << (64 - KASAN_TAG_SHIFT)) - 2))
-
 #define KASAN_SHADOW_SCALE (sizeof(uintptr_t))
 
 #define KASAN_SHADOW_SIZE(size) \
@@ -68,6 +66,18 @@ static spinlock_t g_lock;
  * Private Functions
  ****************************************************************************/
 
+static inline uint8_t kasan_random_tag(void)
+{
+  /* Use a simple LCG that does not depend on TLS (rand() requires
+   * per-task seed via tl_task which is NULL during early boot).
+   */
+
+  static unsigned long seed = 1;
+
+  seed = seed * 1103515245 + 12345;
+  return 1 + (seed >> 16) % ((1 << (64 - KASAN_TAG_SHIFT)) - 2);
+}
+
 static inline_function FAR uint8_t *
 kasan_mem_to_shadow(FAR const void *ptr, size_t size)
 {
@@ -79,7 +89,8 @@ kasan_mem_to_shadow(FAR const void *ptr, size_t size)
 
   for (i = 0; i < count; i++)
     {
-      if (addr >= g_region[i]->begin && addr < g_region[i]->end)
+      if (g_region[i] &&
+          addr >= g_region[i]->begin && addr < g_region[i]->end)
         {
           DEBUGASSERT(addr + size <= g_region[i]->end);
           addr -= g_region[i]->begin;
