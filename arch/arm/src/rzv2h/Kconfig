@@ -58,6 +58,7 @@ config ARCH_CHIP_R9A09G057
 	select RZV2H_HAVE_RIIC6
 	select RZV2H_HAVE_RIIC7
 	select RZV2H_HAVE_RIIC8
+	select RZV2H_HAVE_RTC
 	---help---
 		RZ/V2H family of Renesas MPUs cortex-r8
 
@@ -6763,5 +6764,52 @@ config RZV2H_QSPI
 		NuttX's generic QSPI interface (struct qspi_dev_s).  The attached
 		flash type, wiring and partitioning are board properties and are
 		configured in the board's Kconfig.
+
+config RZV2H_HAVE_RTC
+	bool
+	default n
+
+menuconfig RZV2H_RTC
+	bool "RTC support"
+	default n
+	depends on RZV2H_HAVE_RTC
+	---help---
+		Enable the RZ/V2H RTC driver. Provides /dev/rtc0 and system-clock
+		seeding via CONFIG_RTC_ARCH. Requires CONFIG_RTC=y,
+		CONFIG_RTC_DATETIME=y, CONFIG_RTC_DRIVER=y, CONFIG_RTC_ARCH=y.
+
+if RZV2H_RTC
+
+config RZV2H_RTC_ALARM_PRIORITY
+	int "RTC alarm interrupt priority"
+	range 0 15
+	default 12
+
+config RZV2H_RTC_PERIODIC_PRIORITY
+	int "RTC periodic interrupt priority"
+	range 0 15
+	default 12
+
+config RZV2H_RTC_CARRY_PRIORITY
+	int "RTC carry priority"
+	range 0 15
+	default 12
+
+config RZV2H_RTC_ALARM_INTSEL
+	int "RTC alarm interrupt-select (SEL) IRQ number"
+	default 422
+	range 353 479
+
+config RZV2H_RTC_PERIODIC_INTSEL
+	int "RTC periodic interrupt-select (SEL) IRQ number"
+	default 421
+	range 353 479
+
+config RZV2H_RTC_CARRY_INTSEL
+	int "RTC carry interrupt-select (SEL) IRQ number"
+	default 420
+	range 353 479
+
+endif # RZV2H_RTC
 
 endmenu # "RZ/V2H Configuration Options"
