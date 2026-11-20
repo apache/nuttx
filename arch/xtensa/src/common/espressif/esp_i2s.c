@@ -1076,6 +1076,7 @@ static IRAM_ATTR int i2s_txdma_setup(struct esp_i2s_s *priv,
   /* Get the transfer information, accounting for any data offset */
 
   const apb_samp_t bytes_per_sample = priv->data_width / 8;
+
   samp = &apb->samp[apb->curbyte];
   samp_size = (apb->nbytes - apb->curbyte) + priv->tx.carry.bytes;
   carry_size = samp_size % bytes_per_sample;
@@ -2335,6 +2336,7 @@ static void i2s_tx_channel_start(struct esp_i2s_s *priv)
 static void i2s_rx_channel_start(struct esp_i2s_s *priv)
 {
   int upd_timeout;
+
   if (priv->config->rx_en)
     {
       if (priv->rx_started)
@@ -3547,6 +3549,7 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
       int cpuint = esp_setup_irq(periph, 1,
                                  ESP_IRQ_TRIGGER_LEVEL,
                                  i2s_interrupt, priv);
+
       if (cpuint < 0)
         {
           i2serr("Failed to allocate a CPU interrupt.\n");
@@ -3567,6 +3570,7 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
       int cpuint = esp_setup_irq(periph, 1,
                                  ESP_IRQ_TRIGGER_LEVEL,
                                  i2s_interrupt, priv);
+
       if (cpuint < 0)
         {
           i2serr("Failed to allocate a CPU interrupt.\n");
@@ -3591,6 +3595,7 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
                              ESP_IRQ_PRIORITY_DEFAULT,
                              ESP_IRQ_TRIGGER_LEVEL,
                              i2s_interrupt, priv);
+
   if (cpuint < 0)
     {
       i2serr("Failed to allocate a CPU interrupt.\n");

@@ -77,7 +77,6 @@ void nx_idle_trampoline(void)
 
   while (!OSINIT_IDLELOOP());
 
-
   /* A task delivered to this CPU before it could take interrupts may have
    * lost its inter-processor interrupt.  Clear the stale request, which
    * would block every later delivery here; sched_unlock() runs the task.

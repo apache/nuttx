@@ -421,7 +421,7 @@ int up_debugpoint_remove(int type, void *addr, size_t size)
         break;
       default:
         return -EINVAL;
-  }
+    }
 
   return 0;
 }
