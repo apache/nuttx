@@ -60,11 +60,7 @@ int libelf_uninitialize(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Close the ELF file */
 
-  if (loadinfo->filfd >= 0)
-    {
-      _NX_CLOSE(loadinfo->filfd);
-      loadinfo->filfd = -1;
-    }
+  _NX_FILE_CLOSE(&loadinfo->file);
 
   return OK;
 }
