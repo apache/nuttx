@@ -21,6 +21,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/board/rzv2h-rptun.h>
 
 /*
  * RZ/V2H Cortex-R8_0 linker script for NuttX.
@@ -51,11 +52,23 @@ MEMORY
     ITCM (rwx)     : ORIGIN = 0x00000000, LENGTH = 128K
     DTCM (rwx)     : ORIGIN = 0x00020000, LENGTH = 128K
     RAM  (rwx)     : ORIGIN = 0x08180000, LENGTH = 512K
+#ifdef CONFIG_RZV2H_RPTUN
+    RSCTBL (rw)    : ORIGIN = BOARD_RPTUN_RESOURCE_ADDR,
+                     LENGTH = BOARD_RPTUN_RESOURCE_SIZE
+#endif
 }
 
 OUTPUT_ARCH(arm)
 EXTERN(_vector_start)
 ENTRY(__start)
+
+#ifdef CONFIG_RZV2H_RPTUN
+/* The generated reference MHU_B_NS instance leaves p_shared_memory NULL.
+ * FSP uses this base symbol and adds eight bytes per logical MHU channel.
+ */
+
+PROVIDE(__mhu_shmem_start = BOARD_RPTUN_MHU_SHMEM_ADDR);
+#endif
 
 /* Start of the read-only SRAM part of the image.  Everything from here up to
  * __mpu_code_end (the vector load image, .text, .rodata, .init_section and
@@ -182,6 +195,23 @@ SECTIONS
     __mpu_code_end = ABSOLUTE(.);
 
     _eronly = ABSOLUTE(.);
+
+#ifdef CONFIG_RZV2H_RPTUN
+    /* Multi-OS sample maps the resource table directly at 0x42f00000 through
+     * UIO.  Like the Renesas reference linker script, keep the live table
+     * NOLOAD and initialize it from a template during board bring-up.
+     */
+
+    .resource_table (NOLOAD) :
+    {
+        . = ALIGN(8);
+        KEEP(*(.resource_table))
+        . = ALIGN(4);
+    } > RSCTBL
+
+    ASSERT(SIZEOF(.resource_table) <= BOARD_RPTUN_RESOURCE_SIZE,
+           "RZ/V2H resource table exceeds the reserved region")
+#endif
 
     .data :
     {
