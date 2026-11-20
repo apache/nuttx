@@ -344,6 +344,19 @@ config SERIAL_TERMIOS
 		Note: other software settings (echo, \r\n<->\n, break, tcflush)
 		are always supported.
 
+config SERIAL_WINSIZE
+	bool "Terminal window size (TIOCGWINSZ/TIOCSWINSZ)"
+	default !DEFAULT_SMALL
+	---help---
+		Enable TIOCGWINSZ and TIOCSWINSZ ioctl support in the serial
+		and pseudo-terminal drivers.  When enabled, each uart_dev_s
+		carries a struct winsize (8 bytes).  A window size change sends
+		SIGWINCH to the foreground process if CONFIG_TTY_SIGINT or
+		CONFIG_TTY_SIGTSTP is enabled.
+
+		Disable on memory-constrained targets that never resize a
+		terminal to save Flash and per-device SRAM.
+
 config SERIAL_BREAK
 	bool "Serial line break (tcsendbreak) support"
 	default !DEFAULT_SMALL

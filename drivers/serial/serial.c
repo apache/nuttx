@@ -2093,6 +2093,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             break;
 #endif
 
+#ifdef CONFIG_SERIAL_WINSIZE
           case TIOCGWINSZ:
             {
               FAR struct winsize *ws = (FAR struct winsize *)(uintptr_t)arg;
@@ -2132,6 +2133,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 }
             }
             break;
+#endif
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
           /* Make the controlling terminal of the calling process */
