@@ -39,6 +39,7 @@ config ARCH_CHIP_R9A09G057
 	select ARMV7R_HAVE_GICv2
 	select ARCH_HAVE_MPU
 	select ARCH_IRQPRIO
+	select RZV2H_HAVE_ADC
 	select RZV2H_HAVE_SCI_B_UART0
 	select RZV2H_HAVE_SCI_B_UART1
 	select RZV2H_HAVE_SCI_B_UART2
@@ -68,6 +69,10 @@ config RZV2H_GPIO
 		Enable support for GPIO pins.
 
 # Peripheral
+config RZV2H_HAVE_ADC
+	bool
+	default n
+
 config RZV2H_SCI_B
 	bool
 	default n
@@ -215,6 +220,239 @@ config RZV2H_SCI_B_UART9
 	select SCI9_SERIALDRIVER
 
 endif # RZV2H_UART_SCI
+
+menuconfig RZV2H_ADC
+	bool "ADC-E support"
+	default n
+	depends on ADC && RZV2H_HAVE_ADC
+	---help---
+		Enable the RZ/V2H ADC-E lower-half driver for ADC unit 0.
+		Select ANI000 through ANI007 in the ADC0 channel selection menu.
+
+if RZV2H_ADC
+
+menu "ADC0 channel selection"
+
+config RZV2H_ADC0_ANI000
+	bool "ANI000"
+	default y
+	---help---
+		Include dedicated analog input ANI000 in ADC0 group-A scans.
+
+config RZV2H_ADC0_ANI001
+	bool "ANI001"
+	default n
+	---help---
+		Include dedicated analog input ANI001 in ADC0 group-A scans.
+
+config RZV2H_ADC0_ANI002
+	bool "ANI002"
+	default n
+	---help---
+		Include dedicated analog input ANI002 in ADC0 group-A scans.
+
+config RZV2H_ADC0_ANI003
+	bool "ANI003"
+	default n
+	---help---
+		Include dedicated analog input ANI003 in ADC0 group-A scans.
+
+config RZV2H_ADC0_ANI004
+	bool "ANI004"
+	default n
+	---help---
+		Include dedicated analog input ANI004 in ADC0 group-A scans.
+
+config RZV2H_ADC0_ANI005
+	bool "ANI005"
+	default n
+	---help---
+		Include dedicated analog input ANI005 in ADC0 group-A scans.
+
+config RZV2H_ADC0_ANI006
+	bool "ANI006"
+	default n
+	---help---
+		Include dedicated analog input ANI006 in ADC0 group-A scans.
+
+config RZV2H_ADC0_ANI007
+	bool "ANI007"
+	default n
+	---help---
+		Include dedicated analog input ANI007 in ADC0 group-A scans.
+
+endmenu # "ADC0 channel selection"
+
+choice
+	prompt "ADC resolution"
+	default RZV2H_ADC_RESOLUTION_12BIT
+
+config RZV2H_ADC_RESOLUTION_12BIT
+	bool "12-bit"
+	---help---
+		Use 12-bit conversion results with a range of 0 to 4095.
+
+config RZV2H_ADC_RESOLUTION_8BIT
+	bool "8-bit"
+	---help---
+		Use 8-bit conversion results with a range of 0 to 255.
+
+endchoice # "ADC resolution"
+
+config RZV2H_ADC_WINDOW_A
+	bool "Enable Window A comparison"
+	default n
+	---help---
+		Enable the ADC-E Window A hardware comparator and its interrupt.
+		Every channel enabled in the ADC0 channel selection menu is compared
+		using the same lower limit, upper limit, and comparison condition.
+
+if RZV2H_ADC_WINDOW_A
+
+choice
+	prompt "Window A comparison condition"
+	default RZV2H_ADC_WINDOW_A_OUTSIDE
+
+config RZV2H_ADC_WINDOW_A_OUTSIDE
+	bool "Outside window"
+	---help---
+		Generate a Window A event when a selected channel result is outside
+		the configured lower-to-upper window.
+
+config RZV2H_ADC_WINDOW_A_INSIDE
+	bool "Inside window"
+	---help---
+		Generate a Window A event when a selected channel result is inside
+		the configured lower-to-upper window.
+
+endchoice # "Window A comparison condition"
+
+config RZV2H_ADC_WINDOW_A_LOWER
+	int "Window A lower threshold"
+	range 0 65535
+	default 1024 if RZV2H_ADC_RESOLUTION_12BIT
+	default 64 if RZV2H_ADC_RESOLUTION_8BIT
+	---help---
+		Set the 16-bit Window A lower threshold register value.
+
+config RZV2H_ADC_WINDOW_A_UPPER
+	int "Window A upper threshold"
+	range 0 65535
+	default 3072 if RZV2H_ADC_RESOLUTION_12BIT
+	default 192 if RZV2H_ADC_RESOLUTION_8BIT
+	---help---
+		Set the 16-bit Window A upper threshold register value. This
+		value must be greater than or equal to the lower threshold.
+
+config RZV2H_ADC_WINDOW_A_IRQ_PRIORITY
+	int "Window A interrupt priority"
+	range 0 15
+	default 12
+	---help---
+		Set the GIC priority used by the ADC-E Window A compare interrupt.
+
+endif # RZV2H_ADC_WINDOW_A
+
+choice
+	prompt "ADC add/average count"
+	default RZV2H_ADC_ADD_AVERAGE_OFF
+
+config RZV2H_ADC_ADD_AVERAGE_OFF
+	bool "Disabled"
+	---help---
+		Return one conversion result for each enabled channel.
+
+config RZV2H_ADC_ADD_TWO
+	bool "Add 2 conversions"
+	---help---
+		Return the sum of two conversions for every enabled channel.
+
+config RZV2H_ADC_ADD_THREE
+	bool "Add 3 conversions"
+	---help---
+		Return the sum of three conversions for every enabled channel.
+
+config RZV2H_ADC_ADD_FOUR
+	bool "Add 4 conversions"
+	---help---
+		Return the sum of four conversions for every enabled channel.
+
+config RZV2H_ADC_ADD_SIXTEEN
+	bool "Add 16 conversions"
+	---help---
+		Return the sum of sixteen conversions for every enabled channel.
+
+config RZV2H_ADC_AVERAGE_TWO
+	bool "Average 2 conversions"
+	---help---
+		Return the average of two conversions for every enabled channel.
+		The result retains the configured 8-bit or 12-bit ADC range.
+
+config RZV2H_ADC_AVERAGE_FOUR
+	bool "Average 4 conversions"
+	---help---
+		Return the average of four conversions for every enabled channel.
+		The result retains the configured 8-bit or 12-bit ADC range.
+
+endchoice # "ADC add/average count"
+
+config RZV2H_ADC_CLEAR_AFTER_READ
+	bool "Clear ADC result after read"
+	default n
+	---help---
+		Enable the ADC-E clear-after-read function. When enabled, hardware
+		clears a channel's result register after the driver reads it.
+
+		Leave this disabled if the most recent conversion result must remain
+		available for repeated reads. This option does not change the NuttX
+		ADC upper-half FIFO contents after a sample has been delivered.
+
+config RZV2H_ADC_SCAN_END_INTERRUPT
+	bool "Use scan-end interrupt"
+	default n
+	---help---
+		Deliver completed scans through the ADC-E group-A scan-end
+		interrupt. If disabled, ANIOC_TRIGGER polls for scan completion.
+
+config RZV2H_ADC_SCAN_END_INTSEL
+	int "ADC scan-end interrupt-select (SEL) IRQ number"
+	default 429
+	range 353 479
+	depends on RZV2H_ADC_SCAN_END_INTERRUPT
+	---help---
+		Select the FSP IRQ number for the SEL. Values 353 through 479
+		correspond to SEL0 through SEL126.
+
+config RZV2H_ADC_SCAN_END_IRQ_PRIORITY
+	int "ADC scan-end interrupt priority"
+	range 0 15
+	default 12
+	depends on RZV2H_ADC_SCAN_END_INTERRUPT
+	---help---
+		Set the GIC priority used by the ADC-E group-A scan-end
+		interrupt. Zero is the highest priority and 15 is the lowest.
+
+choice
+	prompt "ADC trigger source"
+	default RZV2H_ADC_TRIGGER_SOFTWARE
+
+config RZV2H_ADC_TRIGGER_SOFTWARE
+	bool "Software trigger"
+	---help---
+		ANIOC_TRIGGER starts one ADC scan immediately.
+
+config RZV2H_ADC_TRIGGER_EXTERNAL
+	bool "External ADTRG hardware trigger"
+	depends on RZV2H_ADC_SCAN_END_INTERRUPT
+	---help---
+		Enable the ADC external trigger input. A subsequent external
+		ADTRG event starts the conversion.
+
+endchoice # "ADC trigger source"
+
+comment "ELC are not supported"
+
+endif # RZV2H_ADC
 
 config RZV2H_UBOOT_IMAGE
 	bool "Generate split CR8_0 U-Boot images"

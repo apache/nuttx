@@ -37,4 +37,7 @@ if(CONFIG_RZV2H_SCI_B)
   list(APPEND SRCS rzv2h_serial.c)
 endif()
 
+if(CONFIG_RZV2H_ADC)
+  list(APPEND SRCS rzv2h_adc.c)
+endif()
 target_sources(arch PRIVATE ${SRCS})

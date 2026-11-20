@@ -175,6 +175,11 @@
 #define AN_RM57_FIRST     (AN_MCP445X_FIRST + AN_MCP445X_NCMDS)
 #define AN_RM57_NCMDS     13
 
+/* See arch/arm/include/rzv2h/adc.h */
+
+#define AN_RZV2H_FIRST    (AN_RM57_FIRST + AN_RM57_NCMDS)
+#define AN_RZV2H_NCMDS    1
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
