@@ -45,6 +45,85 @@
 #define tmp3          r6
 #define src_offset    r7
 
+/* Pointer-authentication prologue shared by both variants.  */
+	.macro pac_prologue
+#if __ARM_FEATURE_PAC_DEFAULT
+#  if __ARM_FEATURE_BTI_DEFAULT
+	pacbti	ip, lr, sp
+#  else
+	pac	ip, lr, sp
+#  endif
+#endif
+	.endm
+
+#if defined(__ARM_FEATURE_MVE)
+
+/* MVE path: byte-copy the head until src is 16-byte aligned (copying and
+ * NUL-checking each byte), then copy one 16-byte block per iteration.  A
+ * block containing a NUL is re-copied byte-by-byte so nothing past the NUL
+ * is written.  dst is preserved for the return value.
+ */
+
+#define dst		r0		/* moving dst; start kept in r4 */
+#define src		r1
+#define data		r2
+#define tmp		r3
+#define start		r4
+
+	.syntax unified
+	.text
+	.align 2
+	.global ARCH_LIBCFUN(strcpy)
+	.thumb
+	.type ARCH_LIBCFUN(strcpy), %function
+
+ARCH_LIBCFUN(strcpy):
+	.cfi_sections .debug_frame
+	.cfi_startproc
+	pac_prologue
+	push	{r4, lr}
+	mov	start, dst
+
+.Lmve_head:
+	ldrb	data, [src]
+	strb	data, [dst]
+	cmp	data, #0
+	beq	.Lmve_ret
+	adds	src, src, #1
+	adds	dst, dst, #1
+	ands	tmp, src, #15
+	bne	.Lmve_head
+
+.Lmve_loop:
+	vldrb.8	q0, [src], #16
+	vminv.u8 data, q0		/* 0 iff a NUL is present */
+	cmp	data, #0
+	beq	.Lmve_found
+	vstrb.8	q0, [dst], #16
+	b	.Lmve_loop
+
+.Lmve_found:
+	subs	src, src, #16
+.Lmve_copy:
+	ldrb	data, [src], #1
+	strb	data, [dst], #1
+	cmp	data, #0
+	bne	.Lmve_copy
+
+.Lmve_ret:
+	mov	dst, start		/* return original dst */
+	pop	{r4, lr}
+#if __ARM_FEATURE_PAC_DEFAULT
+	aut	ip, lr, sp
+#endif
+	bx	lr
+
+	.cfi_endproc
+	.size ARCH_LIBCFUN(strcpy), . - ARCH_LIBCFUN(strcpy)
+
+#else
+
+/* Byte masks used only by the non-MVE path below.  */
 #ifdef __ARM_BIG_ENDIAN
 #  define MASK_0          0xff000000
 #  define MASK_1          0xff0000
@@ -73,13 +152,7 @@
     .type   ARCH_LIBCFUN(strcpy), %function
 
 ARCH_LIBCFUN(strcpy):
-#if __ARM_FEATURE_PAC_DEFAULT
-#  if __ARM_FEATURE_BTI_DEFAULT
-    pacbti  ip, lr, sp
-#  else
-    pac     ip, lr, sp
-#  endif /* __ARM_FEATURE_BTI_DEFAULT */
-#endif /* __ARM_FEATURE_PAC_DEFAULT */
+	pac_prologue
     push    {result, tmp1, tmp2, tmp3, src_offset}
     eor     tmp1, dst, src
     tst     tmp1, #3
@@ -328,5 +401,6 @@ offset_3:
 .cpy_done:
     *dst++ = 0;
 #endif  /* Pseudo code end */
+#endif /* __ARM_FEATURE_MVE */
 
 #endif

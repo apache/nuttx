@@ -94,8 +94,97 @@
 
 #include "acle-compat.h"
 
+/* Pointer-authentication prologue shared by all variants.  */
+	.macro pac_prologue
+#if __ARM_FEATURE_PAC_DEFAULT
+#  if __ARM_FEATURE_BTI_DEFAULT
+	pacbti	ip, lr, sp
+#  else
+	pac	ip, lr, sp
+#  endif
+#endif
+	.endm
+
+#if defined(__ARM_FEATURE_MVE)
+
+/* MVE path: scan 16 bytes per iteration.  XOR each loaded vector with the
+ * replicated search byte (matching bytes become zero), then take the
+ * horizontal minimum.  VMINV computes min(Rda, min(Qm)), so Rda must be
+ * initialized to 0xFF (the largest unsigned byte) before the loop so the
+ * result reflects only the vector contents.
+ */
+
+#define src		r0
+#define ch		r1
+#define n		r2
+#define chunks		r3
+#define data		r4
+#define tail		r5
+
+	.thumb
+	.syntax unified
+	.global ARCH_LIBCFUN(memchr)
+	.thumb_func
+	.type ARCH_LIBCFUN(memchr), %function
+ARCH_LIBCFUN(memchr):
+	.cfi_sections .debug_frame
+	.cfi_startproc
+	pac_prologue
+	push	{r4, r5, lr}
+	.cfi_def_cfa_offset 12
+	.cfi_offset lr, -4
+	.cfi_offset r4, -12
+	.cfi_offset r5, -8
+
+	cbz	n, .Lmve_nf
+	and	ch, ch, #0xff
+	vdup.8	q0, ch
+	lsrs	chunks, n, #4		/* number of 16-byte chunks */
+	beq	.Lmve_tail
+	movs	data, #0xff		/* VMINV starting value: max unsigned byte */
+.Lmve_loop:
+	vldrb.8	q1, [src], #16
+	veor	q1, q1, q0		/* matching bytes become zero */
+	vminv.u8 data, q1		/* min(0xff, min(q1)) = 0 iff match */
+	cmp	data, #0
+	beq	.Lmve_found
+	subs	chunks, chunks, #1
+	bne	.Lmve_loop
+.Lmve_tail:
+	ands	tail, n, #15
+	beq	.Lmve_nf
+.Lmve_tail_loop:
+	ldrb	data, [src], #1
+	cmp	data, ch
+	beq	.Lmve_found_ret
+	subs	tail, tail, #1
+	bne	.Lmve_tail_loop
+.Lmve_nf:
+	mov	src, #0
+	pop	{r4, r5, lr}
+#if __ARM_FEATURE_PAC_DEFAULT
+	aut	ip, lr, sp
+#endif
+	bx	lr
+.Lmve_found:
+	sub	src, src, #16		/* back to the start of the block */
+.Lmve_found_scan:
+	ldrb	data, [src], #1
+	cmp	data, ch
+	bne	.Lmve_found_scan
+.Lmve_found_ret:
+	sub	src, src, #1		/* src was post-incremented */
+	pop	{r4, r5, lr}
+#if __ARM_FEATURE_PAC_DEFAULT
+	aut	ip, lr, sp
+#endif
+	bx	lr
+
+	.cfi_endproc
+	.size ARCH_LIBCFUN(memchr), . - ARCH_LIBCFUN(memchr)
+
+#elif defined (__ARM_NEON__) || defined (__ARM_NEON)
 @ NOTE: This ifdef MUST match the one in memchr-stub.c
-#if defined (__ARM_NEON__) || defined (__ARM_NEON)
 #if __ARM_ARCH >= 8 && __ARM_ARCH_PROFILE == 'R'
 	.arch	armv8-r
 #else
@@ -153,13 +242,7 @@
 ARCH_LIBCFUN(memchr):
 	.cfi_sections .debug_frame
 	.cfi_startproc
-#if __ARM_FEATURE_PAC_DEFAULT
-#  if __ARM_FEATURE_BTI_DEFAULT
-	pacbti	ip, lr, sp
-#  else
-	pac	ip, lr, sp
-#  endif /* __ARM_FEATURE_BTI_DEFAULT */
-#endif /* __ARM_FEATURE_PAC_DEFAULT */
+	pac_prologue
 	/* Use a simple loop if there are less than 8 bytes to search.  */
 	cmp	cntin, #7
 	bhi	.Llargestr
@@ -321,17 +404,13 @@ ARCH_LIBCFUN(memchr):
 	.global ARCH_LIBCFUN(memchr)
 	.type ARCH_LIBCFUN(memchr),%function
 ARCH_LIBCFUN(memchr):
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	@ r0 = start of memory to scan
 	@ r1 = character to look for
 	@ r2 = length
 	@ returns r0 = pointer to character or NULL if not found
-#if __ARM_FEATURE_PAC_DEFAULT
-#  if __ARM_FEATURE_BTI_DEFAULT
-	pacbti	ip, lr, sp
-#  else
-	pac	ip, lr, sp
-#  endif /* __ARM_FEATURE_BTI_DEFAULT */
-#endif /* __ARM_FEATURE_PAC_DEFAULT */
+	pac_prologue
 	and	r1,r1,#0xff	@ Don't trust the caller to pass a char
 
 	cmp	r2,#16		@ If short don't bother with anything clever
@@ -353,6 +432,11 @@ ARCH_LIBCFUN(memchr):
 10:
 	@ We are aligned, we know we have at least 8 bytes to work with
 	push	{r4,r5,r6,r7}
+	.cfi_def_cfa_offset 16
+	.cfi_offset r4, -16
+	.cfi_offset r5, -12
+	.cfi_offset r6, -8
+	.cfi_offset r7, -4
 	orr	r1, r1, r1, lsl #8	@ expand the match word across all bytes
 	orr	r1, r1, r1, lsl #16
 	bic	r4, r2, #7	@ Number of double words to work with * 8
@@ -374,6 +458,11 @@ ARCH_LIBCFUN(memchr):
 	bne	15b		@ (Flags from the subs above)
 
 	pop	{r4,r5,r6,r7}
+	.cfi_def_cfa_offset 0
+	.cfi_restore r4
+	.cfi_restore r5
+	.cfi_restore r6
+	.cfi_restore r7
 	and	r1,r1,#0xff	@ r1 back to a single character
 	and	r2,r2,#7	@ Leave the count remaining as the number
 				@ after the double words have been done
@@ -425,11 +514,17 @@ ARCH_LIBCFUN(memchr):
 
 61:
 	pop	{r4,r5,r6,r7}
+	.cfi_def_cfa_offset 0
+	.cfi_restore r4
+	.cfi_restore r5
+	.cfi_restore r6
+	.cfi_restore r7
 	subs	r0,r0,#1
 #if __ARM_FEATURE_PAC_DEFAULT
 	aut	ip, lr, sp
 #endif /* __ARM_FEATURE_PAC_DEFAULT */
 	bx	lr
+	.cfi_endproc
 #else
   /* Defined in memchr-stub.c.  */
 #endif
