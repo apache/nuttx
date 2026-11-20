@@ -47,6 +47,10 @@ if(CONFIG_DEV_GPIO)
   list(APPEND SRCS rzv2h_gpio.c)
 endif()
 
+if(CONFIG_RZV2H_QSPI)
+  list(APPEND SRCS rzv2h_qspi.c)
+endif()
+
 # Peripheral driver initialization
 
 target_sources(board PRIVATE ${SRCS})

@@ -27,6 +27,140 @@ config BOARD_RZV2H_EVK
 	---help---
 		Enable support for the RZV2H-EVK board based on the RZV2H MPU.
 
+if RZV2H_QSPI
+
+config RZV2H_EVK_QSPI_MT25QU512ABB
+	bool
+	default y
+	select MTD
+	select MTD_N25QXXX
+	---help---
+		The RZV2H-EVK and RZV2H-RDK are fitted with a Micron
+		MT25QU512ABB8E12-0SIT 512Mbit (64MB) QSPI NOR FLASH.  This
+		part shares the same command set as the Micron N25Q/MT25Q
+		family, so it is supported by the n25qxxx MTD driver
+		(auto-detected at runtime via its JEDEC ID: manufacturer
+		0x20, device type 0xbb, capacity 0x20).
+
+choice
+	prompt "QSPI flash chip select"
+	default RZV2H_EVK_QSPI_CHIP_SELECT_0
+	---help---
+		Which xSPI0 chip select the QSPI NOR flash is wired to.
+		Both RZV2H-EVK and RZV2H-RDK fit the flash on CS0 by
+		default, and both boards' rzv2h_qspi_setup() also pin-mux
+		CS1 (xSPI0_CS1N, P1_0/Func15) when this is set to CS1.
+
+config RZV2H_EVK_QSPI_CHIP_SELECT_0
+	bool "CS0"
+
+config RZV2H_EVK_QSPI_CHIP_SELECT_1
+	bool "CS1"
+
+endchoice
+
+choice
+	prompt "N25QXXX read protocol"
+	default RZV2H_EVK_QSPI_N25QXXX_PROTOCOL_1S4S4S
+	---help---
+		SPI protocol width used for reads from the on-board
+		MT25QU512ABB.  The n25qxxx MTD driver itself always issues
+		its stock Quad I/O Fast Read (0xEB, 1S-4S-4S); board-specific
+		rzv2h_qspi_memory() transparently re-encodes that request
+		onto the wire in whichever protocol is selected here,
+		entering/exiting the flash's persistent Quad SPI mode as
+		needed.  Program, erase, and status/config-register commands
+		are unaffected and always use plain 1S-1S-1S.
+
+config RZV2H_EVK_QSPI_N25QXXX_PROTOCOL_1S1S1S
+	bool "1S-1S-1S (standard SPI Read, 0x03)"
+
+config RZV2H_EVK_QSPI_N25QXXX_PROTOCOL_1S2S2S
+	bool "1S-2S-2S (Dual I/O Fast Read, 0xBB)"
+
+config RZV2H_EVK_QSPI_N25QXXX_PROTOCOL_1S4S4S
+	bool "1S-4S-4S (Quad I/O Fast Read, 0xEB)"
+
+config RZV2H_EVK_QSPI_N25QXXX_PROTOCOL_4S4S4S
+	bool "4S-4S-4S (persistent Quad SPI / QPI mode)"
+	---help---
+		Switches the flash into its persistent Quad SPI mode (Micron
+		N25Q/MT25Q: ENTER QUAD I/O MODE, 0x35) around each read and
+		back out (RESET QUAD I/O MODE, 0xF5) afterward.  Requires the
+		xSPI controller to honor a quad-wide instruction phase on
+		demand, which rzv2h_qspi_command()/rzv2h_qspi_memory() do --
+		if that ever changes, the RESET command will not reach the
+		chip and every following operation will fail until the chip
+		is power-cycled.
+
+config RZV2H_EVK_QSPI_N25QXXX_PROTOCOL_4S4D4D
+	bool "4S-4D-4D (persistent Quad SPI / QPI mode, DTR read)"
+	---help---
+		Like the 4S-4S-4S option, this switches the flash into its
+		persistent Quad SPI mode (ENTER QUAD I/O MODE, 0x35) around
+		each read and back out (RESET QUAD I/O MODE, 0xF5)
+		afterward, but issues DTR FAST READ (0x0D) instead of plain
+		FAST READ, doubling data throughput by sampling on both
+		clock edges. Same power-cycle caveat as 4S-4S-4S if the RESET
+		command is ever lost.
+
+endchoice
+
+endif # RZV2H_QSPI
+
+config RZV2H_EVK_QSPI_SYSLOG_FILE
+	bool "Redirect syslog output to a file on the QSPI flash"
+	default n
+	depends on RZV2H_QSPI && FS_LITTLEFS && SYSLOG_FILE
+	help
+		Once the QSPI flash is mounted, switch the SYSLOG output channel
+		to a file on it via syslog_file_channel(), so log messages
+		persist across resets.
+
+config RZV2H_EVK_QSPI_SYSLOG_FILE_PATH
+	string "SYSLOG file path"
+	default "/mnt/qspi/syslog.txt"
+	depends on RZV2H_EVK_QSPI_SYSLOG_FILE
+
+config RZV2H_EVK_QSPI_FW_PART_SIZE
+	int "Firmware image partition size (KiB)"
+	default 4096
+	range 0 65536
+	depends on RZV2H_QSPI && MTD_PARTITION
+	help
+		Size, in KiB, of the QSPI partition reserved for the firmware
+		image.  Rounded down to a multiple of the flash erase size.
+
+		When CONFIG_MTD_PARTITION is enabled, the QSPI flash is split
+		into three MTD partitions instead of exposing it as a single
+		flat filesystem, so that firmware, parameters, and logging
+		cannot corrupt one another:
+
+		  - a firmware-image partition (raw MTD, no filesystem),
+		    intended to hold a flight-stack (e.g. PX4) firmware image
+		    at a fixed offset;
+		  - a parameter/configuration partition, registered as
+		    /dev/config via mtdconfig_register() (requires
+		    CONFIG_MTD_CONFIG or CONFIG_MTD_CONFIG_NVS);
+		  - a mission-data/flight-log partition, formatted with
+		    LittleFS and mounted at /mnt/qspi as before.
+
+		When CONFIG_MTD_PARTITION is disabled, the QSPI flash is used
+		as a single flat LittleFS volume, as before, and this setting
+		has no effect.
+
+config RZV2H_EVK_QSPI_PARAM_PART_SIZE
+	int "Parameter/configuration partition size (KiB)"
+	default 256
+	range 0 65536
+	depends on RZV2H_QSPI && MTD_PARTITION
+	help
+		Size, in KiB, of the QSPI partition reserved for the
+		parameter/configuration store.  Rounded down to a multiple of
+		the flash erase size.  The remainder of the flash, after the
+		firmware and parameter partitions, is used for mission data
+		and flight logs.
+
 endif
 
 config RZV2H_EXAMPLE_SUPPORT

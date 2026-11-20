@@ -109,6 +109,21 @@
 #define BOARD_SCI9_TXD_GPIO   GPIO_TXD9_MOSI9_SDA9_P8_2_M6
 #define BOARD_SCI9_RXD_GPIO   GPIO_RXD9_MISO9_SCL9_P8_3_M6
 
+/* xSPI0 (QSPI NOR flash) pins.
+ *
+ */
+
+#define BOARD_QSPI0_CKN_GPIO     GPIO_XSPI0_CKN
+#define BOARD_QSPI0_CKP_GPIO     GPIO_XSPI0_CKP
+#define BOARD_QSPI0_CS0N_GPIO    GPIO_XSPI0_CS0N
+#define BOARD_QSPI0_CS1N_GPIO    GPIO_XSPI0_CS1N
+#define BOARD_QSPI0_RESET0N_GPIO GPIO_XSPI0_RESET0N
+#define BOARD_QSPI0_IO0_GPIO     GPIO_XSPI0_IO0
+#define BOARD_QSPI0_IO1_GPIO     GPIO_XSPI0_IO1
+#define BOARD_QSPI0_IO2_GPIO     GPIO_XSPI0_IO2
+#define BOARD_QSPI0_IO3_GPIO     GPIO_XSPI0_IO3
+#define BOARD_QSPI0_DS_GPIO      GPIO_XSPI0_DS
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -142,6 +157,18 @@ void rzv2h_board_initialize(void);
  ****************************************************************************/
 
 void rzv2h_serial_setup(void);
+
+/****************************************************************************
+ * Name: rzv2h_qspi_setup
+ *
+ * Description:
+ *   Configure the xSPI0 pins (SPCLK/IO0-3/CS0) for QSPI operation.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV2H_QSPI
+void rzv2h_qspi_setup(void);
+#endif
 
 #ifdef __cplusplus
 }
