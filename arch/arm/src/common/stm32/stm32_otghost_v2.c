@@ -3944,6 +3944,7 @@ static int stm32_rh_enumerate(struct stm32_usbhost_s *priv,
 {
   uint32_t regval;
   int ret;
+  int i;
 
   DEBUGASSERT(conn != NULL && hport != NULL && hport->port == 0);
 
@@ -3970,6 +3971,24 @@ static int stm32_rh_enumerate(struct stm32_usbhost_s *priv,
   /* Reset the host port */
 
   stm32_portreset(priv);
+
+  /* Wait until the port is enabled.  A device can reconnect after the
+   * reset, and the connect interrupt then resets the port again.
+   */
+
+  for (i = 0; (stm32_getreg(STM32_OTG_HPRT) & OTG_HPRT_PENA) == 0; i++)
+    {
+      if (i >= 50)
+        {
+          return -ENODEV;
+        }
+
+      nxsched_usleep(10 * 1000);
+    }
+
+  /* USB 2.0 reset recovery time */
+
+  nxsched_usleep(10 * 1000);
 
   /* Get the current device speed */
 
