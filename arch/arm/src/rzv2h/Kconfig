@@ -237,4 +237,395 @@ config RZV2H_UBOOT_IMAGE
 		table is linked into SRAM and copied to ITCM by the NuttX startup
 		code after the debugger enters the firmware at __start.
 
+menuconfig RZV2H_SPI_B
+	bool "SPI_B support"
+	default n
+	select SPI
+	---help---
+		Enable the NuttX SPI lower-half driver for the RZ/V2H SPI_B
+		controller using the Renesas FSP r_spi_b API.
+
+		The FSP hardware role can be selected independently for each SPI_B
+		channel.  Master channels use the standard NuttX SPI interface;
+		slave channels use the NuttX SPI slave-controller interface.  Pin
+		multiplexing, chip-select handling, and device registration are
+		provided by the board logic.
+
+if RZV2H_SPI_B
+
+config RZV2H_SPI_B_IRQ_PRIORITY
+	int "SPI_B interrupt priority"
+	range 0 15
+	default 12
+	---help---
+		Set the GIC interrupt priority used by the RXI, TXI, transfer-end,
+		and error interrupts of all enabled SPI_B channels.  Zero is the
+		highest priority and 15 is the lowest.
+
+config RZV2H_SPI_SLAVE_BUFFER_SIZE
+	int "SPI_B slave transfer buffer size (words)"
+	default 128
+	range 1 4096
+	depends on SPI_SLAVE
+	---help---
+		Number of words copied into the controller's transmit and receive
+		buffers for each SPI_B slave channel.  FSP requires a known transfer
+		length before the master supplies the clock, so one NuttX slave
+		enqueue operation is limited to this number of words.
+
+config RZV2H_SPI_SLAVE_DEFAULT_NWORDS
+	int "SPI_B slave listen transfer size (words)"
+	default 4
+	range 1 RZV2H_SPI_SLAVE_BUFFER_SIZE
+	depends on SPI_SLAVE
+	---help---
+		Number of words armed when a slave device polls for received data
+		without first enqueueing transmit data.  The external master must
+		clock exactly this number of words because the FSP SPI_B API requires
+		the transfer length before the transfer starts.
+
+config RZV2H_SPI_CHANNEL_0
+	bool "SPI_B channel 0"
+	default n
+	---help---
+		Enable the SPI_B channel 0 lower-half instance.  The board must
+		configure the channel pins and provide its chip-select callbacks.
+
+if RZV2H_SPI_CHANNEL_0
+
+config RZV2H_SPI0_TXI_INTSEL
+	int "SPI_B TXI interrupt-select (SEL) IRQ number"
+	default 428
+	range 353 479
+
+config RZV2H_SPI0_RXI_INTSEL
+	int "SPI_B RXI interrupt-select (SEL) IRQ number"
+	default 427
+	range 353 479
+
+config RZV2H_SPI_CHANNEL_0_FREQUENCY
+	int "SPI_B channel 0 initial frequency (Hz)"
+	range 1 1000000000
+	default 1000000
+	---help---
+		Set the initial SPI_B channel 0 master frequency.  The NuttX
+		SPI_SETFREQUENCY interface can change it after initialization.
+		FSP limits the achievable frequency according to the selected
+		SPI_B source clock and divider range.  In slave mode the external
+		master supplies the clock, so this setting is not used.
+
+config RZV2H_SPI_CHANNEL_0_NBITS
+	int "SPI_B channel 0 initial bits per word"
+	range 4 32
+	default 8
+	---help---
+		Set the initial number of bits in each SPI_B channel 0 master word.
+		The NuttX SPI_SETBITS interface can change it after initialization.
+		A slave device supplies its width to bind() instead.
+
+choice
+	prompt "SPI_B channel 0 clock polarity"
+	default RZV2H_SPI_CHANNEL_0_CPOL_LOW
+	---help---
+		Initial master clock polarity.  A slave device supplies its mode
+		to bind() instead.
+
+config RZV2H_SPI_CHANNEL_0_CPOL_LOW
+	bool "CPOL=0 (clock low when idle)"
+
+config RZV2H_SPI_CHANNEL_0_CPOL_HIGH
+	bool "CPOL=1 (clock high when idle)"
+
+endchoice
+
+choice
+	prompt "SPI_B channel 0 clock phase"
+	default RZV2H_SPI_CHANNEL_0_CPHA_ODD
+	---help---
+		Initial master clock phase.  A slave device supplies its mode to
+		bind() instead.
+
+config RZV2H_SPI_CHANNEL_0_CPHA_ODD
+	bool "CPHA=0 (sample on first/odd edge)"
+
+config RZV2H_SPI_CHANNEL_0_CPHA_EVEN
+	bool "CPHA=1 (sample on second/even edge)"
+
+endchoice
+
+config RZV2H_SPI_CHANNEL_0_INITIAL_MODE
+	int
+	default 0 if RZV2H_SPI_CHANNEL_0_CPOL_LOW && RZV2H_SPI_CHANNEL_0_CPHA_ODD
+	default 1 if RZV2H_SPI_CHANNEL_0_CPOL_LOW && RZV2H_SPI_CHANNEL_0_CPHA_EVEN
+	default 2 if RZV2H_SPI_CHANNEL_0_CPOL_HIGH && RZV2H_SPI_CHANNEL_0_CPHA_ODD
+	default 3 if RZV2H_SPI_CHANNEL_0_CPOL_HIGH && RZV2H_SPI_CHANNEL_0_CPHA_EVEN
+
+choice
+	prompt "SPI_B channel 0 operating mode"
+	default RZV2H_SPI_CHANNEL_0_MASTER
+
+config RZV2H_SPI_CHANNEL_0_MASTER
+	bool "Master"
+
+config RZV2H_SPI_CHANNEL_0_SLAVE
+	bool "Slave"
+	depends on SPI_SLAVE
+	---help---
+		Expose this channel through the NuttX struct spi_slave_ctrlr_s
+		interface.  Enable SPI_SLAVE_DRIVER to register /dev/spislv0 for
+		application-level testing.
+
+endchoice
+
+choice
+	prompt "SPI_B channel 0 wire mode"
+	default RZV2H_SPI_CHANNEL_0_3WIRE
+
+config RZV2H_SPI_CHANNEL_0_3WIRE
+	bool "3-wire clock-synchronous (no SSL)"
+	---help---
+		Use the FSP clock-synchronous method.  Transfers use MOSI, MISO,
+		and RSPCK; the SPI_B peripheral does not use SSL for framing.
+
+config RZV2H_SPI_CHANNEL_0_4WIRE
+	bool "4-wire SPI (uses SSL)"
+	---help---
+		Use the FSP SPI method.  Transfers use MOSI, MISO, RSPCK, and
+		SSL.  The board routes the selected SSL pin to the SPI_B
+		peripheral output in master mode or input in slave mode.
+
+endchoice
+
+endif # RZV2H_SPI_CHANNEL_0
+
+config RZV2H_SPI_CHANNEL_1
+	bool "SPI_B channel 1"
+	default n
+	---help---
+		Enable the SPI_B channel 1 lower-half instance.  The board must
+		configure the channel pins and provide its chip-select callbacks.
+
+if RZV2H_SPI_CHANNEL_1
+
+config RZV2H_SPI1_TXI_INTSEL
+	int "SPI_B TXI interrupt-select (SEL) IRQ number"
+	default 426
+	range 353 479
+
+config RZV2H_SPI1_RXI_INTSEL
+	int "SPI_B RXI interrupt-select (SEL) IRQ number"
+	default 425
+	range 353 479
+
+config RZV2H_SPI_CHANNEL_1_FREQUENCY
+	int "SPI_B channel 1 initial frequency (Hz)"
+	range 1 1000000000
+	default 1000000
+	---help---
+		Set the initial SPI_B channel 1 master frequency.  The NuttX
+		SPI_SETFREQUENCY interface can change it after initialization.
+		FSP limits the achievable frequency according to the selected
+		SPI_B source clock and divider range.  In slave mode the external
+		master supplies the clock, so this setting is not used.
+
+config RZV2H_SPI_CHANNEL_1_NBITS
+	int "SPI_B channel 1 initial bits per word"
+	range 4 32
+	default 8
+	---help---
+		Set the initial number of bits in each SPI_B channel 1 master word.
+		The NuttX SPI_SETBITS interface can change it after initialization.
+		A slave device supplies its width to bind() instead.
+
+choice
+	prompt "SPI_B channel 1 clock polarity"
+	default RZV2H_SPI_CHANNEL_1_CPOL_LOW
+	---help---
+		Initial master clock polarity.  A slave device supplies its mode
+		to bind() instead.
+
+config RZV2H_SPI_CHANNEL_1_CPOL_LOW
+	bool "CPOL=0 (clock low when idle)"
+
+config RZV2H_SPI_CHANNEL_1_CPOL_HIGH
+	bool "CPOL=1 (clock high when idle)"
+
+endchoice
+
+choice
+	prompt "SPI_B channel 1 clock phase"
+	default RZV2H_SPI_CHANNEL_1_CPHA_ODD
+	---help---
+		Initial master clock phase.  A slave device supplies its mode to
+		bind() instead.
+
+config RZV2H_SPI_CHANNEL_1_CPHA_ODD
+	bool "CPHA=0 (sample on first/odd edge)"
+
+config RZV2H_SPI_CHANNEL_1_CPHA_EVEN
+	bool "CPHA=1 (sample on second/even edge)"
+
+endchoice
+
+config RZV2H_SPI_CHANNEL_1_INITIAL_MODE
+	int
+	default 0 if RZV2H_SPI_CHANNEL_1_CPOL_LOW && RZV2H_SPI_CHANNEL_1_CPHA_ODD
+	default 1 if RZV2H_SPI_CHANNEL_1_CPOL_LOW && RZV2H_SPI_CHANNEL_1_CPHA_EVEN
+	default 2 if RZV2H_SPI_CHANNEL_1_CPOL_HIGH && RZV2H_SPI_CHANNEL_1_CPHA_ODD
+	default 3 if RZV2H_SPI_CHANNEL_1_CPOL_HIGH && RZV2H_SPI_CHANNEL_1_CPHA_EVEN
+
+choice
+	prompt "SPI_B channel 1 operating mode"
+	default RZV2H_SPI_CHANNEL_1_MASTER
+
+config RZV2H_SPI_CHANNEL_1_MASTER
+	bool "Master"
+
+config RZV2H_SPI_CHANNEL_1_SLAVE
+	bool "Slave"
+	depends on SPI_SLAVE
+	---help---
+		Expose this channel through the NuttX struct spi_slave_ctrlr_s
+		interface.  Enable SPI_SLAVE_DRIVER to register /dev/spislv1 for
+		application-level testing.
+
+endchoice
+
+choice
+	prompt "SPI_B channel 1 wire mode"
+	default RZV2H_SPI_CHANNEL_1_3WIRE
+
+config RZV2H_SPI_CHANNEL_1_3WIRE
+	bool "3-wire clock-synchronous (no SSL)"
+	---help---
+		Use the FSP clock-synchronous method.  Transfers use MOSI, MISO,
+		and RSPCK; the SPI_B peripheral does not use SSL for framing.
+
+config RZV2H_SPI_CHANNEL_1_4WIRE
+	bool "4-wire SPI (uses SSL)"
+	---help---
+		Use the FSP SPI method.  Transfers use MOSI, MISO, RSPCK, and
+		SSL.  The board routes the selected SSL pin to the SPI_B
+		peripheral output in master mode or input in slave mode.
+
+endchoice
+
+endif # RZV2H_SPI_CHANNEL_1
+
+config RZV2H_SPI_CHANNEL_2
+	bool "SPI_B channel 2"
+	default n
+	---help---
+		Enable the SPI_B channel 2 lower-half instance.  The board must
+		configure the channel pins and provide its chip-select callbacks.
+
+if RZV2H_SPI_CHANNEL_2
+
+config RZV2H_SPI2_TXI_INTSEL
+	int "SPI_B TXI interrupt-select (SEL) IRQ number"
+	default 424
+	range 353 479
+
+config RZV2H_SPI2_RXI_INTSEL
+	int "SPI_B RXI interrupt-select (SEL) IRQ number"
+	default 423
+	range 353 479
+
+config RZV2H_SPI_CHANNEL_2_FREQUENCY
+	int "SPI_B channel 2 initial frequency (Hz)"
+	range 1 1000000000
+	default 1000000
+	---help---
+		Set the initial SPI_B channel 2 master frequency.  The NuttX
+		SPI_SETFREQUENCY interface can change it after initialization.
+		FSP limits the achievable frequency according to the selected
+		SPI_B source clock and divider range.  In slave mode the external
+		master supplies the clock, so this setting is not used.
+
+config RZV2H_SPI_CHANNEL_2_NBITS
+	int "SPI_B channel 2 initial bits per word"
+	range 4 32
+	default 8
+	---help---
+		Set the initial number of bits in each SPI_B channel 2 master word.
+		The NuttX SPI_SETBITS interface can change it after initialization.
+		A slave device supplies its width to bind() instead.
+
+choice
+	prompt "SPI_B channel 2 clock polarity"
+	default RZV2H_SPI_CHANNEL_2_CPOL_LOW
+	---help---
+		Initial master clock polarity.  A slave device supplies its mode
+		to bind() instead.
+
+config RZV2H_SPI_CHANNEL_2_CPOL_LOW
+	bool "CPOL=0 (clock low when idle)"
+
+config RZV2H_SPI_CHANNEL_2_CPOL_HIGH
+	bool "CPOL=1 (clock high when idle)"
+
+endchoice
+
+choice
+	prompt "SPI_B channel 2 clock phase"
+	default RZV2H_SPI_CHANNEL_2_CPHA_ODD
+	---help---
+		Initial master clock phase.  A slave device supplies its mode to
+		bind() instead.
+
+config RZV2H_SPI_CHANNEL_2_CPHA_ODD
+	bool "CPHA=0 (sample on first/odd edge)"
+
+config RZV2H_SPI_CHANNEL_2_CPHA_EVEN
+	bool "CPHA=1 (sample on second/even edge)"
+
+endchoice
+
+config RZV2H_SPI_CHANNEL_2_INITIAL_MODE
+	int
+	default 0 if RZV2H_SPI_CHANNEL_2_CPOL_LOW && RZV2H_SPI_CHANNEL_2_CPHA_ODD
+	default 1 if RZV2H_SPI_CHANNEL_2_CPOL_LOW && RZV2H_SPI_CHANNEL_2_CPHA_EVEN
+	default 2 if RZV2H_SPI_CHANNEL_2_CPOL_HIGH && RZV2H_SPI_CHANNEL_2_CPHA_ODD
+	default 3 if RZV2H_SPI_CHANNEL_2_CPOL_HIGH && RZV2H_SPI_CHANNEL_2_CPHA_EVEN
+
+choice
+	prompt "SPI_B channel 2 operating mode"
+	default RZV2H_SPI_CHANNEL_2_MASTER
+
+config RZV2H_SPI_CHANNEL_2_MASTER
+	bool "Master"
+
+config RZV2H_SPI_CHANNEL_2_SLAVE
+	bool "Slave"
+	depends on SPI_SLAVE
+	---help---
+		Expose this channel through the NuttX struct spi_slave_ctrlr_s
+		interface.  Enable SPI_SLAVE_DRIVER to register /dev/spislv2 for
+		application-level testing.
+
+endchoice
+
+choice
+	prompt "SPI_B channel 2 wire mode"
+	default RZV2H_SPI_CHANNEL_2_3WIRE
+
+config RZV2H_SPI_CHANNEL_2_3WIRE
+	bool "3-wire clock-synchronous (no SSL)"
+	---help---
+		Use the FSP clock-synchronous method.  Transfers use MOSI, MISO,
+		and RSPCK; the SPI_B peripheral does not use SSL for framing.
+
+config RZV2H_SPI_CHANNEL_2_4WIRE
+	bool "4-wire SPI (uses SSL)"
+	---help---
+		Use the FSP SPI method.  Transfers use MOSI, MISO, RSPCK, and
+		SSL.  The board routes the selected SSL pin to the SPI_B
+		peripheral output in master mode or input in slave mode.
+
+endchoice
+
+endif # RZV2H_SPI_CHANNEL_2
+
+endif # RZV2H_SPI_B
+
 endmenu # "RZ/V2H Configuration Options"
