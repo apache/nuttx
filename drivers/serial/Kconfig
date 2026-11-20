@@ -1100,6 +1100,27 @@ config CONSOLE_NETDEV_TXBUFSIZE
 	int "CONSOLE netdev transmit buffer size"
 	default 256
 
+config CONSOLE_NETDEV_WORKQUEUE
+	bool "CONSOLE netdev dedicated work queue"
+	default n
+	---help---
+		Send, receive and open/close the console socket on a work queue
+		of its own instead of LPWORK.  Other LPWORK users then cannot
+		delay the console, and the console, which may wait up to three
+		seconds for ARP while sending, cannot delay them.
+
+if CONSOLE_NETDEV_WORKQUEUE
+
+config CONSOLE_NETDEV_WORKPRIORITY
+	int "CONSOLE netdev work queue priority"
+	default 100
+
+config CONSOLE_NETDEV_WORKSTACKSIZE
+	int "CONSOLE netdev work queue stack size"
+	default DEFAULT_TASK_STACKSIZE
+
+endif # CONSOLE_NETDEV_WORKQUEUE
+
 endif
 
 endif # SERIAL

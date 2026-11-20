@@ -62,6 +62,9 @@ struct netdev_consol_s
   struct work_s     txwork;
   struct work_s     rxwork;
   struct work_s     ctrlwork;
+#ifdef CONFIG_CONSOLE_NETDEV_WORKQUEUE
+  FAR struct kwork_wqueue_s *wqueue;
+#endif
   mutex_t           lock;
   int               sockerr;
   bool              wantopen;
@@ -106,6 +109,9 @@ static void netdev_console_poll(FAR struct pollfd_s *fds);
 static void netdev_console_txwork(FAR void *arg);
 static void netdev_console_rxwork(FAR void *arg);
 static void netdev_console_ctrlwork(FAR void *arg);
+static void netdev_console_queue(FAR struct netdev_consol_s *priv,
+                                 FAR struct work_s *work, worker_t worker,
+                                 clock_t delay);
 
 /****************************************************************************
  * Private Data
@@ -263,6 +269,21 @@ static int netdev_console_can_init(FAR struct uart_dev_s *dev)
 #endif
 
 /****************************************************************************
+ * Name: netdev_console_queue
+ ****************************************************************************/
+
+static void netdev_console_queue(FAR struct netdev_consol_s *priv,
+                                 FAR struct work_s *work, worker_t worker,
+                                 clock_t delay)
+{
+#ifdef CONFIG_CONSOLE_NETDEV_WORKQUEUE
+  work_queue_wq(priv->wqueue, work, worker, priv, delay);
+#else
+  work_queue(LPWORK, work, worker, priv, delay);
+#endif
+}
+
+/****************************************************************************
  * Name: netdev_console_setup
  ****************************************************************************/
 
@@ -332,7 +353,7 @@ static int netdev_console_attach(FAR struct uart_dev_s *dev)
    */
 
   priv->wantopen = true;
-  work_queue(LPWORK, &priv->ctrlwork, netdev_console_ctrlwork, priv, 0);
+  netdev_console_queue(priv, &priv->ctrlwork, netdev_console_ctrlwork, 0);
   return OK;
 }
 
@@ -349,7 +370,7 @@ static void netdev_console_detach(FAR struct uart_dev_s *dev)
    */
 
   priv->wantopen = false;
-  work_queue(LPWORK, &priv->ctrlwork, netdev_console_ctrlwork, priv, 0);
+  netdev_console_queue(priv, &priv->ctrlwork, netdev_console_ctrlwork, 0);
 }
 
 /****************************************************************************
@@ -387,7 +408,7 @@ static void netdev_console_dmasend(FAR struct uart_dev_s *dev)
    * done by netdev_console_txwork().
    */
 
-  work_queue(LPWORK, &priv->txwork, netdev_console_txwork, priv, 0);
+  netdev_console_queue(priv, &priv->txwork, netdev_console_txwork, 0);
 }
 
 /****************************************************************************
@@ -421,7 +442,7 @@ static void netdev_console_dmareceive(FAR struct uart_dev_s *dev)
        * spinlock here, so let netdev_console_rxwork() read the socket.
        */
 
-      work_queue(LPWORK, &priv->rxwork, netdev_console_rxwork, priv, 0);
+      netdev_console_queue(priv, &priv->rxwork, netdev_console_rxwork, 0);
       dev->dmarx.nbytes = 0;
       uart_recvchars_done(dev);
       return;
@@ -559,7 +580,8 @@ static void netdev_console_poll(FAR struct pollfd_s *fds)
       fds->revents &= ~POLLIN;
       if (priv->rxint)
         {
-          work_queue(LPWORK, &priv->rxwork, netdev_console_rxwork, priv, 0);
+          netdev_console_queue(priv, &priv->rxwork, netdev_console_rxwork,
+                               0);
         }
     }
 }
@@ -742,8 +764,8 @@ static void netdev_console_ctrlwork(FAR void *arg)
 
   if (ret < 0)
     {
-      work_queue(LPWORK, &priv->ctrlwork, netdev_console_ctrlwork, priv,
-                 SEC2TICK(1));
+      netdev_console_queue(priv, &priv->ctrlwork, netdev_console_ctrlwork,
+                           SEC2TICK(1));
     }
 
   /* Send what was written while the socket was not open. */
@@ -777,6 +799,16 @@ static void netdev_console_ctrlwork(FAR void *arg)
 
 int netdev_console_init(void)
 {
+#ifdef CONFIG_CONSOLE_NETDEV_WORKQUEUE
+  g_netdev_console.wqueue =
+    work_queue_create("netdev_console", CONFIG_CONSOLE_NETDEV_WORKPRIORITY,
+                      NULL, CONFIG_CONSOLE_NETDEV_WORKSTACKSIZE, 1);
+  if (g_netdev_console.wqueue == NULL)
+    {
+      return -ENOMEM;
+    }
+#endif
+
   /* Register as console */
 
   return uart_register("/dev/console", &g_netdev_console.dev);
