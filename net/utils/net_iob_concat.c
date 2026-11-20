@@ -41,7 +41,8 @@
  *
  * Description:
  *   Concatenate iob_s chain iob2 to iob1, if CONFIG_NET_RECV_PACK is
- *   endabled, pack all data in the I/O buffer chain.
+ *   enabled, pack the chain from the last buffer of iob1.  If iob1 is
+ *   empty or its last buffer has no data, pack the whole chain.
  *
  * Returned Value:
  *   The number of bytes actually buffered is returned.  This will be either
@@ -51,12 +52,24 @@
 
 uint16_t net_iob_concat(FAR struct iob_s **iob1, FAR struct iob_s **iob2)
 {
+#ifdef CONFIG_NET_RECV_PACK
+  FAR struct iob_s *tail = NULL;
+#endif
+
   if (*iob1 == NULL)
     {
       *iob1 = *iob2;
     }
   else
     {
+#ifdef CONFIG_NET_RECV_PACK
+      tail = *iob1;
+      while (tail->io_flink != NULL)
+        {
+          tail = tail->io_flink;
+        }
+#endif
+
       iob_concat(*iob1, *iob2);
     }
 
@@ -64,10 +77,18 @@ uint16_t net_iob_concat(FAR struct iob_s **iob1, FAR struct iob_s **iob2)
 
 #ifdef CONFIG_NET_RECV_PACK
   /* Merge an iob chain into a continuous space, thereby reducing iob
-   * consumption.
+   * consumption.  Pack from the last buffer of iob1, so that the data
+   * queued before it is not moved again.
    */
 
-  *iob1 = iob_pack(*iob1);
+  if (tail != NULL && tail->io_len > 0)
+    {
+      iob_pack(tail);
+    }
+  else
+    {
+      *iob1 = iob_pack(*iob1);
+    }
 #endif
 
   return (*iob1)->io_pktlen;
