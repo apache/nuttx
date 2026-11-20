@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/spawn/lib_psa_setstacksize.c
+ * libs/libc/spawn/lib_psa_inline.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,36 +26,12 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
+/* Emit callable libc versions of the accessors defined in <spawn.h>. */
+
+#define POSIX_SPAWN_INLINE
+
 #include <spawn.h>
-#include <assert.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: posix_spawnattr_setstacksize
- *
- * Description:
- *   The posix_spawnattr_setstacksize() function shall set the spawn-
- *   stacksize attribute in an initialized attributes object referenced
- *   by attr.
- *
- * Input Parameters:
- *   attr  - The address spawn attributes to be used.
- *   stacksize - The new stacksize to set.
- *
- * Returned Value:
- *   On success, these functions return 0; on failure they return an error
- *   number from <errno.h>.
- *
- ****************************************************************************/
-
-int posix_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
-                                 size_t stacksize)
-{
-  DEBUGASSERT(attr);
-  attr->stacksize = stacksize;
-  return OK;
-}
