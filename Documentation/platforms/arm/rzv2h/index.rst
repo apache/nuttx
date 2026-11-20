@@ -39,6 +39,7 @@ MPU         Yes      Static PMSAv7 region table (ITCM/DTCM/SRAM/code)
 TIMER       Yes      MPCore Private Timer used as the system tick source
 SCI         Yes      Interrupt-driven SCI-B asynchronous UART on channels 0-9
 GPIO        Yes      Basic operations (config/read/write), no interrupt support
+CAN         Yes      CAN-FD on channels 0-5
 QSPI        Yes      xSPI controller in QSPI mode, manual-command transfers only
 ==========  =======  ============================================================
 
@@ -114,7 +115,30 @@ partitioned by module, allocated from the top of the range downward:
 Module  Count                IRQ range (>= 353)
 ======  ==================  ================================
 TINT    32 (tint0-tint31)    479-448
+CAN       6 (can0-can5)        419-400 (gerr/grecc, rec/trx/err)
 ======  ==================  ================================
+
+CAN
+------
+
+The CAN-FD driver supports CAN FD operation on channels 0 through 5.
+
+``CONFIG_RZV2H_CANFD`` enables the driver and ``CONFIG_RZV2H_CANFDn``
+selects each required channel. Each channel has independent Kconfig
+options for the nominal and data bit rates (computed from the rates and
+sample point, or set manually), delay compensation, the receive FIFO,
+the number of TX message buffers, channel error interrupts, REC/TRX/ERR
+interrupt-select (SEL) IRQ numbers, and interrupt priority.
+
+Error reporting (``CONFIG_CAN_ERRORS``) is supported.
+
+With ``CONFIG_CAN_LOOPBACK``, each channel enters internal or external
+loopback mode when opened, as selected by
+``CONFIG_RZV2H_CANFD_LOOPBACK_INTERNAL`` or
+``CONFIG_RZV2H_CANFD_LOOPBACK_EXTERNAL``.
+
+With ``CONFIG_RZV2H_CANFD_SOCKET``, the channels are SocketCAN network
+interfaces (``can0`` to ``can5``) instead of character devices.
 
 QSPI
 ----
