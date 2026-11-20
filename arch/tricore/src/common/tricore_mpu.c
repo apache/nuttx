@@ -26,8 +26,8 @@
 #include <nuttx/debug.h>
 
 #include <arch/barriers.h>
+#include <arch/mpu.h>
 
-#include "tricore_mpu.h"
 #include "tricore_internal.h"
 
 /****************************************************************************
@@ -42,7 +42,7 @@ static unsigned int g_mpu_set;
  * Private Functions
  ****************************************************************************/
 
-static uint32_t get_dpre_value(unsigned int set)
+static inline_function uint32_t get_dpre_value(unsigned int set)
 {
   switch (set)
     {
@@ -83,7 +83,8 @@ static uint32_t get_dpre_value(unsigned int set)
     }
 }
 
-static void set_dpre_value(unsigned int set, uint32_t dpre_value)
+static inline_function void set_dpre_value(unsigned int set,
+                                           uint32_t dpre_value)
 {
   switch (set)
     {
@@ -134,7 +135,7 @@ static void set_dpre_value(unsigned int set, uint32_t dpre_value)
   UP_ISB();
 }
 
-static uint32_t get_dpwe_value(unsigned int set)
+static inline_function uint32_t get_dpwe_value(unsigned int set)
 {
   switch (set)
     {
@@ -175,7 +176,8 @@ static uint32_t get_dpwe_value(unsigned int set)
     }
 }
 
-static void set_dpwe_value(unsigned int set, uint32_t dpwe_value)
+static inline_function void set_dpwe_value(unsigned int set,
+                                           uint32_t dpwe_value)
 {
   switch (set)
     {
@@ -226,7 +228,7 @@ static void set_dpwe_value(unsigned int set, uint32_t dpwe_value)
   UP_ISB();
 }
 
-static uint32_t get_cpxe_value(unsigned int set)
+static inline_function uint32_t get_cpxe_value(unsigned int set)
 {
   switch (set)
     {
@@ -267,7 +269,8 @@ static uint32_t get_cpxe_value(unsigned int set)
     }
 }
 
-static void set_cpxe_value(unsigned int set, uint32_t cpxe_value)
+static inline_function void set_cpxe_value(unsigned int set,
+                                           uint32_t cpxe_value)
 {
   switch (set)
     {
@@ -318,9 +321,9 @@ static void set_cpxe_value(unsigned int set, uint32_t cpxe_value)
   UP_ISB();
 }
 
-static int get_dpr_addrass_value(unsigned int region,
-                                 uint32_t *dpr_l,
-                                 uint32_t *dpr_u)
+static inline_function int get_dpr_addrass_value(unsigned int region,
+                                                 uint32_t *dpr_l,
+                                                 uint32_t *dpr_u)
 {
   switch (region)
     {
@@ -475,9 +478,9 @@ static int get_dpr_addrass_value(unsigned int region,
   return 0;
 }
 
-static void set_dpr_address_value(unsigned int region,
-                                  uint32_t dpr_l,
-                                  uint32_t dpr_u)
+static inline_function void set_dpr_address_value(unsigned int region,
+                                                  uint32_t dpr_l,
+                                                  uint32_t dpr_u)
 {
   switch (region)
     {
@@ -632,9 +635,9 @@ static void set_dpr_address_value(unsigned int region,
   UP_ISB();
 }
 
-static int get_cpr_address_region(unsigned int region,
-                                  uint32_t *cpr_l,
-                                  uint32_t *cpr_u)
+static inline_function int get_cpr_address_region(unsigned int region,
+                                                  uint32_t *cpr_l,
+                                                  uint32_t *cpr_u)
 {
   switch (region)
     {
@@ -741,9 +744,9 @@ static int get_cpr_address_region(unsigned int region,
   return 0;
 }
 
-static void set_cpr_address_value(unsigned int region,
-                                  uint32_t cpr_l,
-                                  uint32_t cpr_u)
+static inline_function void set_cpr_address_value(unsigned int region,
+                                                  uint32_t cpr_l,
+                                                  uint32_t cpr_u)
 {
   switch (region)
     {
@@ -848,8 +851,9 @@ static void set_cpr_address_value(unsigned int region,
   UP_ISB();
 }
 
-static void mpu_modify_data_region(unsigned int region, uintptr_t base,
-                                   size_t size)
+static inline_function void mpu_modify_data_region(unsigned int region,
+                                                   uintptr_t base,
+                                                   size_t size)
 {
   /* Check valid */
 
@@ -860,8 +864,9 @@ static void mpu_modify_data_region(unsigned int region, uintptr_t base,
   set_dpr_address_value(region, base, base + size);
 }
 
-static void mpu_modify_code_region(unsigned int region, uintptr_t base,
-                                   size_t size)
+static inline_function void mpu_modify_code_region(unsigned int region,
+                                                   uintptr_t base,
+                                                   size_t size)
 {
   /* Check valid */
 
@@ -872,8 +877,9 @@ static void mpu_modify_code_region(unsigned int region, uintptr_t base,
   set_cpr_address_value(region, base, base + size);
 }
 
-static void mpu_modify_data_set(unsigned int set, unsigned int region,
-                                int flags)
+static inline_function void mpu_modify_data_set(unsigned int set,
+                                                unsigned int region,
+                                                int flags)
 {
   /* Check valid */
 
@@ -896,8 +902,9 @@ static void mpu_modify_data_set(unsigned int set, unsigned int region,
   set_dpwe_value(set, dpwe_value);
 }
 
-static void mpu_modify_code_set(unsigned int set, unsigned int region,
-                                int flags)
+static inline_function void mpu_modify_code_set(unsigned int set,
+                                                unsigned int region,
+                                                int flags)
 {
   /* Check valid */
 
@@ -1123,32 +1130,6 @@ void mpu_free_set(unsigned int set)
 }
 
 /****************************************************************************
- * Name: mpu_control
- *
- * Description:
- *   Configure and enable (or disable) the MPU
- *
- * Input Parameters:
- *   enable - Flag indicating whether to enable the MPU.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void mpu_control(bool enable)
-{
-  uint32_t corecon_value = tricore_mfcr(TRICORE_CPU_CORECON);
-
-  corecon_value = enable ?
-                  corecon_value | (1 << 1) :
-                  corecon_value & ~(1 << 1);
-  tricore_mtcr(TRICORE_CPU_CORECON, corecon_value);
-
-  UP_ISB();
-}
-
-/****************************************************************************
  * Name: mpu_dump_set
  *
  * Description:
@@ -1324,58 +1305,6 @@ unsigned int mpu_configure_region(unsigned int set, uintptr_t base,
     }
 
   return region;
-}
-
-/****************************************************************************
- * Name: mpu_get_active_set
- *
- * Description:
- *   Get current protection set
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Current protection set.
- *
- ****************************************************************************/
-
-unsigned int mpu_get_active_set(void)
-{
-  uint32_t psw_value = tricore_mfcr(TRICORE_CPU_PSW);
-
-  return ((psw_value & (0x1 << 15)) >> 15) << 2 |
-         ((psw_value & (0x3 << 12)) >> 12);
-}
-
-/****************************************************************************
- * Name: mpu_set_active_set
- *
- * Description:
- *   Set active protection set
- *
- * Input Parameters:
- *   Protection set .
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void mpu_set_active_set(unsigned int set)
-{
-  /* Check that the set valid */
-
-  DEBUGASSERT(set < CONFIG_ARCH_MPU_NSETS);
-
-  uint32_t psw_value = tricore_mfcr(TRICORE_CPU_PSW);
-
-  psw_value &= ~((0x3 << 12) | (0x1 << 15));
-  psw_value |= (set >> 2) << 15;
-  psw_value |= (set & 0x03) << 12;
-  tricore_mtcr(TRICORE_CPU_PSW, psw_value);
-
-  UP_ISB();
 }
 
 /****************************************************************************

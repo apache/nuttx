@@ -36,6 +36,7 @@
 #include <arch/barriers.h>
 #include <arch/irq.h>
 #include <sched/sched.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/sched.h>
 
 #include "tricore_internal.h"
@@ -128,6 +129,11 @@ void tricore_svcall(volatile void *trap)
         *running_task = tcb;
         tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
         UP_ISB();
+
+#ifdef CONFIG_ARCH_ADDRENV
+        addrenv_switch(tcb);
+#endif
+
         break;
 
 #ifdef CONFIG_LIB_SYSCALL
