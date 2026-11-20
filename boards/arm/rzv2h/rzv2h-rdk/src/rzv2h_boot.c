@@ -121,6 +121,12 @@ void rzv2h_board_initialize(void)
   rzv2h_serial_setup();
 #endif
 
+  /* Configure the xSPI0 pins for QSPI operation */
+
+#ifdef CONFIG_RZV2H_QSPI
+  rzv2h_qspi_setup();
+#endif
+
   /* Configure on-board LEDs if LED support has been selected */
 
 #ifdef CONFIG_ARCH_LEDS

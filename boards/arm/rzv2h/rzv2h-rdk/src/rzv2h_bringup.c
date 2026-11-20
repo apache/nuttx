@@ -70,6 +70,16 @@ int rzv2h_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RZV2H_QSPI
+  ret = rzv2h_qspi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: rzv2h_qspi_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
   /* Register the user LED driver.  The generic lower half calls
    * board_userled_initialize() before registering /dev/userleds.
