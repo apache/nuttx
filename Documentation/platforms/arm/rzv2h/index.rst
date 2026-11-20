@@ -39,6 +39,7 @@ MPU         Yes      Static PMSAv7 region table (ITCM/DTCM/SRAM/code)
 TIMER       Yes      MPCore Private Timer used as the system tick source
 SCI         Yes      Interrupt-driven SCI-B asynchronous UART on channels 0-9
 GPIO        Yes      Basic operations (config/read/write), no interrupt support
+ADC         Yes      ADC-E unit 0 with 8 analog inputs and group-A scans
 ==========  =======  ============================================================
 
 CLOCK
@@ -113,7 +114,35 @@ partitioned by module, allocated from the top of the range downward:
 Module  Count                IRQ range (>= 353)
 ======  ==================  ================================
 TINT    32 (tint0-tint31)    479-448
+ADC     1 (adc0)             429
 ======  ==================  ================================
+
+ADC
+---
+
+The ADC-E driver supports the single RZ/V2H ADC0 unit and provides eight
+dedicated analog inputs, ``ANI000`` through ``ANI007``.
+``CONFIG_RZV2H_ADC`` enables the ADC-E driver. The following functions are
+currently supported:
+
+* 8-bit or 12-bit conversion results
+* Polling or scan-end interrupt
+* Software-triggered group-A scans
+* Asynchronous external ``ADTRG`` input triggering in interrupt mode
+* Configurable addition or averaging of results
+* Clear-after-read operation
+* Window A comparison and event status
+
+``ANIOC_TRIGGER`` starts a software-triggered scan or arms the external
+trigger, depending on the selected Kconfig trigger source.
+``ANIOC_GET_NCHANNELS`` reports the number of configured inputs. Window A
+builds also provide ``ANIOC_RZV2H_WINDOW_A_STATUS``.
+
+The scan-end request is connected to a programmable INTC SEL line.
+Currently set ADC's scan-end interrupt-select IRQ number to ``429`` (SEL76).
+
+Group-B and group-C scans, GPT/ELC trigger routing, DMA delivery, and Window B
+comparison are not currently supported.
 
 Supported Boards
 ================

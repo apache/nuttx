@@ -373,6 +373,121 @@ devices in ascending hardware-channel order. Their TX and RX pin choices are
 board-specific and are defined by ``BOARD_SCIn_TXD_GPIO`` and
 ``BOARD_SCIn_RXD_GPIO`` in ``boards/arm/rzv2h/rzv2h-evk/include/board.h``.
 
+ADC
+===
+
+The board exposes ADC-E unit 0 as one device, ``/dev/adc0``.
+
+ADC Pin Assignments
+-------------------
+
+The eight dedicated inputs are on J3. The odd pins contain channels 0 through
+3, while the even pins contain channels 4 through 7.
+
+======  ==============  ===========  ======  ======  ===========
+J3 pin  Signal          Channel/use  J3 pin  Signal  Channel/use
+======  ==============  ===========  ======  ======  ===========
+1       +1.8 V (S1.8V)  Test supply  2       GND     Test ground
+3       ANI000          0            4       ANI004  4
+5       ANI001          1            6       ANI005  5
+7       ANI002          2            8       ANI006  6
+9       ANI003          3            10      ANI007  7
+======  ==============  ===========  ======  ======  ===========
+
+Keep inputs between GND and ``ADAVDD18`` (1.8 V); do not apply 3.3 V. The
+maximum signal-source impedance is 1 kohm, including source and parasitic
+resistance.
+
+**Note**: When enabling multiple channels, each channel must be wired as a
+closed circuit. Leaving a channel open (floating) is not recommended, it
+can lead to channel-to-channel crosstalk due to sample-and-hold capacitor.
+If one channel is floating, residual charge from the previously sampled
+channel can influence the measured value and induce noise. Floating inputs
+can introduce errors that may affect other enabled channels, especially
+when scanning multiple channels.
+
+External trigger
+----------------
+
+To use a hardware trigger, enable
+``CONFIG_RZV2H_ADC_TRIGGER_EXTERNAL`` and
+``CONFIG_RZV2H_ADC_SCAN_END_INTERRUPT``. The board assigns ADTRG to P05 on
+J1 pin 17 and configures it as a mode-4 peripheral input with pull-up and
+Schmitt input enabled.
+
+Connect a 1.8-V-compatible trigger source to P05. After the application calls
+``ANIOC_TRIGGER``, ADC-E waits for a high-to-low transition on ADTRG, performs
+one scan, and delivers the selected channel results through ``/dev/adc0``.
+The trigger source must return high before the next scan is armed. Use a clean
+pulse or debounce a mechanical switch in the application or external circuit.
+
+ADC interrupt IDs
+-----------------
+
+====================  ========================  ==============================
+Function              Source ID                 Destination/configuration
+====================  ========================  ==============================
+Group-A scan end      INTSEL event 575          SEL76 (FSP IRQ 429)
+Window A compare      Fixed FSP IRQ 246         No INTSEL routing
+====================  ========================  ==============================
+
+``CONFIG_RZV2H_ADC_SCAN_END_INTSEL`` selects the Group-A destination.
+For interrupt select routing, values in range 353 - 479 map to SEL0 - SEL126.
+
+Window mode
+-----------
+
+Window A compares every enabled channel against one lower and upper threshold.
+Enable ``CONFIG_RZV2H_ADC_WINDOW_A``, select an inside- or outside-window
+condition, and set the 16-bit lower and upper threshold values. Window A
+uses its own fixed interrupt and works with either polling or scan-end
+interrupt delivery. When addition is enabled, set the thresholds for the
+resulting summed ADC value; averaging retains the selected ADC resolution
+range.
+
+An application can include ``<arch/chip/adc.h>`` and use
+``ANIOC_RZV2H_WINDOW_A_STATUS`` to obtain and clear the pending channel mask
+and event counters.
+
+Configuration and use
+---------------------
+
+Start from the board configuration::
+
+   ./tools/configure.sh rzv2h-evk:adc
+
+Select at least one ``CONFIG_RZV2H_ADC0_ANI000`` through
+``CONFIG_RZV2H_ADC0_ANI007`` channel. Kconfig also selects 8- or 12-bit
+resolution, software or external triggering, interrupt or polling completion,
+add/average count, clear-after-read, and optional Window A comparison.
+External triggering requires scan-end interrupt mode. Group B/C, ELC/GPT
+triggers, DMA, and Window B are not implemented.
+
+Use ``CONFIG_ADC_FIFOSIZE=9`` when all eight channels are enabled. The NuttX
+circular FIFO reserves one entry, leaving eight entries for a complete scan.
+Each scan places one ``adc_msg_s`` in the NuttX ADC FIFO for every 
+enabled channel.
+
+After boot, enabled ADC are registered as /dev/adc0 devices. Verify with::
+
+    nsh> ls /dev
+    /dev:
+    console
+    adc0
+    null
+    zero
+
+To use the standard ADC example, enable ``CONFIG_EXAMPLES_ADC`` and
+``CONFIG_EXAMPLES_ADC_SWTRIG`` so the standard NuttX ADC example issues
+``ANIOC_TRIGGER`` before each read.
+From NSH, request 10 scans with::
+
+   nsh> adc -n 10
+
+Ground and 1.8 V should read near 0 and full scale respectively: 4095 in
+12-bit mode or 255 in 8-bit mode.
+In external-trigger mode, the command waits for an ADTRG event.
+
 Bring-up
 ========
 
@@ -457,3 +572,10 @@ active-low ``P0_0`` and ``P0_1`` LED outputs.  The generic ``/dev/gpio1`` and
 ``/dev/gpio2`` interfaces are also available for individual read/write
 testing.  Automatic OS-status LED control through ``CONFIG_ARCH_LEDS`` is
 not yet implemented.
+
+adc defconfig
+-------------
+
+ADC configuration enabling ADC-E unit 0, ``/dev/adc0``, scan-end interrupt
+delivery, software triggering, and the standard ADC example. Its FIFO size is
+nine so one full eight-channel scan fits in the upper-half circular buffer.
