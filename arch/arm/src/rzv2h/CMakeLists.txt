@@ -37,6 +37,14 @@ if(CONFIG_RZV2H_SCI_B)
   list(APPEND SRCS rzv2h_serial.c)
 endif()
 
+if(CONFIG_RZV2H_RIIC_I2C)
+  list(APPEND SRCS rzv2h_riic_i2c.c)
+endif()
+
+if(CONFIG_RZV2H_SCI_I2C)
+  list(APPEND SRCS rzv2h_sci_i2c.c)
+endif()
+
 if(CONFIG_RZV2H_QSPI)
   list(APPEND SRCS rzv2h_qspi.c)
 endif()

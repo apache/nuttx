@@ -144,6 +144,97 @@
 #define GPIO_RXD9_MISO9_SCL9_P8_3_M6  RZV2H_PINMUX(8, 3, 6)
 #define GPIO_RXD9_MISO9_SCL9_PB_3_M2  RZV2H_PINMUX(11, 3, 2)
 
+/* SCI I2C pin configurations.
+ *
+ * The pins are configured as N-channel open-drain outputs with
+ * Schmitt-trigger inputs; pull-up resistors are required on both lines.
+ */
+
+#define RZV2H_PINMUX_SCI_I2C(port, pin, mode) \
+  RZV2H_PINMUX_CFG(port, pin, mode, \
+                   IOPORT_CFG_DRIVE_B01 | IOPORT_CFG_SLEW_RATE_FAST | \
+                   IOPORT_CFG_NOD_ENABLE | IOPORT_CFG_SCHMITT_ENABLE)
+
+/* SCI channel 0 simple I2C. */
+
+#define GPIO_SCI_SDA0_P5_0_M1          RZV2H_PINMUX_SCI_I2C(5, 0, 1)
+#define GPIO_SCI_SDA0_P9_2_M6          RZV2H_PINMUX_SCI_I2C(9, 2, 6)
+#define GPIO_SCI_SCL0_P5_1_M1          RZV2H_PINMUX_SCI_I2C(5, 1, 1)
+#define GPIO_SCI_SCL0_P9_3_M6          RZV2H_PINMUX_SCI_I2C(9, 3, 6)
+
+/* SCI channel 1 simple I2C. */
+
+#define GPIO_SCI_SDA1_P5_2_M1          RZV2H_PINMUX_SCI_I2C(5, 2, 1)
+#define GPIO_SCI_SDA1_P9_6_M6          RZV2H_PINMUX_SCI_I2C(9, 6, 6)
+#define GPIO_SCI_SCL1_P5_3_M1          RZV2H_PINMUX_SCI_I2C(5, 3, 1)
+#define GPIO_SCI_SCL1_P9_7_M6          RZV2H_PINMUX_SCI_I2C(9, 7, 6)
+
+/* SCI channel 2 simple I2C. */
+
+#define GPIO_SCI_SDA2_P5_4_M1          RZV2H_PINMUX_SCI_I2C(5, 4, 1)
+#define GPIO_SCI_SDA2_P6_0_M6          RZV2H_PINMUX_SCI_I2C(6, 0, 6)
+#define GPIO_SCI_SCL2_P5_5_M1          RZV2H_PINMUX_SCI_I2C(5, 5, 1)
+#define GPIO_SCI_SCL2_P6_1_M6          RZV2H_PINMUX_SCI_I2C(6, 1, 6)
+
+/* SCI channel 3 simple I2C. */
+
+#define GPIO_SCI_SDA3_P3_4_M2          RZV2H_PINMUX_SCI_I2C(3, 4, 2)
+#define GPIO_SCI_SDA3_P5_6_M1          RZV2H_PINMUX_SCI_I2C(5, 6, 1)
+#define GPIO_SCI_SDA3_P6_2_M6          RZV2H_PINMUX_SCI_I2C(6, 2, 6)
+#define GPIO_SCI_SCL3_P3_5_M2          RZV2H_PINMUX_SCI_I2C(3, 5, 2)
+#define GPIO_SCI_SCL3_P5_7_M1          RZV2H_PINMUX_SCI_I2C(5, 7, 1)
+#define GPIO_SCI_SCL3_P6_3_M6          RZV2H_PINMUX_SCI_I2C(6, 3, 6)
+
+/* SCI channel 4 simple I2C. */
+
+#define GPIO_SCI_SDA4_P4_0_M2          RZV2H_PINMUX_SCI_I2C(4, 0, 2)
+#define GPIO_SCI_SDA4_P7_0_M1          RZV2H_PINMUX_SCI_I2C(7, 0, 1)
+#define GPIO_SCI_SDA4_P8_4_M6          RZV2H_PINMUX_SCI_I2C(8, 4, 6)
+#define GPIO_SCI_SCL4_P4_1_M2          RZV2H_PINMUX_SCI_I2C(4, 1, 2)
+#define GPIO_SCI_SCL4_P7_1_M1          RZV2H_PINMUX_SCI_I2C(7, 1, 1)
+#define GPIO_SCI_SCL4_P8_5_M6          RZV2H_PINMUX_SCI_I2C(8, 5, 6)
+
+/* SCI channel 5 simple I2C. */
+
+#define GPIO_SCI_SDA5_P4_4_M2          RZV2H_PINMUX_SCI_I2C(4, 4, 2)
+#define GPIO_SCI_SDA5_P7_2_M1          RZV2H_PINMUX_SCI_I2C(7, 2, 1)
+#define GPIO_SCI_SDA5_P8_6_M6          RZV2H_PINMUX_SCI_I2C(8, 6, 6)
+#define GPIO_SCI_SCL5_P4_5_M2          RZV2H_PINMUX_SCI_I2C(4, 5, 2)
+#define GPIO_SCI_SCL5_P7_3_M1          RZV2H_PINMUX_SCI_I2C(7, 3, 1)
+#define GPIO_SCI_SCL5_P8_7_M6          RZV2H_PINMUX_SCI_I2C(8, 7, 6)
+
+/* SCI channel 6 simple I2C. */
+
+#define GPIO_SCI_SDA6_P6_4_M6          RZV2H_PINMUX_SCI_I2C(6, 4, 6)
+#define GPIO_SCI_SDA6_P7_4_M1          RZV2H_PINMUX_SCI_I2C(7, 4, 1)
+#define GPIO_SCI_SDA6_P9_0_M2          RZV2H_PINMUX_SCI_I2C(9, 0, 2)
+#define GPIO_SCI_SCL6_P6_5_M6          RZV2H_PINMUX_SCI_I2C(6, 5, 6)
+#define GPIO_SCI_SCL6_P7_5_M1          RZV2H_PINMUX_SCI_I2C(7, 5, 1)
+#define GPIO_SCI_SCL6_P9_1_M2          RZV2H_PINMUX_SCI_I2C(9, 1, 2)
+
+/* SCI channel 7 simple I2C. */
+
+#define GPIO_SCI_SDA7_P6_6_M6          RZV2H_PINMUX_SCI_I2C(6, 6, 6)
+#define GPIO_SCI_SDA7_P7_6_M1          RZV2H_PINMUX_SCI_I2C(7, 6, 1)
+#define GPIO_SCI_SDA7_P9_4_M2          RZV2H_PINMUX_SCI_I2C(9, 4, 2)
+#define GPIO_SCI_SCL7_P6_7_M6          RZV2H_PINMUX_SCI_I2C(6, 7, 6)
+#define GPIO_SCI_SCL7_P7_7_M1          RZV2H_PINMUX_SCI_I2C(7, 7, 1)
+#define GPIO_SCI_SCL7_P9_5_M2          RZV2H_PINMUX_SCI_I2C(9, 5, 2)
+
+/* SCI channel 8 simple I2C. */
+
+#define GPIO_SCI_SDA8_P8_0_M6          RZV2H_PINMUX_SCI_I2C(8, 0, 6)
+#define GPIO_SCI_SDA8_PB_1_M2          RZV2H_PINMUX_SCI_I2C(11, 1, 2)
+#define GPIO_SCI_SCL8_P8_1_M6          RZV2H_PINMUX_SCI_I2C(8, 1, 6)
+#define GPIO_SCI_SCL8_PB_2_M2          RZV2H_PINMUX_SCI_I2C(11, 2, 2)
+
+/* SCI channel 9 simple I2C. */
+
+#define GPIO_SCI_SDA9_P8_2_M6          RZV2H_PINMUX_SCI_I2C(8, 2, 6)
+#define GPIO_SCI_SDA9_PB_4_M2          RZV2H_PINMUX_SCI_I2C(11, 4, 2)
+#define GPIO_SCI_SCL9_P8_3_M6          RZV2H_PINMUX_SCI_I2C(8, 3, 6)
+#define GPIO_SCI_SCL9_PB_3_M2          RZV2H_PINMUX_SCI_I2C(11, 3, 2)
+
 /* RIIC I2C pin configurations. */
 
 /* RIIC channel 0: P31/SCL, P30/SDA, Mode 1 */

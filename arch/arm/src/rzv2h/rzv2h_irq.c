@@ -191,9 +191,6 @@ int rzv2h_intsel_connect_event(rzv2h_irqn_t irq, rzv2h_irqsel_t event,
 
   leave_critical_section(flags);
 
-  syslog(LOG_INFO, "INTC: connected SEL%d (IRQ %d) to event %d\n",
-         sel, (int)irq, (int)event);
-
   return OK;
 }
 
@@ -246,8 +243,6 @@ int rzv2h_intsel_disconnect_event(rzv2h_irqn_t irq)
   g_intsel_event[sel] = RZV2H_IRQSEL_NONE;
 
   leave_critical_section(flags);
-
-  syslog(LOG_INFO, "INTC: freed SEL%d (IRQ %d)\n", sel, (int)irq);
 
   return 0;
 }
