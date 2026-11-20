@@ -259,6 +259,59 @@ devices in ascending hardware-channel order. Their TX and RX pin choices are
 board-specific and are defined by ``BOARD_SCIn_TXD_GPIO`` and
 ``BOARD_SCIn_RXD_GPIO`` in ``boards/arm/rzv2h/rzv2h-rdk/include/board.h``.
 
+PWM
+===
+
+The RZV2H-RDK exposes GPT-based PWM output on channels 0 through 15.
+
+Pin Assignments
+---------------
+
+Each GPT channel is routed to the following board pin.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Channel
+     - Pin
+   * - GPT0
+     - ``P7_0``
+   * - GPT1
+     - ``P8_0``
+   * - GPT2
+     - ``P4_4``
+   * - GPT3
+     - ``P4_6``
+   * - GPT4
+     - ``P9_4``
+   * - GPT5
+     - ``P9_6``
+   * - GPT6
+     - ``PA_4``
+   * - GPT7
+     - ``P8_6``
+   * - GPT8
+     - ``P9_4``
+   * - GPT9
+     - ``P9_6``
+   * - GPT10
+     - ``PA_4``
+   * - GPT11
+     - ``P6_2``
+   * - GPT12
+     - ``P3_0``
+   * - GPT13
+     - ``P6_4``
+   * - GPT14
+     - ``P3_5``
+   * - GPT15
+     - ``P6_6``
+
+These definitions are in ``boards/arm/rzv2h/rzv2h-rdk/include/board.h``.
+
+The ``pwm`` board configuration (``rzv2h-rdk:pwm``) enables GPT6
+(PWM output on ``PA_4``) and the ``pwm`` application for interactive testing.
+
 QSPI Flash
 ==========
 

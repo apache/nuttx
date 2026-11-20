@@ -373,6 +373,89 @@ devices in ascending hardware-channel order. Their TX and RX pin choices are
 board-specific and are defined by ``BOARD_SCIn_TXD_GPIO`` and
 ``BOARD_SCIn_RXD_GPIO`` in ``boards/arm/rzv2h/rzv2h-evk/include/board.h``.
 
+PWM
+===
+
+The RZV2H-EVK exposes GPT-based PWM output on channels 0 through 15.
+
+Pin Assignments
+---------------
+
+Each GPT channel is routed to the following board pin.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Channel
+     - Pin
+   * - GPT0
+     - ``P7_0``
+   * - GPT1
+     - ``P8_0``
+   * - GPT2
+     - ``P4_4``
+   * - GPT3
+     - ``P4_6``
+   * - GPT4
+     - ``P9_4``
+   * - GPT5
+     - ``P9_6``
+   * - GPT6
+     - ``P3_4``
+   * - GPT7
+     - ``P8_6``
+   * - GPT8
+     - ``P9_4``
+   * - GPT9
+     - ``P9_6``
+   * - GPT10
+     - ``PA_4``
+   * - GPT11
+     - ``P6_2``
+   * - GPT12
+     - ``P3_0``
+   * - GPT13
+     - ``P6_4``
+   * - GPT14
+     - ``P3_5``
+   * - GPT15
+     - ``P6_6``
+
+These definitions are in ``boards/arm/rzv2h/rzv2h-evk/include/board.h``.
+
+The relevant options for enabling GPT7 as an example are::
+
+   CONFIG_PWM=y
+   CONFIG_RZV2H_GPT_PWM=y
+   CONFIG_RZV2H_GPT7_PWM=y
+   CONFIG_RZV2H_GPT_PWM_DEFAULT_FREQUENCY=1000
+   CONFIG_EXAMPLES_PWM=y
+
+After boot, enabled PWM channels are registered as ``/dev/pwmN`` devices.
+Verify with::
+
+   nsh> ls /dev
+   /dev:
+    console
+    null
+    pwm7
+    ttyS0
+    zero
+
+The ``pwm`` board configuration (``rzv2h-evk:pwm``) enables GPT7
+(PWM output on P8_6, corresponding to CN1 Pmod pin 9) and the
+``pwm`` application for interactive testing. Other channels can be
+enabled by adding the corresponding ``CONFIG_RZV2H_GPTn_PWM`` options.
+
+Using the ``pwm`` Application
+-----------------------------
+
+Start a 1 Hz PWM signal at 50% duty cycle on channel 7::
+
+   nsh> pwm -p /dev/pwm7 -f 1 -d 50
+
+The ``-f`` option sets the frequency in Hz and ``-d`` sets the duty cycle.
+
 QSPI Flash
 ==========
 
