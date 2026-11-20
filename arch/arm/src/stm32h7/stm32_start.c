@@ -117,8 +117,9 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
 void __start(void) noinstrument_function;
 #endif
 
-/* Called from __start before any clock setup, with .data and .bss in place.
- * A bootloader can hand over to the ROM bootloader here.
+/* Called from __start before the system clock is set up.  On some STM32
+ * families it runs before .data and .bss are initialized, so it must not
+ * rely on them.  A bootloader can hand over to the ROM bootloader here.
  */
 
 void stm32_preclock_hook(void) weak_function;
@@ -250,9 +251,7 @@ void __start(void)
   arm_stack_check_init();
 #endif
 
-  /* Let the board act while the chip is still as reset left it, before
-   * any clock setup.
-   */
+  /* Let the board act before the system clock is set up. */
 
   if (stm32_preclock_hook)
     {

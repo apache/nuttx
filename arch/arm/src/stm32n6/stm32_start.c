@@ -105,6 +105,13 @@ static inline void stm32_enable_lob(void)
 
 void __start_c(void) noinstrument_function;
 
+/* Called from __start before the system clock is set up.  On some STM32
+ * families it runs before .data and .bss are initialized, so it must not
+ * rely on them.  A bootloader can hand over to the ROM bootloader here.
+ */
+
+void stm32_preclock_hook(void) weak_function;
+
 /****************************************************************************
  * Name: __start
  *
@@ -248,6 +255,13 @@ void __start_c(void)
     }
 
   stm32_enable_lob();
+
+  /* Let the board act before the system clock is set up. */
+
+  if (stm32_preclock_hook)
+    {
+      stm32_preclock_hook();
+    }
 
   stm32_clockconfig();
 
