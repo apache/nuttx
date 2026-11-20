@@ -192,7 +192,12 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
   int policy;
   int ret;
 
-  DEBUGASSERT(trampoline != NULL);
+  /* The trampoline and the thread entry point must be non-NULL */
+
+  if (trampoline == NULL || entry == NULL)
+    {
+      return EINVAL;
+    }
 
   parent = this_task();
   DEBUGASSERT(parent != NULL);
@@ -212,6 +217,13 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
       default_attr.stacksize = lib_get_stacksize(default_attr.stacksize);
       attr = &default_attr;
+    }
+
+  /* The stack size must be at least PTHREAD_STACK_MIN */
+
+  if (attr->stacksize < PTHREAD_STACK_MIN)
+    {
+      return EINVAL;
     }
 
 #ifdef CONFIG_TLS_ALIGNED
