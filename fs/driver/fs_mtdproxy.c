@@ -27,7 +27,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/stat.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -38,79 +37,8 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
 #include <nuttx/mtd/mtd.h>
-#include <nuttx/mutex.h>
 
 #include "driver/driver.h"
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static uint32_t g_devno;
-static mutex_t g_devno_lock = NXMUTEX_INITIALIZER;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: unique_blkdev
- *
- * Description:
- *   Create a unique temporary device name in the /dev/ directory of the
- *   pseudo-file system.  We cannot use mktemp for this because it will
- *   attempt to open() the file.
- *
- * Input Parameters:
- *   devbuf - Buffer to store the generated device name
- *   len    - Length of the buffer
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int unique_blkdev(FAR char *devbuf, size_t len)
-{
-  struct stat statbuf;
-  uint32_t devno;
-  int ret;
-
-  /* Loop until we get a unique device name */
-
-  for (; ; )
-    {
-      /* Get the mutex protecting the path number */
-
-      ret = nxmutex_lock(&g_devno_lock);
-      if (ret < 0)
-        {
-          ferr("ERROR: nxmutex_lock failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Get the next device number and release the semaphore */
-
-      devno = ++g_devno;
-      nxmutex_unlock(&g_devno_lock);
-
-      /* Construct the full device number */
-
-      devno &= 0xffffff;
-      snprintf(devbuf, len, "/dev/tmpb%06lx", (unsigned long)devno);
-
-      /* Make sure that file name is not in use */
-
-      ret = nx_stat(devbuf, &statbuf, 1);
-      if (ret < 0)
-        {
-          DEBUGASSERT(ret == -ENOENT);
-          return OK;
-        }
-
-      /* It is in use, try again */
-    }
-}
 
 /****************************************************************************
  * Public Functions
@@ -146,7 +74,7 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
 
   /* Create a unique temporary file name for the block device */
 
-  ret = unique_blkdev(blkdev, sizeof(blkdev));
+  ret = unique_devname('b', blkdev, sizeof(blkdev));
   if (ret != OK)
     {
       ferr("ERROR: Failed to create temporary device name\n");
