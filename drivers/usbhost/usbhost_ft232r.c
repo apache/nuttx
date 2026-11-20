@@ -218,6 +218,7 @@ struct usbhost_ft232r_s
   /* The remainder of the fields are provide to the FTDI class */
 
   volatile bool  disconnected;   /* TRUE: Device has been disconnected */
+  bool           connecting;     /* usbhost_connect() is running */
   bool           stop2;          /* True: 2 stop bits (for line coding) */
   bool           txena;          /* True: TX "interrupts" enabled */
   bool           rxena;          /* True: RX "interrupts" enabled */
@@ -334,6 +335,7 @@ static bool usbhost_rxflowcontrol(FAR struct uart_dev_s *uartdev,
 static void usbhost_txint(FAR struct uart_dev_s *uartdev, bool enable);
 static bool usbhost_txready(FAR struct uart_dev_s *uartdev);
 static bool usbhost_txempty(FAR struct uart_dev_s *uartdev);
+static int  usbhost_release(FAR struct uart_dev_s *uartdev);
 
 /* FTDI control transfer helpers */
 
@@ -402,7 +404,8 @@ static const struct uart_ops_s g_uart_ops =
   NULL,                  /* send */
   usbhost_txint,         /* txinit */
   usbhost_txready,       /* txready */
-  usbhost_txempty        /* txempty */
+  usbhost_txempty,       /* txempty */
+  usbhost_release        /* release */
 };
 
 /* This is an array of pre-allocated USB host FTDI class instances */
@@ -1340,18 +1343,49 @@ static void usbhost_rxdata_work(FAR void *arg)
 static void usbhost_destroy(FAR void *arg)
 {
   FAR struct usbhost_ft232r_s *priv = (FAR struct usbhost_ft232r_s *)arg;
-  FAR struct usbhost_hubport_s *hport;
   char devname[DEV_NAMELEN];
 
   DEBUGASSERT(priv != NULL && priv->usbclass.hport != NULL);
-  hport = priv->usbclass.hport;
 
   uinfo("crefs: %d\n", priv->crefs);
 
-  /* Unregister the serial lower half driver */
+  /* Unregister the serial lower half driver.  The serial upper half calls
+   * usbhost_release() to free the class instance, at once if the device is
+   * not open, or after the last close.
+   */
 
   usbhost_mkdevname(priv, devname);
-  unregister_driver(devname);
+  if (unregister_driver(devname) < 0)
+    {
+      /* Never registered: free the class instance now */
+
+      usbhost_release(&priv->uartdev);
+    }
+}
+
+/****************************************************************************
+ * Name: usbhost_release
+ *
+ * Description:
+ *   Free the class instance.  The serial upper half calls this after the
+ *   driver was unregistered and the last open reference was closed.
+ *
+ ****************************************************************************/
+
+static int usbhost_release(FAR struct uart_dev_s *uartdev)
+{
+  FAR struct usbhost_ft232r_s *priv = uartdev->priv;
+  FAR struct usbhost_hubport_s *hport = priv->usbclass.hport;
+
+  /* Wait for usbhost_connect() to release the lock */
+
+  nxmutex_lock(&priv->lock);
+  nxmutex_unlock(&priv->lock);
+
+  /* No more transfers may be started */
+
+  work_cancel_sync(LPWORK, &priv->txwork);
+  work_cancel_sync(LPWORK, &priv->rxwork);
 
   /* Release the device name used by this connection */
 
@@ -1389,6 +1423,7 @@ static void usbhost_destroy(FAR void *arg)
   /* And free the class instance.  */
 
   usbhost_freeclass(priv);
+  return OK;
 }
 
 /****************************************************************************
@@ -1975,6 +2010,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
   FAR struct usbhost_ft232r_s *priv =
     (FAR struct usbhost_ft232r_s *)usbclass;
   char devname[DEV_NAMELEN];
+  irqstate_t flags;
   int ret;
 
   DEBUGASSERT(priv != NULL &&
@@ -1993,7 +2029,10 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
    * being called asynchronously if the device is removed.
    */
 
+  flags = enter_critical_section();
   priv->crefs++;
+  priv->connecting = true;
+  leave_critical_section(flags);
   DEBUGASSERT(priv->crefs == 2);
 
   /* Parse the configuration descriptor to get the bulk I/O endpoints */
@@ -2074,7 +2113,10 @@ errout:
    */
 
   DEBUGASSERT(priv->crefs >= 2);
+  flags = enter_critical_section();
   priv->crefs--;
+  priv->connecting = false;
+  leave_critical_section(flags);
 
   /* Release the semaphore... there is a race condition here.
    * Decrementing the reference count and releasing the semaphore
@@ -2130,14 +2172,13 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
 
   uart_connected(&priv->uartdev, false);
 
-  /* Now check the number of references on the class instance.  If it is one,
-   * then we can free the class instance now.  Otherwise, we will have to
-   * wait until the holders of the references free them by closing the
-   * serial driver.
+  /* Unregister the driver unless usbhost_connect() is still running.  The
+   * class instance is freed by usbhost_release() once the device is not
+   * open any more.
    */
 
   uinfo("crefs: %d\n", priv->crefs);
-  if (priv->crefs == 1)
+  if (!priv->connecting)
     {
       /* Destroy the class instance.  If we are executing from an interrupt
        * handler, then defer the destruction to the worker thread.
@@ -2189,20 +2230,12 @@ static int usbhost_setup(FAR struct uart_dev_s *uartdev)
   DEBUGASSERT(uartdev && uartdev->priv);
   priv = (FAR struct usbhost_ft232r_s *)uartdev->priv;
 
-  /* Make sure that we have exclusive access to the private data structure */
-
-  DEBUGASSERT(priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
-  ret = nxmutex_lock(&priv->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Check if the FTDI device is still connected.  We need to disable
-   * interrupts momentarily to assure that there are no asynchronous
-   * isconnect events.
+  /* This is called with the uart spinlock held, so it must not take
+   * priv->lock.  Disable interrupts momentarily to assure that there are no
+   * asynchronous disconnect events.
    */
 
+  DEBUGASSERT(priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
   flags = enter_critical_section();
   if (priv->disconnected)
     {
@@ -2222,7 +2255,6 @@ static int usbhost_setup(FAR struct uart_dev_s *uartdev)
     }
 
   leave_critical_section(flags);
-  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -2244,39 +2276,14 @@ static void usbhost_shutdown(FAR struct uart_dev_s *uartdev)
   DEBUGASSERT(uartdev && uartdev->priv);
   priv = (FAR struct usbhost_ft232r_s *)uartdev->priv;
 
-  /* Decrement the reference count on the block driver */
+  /* Decrement the reference count on the block driver.  This is called
+   * with the uart spinlock held, so it must not take priv->lock or free
+   * the class instance; usbhost_release() does that after the last close.
+   */
 
   DEBUGASSERT(priv->crefs > 1);
-  nxmutex_lock(&priv->lock);
-  priv->crefs--;
-
-  /* Release the semaphore.  The following operations when crefs == 1 are
-   * safe because we know that there is no outstanding open references to
-   * the block driver.
-   */
-
-  nxmutex_unlock(&priv->lock);
-
-  /* We need to disable interrupts momentarily to assure that there are
-   * no asynchronous disconnect events.
-   */
-
   flags = enter_critical_section();
-
-  /* Check if the USB FTDI device is still connected.  If the
-   * FTDI device is not connected and the reference count just
-   * decremented to one, then unregister the block driver and free
-   * the class instance.
-   */
-
-  if (priv->crefs <= 1 && priv->disconnected)
-    {
-      /* Destroy the class instance */
-
-      DEBUGASSERT(priv->crefs == 1);
-      usbhost_destroy(priv);
-    }
-
+  priv->crefs--;
   leave_critical_section(flags);
 }
 
