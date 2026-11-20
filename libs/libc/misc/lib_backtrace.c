@@ -157,6 +157,7 @@ static void backtrace_rehash(FAR struct backtrace_pool_s *bp,
         {
           uint32_t slot = backtrace_hash(entry->stack, entry->depth);
           FAR struct backtrace_entry_s *next = entry->next;
+
           slot = slot % (capacity * 2);
           entry->next = bucket[slot];
           bucket[slot] = entry;
@@ -412,6 +413,7 @@ void backtrace_remove(FAR void *index)
       /* Remove the backtrace record from the linked list */
 
       FAR struct backtrace_entry_s *prev = bp->bucket[slot];
+
       while (prev)
         {
           if (prev->next == entry)
