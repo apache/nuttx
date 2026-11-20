@@ -87,5 +87,14 @@ int rzv2h_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RZV2H_ADC
+  ret = rzv2h_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rzv2h_adc_setup() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
   return OK;
 }

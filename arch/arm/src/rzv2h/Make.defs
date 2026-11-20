@@ -41,3 +41,6 @@ endif
 ifeq ($(CONFIG_DEV_GPIO),y)
 CHIP_CSRCS += rzv2h_gpio.c
 endif
+ifeq ($(CONFIG_RZV2H_ADC),y)
+CHIP_CSRCS += rzv2h_adc.c
+endif
