@@ -16,20 +16,20 @@
  *      documentation and/or other materials provided with the distribution.
  *
  *    * Neither the name of Linaro nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
  * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
- * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -46,9 +46,11 @@
 #define src2		r1
 #define limit		r2
 #define result		r0
-#define data1		r3
-#define data2		r4
-#define tmp1		r12
+#define data1a		r4
+#define data1b		r5
+#define data2a		r6
+#define data2b		r7
+#define tmp1		r3
 
 	.syntax unified
 	.text
@@ -60,10 +62,13 @@
 ARCH_LIBCFUN(memcmp):
 	.cfi_sections .debug_frame
 	.cfi_startproc
-	push	{r4, lr}
-	.cfi_def_cfa_offset 8
+	push	{r4, r5, r6, r7, lr}
+	.cfi_def_cfa_offset 20
+	.cfi_offset r4, -20
+	.cfi_offset r5, -16
+	.cfi_offset r6, -12
+	.cfi_offset r7, -8
 	.cfi_offset lr, -4
-	.cfi_offset r4, -8
 
 	cmp	limit, #0
 	beq	.Lret0
@@ -74,9 +79,9 @@ ARCH_LIBCFUN(memcmp):
 	beq	.Laligned
 
 .Lhead_loop:
-	ldrb	data1, [src1], #1
-	ldrb	data2, [src2], #1
-	cmp	data1, data2
+	ldrb	data1a, [src1], #1
+	ldrb	data2a, [src2], #1
+	cmp	data1a, data2a
 	bne	.Lret_diff_byte
 	subs	limit, limit, #1
 	beq	.Lret0
@@ -84,54 +89,71 @@ ARCH_LIBCFUN(memcmp):
 	bne	.Lhead_loop
 
 .Laligned:
+	/* ldrd needs a word-aligned address, so only take the 8-byte path
+	   when src2 is also word-aligned; otherwise fall back to bytes.  */
+	tst	src2, #3
+	bne	.Lbyte_tail
 .Lword_loop:
-	cmp	limit, #4
+	cmp	limit, #8
 	blo	.Lbyte_tail
-	ldr	data1, [src1], #4
-	ldr	data2, [src2], #4
-	subs	limit, limit, #4
-	cmp	data1, data2
-	bne	.Ldiff_word
-	b	.Lword_loop
+	/* Compare 8 bytes per iteration via ldrd, halving the loop trip
+	   count versus a 4-byte word loop.  */
+	ldrd	data1a, data1b, [src1], #8
+	ldrd	data2a, data2b, [src2], #8
+	subs	limit, limit, #8
+	cmp	data1a, data2a
+	bne	.Ldiff_word_a
+	cmp	data1b, data2b
+	beq	.Lword_loop
+
+	/* Difference is in the second word (bytes 4-7 of this 8-byte block).  */
+.Ldiff_word_b:
+#ifndef __ARM_BIG_ENDIAN
+	rev	data1b, data1b
+	rev	data2b, data2b
+#endif
+	cmp	data1b, data2b
+	blo	.Lret_minus1
+	b	.Lret_plus1
+
+	/* Difference is in the first word (bytes 0-3 of this 8-byte block).  */
+.Ldiff_word_a:
+#ifndef __ARM_BIG_ENDIAN
+	rev	data1a, data1a
+	rev	data2a, data2a
+#endif
+	cmp	data1a, data2a
+	blo	.Lret_minus1
+	b	.Lret_plus1
 
 .Lbyte_tail:
 	cmp	limit, #0
 	beq	.Lret0
 .Lbyte_loop:
-	ldrb	data1, [src1], #1
-	ldrb	data2, [src2], #1
-	cmp	data1, data2
+	ldrb	data1a, [src1], #1
+	ldrb	data2a, [src2], #1
+	cmp	data1a, data2a
 	bne	.Lret_diff_byte
 	subs	limit, limit, #1
 	bne	.Lbyte_loop
 	b	.Lret0
 
-	.align 2
-.Ldiff_word:
-#ifndef __ARM_BIG_ENDIAN
-	rev	data1, data1
-	rev	data2, data2
-#endif
-	cmp	data1, data2
-	blo	.Lret_minus1
-	b	.Lret_plus1
-
 .Lret_diff_byte:
-	cmp	data1, data2
+	cmp	data1a, data2a
 	blo	.Lret_minus1
 	b	.Lret_plus1
 
 .Lret_minus1:
 	mvn	result, #0		/* -1 */
-	pop	{r4, pc}
+	pop	{r4, r5, r6, r7, pc}
 
 .Lret_plus1:
 	mov	result, #1
-	pop	{r4, pc}
+	pop	{r4, r5, r6, r7, pc}
 
 .Lret0:
 	mov	result, #0
-	pop	{r4, pc}
+	pop	{r4, r5, r6, r7, pc}
 
 	.cfi_endproc
 	.size ARCH_LIBCFUN(memcmp), . - ARCH_LIBCFUN(memcmp)
