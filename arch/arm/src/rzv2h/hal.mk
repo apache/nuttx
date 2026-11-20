@@ -73,3 +73,6 @@ CHIP_CSRCS += $(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)src$(DELIM
 endif
 
 ############################################################################
+ifeq ($(CONFIG_RZV2H_SPI_B),y)
+CHIP_CSRCS += $(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)src$(DELIM)rzv$(DELIM)r_spi_b$(DELIM)r_spi_b.c
+endif

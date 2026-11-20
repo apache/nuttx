@@ -308,6 +308,401 @@ The current button and LED tests both reuse the standard NuttX GPIO example:
    supported.  The automatic ``board_autoled_*()`` hooks selected by
    ``CONFIG_ARCH_LEDS`` remain placeholders.
 
+SPI
+===
+
+The RZ/V2H-EVK board logic configures pins and registers the RZ/V2H SPI-B
+lower half.  All three channels can be enabled independently.  A channel
+selected as master uses the NuttX master interface; a channel selected as
+slave uses the separate NuttX slave-controller interface.
+
+SPI Pin Assignments
+-------------------
+
+The SPI-B channels use the following board-defined pin assignments.  The SSL
+column shows the default route selected in
+``boards/arm/rzv2h/rzv2h-evk/include/board.h``.  SSL is configured only in
+4-wire mode.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Channel
+     - RSPCK Pin
+     - MOSI Pin
+     - MISO Pin
+     - Default SSL Pin
+   * - SPI-B 0
+     - ``P9_2``
+     - ``P9_0``
+     - ``P9_1``
+     - ``SSLA0`` on ``P9_3``
+   * - SPI-B 1
+     - ``PB_0``
+     - ``PB_1``
+     - ``PB_2``
+     - ``SSLB0`` on ``PA_4``
+   * - SPI-B 2
+     - ``PB_5``
+     - ``PB_4``
+     - ``PB_3``
+     - ``SSLC0`` on ``PA_7``
+
+SSL Route Selection
+-------------------
+
+Kconfig selects only 3-wire or 4-wire operation; it does not select an SSL
+signal or pin.  For 4-wire operation, each channel's
+``BOARD_SPIx_SSL_ROUTE`` definition in ``board.h`` selects one of the
+following routes supported by the current pin definitions:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Channel
+     - SSL Signal
+     - Hardware Selector
+     - Available Route Definitions
+   * - SPI-B 0
+     - ``SSLA0``
+     - 0
+     - ``BOARD_SPI0_SSL_ROUTE_SSLA0_P04`` (``P0_4``),
+       ``BOARD_SPI0_SSL_ROUTE_SSLA0_P34`` (``P3_4``),
+       ``BOARD_SPI0_SSL_ROUTE_SSLA0_P93`` (``P9_3``)
+   * - SPI-B 0
+     - ``SSLA1``
+     - 1
+     - ``BOARD_SPI0_SSL_ROUTE_SSLA1_P05`` (``P0_5``),
+       ``BOARD_SPI0_SSL_ROUTE_SSLA1_P35`` (``P3_5``),
+       ``BOARD_SPI0_SSL_ROUTE_SSLA1_P94`` (``P9_4``)
+   * - SPI-B 0
+     - ``SSLA2``
+     - 2
+     - ``BOARD_SPI0_SSL_ROUTE_SSLA2_P14`` (``P1_4``),
+       ``BOARD_SPI0_SSL_ROUTE_SSLA2_P36`` (``P3_6``),
+       ``BOARD_SPI0_SSL_ROUTE_SSLA2_P95`` (``P9_5``)
+   * - SPI-B 0
+     - ``SSLA3``
+     - 3
+     - ``BOARD_SPI0_SSL_ROUTE_SSLA3_P15`` (``P1_5``),
+       ``BOARD_SPI0_SSL_ROUTE_SSLA3_P37`` (``P3_7``),
+       ``BOARD_SPI0_SSL_ROUTE_SSLA3_P96`` (``P9_6``)
+   * - SPI-B 1
+     - ``SSLB0``
+     - 0
+     - ``BOARD_SPI1_SSL_ROUTE_SSLB0_P34`` (``P3_4``),
+       ``BOARD_SPI1_SSL_ROUTE_SSLB0_PA4`` (``PA_4``)
+   * - SPI-B 1
+     - ``SSLB1``
+     - 1
+     - ``BOARD_SPI1_SSL_ROUTE_SSLB1_P36`` (``P3_6``),
+       ``BOARD_SPI1_SSL_ROUTE_SSLB1_PA5`` (``PA_5``)
+   * - SPI-B 1
+     - ``SSLB2``
+     - 2
+     - ``BOARD_SPI1_SSL_ROUTE_SSLB2_P04`` (``P0_4``),
+       ``BOARD_SPI1_SSL_ROUTE_SSLB2_PA6`` (``PA_6``)
+   * - SPI-B 1
+     - ``SSLB3``
+     - 3
+     - ``BOARD_SPI1_SSL_ROUTE_SSLB3_P14`` (``P1_4``),
+       ``BOARD_SPI1_SSL_ROUTE_SSLB3_PA7`` (``PA_7``)
+   * - SPI-B 2
+     - ``SSLC0``
+     - 0
+     - ``BOARD_SPI2_SSL_ROUTE_SSLC0_P35`` (``P3_5``),
+       ``BOARD_SPI2_SSL_ROUTE_SSLC0_PA7`` (``PA_7``)
+   * - SPI-B 2
+     - ``SSLC1``
+     - 1
+     - ``BOARD_SPI2_SSL_ROUTE_SSLC1_P37`` (``P3_7``),
+       ``BOARD_SPI2_SSL_ROUTE_SSLC1_PA6`` (``PA_6``)
+   * - SPI-B 2
+     - ``SSLC2``
+     - 2
+     - ``BOARD_SPI2_SSL_ROUTE_SSLC2_P05`` (``P0_5``),
+       ``BOARD_SPI2_SSL_ROUTE_SSLC2_PA5`` (``PA_5``)
+   * - SPI-B 2
+     - ``SSLC3``
+     - 3
+     - ``BOARD_SPI2_SSL_ROUTE_SSLC3_P15`` (``P1_5``),
+       ``BOARD_SPI2_SSL_ROUTE_SSLC3_PA4`` (``PA_4``)
+
+To change an SSL route, edit only the applicable default in ``board.h``.  For
+example, SPI-B 0 defaults to SSLA0 on P9_3::
+
+   #define BOARD_SPI0_SSL_ROUTE  BOARD_SPI0_SSL_ROUTE_SSLA0_P93
+
+To use SSLA2 on P9_5 instead, change it to::
+
+   #define BOARD_SPI0_SSL_ROUTE  BOARD_SPI0_SSL_ROUTE_SSLA2_P95
+
+The board definitions derive the hardware selector and the master output or
+slave input pin from this route.  Do not edit the derived
+``BOARD_SPIx_SSL_SELECT``, ``BOARD_SPIx_SSL_INPUT``,
+``BOARD_SPIx_SSL_OUTPUT``, or ``BOARD_SPIx_SSL_PIN`` definitions.
+
+Before selecting another route, check the EVK schematic and all enabled
+peripherals for pin conflicts.  Some routes share physical pins with routes
+on other SPI-B channels or with other peripheral functions.
+
+SPI configuration
+-----------------
+
+Start from the dedicated configuration when validating SPI::
+
+   tools/configure.sh rzv2h-evk:nsh-spi
+   make
+
+The configuration enables the following common options::
+
+   CONFIG_NSH_MAXARGUMENTS=32
+   CONFIG_SPI=y
+   CONFIG_SPI_EXCHANGE=y
+   CONFIG_SPI_DRIVER=y
+   CONFIG_SPI_SLAVE=y
+   CONFIG_SPI_SLAVE_DRIVER=y
+   CONFIG_EXAMPLES_SPISLV=y
+   CONFIG_SYSTEM_SPITOOL=y
+   CONFIG_RZV2H_SPI_B=y
+   CONFIG_RZV2H_SPI_B_IRQ_PRIORITY=12
+
+For each required channel, enable ``CONFIG_RZV2H_SPI_CHANNEL_0``,
+``CONFIG_RZV2H_SPI_CHANNEL_1``, or ``CONFIG_RZV2H_SPI_CHANNEL_2`` and choose:
+
+* its initial frequency and word width;
+* CPOL and CPHA;
+* the master or slave operating role;
+* 3-wire clock-synchronous or 4-wire SPI operation;
+* RXI and TXI interrupt-select numbers.
+
+The role and wire mode are compile-time choices.  ``CONFIG_SPI_DRIVER``
+registers each master channel as ``/dev/spiN`` and
+``CONFIG_SPI_SLAVE_DRIVER`` registers each slave channel as
+``/dev/spislvN``, where ``N`` is the SPI-B hardware channel.  ``spitool``
+uses only the master interface.  The ``spislv`` example accesses the generic
+SPI slave character driver.
+
+Initialization
+--------------
+
+During late board initialization, ``rzv2h_bringup()`` calls
+``board_spi_initialize()`` when ``CONFIG_RZV2H_SPI_B`` is enabled.  For each
+enabled channel, the board layer performs the following operations:
+
+#. Configures MISO, MOSI, and RSPCK through the FSP IOPORT API.  In 4-wire
+   mode, it also configures SSL as a native SPI-B peripheral output for a
+   master or input for a slave.  SSL is left unconfigured in 3-wire mode.
+#. Calls ``rzv2h_spibus_initialize()`` for a master or
+   ``rzv2h_spi_slave_initialize()`` for a slave.
+#. Connects RXI and TXI events to their configured INTSEL lines, attaches the
+   NuttX handlers, and configures the fixed TEI and ERI interrupts.
+#. Registers a master with ``spi_register()`` or a slave with
+   ``spi_slave_register()``.  The slave FSP instance is opened when its
+   upper half binds so the requested mode and word width can be applied.
+
+An initialization failure is reported through syslog and causes board
+bring-up to return the corresponding error.  Verify registration after boot::
+
+   nsh> ls /dev
+
+The expected list contains ``spiN`` for each master and ``spislvN`` for each
+slave.  By default, ``nsh-spi`` registers ``/dev/spi0``, ``/dev/spi1``, and
+``/dev/spislv2``.
+
+Interrupt routing
+-----------------
+
+RXI and TXI use programmable SEL lines.  Their defaults are:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Channel
+     - TXI option and default
+     - RXI option and default
+   * - 0
+     - ``CONFIG_RZV2H_SPI0_TXI_INTSEL=428``
+     - ``CONFIG_RZV2H_SPI0_RXI_INTSEL=427``
+   * - 1
+     - ``CONFIG_RZV2H_SPI1_TXI_INTSEL=426``
+     - ``CONFIG_RZV2H_SPI1_RXI_INTSEL=425``
+   * - 2
+     - ``CONFIG_RZV2H_SPI2_TXI_INTSEL=424``
+     - ``CONFIG_RZV2H_SPI2_RXI_INTSEL=423``
+
+Do not assign one SEL interrupt to more than one event.  TEI and ERI do not
+have Kconfig selectors because SPI-B gives them fixed interrupt assignments.
+All four NuttX handlers enter the corresponding FSP ISR.  RXI, TXI, and TEI
+use rising-edge triggers; ERI uses a high-level trigger.
+
+Runtime API behavior
+--------------------
+
+``SPI_SETFREQUENCY()`` asks FSP to calculate a divider and returns the actual
+clock, which does not exceed the requested master frequency.  Requests above
+the hardware maximum select the maximum supported rate.  The lower half
+reopens the FSP instance to apply frequency or CPOL/CPHA changes.
+
+On a master, ``SPI_SETMODE()`` supports modes 0 through 3 and
+``SPI_SETBITS()`` accepts widths from 4 through 32 bits.  Word width is passed
+to each FSP transfer and does not require reopening the instance.  On a slave,
+the generic slave upper half supplies mode and width to ``bind()`` through
+``CONFIG_SPI_SLAVE_DRIVER_MODE`` and ``CONFIG_SPI_SLAVE_DRIVER_WIDTH``.  The
+external master alone supplies the bus clock, so the slave channel's initial
+frequency is unused.
+
+FSP wire mode
+-------------
+
+Each channel provides a mutually exclusive Kconfig choice:
+
+* ``CONFIG_RZV2H_SPI_CHANNEL_0_3WIRE``,
+  ``CONFIG_RZV2H_SPI_CHANNEL_1_3WIRE``, and
+  ``CONFIG_RZV2H_SPI_CHANNEL_2_3WIRE`` select
+  ``SPI_B_SSL_MODE_CLK_SYN`` for the corresponding channel.  This is the FSP
+  clock-synchronous method using MOSI, MISO, and RSPCK without hardware SSL
+  framing.  SSL remains unconfigured for both operating roles.
+* ``CONFIG_RZV2H_SPI_CHANNEL_0_4WIRE``,
+  ``CONFIG_RZV2H_SPI_CHANNEL_1_4WIRE``, and
+  ``CONFIG_RZV2H_SPI_CHANNEL_2_4WIRE`` select ``SPI_B_SSL_MODE_SPI``.  This
+  uses MOSI, MISO, RSPCK, and SSL.  The selected SSL route is a native SPI-B
+  peripheral output for a master or input for a slave.
+
+The 3-wire choice is the Kconfig default.  In 4-wire master mode, FSP and the
+SPI-B peripheral assert and deassert the selected SSL signal around a
+transfer.  The single board ``select()`` callback recognizes
+``SPIDEV_USER(0)`` but does not drive a GPIO: it ignores the request in 3-wire
+mode and leaves native SSL framing to SPI-B in 4-wire mode.  The corresponding
+master ``status()`` callback reports ``SPI_STATUS_PRESENT`` for
+``SPIDEV_USER(0)`` and zero for other device IDs.
+
+The FSP wire-mode setting is separate from the NuttX SPI modes 0 through 3
+selected by ``SPI_SETMODE()``.  Those modes control CPOL and CPHA.
+
+Master transfers use FSP asynchronously but block the calling NuttX task
+until the FSP completion callback runs.  Slave writes arm an FSP transfer and
+return without waiting for master clocks.
+
+Channel 1 master loopback test
+------------------------------
+
+The ``nsh-spi`` configuration enables channel 1 as a master with 3-wire
+clock-synchronous operation, mode 0, 8-bit words, and an initial frequency of
+1 MHz::
+
+   CONFIG_RZV2H_SPI_CHANNEL_1=y
+   CONFIG_RZV2H_SPI_CHANNEL_1_MASTER=y
+   CONFIG_RZV2H_SPI_CHANNEL_1_3WIRE=y
+   CONFIG_RZV2H_SPI_CHANNEL_1_FREQUENCY=1000000
+   CONFIG_RZV2H_SPI_CHANNEL_1_NBITS=8
+   CONFIG_RZV2H_SPI_CHANNEL_1_CPOL_LOW=y
+   CONFIG_RZV2H_SPI_CHANNEL_1_CPHA_ODD=y
+
+With the board powered off, connect channel 1 MOSI ``PB_1`` directly to
+channel 1 MISO ``PB_2``.  No SSL connection is required in 3-wire mode.
+Channel 1 RSPCK is available on ``PB_0`` for logic-analyzer measurements.
+
+.. warning::
+
+   ``PB_0``, ``PB_1``, and ``PB_2`` are multiplexed with board USB and camera
+   control signals.  Do not run a conflicting peripheral while using these
+   pins for SPI1, and verify the EVK connection before installing the
+   PB_1-to-PB_2 loopback jumper.
+
+After rebuilding and booting NuttX, verify that ``/dev/spi1`` is present and
+run::
+
+   nsh> spi exch -b1 -f1000000 -m0 -w8 -x4 AABBCCDD
+   Sending:        AA BB CC DD
+   Received:       AA BB CC DD
+
+Matching transmitted and received bytes validate the SPI1 pin multiplexing,
+master transfer, interrupt dispatch, and completion path.  The SPI clock is
+active only while data is transferred.  To measure its frequency, capture a
+clock burst on ``PB_0`` and measure between steady-state RSPCK edges rather
+than between separate transfers.
+
+Channel 0 master to channel 2 slave test
+----------------------------------------
+
+The intended inter-channel wiring is:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Channel 0 master
+     - Channel 2 slave
+   * - MOSI ``P9_0``
+     - MOSI ``PB_4``
+   * - MISO ``P9_1``
+     - MISO ``PB_3``
+   * - RSPCK ``P9_2``
+     - RSPCK ``PB_5``
+
+For the default 3-wire mode, do not connect channel 0 SSL ``P9_3`` to channel
+2 SSL ``PA_7``.  The slave does not use SSL in this mode.  Select 3-wire mode
+explicitly when reproducing this setup::
+
+   CONFIG_RZV2H_SPI_CHANNEL_0_3WIRE=y
+   CONFIG_RZV2H_SPI_CHANNEL_2_3WIRE=y
+
+For a 4-wire test, select 4-wire mode on both channels and add the SSL
+connection::
+
+   CONFIG_RZV2H_SPI_CHANNEL_0_4WIRE=y
+   CONFIG_RZV2H_SPI_CHANNEL_2_4WIRE=y
+
+Connect channel 0 SSLA0 ``P9_3`` to channel 2 SSLC0 ``PA_7``.  The board
+configures ``P9_3`` as the native SSLA0 peripheral output and ``PA_7`` as the
+native SSLC0 peripheral input.
+
+The ``nsh-spi`` configuration already selects channel 0 master, channel 2
+slave, mode 0, 8-bit words, the slave character driver, and the ``spislv``
+example.
+
+Queue four slave bytes, then clock one four-byte full-duplex transaction from
+the master::
+
+   nsh> spislv -p /dev/spislv2 -x 4 AABBCCDD &
+   Slave: Queuing 4 bytes for sending to master: AA BB CC DD
+   nsh> spi exch -b0 -f1000000 -m0 -w8 -x4 11223344
+   Sending:        11 22 33 44
+   Data received from master (4 bytes): 11 22 33 44
+   Received:       AA BB CC DD
+
+For listen-only validation, set
+``CONFIG_RZV2H_SPI_SLAVE_DEFAULT_NWORDS=4`` and run::
+
+   nsh> spislv -p /dev/spislv2 -l &
+   Slave: Listen-only mode activated. Waiting for data from master.
+   nsh> spi exch -b0 -f1000000 -m0 -w8 -x4 11223349
+   Sending:        11 22 33 49
+   Data received from master (4 bytes): 11 22 33 49
+   Received:       00 00 00 00
+
+The fixed listen length is required because FSP must know the transfer count
+before the master supplies clocks.  The all-zero master receive data is
+expected because no slave transmit block was queued.  Clocking fewer words
+leaves the transfer armed; clocking more words is outside the committed FSP
+transaction.
+
+SPI current limitations
+-----------------------
+
+* DMA, deferred-trigger transfers, optional hardware-feature control, and
+  master callback registration are not implemented.
+* Master device-ID mapping supports ``SPIDEV_USER(0)`` only.  Hardware SSL,
+  rather than a GPIO write in ``select()``, frames 4-wire transfers.
+  ``SPI_B_SSL_LEVEL_KEEP_DISABLE`` means that each FSP transfer has its own
+  SSL frame; ``select()`` cannot hold SSL active across multiple transfers.
+* A master synchronous transfer has no timeout.
+* ``cmddata()`` has no board D/C signal and returns ``-ENOSYS`` for the
+  supported device ID.  Runtime delay control accepts only an all-zero delay
+  request.
+* Both ends of an inter-channel test must use the same CPOL, CPHA, and word
+  width.  The master alone determines the bus frequency.
+
 Serial Consoles
 ===============
 
@@ -377,7 +772,7 @@ Bring-up
 ========
 
 This section describes what has been brought up so far for the CR8_0 core.
-Clock, MPU, GIC, timer, GPIO, and SCI-B UART support described on this
+Clock, MPU, GIC, timer, GPIO, SCI-B UART, and SPI-B support described on this
 page are implemented.  Board options not described here may still be
 placeholders.
 
@@ -457,3 +852,17 @@ active-low ``P0_0`` and ``P0_1`` LED outputs.  The generic ``/dev/gpio1`` and
 ``/dev/gpio2`` interfaces are also available for individual read/write
 testing.  Automatic OS-status LED control through ``CONFIG_ARCH_LEDS`` is
 not yet implemented.
+
+nsh-spi
+-------
+
+NuttShell configuration for SPI-B bring-up.  It enables the standard NuttX
+master character driver and ``apps/system/spi``, plus the generic SPI slave
+character driver and ``apps/examples/spislv_test``.  Channels 0 and 1 are
+configured as masters at 1 MHz, and channel 2 is configured as a slave.  All
+three use mode 0 and 8-bit words.  The master devices are registered as
+``/dev/spi0`` and ``/dev/spi1``.  The slave is registered as
+``/dev/spislv2`` and uses a four-word default listen transfer.
+
+For channel 1 loopback validation, connect ``PB_1`` to ``PB_2`` and use the
+documented ``spi exch -b1`` command.
