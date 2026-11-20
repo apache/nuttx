@@ -97,7 +97,7 @@ static ssize_t netprocfs_tcpstats(FAR struct netprocfs_file_s *priv,
                       " %3" PRIu8
                       " %4" PRIu32
                       " %3" PRIu8
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#if CONFIG_NET_SEND_BUFSIZE > 0 && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
                       " %6" PRIu32
 #endif
                       " %6u",
@@ -108,7 +108,7 @@ static ssize_t netprocfs_tcpstats(FAR struct netprocfs_file_s *priv,
                       conn->timer,
                       (uint32_t)conn->tx_unacked,
                       conn->nrtx,
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#if CONFIG_NET_SEND_BUFSIZE > 0 && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
                       tcp_wrbuffer_inqueue_size(conn),
 #endif
                       (conn->readahead) ? conn->readahead->io_pktlen : 0);
@@ -162,7 +162,7 @@ ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
         {
           len = snprintf(buffer, buflen, "TCP sl  "
                                          "st flg ref tmr uack nrt   "
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#if CONFIG_NET_SEND_BUFSIZE > 0 && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
                                           "txsz   "
 #endif
                                           "rxsz "

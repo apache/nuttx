@@ -61,7 +61,6 @@
 static uint32_t tcp_calc_rcvsize(FAR struct tcp_conn_s *conn,
                                  uint32_t recvwndo)
 {
-#if CONFIG_NET_RECV_BUFSIZE > 0
   uint32_t recvsize;
   uint32_t desire;
 
@@ -78,7 +77,6 @@ static uint32_t tcp_calc_rcvsize(FAR struct tcp_conn_s *conn,
     {
       recvwndo = 0;
     }
-#endif
 
   return recvwndo;
 }
