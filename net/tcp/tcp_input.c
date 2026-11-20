@@ -1468,6 +1468,8 @@ skip_rtt:
             }
           else if ((conn->tcpstateflags & TCP_STATE_MASK) <= TCP_FIN_WAIT_2)
             {
+              tcp_recvwindow_loss(dev, conn);
+
 #ifdef CONFIG_NET_TCP_OUT_OF_ORDER
               /* Queue out-of-order segments. */
 
