@@ -32,11 +32,13 @@
 
 #include <nuttx/debug.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/serial/uart_rpmsg.h>
+#include <nuttx/wqueue.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -49,6 +51,10 @@
 
 #define UART_RPMSG_TTY_WRITE            0
 #define UART_RPMSG_TTY_WAKEUP           1
+
+/* Retry delay when no TX buffer is free */
+
+#define UART_RPMSG_TXRETRY              MSEC2TICK(10)
 
 /****************************************************************************
  * Private Types
@@ -78,11 +84,14 @@ begin_packed_struct struct uart_rpmsg_wakeup_s
 struct uart_rpmsg_priv_s
 {
   struct rpmsg_endpoint ept;
+  struct work_s         txwork;
+  struct work_s         wakework;
   mutex_t               lock;
   char                  devname[UART_RPMSG_NAME_SIZE];
   char                  cpuname[UART_RPMSG_NAME_SIZE];
   FAR void              *recv_data;
   bool                  last_upper;
+  bool                  wakeup;
 };
 
 /****************************************************************************
@@ -110,10 +119,16 @@ static void uart_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
                                       FAR void *priv_);
 static int  uart_rpmsg_ept_cb(struct rpmsg_endpoint *ept, FAR void *data,
                               size_t len, uint32_t src, FAR void *priv_);
+static void uart_rpmsg_txwork(FAR void *arg);
+static void uart_rpmsg_wakework(FAR void *arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* Work queue that sends to the remote, shared by all devices */
+
+static FAR struct kwork_wqueue_s *g_uart_rpmsg_wqueue;
 
 static const struct uart_ops_s g_uart_rpmsg_ops =
 {
@@ -163,68 +178,32 @@ static bool uart_rpmsg_rxflowcontrol(FAR struct uart_dev_s *dev,
                                      unsigned int nbuffered, bool upper)
 {
   FAR struct uart_rpmsg_priv_s *priv = dev->priv;
-  FAR struct uart_rpmsg_wakeup_s msg;
 
-  nxmutex_lock(&priv->lock);
+  /* This may be called with the uart spinlock held, so the wakeup message,
+   * whose send may block, is sent by uart_rpmsg_wakework().
+   */
+
   if (!upper && upper != priv->last_upper)
     {
-      memset(&msg, 0, sizeof(msg));
-
-      msg.header.command = UART_RPMSG_TTY_WAKEUP;
-      if (is_rpmsg_ept_ready(&priv->ept))
-        {
-          rpmsg_send(&priv->ept, &msg, sizeof(msg));
-        }
+      priv->wakeup = true;
+      work_queue_wq(g_uart_rpmsg_wqueue, &priv->wakework,
+                    uart_rpmsg_wakework, dev, 0);
     }
 
   priv->last_upper = upper;
-  nxmutex_unlock(&priv->lock);
   return false;
 }
 
 static void uart_rpmsg_dmasend(FAR struct uart_dev_s *dev)
 {
   FAR struct uart_rpmsg_priv_s *priv = dev->priv;
-  FAR struct uart_dmaxfer_s *xfer = &dev->dmatx;
-  FAR struct uart_rpmsg_write_s *msg;
-  size_t len = xfer->length + xfer->nlength;
-  uint32_t space;
 
-  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
-  if (!msg)
-    {
-      dev->dmatx.length = 0;
-      return;
-    }
+  /* Called with the uart spinlock held, so the send, which may block, is
+   * done by uart_rpmsg_txwork().
+   */
 
-  memset(msg, 0, sizeof(*msg));
-
-  space = space - sizeof(*msg);
-
-  if (len > space)
-    {
-      len = space;
-    }
-
-  if (len > xfer->length)
-    {
-      memcpy(msg->data, xfer->buffer, xfer->length);
-      memcpy(msg->data + xfer->length, xfer->nbuffer, len - xfer->length);
-    }
-  else
-    {
-      memcpy(msg->data, xfer->buffer, len);
-    }
-
-  msg->count          = len;
-  msg->header.command = UART_RPMSG_TTY_WRITE;
-  msg->header.result  = -ENXIO;
-  msg->header.cookie  = (uintptr_t)dev;
-
-  if (rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len) < 0)
-    {
-      rpmsg_release_tx_buffer(&priv->ept, msg);
-    }
+  work_queue_wq(g_uart_rpmsg_wqueue, &priv->txwork, uart_rpmsg_txwork,
+                dev, 0);
 }
 
 static void uart_rpmsg_dmareceive(FAR struct uart_dev_s *dev)
@@ -269,14 +248,30 @@ static void uart_rpmsg_dmatxavail(FAR struct uart_dev_s *dev)
 {
   FAR struct uart_rpmsg_priv_s *priv = dev->priv;
 
-  nxmutex_lock(&priv->lock);
+  /* Called with the uart spinlock held.  Start a new transfer only when
+   * the previous one is done.
+   */
 
   if (is_rpmsg_ept_ready(&priv->ept) && dev->dmatx.length == 0)
     {
       uart_xmitchars_dma(dev);
     }
+}
 
-  nxmutex_unlock(&priv->lock);
+/****************************************************************************
+ * Name: uart_rpmsg_txavail
+ *
+ * Description:
+ *   Start a transfer from a context that does not hold the uart spinlock.
+ *
+ ****************************************************************************/
+
+static void uart_rpmsg_txavail(FAR struct uart_dev_s *dev)
+{
+  irqstate_t flags = uart_spinlock(dev, true);
+
+  uart_rpmsg_dmatxavail(dev);
+  uart_spinunlock(dev, true, flags);
 }
 
 static void uart_rpmsg_send(FAR struct uart_dev_s *dev, int ch)
@@ -326,7 +321,7 @@ static void uart_rpmsg_ns_bound(struct rpmsg_endpoint *ept)
 {
   FAR struct uart_dev_s *dev = ept->priv;
 
-  uart_rpmsg_dmatxavail(dev);
+  uart_rpmsg_txavail(dev);
 }
 
 static void uart_rpmsg_device_created(FAR struct rpmsg_device *rdev,
@@ -354,14 +349,26 @@ static void uart_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
   FAR struct uart_dev_s *dev = priv_;
   FAR struct uart_rpmsg_priv_s *priv = dev->priv;
 
+  irqstate_t flags;
+
+  /* Wait for the works to finish with the endpoint */
+
+  nxmutex_lock(&priv->lock);
+
   if (priv->ept.priv != NULL &&
       strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)) == 0)
     {
       rpmsg_destroy_ept(&priv->ept);
     }
 
+  nxmutex_unlock(&priv->lock);
+
+  /* Drop the transfer in progress */
+
+  flags = uart_spinlock(dev, true);
   dev->dmatx.nbytes = dev->dmatx.length + dev->dmatx.nlength;
   uart_xmitchars_done(dev);
+  uart_spinunlock(dev, true, flags);
 }
 
 static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
@@ -376,7 +383,7 @@ static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
     {
       /* Get write-cmd response, this tell how many data have sent */
 
-      nxmutex_lock(&priv->lock);
+      irqstate_t flags = uart_spinlock(dev, true);
 
       dev->dmatx.nbytes = header->result;
       if (header->result < 0)
@@ -386,14 +393,14 @@ static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
 
       uart_xmitchars_done(dev);
 
-      nxmutex_unlock(&priv->lock);
-
       /* If have sent some data succeed, then continue send */
 
       if (msg->count == header->result)
         {
           uart_rpmsg_dmatxavail(dev);
         }
+
+      uart_spinunlock(dev, true, flags);
     }
   else if (header->command == UART_RPMSG_TTY_WRITE)
     {
@@ -412,10 +419,137 @@ static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
     {
       /* Remote core have space, then wakeup current core, continue send */
 
-      uart_rpmsg_dmatxavail(dev);
+      uart_rpmsg_txavail(dev);
     }
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: uart_rpmsg_txwork
+ *
+ * Description:
+ *   Send the buffer prepared by uart_xmitchars_dma().  This runs without
+ *   the uart spinlock, so getting a TX buffer and sending may block.  The
+ *   transfer completes when the remote answers, in uart_rpmsg_ept_cb().
+ *
+ ****************************************************************************/
+
+static void uart_rpmsg_txwork(FAR void *arg)
+{
+  FAR struct uart_dev_s *dev = arg;
+  FAR struct uart_rpmsg_priv_s *priv = dev->priv;
+  FAR struct uart_dmaxfer_s *xfer = &dev->dmatx;
+  FAR struct uart_rpmsg_write_s *msg;
+  irqstate_t flags;
+  uint32_t space;
+  size_t len;
+  int ret = -ENOTCONN;
+
+  nxmutex_lock(&priv->lock);
+
+  /* Nothing to send when the transfer was dropped while queued */
+
+  flags = uart_spinlock(dev, true);
+  len = xfer->length + xfer->nlength;
+  uart_spinunlock(dev, true, flags);
+
+  if (len == 0)
+    {
+      nxmutex_unlock(&priv->lock);
+      return;
+    }
+
+  if (is_rpmsg_ept_ready(&priv->ept))
+    {
+      /* Do not wait for a TX buffer here: that would hold up the other
+       * works.  Try again later instead.
+       */
+
+      msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, false);
+      if (msg == NULL)
+        {
+          nxmutex_unlock(&priv->lock);
+          work_queue_wq(g_uart_rpmsg_wqueue, &priv->txwork,
+                        uart_rpmsg_txwork, dev, UART_RPMSG_TXRETRY);
+          return;
+        }
+
+      memset(msg, 0, sizeof(*msg));
+
+      space = space - sizeof(*msg);
+
+      if (len > space)
+        {
+          len = space;
+        }
+
+      if (len > xfer->length)
+        {
+          memcpy(msg->data, xfer->buffer, xfer->length);
+          memcpy(msg->data + xfer->length, xfer->nbuffer,
+                 len - xfer->length);
+        }
+      else
+        {
+          memcpy(msg->data, xfer->buffer, len);
+        }
+
+      msg->count          = len;
+      msg->header.command = UART_RPMSG_TTY_WRITE;
+      msg->header.result  = -ENXIO;
+      msg->header.cookie  = (uintptr_t)dev;
+
+      ret = rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len);
+      if (ret < 0)
+        {
+          rpmsg_release_tx_buffer(&priv->ept, msg);
+        }
+    }
+
+  nxmutex_unlock(&priv->lock);
+
+  /* No answer will come: end the transfer and keep the data in the xmit
+   * buffer for the next write.
+   */
+
+  if (ret < 0)
+    {
+      flags = uart_spinlock(dev, true);
+      xfer->nbytes = 0;
+      uart_xmitchars_done(dev);
+      uart_spinunlock(dev, true, flags);
+    }
+}
+
+/****************************************************************************
+ * Name: uart_rpmsg_wakework
+ *
+ * Description:
+ *   Tell the remote that there is free space in the receive buffer.
+ *
+ ****************************************************************************/
+
+static void uart_rpmsg_wakework(FAR void *arg)
+{
+  FAR struct uart_dev_s *dev = arg;
+  FAR struct uart_rpmsg_priv_s *priv = dev->priv;
+  struct uart_rpmsg_wakeup_s msg;
+
+  nxmutex_lock(&priv->lock);
+
+  if (priv->wakeup)
+    {
+      priv->wakeup = false;
+      memset(&msg, 0, sizeof(msg));
+      msg.header.command = UART_RPMSG_TTY_WAKEUP;
+      if (is_rpmsg_ept_ready(&priv->ept))
+        {
+          rpmsg_send(&priv->ept, &msg, sizeof(msg));
+        }
+    }
+
+  nxmutex_unlock(&priv->lock);
 }
 
 /****************************************************************************
@@ -429,6 +563,17 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
   FAR struct uart_dev_s *dev;
   char name[32];
   int ret;
+
+  if (g_uart_rpmsg_wqueue == NULL)
+    {
+      g_uart_rpmsg_wqueue =
+        work_queue_create("uart_rpmsg", CONFIG_RPMSG_WQUEUE_PRIORITY, NULL,
+                          CONFIG_RPMSG_WQUEUE_STACKSIZE, 1);
+      if (g_uart_rpmsg_wqueue == NULL)
+        {
+          return -ENOMEM;
+        }
+    }
 
   dev = kmm_zalloc(sizeof(struct uart_dev_s) +
                    sizeof(struct uart_rpmsg_priv_s) +
