@@ -256,7 +256,11 @@ pid_t up_fork(bool vfork)
    * case trap because of csa_addr[0] inconsistent value
    */
 
-  __asm__ __volatile__ ("rslcx" ::: "memory");
+  __asm__ __volatile__ ("rslcx" ::: "memory",
+                        "d0", "d1", "d2", "d3",
+                        "d4", "d5", "d6", "d7",
+                        "a2", "a3", "a4", "a5",
+                        "a6", "a7");
 
   sinfo("lcsa=0x%zX pucsa=%p recalc=%p\n",
         context.lcsa[TRICORE_CSA_NEXT], context.pucsa,
