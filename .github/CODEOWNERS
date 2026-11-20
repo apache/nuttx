@@ -13812,7 +13812,6 @@ fs/littlefs/Kconfig yamamoto@midokura.com igy1000mb@gmail.com you@example.com li
 fs/littlefs/lfs_getpath.patch chenrun1@xiaomi.com
 fs/littlefs/lfs_getsetattr.patch zhouliang3@xiaomi.com devel@sumpfralle.de
 fs/littlefs/lfs_nuttx_defines.h yamamoto@midokura.com
-fs/littlefs/lfs_util.patch radek.pesina@motec.com.au chenrun1@xiaomi.com
 fs/littlefs/lfs_vfs.c xiaoxiang@xiaomi.com li8303@163.com zhouliang3@xiaomi.com dongjiuzhu1@xiaomi.com abdelatif.guettouche@gmail.com
 fs/littlefs/lfs_vfs.h xiaoxiang@xiaomi.com alin.jerpelea@sony.com
 

@@ -144,7 +144,7 @@ config FS_LITTLEFS_ATTR_MAX
 
 config FS_LITTLEFS_LOCAL_PATCHES
 	bool
-	depends on FS_LITTLEFS_VERSION = "v2.5.1"
+	depends on FS_LITTLEFS_VERSION = "v2.11.2"
 	default y
 	---help---
 		For the internal use to control the application of NuttX local
@@ -153,7 +153,6 @@ config FS_LITTLEFS_LOCAL_PATCHES
 
 config FS_LITTLEFS_HAS_LFS_DEFINES
 	bool "Use LFS_DEFINES (available for littlefs >=2.10.0)"
-	depends on !FS_LITTLEFS_LOCAL_PATCHES
 	default y
 	---help---
 		Set this y if you are using littlefs versions which supports
@@ -172,7 +171,7 @@ config FS_LITTLEFS_ATTR_UPDATE
 		Enable support for attributes when create a file.
 
 		CAVEAT: This feature is implemented with NuttX specific
-		modifications to LITTLEFS v2.5.1. The modifications might
+		modifications to LITTLEFS v2.11.2. The modifications might
 		not be compatible with other versions of LITTLEFS.
 
 config FS_LITTLEFS_GETPATH
@@ -183,12 +182,12 @@ config FS_LITTLEFS_GETPATH
 		FIOC_FILEPATH ioctl support for LITTLEFS file system.
 
 		CAVEAT: This feature is implemented with NuttX specific
-		modifications to LITTLEFS v2.5.1. The modifications might
+		modifications to LITTLEFS v2.11.2. The modifications might
 		not be compatible with other versions of LITTLEFS.
 
 config FS_LITTLEFS_VERSION
 	string "LITTLEFS version to use"
-	default "v2.5.1"
+	default "v2.11.2"
 	---help---
 		The LITTLEFS version to use.
 
