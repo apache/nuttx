@@ -188,8 +188,13 @@ function(nuttx_add_romfs)
             copy_directory ${PATH} romfs_${NAME} \; fi
     COMMAND genromfs -f ${IMGNAME} -d romfs_${NAME} -V ${NAME}
     COMMAND xxd -i ${IMGNAME} romfs_${NAME}.${EXTENSION}
-    COMMAND if ! [ -z "${NONCONST}" ]\; then sed -E -i'' -e
-            "s/^unsigned/const unsigned/g" romfs_${NAME}.${EXTENSION} \; fi
+    COMMAND
+      if ! [ -z "${NONCONST}" ]\; then sed -E -i'' -e
+      "s/^unsigned char/const unsigned char aligned_data\\(4\\)/g"
+      romfs_${NAME}.${EXTENSION} \; fi
+    COMMAND
+      bash -c
+      'sed -i \"1i\\\#include <nuttx/compiler.h>\" romfs_${NAME}.${EXTENSION}'
     DEPENDS ${DEPENDS})
 
   if(NOT HEADER)
@@ -482,7 +487,10 @@ function(process_all_directory_romfs)
             etc romfs_etc \; fi
     COMMAND genromfs -f romfs.img -d romfs_etc -V etc
     COMMAND xxd -i romfs.img romfs_etc.c
-    COMMAND sed -E -i'' -e "s/^unsigned/const unsigned/g" romfs_etc.c
+    COMMAND
+      sed -E -i'' -e
+      "s/^unsigned char/const unsigned char aligned_data\\(4\\)/g" romfs_etc.c
+    COMMAND bash -c 'sed -i \"1i\\\#include <nuttx/compiler.h>\" romfs_etc.c'
     DEPENDS ${DEPENDS})
 
   add_custom_target(target-romfs DEPENDS ${DEPENDS})
