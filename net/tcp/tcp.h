@@ -126,6 +126,7 @@
 
 #define TCP_RESET             0x20U /* The peer reset the connection */
 #define TCP_RESETERR          0x40U /* ECONNRESET of it not yet reported */
+#define TCP_SYNFIRST          0x80U /* The first SYN of connect() not sent */
 
 /* The Max Range count of TCP Selective ACKs */
 

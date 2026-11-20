@@ -176,6 +176,11 @@ config NET_TCP_MAXRTX
 config NET_TCP_MAXSYNRTX
 	int "Maximum retransmitted number of TCP/IP SYN packet"
 	default 5
+	---help---
+		The number of times that the SYN of connect(), or the SYN-ACK of a
+		connection that a listener accepts, is sent again when no answer
+		comes.  The first SYN or SYN-ACK is not counted: connect() sends
+		at most NET_TCP_MAXSYNRTX + 1 SYNs.
 
 config NET_TCP_WAIT_TIMEOUT
 	int "TIME_WAIT Length of TCP/IP connections"

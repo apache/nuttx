@@ -1636,6 +1636,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   conn->tx_unacked = 1;    /* TCP length of the SYN is one. */
   conn->nrtx       = 0;
   conn->timeout    = true; /* Send the SYN immediately. */
+  conn->flags     |= TCP_SYNFIRST;
   conn->rto        = TCP_RTO;
   conn->sa         = 0;
   conn->sv         = 16;   /* Initial value of the RTT variance. */
