@@ -62,29 +62,7 @@ else()
   message(FATAL_ERROR "CMAKE_SYSTEM_PROCESSOR not set")
 endif()
 
-get_directory_property(TOOLCHAIN_DIR_FLAGS DIRECTORY ${NUTTX_DIR}
-                                                     COMPILE_OPTIONS)
-
-set(NUTTX_EXTRA_FLAGS "")
-foreach(FLAG ${TOOLCHAIN_DIR_FLAGS})
-  if(FLAG IN_LIST COMPILE_ONLY_FLAGS)
-    continue()
-  endif()
-  if(NOT FLAG MATCHES "^\\$<.*>$")
-    list(APPEND NUTTX_EXTRA_FLAGS ${FLAG})
-  else()
-    string(REGEX MATCH "\\$<\\$<COMPILE_LANGUAGE:C>:(.*)>" matched ${FLAG})
-    if(matched)
-      list(APPEND NUTTX_EXTRA_FLAGS ${CMAKE_MATCH_1})
-    endif()
-  endif()
-endforeach()
-
-if(NUTTX_EXTRA_FLAGS)
-  list(REMOVE_DUPLICATES NUTTX_EXTRA_FLAGS)
-endif()
-
-set_property(GLOBAL PROPERTY NUTTX_EXTRA_FLAGS ${NUTTX_EXTRA_FLAGS})
+nuttx_collect_extra_flags()
 
 separate_arguments(CMAKE_C_FLAG_ARGS NATIVE_COMMAND ${CMAKE_C_FLAGS})
 
