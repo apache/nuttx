@@ -37,25 +37,76 @@
 #include <arpa/inet.h>
 
 #include <nuttx/net/dns.h>
+#if CONFIG_TLS_NCLEANUP > 0
+#  include <nuttx/tls.h>
+#endif
 
 #include "netdb/lib_dns.h"
 
 #ifdef CONFIG_NETDB_DNSCLIENT
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDB_RESOLVCONF
+struct dns_foreach_resolvconf_s
+{
+  FAR FILE *stream;
+  bool locked;
+};
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 #ifdef CONFIG_NETDB_RESOLVCONF
+
+/****************************************************************************
+ * Name: dns_foreach_cleanup
+ *
+ * Description:
+ *   Cleanup handler for dns_foreach_nameserver() resolvconf path.
+ *   Releases the DNS lock (if held) and closes the resolv.conf stream.
+ *
+ ****************************************************************************/
+
+#if CONFIG_TLS_NCLEANUP > 0
+static void dns_foreach_cleanup(FAR void *arg)
+{
+  FAR struct dns_foreach_resolvconf_s *state = arg;
+
+  if (state->locked)
+    {
+      unsigned int count;
+
+      /* Release all nesting levels of the recursive DNS lock */
+
+      dns_breaklock(&count);
+    }
+
+  fclose(state->stream);
+}
+#endif
+
 static FAR char *skip_spaces(FAR char *ptr)
 {
-  while (isspace(*ptr)) ptr++;
+  while (isspace(*ptr))
+    {
+      ptr++;
+    }
+
   return ptr;
 }
 
 static FAR char *find_spaces(FAR char *ptr)
 {
-  while (*ptr && !isspace(*ptr)) ptr++;
+  while (*ptr && !isspace(*ptr))
+    {
+      ptr++;
+    }
+
   return ptr;
 }
 #endif
@@ -77,8 +128,8 @@ static FAR char *find_spaces(FAR char *ptr)
 
 int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 {
+  struct dns_foreach_resolvconf_s state;
   union dns_addr_u u;
-  FAR FILE *stream;
   char line[DNS_MAX_LINE];
   FAR char *addrstr;
   FAR char *ptr;
@@ -89,8 +140,8 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
   /* Open the resolver configuration file */
 
-  stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "r");
-  if (stream == NULL)
+  state.stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "r");
+  if (state.stream == NULL)
     {
       ret = -get_errno();
       nerr("ERROR: Failed to open %s: %d\n",
@@ -99,10 +150,16 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
       return ret;
     }
 
+  state.locked = false;
+#if CONFIG_TLS_NCLEANUP > 0
+  tls_cleanup_push(tls_get_info(), dns_foreach_cleanup, &state);
+#endif
+
   dns_lock();
+  state.locked = true;
 
   keylen = strlen(NETDB_DNS_KEYWORD);
-  while (fgets(line, DNS_MAX_LINE, stream) != NULL)
+  while (fgets(line, DNS_MAX_LINE, state.stream) != NULL)
     {
       ptr = skip_spaces(line);
       if (strncmp(ptr, NETDB_DNS_KEYWORD, keylen) == 0)
@@ -190,10 +247,12 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
             {
               u.ipv4.sin_family = AF_INET;
               u.ipv4.sin_port   = port;
+              state.locked = false;
               dns_breaklock(&count);
               ret = callback(arg, (FAR struct sockaddr *)&u.ipv4,
                              sizeof(struct sockaddr_in));
               dns_restorelock(count);
+              state.locked = true;
             }
           else
 #endif
@@ -211,10 +270,12 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
                 {
                   u.ipv6.sin6_family = AF_INET6;
                   u.ipv6.sin6_port   = port;
+                  state.locked = false;
                   dns_breaklock(&count);
                   ret = callback(arg, (FAR struct sockaddr *)&u.ipv6,
                                  sizeof(struct sockaddr_in6));
                   dns_restorelock(count);
+                  state.locked = true;
                 }
               else
 #endif
@@ -233,8 +294,12 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
         }
     }
 
+  state.locked = false;
   dns_unlock();
-  fclose(stream);
+#if CONFIG_TLS_NCLEANUP > 0
+  tls_cleanup_pop(tls_get_info(), 0);
+#endif
+  fclose(state.stream);
   return ret;
 }
 
