@@ -296,6 +296,22 @@ function(nuttx_add_external_library target)
     set_property(GLOBAL APPEND PROPERTY NUTTX_APPS_LIBRARIES ${target})
   elseif("${ARGS_MODE}" STREQUAL "KERNEL")
     set_property(GLOBAL APPEND PROPERTY NUTTX_KERNEL_LIBRARIES ${target})
+    # we should treat external library same in PROTECTED and KERNEL mode which
+    # its select MODE KERNEL
+    if(NOT CONFIG_BUILD_FLAT)
+      target_compile_options(
+        ${target}
+        PRIVATE
+          $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_COMPILE_OPTIONS>>)
+      target_compile_definitions(
+        ${target}
+        PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_DEFINITIONS>>)
+      target_include_directories(
+        ${target}
+        PRIVATE
+          $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_INCLUDE_DIRECTORIES>>
+      )
+    endif()
   endif()
   nuttx_add_library_internal(${target})
 endfunction()
