@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <sys/random.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -64,7 +65,7 @@ ssize_t getrandom(FAR void *bytes, size_t nbytes, unsigned int flags)
 {
   int oflags = O_RDONLY;
   FAR const char *dev;
-  int fd;
+  _NX_FILE file;
   ssize_t ret;
 
   if ((flags & GRND_NONBLOCK) != 0)
@@ -81,23 +82,23 @@ ssize_t getrandom(FAR void *bytes, size_t nbytes, unsigned int flags)
       dev = "/dev/urandom";
     }
 
-  fd = _NX_OPEN(dev, oflags);
-  if (fd < 0)
+  ret = _NX_FILE_OPEN(&file, dev, oflags, 0);
+  if (ret < 0)
     {
-      _NX_SETERRNO(fd);
-      return fd;
+      set_errno(-_NX_FILE_ERRVAL(ret));
+      return ERROR;
     }
 
-  ret = _NX_READ(fd, bytes, nbytes);
+  ret = _NX_FILE_READ(&file, bytes, nbytes);
   if (ret < 0)
     {
       /* An error occurred on the read. */
 
-      _NX_SETERRNO(ret);
+      set_errno(-_NX_FILE_ERRVAL(ret));
       ret = ERROR;
     }
 
-  _NX_CLOSE(fd);
+  _NX_FILE_CLOSE(&file);
 
   return ret;
 }

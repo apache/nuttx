@@ -34,6 +34,7 @@
 #include <elf.h>
 
 #include <nuttx/addrenv.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/list.h>
 
 /****************************************************************************
@@ -50,8 +51,8 @@
  * blocks in place.  The loader holds the pin through a file reference,
  * because the unload runs on another task.
  *
- * That reference is taken with file_get() and file_dup2(), which are kernel
- * side, so this is for the copy of libc that runs there.
+ * That reference is taken with file_dup2(), which is kernel side, so this
+ * is for the copy of libc that runs there.
  */
 
 #if defined(CONFIG_FS_PIN) && \
@@ -273,7 +274,7 @@ struct mod_loadinfo_s
   uint16_t      strtabidx;   /* String table section index */
   uint16_t      dsymtabidx;  /* Dynamic symbol table section index */
   uint16_t      buflen;      /* size of iobuffer[] */
-  int           filfd;       /* Descriptor for the file being loaded */
+  _NX_FILE      file;        /* The file being loaded */
   int           nexports;    /* ET_DYN - Number of symbols exported */
   uintptr_t     xipbase;     /* if elf is position independent, and use
                               * romfs/tmps, we can try get xipbase,

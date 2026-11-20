@@ -294,23 +294,28 @@ static int gcov_reboot_notify(FAR struct notifier_block *nb,
 static int gcov_standard_dump(FAR struct dump_args *args,
                               FAR char *path, FAR uint8_t *data, size_t size)
 {
-  int written;
-  int fd;
+  ssize_t written;
+  _NX_FILE file;
+  int ret;
 
-  fd = _NX_OPEN(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-  if (fd < 0)
+  ret = _NX_FILE_OPEN(&file, path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (ret < 0)
     {
-      return -errno;
+      return _NX_FILE_ERRVAL(ret);
     }
 
-  written = _NX_WRITE(fd, data, size);
-  if (written != size)
+  written = _NX_FILE_WRITE(&file, data, size);
+  if (written < 0)
     {
-      return -errno;
+      ret = _NX_FILE_ERRVAL(written);
+    }
+  else
+    {
+      ret = (size_t)written == size ? OK : -EIO;
     }
 
-  _NX_CLOSE(fd);
-  return OK;
+  _NX_FILE_CLOSE(&file);
+  return ret;
 }
 
 static int gcov_onefile_dump(FAR struct dump_args *args,
