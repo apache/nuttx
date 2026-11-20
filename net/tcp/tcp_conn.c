@@ -1329,7 +1329,6 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
 
       conn->tx_unacked       = 1;
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      conn->expired          = 0;
       conn->isn              = 0;
       conn->sent             = 0;
       conn->sndseq_max       = tcp_getsequence(conn->sndseq) + 1;
@@ -1646,7 +1645,6 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   tcp_initsequence(conn);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  conn->expired    = 0;
   conn->isn        = 0;
   conn->sent       = 0;
   conn->sndseq_max = tcp_getsequence(conn->sndseq) + 1;
