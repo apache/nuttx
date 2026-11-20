@@ -44,6 +44,7 @@ PWM         Yes      GPT (General PWM Timer) PWM on channels 0-15
 CAN         Yes      CAN-FD on channels 0-5
 QSPI        Yes      xSPI controller in QSPI mode, manual-command transfers only
 RTC         Yes      Calendar, one-shot alarm, periodic wakeup, system clock.
+OpenAMP     Yes      RPTUN/RPMsg transport using shared memory and MHU-B (Mailbox)
 ==========  =======  ============================================================
 
 CLOCK
@@ -308,6 +309,27 @@ exceed the requested frequency.
 
 See :doc:`the RZV2H-EVK board documentation <boards/rzv2h-evk/index>` for
 board-level bring-up, partitioning, and configuration details.
+
+OpenAMP
+-------
+
+NuttX on CR8_0 can communicate with Linux on CA55 through the generic
+RPTUN/OpenAMP RPMsg stack. Linux is the VirtIO master and NuttX is the
+device. Shared memory holds the resource table, vrings and message
+buffers; the RZ/V2H lower half uses MHU-B (Mailbox) for notifications.
+
+``CONFIG_RZV2H_RPTUN`` enables the transport. The current EVK and RDK
+``nsh-openamp`` configurations select channel 1 and provide the
+``rpmsg-service-1`` echo endpoint for a compatible Renesas Multi-OS
+v3.3.0 Linux peer. NuttX activates one channel at a time, and the
+Linux peer must use matching memory reservations and mailbox routing.
+
+Boot and test procedures are board-specific. The EVK and RDK configuration
+generates single uboot images for U-Boot. Neither documented flow uses Linux
+kernel RemoteProc to load NuttX. See the
+:doc:`EVK board guide </platforms/arm/rzv2h/boards/rzv2h-evk/index>`
+and :doc:`RDK board guide </platforms/arm/rzv2h/boards/rzv2h-rdk/index>`
+for configuration, boot, Linux peer requirements and RPMsg testing.
 
 Supported Boards
 ================

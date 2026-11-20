@@ -549,8 +549,8 @@ RIIC I2C, with the SCI I2C bus number::
    nsh> i2c set -b 17 -a 0x50 -r 0x10 0x5a
    nsh> i2c reset -b 17
 
-PWM
-===
+PWM (GPT)
+=========
 
 The RZV2H-EVK exposes GPT-based PWM output on channels 0 through 15.
 
@@ -1088,6 +1088,186 @@ The system clock is seeded from the RTC at boot. If the RTC has never been
 started it falls back to the build-time default date and the boot log prints
 ``rzv2h_rtc: RTC not set; using build-time default date``. See the Real-Time
 Clock (RTC) section above for configuration and NSH usage.
+OpenAMP
+========
+
+The ``nsh-openamp`` configuration runs NuttX on CR8_0 as the remote side of the
+RZ/V Multi-OS v3.3.0 Linux RPMsg sample. It enables the RPTUN lower
+half, channel 1, and the ``rpmsg-service-1`` echo endpoint. The MHU-B
+notification uses channel 3 (FSP IRQ 314); the resource-table entry is
+at ``0x42f00070``, the two VRings are at ``0x43100000`` and
+``0x43150000``, and RPMsg buffers start at ``0x43500000``.
+Only one RPMsg channel is active in NuttX at a time.
+
+The Linux peer must reserve ``0x42f00000--0x42f01fff`` for the
+resource table/MHU shared memory and ``0x43000000--0x437fffff``
+for RPMsg, with matching MHU routing. A mismatched Linux image may
+fail to notify NuttX or corrupt shared memory.
+
+Configuration and build
+-----------------------
+
+From the NuttX source directory::
+
+   $ tools/configure.sh rzv2h-evk:nsh-openamp
+   $ make -j4
+
+The defconfig selects ``CONFIG_RZV2H_RPTUN=y``,
+``CONFIG_RZV2H_RPTUN_CHANNEL1=y``,
+``CONFIG_RZV2H_RPTUN_ECHO=y``,
+``CONFIG_RPMSG_LOCAL_CPUNAME="cr8-0"``, and
+``CONFIG_RZV2H_UBOOT_IMAGE=y``. It uses SCI2 for the 115200-8N1
+NuttShell console. The build creates ``nuttx_uboot.bin`` in the
+NuttX build directory. It contains the initialized SRAM image and starts
+with a load copy of the vectors.
+
+.. note::
+
+   SCI peripheral and pin ownership must not conflict between NuttX on
+   CR8_0 and Linux on CA55. For the tested EVK pairing, SCI2 (TX on
+   ``P5_4``, RX on ``P5_5``) was checked as non-conflicting. This check is
+   specific to that Linux image and device tree. If the Linux image, DTB,
+   overlays, or console assignment changes, verify that Linux does not
+   enable SCI2 or remux these pins; otherwise the NuttX console may fail.
+
+Procedure
+---------
+
+Build the Linux image
+~~~~~~~~~~~~~~~~~~~~~
+
+The Linux side runs the Multi-OS v3.3.0 RPMsg peer. Download the
+`RZV Multi-OS Package v3.3.0
+<https://www.renesas.com/en/document/sws/rzv-multi-os-package-v330>`_ and
+integrate it into the RZ/V2H AI SDK Yocto build as described in section
+"3.2 Integration of Multi-OS Package related stuff" of the
+RZ/V2H Multi-OS quick start guide (r01qs0077ej0330-rzv2h-multi-os-pkg.pdf), available from the download link above.
+Starting CR8_0 from U-Boot needs SRAM region access, so keep this line
+enabled in ``meta-rz-features/meta-rz-multi-os/meta-rzv2h/conf/layer.conf``
+(newer packages spell it ``MACHINE_FEATURES:append = " RZ_SRAM_REGION_ACCESS"``)::
+
+   MACHINE_FEATURES_append = " SRAM_REGION_ACCESS"
+
+After the build, the following artifacts are in the Yocto deploy
+directory (``build/tmp/deploy/images``):
+
+- Boot loader: ``bl2_bp_spi-rzv2h-evk-ver1.srec`` and
+  ``fip-rzv2h-evk-ver1.srec``
+- Flash Writer: ``Flash_Writer_SCIF_RZV2H_DEV_INTERNAL_MEMORY.mot``
+- SD card image: ``core-image-weston-rzv2h-evk-ver1.wic.gz`` and
+  ``core-image-weston-rzv2h-evk-ver1.wic.bmap``
+
+Write the boot loader with Flash Writer as described in the AI SDK guide.
+
+Prepare the SD card
+~~~~~~~~~~~~~~~~~~~
+
+Write the SD card image by following "Write the Linux files to SD card"
+in the AI SDK guide. Then copy ``nuttx_uboot.bin`` from the NuttX build
+directory to ``boot/`` on the card's second (ext4) partition::
+
+   $ sudo mkdir -p /mnt/sd
+   $ sudo mount /dev/sdb2 /mnt/sd
+   $ sudo cp nuttx_uboot.bin /mnt/sd/boot
+   $ sync
+   $ sudo umount /mnt/sd
+
+.. warning::
+
+   Replace ``/dev/sdb`` with the device name of your microSD card. Check
+   it with ``lsblk`` before mounting or writing anything.
+
+Insert the card into the EVK's SD2 slot. The U-Boot commands below
+assume its second partition is ``mmc 0:2``.
+
+Start NuttX and Linux from U-Boot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Connect a terminal (115200-8N1) to the U-Boot console on CN12, power on
+the board, and press any key within 3 seconds to stop autoboot. Back up
+the existing environment and check
+``printenv sd0load bootimage prodsd0bootargs``. Enter each ``setenv``
+command as **one line**; quoting preserves the semicolons::
+
+   => setenv cr80start 'dcache off; mw.l 0x10420D24 0x04000000; mw.l 0x10420600 0xE000E000; mw.l 0x10420604 0x00030003; mw.l 0x10420908 0x1FFF0000; mw.l 0x10420C44 0x003F0000; mw.l 0x10420C14 0x00000000; mw.l 0x10420908 0x10001000; mw.l 0x10420C48 0x00000020; mw.l 0x10420908 0x1FFF1FFF; mw.l 0x10420C48 0x00000000; mw.l 0x12040000 0xe51ff004; mw.l 0x12040004 0x08180000; ext4load mmc 0:2 0x08180000 boot/nuttx_uboot.bin; mw.l 0x10420C14 0x00000003; dcache on'
+   => run cr80start
+   => setenv prodsd0bootargs 'setenv bootargs rw rootwait earlycon root=/dev/mmcblk0p2 clk_ignore_unused'
+   => run sd0load
+   => run bootimage
+
+``cr80start`` runs these commands in order. The step numbers refer to
+``release_reset_cr8()`` in the Renesas Multi-OS v3.3.0 CM33 sample
+(``src/cr8_start.c``).
+
+.. list-table::
+   :header-rows: 1
+   :widths: 45 55
+
+   * - Command
+     - Purpose
+   * - ``dcache off``
+     - Turn off the U-Boot data cache so the writes below reach memory directly
+   * - ``mw.l 0x10420D24 0x04000000``
+     - Release the CR8 bus module stop
+   * - ``mw.l 0x10420600 0xE000E000``, ``mw.l 0x10420604 0x00030003``
+     - Turn on CR8 clocks: CR8_0_PERIPHCLK, ACLK, ATCLK0 (CLKON_0) and TSCLK, DBGCLK (CLKON_1)
+   * - ``mw.l 0x10420908 0x1FFF0000``
+     - Assert CR8 resets (CPG_RST_2)
+   * - ``mw.l 0x10420C44 0x003F0000``
+     - Step 2: set CPG_LP_CR8_CTL3 request bits
+   * - ``mw.l 0x10420C14 0x00000000``
+     - Step 3: CPG_CR8_CONFIG1 = 0, "Disable fetch" (CPU halted)
+   * - ``mw.l 0x10420908 0x10001000``
+     - Step 4: release CR8_0_NMISCRESET (RSTB12)
+   * - ``mw.l 0x10420C48 0x00000020``
+     - Step 6: write RESET_TRIG
+   * - ``mw.l 0x10420908 0x1FFF1FFF``
+     - Step 8: release all CR8 resets
+   * - ``mw.l 0x10420C48 0x00000000``
+     - Step 10: clear RESET_TRIG
+   * - ``mw.l 0x12040000 0xe51ff004``
+     - Load the program into ITCM (``copy_cr8_prog()``; the reset vector at 0x12040000 is 0x42040000 in the CM33 view): ITCM word 0 = ``ldr pc, [pc, #-4]``
+   * - ``mw.l 0x12040004 0x08180000``
+     - ITCM word 1 = jump target 0x08180000
+   * - ``ext4load mmc 0:2 0x08180000 boot/nuttx_uboot.bin``
+     - Load the program (``copy_cr8_prog()``): NuttX image into RCPU-SRAM
+   * - ``mw.l 0x10420C14 0x00000003``
+     - Step 12: nCPUHALT = 3, "Enable fetch"
+   * - ``dcache on``
+     - Turn the U-Boot data cache back on
+
+``cr80start`` powers up CR8_0 and keeps it halted while its resets are
+released. It then writes the two-word reset trampoline into ITCM (see
+`Linker script`_), loads ``nuttx_uboot.bin`` into RCPU-SRAM at
+0x08180000, and lets CR8_0 start fetching. NuttX is started before
+Linux; Linux kernel RemoteProc is **not** used to load NuttX in this
+flow.
+
+The ``clk_ignore_unused`` argument stops Linux's unused-clock pass from
+disabling clocks needed by CR8_0. By default Linux owns all clock
+configuration, and peripherals it does not enable itself enter Module
+Standby after the kernel boots; see section 3.3 of the
+`RZV Multi-OS Package v3.3.0
+<https://www.renesas.com/en/document/sws/rzv-multi-os-package-v330?r=25578220>`__.
+The argument does not resolve
+peripheral-ownership conflicts. ``saveenv`` is optional after the
+commands are verified; it persists the modified environment. If the
+Linux image uses other boot variables, follow its verified Linux boot
+procedure instead.
+
+Linux RPMsg test
+----------------
+
+Log in to Linux as ``root`` and run::
+
+   # rpmsg_sample_client
+
+Select option ``4`` (CR8 core0, channel 1). NuttX should register
+``/dev/rptun/linux`` and create ``rpmsg-service-1`` when the RPMsg
+device is ready. Success requires the Linux client to receive and
+validate echoed payloads; endpoint creation alone is insufficient.
+When the client sends its shutdown word, NuttX logs the shutdown and
+re-arms RPTUN for another Linux session.
 
 Linker script
 -------------
@@ -1097,20 +1277,29 @@ map for CR8_0:
 
 - ``ITCM``  0x00000000, 128 KB
 - ``DTCM``  0x00020000, 128 KB
-- ``RAM``   0x08180000, 512 KB (RCPU-SRAM; holds .vectors, .text, .data,
-  .bss, heap and stack)
+- ``RAM``   0x08180000, 512 KB (RCPU-SRAM; holds .text, .data, .bss,
+  heap, stack, and the .vectors load image)
 
-The exception vector table is linked into RAM (an LMA of 0 could not be
-written by the debugger before ITCM is mapped) and copied into ITCM by
-``arm_boot()`` at runtime. The read-only code region
-(``__mpu_code_start``..``__mpu_code_end``) is padded up to a power of two so
-the MPU code window above can be programmed as an exact-fit region with no
-sub-region mask.
+The exception vector table always runs from ITCM at 0x00000000 and always
+has a load copy at the start of SRAM, which ``arm_boot()`` copies to ITCM.
+Debugger configurations link ``.vectors`` in SRAM. With
+``CONFIG_RZV2H_UBOOT_IMAGE``, the table is linked at its ITCM address and
+stored in SRAM (``> ITCM AT> RAM``). Because CR8_0 takes its reset vector
+from ITCM, ``cr80start`` writes a two-word trampoline there before
+releasing CR8_0: ``mw.l 0x12040000 0xe51ff004`` (``ldr pc, [pc, #-4]``)
+and ``mw.l 0x12040004 0x08180000`` (its target, the start of
+``nuttx_uboot.bin``). The reset slot of the stored table then branches to
+``__start``, and ``arm_boot()`` replaces the trampoline with the full
+table.
+The read-only code region (``__mpu_code_start`` to ``__mpu_code_end``)
+is padded to a power of two for its MPU region.
 
 Loading Code
 ============
 
 Use a J-Link or another SWD/JTAG probe to load debugger configurations.
+For the ``nsh-openamp`` U-Boot image and its Linux test, follow the
+OpenAMP procedure above.
 
 Configurations
 ==============
@@ -1203,3 +1392,12 @@ alarm
 
 NSH + RTC alarm example: enables RTC with alarm support and the
 ``apps/examples/alarm`` application.
+
+nsh-openamp
+-----------
+
+NuttShell configuration for testing RPMsg between Linux on CA55 and NuttX
+on CR8_0. It enables channel-1 RPTUN and the ``rpmsg-service-1`` echo
+endpoint. This EVK preset generates single uboot images for U-Boot and
+uses SCI2 for the console. See the OpenAMP section above for setup, boot,
+and test instructions.
