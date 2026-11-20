@@ -1482,17 +1482,9 @@ skip_rtt:
             {
               /* A segment without data, SYN or FIN is acceptable if
                * RCV.NXT =< SEG.SEQ < RCV.NXT+RCV.WND (RFC 9293, 3.10.7.4).
-               * Pass a new ACK to the application, but do not answer it.
+               * It goes on to the window update and the state machine, and
+               * gets no ACK.
                */
-
-              if ((flags & TCP_ACKDATA) != 0)
-                {
-                  dev->d_sndlen = 0;
-                  tcp_appsend(dev, conn,
-                              tcp_callback(dev, conn, TCP_ACKDATA));
-                }
-
-              return;
             }
           else if ((conn->tcpstateflags & TCP_STATE_MASK) <= TCP_FIN_WAIT_2)
             {
