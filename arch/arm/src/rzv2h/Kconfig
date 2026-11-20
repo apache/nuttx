@@ -237,4 +237,14 @@ config RZV2H_UBOOT_IMAGE
 		table is linked into SRAM and copied to ITCM by the NuttX startup
 		code after the debugger enters the firmware at __start.
 
+config RZV2H_QSPI
+	bool "QSPI (xSPI) support"
+	default n
+	---help---
+		Enable support for the RZ/V2H xSPI controller in QSPI mode,
+		used to talk to a QSPI-capable SPI NOR flash device through
+		NuttX's generic QSPI interface (struct qspi_dev_s).  The attached
+		flash type, wiring and partitioning are board properties and are
+		configured in the board's Kconfig.
+
 endmenu # "RZ/V2H Configuration Options"
