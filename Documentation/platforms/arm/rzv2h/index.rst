@@ -2,10 +2,9 @@
 Renesas RZ/V2H
 ==============
 
-The RZ/V2H is a Renesas AI-accelerated multicore MPU built around a
-heterogeneous set of Arm cores: dual Cortex-A55 (application cores) plus
-dual Cortex-R8 (real-time cores), alongside a DSP and an AI-MAC (DRP-AI3)
-accelerator.
+The RZ/V2H is a heterogeneous multicore MPU integrating dual Cortex-A55,
+dual Cortex-R8, and Cortex-M33 cores, together with a DSP and the DRP-AI3
+AI accelerator.
 
 .. image:: RZV2H-block-chart-DRP-AI3.png
    :alt: RZV2H block chart DRP-AI3
@@ -44,6 +43,7 @@ SCI I2C     Yes      Interrupt-driven SCI simple I2C master on channels 0-9
 PWM         Yes      GPT (General PWM Timer) PWM on channels 0-15
 CAN         Yes      CAN-FD on channels 0-5
 QSPI        Yes      xSPI controller in QSPI mode, manual-command transfers only
+RTC         Yes      Calendar, one-shot alarm, periodic wakeup, system clock.
 ==========  =======  ============================================================
 
 CLOCK
@@ -100,6 +100,20 @@ GPIO
 
 The GPIO driver provides fundamental support for pin configuration, read,
 and write operations. GPIO interrupt support is currently unavailable.
+
+RTC
+---
+
+The RTC driver provides a calendar clock (date and time) through the
+standard NuttX RTC lower-half. ``CONFIG_RZV2H_RTC`` enables it and requires
+``CONFIG_RTC``, ``CONFIG_RTC_DATETIME``, ``CONFIG_RTC_DRIVER`` and
+``CONFIG_RTC_ARCH``. It exposes ``/dev/rtc0`` and seeds the NuttX system
+clock at boot. The supported calendar range is 2000-2099. If the RTC has
+never been set, the system clock falls back to the build-time default date.
+
+``CONFIG_RTC_ALARM`` adds a single one-shot alarm (``CONFIG_RTC_NALARMS``
+must be 1) supporting absolute, relative, read-back and cancel operations.
+``CONFIG_RTC_PERIODIC`` adds a periodic wakeup at rates from `1/128s` to `2s`.
 
 INTC SEL (Interrupt Select) Lines
 ---------------------------------
