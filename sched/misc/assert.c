@@ -64,8 +64,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DEADLOCK_MAX 8
-
 /* The dump_lockholder() buffer must hold the deeper of the two backtrace
  * sources: the spinlock backtrace (CONFIG_LIBC_BACKTRACE_DEPTH) and this
  * tree's fixed mutex backtrace (CONFIG_LIBC_MUTEX_BACKTRACE, an
@@ -98,7 +96,7 @@
 #  undef CONFIG_ARCH_USBDUMP
 #endif
 
-#define DUMP_PTR(p, x) ((uintptr_t)(&(p)[(x)]) < stack_top ? (p)[(x)] : 0)
+#define DUMP_PTR(p, x) ((uintptr_t)(&(p)[(x) + 1]) <= stack_top ? (p)[(x)] : 0)
 #define DUMP_STRIDE    (sizeof(FAR void *) * 8)
 
 #if UINTPTR_MAX <= UINT32_MAX
@@ -120,19 +118,17 @@
 #ifdef CONFIG_SMP
 static noreturn_function int pause_cpu_handler(FAR void *arg);
 #endif
+typedef uintptr_t last_regs_t[XCPTCONTEXT_REGS];
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-static bool g_cpu_paused[CONFIG_SMP_NCPUS];
+static DEFINE_PER_CPU_BSS_SMP(bool, g_cpu_paused);
 #endif
 
 static spinlock_t g_assert_lock = SP_UNLOCKED;
-
-static uintptr_t g_last_regs[CONFIG_SMP_NCPUS][XCPTCONTEXT_REGS]
-                 aligned_data(XCPTCONTEXT_ALIGN);
 
 #ifdef CONFIG_SCHED_DUMP_TASKS
 static FAR const char * const g_policy[4] =
@@ -153,6 +149,9 @@ static FAR const char * const g_ttypenames[4] =
 static struct smp_call_data_s g_call_data =
 SMP_CALL_INITIALIZER(pause_cpu_handler, NULL);
 #endif
+
+static DEFINE_PER_CPU_BSS(last_regs_t, g_last_regs)
+       aligned_data(XCPTCONTEXT_ALIGN);
 
 /****************************************************************************
  * Private Functions
@@ -194,6 +193,7 @@ static void sp_out_of_range(uintptr_t sp)
  * Name: stack_dump
  ****************************************************************************/
 
+nosanitize_address
 static void stack_dump(uintptr_t sp, uintptr_t stack_top)
 {
   uintptr_t stack;
@@ -229,12 +229,31 @@ static void dump_stackinfo(FAR const char *tag, uintptr_t sp,
 
       _alert("    sp: %p\n", (FAR void *)sp);
 
-      /* Get more information */
+      /* Back off before the current sp so the dump also covers the
+       * hardware exception frame that sits just below it.  When an assert
+       * is taken from an interrupt, the reconstructed user sp points above
+       * that frame; dumping only one stride back omits it, which prevents
+       * an offline DWARF/CFI unwinder from crossing the exception boundary
+       * into the faulting userspace context.  Backing off a whole register
+       * context (sizeof(last_regs_t) == XCPTCONTEXT byte size) is enough to
+       * include the frame on any architecture, clamped to the stack base.
+       */
 
-      if (sp - DUMP_STRIDE >= base)
+      if (sp - sizeof(last_regs_t) >= base)
         {
-          sp -= DUMP_STRIDE;
+          sp -= sizeof(last_regs_t);
         }
+      else
+        {
+          sp = base;
+        }
+
+#if CONFIG_ARCH_STACKDUMP_MAX_LENGTH > 0
+      if (top - sp > CONFIG_ARCH_STACKDUMP_MAX_LENGTH)
+        {
+          top = sp + CONFIG_ARCH_STACKDUMP_MAX_LENGTH;
+        }
+#endif
 
       stack_dump(sp, top);
     }
@@ -480,7 +499,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
  * Name: dump_backtrace
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_BACKTRACE
+#ifdef CONFIG_SCHED_DUMP_BACKTRACE
 static void dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
 {
   sched_dumpstack(tcb->pid);
@@ -580,7 +599,7 @@ static void dump_tasks(void)
   nxsched_foreach(dump_task, NULL);
 #endif /* CONFIG_SCHED_DUMP_TASKS */
 
-#ifdef CONFIG_SCHED_BACKTRACE
+#ifdef CONFIG_SCHED_DUMP_BACKTRACE
   nxsched_foreach(dump_backtrace, NULL);
 #endif
 
@@ -640,8 +659,9 @@ static void dump_lockholder(pid_t tid)
 
 static void dump_deadlock(void)
 {
-  pid_t deadlock[DEADLOCK_MAX];
-  size_t i = nxsched_collect_deadlock(deadlock, DEADLOCK_MAX);
+  pid_t deadlock[CONFIG_ARCH_DEADLOCKDUMP_MAX];
+  size_t i = nxsched_collect_deadlock(deadlock,
+                                      CONFIG_ARCH_DEADLOCKDUMP_MAX);
 
   while (i-- > 0)
     {
@@ -661,9 +681,9 @@ static void dump_deadlock(void)
 
 static noreturn_function int pause_cpu_handler(FAR void *arg)
 {
-  up_regs_memcpy(g_last_regs[this_cpu()], running_regs(),
-                 sizeof(g_last_regs[0]));
-  g_cpu_paused[this_cpu()] = true;
+  up_regs_memcpy(this_cpu_var(g_last_regs), running_regs(),
+                 sizeof(last_regs_t));
+  this_cpu_var_smp(g_cpu_paused) = true;
   up_flush_dcache_all();
   while (1);
 }
@@ -674,21 +694,21 @@ static noreturn_function int pause_cpu_handler(FAR void *arg)
 
 static void pause_all_cpu(void)
 {
-  cpu_set_t cpus = (1 << CONFIG_SMP_NCPUS) - 1;
+  cpu_set_t cpuset = (1 << CONFIG_SMP_NCPUS) - 1;
   int delay = CONFIG_ASSERT_PAUSE_CPU_TIMEOUT;
+  int ncpus = 0;
 
-  CPU_CLR(this_cpu(), &cpus);
-  nxsched_smp_call_async(cpus, &g_call_data);
-  g_cpu_paused[this_cpu()] = true;
+  CPU_CLR(this_cpu(), &cpuset);
+  nxsched_smp_call_async(cpuset, &g_call_data);
+  this_cpu_var_smp(g_cpu_paused) = true;
 
   /* Check if all CPUs paused with timeout */
 
-  cpus = 0;
-  while (delay-- > 0 && cpus < CONFIG_SMP_NCPUS)
+  while (delay-- > 0 && ncpus < CONFIG_SMP_NCPUS)
     {
-      if (g_cpu_paused[cpus])
+      if (per_cpu_var_smp(g_cpu_paused, ncpus))
         {
-          cpus++;
+          ncpus++;
         }
       else
         {
@@ -794,11 +814,12 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
         }
 
       _alert("Dump CPU%d: %s\n", cpu,
-             g_cpu_paused[cpu] ? "PAUSED" : "RUNNING");
+             per_cpu_var_smp(g_cpu_paused, cpu) ? "PAUSED" : "RUNNING");
 
-      if (g_cpu_paused[cpu])
+      if (per_cpu_var_smp(g_cpu_paused, cpu))
         {
-          dump_running_task(g_running_tasks[cpu], g_last_regs[cpu]);
+          dump_running_task(g_running_tasks[cpu],
+                            per_cpu_var(g_last_regs, cpu));
         }
     }
 #endif
@@ -822,7 +843,15 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
   /* Flush previous SYSLOG data before possible long time coredump */
 
   syslog_flush();
+}
 
+/****************************************************************************
+ * Name: dump_core_info
+ ****************************************************************************/
+
+static void dump_core_info(FAR struct tcb_s *rtcb, FAR const char *filename,
+                           int linenum, FAR const char *msg, FAR void *regs)
+{
 #ifdef CONFIG_BOARD_CRASHDUMP_CUSTOM
   board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
 #endif
@@ -853,9 +882,18 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
 static void reset_board(void)
 {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-  up_flush_dcache_all();
   board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
-#else
+
+  /* board_reset() is permitted to be asynchronous (e.g. it just requests an
+   * external reset via a GPIO pin and returns immediately).  Per the
+   * function contract documented above ("It should never return."), spin
+   * here so that we do not fall back into the caller while g_nx_initstate
+   * is already OSINIT_PANIC.  If we did return, any subsequent fault would
+   * re-enter _assert(), hit the recursive-assert fast path, and mask the
+   * original crash context.
+   */
+#endif
+
   for (; ; )
     {
 #ifdef CONFIG_ARCH_LEDS
@@ -867,7 +905,6 @@ static void reset_board(void)
 #endif
       up_mdelay(250);
     }
-#endif
 }
 
 /****************************************************************************
@@ -925,13 +962,13 @@ void _assert(FAR const char *filename, int linenum,
 
   if (regs == NULL)
     {
-      up_saveusercontext(g_last_regs[this_cpu()]);
-      regs = g_last_regs[this_cpu()];
+      up_saveusercontext(this_cpu_var(g_last_regs));
+      regs = this_cpu_var(g_last_regs);
     }
   else
     {
-      up_regs_memcpy(g_last_regs[this_cpu()], regs, sizeof(g_last_regs[0]));
-      regs = g_last_regs[this_cpu()];
+      up_regs_memcpy(this_cpu_var(g_last_regs), regs, sizeof(last_regs_t));
+      regs = this_cpu_var(g_last_regs);
     }
 
   notifier_data.rtcb = rtcb;
@@ -962,7 +999,17 @@ void _assert(FAR const char *filename, int linenum,
 
       dump_fatal_info(rtcb, filename, linenum, msg, regs);
 
+      /* Flush dcache before notify other CPU */
+
+      up_flush_dcache_all();
+
+      /* Notify PANIC_KERNEL_FINAL */
+
       panic_notifier_call_chain(PANIC_KERNEL_FINAL, &notifier_data);
+
+      /* Dump core information */
+
+      dump_core_info(rtcb, filename, linenum, msg, regs);
 
       reboot_notifier_call_chain(SYS_HALT, NULL);
 

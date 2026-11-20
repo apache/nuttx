@@ -1288,7 +1288,7 @@ config ARCH_HAVE_REGCPY
 config ARCH_STACKDUMP_MAX_LENGTH
 	int "The maximum length for dump stack on assertions"
 	depends on ARCH_STACKDUMP
-	default 0
+	default 4096
 
 config ARCH_USBDUMP
 	bool "Dump USB trace data"
@@ -1301,7 +1301,15 @@ config ARCH_DEADLOCKDUMP
 	bool "Dump dead lock thread"
 	default "n"
 	---help---
-		This option will dump the dead lock thread when assert happen..
+		This option will dump the dead lock thread when assert happen.
+
+config ARCH_DEADLOCKDUMP_MAX
+	int "The maximum threads to dump when deadlock"
+	depends on ARCH_DEADLOCKDUMP
+	default 8
+	---help---
+		This is the maximum number of threads to dump when deadlock in mutex
+		or spinlock.
 
 config ENDIAN_BIG
 	bool "Big Endian Architecture"
