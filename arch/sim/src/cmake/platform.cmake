@@ -21,3 +21,5 @@
 # ##############################################################################
 
 set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
+
+nuttx_collect_extra_flags()

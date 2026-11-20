@@ -23,6 +23,8 @@
 # search. If the manual of the newly supported toolchain is different, you can
 # override these methods in the toolchain
 
+include(nuttx_collect_extra_flags)
+
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   if(CMAKE_C_COMPILER_VERSION VERSION_GREATER 4.9)
     # force color for gcc > 4.9
