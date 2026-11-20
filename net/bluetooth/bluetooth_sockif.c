@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -38,13 +39,28 @@
 #include <netpacket/bluetooth.h>
 
 #include <nuttx/net/net.h>
+#include <nuttx/net/netdev.h>
 #include <nuttx/net/radiodev.h>
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 
+#include "netdev/netdev.h"
 #include "bluetooth/bluetooth.h"
 
 #ifdef CONFIG_NET_BLUETOOTH
+
+#ifndef CONFIG_WIRELESS_BLUETOOTH_HOST
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct bluetooth_findbyidx_s
+{
+  uint8_t                    bf_tgt;
+  uint8_t                    bf_cur;
+  FAR struct radio_driver_s *bf_radio;
+};
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -70,6 +86,12 @@ static int        bluetooth_l2cap_bind(FAR struct socket *psock,
 static int        bluetooth_hci_bind(FAR struct socket *psock,
                     FAR const struct sockaddr_hci *addr,
                     socklen_t addrlen);
+#ifndef CONFIG_WIRELESS_BLUETOOTH_HOST
+static int        bluetooth_hci_dev_callback(FAR struct net_driver_s *dev,
+                    FAR void *arg);
+static FAR struct radio_driver_s *bluetooth_hci_find_device(uint8_t index);
+static bool       bluetooth_hci_has_other(FAR struct bluetooth_conn_s *conn);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -114,6 +136,7 @@ static int bluetooth_sockif_alloc(FAR struct socket *psock)
    */
 
   FAR struct bluetooth_conn_s *conn = bluetooth_conn_alloc();
+
   if (conn == NULL)
     {
       /* Failed to reserve a connection structure */
@@ -321,6 +344,7 @@ static int bluetooth_bind(FAR struct socket *psock,
       case BTPROTO_L2CAP:
         {
           FAR const struct sockaddr_l2 *iaddr;
+
           if (addrlen < sizeof(struct sockaddr_l2))
             {
               nerr("ERROR: Invalid address length: %zu < %zu\n",
@@ -335,6 +359,7 @@ static int bluetooth_bind(FAR struct socket *psock,
       case BTPROTO_HCI:
         {
           FAR const struct sockaddr_hci *hciaddr;
+
           if (addrlen < sizeof(struct sockaddr_hci))
             {
               nerr("ERROR: Invalid address length: %zu < %zu\n",
@@ -451,6 +476,9 @@ static int bluetooth_hci_bind(FAR struct socket *psock,
                               FAR const struct sockaddr_hci *hciaddr,
                              socklen_t addrlen)
 {
+#ifndef CONFIG_WIRELESS_BLUETOOTH_HOST
+  FAR struct radio_driver_s *radio;
+#endif
   FAR struct bluetooth_conn_s *conn;
 
   /* Bind a PF_BLUETOOTH socket to an network device.
@@ -474,12 +502,115 @@ static int bluetooth_hci_bind(FAR struct socket *psock,
       return -EINVAL;
     }
 
-  conn->bc_proto = psock->s_proto;
+#ifndef CONFIG_WIRELESS_BLUETOOTH_HOST
+  net_lock();
+
+  if (hciaddr->hci_dev > UINT8_MAX)
+    {
+      net_unlock();
+      return -ENODEV;
+    }
+
+  radio = bluetooth_hci_find_device(hciaddr->hci_dev);
+  if (radio == NULL)
+    {
+      net_unlock();
+      return -ENODEV;
+    }
+#endif
+
   conn->bc_channel = hciaddr->hci_channel;
-  conn->bc_ldev = hciaddr->hci_dev;
+  conn->bc_ldev    = hciaddr->hci_dev;
+  conn->bc_proto   = psock->s_proto;
+
+#ifndef CONFIG_WIRELESS_BLUETOOTH_HOST
+  netdev_carrier_on(&radio->r_dev);
+  net_unlock();
+#endif
 
   return OK;
 }
+
+#ifndef CONFIG_WIRELESS_BLUETOOTH_HOST
+/****************************************************************************
+ * Name: bluetooth_hci_dev_callback
+ *
+ * Description:
+ *   Find a Bluetooth network device by its zero-based index among Bluetooth
+ *   devices.
+ *
+ ****************************************************************************/
+
+static int bluetooth_hci_dev_callback(FAR struct net_driver_s *dev,
+                                      FAR void *arg)
+{
+  FAR struct bluetooth_findbyidx_s *match = arg;
+
+  if (dev->d_lltype == NET_LL_BLUETOOTH)
+    {
+      if (match->bf_cur == match->bf_tgt)
+        {
+          match->bf_radio = (FAR struct radio_driver_s *)dev;
+          return 1;
+        }
+
+      match->bf_cur++;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: bluetooth_hci_find_device
+ *
+ * Description:
+ *   Find a Bluetooth network device by its zero-based index among Bluetooth
+ *   devices.
+ *
+ ****************************************************************************/
+
+static FAR struct radio_driver_s *bluetooth_hci_find_device(uint8_t index)
+{
+  struct bluetooth_findbyidx_s match;
+
+  match.bf_tgt   = index;
+  match.bf_cur   = 0;
+  match.bf_radio = NULL;
+
+  netdev_foreach(bluetooth_hci_dev_callback, &match);
+  return match.bf_radio;
+}
+
+/****************************************************************************
+ * Name: bluetooth_hci_has_other
+ *
+ * Description:
+ *   Check whether another HCI socket is attached to the same controller.
+ *
+ ****************************************************************************/
+
+static bool bluetooth_hci_has_other(FAR struct bluetooth_conn_s *conn)
+{
+  FAR struct bluetooth_conn_s *other;
+  bool found = false;
+
+  bluetooth_conn_list_lock();
+
+  for (other = bluetooth_conn_next(NULL); other != NULL;
+       other = bluetooth_conn_next(other))
+    {
+      if (other != conn && other->bc_proto == BTPROTO_HCI &&
+          other->bc_ldev == conn->bc_ldev)
+        {
+          found = true;
+          break;
+        }
+    }
+
+  bluetooth_conn_list_unlock();
+  return found;
+}
+#endif
 
 /****************************************************************************
  * Name: bluetooth_getsockname
@@ -640,8 +771,29 @@ static int bluetooth_close(FAR struct socket *psock)
             {
               /* Yes... free the connection structure */
 
-              conn->bc_crefs = 0;                  /* No more references on the connection */
-              bluetooth_conn_free(psock->s_conn);  /* Free network resources */
+#ifndef CONFIG_WIRELESS_BLUETOOTH_HOST
+              if (conn->bc_proto == BTPROTO_HCI)
+                {
+                  FAR struct radio_driver_s *radio;
+
+                  net_lock();
+                  radio = bluetooth_hci_find_device(conn->bc_ldev);
+
+                  if (radio != NULL && !bluetooth_hci_has_other(conn))
+                    {
+                      netdev_carrier_off(&radio->r_dev);
+                    }
+
+                  conn->bc_crefs = 0;
+                  bluetooth_conn_free(conn);
+                  net_unlock();
+                }
+              else
+#endif
+                {
+                  conn->bc_crefs = 0;
+                  bluetooth_conn_free(conn);
+                }
             }
           else
             {
