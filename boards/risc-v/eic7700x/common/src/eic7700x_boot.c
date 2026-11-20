@@ -44,6 +44,12 @@
 #include "eic7700x_pinctrl.h"
 #include "eic7700x_reset.h"
 
+#ifdef CONFIG_BOARDCTL_RESET
+#  include "riscv_internal.h"
+#  include "riscv_sbi.h"
+#  include "hardware/eic7700x_clk.h"
+#endif
+
 #include "board_config.h"
 
 /****************************************************************************
@@ -205,3 +211,33 @@ void board_late_initialize(void)
   eic7700x_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */
+
+/****************************************************************************
+ * Name: board_reset
+ *
+ * Description:
+ *   Reset the whole SoC, the same way every other operating system on this
+ *   chip does: ask the machine mode firmware, whose reset driver writes
+ *   the manual's magic value into the system software reset register.  If
+ *   the firmware refuses, it should not, but a reset path gets no second
+ *   chance to be humble, write the magic ourselves, and if even that
+ *   changes nothing, stop dead rather than return into a system that was
+ *   promised a reset.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_RESET
+int board_reset(int status)
+{
+  riscv_sbi_system_reset(SBI_SRST_TYPE_REBOOT_COLD, SBI_SRST_REASON_NONE);
+
+  putreg32(EIC7700X_SWRST_MAGIC,
+           EIC7700X_CLK_BASE + EIC7700X_SYS_SWRST_VALUE);
+
+  for (; ; )
+    {
+    }
+
+  return 0;  /* Unreachable, but the prototype wants it */
+}
+#endif
