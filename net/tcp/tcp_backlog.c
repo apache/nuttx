@@ -130,6 +130,13 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
       blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&bls->bl_free);
       blc->bc_conn = blconn;
       sq_addlast(&blc->bc_node, &bls->bl_pending);
+
+      /* tcp_backlogremove() cleared the parent.  Set it again: the input
+       * path uses it to take a pending connection that the peer resets out
+       * of the backlog.
+       */
+
+      blconn->blparent = conn;
     }
 
   tcp_backlogdestroy(conn);
