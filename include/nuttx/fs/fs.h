@@ -1612,7 +1612,7 @@ ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
  * Name: file_sendfile
  *
  * Description:
- *   Equivalent to the standard sendfile function except that is accepts a
+ *   Equivalent to the standard sendfile function except that it accepts a
  *   struct file instance instead of a file descriptor.
  *
  ****************************************************************************/

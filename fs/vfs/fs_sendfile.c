@@ -26,11 +26,13 @@
 
 #include <nuttx/config.h>
 
-#include <sys/sendfile.h>
-#include <stdbool.h>
 #include <errno.h>
-#include <nuttx/debug.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <sys/sendfile.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/lib/lib.h>
@@ -249,7 +251,7 @@ static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
  * Name: file_sendfile
  *
  * Description:
- *   Equivalent to the standard sendfile function except that is accepts a
+ *   Equivalent to the standard sendfile function except that it accepts a
  *   struct file instance instead of a file descriptor.
  *
  ****************************************************************************/
@@ -257,10 +259,36 @@ static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
 ssize_t file_sendfile(FAR struct file *outfile, FAR struct file *infile,
                       FAR off_t *offset, size_t count)
 {
+  if (outfile == NULL || infile == NULL)
+    {
+      return -EBADF;
+    }
+
+  if (outfile == infile)
+    {
+      return -EINVAL;
+    }
+
+  if ((infile->f_oflags & O_ACCMODE) == O_WRONLY ||
+      (outfile->f_oflags & O_ACCMODE) == O_RDONLY)
+    {
+      return -EBADF;
+    }
+
+  if (offset != NULL && *offset < 0)
+    {
+      return -EINVAL;
+    }
+
   if (count == 0)
     {
       nwarn("WARNING: sendfile count is zero\n");
       return 0;
+    }
+
+  if (count > SSIZE_MAX)
+    {
+      count = SSIZE_MAX;
     }
 
 #ifdef CONFIG_NET_SENDFILE
@@ -276,11 +304,12 @@ ssize_t file_sendfile(FAR struct file *outfile, FAR struct file *infile,
    * cannot seek (a pipe, a FIFO or a socket) uses the slow path.
    */
 
-  if (psock != NULL && !INODE_IS_NOSEEK(infile->f_inode))
+  if (psock != NULL && infile->f_inode != NULL &&
+      !INODE_IS_NOSEEK(infile->f_inode))
     {
       /* Then let psock_sendfile do the work. */
 
-      int ret = psock_sendfile(psock, infile, offset, count);
+      ssize_t ret = psock_sendfile(psock, infile, offset, count);
 
       if (ret >= 0 || ret != -ENOSYS)
         {
@@ -339,10 +368,11 @@ ssize_t file_sendfile(FAR struct file *outfile, FAR struct file *infile,
  * Returned Value:
  *   If the transfer was successful, the number of bytes written to outfd is
  *   returned.  On error, -1 is returned, and errno is set appropriately.
- *   There error values are those returned by read() or write() plus:
+ *   These error values are those returned by read() or write() plus:
  *
- *   EINVAL - Bad input parameters.
- *   ENOMEM - Could not allocated an I/O buffer
+ *   EBADF  - A file descriptor is invalid or has wrong access mode.
+ *   EINVAL - Bad input parameters (e.g., negative offset or outfd == infd).
+ *   ENOMEM - Could not allocate an I/O buffer.
  *
  ****************************************************************************/
 
@@ -350,7 +380,13 @@ ssize_t sendfile(int outfd, int infd, FAR off_t *offset, size_t count)
 {
   FAR struct file *outfile;
   FAR struct file *infile;
-  int ret;
+  ssize_t ret;
+
+  if (outfd == infd)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
 
   ret = file_get(outfd, &outfile);
   if (ret < 0)

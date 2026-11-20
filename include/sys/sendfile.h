@@ -95,10 +95,11 @@ extern "C"
  * Returned Value:
  *   If the transfer was successful, the number of bytes written to outfd is
  *   returned.  On error, -1 is returned, and errno is set appropriately.
- *   There error values are those returned by read() or write() plus:
+ *   These error values are those returned by read() or write() plus:
  *
- *   EINVAL - Bad input parameters.
- *   ENOMEM - Could not allocated an I/O buffer
+ *   EBADF  - A file descriptor is invalid or has wrong access mode.
+ *   EINVAL - Bad input parameters (e.g., negative offset or outfd == infd).
+ *   ENOMEM - Could not allocate an I/O buffer.
  *
  ****************************************************************************/
 
