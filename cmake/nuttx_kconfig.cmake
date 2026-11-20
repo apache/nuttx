@@ -80,7 +80,9 @@ function(nuttx_export_kconfig kconfigfile)
       string(REPLACE "${Name}=" "" Value ${NameAndValue})
 
       # remove extra quotes
-      string(REPLACE "\"" "" Value ${Value})
+      if(Value MATCHES "^\"(.*)\"$")
+        set(Value "${CMAKE_MATCH_1}")
+      endif()
       decode_semicolon(Value)
       # Set the variable
       set(${Name}
