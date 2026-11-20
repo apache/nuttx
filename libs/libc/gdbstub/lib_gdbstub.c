@@ -1175,7 +1175,7 @@ static int gdb_read_register(FAR struct gdb_state_s *state)
  *   Zero on success.
  *   Negative value on error.
  *
- * Note: Comand Format: Pn.
+ * Note: Command Format: Pn.
  *       Response Format: OK or negative value for error number.
  ****************************************************************************/
 
