@@ -249,6 +249,7 @@ static const char *g_white_prefix[] =
   "R_XSPI_",
   "RSP_INT_STSn",
   "R_RTC",
+  "R_SPI_B_",
 
   /* Ref:  apps/system/microros, apps/examples/microros_*
    * ROS 2 standard message package names and rosidl scalar type names

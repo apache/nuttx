@@ -64,6 +64,15 @@
       IOPORT_CFG_SLEW_RATE_FAST | ((uint32_t)(mode) << 24) \
     })
 
+#define RZV2H_PINMUX_INPUT(port, pin, mode) \
+  ((gpio_pinset_t) \
+    { \
+      (uint32_t)(((port) << 8) | (pin)), \
+      IOPORT_CFG_DRIVE_B01 | IOPORT_CFG_PERIPHERAL_PIN | \
+      IOPORT_CFG_SPECIAL_PURPOSE_PORT_INPUT_ENABLE | \
+      IOPORT_CFG_SLEW_RATE_FAST | ((uint32_t)(mode) << 24) \
+    })
+
 #define RZV2H_PINMUX_OUTPUT(port, pin, mode)  RZV2H_PINMUX(port, pin, mode)
 
 /* GPIO output pin. Set the level with rzv2h_gpiowrite(). */
