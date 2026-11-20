@@ -61,3 +61,7 @@ endif
 ifeq ($(CONFIG_RZV2H_QSPI),y)
 CHIP_CSRCS += rzv2h_qspi.c
 endif
+
+ifeq ($(CONFIG_RZV2H_RTC),y)
+CHIP_CSRCS += rzv2h_rtc.c
+endif

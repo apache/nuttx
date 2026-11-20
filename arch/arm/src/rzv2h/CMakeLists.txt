@@ -57,4 +57,8 @@ if(CONFIG_RZV2H_QSPI)
   list(APPEND SRCS rzv2h_qspi.c)
 endif()
 
+if(CONFIG_RZV2H_RTC)
+  list(APPEND SRCS rzv2h_rtc.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
