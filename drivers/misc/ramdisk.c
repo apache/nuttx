@@ -521,15 +521,28 @@ int ramdisk_unregister(FAR const char *path)
     }
 
   ret = unregister_blockdriver(path);
-  if (ret < 0)
+  if (ret < 0 && ret != -EBUSY)
     {
       ferr("ERROR: unregister driver failed, ret=%d\n", ret);
       return ret;
     }
 
-  /* Release the driver space */
+  /* Release the driver space, or defer it to the last close */
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  RDFLAG_UNLINK(dev->rd_flags);
+  if (dev->rd_crefs == 0)
+    {
+      rd_destroy(dev);
+    }
+#else
+  if (ret == -EBUSY)
+    {
+      return -EBUSY;
+    }
 
   kmm_free(dev);
+#endif
 
-  return ret;
+  return OK;
 }
