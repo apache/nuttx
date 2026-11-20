@@ -286,6 +286,7 @@ static int pci_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case PCIOCREAD:
         {
           FAR struct pci_io *io = (FAR struct pci_io *)arg;
+
           ret = pci_bus_read_config(ctrl->bus, devfn, io->pi_reg,
                                     io->pi_width, &io->pi_data);
           break;
@@ -294,6 +295,7 @@ static int pci_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case PCIOCWRITE:
         {
           FAR struct pci_io *io = (FAR struct pci_io *)arg;
+
           ret = pci_bus_write_config(ctrl->bus, devfn, io->pi_reg,
                                      io->pi_width, io->pi_data);
           break;
@@ -304,6 +306,7 @@ static int pci_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct pci_rom *rom = (FAR struct pci_rom *)arg;
           FAR struct pci_device_s *dev =
             pci_find_device_from_bus(ctrl->bus, sel->pc_bus, devfn);
+
           if (dev == NULL)
             {
               return -ENODEV;
@@ -323,6 +326,7 @@ static int pci_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct pci_rom *rom = (FAR struct pci_rom *)arg;
           FAR struct pci_device_s *dev =
             pci_find_device_from_bus(ctrl->bus, sel->pc_bus, devfn);
+
           if (dev == NULL)
             {
               return -ENODEV;
@@ -357,6 +361,7 @@ static int pci_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           uint32_t data;
 
           FAR struct pci_io *io = (FAR struct pci_io *)arg;
+
           if (io->pi_width != 4 || (io->pi_reg & 0x3) ||
               io->pi_reg <  PCI_BASE_ADDRESS_0 ||
               io->pi_reg >= PCI_BASE_ADDRESS_SPACE)
@@ -377,6 +382,7 @@ static int pci_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case PCIOCGETVPD:
         {
           FAR struct pci_vpd_req *pv = (FAR struct pci_vpd_req *)arg;
+
           ret = pci_vpd_read(ctrl->bus, devfn, pv->pv_offset,
                              pv->pv_count, pv->pv_data);
           break;
@@ -594,6 +600,7 @@ static uint8_t pci_find_next_cap(FAR struct pci_bus_s *bus,
                                  unsigned int devfn, uint8_t pos, int cap)
 {
   int ttl = 48;
+
   return pci_find_next_cap_ttl(bus, devfn, pos, cap, &ttl);
 }
 
@@ -1179,7 +1186,7 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
             break;
 
           default:
-          bad:
+bad:
             pcierr("PCI: %02x:%02" PRIx32 " [%04x/%04x/%06" PRIx32
                    "] has unknown header type %02x, ignoring.\n",
                    bus->number, dev->devfn, dev->vendor, dev->device, class,
@@ -2020,12 +2027,12 @@ void pci_release_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
   pci_get_msi_base(dev, &msi, &msix);
   if (msi)
     {
-       pci_disable_msi(dev, msi);
+      pci_disable_msi(dev, msi);
     }
 
   if (msix)
     {
-       pci_disable_msix(dev, msix, num);
+      pci_disable_msix(dev, msix, num);
     }
 #endif
 
@@ -2137,6 +2144,7 @@ void pci_enable_irq(FAR struct pci_device_s *dev, int irq)
 void pci_disable_irq(FAR struct pci_device_s *dev)
 {
   uint16_t command;
+
   pci_read_config_word(dev, PCI_COMMAND, &command);
   command |= PCI_COMMAND_INTX_DISABLE;
   pci_write_config_word(dev, PCI_COMMAND, command);
