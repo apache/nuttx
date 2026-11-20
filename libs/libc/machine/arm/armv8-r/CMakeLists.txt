@@ -44,6 +44,30 @@ if(CONFIG_ARMV8R_STRLEN)
   list(APPEND SRCS arch_strlen.S)
 endif()
 
+if(CONFIG_ARMV8R_MEMCMP)
+  list(APPEND SRCS arch_memcmp.S)
+endif()
+
+if(CONFIG_ARMV8R_STRCHR)
+  list(APPEND SRCS arch_strchr.S)
+endif()
+
+if(CONFIG_ARMV8R_STRCHRNUL)
+  list(APPEND SRCS arch_strchrnul.S)
+endif()
+
+if(CONFIG_ARMV8R_STRNCMP)
+  list(APPEND SRCS arch_strncmp.S)
+endif()
+
+if(CONFIG_ARMV8R_STRNLEN)
+  list(APPEND SRCS arch_strnlen.S)
+endif()
+
+if(CONFIG_ARMV8R_STRRCHR)
+  list(APPEND SRCS arch_strrchr.S)
+endif()
+
 if(CONFIG_LIBC_ARCH_ELF)
   list(APPEND SRCS arch_elf.c)
 endif()
