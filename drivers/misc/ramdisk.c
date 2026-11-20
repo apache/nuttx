@@ -245,11 +245,11 @@ static ssize_t rd_read(FAR struct inode *inode, unsigned char *buffer,
   if (start_sector < dev->rd_nsectors &&
       start_sector + nsectors <= dev->rd_nsectors)
     {
-       finfo("Transfer %d bytes from %p\n",
-             nsectors * dev->rd_sectsize,
-             &dev->rd_buffer[start_sector * dev->rd_sectsize]);
+      finfo("Transfer %d bytes from %p\n",
+            nsectors * dev->rd_sectsize,
+            &dev->rd_buffer[start_sector * dev->rd_sectsize]);
 
-       memcpy(buffer,
+      memcpy(buffer,
               &dev->rd_buffer[start_sector * dev->rd_sectsize],
               nsectors * dev->rd_sectsize);
       return nsectors;
@@ -285,8 +285,8 @@ static ssize_t rd_write(FAR struct inode *inode,
            start_sector + nsectors <= dev->rd_nsectors)
     {
       finfo("Transfer %d bytes to %p\n",
-             nsectors * dev->rd_sectsize,
-             &dev->rd_buffer[start_sector * dev->rd_sectsize]);
+            nsectors * dev->rd_sectsize,
+            &dev->rd_buffer[start_sector * dev->rd_sectsize]);
 
       memcpy(&dev->rd_buffer[start_sector * dev->rd_sectsize],
              buffer,
