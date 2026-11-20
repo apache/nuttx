@@ -229,54 +229,54 @@ static int backtrace_expand(FAR struct backtrace_pool_s *bp,
     }
 
 #if CONFIG_LIBC_BACKTRACE_LOAD_FACTOR < 100
-    {
-      /* When expanding, double the capacity of the bucket and release
-       * the old bucket.
-       */
+  {
+    /* When expanding, double the capacity of the bucket and release
+     * the old bucket.
+     */
 
-      FAR struct backtrace_entry_s **oldbucket;
-      FAR struct backtrace_entry_s **bucket;
-      FAR struct backtrace_entry_s *pool;
-      size_t poolsize = bp->capacity;
-      size_t capacity = bp->capacity * 2;
+    FAR struct backtrace_entry_s **oldbucket;
+    FAR struct backtrace_entry_s **bucket;
+    FAR struct backtrace_entry_s *pool;
+    size_t poolsize = bp->capacity;
+    size_t capacity = bp->capacity * 2;
 
-      /* Drop the lock before the sleeping allocation so we neither deadlock
-       * on the pool spinlock nor block IRQs across heap allocation.
-       */
+    /* Drop the lock before the sleeping allocation so we neither deadlock
+     * on the pool spinlock nor block IRQs across heap allocation.
+     */
 
-      backtrace_unlock(bp, *flags);
-      bucket = lib_zalloc(sizeof(FAR struct backtrace_entry_s *) * capacity);
-      pool = lib_zalloc(sizeof(struct backtrace_entry_s) * poolsize);
-      if (bucket == NULL || pool == NULL)
-        {
-          lib_free(bucket);
-          lib_free(pool);
-          *flags = backtrace_lock(bp);
-          return -ENOMEM;
-        }
+    backtrace_unlock(bp, *flags);
+    bucket = lib_zalloc(sizeof(FAR struct backtrace_entry_s *) * capacity);
+    pool = lib_zalloc(sizeof(struct backtrace_entry_s) * poolsize);
+    if (bucket == NULL || pool == NULL)
+      {
+        lib_free(bucket);
+        lib_free(pool);
+        *flags = backtrace_lock(bp);
+        return -ENOMEM;
+      }
 
-      *flags = backtrace_lock(bp);
-      backtrace_rehash(bp, bucket);
+    *flags = backtrace_lock(bp);
+    backtrace_rehash(bp, bucket);
 
-      for (i = 0; i < poolsize; i++)
-        {
-          sq_addlast(&pool[i].freenode, &bp->freelist);
-        }
+    for (i = 0; i < poolsize; i++)
+      {
+        sq_addlast(&pool[i].freenode, &bp->freelist);
+      }
 
-      oldbucket = bp->bucket;
-      bp->bucket = bucket;
-      bp->capacity = capacity;
-      backtrace_unlock(bp, *flags);
+    oldbucket = bp->bucket;
+    bp->bucket = bucket;
+    bp->capacity = capacity;
+    backtrace_unlock(bp, *flags);
 
-      if (oldbucket != g_backtrace_bucket)
-        {
-          lib_free(oldbucket);
-        }
+    if (oldbucket != g_backtrace_bucket)
+      {
+        lib_free(oldbucket);
+      }
 
-      *flags = backtrace_lock(bp);
-    }
+    *flags = backtrace_lock(bp);
+  }
 #else
-    (void)flags;
+  (void)flags;
 #endif /* CONFIG_LIBC_BACKTRACE_LOAD_FACTOR < 100 */
 
   return 0;
