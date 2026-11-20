@@ -69,7 +69,8 @@ static bool pthread_mutex_accessible(FAR struct tcb_s *tcb,
   uintptr_t start = (uintptr_t)ptr;
   uintptr_t end = start + size - 1;
 
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_KERNEL)
     {
       return true;
     }

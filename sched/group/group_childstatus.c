@@ -132,7 +132,7 @@ static void group_child_handler(FAR struct tcb_s *tcb, FAR void *arg)
   if (group != NULL && group != search->group &&
       group->tg_ppid == search->group->tg_pid &&
       (search->pid == INVALID_PROCESS_ID || group->tg_pid == search->pid) &&
-      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) == 0)
+      (atomic_read(&tcb->flags) & TCB_FLAG_EXIT_PROCESSING) == 0)
     {
       search->found = true;
     }

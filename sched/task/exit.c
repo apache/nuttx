@@ -67,7 +67,8 @@ void _exit(int status)
    * exit through a different mechanism.
    */
 
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+      TCB_FLAG_TTYPE_KERNEL)
     {
       group_kill_children(tcb);
     }
@@ -92,7 +93,7 @@ void _exit(int status)
    * once, or does something very naughty.
    */
 
-  tcb->flags |= TCB_FLAG_EXIT_PROCESSING;
+  atomic_or(&tcb->flags, TCB_FLAG_EXIT_PROCESSING);
 
   nxtask_exithook(tcb, status);
 

@@ -64,14 +64,15 @@ void up_release_stack(struct tcb_s *dtcb, uint8_t ttype)
 {
   /* Is there a stack allocated? */
 
-  if (dtcb->stack_alloc_ptr && (dtcb->flags & TCB_FLAG_FREE_STACK))
+  if (dtcb->stack_alloc_ptr &&
+      (atomic_read(&dtcb->flags) & TCB_FLAG_FREE_STACK))
     {
       kumm_free(dtcb->stack_alloc_ptr);
     }
 
   /* Mark the stack freed */
 
-  dtcb->flags &= ~TCB_FLAG_FREE_STACK;
+  atomic_and(&dtcb->flags, ~TCB_FLAG_FREE_STACK);
   dtcb->stack_alloc_ptr = NULL;
   dtcb->stack_base_ptr = NULL;
   dtcb->adj_stack_size = 0;

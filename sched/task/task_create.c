@@ -97,7 +97,7 @@ int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
 
   /* Setup the task type */
 
-  tcb->flags = ttype | TCB_FLAG_FREE_TCB;
+  atomic_set(&tcb->flags, ttype | TCB_FLAG_FREE_TCB);
 
   /* Initialize the task */
 

@@ -109,8 +109,8 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
 
   /* Check to see if this task has the non-cancelable bit set. */
 
-  if ((tcb->flags & TCB_FLAG_FORCED_CANCEL) == 0 &&
-      (tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) != 0u)
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_FORCED_CANCEL) == 0 &&
+      (tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) != 0)
     {
       /* Then we cannot cancel the thread now.  Here is how this is
        * supposed to work:
@@ -167,8 +167,9 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
 
           if (tcb->task_state == TSTATE_WAIT_SEM)
             {
-              if ((tcb->flags & TCB_FLAG_SYSCALL) == 0 ||
-                  (tcb->flags & TCB_FLAG_UNINTERRUPTIBLE) == 0 ||
+              if ((atomic_read(&tcb->flags) & TCB_FLAG_SYSCALL) == 0 ||
+                  (atomic_read(&tcb->flags) &
+                   TCB_FLAG_UNINTERRUPTIBLE) == 0 ||
                   tcb->waitobj == &tcb->join_sem)
                 {
                   nxsem_wait_irq(tcb, ECANCELED);

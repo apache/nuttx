@@ -60,7 +60,8 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
    * for the time it has consumed from its timeslice.
    */
 
-  if ((from->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+  if ((atomic_read(&from->flags) & TCB_FLAG_POLICY_MASK) ==
+      TCB_FLAG_SCHED_RR)
     {
       nxsched_suspend_roundrobin(from);
     }
@@ -73,12 +74,14 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
 #ifdef CONFIG_SCHED_SPORADIC
   /* Perform sporadic schedule operations */
 
-  if ((from->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+  if ((atomic_read(&from->flags) & TCB_FLAG_POLICY_MASK) ==
+      TCB_FLAG_SCHED_SPORADIC)
     {
       DEBUGVERIFY(nxsched_suspend_sporadic(from));
     }
 
-  if ((to->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+  if ((atomic_read(&to->flags) & TCB_FLAG_POLICY_MASK) ==
+      TCB_FLAG_SCHED_SPORADIC)
     {
       DEBUGVERIFY(nxsched_resume_sporadic(to));
     }
@@ -89,7 +92,7 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
    * the timer for its remaining timeslice.
    */
 
-  if ((to->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+  if ((atomic_read(&to->flags) & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
     {
       nxsched_resume_roundrobin(to);
     }

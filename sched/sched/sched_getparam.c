@@ -54,7 +54,8 @@
 static void nxsched_get_sporadic_param(FAR struct tcb_s *tcb,
                                        FAR struct sched_param *param)
 {
-  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_POLICY_MASK) ==
+      TCB_FLAG_SCHED_SPORADIC)
     {
       FAR struct sporadic_s *sporadic = tcb->sporadic;
 

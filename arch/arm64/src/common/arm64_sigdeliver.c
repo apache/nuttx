@@ -66,6 +66,7 @@ void arm64_sigdeliver(void)
 
   irqstate_t  flags;
   int16_t saved_irqcount;
+
   flags = (rtcb->xcp.saved_regs[REG_SPSR] & SPSR_DAIF_MASK);
 #endif
 
@@ -132,7 +133,7 @@ retry:
 #endif
 
   if (!sq_empty(&rtcb->sigpendactionq) &&
-      (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
+      (atomic_read(&rtcb->flags) & TCB_FLAG_SIGNAL_ACTION) == 0)
     {
 #ifdef CONFIG_SMP
       leave_critical_section(flags);

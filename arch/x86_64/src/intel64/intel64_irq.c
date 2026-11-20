@@ -545,7 +545,8 @@ static int x86_64_fault_user_isr(int irq, void *c, void *arg)
    * into the recovery path with a stale selector.
    */
 
-  if (((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL) ||
+  if (((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_KERNEL) ||
       ((regs[REG_CS] & X86_GDT_PL_MASK) != X86_GDT_RPL_USER))
     {
       return x86_64_fault_panic_isr(irq, c, arg);
@@ -578,7 +579,7 @@ static int x86_64_fault_user_isr(int irq, void *c, void *arg)
   sched_dumpstack(tcb->pid);
 #endif
 
-  tcb->flags |= TCB_FLAG_FORCED_CANCEL;
+  atomic_or(&tcb->flags, TCB_FLAG_FORCED_CANCEL);
 
   /* Return to _exit(SIGSEGV) in ring 0 instead of to the instruction that
    * faulted, which would only fault again.  The frame this rewrites is the
@@ -633,7 +634,8 @@ static int x86_64_fault_kill_isr(int irq, void *c, void *arg)
 {
   struct tcb_s *tcb = this_task();
 
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL
+  if ((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_KERNEL
 #ifndef CONFIG_BUILD_FLAT
       || (tcb->xcp.regs[REG_CS] & X86_GDT_PL_MASK) != X86_GDT_RPL_USER
 #endif

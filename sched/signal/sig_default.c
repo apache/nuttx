@@ -233,11 +233,11 @@ static void nxsig_abnormal_termination(int signo)
    * fatal exception: a thread can block or catch SIGTERM.
    */
 
-  rtcb->flags |= TCB_FLAG_FORCED_CANCEL;
+  atomic_or(&rtcb->flags, TCB_FLAG_FORCED_CANCEL);
   group_kill_children(rtcb);
 #endif
 
-  if ((rtcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+  if ((atomic_read(&rtcb->flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       /* If we are already in the process of terminating, then we should
        * not be here.  We should have already exited.
@@ -249,7 +249,8 @@ static void nxsig_abnormal_termination(int signo)
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Check if the currently running task is actually a pthread */
 
-  if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+  if ((atomic_read(&rtcb->flags) & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_PTHREAD)
     {
       /* Exit the final thread of the task group.
        *

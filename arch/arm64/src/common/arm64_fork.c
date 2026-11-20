@@ -472,7 +472,7 @@ pid_t arm64_fork(bool vfork, const struct fork_s *context)
    * that called into arm64_fork_func.S.
    */
 
-  if ((parent->flags & TCB_FLAG_SYSCALL) != 0)
+  if ((atomic_read(&parent->flags) & TCB_FLAG_SYSCALL) != 0)
     {
       return arm64_fork_syscall(vfork, parent);
     }

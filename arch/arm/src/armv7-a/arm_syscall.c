@@ -262,7 +262,7 @@ uint32_t *arm_syscall(uint32_t *regs)
            * the system call.
            */
 
-          rtcb->flags          &= ~TCB_FLAG_SYSCALL;
+          atomic_and(&rtcb->flags, ~TCB_FLAG_SYSCALL);
           nxsig_unmask_pendingsignal();
           regs                  = tcb->xcp.regs;
         }
@@ -538,7 +538,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
           /* Indicate that we are in a syscall handler. */
 
-          rtcb->flags   |= TCB_FLAG_SYSCALL;
+          atomic_or(&rtcb->flags, TCB_FLAG_SYSCALL);
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
           /* If this is the first SYSCALL and if there is an allocated

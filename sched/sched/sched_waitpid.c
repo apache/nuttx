@@ -387,7 +387,7 @@ pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options)
       ctcb = nxsched_get_tcb(pid);
       if (!ctcb || !ctcb->group ||
           ctcb->group->tg_ppid != rtcb->group->tg_pid ||
-          (ctcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+          (atomic_read(&ctcb->flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
         {
           ret = -ECHILD;
         }
@@ -424,7 +424,7 @@ pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options)
   if (ctcb != NULL)
     {
       if ((group = ctcb->group) != NULL &&
-          (ctcb->flags & TCB_FLAG_EXIT_PROCESSING) == 0)
+          (atomic_read(&ctcb->flags) & TCB_FLAG_EXIT_PROCESSING) == 0)
         {
           /* Lock this group so that it cannot be
            * deleted until the wait completes

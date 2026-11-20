@@ -96,7 +96,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
     {
       /* Yes.. Release the old stack allocation */
 
-      up_release_stack(tcb, tcb->flags & TCB_FLAG_TTYPE_MASK);
+      up_release_stack(tcb, atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK);
     }
 
   /* Save the new stack allocation */
@@ -123,6 +123,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * since it's impossible to extend a preallocated memory in place.
    */
 
-  return up_create_stack(tcb, stack_size, tcb->flags & TCB_FLAG_TTYPE_MASK);
+  return up_create_stack(tcb, stack_size,
+                         atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK);
 #endif
 }

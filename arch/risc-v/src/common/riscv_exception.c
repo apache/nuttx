@@ -109,8 +109,9 @@ static void riscv_fault_handler(uintreg_t cause, void *regs)
    * two checks are kept as defensive redundancy.
    */
 
-  if (((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&
-      ((tcb->flags & TCB_FLAG_SYSCALL) == false) &&
+  if (((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+      TCB_FLAG_TTYPE_KERNEL) &&
+      ((atomic_read(&tcb->flags) & TCB_FLAG_SYSCALL) == false) &&
       !(((uintreg_t *)regs)[REG_INT_CTX] & STATUS_PPP))
     {
       struct tcb_s *ptcb = nxsched_get_tcb(tcb->group->tg_pid);
@@ -122,7 +123,7 @@ static void riscv_fault_handler(uintreg_t cause, void *regs)
       sched_dumpstack(tcb->pid);
 #endif
 
-      tcb->flags |= TCB_FLAG_FORCED_CANCEL;
+      atomic_or(&tcb->flags, TCB_FLAG_FORCED_CANCEL);
 
       /* Return to _exit function in privileged mode with argument SIGSEGV */
 

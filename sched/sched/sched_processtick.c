@@ -74,7 +74,8 @@ static inline void nxsched_cpu_scheduler(int cpu)
 #if CONFIG_RR_INTERVAL > 0
   /* Check if the currently executing task uses round robin scheduling. */
 
-  if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+  if ((atomic_read(&rtcb->flags) & TCB_FLAG_POLICY_MASK) ==
+      TCB_FLAG_SCHED_RR)
     {
       /* Yes, check if the currently executing task has exceeded its
        * timeslice.
@@ -87,7 +88,8 @@ static inline void nxsched_cpu_scheduler(int cpu)
 #ifdef CONFIG_SCHED_SPORADIC
   /* Check if the currently executing task uses sporadic scheduling. */
 
-  if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+  if ((atomic_read(&rtcb->flags) & TCB_FLAG_POLICY_MASK) ==
+      TCB_FLAG_SCHED_SPORADIC)
     {
       /* Yes, check if the currently executing task has exceeded its
        * budget.

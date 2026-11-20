@@ -96,7 +96,7 @@ int sched_rr_get_interval(pid_t pid, struct timespec *interval)
                * configured for round-robin scheduling.
                */
 
-              if ((rrtcb->flags & TCB_FLAG_POLICY_MASK) ==
+              if ((atomic_read(&rrtcb->flags) & TCB_FLAG_POLICY_MASK) ==
                   TCB_FLAG_SCHED_RR)
                 {
                   /* Convert the timeslice value from ticks to a timespec */

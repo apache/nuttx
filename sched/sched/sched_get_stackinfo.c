@@ -86,7 +86,7 @@ int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
                * threads in the same task group.
                */
 
-              if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) !=
+              if ((atomic_read(&rtcb->flags) & TCB_FLAG_TTYPE_MASK) !=
                   TCB_FLAG_TTYPE_KERNEL)
                 {
                   /* It is an application thread.  It is permitted to query

@@ -221,7 +221,7 @@ void group_leave(FAR struct tcb_s *tcb)
        * still using them, causing use-after-free crashes.
        */
 
-      bool release = !(tcb->flags & TCB_FLAG_TTYPE_KERNEL);
+      bool release = !(atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_KERNEL);
 
       /* Remove the member from group. */
 
@@ -243,12 +243,13 @@ void group_leave(FAR struct tcb_s *tcb)
        * stack into it.  The heap of a vfork() child stays.
        */
 
-      if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL &&
+      if ((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+          TCB_FLAG_TTYPE_KERNEL &&
           (group->tg_flags &
            (GROUP_FLAG_PRIVILEGED | GROUP_FLAG_VFORK)) == 0 &&
           (release || (group->tg_flags & GROUP_FLAG_EXITING) != 0))
         {
-          tcb->flags &= ~TCB_FLAG_FREE_STACK;
+          atomic_and(&tcb->flags, ~TCB_FLAG_FREE_STACK);
         }
 #endif
 
@@ -266,7 +267,7 @@ void group_leave(FAR struct tcb_s *tcb)
                tcb->addrenv_own != this_task()->addrenv_curr))
             {
               group->tg_flags &= ~GROUP_FLAG_VFORK;
-              tcb->flags &= ~TCB_FLAG_FREE_STACK;
+              atomic_and(&tcb->flags, ~TCB_FLAG_FREE_STACK);
             }
 #endif
 

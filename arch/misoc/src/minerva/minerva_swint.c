@@ -136,12 +136,12 @@ int minerva_swint(int irq, void *context, void *arg)
        * saved context referenced in $a1.
        */
 
-    case SYS_restore_context:
-      {
-        DEBUGASSERT(regs[REG_A1] != 0);
-        up_set_current_regs((uint32_t *)regs[REG_A1]);
-      }
-      break;
+      case SYS_restore_context:
+        {
+          DEBUGASSERT(regs[REG_A1] != 0);
+          up_set_current_regs((uint32_t *)regs[REG_A1]);
+        }
+        break;
 
       /* A0=SYS_switch_context: This a switch context command: void
        * misoc_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
@@ -152,13 +152,13 @@ int minerva_swint(int irq, void *context, void *arg)
        * register area referenced by the saved contents of R6.
        */
 
-    case SYS_switch_context:
-      {
-        DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-        minerva_copystate((uint32_t *) regs[REG_A1], regs);
-        up_set_current_regs((uint32_t *)regs[REG_A2]);
-      }
-      break;
+      case SYS_switch_context:
+        {
+          DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
+          minerva_copystate((uint32_t *) regs[REG_A1], regs);
+          up_set_current_regs((uint32_t *)regs[REG_A2]);
+        }
+        break;
 
       /* A0=SYS_syscall_return: This a switch context command: void
        * up_sycall_return(void); At this point, the following values are
@@ -167,32 +167,32 @@ int minerva_swint(int irq, void *context, void *arg)
        */
 
 #ifdef CONFIG_BUILD_KERNEL
-    case SYS_syscall_return:
-      {
-        struct tcb_s *rtcb = this_task();
-        int index = (int)rtcb->xcp.nsyscalls - 1;
+      case SYS_syscall_return:
+        {
+          struct tcb_s *rtcb = this_task();
+          int index = (int)rtcb->xcp.nsyscalls - 1;
 
-        /* Make sure that there is a saved syscall return address. */
+          /* Make sure that there is a saved syscall return address. */
 
-        DEBUGASSERT(index >= 0);
+          DEBUGASSERT(index >= 0);
 
-        /* Setup to return to the saved syscall return address in the
-         * original mode.
-         */
+          /* Setup to return to the saved syscall return address in the
+           * original mode.
+           */
 
-        up_current_regs()[REG_CSR_MEPC] =
-          rtcb->xcp.syscall[index].sysreturn;
+          up_current_regs()[REG_CSR_MEPC] =
+            rtcb->xcp.syscall[index].sysreturn;
 #error "Missing logic -- need to restore the original mode"
-        rtcb->xcp.nsyscalls          = index;
+          rtcb->xcp.nsyscalls          = index;
 
-        /* Handle any signal actions that were deferred while processing
-         * the system call.
-         */
+          /* Handle any signal actions that were deferred while processing
+           * the system call.
+           */
 
-        rtcb->flags                 &= ~TCB_FLAG_SYSCALL;
-        (void)nxsig_unmask_pendingsignal();
-      }
-      break;
+          atomic_and(&rtcb->flags, ~TCB_FLAG_SYSCALL);
+          (void)nxsig_unmask_pendingsignal();
+        }
+        break;
 #endif
 
       /* This is not an architecture-specify system call.  If NuttX is built
@@ -200,44 +200,44 @@ int minerva_swint(int irq, void *context, void *arg)
        * additional system calls must be handled as in the default case.
        */
 
-    default:
-      {
+      default:
+        {
 #ifdef CONFIG_BUILD_KERNEL
-        struct tcb_s *rtcb = this_task();
-        int index = rtcb->xcp.nsyscalls;
+          struct tcb_s *rtcb = this_task();
+          int index = rtcb->xcp.nsyscalls;
 
-        /* Verify that the SYS call number is within range */
+          /* Verify that the SYS call number is within range */
 
-        DEBUGASSERT(up_current_regs()[REG_A0] < SYS_maxsyscall);
+          DEBUGASSERT(up_current_regs()[REG_A0] < SYS_maxsyscall);
 
-        /* Make sure that we got here that there is a no saved syscall return
-         * address.  We cannot yet handle nested system calls.
-         */
+          /* Make sure that we got here that there is a no saved syscall
+           * return address.  We cannot yet handle nested system calls.
+           */
 
-        DEBUGASSERT(index < CONFIG_SYS_NNEST);
+          DEBUGASSERT(index < CONFIG_SYS_NNEST);
 
-        /* Setup to return to dispatch_syscall in privileged mode.
-        */
+          /* Setup to return to dispatch_syscall in privileged mode.
+           */
 
-        rtcb->xcpsyscall[index].sysreturn = regs[REG_CSR_MEPC];
+          rtcb->xcpsyscall[index].sysreturn = regs[REG_CSR_MEPC];
 #error "Missing logic -- Need to save mode"
-        rtcb->xcp.nsyscalls = index + 1;
+          rtcb->xcp.nsyscalls = index + 1;
 
-        regs[REG_CSR_MEPC]  = (uint32_t) dispatch_syscall;
+          regs[REG_CSR_MEPC]  = (uint32_t) dispatch_syscall;
 #error "Missing logic -- Need to set privileged mode"
 
-        /* Offset R0 to account for the reserved values */
+          /* Offset R0 to account for the reserved values */
 
-        up_current_regs()[REG_A0] -= CONFIG_SYS_RESERVED;
+          up_current_regs()[REG_A0] -= CONFIG_SYS_RESERVED;
 
-        /* Indicate that we are in a syscall handler. */
+          /* Indicate that we are in a syscall handler. */
 
-        rtcb->flags            |= TCB_FLAG_SYSCALL;
+          atomic_or(&rtcb->flags, TCB_FLAG_SYSCALL);
 #else
-        svcerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
+          svcerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
 #endif
-      }
-      break;
+        }
+        break;
     }
 
   /* Report what happened.  That might difficult in the case of a context
