@@ -465,7 +465,8 @@ FAR void *net_ipv6_payload(FAR struct ipv6_hdr_s *ipv6, FAR uint8_t *proto);
  *
  * Description:
  *   Concatenate iob_s chain iob2 to iob1, if CONFIG_NET_RECV_PACK is
- *   endabled, pack all data in the I/O buffer chain.
+ *   enabled, pack the chain from the last buffer of iob1.  If iob1 is
+ *   empty or its last buffer has no data, pack the whole chain.
  *
  * Returned Value:
  *   The number of bytes actually buffered is returned.  This will be either
