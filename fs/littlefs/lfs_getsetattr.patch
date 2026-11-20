@@ -1,7 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: zhouliang3 <zhouliang3@xiaomi.com>
+Date: Thu, 9 Sep 2021 20:02:15 +0800
+Subject: [PATCH] littlefs: Add lfs_file_getattr and lfs_file_setattr
+
+Signed-off-by: zhouliang3 <zhouliang3@xiaomi.com>
+---
+ lfs.c | 35 +++++++++++++++++++++++++++++++++++
+ lfs.h | 27 +++++++++++++++++++++++++++
+ 2 files changed, 62 insertions(+)
+
 --- ./littlefs/littlefs/lfs.c
 +++ ./littlefs/littlefs/lfs.c
-@@ -5717,6 +5717,41 @@ int lfs_file_path(lfs_t *lfs, lfs_file_t *file, char *path, lfs_size_t size) {
-     return err < 0 ? err : 0;
+@@ -6380,6 +6380,41 @@ lfs_ssize_t lfs_file_path(lfs_t *lfs, lfs_file_t *file, char *path, lfs_size_t s
+     return res;
  }
  
 +lfs_ssize_t lfs_file_getattr(lfs_t *lfs, lfs_file_t *file,
@@ -44,9 +55,9 @@
      int err = LFS_LOCK(lfs->cfg);
 --- ./littlefs/littlefs/lfs.h
 +++ ./littlefs/littlefs/lfs.h
-@@ -611,6 +611,33 @@ lfs_soff_t lfs_file_size(lfs_t *lfs, lfs_file_t *file);
- // Returns a negative error code on failure.
- int lfs_file_path(lfs_t *lfs, lfs_file_t *file, char *path, lfs_size_t size);
+@@ -664,6 +664,33 @@ lfs_ssize_t lfs_file_path(lfs_t *lfs, lfs_file_t *file,
+         char *path, lfs_size_t size);
+ 
  
 +// Get a custom attribute of file
 +//

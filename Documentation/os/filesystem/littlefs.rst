@@ -30,6 +30,22 @@ well as file operations (``fopen()``, ``fclose()``, etc).
    devices such as flash chips, SD cards and eMMC. Performance on SD cards and
    eMMC devices is worse than flash.
 
+Version and local patches
+=========================
+
+NuttX downloads littlefs ``CONFIG_FS_LITTLEFS_VERSION`` (default ``v2.11.2``)
+at build time. For this default version two NuttX patches are applied, which
+add ``lfs_file_path()`` (used by ``CONFIG_FS_LITTLEFS_GETPATH``) and
+``lfs_file_getattr()``/``lfs_file_setattr()`` (used by
+``CONFIG_FS_LITTLEFS_ATTR_UPDATE``). With any other version the patches are
+skipped and both options are unavailable.
+
+littlefs v2.11.2 writes on-disk version 2.1, while v2.5.1 and earlier wrote
+2.0. littlefs 2.1 mounts 2.0 images and upgrades the superblock on the first
+write. To keep writing 2.0 images, for example for older bootloaders, enable
+``CONFIG_FS_LITTLEFS_MULTI_VERSION`` and set
+``CONFIG_FS_LITTLEFS_DISK_VERSION`` to ``0x00020000``.
+
 User identity and permissions
 =============================
 
