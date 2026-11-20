@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <sys/param.h>
 #include <nuttx/debug.h>
 
 #include <net/if.h>
@@ -163,6 +164,51 @@ static uint32_t tcp_maxrcvwin(FAR struct tcp_conn_s *conn)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: tcp_recvwindow_loss
+ *
+ * Description:
+ *   A segment arrived after a gap: the frames in front of it were lost.
+ *   Limit the receive window that the connection advertises.
+ *
+ * Input Parameters:
+ *   dev  - The device that received the segment.
+ *   conn - The TCP connection.
+ *
+ ****************************************************************************/
+
+void tcp_recvwindow_loss(FAR struct net_driver_s *dev,
+                         FAR struct tcp_conn_s *conn)
+{
+  uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
+  uint32_t mss = tcp_rx_mss(dev);
+  uint32_t wnd = 0;
+
+  /* The other segments of the same window are lost with the first one:
+   * limit the window once per window.
+   */
+
+  if (conn->rcv_clamp != 0 && TCP_SEQ_LT(rcvseq, conn->rcv_lossseq))
+    {
+      return;
+    }
+
+  if (TCP_SEQ_GT(conn->rcv_adv, rcvseq))
+    {
+      wnd = TCP_SEQ_SUB(conn->rcv_adv, rcvseq);
+    }
+
+  if (conn->rcv_clamp != 0 && conn->rcv_clamp < wnd)
+    {
+      wnd = conn->rcv_clamp;
+    }
+
+  conn->rcv_clampmax = MAX(wnd > mss ? wnd - mss : 0, 2 * mss);
+  conn->rcv_clamp    = MAX(wnd / 2, 2 * mss);
+  conn->rcv_clampseq = conn->rcv_adv;
+  conn->rcv_lossseq  = conn->rcv_adv;
+}
+
+/****************************************************************************
  * Name: tcp_get_recvwindow
  *
  * Description:
@@ -261,6 +307,25 @@ uint32_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
        */
 
       recvwndo = tailroom;
+    }
+
+  /* After a loss the window grows by one segment per window, up to one
+   * segment less than the window that lost frames.
+   */
+
+  if (conn->rcv_clamp != 0)
+    {
+      uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
+
+      if (TCP_SEQ_GTE(rcvseq, conn->rcv_clampseq) &&
+          conn->rcv_clamp < conn->rcv_clampmax)
+        {
+          conn->rcv_clamp    = MIN(conn->rcv_clamp + mss,
+                                   conn->rcv_clampmax);
+          conn->rcv_clampseq = rcvseq + conn->rcv_clamp;
+        }
+
+      recvwndo = MIN(recvwndo, conn->rcv_clamp);
     }
 
   recvwndo = tcp_calc_rcvsize(conn, recvwndo);
