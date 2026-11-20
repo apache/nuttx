@@ -948,6 +948,9 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   FAR struct tcp_wrbuffer_s *wrbuffer;
 #endif
+#ifdef CONFIG_NET_TCPBACKLOG
+  FAR struct tcp_backlog_s *blg;
+#endif
 
   DEBUGASSERT(conn->crefs == 0);
 
@@ -1018,22 +1021,25 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   nxsem_destroy(&conn->snd_sem);
 #endif
 
+#ifdef CONFIG_NET_TCPBACKLOG
+  /* Remove any backlog attached to this connection.  Take it away with the
+   * list locked: tcp_input() looks at the blparent of a pending connection
+   * under the same lock, and then locks this connection, so do it before
+   * conn_uninit() destroys that lock.  Free the pending connections after
+   * the list is unlocked: tcp_free() takes their device locks, and the
+   * input path takes the list lock under a device lock.
+   */
+
+  tcp_conn_list_lock();
+  blg = tcp_backlogdetach(conn);
+  tcp_conn_list_unlock();
+
+  tcp_backlogfree(blg);
+#endif
+
   /* Use conn_uninit to release all connection resources */
 
   conn_uninit(&conn->sconn);
-
-#ifdef CONFIG_NET_TCPBACKLOG
-  tcp_conn_list_lock();
-
-  /* Remove any backlog attached to this connection */
-
-  if (conn->backlog)
-    {
-      tcp_backlogdestroy(conn);
-    }
-
-  tcp_conn_list_unlock();
-#endif
 
   nxrmutex_destroy(&conn->sconn.s_lock);
 

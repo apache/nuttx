@@ -59,6 +59,7 @@
 int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
 {
   FAR struct tcp_backlog_s     *bls = NULL;
+  FAR struct tcp_backlog_s     *old;
   FAR struct tcp_blcontainer_s *blc;
   FAR struct tcp_conn_s        *blconn;
   int size;
@@ -139,83 +140,112 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
       blconn->blparent = conn;
     }
 
-  tcp_backlogdestroy(conn);
+  old = tcp_backlogdetach(conn);
 
   /* Now install the backlog tear-off in the connection.  NOTE that bls may
    * actually be NULL if nblg is <= 0;  In that case, we are disabling
-   * backlog support.  Since the network is locked, destroying the old
-   * backlog and replace it with the new is an atomic operation
+   * backlog support.  Since the connection is locked, detaching the old
+   * backlog and installing the new one is an atomic operation.
    */
 
   conn->backlog = bls;
   conn_unlock(&conn->sconn);
+
+  /* Free the connections left in the old backlog without the lock of the
+   * connection: tcp_free() takes their device locks.
+   */
+
+  tcp_backlogfree(old);
   return OK;
 }
 
 /****************************************************************************
- * Name: tcp_backlogdestroy
+ * Name: tcp_backlogdetach
  *
  * Description:
- *   (1) Called from tcp_free() whenever a connection is freed.
- *   (2) Called from tcp_backlogcreate() to destroy any old backlog
- *
- *   NOTE: This function may re-enter tcp_free when a connection that
- *   is freed that has pending connections.
+ *   Take the backlog of a connection away from it, with the pending
+ *   connections in it: their blparent is set to NULL, so that the input
+ *   path does not use the backlog any more.  tcp_backlogfree() frees them.
  *
  * Assumptions:
- *   Called from network socket logic with the network locked
+ *   Called from tcp_free() with the TCP connection list locked, or from
+ *   tcp_backlogcreate() with the connection locked.
  *
  ****************************************************************************/
 
-int tcp_backlogdestroy(FAR struct tcp_conn_s *conn)
+FAR struct tcp_backlog_s *tcp_backlogdetach(FAR struct tcp_conn_s *conn)
 {
   FAR struct tcp_backlog_s     *blg;
   FAR struct tcp_blcontainer_s *blc;
-  FAR struct tcp_conn_s        *blconn;
 
   ninfo("conn=%p\n", conn);
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!conn)
+  blg           = conn->backlog;
+  conn->backlog = NULL;
+
+  if (blg != NULL)
     {
-      return -EINVAL;
-    }
-#endif
-
-  /* Make sure that the connection has a backlog to be destroyed */
-
-  if (conn->backlog)
-    {
-      /* Remove the backlog structure reference from the connection */
-
-      blg           = conn->backlog;
-      conn->backlog = NULL;
-
-      /* Handle any pending connections in the backlog */
-
-      while ((blc = (FAR struct tcp_blcontainer_s *)
-                    sq_remfirst(&blg->bl_pending)) != NULL)
+      for (blc = (FAR struct tcp_blcontainer_s *)sq_peek(&blg->bl_pending);
+           blc != NULL;
+           blc = (FAR struct tcp_blcontainer_s *)sq_next(&blc->bc_node))
         {
-          blconn = blc->bc_conn;
-          if (blconn)
+          if (blc->bc_conn != NULL)
             {
-              /* REVISIT
-               * -- such connections really need to be gracefully closed
-               */
-
-              blconn->blparent = NULL;
-              blconn->backlog  = NULL;
-              blconn->crefs    = 0;
-              tcp_free(blconn);
+              blc->bc_conn->blparent = NULL;
             }
         }
-
-      /* Then free the entire backlog structure */
-
-      kmm_free(blg);
     }
 
-  return OK;
+  return blg;
+}
+
+/****************************************************************************
+ * Name: tcp_backlogfree
+ *
+ * Description:
+ *   Free a backlog that tcp_backlogdetach() returned, and the pending
+ *   connections in it.
+ *
+ *   NOTE: This function re-enters tcp_free() for each pending connection.
+ *
+ * Assumptions:
+ *   The caller holds no lock of the network: tcp_free() takes the device
+ *   lock of each pending connection, and the input path takes the TCP
+ *   connection list lock under a device lock.
+ *
+ ****************************************************************************/
+
+void tcp_backlogfree(FAR struct tcp_backlog_s *blg)
+{
+  FAR struct tcp_blcontainer_s *blc;
+  FAR struct tcp_conn_s        *blconn;
+
+  if (blg == NULL)
+    {
+      return;
+    }
+
+  /* Handle any pending connections in the backlog */
+
+  while ((blc = (FAR struct tcp_blcontainer_s *)
+                sq_remfirst(&blg->bl_pending)) != NULL)
+    {
+      blconn = blc->bc_conn;
+      if (blconn)
+        {
+          /* REVISIT
+           * -- such connections really need to be gracefully closed
+           */
+
+          blconn->backlog = NULL;
+          blconn->crefs   = 0;
+          tcp_free(blconn);
+        }
+    }
+
+  /* Then free the entire backlog structure */
+
+  kmm_free(blg);
 }
 
 /****************************************************************************
