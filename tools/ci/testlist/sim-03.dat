@@ -24,6 +24,9 @@
 -Darwin,sim:usbdev
 -Darwin,sim:usbhost
 
+# zblue needs the Linux HCI socket and ELF section start/stop symbols
+-Darwin,sim:zblue
+
 # Boards build by CMake
 CMake,sim:ostest
 CMake,sim:ostest_oneholder
@@ -51,3 +54,4 @@ CMake,sim:userfs
 CMake,sim:usrsocktest
 CMake,sim:ustream
 CMake,sim:vncserver
+CMake,sim:zblue

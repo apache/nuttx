@@ -1007,6 +1007,28 @@ At this point you should be able to detect a "nimble" BLE device when scanning
 for BLE devices. You can use nRFConnect Android application from Nordic to
 connect and inspect exposed GATT services.
 
+zblue
+-----
+
+The Zephyr Bluetooth host (:doc:`/applications/wireless/zblue/index`) in
+userspace, on a Bluetooth controller of the host attached with
+``CONFIG_SIM_HCISOCKET`` and exposed as ``/dev/ttyHCI0``. The controller is
+taken over with the HCI user channel, so it must be down on the host and the
+simulator needs ``CAP_NET_ADMIN``:
+
+.. code:: console
+
+   $ sudo hciconfig hci0 down
+   $ sudo ./nuttx --bt-dev=hci0
+   nsh> zblue_peripheral &
+   zblue: Bluetooth ready, identity P:00:1A:7D:DA:71:11
+   zblue: advertising as "NuttX zblue"
+
+A central can then scan for "NuttX zblue", connect and read the GAP and GATT
+services, for example ``gatttool -i hci1 -b <address> --primary`` from a
+second adapter. ``CONFIG_DEV_URANDOM`` provides the entropy for the host
+cryptography; it is not suitable for a real device.
+
 nsh
 ---
 
