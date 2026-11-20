@@ -259,7 +259,19 @@ struct xcptcontext
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_MULTICPU
-int up_cpu_index(void) noinstrument_function;
+noinstrument_function
+static inline_function int up_cpu_index(void)
+{
+  /* Register CORE_ID[2:0] holds cpu number. */
+
+  uint8_t id = tricore_mfcr(TRICORE_CPU_CORE_ID) & 0x7;
+
+#ifdef CONFIG_ARCH_CHIP_TC3XX
+  id = id > 5 ? 5 : id;
+#endif
+
+  return id;
+}
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************
