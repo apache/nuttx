@@ -177,9 +177,9 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
           set_errno(ENOMEM);
           return ERROR;
         }
-    }
 
-  memset(pollset, 0, npfds * sizeof(struct pollfd));
+      memset(pollset, 0, npfds * sizeof(struct pollfd));
+    }
 
   /* Initialize the descriptor list for poll() */
 
@@ -311,6 +311,10 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
         }
     }
 
-  lib_put_tempbuffer(pollset);
+  if (pollset != NULL)
+    {
+      lib_put_tempbuffer(pollset);
+    }
+
   return ret;
 }
