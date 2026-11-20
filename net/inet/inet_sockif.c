@@ -63,6 +63,24 @@ union sockaddr_u
 };
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* SO_RCVBUF and SO_SNDBUF: a TCP connection always has a receive limit,
+ * and a send limit with write buffers (net/tcp/tcp.h).  UDP has them only
+ * when CONFIG_NET_RECV_BUFSIZE or CONFIG_NET_SEND_BUFSIZE is > 0.
+ */
+
+#if CONFIG_NET_RECV_BUFSIZE > 0 || defined(NET_TCP_HAVE_STACK)
+#  define INET_HAVE_RCVBUF 1
+#endif
+
+#if CONFIG_NET_SEND_BUFSIZE > 0 || \
+    (defined(NET_TCP_HAVE_STACK) && defined(CONFIG_NET_TCP_WRITE_BUFFERS))
+#  define INET_HAVE_SNDBUF 1
+#endif
+
+/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -649,7 +667,7 @@ static int inet_get_socketlevel_option(FAR struct socket *psock, int option,
 {
   switch (option)
     {
-#if CONFIG_NET_RECV_BUFSIZE > 0
+#ifdef INET_HAVE_RCVBUF
       case SO_RCVBUF:     /* Reports receive buffer size */
         {
           if (*value_len != sizeof(int))
@@ -666,7 +684,7 @@ static int inet_get_socketlevel_option(FAR struct socket *psock, int option,
             }
           else
 #endif
-#ifdef NET_UDP_HAVE_STACK
+#if defined(NET_UDP_HAVE_STACK) && CONFIG_NET_RECV_BUFSIZE > 0
           if (psock->s_type == SOCK_DGRAM)
             {
               FAR struct udp_conn_s *udp = psock->s_conn;
@@ -682,7 +700,7 @@ static int inet_get_socketlevel_option(FAR struct socket *psock, int option,
         break;
 #endif
 
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#ifdef INET_HAVE_SNDBUF
       case SO_SNDBUF:     /* Reports send buffer size */
         {
           if (*value_len != sizeof(int))
@@ -690,7 +708,7 @@ static int inet_get_socketlevel_option(FAR struct socket *psock, int option,
               return -EINVAL;
             }
 
-#ifdef NET_TCP_HAVE_STACK
+#if defined(NET_TCP_HAVE_STACK) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
           if (psock->s_type == SOCK_STREAM)
             {
               FAR struct tcp_conn_s *tcp = psock->s_conn;
@@ -699,7 +717,7 @@ static int inet_get_socketlevel_option(FAR struct socket *psock, int option,
             }
           else
 #endif
-#ifdef NET_UDP_HAVE_STACK
+#if defined(NET_UDP_HAVE_STACK) && CONFIG_NET_SEND_BUFSIZE > 0
           if (psock->s_type == SOCK_DGRAM)
             {
               FAR struct udp_conn_s *udp = psock->s_conn;
@@ -900,7 +918,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
         break;
 #endif
 
-#if CONFIG_NET_RECV_BUFSIZE > 0
+#ifdef INET_HAVE_RCVBUF
       case SO_RCVBUF:     /* Sets receive buffer size */
         {
           int buffersize;
@@ -922,7 +940,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
               return -EINVAL;
             }
 
-#if CONFIG_NET_MAX_RECV_BUFSIZE > 0
+#if defined(CONFIG_NET_MAX_RECV_BUFSIZE) && CONFIG_NET_MAX_RECV_BUFSIZE > 0
           buffersize = MIN(buffersize, CONFIG_NET_MAX_RECV_BUFSIZE);
 #endif
 
@@ -939,7 +957,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
             }
           else
 #endif
-#ifdef NET_UDP_HAVE_STACK
+#if defined(NET_UDP_HAVE_STACK) && CONFIG_NET_RECV_BUFSIZE > 0
           if (psock->s_type == SOCK_DGRAM)
             {
               FAR struct udp_conn_s *udp = psock->s_conn;
@@ -960,7 +978,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
         break;
 #endif
 
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#ifdef INET_HAVE_SNDBUF
       case SO_SNDBUF:     /* Sets send buffer size */
         {
           int buffersize;
@@ -983,13 +1001,13 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
               return -EINVAL;
             }
 
-#if CONFIG_NET_MAX_SEND_BUFSIZE > 0
+#if defined(CONFIG_NET_MAX_SEND_BUFSIZE) && CONFIG_NET_MAX_SEND_BUFSIZE > 0
           buffersize = MIN(buffersize, CONFIG_NET_MAX_SEND_BUFSIZE);
 #endif
 
           conn_lock(psock->s_conn);
 
-#ifdef NET_TCP_HAVE_STACK
+#if defined(NET_TCP_HAVE_STACK) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
           if (psock->s_type == SOCK_STREAM)
             {
               FAR struct tcp_conn_s *tcp = psock->s_conn;
@@ -1000,7 +1018,7 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
             }
           else
 #endif
-#ifdef NET_UDP_HAVE_STACK
+#if defined(NET_UDP_HAVE_STACK) && CONFIG_NET_SEND_BUFSIZE > 0
           if (psock->s_type == SOCK_DGRAM)
             {
               FAR struct udp_conn_s *udp = psock->s_conn;

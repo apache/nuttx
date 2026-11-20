@@ -839,11 +839,9 @@ static FAR struct tcp_conn_s *tcp_alloc_conn(uint8_t domain,
       conn->keepintvl     = 2 * DSEC_PER_SEC;
       conn->keepcnt       = 3;
 #endif
-#if CONFIG_NET_RECV_BUFSIZE > 0
-      conn->rcv_bufs      = CONFIG_NET_RECV_BUFSIZE;
-#endif
-#if CONFIG_NET_SEND_BUFSIZE > 0
-      conn->snd_bufs      = CONFIG_NET_SEND_BUFSIZE;
+      conn->rcv_bufs      = TCP_RECV_BUFSIZE;
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      conn->snd_bufs      = TCP_SEND_BUFSIZE;
 
       nxsem_init(&conn->snd_sem, 0, 0);
 #endif
@@ -1005,15 +1003,9 @@ void tcp_free(FAR struct tcp_conn_s *conn)
       tcp_wrbuffer_release(wrbuffer);
     }
 
-#if CONFIG_NET_SEND_BUFSIZE > 0
   /* Notify the send buffer available */
 
   tcp_sendbuffer_notify(conn);
-#endif /* CONFIG_NET_SEND_BUFSIZE */
-
-#endif
-
-#if CONFIG_NET_SEND_BUFSIZE > 0
   nxsem_destroy(&conn->snd_sem);
 #endif
 
@@ -1296,10 +1288,8 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
 
       conn->sconn.s_tos      = listener->sconn.s_tos;
       conn->sconn.s_ttl      = listener->sconn.s_ttl;
-#if CONFIG_NET_RECV_BUFSIZE > 0
       conn->rcv_bufs         = listener->rcv_bufs;
-#endif
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       conn->snd_bufs         = listener->snd_bufs;
 #endif
       conn->mss              = listener->mss;

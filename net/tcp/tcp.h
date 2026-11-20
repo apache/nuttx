@@ -100,6 +100,30 @@
 #define TCP_SEQ_ADD(a, b)   ((uint32_t)((a) + (b)))
 #define TCP_SEQ_SUB(a, b)   ((uint32_t)((a) - (b)))
 
+/* The send and receive buffer size of a connection.  When
+ * CONFIG_NET_SEND_BUFSIZE or CONFIG_NET_RECV_BUFSIZE is 0, a connection
+ * may queue in its write buffers and in its read-ahead 1/8 of the IOBs
+ * above the throttle each, but at least one segment of the largest MSS.
+ * So one connection cannot take all free IOBs.
+ */
+
+#define TCP_IOB_BUFSIZE \
+  ((CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE) * CONFIG_IOB_BUFSIZE / 8)
+#define TCP_DEFAULT_BUFSIZE \
+  (TCP_IOB_BUFSIZE > MAX_TCP_MSS ? TCP_IOB_BUFSIZE : MAX_TCP_MSS)
+
+#if CONFIG_NET_RECV_BUFSIZE > 0
+#  define TCP_RECV_BUFSIZE  CONFIG_NET_RECV_BUFSIZE
+#else
+#  define TCP_RECV_BUFSIZE  TCP_DEFAULT_BUFSIZE
+#endif
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+#  define TCP_SEND_BUFSIZE  CONFIG_NET_SEND_BUFSIZE
+#else
+#  define TCP_SEND_BUFSIZE  TCP_DEFAULT_BUFSIZE
+#endif
+
 /* The error of a send on a TCP socket that is not connected: -ECONNRESET
  * if the peer reset the connection and this is not yet reported, -EPIPE if
  * the connection was closed (POSIX: the socket is no longer connected),
@@ -280,10 +304,8 @@ struct tcp_conn_s
 #endif
   uint32_t snd_wl1;
   uint32_t snd_wl2;
-#if CONFIG_NET_RECV_BUFSIZE > 0
   int32_t  rcv_bufs;      /* Maximum amount of bytes queued in recv */
-#endif
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   int32_t  snd_bufs;      /* Maximum amount of bytes queued in send */
   sem_t    snd_sem;       /* Semaphore signals send completion */
 #endif
@@ -2003,7 +2025,7 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb);
  *
  ****************************************************************************/
 
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 uint32_t tcp_wrbuffer_inqueue_size(FAR struct tcp_conn_s *conn);
 #endif
 
@@ -2329,9 +2351,9 @@ int tcp_ioctl(FAR struct tcp_conn_s *conn, int cmd, unsigned long arg);
  *
  ****************************************************************************/
 
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 void tcp_sendbuffer_notify(FAR struct tcp_conn_s *conn);
-#endif /* CONFIG_NET_SEND_BUFSIZE */
+#endif
 
 /****************************************************************************
  * Name: tcpip_hdrsize

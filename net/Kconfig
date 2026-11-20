@@ -184,7 +184,9 @@ config NET_RECV_BUFSIZE
 	int "Net Default Receive buffer size"
 	default 0
 	---help---
-		This is the default value for receive buffer size.
+		This is the default value for receive buffer size.  With 0, a TCP
+		connection uses 1/8 of the IOBs above IOB_THROTTLE, and at least
+		one segment of the largest MSS; other sockets have no limit.
 
 config NET_MAX_RECV_BUFSIZE
 	int "Net Max Receive buffer size"
@@ -199,7 +201,10 @@ config NET_SEND_BUFSIZE
 	depends on NET_TCP_WRITE_BUFFERS || NET_UDP_WRITE_BUFFERS || NET_CAN_WRITE_BUFFERS
 	default 0
 	---help---
-		This is the default value for send buffer size.
+		This is the default value for send buffer size.  With 0, the TCP
+		write buffers of a connection use 1/8 of the IOBs above
+		IOB_THROTTLE, and at least one segment of the largest MSS; other
+		sockets have no limit.
 
 config NET_MAX_SEND_BUFSIZE
 	int "Net Max Send buffer size"
