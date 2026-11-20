@@ -31,12 +31,18 @@ config ARMV8M_STRING_FUNCTION
 	default n
 	depends on ARCH_TOOLCHAIN_GNU
 	select ARMV8M_MEMCHR
+	select ARMV8M_MEMCMP
 	select ARMV8M_MEMCPY
 	select ARMV8M_MEMSET
 	select ARMV8M_MEMMOVE
+	select ARMV8M_STRCHR
+	select ARMV8M_STRCHRNUL
 	select ARMV8M_STRCMP
 	select ARMV8M_STRCPY
 	select ARMV8M_STRLEN
+	select ARMV8M_STRNCMP
+	select ARMV8M_STRNLEN
+	select ARMV8M_STRRCHR
 
 config ARMV8M_MEMCHR
 	bool "Enable optimized memchr() for ARMv8-M"
@@ -93,5 +99,53 @@ config ARMV8M_STRLEN
 	depends on ARCH_TOOLCHAIN_GNU
 	---help---
 		Enable optimized ARMv8-M specific strlen() library function
+
+config ARMV8M_MEMCMP
+	bool "Enable optimized memcmp() for ARMv8-M"
+	default n
+	select LIBC_ARCH_MEMCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv8-M specific memcmp() library function
+
+config ARMV8M_STRCHR
+	bool "Enable optimized strchr() for ARMv8-M"
+	default n
+	select LIBC_ARCH_STRCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv8-M specific strchr() library function
+
+config ARMV8M_STRCHRNUL
+	bool "Enable optimized strchrnul() for ARMv8-M"
+	default n
+	select LIBC_ARCH_STRCHRNUL
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv8-M specific strchrnul() library function
+
+config ARMV8M_STRNCMP
+	bool "Enable optimized strncmp() for ARMv8-M"
+	default n
+	select LIBC_ARCH_STRNCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv8-M specific strncmp() library function
+
+config ARMV8M_STRNLEN
+	bool "Enable optimized strnlen() for ARMv8-M"
+	default n
+	select LIBC_ARCH_STRNLEN
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv8-M specific strnlen() library function
+
+config ARMV8M_STRRCHR
+	bool "Enable optimized strrchr() for ARMv8-M"
+	default n
+	select LIBC_ARCH_STRRCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv8-M specific strrchr() library function
 
 endif

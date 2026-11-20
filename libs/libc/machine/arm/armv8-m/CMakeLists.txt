@@ -22,6 +22,30 @@
 
 set(SRCS)
 
+if(CONFIG_ARMV8M_MEMCMP)
+  list(APPEND SRCS arch_memcmp.S)
+endif()
+
+if(CONFIG_ARMV8M_STRCHR)
+  list(APPEND SRCS arch_strchr.S)
+endif()
+
+if(CONFIG_ARMV8M_STRCHRNUL)
+  list(APPEND SRCS arch_strchrnul.S)
+endif()
+
+if(CONFIG_ARMV8M_STRNCMP)
+  list(APPEND SRCS arch_strncmp.S)
+endif()
+
+if(CONFIG_ARMV8M_STRNLEN)
+  list(APPEND SRCS arch_strnlen.S)
+endif()
+
+if(CONFIG_ARMV8M_STRRCHR)
+  list(APPEND SRCS arch_strrchr.S)
+endif()
+
 if(CONFIG_LIBC_ARCH_ELF)
   list(APPEND SRCS arch_elf.c)
 endif()
