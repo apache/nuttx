@@ -20,6 +20,28 @@
 #
 # ##############################################################################
 
+# ~~~
+# We define the following library types for NuttX:
+#
+# `NUTTX_KERNEL_LIBRARIES`: used for kernel definition such as `libarch,libboard,libsched...`
+# `NUTTX_SYSTEM_LIBRARIES`: overall system library definition such as `libcxx,libbuiltin-rt...`
+#    (*)  In protected mode, some kernel library will split the system for userspace
+#    (*)  such as libc libmm split into libkc|libc libkmm|libmm
+# NUTTX_USER_LIBRARIES: user-space defined libraries
+# NUTTX_APPS_LIBRARIES: used for application linking typically added via `nuttx_add_application`
+# NUTTX_EXTRA_LIBRARIES: additional external static libraries such as `libgcc,libm`
+#
+# In FLAT mode: all libraries are linked together.
+# In PROTECTED mode: `NUTTX_KERNEL_LIBRARIES` and `NUTTX_EXTRA_LIBRARIES` link the kernel blob.
+#                    `NUTTX_SYSTEM_LIBRARIES`,`NUTTX_USER_LIBRARIES` and `NUTTX_APPS_LIBRARIES` link user blob.
+# In KERNEL mode: `NUTTX_KERNEL_LIBRARIES` and `NUTTX_EXTRA_LIBRARIES` link the kernel blob.
+#                 link `NUTTX_APPS_LIBRARIES` to separate ELF file with 'NUTTX_SYSTEM_LIBRARIES' and 'NUTTX_USER_LIBRARIES'.
+#
+# The linking order follows these principles:
+# `NUTTX_APPS_LIBRARIES` before `NUTTX_USER_LIBRARIES` befor `NUTTX_SYSTEM_LIBRARIES` befor `NUTTX_KERNEL_LIBRARIES`
+# `NUTTX_EXTRA_LIBRARIES` at the very last
+# ~~~
+
 # Internal utility function
 #
 # Used by functions below, not to be used directly
@@ -210,7 +232,7 @@ function(nuttx_add_library target)
   # make sure context and post time ordering
   add_dependencies(${target} apps_context)
   add_dependencies(apps_post ${target})
-  set_property(GLOBAL APPEND PROPERTY NUTTX_SYSTEM_LIBRARIES ${target})
+  set_property(GLOBAL APPEND PROPERTY NUTTX_USER_LIBRARIES ${target})
 
   set_property(
     TARGET nuttx_global
@@ -287,7 +309,7 @@ function(nuttx_add_external_library target)
     # ordering
     add_dependencies(${target} apps_context)
     add_dependencies(apps_post ${target})
-    set_property(GLOBAL APPEND PROPERTY NUTTX_SYSTEM_LIBRARIES ${target})
+    set_property(GLOBAL APPEND PROPERTY NUTTX_USER_LIBRARIES ${target})
     set_property(
       TARGET nuttx_global
       APPEND
