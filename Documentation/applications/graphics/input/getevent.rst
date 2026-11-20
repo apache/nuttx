@@ -77,8 +77,8 @@ The main event loop uses ``poll()`` with a 500 ms timeout to wait for data on
 all open file descriptors. When an event is available, the corresponding read
 callback decodes and prints the event structure via ``syslog``.
 
-``SIGINT`` (``Ctrl+C``) is handled to allow graceful shutdown with proper
-resource cleanup.
+``SIGINT`` (``Ctrl+C``) and ``SIGTERM`` (``kill <pid>``) are handled to allow
+graceful shutdown with proper resource cleanup.
 
 Example Output
 ==============
