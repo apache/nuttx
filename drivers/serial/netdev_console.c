@@ -36,6 +36,7 @@
 #include <nuttx/poll.h>
 #include <netinet/in.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/init.h>
 #include <nuttx/mutex.h>
 #include <nuttx/signal.h>
@@ -60,7 +61,11 @@ struct netdev_consol_s
   struct socket     psock;
   struct work_s     txwork;
   struct work_s     rxwork;
-  mutex_t           rxlock;
+  struct work_s     ctrlwork;
+  mutex_t           lock;
+  int               sockerr;
+  bool              wantopen;
+  bool              opened;
   uint16_t          rxdgram_off;
   uint16_t          rxdgram_len;
   uint8_t           rxdgram[CONFIG_CONSOLE_NETDEV_RXBUFSIZE];
@@ -100,6 +105,7 @@ static bool netdev_console_txempty(FAR struct uart_dev_s *dev);
 static void netdev_console_poll(FAR struct pollfd_s *fds);
 static void netdev_console_txwork(FAR void *arg);
 static void netdev_console_rxwork(FAR void *arg);
+static void netdev_console_ctrlwork(FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -145,7 +151,7 @@ static struct netdev_consol_s g_netdev_console =
     },
     .isconsole = true
   },
-  .rxlock = NXMUTEX_INITIALIZER,
+  .lock = NXMUTEX_INITIALIZER,
 };
 
 /****************************************************************************
@@ -168,7 +174,6 @@ static int netdev_console_udp_init(FAR struct uart_dev_s *dev)
   ret = psock_socket(PF_INET, SOCK_DGRAM, 0, &priv->psock);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to create a socket: %d\n", ret);
       return ret;
     }
 
@@ -183,7 +188,6 @@ static int netdev_console_udp_init(FAR struct uart_dev_s *dev)
   if (ret < 0)
     {
       psock_close(&priv->psock);
-      nerr("ERROR: Failed to connect socket: %d\n", ret);
       return ret;
     }
 
@@ -209,7 +213,6 @@ static int netdev_console_can_init(FAR struct uart_dev_s *dev)
   ret = psock_socket(PF_CAN, SOCK_DGRAM, CAN_ISOTP, &priv->psock);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to create ISO-TP socket: %d\n", ret);
       return ret;
     }
 
@@ -228,7 +231,6 @@ static int netdev_console_can_init(FAR struct uart_dev_s *dev)
   if (ret < 0)
     {
       psock_close(&priv->psock);
-      nerr("ERROR: Failed to bind ISO-TP socket: %d\n", ret);
       return ret;
     }
 
@@ -242,7 +244,6 @@ static int netdev_console_can_init(FAR struct uart_dev_s *dev)
   if (ret < 0)
     {
       psock_close(&priv->psock);
-      nerr("ERROR: Failed to configure ISO-TP socket: %d\n", ret);
       return ret;
     }
 
@@ -279,16 +280,13 @@ static void netdev_console_shutdown(FAR struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: netdev_console_attach
+ * Name: netdev_console_sockopen
  ****************************************************************************/
 
-static int netdev_console_attach(FAR struct uart_dev_s *dev)
+static int netdev_console_sockopen(FAR struct uart_dev_s *dev)
 {
   FAR struct netdev_consol_s *priv = (FAR struct netdev_consol_s *)dev;
   int ret = -EINVAL;
-
-  priv->rxdgram_off = 0;
-  priv->rxdgram_len = 0;
 
 #ifdef CONFIG_CONSOLE_NETDEV_CAN
   ret = netdev_console_can_init(dev);
@@ -316,10 +314,26 @@ static int netdev_console_attach(FAR struct uart_dev_s *dev)
   if (ret < 0)
     {
       psock_close(&priv->psock);
-      nerr("ERROR: Failed to setup socket poll: %d\n", ret);
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: netdev_console_attach
+ ****************************************************************************/
+
+static int netdev_console_attach(FAR struct uart_dev_s *dev)
+{
+  FAR struct netdev_consol_s *priv = (FAR struct netdev_consol_s *)dev;
+
+  /* Called with the uart spinlock held, so the socket, which may block, is
+   * opened by netdev_console_ctrlwork().
+   */
+
+  priv->wantopen = true;
+  work_queue(LPWORK, &priv->ctrlwork, netdev_console_ctrlwork, priv, 0);
+  return OK;
 }
 
 /****************************************************************************
@@ -330,12 +344,12 @@ static void netdev_console_detach(FAR struct uart_dev_s *dev)
 {
   FAR struct netdev_consol_s *priv = (FAR struct netdev_consol_s *)dev;
 
-  work_cancel(LPWORK, &priv->txwork);
-  work_cancel(LPWORK, &priv->rxwork);
-  priv->rxdgram_off = 0;
-  priv->rxdgram_len = 0;
-  psock_poll(&priv->psock, &priv->fds, false);
-  psock_close(&priv->psock);
+  /* Called with the uart spinlock held: let netdev_console_ctrlwork() close
+   * the socket.
+   */
+
+  priv->wantopen = false;
+  work_queue(LPWORK, &priv->ctrlwork, netdev_console_ctrlwork, priv, 0);
 }
 
 /****************************************************************************
@@ -567,30 +581,42 @@ static void netdev_console_txwork(FAR void *arg)
   irqstate_t                  flags;
   ssize_t                     ret;
 
+  nxmutex_lock(&priv->lock);
+
   /* Nothing to send when the buffer was flushed while the work was queued. */
 
   flags = uart_spinlock(dev, true);
   if (dev->dmatx.length == 0 && dev->dmatx.nlength == 0)
     {
       uart_spinunlock(dev, true, flags);
+      nxmutex_unlock(&priv->lock);
       return;
     }
 
   uart_spinunlock(dev, true, flags);
 
-  do
+  if (!priv->opened)
     {
-      ret = psock_send(&priv->psock, dev->dmatx.buffer, dev->dmatx.length,
-                       0);
+      /* Keep the data until netdev_console_ctrlwork() opens the socket. */
 
-      /* Wait for ARP */
-
-      if (ret < 0)
-        {
-          nxsig_sleep(1);
-        }
+      ret = 0;
     }
-  while (ret < 0 && retry--);
+  else
+    {
+      do
+        {
+          ret = psock_send(&priv->psock, dev->dmatx.buffer,
+                           dev->dmatx.length, 0);
+
+          /* Wait for ARP */
+
+          if (ret < 0)
+            {
+              nxsig_sleep(1);
+            }
+        }
+      while (ret < 0 && retry--);
+    }
 
   flags = uart_spinlock(dev, true);
 
@@ -605,6 +631,7 @@ static void netdev_console_txwork(FAR void *arg)
     }
 
   uart_spinunlock(dev, true, flags);
+  nxmutex_unlock(&priv->lock);
 }
 
 /****************************************************************************
@@ -624,7 +651,15 @@ static void netdev_console_rxwork(FAR void *arg)
   irqstate_t                  flags;
   ssize_t                     ret;
 
-  nxmutex_lock(&priv->rxlock);
+  nxmutex_lock(&priv->lock);
+
+  /* The socket is not open, or the console was closed. */
+
+  if (!priv->opened || !priv->rxint)
+    {
+      nxmutex_unlock(&priv->lock);
+      return;
+    }
 
   flags = uart_spinlock(dev, true);
 
@@ -633,7 +668,7 @@ static void netdev_console_rxwork(FAR void *arg)
   if (priv->rxdgram_off < priv->rxdgram_len)
     {
       uart_spinunlock(dev, true, flags);
-      nxmutex_unlock(&priv->rxlock);
+      nxmutex_unlock(&priv->lock);
       return;
     }
 
@@ -651,7 +686,75 @@ static void netdev_console_rxwork(FAR void *arg)
       uart_spinunlock(dev, true, flags);
     }
 
-  nxmutex_unlock(&priv->rxlock);
+  nxmutex_unlock(&priv->lock);
+}
+
+/****************************************************************************
+ * Name: netdev_console_ctrlwork
+ *
+ * Description:
+ *   Open or close the console socket as requested by attach() and detach().
+ *   Closing waits for txwork and rxwork through priv->lock.  Opening is
+ *   retried every second while the console is open.
+ *
+ ****************************************************************************/
+
+static void netdev_console_ctrlwork(FAR void *arg)
+{
+  FAR struct netdev_consol_s *priv = arg;
+  FAR struct uart_dev_s      *dev  = &priv->dev;
+  irqstate_t                  flags;
+  bool                        wantopen;
+  bool                        opened;
+  int                         ret = OK;
+
+  nxmutex_lock(&priv->lock);
+
+  flags = uart_spinlock(dev, true);
+  wantopen = priv->wantopen;
+  if (wantopen != priv->opened)
+    {
+      priv->rxdgram_off = 0;
+      priv->rxdgram_len = 0;
+    }
+
+  uart_spinunlock(dev, true, flags);
+
+  if (wantopen && !priv->opened)
+    {
+      ret = netdev_console_sockopen(dev);
+      priv->opened = ret >= 0;
+    }
+  else if (!wantopen && priv->opened)
+    {
+      psock_poll(&priv->psock, &priv->fds, false);
+      psock_close(&priv->psock);
+      priv->opened = false;
+    }
+
+  /* Do not log here: the log may go to this console, and the writer would
+   * then wait on the work that has to send it.
+   */
+
+  priv->sockerr = ret;
+  opened = priv->opened;
+  nxmutex_unlock(&priv->lock);
+
+  if (ret < 0)
+    {
+      work_queue(LPWORK, &priv->ctrlwork, netdev_console_ctrlwork, priv,
+                 SEC2TICK(1));
+    }
+
+  /* Send what was written while the socket was not open. */
+
+  flags = uart_spinlock(dev, true);
+  if (opened && dev->dmatx.length == 0 && dev->xmit.head != dev->xmit.tail)
+    {
+      uart_xmitchars_dma(dev);
+    }
+
+  uart_spinunlock(dev, true, flags);
 }
 
 /****************************************************************************
