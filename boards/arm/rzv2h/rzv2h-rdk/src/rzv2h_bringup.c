@@ -33,6 +33,11 @@
 #include <nuttx/board.h>
 #include <nuttx/leds/userled.h>
 
+#ifdef CONFIG_RZV2H_RTC
+#  include <nuttx/timers/rtc.h>
+#  include <nuttx/timers/arch_rtc.h>
+#endif
+
 #include "rzv2h-rdk.h"
 
 #if defined(CONFIG_I2C) && defined(CONFIG_RZV2H_SCI_I2C)
@@ -50,6 +55,10 @@
 #include <nuttx/can/can.h>
 #endif
 #include "rzv2h_canfd.h"
+#endif
+
+#ifdef CONFIG_RZV2H_RTC
+#  include "rzv2h_rtc.h"
 #endif
 
 /****************************************************************************
@@ -265,6 +274,49 @@ int rzv2h_bringup(void)
 
 #ifdef CONFIG_RZV2H_CANFD
   rzv2h_canfd_register_all();
+#endif
+
+#ifdef CONFIG_RZV2H_RTC
+  /* Initialize the RTC lower-half driver */
+
+  ret = rzv2h_rtc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rzv2h_rtc_initialize() failed: %d\n", ret);
+      return ret;
+    }
+
+#if defined(CONFIG_RZV2H_RTC) && defined(CONFIG_RTC_DRIVER)
+  /* Register /dev/rtc0 and publish the lower half to the arch interface */
+
+  ret = rtc_initialize(0, rzv2h_rtc_lowerhalf());
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rtc_initialize() failed: %d\n", ret);
+    }
+  else
+    {
+      /* Publish to CONFIG_RTC_ARCH bridge */
+
+      FAR struct rtc_lowerhalf_s *lower = rzv2h_rtc_lowerhalf();
+
+      up_rtc_set_lowerhalf(lower, false);
+
+      /* Report where the boot system-clock seed came from. */
+
+      if (lower->ops->havesettime != NULL &&
+          lower->ops->havesettime(lower))
+        {
+          syslog(LOG_INFO,
+                 "rzv2h_rtc: system clock seeded from RTC\n");
+        }
+      else
+        {
+          syslog(LOG_INFO,
+                 "rzv2h_rtc: RTC not set; using build-time default date\n");
+        }
+    }
+#endif
 #endif
 
   return OK;
