@@ -247,6 +247,9 @@ struct esp32_config_s
 #ifdef CONFIG_SERIAL_TXDMA
   uint8_t  dma_chan;            /* DMA instance 0-1 */
   sem_t   *dma_sem;             /* DMA semaphore */
+#  ifdef CONFIG_ESP32_SPIRAM
+  uint8_t *dma_txbuf;           /* Internal RAM copy of PSRAM TX data */
+#  endif
 #endif
 #ifdef HAVE_RS485
   uint8_t  rs485_dir_gpio;      /* UART RS-485 DIR GPIO pin cfg */
@@ -346,14 +349,23 @@ static const struct uart_ops_s g_uart_ops =
 #ifdef CONFIG_ESP32_UART0
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
+#  if defined(CONFIG_ESP32_UART0_TXDMA) && defined(CONFIG_ESP32_SPIRAM)
+static uint8_t g_uart0dmatxbuf[CONFIG_UART0_TXBUFSIZE];
+#  endif
 #endif
 #ifdef CONFIG_ESP32_UART1
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
+#  if defined(CONFIG_ESP32_UART1_TXDMA) && defined(CONFIG_ESP32_SPIRAM)
+static uint8_t g_uart1dmatxbuf[CONFIG_UART1_TXBUFSIZE];
+#  endif
 #endif
 #ifdef CONFIG_ESP32_UART2
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
+#  if defined(CONFIG_ESP32_UART2_TXDMA) && defined(CONFIG_ESP32_SPIRAM)
+static uint8_t g_uart2dmatxbuf[CONFIG_UART2_TXBUFSIZE];
+#  endif
 #endif
 
 /* This describes the state of the UART0 port. */
@@ -383,6 +395,9 @@ static const struct esp32_config_s g_uart0config =
   .dma_sem        = &g_dma0_sem,
 #else
   .dma_sem        = &g_dma1_sem,
+#endif
+#ifdef CONFIG_ESP32_SPIRAM
+  .dma_txbuf      = g_uart0dmatxbuf,
 #endif
 #endif
 #endif
@@ -472,6 +487,9 @@ static const struct esp32_config_s g_uart1config =
 #    else
   .dma_sem        = &g_dma1_sem,
 #    endif
+#    ifdef CONFIG_ESP32_SPIRAM
+  .dma_txbuf      = g_uart1dmatxbuf,
+#    endif
 #  endif
 #endif
 #ifdef CONFIG_ESP32_UART1_RS485
@@ -560,6 +578,9 @@ static const struct esp32_config_s g_uart2config =
 #    else
   .dma_sem        = &g_dma1_sem,
 #    endif
+#    ifdef CONFIG_ESP32_SPIRAM
+  .dma_txbuf      = g_uart2dmatxbuf,
+#    endif
 #  endif
 #endif
 #ifdef CONFIG_ESP32_UART2_RS485
@@ -644,26 +665,20 @@ static void esp32_dmasend(struct uart_dev_s *dev)
     {
       struct esp32_dmadesc_s *dmadesc;
       uint8_t *tp;
-#ifdef CONFIG_ESP32_SPIRAM
-      uint8_t *alloctp = NULL;
-#endif
 
-      /* If the buffer comes from PSRAM, allocate a new one from
-       * Internal SRAM.
+      /* The DMA cannot read PSRAM, so copy the data to internal RAM.  This
+       * is called with the uart spinlock held, where the heap must not be
+       * used, and the copy must stay valid until the transfer completes,
+       * so use a static buffer: the next transfer of this UART only starts
+       * after the DMA interrupt.
        */
 
 #ifdef CONFIG_ESP32_SPIRAM
       if (esp32_ptr_extram(dev->dmatx.buffer))
         {
-#  ifdef CONFIG_MM_KERNEL_HEAP
-          alloctp = kmm_malloc(dev->dmatx.length);
-#  elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
-          alloctp = xtensa_imm_malloc(dev->dmatx.length);
-#  endif
-
-          DEBUGASSERT(alloctp != NULL);
-          memcpy(alloctp, dev->dmatx.buffer, dev->dmatx.length);
-          tp = alloctp;
+          memcpy(priv->config->dma_txbuf, dev->dmatx.buffer,
+                 dev->dmatx.length);
+          tp = priv->config->dma_txbuf;
         }
       else
 #endif
@@ -691,17 +706,6 @@ static void esp32_dmasend(struct uart_dev_s *dev)
 
       modifyreg32(UHCI_DMA_OUT_LINK_REG(priv->config->dma_chan),
                   UHCI_OUTLINK_STOP_M, UHCI_OUTLINK_START_M);
-
-#ifdef CONFIG_ESP32_SPIRAM
-      if (alloctp != NULL)
-        {
-#  ifdef CONFIG_MM_KERNEL_HEAP
-          kmm_free(alloctp);
-#  elif defined(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP)
-          xtensa_imm_free(alloctp);
-#  endif
-        }
-#endif
     }
 }
 
