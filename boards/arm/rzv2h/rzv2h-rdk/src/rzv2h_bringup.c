@@ -35,9 +35,83 @@
 
 #include "rzv2h-rdk.h"
 
+#ifdef CONFIG_RZV2H_CANFD
+#include <stdio.h>
+#ifndef CONFIG_RZV2H_CANFD_SOCKET
+#include <nuttx/can/can.h>
+#endif
+#include "rzv2h_canfd.h"
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: rzv2h_canfd_register
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV2H_CANFD
+static void rzv2h_canfd_register(int channel)
+{
+#ifdef CONFIG_RZV2H_CANFD_SOCKET
+  int ret;
+
+  /* SocketCAN: network interface can<channel> */
+
+  ret = rzv2h_canfd_sock_initialize(channel);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register can%d: %d\n",
+             channel, ret);
+    }
+#else
+  struct can_dev_s *dev;
+  char path[16];
+  int ret;
+
+  dev = rzv2h_canfd_initialize(channel);
+  if (dev == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init CANFD%d\n", channel);
+      return;
+    }
+
+  snprintf(path, sizeof(path), "/dev/can%d", channel);
+  ret = can_register(path, dev);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register %s: %d\n", path, ret);
+    }
+#endif
+}
+
+/****************************************************************************
+ * Name: rzv2h_canfd_register_all
+ ****************************************************************************/
+
+static void rzv2h_canfd_register_all(void)
+{
+#ifdef CONFIG_RZV2H_CANFD0
+  rzv2h_canfd_register(0);
+#endif
+#ifdef CONFIG_RZV2H_CANFD1
+  rzv2h_canfd_register(1);
+#endif
+#ifdef CONFIG_RZV2H_CANFD2
+  rzv2h_canfd_register(2);
+#endif
+#ifdef CONFIG_RZV2H_CANFD3
+  rzv2h_canfd_register(3);
+#endif
+#ifdef CONFIG_RZV2H_CANFD4
+  rzv2h_canfd_register(4);
+#endif
+#ifdef CONFIG_RZV2H_CANFD5
+  rzv2h_canfd_register(5);
+#endif
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -91,6 +165,10 @@ int rzv2h_bringup(void)
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
       return ret;
     }
+#endif
+
+#ifdef CONFIG_RZV2H_CANFD
+  rzv2h_canfd_register_all();
 #endif
 
   return OK;
