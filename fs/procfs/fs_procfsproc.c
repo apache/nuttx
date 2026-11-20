@@ -657,8 +657,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   /* Show the scheduler policy */
 
-  policy     = g_policy[(tcb->flags & TCB_FLAG_POLICY_MASK) >>
-                        TCB_FLAG_POLICY_SHIFT];
+  policy     = g_policy[tcb->sched_policy];
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
                                "Scheduler:", policy);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,

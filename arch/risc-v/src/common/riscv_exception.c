@@ -110,7 +110,7 @@ static void riscv_fault_handler(uintreg_t cause, void *regs)
    */
 
   if (((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&
-      ((tcb->flags & TCB_FLAG_SYSCALL) == false) &&
+      ((tcb->exec_flags & TCB_EXEC_SYSCALL) == false) &&
       !(((uintreg_t *)regs)[REG_INT_CTX] & STATUS_PPP))
     {
       struct tcb_s *ptcb = nxsched_get_tcb(tcb->group->tg_pid);

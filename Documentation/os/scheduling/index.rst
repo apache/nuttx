@@ -188,9 +188,9 @@ gets it only while round robin is switched off, that is, while
 most board configurations set a positive value, so in most of those
 configurations a new task gets ``SCHED_RR``.
 ``nxthread_setup_scheduler()`` picks the policy for every new TCB with a
-compile-time test, not a runtime one: ``TCB_FLAG_SCHED_RR`` and a timeslice
+compile-time test, not a runtime one: ``SCHED_RR`` and a timeslice
 of ``CONFIG_RR_INTERVAL`` when that value is positive,
-``TCB_FLAG_SCHED_FIFO`` otherwise.  So ``CONFIG_RR_INTERVAL`` is not a
+``SCHED_FIFO`` otherwise.  So ``CONFIG_RR_INTERVAL`` is not a
 per-thread opt-in; setting it changes the default policy of the whole
 system.
 

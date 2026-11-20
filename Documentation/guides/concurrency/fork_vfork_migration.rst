@@ -161,12 +161,12 @@ Five architectures do it, and they are worth copying:
 * arm64: ``arm64_vectors.S`` hands the frame to ``dispatch_syscall()``, which
   stores it in ``xcp.sregs``; ``arm64_fork()`` then dispatches to
   ``arm64_fork_syscall()`` or ``arm64_fork_direct()`` according to whether
-  ``TCB_FLAG_SYSCALL`` is set, so a kernel thread that calls the entry point
+  ``TCB_EXEC_SYSCALL`` is set, so a kernel thread that calls the entry point
   directly still works.
 * armv7-a: ``arm_syscall.c`` stores the frame in ``xcp.sregs``, and
   ``arm_fork()`` dispatches to ``arm_fork_syscall()`` or
   ``arm_fork_direct()``.  The discriminator here is a saved user stack
-  pointer, ``xcp.ustkptr``, rather than ``TCB_FLAG_SYSCALL``:  armv7-a
+  pointer, ``xcp.ustkptr``, rather than ``TCB_EXEC_SYSCALL``:  armv7-a
   dispatches a system call by re-pointing the caller's own exception frame at
   ``dispatch_syscall()``, so the caller *is* the task that runs the kernel
   side of the call.  What makes its snapshot useless is not the system call
@@ -181,7 +181,7 @@ Five architectures do it, and they are worth copying:
 * x86_64: ``x86_64_syscall()`` stores the frame in ``xcp.sregs``, and
   ``x86_64_fork()`` dispatches to ``x86_64_fork_syscall()`` or
   ``x86_64_fork_direct()``.  The discriminator here is ``xcp.sregs`` itself
-  being non-NULL, because raising ``TCB_FLAG_SYSCALL`` would also defer signal
+  being non-NULL, because raising ``TCB_EXEC_SYSCALL`` would also defer signal
   actions -- something x86_64 has never done and its kernel-build signal path
   does not currently survive.  Two properties of ``SYSCALL``/``SYSRET`` shape
   the child's frame:  the instruction leaves the caller's RIP and RFLAGS in

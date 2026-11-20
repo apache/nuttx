@@ -359,7 +359,7 @@ uint64_t *x86_64_syscall(uint64_t *regs)
            * described by its own frame.
            *
            * Note what is deliberately *not* done here.  arm64 and RISC-V
-           * also raise TCB_FLAG_SYSCALL across the stub call, which defers
+           * also raise TCB_EXEC_SYSCALL across the stub call, which defers
            * any signal action until the system call returns.  x86_64 has
            * never set it, and making it do so is not free:  the deferred
            * action then has to be picked up by nxsig_unmask_pendingsignal()

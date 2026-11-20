@@ -73,7 +73,7 @@
 #define NXSEM_COUNT(s)        ((FAR atomic_t *)&((s)->val.semcount))
 #define NXSEM_IS_MUTEX(s)     (((s)->flags & SEM_TYPE_MUTEX) != 0)
 
-/* The uninterruptible waits set TCB_FLAG_UNINTERRUPTIBLE on the waiting
+/* The uninterruptible waits set TCB_EXEC_UNINTERRUPTIBLE on the waiting
  * task: then a pending signal does not make nxsem_wait_slow() fail at once.
  * Not in user space: there, the flag would also stop a signal from ending
  * sem_wait(), and the retry gets the signal when the system call returns.
@@ -84,8 +84,8 @@
   do \
     { \
       (tcb) = nxsched_self(); \
-      (flags) = (tcb)->flags & TCB_FLAG_UNINTERRUPTIBLE; \
-      (tcb)->flags |= TCB_FLAG_UNINTERRUPTIBLE; \
+      (flags) = (tcb)->exec_flags & TCB_EXEC_UNINTERRUPTIBLE; \
+      (tcb)->exec_flags |= TCB_EXEC_UNINTERRUPTIBLE; \
     } \
   while (0)
 
@@ -94,7 +94,7 @@
     { \
       if ((flags) == 0) \
         { \
-          (tcb)->flags &= ~TCB_FLAG_UNINTERRUPTIBLE; \
+          (tcb)->exec_flags &= ~TCB_EXEC_UNINTERRUPTIBLE; \
         } \
     } \
   while (0)

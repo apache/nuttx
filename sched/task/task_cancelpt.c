@@ -167,8 +167,8 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
 
           if (tcb->task_state == TSTATE_WAIT_SEM)
             {
-              if ((tcb->flags & TCB_FLAG_SYSCALL) == 0 ||
-                  (tcb->flags & TCB_FLAG_UNINTERRUPTIBLE) == 0 ||
+              if ((tcb->exec_flags & TCB_EXEC_SYSCALL) == 0 ||
+                  (tcb->exec_flags & TCB_EXEC_UNINTERRUPTIBLE) == 0 ||
                   tcb->waitobj == &tcb->join_sem)
                 {
                   nxsem_wait_irq(tcb, ECANCELED);

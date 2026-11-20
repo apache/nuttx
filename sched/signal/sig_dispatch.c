@@ -767,7 +767,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
    * signal handlers.
    */
 
-  if ((masked == 1) || (stcb->flags & TCB_FLAG_SYSCALL) != 0)
+  if ((masked == 1) || (stcb->exec_flags & TCB_EXEC_SYSCALL) != 0)
 #else
   /* Check if the signal is masked. In that case, it will be added to the
    * list of pending signals.
@@ -933,8 +933,8 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
            * block again.
            */
 
-          if ((stcb->flags & TCB_FLAG_SYSCALL) == 0 ||
-              (stcb->flags & TCB_FLAG_UNINTERRUPTIBLE) == 0)
+          if ((stcb->exec_flags & TCB_EXEC_SYSCALL) == 0 ||
+              (stcb->exec_flags & TCB_EXEC_UNINTERRUPTIBLE) == 0)
             {
               nxsem_wait_irq(stcb, EINTR);
             }

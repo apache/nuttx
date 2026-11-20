@@ -132,7 +132,7 @@ retry:
 #endif
 
   if (!sq_empty(&rtcb->sigpendactionq) &&
-      (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
+      (rtcb->exec_flags & TCB_EXEC_SIGNAL_ACTION) == 0)
     {
 #ifdef CONFIG_SMP
       leave_critical_section((uint16_t)regs[REG_PRIMASK]);

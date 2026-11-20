@@ -1208,7 +1208,7 @@ static int notify_check_inode(FAR struct file *filep)
 
   /* We only apply notify on mount points (f_inode won't be NULL). */
 
-  if ((tcb->flags & TCB_FLAG_SIGNAL_ACTION) ||
+  if ((tcb->exec_flags & TCB_EXEC_SIGNAL_ACTION) ||
       (!INODE_IS_MOUNTPT(filep->f_inode) &&
       !INODE_IS_PSEUDODIR(filep->f_inode) &&
       !INODE_IS_DRIVER(filep->f_inode)))

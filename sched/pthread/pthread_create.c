@@ -447,25 +447,24 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   /* Set the appropriate scheduling policy in the TCB */
 
-  ptcb->flags &= ~TCB_FLAG_POLICY_MASK;
   switch (policy)
     {
       default:
       case SCHED_FIFO:
-        ptcb->flags    |= TCB_FLAG_SCHED_FIFO;
+        ptcb->sched_policy = SCHED_FIFO;
         break;
 
 #if CONFIG_RR_INTERVAL > 0
       case SCHED_OTHER:
       case SCHED_RR:
-        ptcb->flags    |= TCB_FLAG_SCHED_RR;
-        ptcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
+        ptcb->sched_policy = SCHED_RR;
+        ptcb->timeslice    = MSEC2TICK(CONFIG_RR_INTERVAL);
         break;
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
       case SCHED_SPORADIC:
-        ptcb->flags    |= TCB_FLAG_SCHED_SPORADIC;
+        ptcb->sched_policy = SCHED_SPORADIC;
         break;
 #endif
     }

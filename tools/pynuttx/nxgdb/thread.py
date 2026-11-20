@@ -471,8 +471,7 @@ class Ps(gdb.Command):
 
         policy = eval2str(
             TaskSchedPolicy,
-            (tcb["flags"] & get_macro("TCB_FLAG_POLICY_MASK"))
-            >> get_macro("TCB_FLAG_POLICY_SHIFT"),
+            tcb["sched_policy"],
         )
 
         task_type = eval2str(

@@ -522,7 +522,7 @@ static int x86_64_fault_panic_isr(int irq, void *c, void *arg)
  *   interrupt handler, a kernel thread -- runs in ring 0, so a fault there
  *   is correctly refused recovery.  That is the same discriminator RISC-V
  *   uses in STATUS_PPP and arm64 in SPSR_MODE_EL0T; x86_64 cannot use
- *   TCB_FLAG_SYSCALL, which it has never set (see x86_64_syscall()).
+ *   TCB_EXEC_SYSCALL, which it has never set (see x86_64_syscall()).
  *
  ****************************************************************************/
 

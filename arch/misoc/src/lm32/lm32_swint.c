@@ -218,7 +218,7 @@ int lm32_swint(int irq, void *context, void *arg)
            * the system call.
            */
 
-          rtcb->flags            &= ~TCB_FLAG_SYSCALL;
+          rtcb->exec_flags &= ~TCB_EXEC_SYSCALL;
           (void)nxsig_unmask_pendingsignal();
         }
         break;
@@ -260,7 +260,7 @@ int lm32_swint(int irq, void *context, void *arg)
 
           /* Indicate that we are in a syscall handler. */
 
-          rtcb->flags            |= TCB_FLAG_SYSCALL;
+          rtcb->exec_flags |= TCB_EXEC_SYSCALL;
 #else
           svcerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
 #endif

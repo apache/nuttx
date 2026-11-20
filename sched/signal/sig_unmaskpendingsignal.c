@@ -150,11 +150,11 @@ bool nxsig_unmask_pendingsignal(void)
 
   dispatched = nxsig_dispatch_unmasked(rtcb);
 
-  if ((rtcb->flags & (TCB_FLAG_SYSCALL | TCB_FLAG_SIGMASK_SAVED)) ==
-      TCB_FLAG_SIGMASK_SAVED)
+  if ((rtcb->exec_flags & (TCB_EXEC_SYSCALL | TCB_EXEC_SIGMASK_SAVED)) ==
+      TCB_EXEC_SIGMASK_SAVED)
     {
       rtcb->sigprocmask = rtcb->sigsavedmask;
-      rtcb->flags &= ~TCB_FLAG_SIGMASK_SAVED;
+      rtcb->exec_flags &= ~TCB_EXEC_SIGMASK_SAVED;
 
       if (nxsig_dispatch_unmasked(rtcb))
         {
@@ -183,10 +183,10 @@ bool nxsig_unmask_pendingsignal(void)
 
 void nxsig_restoremask(FAR struct tcb_s *rtcb, FAR const sigset_t *mask)
 {
-  if ((rtcb->flags & TCB_FLAG_SYSCALL) != 0)
+  if ((rtcb->exec_flags & TCB_EXEC_SYSCALL) != 0)
     {
       rtcb->sigsavedmask = *mask;
-      rtcb->flags |= TCB_FLAG_SIGMASK_SAVED;
+      rtcb->exec_flags |= TCB_EXEC_SIGMASK_SAVED;
     }
   else
     {

@@ -451,8 +451,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
          , tcb->cpu
 #endif
          , tcb->sched_priority
-         , g_policy[(tcb->flags & TCB_FLAG_POLICY_MASK) >>
-                    TCB_FLAG_POLICY_SHIFT]
+         , g_policy[tcb->sched_policy]
          , g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK)
                         >> TCB_FLAG_TTYPE_SHIFT]
          , tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-'

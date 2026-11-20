@@ -427,7 +427,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
                          tcb->adj_stack_size);
 
 #ifdef CONFIG_LIB_SYSCALL
-  insyscall = (tcb->flags & TCB_FLAG_SYSCALL) != 0;
+  insyscall = (tcb->exec_flags & TCB_EXEC_SYSCALL) != 0;
 #endif
 
   /* The main fp chain may start on (and naturally unwind through) any

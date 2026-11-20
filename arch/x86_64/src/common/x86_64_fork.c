@@ -540,7 +540,7 @@ pid_t x86_64_fork(bool vfork, const struct fork_s *context)
    * and the caller to clone is the user task that trapped, not the code that
    * called into fork.S.
    *
-   * arm64 and RISC-V discriminate on TCB_FLAG_SYSCALL instead.  x86_64
+   * arm64 and RISC-V discriminate on TCB_EXEC_SYSCALL instead.  x86_64
    * cannot:  that flag also defers signal actions, which x86_64 has never
    * done and which its kernel-build signal path does not currently survive
    * -- see the note in x86_64_syscall().  xcp.sregs says exactly what is
