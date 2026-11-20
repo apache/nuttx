@@ -40,6 +40,10 @@
  * Public Types
  ****************************************************************************/
 
+/* Forward declarations */
+
+struct spi_dev_s;
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -81,6 +85,30 @@ int rzv2h_gpio_initialize(void);
 
 #ifdef CONFIG_ARCH_BUTTONS
 void board_button_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: board_spi_initialize
+ *
+ * Description:
+ *   Initialize SPI buses
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV2H_SPI_B
+int board_spi_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: board_sci_spi_initialize
+ *
+ * Description:
+ *   Initialize SCI_B SPI buses
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV2H_SCI_SPI
+int board_sci_spi_initialize(void);
 #endif
 
 /****************************************************************************
