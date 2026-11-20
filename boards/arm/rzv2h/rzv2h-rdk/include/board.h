@@ -29,6 +29,10 @@
 
 #include <nuttx/config.h>
 
+#ifdef CONFIG_RZV2H_RPTUN
+#  include "rzv2h-rptun.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
