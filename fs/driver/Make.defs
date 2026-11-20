@@ -46,6 +46,10 @@ ifneq ($(CONFIG_DISABLE_PSEUDOFS_OPERATIONS),y)
 CSRCS += fs_blockproxy.c
 endif
 endif # CONFIG_BCH
+
+ifneq ($(filter fs_blockproxy.c fs_mtdproxy.c,$(CSRCS)),)
+CSRCS += fs_uniquedevname.c
+endif
 endif # CONFIG_DISABLE_MOUNTPOINT
 
 # Include driver build support

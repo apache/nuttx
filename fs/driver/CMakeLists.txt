@@ -57,6 +57,11 @@ if(NOT CONFIG_DISABLE_MOUNTPOINT)
       list(APPEND SRCS fs_blockproxy.c)
     endif()
   endif()
+
+  if(CONFIG_FS_MTD_PROXY OR (CONFIG_BCH AND NOT
+                                            CONFIG_DISABLE_PSEUDOFS_OPERATIONS))
+    list(APPEND SRCS fs_uniquedevname.c)
+  endif()
 endif()
 
 target_sources(fs PRIVATE ${SRCS})
