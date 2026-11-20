@@ -39,6 +39,7 @@ MPU         Yes      Static PMSAv7 region table (ITCM/DTCM/SRAM/code)
 TIMER       Yes      MPCore Private Timer used as the system tick source
 SCI         Yes      Interrupt-driven SCI-B asynchronous UART on channels 0-9
 GPIO        Yes      Basic operations (config/read/write), no interrupt support
+QSPI        Yes      xSPI controller in QSPI mode, manual-command transfers only
 ==========  =======  ============================================================
 
 CLOCK
@@ -114,6 +115,93 @@ Module  Count                IRQ range (>= 353)
 ======  ==================  ================================
 TINT    32 (tint0-tint31)    479-448
 ======  ==================  ================================
+
+QSPI
+----
+
+``rzv2h_qspi.c`` implements the standard NuttX ``struct qspi_dev_s``
+interface (``arch/arm/src/rzv2h/rzv2h_qspi.c``) on top of the Renesas FSP
+xSPI-QSPI HAL (``r_xspi_qspi``). It is intended to drive a SPI NOR flash
+device wired to the xSPI controller, using the NuttX QSPI-based MTD flash
+drivers (``n25qxxx``, ``mx25rxx``, ``w25qxxxjv``, ``gd25``, ``gd55``,
+``s25fl1``).
+
+Commands and memory reads/writes are issued through
+``R_XSPI_QSPI_DirectTransfer()`` (manual-command mode); each transaction
+moves at most 8 bytes, so larger transfers are split into a sequence of
+transactions by the driver. There is no XIP (execute-in-place,
+memory-mapped) support and no DMA: all data moves through the CPU, so
+throughput is limited compared to a memory-mapped or DMA-driven transfer.
+
+Protocol support
+^^^^^^^^^^^^^^^^
+
+The ``n25qxxx`` MTD driver always requests Quad I/O Fast Read (``0xEB``).
+``rzv2h_qspi_memory()`` sends that read on the wire in whichever protocol
+is selected by the ``CONFIG_RZV2H_<BOARD>_QSPI_N25QXXX_PROTOCOL_*`` choice
+(``<BOARD>`` is ``EVK`` or ``RDK``).
+Program, erase, and status/configuration-register commands always use
+``1S-1S-1S``, whatever read protocol is selected.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Protocol
+     - Kconfig option
+     - Read command
+     - Status
+   * - ``1S-1S-1S``
+     - ``CONFIG_RZV2H_<BOARD>_QSPI_N25QXXX_PROTOCOL_1S1S1S``
+     - READ (``0x03``)
+     - Supported
+   * - ``1S-2S-2S``
+     - ``CONFIG_RZV2H_<BOARD>_QSPI_N25QXXX_PROTOCOL_1S2S2S``
+     - Dual I/O Fast Read (``0xBB``)
+     - Supported
+   * - ``1S-4S-4S``
+     - ``CONFIG_RZV2H_<BOARD>_QSPI_N25QXXX_PROTOCOL_1S4S4S``
+     - Quad I/O Fast Read (``0xEB``)
+     - Supported (**default**)
+   * - ``4S-4S-4S``
+     - ``CONFIG_RZV2H_<BOARD>_QSPI_N25QXXX_PROTOCOL_4S4S4S``
+     - FAST READ (``0x0B``) in persistent Quad SPI mode (``0x35``/``0xF5``)
+     - Supported
+   * - ``4S-4D-4D``
+     - ``CONFIG_RZV2H_<BOARD>_QSPI_N25QXXX_PROTOCOL_4S4D4D``
+     - DTR FAST READ (``0x0D``) in persistent Quad SPI mode
+     - Needs a board that connects ``XSPI0_DS`` to the flash (see below)
+   * - ``8D-8D-8D``
+     - none
+     - none
+     - Not supported
+
+``2S-2S-2S`` has no Kconfig read option. The driver still sends it for
+commands that set the dual-instruction flags (``QSPICMD_IDUAL`` or
+``QSPIMEM_IDUAL``).
+
+DDR protocols (``4S-4D-4D`` and ``8D-8D-8D``) sample read data with the
+``XSPI0_DS`` strobe. The hardware manual states: "DDR access without
+XSPI0_DS is not supported". A board must connect ``XSPI0_DS`` to a flash
+that drives it before ``4S-4D-4D`` can work.
+
+``8D-8D-8D`` is not supported for four reasons:
+
+- The FSP xSPI-QSPI HAL rejects it: ``R_XSPI_QSPI_SpiProtocolSet()``
+  returns ``FSP_ERR_INVALID_ARGUMENT``. The ``SOPI`` and ``DOPI`` modes
+  are rejected the same way.
+- It needs ``XSPI0_IO4``-``XSPI0_IO7`` and ``XSPI0_DS`` connected to an
+  octal flash.
+- The Quad SPI NOR flash on the RZV2H boards has only 4 data lines.
+- The generic NuttX QSPI interface (``include/nuttx/spi/qspi.h``) has no
+  flags for octal or DDR transfers.
+
+The xSPI serial clock is derived from a dedicated CPG divider that only
+feeds this peripheral (four ratios: source clock divided by 2, 4, 8, or
+16); ``rzv2h_qspi_setfrequency()`` picks the closest ratio that does not
+exceed the requested frequency.
+
+See :doc:`the RZV2H-EVK board documentation <boards/rzv2h-evk/index>` for
+board-level bring-up, partitioning, and configuration details.
 
 Supported Boards
 ================
