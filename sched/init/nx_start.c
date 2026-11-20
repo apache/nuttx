@@ -439,6 +439,18 @@ static void idle_group_initialize(void)
 
       tls_init_info(tcb);
 
+#ifdef CONFIG_SMP
+      /* up_initial_state() builds the initial register frame at the top of
+       * the idle stack.  tls_init_info() may reserve/adjust stack space, so
+       * secondary CPU idle contexts must be rebuilt after TLS setup.
+       */
+
+      if (i > 0)
+        {
+          up_initial_state(tcb);
+        }
+#endif
+
       /* Complete initialization of the IDLE group.  Suppress retention
        * of child status in the IDLE group.
        */
@@ -724,6 +736,13 @@ void nx_start(void)
 
   g_nx_initstate = OSINIT_IDLELOOP;
   sched_trace_mark("IDLELOOP");
+
+#ifdef CONFIG_SMP
+  for (i = 1; i < CONFIG_SMP_NCPUS; i++)
+    {
+      up_send_smp_sched(i);
+    }
+#endif
 
   /* Let other threads have access to the memory manager */
 
