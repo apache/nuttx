@@ -57,6 +57,7 @@ static void nxsched_get_sporadic_param(FAR struct tcb_s *tcb,
   if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
       FAR struct sporadic_s *sporadic = tcb->sporadic;
+
       DEBUGASSERT(sporadic != NULL);
 
       /* Return parameters associated with SCHED_SPORADIC */
@@ -205,6 +206,7 @@ int nxsched_get_param(pid_t pid, FAR struct sched_param *param)
 int sched_getparam(pid_t pid, FAR struct sched_param *param)
 {
   int ret = nxsched_get_param(pid, param);
+
   if (ret < 0)
     {
       set_errno(-ret);

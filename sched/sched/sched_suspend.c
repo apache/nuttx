@@ -117,6 +117,7 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
   sq_for_every(&tcb->sigpendactionq, entry)
     {
       FAR sigq_t *sigq = (FAR sigq_t *)entry;
+
       if (sigq->info.si_signo == SIGCONT)
         {
           leave_critical_section(flags);
