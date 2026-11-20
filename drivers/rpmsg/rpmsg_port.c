@@ -862,7 +862,7 @@ static void rpmsg_port_dump_buffer(FAR struct rpmsg_device *rdev,
   irqstate_t flags = spin_lock_irqsave(&queue->ready.lock);
 
   syslog(LOG_EMERG, "rpmsg_port queue %s: {used: %u, avail: %u}\n",
-         rx ? "RX" : "TX", rpmsg_port_queue_nused(queue),
+         rx ? "RX" : "TX", queue->ready.num,
          rpmsg_port_queue_navail(queue));
   syslog(LOG_EMERG, "rpmsg buffer list:\n");
   list_for_every_entry(&queue->ready.head, node,
