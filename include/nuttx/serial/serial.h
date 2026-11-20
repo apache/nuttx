@@ -371,7 +371,9 @@ struct uart_dev_s
 
   /* Terminal window size (TIOCGWINSZ, TIOCSWINSZ) */
 
+#ifdef CONFIG_SERIAL_WINSIZE
   struct winsize       winsize;
+#endif
 
   /* Semaphores & mutex */
 
