@@ -259,6 +259,92 @@ devices in ascending hardware-channel order. Their TX and RX pin choices are
 board-specific and are defined by ``BOARD_SCIn_TXD_GPIO`` and
 ``BOARD_SCIn_RXD_GPIO`` in ``boards/arm/rzv2h/rzv2h-rdk/include/board.h``.
 
+QSPI Flash
+==========
+
+The board port drives the xSPI controller in QSPI mode (see
+:doc:`the RZV2H peripheral overview <../../index>`) to talk to a SPI NOR
+flash device. There is no flash part wired into the NuttX tree for this
+board; select the matching ``CONFIG_MTD_*`` driver for the part actually
+fitted on the RDK before enabling ``CONFIG_RZV2H_QSPI``.
+
+``rzv2h_qspi_initialize()``
+(``boards/arm/rzv2h/rzv2h-rdk/src/rzv2h_qspi.c``) brings up the bus,
+initializes the selected MTD flash driver, and then either:
+
+- mounts the whole chip as a single flat LittleFS volume at ``/mnt/qspi``
+  (default), or
+- if ``CONFIG_MTD_PARTITION`` is enabled, splits the chip into three MTD
+  partitions first (see Partitioning below), and mounts LittleFS on the
+  remaining space only.
+
+Read protocol
+-------------
+
+The default read protocol is ``1S-4S-4S``. ``1S-1S-1S``, ``1S-2S-2S``,
+and ``4S-4S-4S`` also work on this board. They are selected with the
+``CONFIG_RZV2H_RDK_QSPI_N25QXXX_PROTOCOL_*`` choice (see
+:doc:`the RZV2H peripheral overview <../../index>`).
+
+This board ties ``XSPI0_DS`` to GND through a 10K resistor (R47). It
+also leaves ``XSPI0_IO4``-``XSPI0_IO7`` unconnected to the flash. As a
+result, the DDR protocols cannot work here:
+
+- Selecting ``CONFIG_RZV2H_RDK_QSPI_N25QXXX_PROTOCOL_4S4D4D`` stops the build
+  with an ``#error``.
+- ``8D-8D-8D`` is not supported.
+
+Partitioning
+------------
+
+Enabling ``CONFIG_MTD_PARTITION`` (plus ``CONFIG_MTD_CONFIG`` or
+``CONFIG_MTD_CONFIG_NVS``) makes ``rzv2h_qspi_partition()`` divide
+the flash chip into three independent regions, so that firmware,
+parameters, and logging cannot corrupt one another on the same chip:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Partition
+     - Size (Kconfig)
+     - Exposed as
+     - Purpose
+   * - Firmware image
+     - ``CONFIG_RZV2H_RDK_QSPI_FW_PART_SIZE`` (KiB, default 4096)
+     - ``/dev/mtdfw0`` (raw MTD, no filesystem)
+     - Fixed-offset region for a flight-stack (e.g. PX4) firmware image,
+       read/written directly by a bootloader/loader
+   * - Parameter/configuration
+     - ``CONFIG_RZV2H_RDK_QSPI_PARAM_PART_SIZE`` (KiB, default 256)
+     - ``/dev/config`` (via ``mtdconfig_register()``)
+     - Key/value parameter and configuration store, isolated from
+       filesystem I/O
+   * - Mission data / flight logs
+     - remainder of the chip
+     - ``/mnt/qspi`` (LittleFS)
+     - Ordinary files: mission data, flight logs, and (optionally) the
+       redirected syslog file described below
+
+Both partition sizes are rounded down to a multiple of the flash erase
+size. If the requested firmware and parameter partitions do not fit
+within the chip's erase-block count, ``rzv2h_qspi_initialize()``
+fails with an error logged via ``syslog()``.
+
+When ``CONFIG_MTD_PARTITION`` is disabled, none of the above applies and
+the chip is used as a single flat LittleFS volume, as before.
+
+Persistent syslog
+------------------
+
+``CONFIG_RZV2H_RDK_QSPI_SYSLOG_FILE`` redirects kernel ``syslog()`` output to
+a file on the mounted QSPI LittleFS volume (default path
+``/mnt/qspi/syslog.txt``, set via ``CONFIG_RZV2H_RDK_QSPI_SYSLOG_FILE_PATH``)
+once it is mounted, so log messages persist across resets. This requires
+``CONFIG_FS_LITTLEFS`` and ``CONFIG_SYSLOG_FILE``. When
+``CONFIG_MTD_PARTITION`` is enabled, this file lives in the mission-data
+/ flight-log partition described above, not in the firmware or parameter
+partitions.
+
 Configurations
 ==============
 
@@ -278,3 +364,15 @@ and includes the standard NuttX ``leds`` example.  Run ``leds`` to cycle the
 active-low ``P11_4`` and ``P11_5`` LED outputs.  The generic ``/dev/gpio0``,
 ``/dev/gpio1``, and ``/dev/gpio2`` interfaces are also available for
 individual read/write testing.
+
+nsh-xspi
+--------
+
+Exercises the xSPI controller in QSPI mode (see QSPI Flash above).
+Enables ``CONFIG_RZV2H_QSPI`` with an ``N25QXXX`` MTD flash driver,
+mounted as a single flat LittleFS volume at ``/mnt/qspi``. Partitioning
+(``CONFIG_MTD_PARTITION``) and syslog redirection
+(``CONFIG_RZV2H_RDK_QSPI_SYSLOG_FILE``) are optional features (see above) not
+enabled by this defconfig. As with the other configurations, there is no
+working console driver yet, so this is intended for bring-up validation
+with a debugger.
