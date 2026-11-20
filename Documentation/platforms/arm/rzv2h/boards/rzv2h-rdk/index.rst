@@ -1,10 +1,10 @@
-=========
-RZV2H-RDK
-=========
+==========
+RZ/V2H RDK
+==========
 
 .. tags:: arch:arm, arch:armv7-r, arch:cortex-r8, chip:rzv2h, vendor:renesas
 
-The RZV2H-RDK is a development board for the Renesas RZ/V2H (R9A09G057)
+The RZ/V2H RDK is a development board for the Renesas RZ/V2H (R9A09G057)
 MPU. NuttX is ported to run on one of the two Cortex-R8 real-time cores
 (``CR8_0``).
 
@@ -138,9 +138,11 @@ Press and hold the button, then run the read command again::
      Input pin:     Value=1
 
 Release the button and repeat the command; the value must return to ``0``.
+Each invocation of the standard ``apps/examples/gpio`` application performs
+one read and exits, so the button must remain pressed for the second command.
 
-Current limitations
-~~~~~~~~~~~~~~~~~~~
+GPIO limitations
+~~~~~~~~~~~~~~~~
 
 The current GPIO implementation supports synchronous read and write only.
 GPIO interrupt attachment and enablement are placeholders, so ``gpio -w``
@@ -259,6 +261,58 @@ devices in ascending hardware-channel order. Their TX and RX pin choices are
 board-specific and are defined by ``BOARD_SCIn_TXD_GPIO`` and
 ``BOARD_SCIn_RXD_GPIO`` in ``boards/arm/rzv2h/rzv2h-rdk/include/board.h``.
 
+Real-Time Clock (RTC)
+=====================
+
+The RZ/V2H RTC provides a calendar clock, a one-shot alarm and a periodic
+wakeup.  It is registered through ``CONFIG_RTC_ARCH`` so a single driver both
+exposes ``/dev/rtc0`` and seeds the NuttX system clock at boot.  If the RTC
+has never been set, the system clock falls back to the build-time default
+date.
+
+RTC Clock source
+----------------
+
+On the RZ/V2H-RDK the RTC sub-clock is driven from a 32.768 kHz crystal.
+
+RTC configuration
+-----------------
+
+Enable the RTC on top of an existing configuration (for example
+``rzv2h-rdk:nsh``) with the following options::
+
+   CONFIG_RTC=y
+   CONFIG_RTC_DATETIME=y
+   CONFIG_RTC_DRIVER=y
+   CONFIG_RTC_ARCH=y
+   CONFIG_RTC_ALARM=y
+   CONFIG_RTC_NALARMS=1
+   CONFIG_RTC_PERIODIC=y
+   CONFIG_RZV2H_RTC=y
+   CONFIG_NSH_DISABLE_DATE=n
+   CONFIG_SIG_EVTHREAD=y
+   CONFIG_SCHED_LPWORK=y
+   CONFIG_EXAMPLES_ALARM=y
+   CONFIG_BOARD_LATE_INITIALIZE=y
+
+With these options the board registers ``/dev/rtc0`` during board
+initialization.
+
+RTC NSH
+-------
+
+Read and set the calendar with the NSH ``date`` builtin
+(``CONFIG_NSH_DISABLE_DATE=n``).  If the RTC has never been set, the boot
+log reports the fallback and ``date`` shows the build-time default:
+
+.. code-block:: console
+
+   rzv2h_rtc: RTC not set; using build-time default date
+   NuttShell (NSH) NuttX-13.0.0
+   nsh> date -s "Jul 29 15:30:00 2026"
+   nsh> date
+   Wed, Jul 29 15:30:01 2026
+
 Configurations
 ==============
 
@@ -278,3 +332,9 @@ and includes the standard NuttX ``leds`` example.  Run ``leds`` to cycle the
 active-low ``P11_4`` and ``P11_5`` LED outputs.  The generic ``/dev/gpio0``,
 ``/dev/gpio1``, and ``/dev/gpio2`` interfaces are also available for
 individual read/write testing.
+alarm
+-----
+
+NSH + RTC alarm example: enables RTC with alarm support and the
+``apps/examples/alarm`` application.
+
