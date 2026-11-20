@@ -1041,8 +1041,13 @@ void udp_sendbuffer_notify(FAR struct udp_conn_s *conn)
 {
   int val = 0;
 
+  /* Post also when no thread waits yet: a sender can be between its check
+   * of the limit and its wait, with the locks released.  A count that no
+   * sender waited for only makes a sender check the limit once more.
+   */
+
   nxsem_get_value(&conn->sndsem, &val);
-  if (val < 0)
+  if (val <= 0)
     {
       nxsem_post(&conn->sndsem);
     }
