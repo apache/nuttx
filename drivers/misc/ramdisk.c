@@ -146,7 +146,7 @@ static void rd_destroy(FAR struct rd_struct_s *dev)
     {
       /* Yes.. do it */
 
-      if (dev->rd_flags & RDFLAG_USER)
+      if (RDFLAG_IS_FUNLINK(dev->rd_flags))
         {
           kmm_free(dev->rd_buffer);
         }
