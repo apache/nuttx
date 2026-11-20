@@ -1148,7 +1148,7 @@ static int vsock_recv_connecting(FAR struct vsock_conn_s *conn,
         return 0;
       case VIRTIO_VSOCK_OP_RST:
         vrterr("conn=%p, VSOCK_RST\n", conn);
-        ret = -ECONNRESET;
+        ret = -ECONNREFUSED;
         break;
       default:
         vrterr("conn=%p, VSOCK_ERROR, op=%u\n", conn, hdr->op);
