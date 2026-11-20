@@ -1180,6 +1180,91 @@ config RZV2H_UBOOT_IMAGE
 		table is linked into SRAM and copied to ITCM by the NuttX startup
 		code after the debugger enters the firmware at __start.
 
+# GPT PWM configuration
+
+menuconfig RZV2H_GPT_PWM
+	bool "GPT PWM support"
+	default n
+	depends on PWM
+	---help---
+		Enable GPT (General PWM Timer) support for PWM output on RZV2H.
+		The GPT peripheral generates saw-wave PWM with configurable
+		frequency and duty cycle on a GTIOC output pin.
+
+if RZV2H_GPT_PWM
+
+config RZV2H_GPT_PWM_DEFAULT_FREQUENCY
+	int "Default PWM frequency (Hz)"
+	default 1000
+	---help---
+		Default PWM frequency in Hz when not specified by application.
+
+config RZV2H_GPT0_PWM
+	bool "Enable GPT0 for PWM"
+	default n
+
+config RZV2H_GPT1_PWM
+	bool "Enable GPT1 for PWM"
+	default n
+
+config RZV2H_GPT2_PWM
+	bool "Enable GPT2 for PWM"
+	default n
+
+config RZV2H_GPT3_PWM
+	bool "Enable GPT3 for PWM"
+	default n
+
+config RZV2H_GPT4_PWM
+	bool "Enable GPT4 for PWM"
+	default n
+
+config RZV2H_GPT5_PWM
+	bool "Enable GPT5 for PWM"
+	default n
+
+config RZV2H_GPT6_PWM
+	bool "Enable GPT6 for PWM"
+	default n
+
+config RZV2H_GPT7_PWM
+	bool "Enable GPT7 for PWM"
+	default n
+
+config RZV2H_GPT8_PWM
+	bool "Enable GPT8 for PWM"
+	default n
+
+config RZV2H_GPT9_PWM
+	bool "Enable GPT9 for PWM"
+	default n
+
+config RZV2H_GPT10_PWM
+	bool "Enable GPT10 for PWM"
+	default n
+
+config RZV2H_GPT11_PWM
+	bool "Enable GPT11 for PWM"
+	default n
+
+config RZV2H_GPT12_PWM
+	bool "Enable GPT12 for PWM"
+	default n
+
+config RZV2H_GPT13_PWM
+	bool "Enable GPT13 for PWM"
+	default n
+
+config RZV2H_GPT14_PWM
+	bool "Enable GPT14 for PWM"
+	default n
+
+config RZV2H_GPT15_PWM
+	bool "Enable GPT15 for PWM"
+	default n
+
+endif # RZV2H_GPT_PWM
+
 config RZV2H_QSPI
 	bool "QSPI (xSPI) support"
 	default n

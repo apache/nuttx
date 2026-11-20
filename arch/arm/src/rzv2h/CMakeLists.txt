@@ -45,6 +45,10 @@ if(CONFIG_RZV2H_SCI_I2C)
   list(APPEND SRCS rzv2h_sci_i2c.c)
 endif()
 
+if(CONFIG_RZV2H_GPT_PWM)
+  list(APPEND SRCS rzv2h_pwm.c)
+endif()
+
 if(CONFIG_RZV2H_QSPI)
   list(APPEND SRCS rzv2h_qspi.c)
 endif()
