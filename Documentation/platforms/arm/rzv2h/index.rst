@@ -41,6 +41,7 @@ SCI         Yes      Interrupt-driven SCI-B asynchronous UART on channels 0-9
 GPIO        Yes      Basic operations (config/read/write), no interrupt support
 RIIC I2C    Yes      Interrupt-driven RIIC master on channels 0-8
 SCI I2C     Yes      Interrupt-driven SCI simple I2C master on channels 0-9
+PWM         Yes      GPT (General PWM Timer) PWM on channels 0-15
 QSPI        Yes      xSPI controller in QSPI mode, manual-command transfers only
 ==========  =======  ============================================================
 
@@ -170,6 +171,18 @@ and interrupt priority. Channel ``n`` is registered as
 
 I2C bus reset recovery (``CONFIG_I2C_RESET``) is supported, using the same
 method as RIIC I2C.
+
+PWM
+---
+
+The RZ/V2H use the pulsed output control
+implemented using the GPT (General PWM Timer). The driver supports PWM with
+configurable frequency and duty cycle on channels 0 through 15.
+
+``CONFIG_RZV2H_GPT_PWM`` enables the GPT PWM driver. Each channel is
+individually selectable via ``CONFIG_RZV2H_GPTn_PWM``.
+The output pin (GTIOCA or GTIOCB) for each channel is defined in the
+board's ``board.h`` (``BOARD_GPTn_GTIOC_GPIO`` and ``BOARD_GPTn_USE_GTIOCA``).
 
 QSPI
 ----
