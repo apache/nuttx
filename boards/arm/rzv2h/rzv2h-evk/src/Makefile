@@ -58,6 +58,9 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += rzv2h_gpio.c
 endif
 
+ifeq ($(CONFIG_RZV2H_RPTUN),y)
+CSRCS += rzv2h_rptun.c rzv2h_rsctable.c
+endif
 ############################################################################
 # Peripheral driver initialization
 ############################################################################

@@ -146,6 +146,30 @@ struct mpu_region_s g_mpu_region_table[] =
     MPU_RACR_B | MPU_RACR_XN                           /* attribute */
   },
 
+#ifdef CONFIG_RZV2H_RPTUN
+  /* region 5 (OpenAMP resource table and MHU shared memory)
+   *
+   * Normal, non-cacheable, shareable memory, matching regions 8 and 9 in
+   * the Renesas CR8_0 reference project.
+   */
+
+  {
+    BOARD_RPTUN_RESOURCE_ADDR,                         /* base address */
+    MPU_SIZE_KB(8),                                    /* size */
+    MPU_RACR_AP_RWRW | MPU_RACR_TEX(1) | MPU_RACR_S |
+    MPU_RACR_XN                                        /* attribute */
+  },
+
+  /* region 6 (OpenAMP vrings and RPMsg buffers) */
+
+  {
+    BOARD_RPTUN_RPMSG_ADDR,                            /* base address */
+    BOARD_RPTUN_RPMSG_MPU_SIZE,                        /* size */
+    MPU_RACR_AP_RWRW | MPU_RACR_TEX(1) | MPU_RACR_S |
+    MPU_RACR_XN                                        /* attribute */
+  },
+#endif
+
   /* Last region (SRAM code window: .text, .rodata, .init_section,
    * .ARM.exidx, and the .vectors load image)
    *

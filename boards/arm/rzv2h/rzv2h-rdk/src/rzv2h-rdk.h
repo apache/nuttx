@@ -57,6 +57,19 @@
 int rzv2h_bringup(void);
 
 /****************************************************************************
+ * Name: board_rptun_initialize
+ *
+ * Description:
+ *   Register the Cortex-R8 RPTUN device using the board's FSP MHU_B_NS
+ *   instance and the Multi-OS shared resource table.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV2H_RPTUN
+int board_rptun_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: rzv2h_gpio_initialize
  *
  * Description:
