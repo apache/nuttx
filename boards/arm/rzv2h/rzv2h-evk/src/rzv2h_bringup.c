@@ -47,6 +47,10 @@
 #include "rzv2h_sci_i2c.h"
 #endif
 
+#if defined(CONFIG_RZV2H_GPT_PWM)
+#include "rzv2h_pwm.h"
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -245,6 +249,16 @@ int rzv2h_bringup(void)
 
 #if defined(CONFIG_I2C) && defined(CONFIG_RZV2H_SCI_I2C)
   rzv2h_sci_i2c_initialize();
+#endif
+
+#ifdef CONFIG_RZV2H_GPT_PWM
+  /* Initialize PWM and register the PWM device */
+
+  ret = rzv2h_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rzv2h_pwm_setup() failed: %d\n", ret);
+    }
 #endif
 
   return OK;
