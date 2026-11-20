@@ -1265,6 +1265,5495 @@ config RZV2H_GPT15_PWM
 
 endif # RZV2H_GPT_PWM
 
+menuconfig RZV2H_CANFD
+	bool "CANFD support"
+	default n
+	---help---
+		Enable Renesas CAN-FD driver for RZ/V2H. This driver
+		supports CAN FD (Flexible Data-rate) with up to 6 channels.
+
+if RZV2H_CANFD
+
+choice
+	prompt "CAN character driver or SocketCAN support"
+	default RZV2H_CANFD_CHARDEV
+	---help---
+		How applications use the enabled CAN-FD channels.
+
+config RZV2H_CANFD_CHARDEV
+	bool "Character device (/dev/canX)"
+	select CAN
+	select ARCH_HAVE_CAN_ERRORS
+	---help---
+		Channel n is the character device /dev/can<n> of the NuttX
+		CAN driver (CONFIG_CAN).
+
+config RZV2H_CANFD_SOCKET
+	bool "SocketCAN (canX network interface)"
+	depends on NET_CAN
+	select NET_CAN_HAVE_CANFD
+	select NET_CAN_HAVE_ERRORS
+	select NET_CAN_HAVE_TX_DEADLINE
+	---help---
+		Channel n is the SocketCAN network interface can<n>
+		(CONFIG_NET_CAN). Bring it up with "ifup can<n>".
+
+endchoice # CAN character driver or SocketCAN support
+
+if RZV2H_CANFD_SOCKET
+
+config RZV2H_CANFD_SOCK_RX_DEPTH
+	int "SocketCAN RX queue depth"
+	default 16
+	range 1 255
+	---help---
+		Number of received frames and error frames one channel holds
+		until the network stack reads them. When the queue is full,
+		new frames are dropped and an RX overflow error frame is
+		sent.
+
+config RZV2H_CANFD_SOCK_LOOPBACK
+	bool "SocketCAN loopback mode at ifup"
+	default n
+	---help---
+		Enter the mode selected in "Loopback Mode" when the
+		interface is brought up.
+
+endif # RZV2H_CANFD_SOCKET
+
+# =========================================================================
+# Global Settings
+# =========================================================================
+
+menu "Global"
+
+menu "Global Error Interrupt"
+	depends on RZV2H_CANFD
+
+menu "Sources"
+
+config RZV2H_CANFD_GLOBAL_ERR_DEIE
+	bool "DLC Check Error Interrupt"
+	default n
+	---help---
+		Enable interrupt on DLC check error.
+
+config RZV2H_CANFD_GLOBAL_ERR_MEIE
+	bool "Message Lost Error Interrupt"
+	default n
+	---help---
+		Enable interrupt on message lost error.
+
+config RZV2H_CANFD_GLOBAL_ERR_CMPOFIE
+	bool "FD Payload Overflow Error Interrupt"
+	default n
+	---help---
+		Enable interrupt on FD payload overflow error.
+
+endmenu # Sources
+
+config RZV2H_CANFD_GLOBAL_ERR_CH
+	int "Callback Channel"
+	default 0
+	range 0 5
+	---help---
+		Channel that gets the DLC, FD payload overflow and ECC error
+		reports. While it is not open, they are not reported.
+
+config RZV2H_CANFD_GLOBAL_ERR_PRIORITY
+	int "Global Error Interrupt Priority"
+	default 12
+	range 0 15
+	---help---
+		Priority for the global error interrupt. This interrupt is
+		fired for each of the error sources selected above.
+
+endmenu # Global Error Interrupt
+
+# =========================================================================
+# Reception Settings
+# =========================================================================
+
+menu "Reception"
+	depends on RZV2H_CANFD
+
+menu "FIFOs"
+
+config RZV2H_CANFD_RX_FIFO_PRIORITY
+	int "RX FIFO Interrupt Priority"
+	default 12
+	range 0 15
+	---help---
+		This priority level will apply to all RX FIFO interrupts
+		globally.
+
+menu "RX FIFO 0"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_RXFIFO0_DISABLED
+
+config RZV2H_CANFD_RXFIFO0_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_RXFIFO0_ENABLED
+	bool "Enabled"
+
+endchoice # RX FIFO 0 Enable
+
+config RZV2H_CANFD_RXFIFO0_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_RXFIFO0_DISABLED
+	default 1 if RZV2H_CANFD_RXFIFO0_ENABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_RXFIFO0_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO0_INT_MODE_DISABLE
+	bool "Disable"
+
+config RZV2H_CANFD_RXFIFO0_INT_MODE_THRESHOLD
+	bool "At Threshold Value"
+
+config RZV2H_CANFD_RXFIFO0_INT_MODE_EVERY_FRAME
+	bool "Every Frame"
+
+endchoice # RX FIFO 0 Interrupt Mode
+
+config RZV2H_CANFD_RXFIFO0_INT_MODE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD_RXFIFO0_INT_MODE_DISABLE
+	default 1 if RZV2H_CANFD_RXFIFO0_INT_MODE_THRESHOLD
+	default 2 if RZV2H_CANFD_RXFIFO0_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO0_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 3
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_RXFIFO0_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_RXFIFO0_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+endmenu # RX FIFO 0
+
+menu "RX FIFO 1"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_RXFIFO1_DISABLED
+
+config RZV2H_CANFD_RXFIFO1_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_RXFIFO1_ENABLED
+	bool "Enabled"
+
+endchoice # RX FIFO 1 Enable
+
+config RZV2H_CANFD_RXFIFO1_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_RXFIFO1_DISABLED
+	default 1 if RZV2H_CANFD_RXFIFO1_ENABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_RXFIFO1_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO1_INT_MODE_DISABLE
+	bool "Disable"
+
+config RZV2H_CANFD_RXFIFO1_INT_MODE_THRESHOLD
+	bool "At Threshold Value"
+
+config RZV2H_CANFD_RXFIFO1_INT_MODE_EVERY_FRAME
+	bool "Every Frame"
+
+endchoice # RX FIFO 1 Interrupt Mode
+
+config RZV2H_CANFD_RXFIFO1_INT_MODE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD_RXFIFO1_INT_MODE_DISABLE
+	default 1 if RZV2H_CANFD_RXFIFO1_INT_MODE_THRESHOLD
+	default 2 if RZV2H_CANFD_RXFIFO1_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO1_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 3
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_RXFIFO1_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_RXFIFO1_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+endmenu # RX FIFO 1
+
+menu "RX FIFO 2"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_RXFIFO2_DISABLED
+
+config RZV2H_CANFD_RXFIFO2_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_RXFIFO2_ENABLED
+	bool "Enabled"
+
+endchoice # RX FIFO 2 Enable
+
+config RZV2H_CANFD_RXFIFO2_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_RXFIFO2_DISABLED
+	default 1 if RZV2H_CANFD_RXFIFO2_ENABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_RXFIFO2_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO2_INT_MODE_DISABLE
+	bool "Disable"
+
+config RZV2H_CANFD_RXFIFO2_INT_MODE_THRESHOLD
+	bool "At Threshold Value"
+
+config RZV2H_CANFD_RXFIFO2_INT_MODE_EVERY_FRAME
+	bool "Every Frame"
+
+endchoice # RX FIFO 2 Interrupt Mode
+
+config RZV2H_CANFD_RXFIFO2_INT_MODE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD_RXFIFO2_INT_MODE_DISABLE
+	default 1 if RZV2H_CANFD_RXFIFO2_INT_MODE_THRESHOLD
+	default 2 if RZV2H_CANFD_RXFIFO2_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO2_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 3
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_RXFIFO2_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_RXFIFO2_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+endmenu # RX FIFO 2
+
+menu "RX FIFO 3"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_RXFIFO3_DISABLED
+
+config RZV2H_CANFD_RXFIFO3_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_RXFIFO3_ENABLED
+	bool "Enabled"
+
+endchoice # RX FIFO 3 Enable
+
+config RZV2H_CANFD_RXFIFO3_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_RXFIFO3_DISABLED
+	default 1 if RZV2H_CANFD_RXFIFO3_ENABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_RXFIFO3_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO3_INT_MODE_DISABLE
+	bool "Disable"
+
+config RZV2H_CANFD_RXFIFO3_INT_MODE_THRESHOLD
+	bool "At Threshold Value"
+
+config RZV2H_CANFD_RXFIFO3_INT_MODE_EVERY_FRAME
+	bool "Every Frame"
+
+endchoice # RX FIFO 3 Interrupt Mode
+
+config RZV2H_CANFD_RXFIFO3_INT_MODE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD_RXFIFO3_INT_MODE_DISABLE
+	default 1 if RZV2H_CANFD_RXFIFO3_INT_MODE_THRESHOLD
+	default 2 if RZV2H_CANFD_RXFIFO3_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO3_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 3
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_RXFIFO3_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_RXFIFO3_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+endmenu # RX FIFO 3
+
+menu "RX FIFO 4"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_RXFIFO4_DISABLED
+
+config RZV2H_CANFD_RXFIFO4_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_RXFIFO4_ENABLED
+	bool "Enabled"
+
+endchoice # RX FIFO 4 Enable
+
+config RZV2H_CANFD_RXFIFO4_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_RXFIFO4_DISABLED
+	default 1 if RZV2H_CANFD_RXFIFO4_ENABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_RXFIFO4_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO4_INT_MODE_DISABLE
+	bool "Disable"
+
+config RZV2H_CANFD_RXFIFO4_INT_MODE_THRESHOLD
+	bool "At Threshold Value"
+
+config RZV2H_CANFD_RXFIFO4_INT_MODE_EVERY_FRAME
+	bool "Every Frame"
+
+endchoice # RX FIFO 4 Interrupt Mode
+
+config RZV2H_CANFD_RXFIFO4_INT_MODE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD_RXFIFO4_INT_MODE_DISABLE
+	default 1 if RZV2H_CANFD_RXFIFO4_INT_MODE_THRESHOLD
+	default 2 if RZV2H_CANFD_RXFIFO4_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO4_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 3
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_RXFIFO4_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_RXFIFO4_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+endmenu # RX FIFO 4
+
+menu "RX FIFO 5"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_RXFIFO5_DISABLED
+
+config RZV2H_CANFD_RXFIFO5_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_RXFIFO5_ENABLED
+	bool "Enabled"
+
+endchoice # RX FIFO 5 Enable
+
+config RZV2H_CANFD_RXFIFO5_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_RXFIFO5_DISABLED
+	default 1 if RZV2H_CANFD_RXFIFO5_ENABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_RXFIFO5_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO5_INT_MODE_DISABLE
+	bool "Disable"
+
+config RZV2H_CANFD_RXFIFO5_INT_MODE_THRESHOLD
+	bool "At Threshold Value"
+
+config RZV2H_CANFD_RXFIFO5_INT_MODE_EVERY_FRAME
+	bool "Every Frame"
+
+endchoice # RX FIFO 5 Interrupt Mode
+
+config RZV2H_CANFD_RXFIFO5_INT_MODE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD_RXFIFO5_INT_MODE_DISABLE
+	default 1 if RZV2H_CANFD_RXFIFO5_INT_MODE_THRESHOLD
+	default 2 if RZV2H_CANFD_RXFIFO5_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO5_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 3
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_RXFIFO5_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_RXFIFO5_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+endmenu # RX FIFO 5
+
+menu "RX FIFO 6"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_RXFIFO6_DISABLED
+
+config RZV2H_CANFD_RXFIFO6_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_RXFIFO6_ENABLED
+	bool "Enabled"
+
+endchoice # RX FIFO 6 Enable
+
+config RZV2H_CANFD_RXFIFO6_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_RXFIFO6_DISABLED
+	default 1 if RZV2H_CANFD_RXFIFO6_ENABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_RXFIFO6_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO6_INT_MODE_DISABLE
+	bool "Disable"
+
+config RZV2H_CANFD_RXFIFO6_INT_MODE_THRESHOLD
+	bool "At Threshold Value"
+
+config RZV2H_CANFD_RXFIFO6_INT_MODE_EVERY_FRAME
+	bool "Every Frame"
+
+endchoice # RX FIFO 6 Interrupt Mode
+
+config RZV2H_CANFD_RXFIFO6_INT_MODE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD_RXFIFO6_INT_MODE_DISABLE
+	default 1 if RZV2H_CANFD_RXFIFO6_INT_MODE_THRESHOLD
+	default 2 if RZV2H_CANFD_RXFIFO6_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO6_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 3
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_RXFIFO6_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_RXFIFO6_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+endmenu # RX FIFO 6
+
+menu "RX FIFO 7"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_RXFIFO7_DISABLED
+
+config RZV2H_CANFD_RXFIFO7_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_RXFIFO7_ENABLED
+	bool "Enabled"
+
+endchoice # RX FIFO 7 Enable
+
+config RZV2H_CANFD_RXFIFO7_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_RXFIFO7_DISABLED
+	default 1 if RZV2H_CANFD_RXFIFO7_ENABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_RXFIFO7_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO7_INT_MODE_DISABLE
+	bool "Disable"
+
+config RZV2H_CANFD_RXFIFO7_INT_MODE_THRESHOLD
+	bool "At Threshold Value"
+
+config RZV2H_CANFD_RXFIFO7_INT_MODE_EVERY_FRAME
+	bool "Every Frame"
+
+endchoice # RX FIFO 7 Interrupt Mode
+
+config RZV2H_CANFD_RXFIFO7_INT_MODE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD_RXFIFO7_INT_MODE_DISABLE
+	default 1 if RZV2H_CANFD_RXFIFO7_INT_MODE_THRESHOLD
+	default 2 if RZV2H_CANFD_RXFIFO7_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_RXFIFO7_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 3
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_RXFIFO7_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_RXFIFO7_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+endmenu # RX FIFO 7
+
+endmenu # FIFOs
+
+menu "Message Buffers"
+
+config RZV2H_CANFD_RXMB_NUMBER
+	int "Number of Buffers"
+	default 0
+	range 0 96
+	---help---
+		Number of message buffers available for reception. As there
+		is no interrupt for message buffer reception it is
+		recommended to use RX FIFOs instead. Set this value to 0
+		to disable RX Message Buffers.
+
+config RZV2H_CANFD_RXMB_SIZE
+	int "Payload Size"
+	default 2
+	range 0 7
+	---help---
+		Payload size for all RX Message Buffers.
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+endmenu # Message Buffers
+
+menu "Acceptance Filtering"
+
+config RZV2H_CANFD_AFL_CH0_RULE_NUM
+	int "Channel 0 Rule Count"
+	default 64
+	range 1 128
+	---help---
+		Number of acceptance filter list rules dedicated to Channel 0.
+		Max 128 per channel, 768 total across all channels.
+
+config RZV2H_CANFD_AFL_CH1_RULE_NUM
+	int "Channel 1 Rule Count"
+	default 64
+	range 1 128
+	---help---
+		Number of acceptance filter list rules dedicated to Channel 1.
+		Max 128 per channel, 768 total across all channels.
+
+config RZV2H_CANFD_AFL_CH2_RULE_NUM
+	int "Channel 2 Rule Count"
+	default 64
+	range 1 128
+	---help---
+		Number of acceptance filter list rules dedicated to Channel 2.
+		Max 128 per channel, 768 total across all channels.
+
+config RZV2H_CANFD_AFL_CH3_RULE_NUM
+	int "Channel 3 Rule Count"
+	default 64
+	range 1 128
+	---help---
+		Number of acceptance filter list rules dedicated to Channel 3.
+		Max 128 per channel, 768 total across all channels.
+
+config RZV2H_CANFD_AFL_CH4_RULE_NUM
+	int "Channel 4 Rule Count"
+	default 64
+	range 1 128
+	---help---
+		Number of acceptance filter list rules dedicated to Channel 4.
+		Max 128 per channel, 768 total across all channels.
+
+config RZV2H_CANFD_AFL_CH5_RULE_NUM
+	int "Channel 5 Rule Count"
+	default 64
+	range 1 128
+	---help---
+		Number of acceptance filter list rules dedicated to Channel 5.
+		Max 128 per channel, 768 total across all channels.
+
+endmenu # Acceptance Filtering
+
+endmenu # Reception
+
+
+# =========================================================================
+# Flexible Data (FD) Settings
+# =========================================================================
+
+menu "Flexible Data (FD)"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Protocol Exceptions"
+	default RZV2H_CANFD_FD_PROTOCOL_EXCEPTION_ISO
+	---help---
+		Select whether to enter the protocol exception handling
+		state when a RES bit is sampled recessive as defined in
+		ISO 11898-1, or to send an error frame (CFDGFDCFG.RPED).
+
+config RZV2H_CANFD_FD_PROTOCOL_EXCEPTION_ISO
+	bool "ISO 11898-1"
+
+config RZV2H_CANFD_FD_PROTOCOL_EXCEPTION
+	bool "Send error frame"
+
+endchoice # Protocol Exceptions
+
+config RZV2H_CANFD_FD_OVERFLOW
+	bool "Payload Overflow Reject"
+	default y
+	---help---
+		When enabled, received messages larger than the destination
+		buffer are rejected. When disabled, they are truncated.
+
+endmenu # Flexible Data (FD)
+
+menu "Common FIFOs"
+
+# =========================================================================
+
+menu "Common FIFO 0"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO0_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO0_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO0_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 0 Enable
+
+config RZV2H_CANFD_COMMON_FIFO0_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO0_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO0_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO0_RX
+
+config RZV2H_CANFD_COMMON_FIFO0_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO0_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 0 Mode
+
+config RZV2H_CANFD_COMMON_FIFO0_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO0_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO0_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO0_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO0_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO0_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 0 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO0_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO0_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO0_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO0_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO0_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO0_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 0 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO0_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO0_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO0_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO0_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO0_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO0_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 0 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO0_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO0_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO0_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO0_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO0_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO0_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO0_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 0 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 0 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO0_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 0
+menu "Common FIFO 1"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO1_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO1_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO1_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 1 Enable
+
+config RZV2H_CANFD_COMMON_FIFO1_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO1_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO1_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO1_RX
+
+config RZV2H_CANFD_COMMON_FIFO1_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO1_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 1 Mode
+
+config RZV2H_CANFD_COMMON_FIFO1_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO1_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO1_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO1_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO1_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO1_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 1 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO1_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO1_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO1_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO1_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO1_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO1_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 1 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO1_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO1_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO1_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO1_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO1_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO1_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 1 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO1_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO1_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO1_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO1_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO1_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO1_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO1_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 1 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 1 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO1_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 1
+menu "Common FIFO 2"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO2_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO2_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO2_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 2 Enable
+
+config RZV2H_CANFD_COMMON_FIFO2_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO2_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO2_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO2_RX
+
+config RZV2H_CANFD_COMMON_FIFO2_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO2_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 2 Mode
+
+config RZV2H_CANFD_COMMON_FIFO2_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO2_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO2_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO2_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO2_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO2_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 2 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO2_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO2_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO2_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO2_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO2_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO2_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 2 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO2_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO2_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO2_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO2_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO2_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO2_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 2 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO2_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO2_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO2_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO2_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO2_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO2_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO2_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 2 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 2 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO2_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 2
+menu "Common FIFO 3"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO3_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO3_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO3_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 3 Enable
+
+config RZV2H_CANFD_COMMON_FIFO3_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO3_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO3_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO3_RX
+
+config RZV2H_CANFD_COMMON_FIFO3_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO3_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 3 Mode
+
+config RZV2H_CANFD_COMMON_FIFO3_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO3_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO3_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO3_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO3_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO3_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 3 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO3_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO3_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO3_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO3_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO3_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO3_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 3 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO3_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO3_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO3_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO3_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO3_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO3_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 3 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO3_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO3_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO3_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO3_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO3_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO3_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO3_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 3 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 3 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO3_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 3
+menu "Common FIFO 4"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO4_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO4_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO4_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 4 Enable
+
+config RZV2H_CANFD_COMMON_FIFO4_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO4_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO4_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO4_RX
+
+config RZV2H_CANFD_COMMON_FIFO4_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO4_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 4 Mode
+
+config RZV2H_CANFD_COMMON_FIFO4_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO4_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO4_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO4_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO4_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO4_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 4 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO4_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO4_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO4_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO4_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO4_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO4_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 4 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO4_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO4_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO4_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO4_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO4_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO4_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 4 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO4_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO4_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO4_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO4_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO4_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO4_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO4_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 4 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 4 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO4_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 4
+menu "Common FIFO 5"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO5_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO5_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO5_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 5 Enable
+
+config RZV2H_CANFD_COMMON_FIFO5_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO5_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO5_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO5_RX
+
+config RZV2H_CANFD_COMMON_FIFO5_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO5_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 5 Mode
+
+config RZV2H_CANFD_COMMON_FIFO5_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO5_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO5_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO5_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO5_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO5_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 5 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO5_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO5_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO5_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO5_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO5_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO5_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 5 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO5_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO5_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO5_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO5_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO5_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO5_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 5 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO5_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO5_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO5_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO5_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO5_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO5_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO5_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 5 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 5 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO5_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 5
+menu "Common FIFO 6"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO6_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO6_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO6_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 6 Enable
+
+config RZV2H_CANFD_COMMON_FIFO6_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO6_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO6_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO6_RX
+
+config RZV2H_CANFD_COMMON_FIFO6_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO6_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 6 Mode
+
+config RZV2H_CANFD_COMMON_FIFO6_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO6_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO6_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO6_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO6_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO6_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 6 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO6_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO6_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO6_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO6_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO6_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO6_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 6 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO6_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO6_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO6_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO6_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO6_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO6_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 6 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO6_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO6_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO6_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO6_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO6_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO6_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO6_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 6 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 6 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO6_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 6
+menu "Common FIFO 7"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO7_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO7_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO7_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 7 Enable
+
+config RZV2H_CANFD_COMMON_FIFO7_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO7_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO7_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO7_RX
+
+config RZV2H_CANFD_COMMON_FIFO7_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO7_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 7 Mode
+
+config RZV2H_CANFD_COMMON_FIFO7_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO7_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO7_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO7_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO7_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO7_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 7 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO7_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO7_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO7_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO7_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO7_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO7_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 7 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO7_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO7_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO7_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO7_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO7_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO7_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 7 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO7_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO7_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO7_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO7_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO7_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO7_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO7_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 7 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 7 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO7_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 7
+menu "Common FIFO 8"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO8_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO8_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO8_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 8 Enable
+
+config RZV2H_CANFD_COMMON_FIFO8_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO8_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO8_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO8_RX
+
+config RZV2H_CANFD_COMMON_FIFO8_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO8_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 8 Mode
+
+config RZV2H_CANFD_COMMON_FIFO8_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO8_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO8_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO8_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO8_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO8_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 8 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO8_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO8_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO8_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO8_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO8_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO8_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 8 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO8_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO8_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO8_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO8_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO8_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO8_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 8 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO8_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO8_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO8_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO8_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO8_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO8_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO8_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 8 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 8 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO8_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 8
+menu "Common FIFO 9"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO9_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO9_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO9_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 9 Enable
+
+config RZV2H_CANFD_COMMON_FIFO9_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO9_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO9_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO9_RX
+
+config RZV2H_CANFD_COMMON_FIFO9_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO9_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 9 Mode
+
+config RZV2H_CANFD_COMMON_FIFO9_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO9_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO9_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO9_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO9_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO9_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 9 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO9_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO9_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO9_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO9_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO9_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO9_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 9 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO9_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO9_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO9_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO9_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO9_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO9_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 9 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO9_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO9_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO9_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO9_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO9_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO9_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO9_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 9 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 9 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO9_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 9
+menu "Common FIFO 10"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO10_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO10_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO10_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 10 Enable
+
+config RZV2H_CANFD_COMMON_FIFO10_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO10_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO10_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO10_RX
+
+config RZV2H_CANFD_COMMON_FIFO10_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO10_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 10 Mode
+
+config RZV2H_CANFD_COMMON_FIFO10_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO10_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO10_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO10_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO10_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO10_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 10 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO10_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO10_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO10_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO10_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO10_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO10_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 10 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO10_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO10_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO10_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO10_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO10_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO10_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 10 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO10_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO10_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO10_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO10_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO10_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO10_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO10_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 10 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 10 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO10_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 10
+menu "Common FIFO 11"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO11_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO11_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO11_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 11 Enable
+
+config RZV2H_CANFD_COMMON_FIFO11_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO11_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO11_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO11_RX
+
+config RZV2H_CANFD_COMMON_FIFO11_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO11_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 11 Mode
+
+config RZV2H_CANFD_COMMON_FIFO11_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO11_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO11_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO11_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO11_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO11_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 11 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO11_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO11_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO11_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO11_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO11_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO11_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 11 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO11_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO11_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO11_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO11_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO11_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO11_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 11 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO11_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO11_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO11_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO11_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO11_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO11_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO11_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 11 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 11 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO11_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 11
+menu "Common FIFO 12"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO12_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO12_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO12_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 12 Enable
+
+config RZV2H_CANFD_COMMON_FIFO12_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO12_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO12_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO12_RX
+
+config RZV2H_CANFD_COMMON_FIFO12_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO12_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 12 Mode
+
+config RZV2H_CANFD_COMMON_FIFO12_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO12_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO12_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO12_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO12_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO12_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 12 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO12_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO12_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO12_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO12_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO12_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO12_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 12 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO12_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO12_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO12_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO12_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO12_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO12_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 12 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO12_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO12_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO12_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO12_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO12_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO12_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO12_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 12 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 12 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO12_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 12
+menu "Common FIFO 13"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO13_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO13_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO13_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 13 Enable
+
+config RZV2H_CANFD_COMMON_FIFO13_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO13_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO13_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO13_RX
+
+config RZV2H_CANFD_COMMON_FIFO13_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO13_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 13 Mode
+
+config RZV2H_CANFD_COMMON_FIFO13_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO13_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO13_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO13_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO13_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO13_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 13 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO13_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO13_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO13_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO13_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO13_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO13_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 13 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO13_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO13_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO13_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO13_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO13_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO13_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 13 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO13_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO13_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO13_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO13_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO13_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO13_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO13_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 13 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 13 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO13_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 13
+menu "Common FIFO 14"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO14_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO14_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO14_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 14 Enable
+
+config RZV2H_CANFD_COMMON_FIFO14_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO14_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO14_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO14_RX
+
+config RZV2H_CANFD_COMMON_FIFO14_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO14_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 14 Mode
+
+config RZV2H_CANFD_COMMON_FIFO14_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO14_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO14_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO14_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO14_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO14_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 14 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO14_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO14_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO14_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO14_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO14_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO14_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 14 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO14_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO14_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO14_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO14_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO14_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO14_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 14 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO14_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO14_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO14_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO14_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO14_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO14_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO14_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 14 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 14 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO14_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 14
+menu "Common FIFO 15"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO15_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO15_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO15_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 15 Enable
+
+config RZV2H_CANFD_COMMON_FIFO15_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO15_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO15_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO15_RX
+
+config RZV2H_CANFD_COMMON_FIFO15_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO15_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 15 Mode
+
+config RZV2H_CANFD_COMMON_FIFO15_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO15_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO15_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO15_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO15_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO15_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 15 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO15_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO15_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO15_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO15_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO15_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO15_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 15 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO15_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO15_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO15_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO15_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO15_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO15_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 15 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO15_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO15_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO15_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO15_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO15_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO15_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO15_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 15 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 15 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO15_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 15
+menu "Common FIFO 16"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO16_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO16_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO16_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 16 Enable
+
+config RZV2H_CANFD_COMMON_FIFO16_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO16_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO16_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO16_RX
+
+config RZV2H_CANFD_COMMON_FIFO16_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO16_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 16 Mode
+
+config RZV2H_CANFD_COMMON_FIFO16_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO16_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO16_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO16_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO16_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO16_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 16 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO16_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO16_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO16_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO16_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO16_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO16_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 16 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO16_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO16_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO16_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO16_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO16_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO16_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 16 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO16_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO16_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO16_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO16_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO16_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO16_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO16_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 16 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 16 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO16_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 16
+menu "Common FIFO 17"
+	depends on RZV2H_CANFD
+
+choice
+	prompt "Enable"
+	default RZV2H_CANFD_COMMON_FIFO17_DISABLED
+
+config RZV2H_CANFD_COMMON_FIFO17_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_COMMON_FIFO17_ENABLED
+	bool "Enabled"
+
+endchoice # Common FIFO 17 Enable
+
+config RZV2H_CANFD_COMMON_FIFO17_ENABLE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO17_DISABLED
+	default 1 if RZV2H_CANFD_COMMON_FIFO17_ENABLED
+
+choice
+	prompt "Mode"
+	default RZV2H_CANFD_COMMON_FIFO17_RX
+
+config RZV2H_CANFD_COMMON_FIFO17_RX
+	bool "Receive"
+
+config RZV2H_CANFD_COMMON_FIFO17_TX
+	bool "Transmit"
+
+endchoice # Common FIFO 17 Mode
+
+config RZV2H_CANFD_COMMON_FIFO17_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO17_RX
+	default 1 if RZV2H_CANFD_COMMON_FIFO17_TX
+
+choice
+	prompt "RX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO17_RX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO17_RX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO17_RX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 17 RX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO17_RX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO17_RX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO17_RX_INT_DISABLED
+
+choice
+	prompt "TX Interrupt Enable"
+	default RZV2H_CANFD_COMMON_FIFO17_TX_INT_ENABLED
+
+config RZV2H_CANFD_COMMON_FIFO17_TX_INT_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD_COMMON_FIFO17_TX_INT_DISABLED
+	bool "Disabled"
+
+endchoice # Common FIFO 17 TX Interrupt Enable
+
+config RZV2H_CANFD_COMMON_FIFO17_TX_INT_ENABLE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_COMMON_FIFO17_TX_INT_ENABLED
+	default 0 if RZV2H_CANFD_COMMON_FIFO17_TX_INT_DISABLED
+
+choice
+	prompt "Interrupt Mode"
+	default RZV2H_CANFD_COMMON_FIFO17_INT_MODE_THRESHOLD
+
+config RZV2H_CANFD_COMMON_FIFO17_INT_MODE_THRESHOLD
+	bool "Threshold"
+
+config RZV2H_CANFD_COMMON_FIFO17_INT_MODE_EVERY_FRAME
+	bool "Every frame"
+
+endchoice # Common FIFO 17 Interrupt Mode
+
+config RZV2H_CANFD_COMMON_FIFO17_INT_MODE
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO17_INT_MODE_THRESHOLD
+	default 1 if RZV2H_CANFD_COMMON_FIFO17_INT_MODE_EVERY_FRAME
+
+config RZV2H_CANFD_COMMON_FIFO17_INT_THRESHOLD
+	int "Interrupt Threshold"
+	default 0
+	range 0 7
+	---help---
+		0=1/8, 1=1/4, 2=3/8, 3=1/2, 4=5/8, 5=3/4, 6=7/8, 7=Full.
+
+config RZV2H_CANFD_COMMON_FIFO17_PAYLOAD
+	int "Payload Size"
+	default 7
+	range 0 7
+	---help---
+		0=8, 1=12, 2=16, 3=20, 4=24, 5=32, 6=48, 7=64 bytes.
+
+config RZV2H_CANFD_COMMON_FIFO17_DEPTH
+	int "Depth"
+	default 3
+	range 1 7
+	---help---
+		1=4, 2=8, 3=16, 4=32, 5=48, 6=64, 7=128 stages.
+
+config RZV2H_CANFD_COMMON_FIFO17_TXMB
+	int "TX Message Buffer"
+	default 0
+	range 0 15
+	---help---
+		TX message buffer index for TX scans.
+		0=TXMB32, 1=TXMB33, ..., 15=TXMB47.
+
+config RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TX_DELAY
+	int "Interval TX Delay"
+	default 0
+	range 0 255
+	---help---
+		Delay between successive transmissions (0-255).
+
+choice
+	prompt "Interval Timer"
+	default RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TIMER_REF
+
+config RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TIMER_REF
+	bool "Reference clock"
+
+config RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TIMER_BIT
+	bool "Bit time clock"
+
+endchoice # Common FIFO 17 Interval Timer
+
+config RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TIMER
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TIMER_REF
+	default 1 if RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TIMER_BIT
+
+choice
+	prompt "Interval Timer Reference Clock Resolution"
+	default RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TIMER_RES_1
+
+config RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TIMER_RES_1
+	bool "x1"
+
+config RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TIMER_RES_10
+	bool "x10"
+
+endchoice # Common FIFO 17 Interval Timer Resolution
+
+config RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TIMER_RES
+	int
+	range 0 1
+	default 0 if RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TIMER_RES_1
+	default 1 if RZV2H_CANFD_COMMON_FIFO17_INTERVAL_TIMER_RES_10
+
+endmenu # Common FIFO 17
+
+
+endmenu # Common FIFOs
+
+choice
+	prompt "Transmission Priority"
+	default RZV2H_CANFD_TRANSMIT_PRIORITY_BUFFER_NUMBER
+	---help---
+		Select transmission priority by message ID or by buffer
+		number (lower number = higher priority). CFDGCFG.TPRI.
+
+config RZV2H_CANFD_TRANSMIT_PRIORITY_MESSAGE_ID
+	bool "Message ID"
+
+config RZV2H_CANFD_TRANSMIT_PRIORITY_BUFFER_NUMBER
+	bool "Buffer Number"
+
+endchoice # Transmission Priority
+
+config RZV2H_CANFD_TRANSMIT_PRIORITY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_TRANSMIT_PRIORITY_BUFFER_NUMBER
+	default 0 if RZV2H_CANFD_TRANSMIT_PRIORITY_MESSAGE_ID
+
+choice
+	prompt "DLC Check"
+	default RZV2H_CANFD_DLC_CHECK_DISABLED
+	---help---
+		Enable DLC check of received messages against the
+		acceptance filter rule. CFDGCFG.DCE.
+
+config RZV2H_CANFD_DLC_CHECK_DISABLED
+	bool "Disabled"
+
+config RZV2H_CANFD_DLC_CHECK_ENABLED
+	bool "Enabled"
+
+endchoice # DLC Check
+
+config RZV2H_CANFD_DLC_CHECK
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD_DLC_CHECK_ENABLED
+	default 0 if RZV2H_CANFD_DLC_CHECK_DISABLED
+
+choice
+	prompt "Clock Source"
+	default RZV2H_CANFD_CLOCK_SOURCE_CLKC
+	---help---
+		Data Link Controller Clock Select (CFDGCFG.DCS). Only
+		CANFD_0_clkc (DCS=0) is allowed; DCS=1 is prohibited.
+
+config RZV2H_CANFD_CLOCK_SOURCE_CLKC
+	bool "CANFD_0_clkc"
+
+endchoice # Clock Source
+
+config RZV2H_CANFD_TIMER_PRESCALER
+	int "Interval Timer Prescaler"
+	default 0
+	range 0 65535
+	---help---
+		Interval timer prescaler (CFDGCFG.ITRCP), used by the Common
+		FIFO Interval TX Delay.
+
+choice
+	prompt "Loopback Mode"
+	default RZV2H_CANFD_LOOPBACK_INTERNAL
+	depends on CAN_LOOPBACK || RZV2H_CANFD_SOCK_LOOPBACK
+	---help---
+		Select the CANFD loopback mode when CONFIG_CAN_LOOPBACK
+		(character device) or CONFIG_RZV2H_CANFD_SOCK_LOOPBACK
+		(SocketCAN) is enabled.
+
+config RZV2H_CANFD_LOOPBACK_INTERNAL
+	bool "Internal Loopback"
+	---help---
+		Internal loopback mode.
+
+config RZV2H_CANFD_LOOPBACK_EXTERNAL
+	bool "External Loopback"
+	---help---
+		External loopback mode.
+
+endchoice # Loopback Mode
+
+config RZV2H_CANFD_GERR_INTSEL
+	int "CANFD Global Error interrupt-select (SEL) IRQ number"
+	default 419
+	range 353 479
+	---help---
+		Interrupt-select (ICU_SEL) IRQ number for the CANFD
+		global error interrupt (INTRCANGERR).
+
+config RZV2H_CANFD_GREEC_INTSEL
+	int "CANFD Global RX FIFO interrupt-select (SEL) IRQ number"
+	default 418
+	range 353 479
+	---help---
+		Interrupt-select (ICU_SEL) IRQ number for the CANFD
+		global RX FIFO / reception interrupt (INTRCANGRECC).
+
+endmenu # Global
+
+# =========================================================================
+# Channels
+# =========================================================================
+
+menu "Channels"
+
+# =========================================================================
+# Per-Channel Settings: Channel 0
+# =========================================================================
+
+config RZV2H_CANFD0
+	bool "CANFD Channel 0"
+	default n
+
+if RZV2H_CANFD0
+
+menu "Bitrate"
+
+menu "Automatic"
+
+config RZV2H_CANFD0_AUTO_CLOCK_SOURCE_FREQ
+	int "Clock Source Frequency"
+	default 0
+	---help---
+		Input clock source frequency. Set 0 if PCLK is used.
+
+config RZV2H_CANFD0_AUTO_NORM_RATE
+	int "Nominal Rate (bps)"
+	default 500000
+	range 1 1000000
+	---help---
+		Nominal bitrate in bits per second (max 1 MHz).
+
+config RZV2H_CANFD0_AUTO_DATA_RATE
+	int "Data Rate (bps)"
+	default 2000000
+	range 1 8000000
+	---help---
+		Data bitrate in bits per second.
+
+config RZV2H_CANFD0_AUTO_SAMPLE_POINT
+	int "Sample Point (%)"
+	default 75
+	range 60 99
+	---help---
+		Desired sample point percentage.
+
+endmenu # Automatic
+
+menu "Manual"
+
+menu "Nominal"
+
+config RZV2H_CANFD0_MANUAL_NORM_PRESCALER
+	int "Prescaler (divisor)"
+	default 1
+	range 1 1024
+
+config RZV2H_CANFD0_MANUAL_NORM_SEGMENT_1
+	int "Time Segment 1 (Tq)"
+	default 119
+	range 2 256
+
+config RZV2H_CANFD0_MANUAL_NORM_SEGMENT_2
+	int "Time Segment 2 (Tq)"
+	default 40
+	range 2 128
+
+config RZV2H_CANFD0_MANUAL_NORM_SYNC_JUMP
+	int "Sync Jump Width (Tq)"
+	default 4
+	range 1 128
+
+endmenu # Nominal
+
+menu "Data"
+
+config RZV2H_CANFD0_MANUAL_DATA_PRESCALER
+	int "Prescaler (divisor)"
+	default 1
+	range 1 2 if RZV2H_CANFD0_DELAY_COMPENSATION
+	range 1 256
+	---help---
+		At most 2 with Delay Compensation.
+
+config RZV2H_CANFD0_MANUAL_DATA_SEGMENT_1
+	int "Time Segment 1 (Tq)"
+	default 29
+	range 2 32
+
+config RZV2H_CANFD0_MANUAL_DATA_SEGMENT_2
+	int "Time Segment 2 (Tq)"
+	default 10
+	range 2 16
+
+config RZV2H_CANFD0_MANUAL_DATA_SYNC_JUMP
+	int "Sync Jump Width (Tq)"
+	default 4
+	range 1 16
+
+endmenu # Data
+
+endmenu # Manual
+
+config RZV2H_CANFD0_USE_MANUAL_BAUDRATE
+	bool "Use Manual Settings"
+	default n
+	---help---
+		Override automatic baudrate generation and use manual
+		bit timing values instead.
+
+config RZV2H_CANFD0_DELAY_COMPENSATION
+	bool "Delay Compensation"
+	default y
+	---help---
+		Automatically compensate for transceiver or bus delay.
+
+endmenu # Bitrate
+
+config RZV2H_CANFD0_INT_PRIORITY
+	int "Channel Interrupt Priority"
+	default 12
+	range 0 15
+
+config RZV2H_CANFD0_REC_INTSEL
+	int "RX Completion interrupt-select (SEL) IRQ number"
+	default 417
+	range 353 479
+
+config RZV2H_CANFD0_TRX_INTSEL
+	int "TX Completion interrupt-select (SEL) IRQ number"
+	default 416
+	range 353 479
+
+config RZV2H_CANFD0_ERR_INTSEL
+	int "Error interrupt-select (SEL) IRQ number"
+	default 415
+	range 353 479
+
+choice
+	prompt "RX FIFO"
+	default RZV2H_CANFD0_RX_FIFO_TYPE_RXFIFO
+	---help---
+		FIFO(s) this channel receives in. RX FIFO 0 must be
+		Enabled, with Interrupt Mode not Disable (RX FIFO 0
+		menu). Common FIFOs must be set to Receive with RX
+		interrupt enabled (Common FIFOs menu).
+
+config RZV2H_CANFD0_RX_FIFO_TYPE_RXFIFO
+	bool "RX FIFO 0"
+
+config RZV2H_CANFD0_RX_FIFO_TYPE_CFIFO
+	bool "Common FIFO 0"
+
+config RZV2H_CANFD0_RX_PRIORITY_FIFOS
+	bool "Common FIFO 0 (high) + 1 (low priority)"
+
+endchoice # CANFD0 RX FIFO
+
+config RZV2H_CANFD0_RX_FIFO_TYPE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD0_RX_FIFO_TYPE_RXFIFO
+	default 1 if RZV2H_CANFD0_RX_FIFO_TYPE_CFIFO
+	default 2 if RZV2H_CANFD0_RX_PRIORITY_FIFOS
+
+config RZV2H_CANFD0_TXMB_NUM
+	int "Number of TX Message Buffers"
+	default 8
+	range 1 16
+	---help---
+		Number of TX message buffers used for transmission:
+		TX MB0 .. TX MB(n-1). The driver enables the TX complete
+		interrupt of these buffers.
+
+menu "Channel Error Interrupts"
+
+choice
+	prompt "Error Warning Interrupt"
+	default RZV2H_CANFD0_ERR_INT_ERR_WARN_DISABLED
+
+config RZV2H_CANFD0_ERR_INT_ERR_WARN_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD0_ERR_INT_ERR_WARN_DISABLED
+	bool "Disabled"
+
+endchoice # CH0 Error Warning Interrupt
+
+config RZV2H_CANFD0_ERR_INT_ERR_WARN
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD0_ERR_INT_ERR_WARN_ENABLED
+	default 0 if RZV2H_CANFD0_ERR_INT_ERR_WARN_DISABLED
+
+choice
+	prompt "Error Passive Interrupt"
+	default RZV2H_CANFD0_ERR_INT_ERR_PASSIVE_DISABLED
+
+config RZV2H_CANFD0_ERR_INT_ERR_PASSIVE_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD0_ERR_INT_ERR_PASSIVE_DISABLED
+	bool "Disabled"
+
+endchoice # CH0 Error Passive Interrupt
+
+config RZV2H_CANFD0_ERR_INT_ERR_PASSIVE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD0_ERR_INT_ERR_PASSIVE_ENABLED
+	default 0 if RZV2H_CANFD0_ERR_INT_ERR_PASSIVE_DISABLED
+
+choice
+	prompt "Bus-Off Entry Interrupt"
+	default RZV2H_CANFD0_ERR_INT_BUS_OFF_ENTRY_DISABLED
+
+config RZV2H_CANFD0_ERR_INT_BUS_OFF_ENTRY_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD0_ERR_INT_BUS_OFF_ENTRY_DISABLED
+	bool "Disabled"
+
+endchoice # CH0 Bus-Off Entry Interrupt
+
+config RZV2H_CANFD0_ERR_INT_BUS_OFF_ENTRY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD0_ERR_INT_BUS_OFF_ENTRY_ENABLED
+	default 0 if RZV2H_CANFD0_ERR_INT_BUS_OFF_ENTRY_DISABLED
+
+choice
+	prompt "Bus-Off Recovery Interrupt"
+	default RZV2H_CANFD0_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+
+config RZV2H_CANFD0_ERR_INT_BUS_OFF_RECOVERY_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD0_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+	bool "Disabled"
+
+endchoice # CH0 Bus-Off Recovery Interrupt
+
+config RZV2H_CANFD0_ERR_INT_BUS_OFF_RECOVERY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD0_ERR_INT_BUS_OFF_RECOVERY_ENABLED
+	default 0 if RZV2H_CANFD0_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+
+choice
+	prompt "Overload Interrupt"
+	default RZV2H_CANFD0_ERR_INT_OVERLOAD_DISABLED
+
+config RZV2H_CANFD0_ERR_INT_OVERLOAD_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD0_ERR_INT_OVERLOAD_DISABLED
+	bool "Disabled"
+
+endchoice # CH0 Overload Interrupt
+
+config RZV2H_CANFD0_ERR_INT_OVERLOAD
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD0_ERR_INT_OVERLOAD_ENABLED
+	default 0 if RZV2H_CANFD0_ERR_INT_OVERLOAD_DISABLED
+
+endmenu # Channel Error Interrupts
+
+config RZV2H_CANFD0_STB_PIN
+	bool "Transceiver STB pin"
+	default n
+	---help---
+		The transceiver has an STB pin (BOARD_CANFD0_STB_GPIO).
+
+endif # RZV2H_CANFD0
+# =========================================================================
+# Per-Channel Settings: Channel 1
+# =========================================================================
+
+config RZV2H_CANFD1
+	bool "CANFD Channel 1"
+	default n
+
+if RZV2H_CANFD1
+
+menu "Bitrate"
+
+menu "Automatic"
+
+config RZV2H_CANFD1_AUTO_CLOCK_SOURCE_FREQ
+	int "Clock Source Frequency"
+	default 0
+	---help---
+		Input clock source frequency. Set 0 if PCLK is used.
+
+config RZV2H_CANFD1_AUTO_NORM_RATE
+	int "Nominal Rate (bps)"
+	default 500000
+	range 1 1000000
+	---help---
+		Nominal bitrate in bits per second (max 1 MHz).
+
+config RZV2H_CANFD1_AUTO_DATA_RATE
+	int "Data Rate (bps)"
+	default 2000000
+	range 1 8000000
+	---help---
+		Data bitrate in bits per second.
+
+config RZV2H_CANFD1_AUTO_SAMPLE_POINT
+	int "Sample Point (%)"
+	default 75
+	range 60 99
+	---help---
+		Desired sample point percentage.
+
+endmenu # Automatic
+
+menu "Manual"
+
+menu "Nominal"
+
+config RZV2H_CANFD1_MANUAL_NORM_PRESCALER
+	int "Prescaler (divisor)"
+	default 1
+	range 1 1024
+
+config RZV2H_CANFD1_MANUAL_NORM_SEGMENT_1
+	int "Time Segment 1 (Tq)"
+	default 119
+	range 2 256
+
+config RZV2H_CANFD1_MANUAL_NORM_SEGMENT_2
+	int "Time Segment 2 (Tq)"
+	default 40
+	range 2 128
+
+config RZV2H_CANFD1_MANUAL_NORM_SYNC_JUMP
+	int "Sync Jump Width (Tq)"
+	default 4
+	range 1 128
+
+endmenu # Nominal
+
+menu "Data"
+
+config RZV2H_CANFD1_MANUAL_DATA_PRESCALER
+	int "Prescaler (divisor)"
+	default 1
+	range 1 2 if RZV2H_CANFD1_DELAY_COMPENSATION
+	range 1 256
+	---help---
+		At most 2 with Delay Compensation.
+
+config RZV2H_CANFD1_MANUAL_DATA_SEGMENT_1
+	int "Time Segment 1 (Tq)"
+	default 29
+	range 2 32
+
+config RZV2H_CANFD1_MANUAL_DATA_SEGMENT_2
+	int "Time Segment 2 (Tq)"
+	default 10
+	range 2 16
+
+config RZV2H_CANFD1_MANUAL_DATA_SYNC_JUMP
+	int "Sync Jump Width (Tq)"
+	default 4
+	range 1 16
+
+endmenu # Data
+
+endmenu # Manual
+
+config RZV2H_CANFD1_USE_MANUAL_BAUDRATE
+	bool "Use Manual Settings"
+	default n
+	---help---
+		Override automatic baudrate generation and use manual
+		bit timing values instead.
+
+config RZV2H_CANFD1_DELAY_COMPENSATION
+	bool "Delay Compensation"
+	default y
+	---help---
+		Automatically compensate for transceiver or bus delay.
+
+endmenu # Bitrate
+
+config RZV2H_CANFD1_INT_PRIORITY
+	int "Channel Interrupt Priority"
+	default 12
+	range 0 15
+
+config RZV2H_CANFD1_REC_INTSEL
+	int "RX Completion interrupt-select (SEL) IRQ number"
+	default 414
+	range 353 479
+
+config RZV2H_CANFD1_TRX_INTSEL
+	int "TX Completion interrupt-select (SEL) IRQ number"
+	default 413
+	range 353 479
+
+config RZV2H_CANFD1_ERR_INTSEL
+	int "Error interrupt-select (SEL) IRQ number"
+	default 412
+	range 353 479
+
+choice
+	prompt "RX FIFO"
+	default RZV2H_CANFD1_RX_FIFO_TYPE_RXFIFO
+	---help---
+		FIFO(s) this channel receives in. RX FIFO 1 must be
+		Enabled, with Interrupt Mode not Disable (RX FIFO 1
+		menu). Common FIFOs must be set to Receive with RX
+		interrupt enabled (Common FIFOs menu).
+
+config RZV2H_CANFD1_RX_FIFO_TYPE_RXFIFO
+	bool "RX FIFO 1"
+
+config RZV2H_CANFD1_RX_FIFO_TYPE_CFIFO
+	bool "Common FIFO 3"
+
+config RZV2H_CANFD1_RX_PRIORITY_FIFOS
+	bool "Common FIFO 3 (high) + 4 (low priority)"
+
+endchoice # CANFD1 RX FIFO
+
+config RZV2H_CANFD1_RX_FIFO_TYPE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD1_RX_FIFO_TYPE_RXFIFO
+	default 1 if RZV2H_CANFD1_RX_FIFO_TYPE_CFIFO
+	default 2 if RZV2H_CANFD1_RX_PRIORITY_FIFOS
+
+config RZV2H_CANFD1_TXMB_NUM
+	int "Number of TX Message Buffers"
+	default 8
+	range 1 16
+	---help---
+		Number of TX message buffers used for transmission:
+		TX MB0 .. TX MB(n-1). The driver enables the TX complete
+		interrupt of these buffers.
+
+menu "Channel Error Interrupts"
+
+choice
+	prompt "Error Warning Interrupt"
+	default RZV2H_CANFD1_ERR_INT_ERR_WARN_DISABLED
+
+config RZV2H_CANFD1_ERR_INT_ERR_WARN_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD1_ERR_INT_ERR_WARN_DISABLED
+	bool "Disabled"
+
+endchoice # CH1 Error Warning Interrupt
+
+config RZV2H_CANFD1_ERR_INT_ERR_WARN
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD1_ERR_INT_ERR_WARN_ENABLED
+	default 0 if RZV2H_CANFD1_ERR_INT_ERR_WARN_DISABLED
+
+choice
+	prompt "Error Passive Interrupt"
+	default RZV2H_CANFD1_ERR_INT_ERR_PASSIVE_DISABLED
+
+config RZV2H_CANFD1_ERR_INT_ERR_PASSIVE_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD1_ERR_INT_ERR_PASSIVE_DISABLED
+	bool "Disabled"
+
+endchoice # CH1 Error Passive Interrupt
+
+config RZV2H_CANFD1_ERR_INT_ERR_PASSIVE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD1_ERR_INT_ERR_PASSIVE_ENABLED
+	default 0 if RZV2H_CANFD1_ERR_INT_ERR_PASSIVE_DISABLED
+
+choice
+	prompt "Bus-Off Entry Interrupt"
+	default RZV2H_CANFD1_ERR_INT_BUS_OFF_ENTRY_DISABLED
+
+config RZV2H_CANFD1_ERR_INT_BUS_OFF_ENTRY_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD1_ERR_INT_BUS_OFF_ENTRY_DISABLED
+	bool "Disabled"
+
+endchoice # CH1 Bus-Off Entry Interrupt
+
+config RZV2H_CANFD1_ERR_INT_BUS_OFF_ENTRY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD1_ERR_INT_BUS_OFF_ENTRY_ENABLED
+	default 0 if RZV2H_CANFD1_ERR_INT_BUS_OFF_ENTRY_DISABLED
+
+choice
+	prompt "Bus-Off Recovery Interrupt"
+	default RZV2H_CANFD1_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+
+config RZV2H_CANFD1_ERR_INT_BUS_OFF_RECOVERY_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD1_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+	bool "Disabled"
+
+endchoice # CH1 Bus-Off Recovery Interrupt
+
+config RZV2H_CANFD1_ERR_INT_BUS_OFF_RECOVERY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD1_ERR_INT_BUS_OFF_RECOVERY_ENABLED
+	default 0 if RZV2H_CANFD1_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+
+choice
+	prompt "Overload Interrupt"
+	default RZV2H_CANFD1_ERR_INT_OVERLOAD_DISABLED
+
+config RZV2H_CANFD1_ERR_INT_OVERLOAD_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD1_ERR_INT_OVERLOAD_DISABLED
+	bool "Disabled"
+
+endchoice # CH1 Overload Interrupt
+
+config RZV2H_CANFD1_ERR_INT_OVERLOAD
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD1_ERR_INT_OVERLOAD_ENABLED
+	default 0 if RZV2H_CANFD1_ERR_INT_OVERLOAD_DISABLED
+
+endmenu # Channel Error Interrupts
+
+config RZV2H_CANFD1_STB_PIN
+	bool "Transceiver STB pin"
+	default n
+	---help---
+		The transceiver has an STB pin (BOARD_CANFD1_STB_GPIO).
+
+endif # RZV2H_CANFD1
+# =========================================================================
+# Per-Channel Settings: Channel 2
+# =========================================================================
+
+config RZV2H_CANFD2
+	bool "CANFD Channel 2"
+	default n
+
+if RZV2H_CANFD2
+
+menu "Bitrate"
+
+menu "Automatic"
+
+config RZV2H_CANFD2_AUTO_CLOCK_SOURCE_FREQ
+	int "Clock Source Frequency"
+	default 0
+	---help---
+		Input clock source frequency. Set 0 if PCLK is used.
+
+config RZV2H_CANFD2_AUTO_NORM_RATE
+	int "Nominal Rate (bps)"
+	default 500000
+	range 1 1000000
+	---help---
+		Nominal bitrate in bits per second (max 1 MHz).
+
+config RZV2H_CANFD2_AUTO_DATA_RATE
+	int "Data Rate (bps)"
+	default 2000000
+	range 1 8000000
+	---help---
+		Data bitrate in bits per second.
+
+config RZV2H_CANFD2_AUTO_SAMPLE_POINT
+	int "Sample Point (%)"
+	default 75
+	range 60 99
+	---help---
+		Desired sample point percentage.
+
+endmenu # Automatic
+
+menu "Manual"
+
+menu "Nominal"
+
+config RZV2H_CANFD2_MANUAL_NORM_PRESCALER
+	int "Prescaler (divisor)"
+	default 1
+	range 1 1024
+
+config RZV2H_CANFD2_MANUAL_NORM_SEGMENT_1
+	int "Time Segment 1 (Tq)"
+	default 119
+	range 2 256
+
+config RZV2H_CANFD2_MANUAL_NORM_SEGMENT_2
+	int "Time Segment 2 (Tq)"
+	default 40
+	range 2 128
+
+config RZV2H_CANFD2_MANUAL_NORM_SYNC_JUMP
+	int "Sync Jump Width (Tq)"
+	default 4
+	range 1 128
+
+endmenu # Nominal
+
+menu "Data"
+
+config RZV2H_CANFD2_MANUAL_DATA_PRESCALER
+	int "Prescaler (divisor)"
+	default 1
+	range 1 2 if RZV2H_CANFD2_DELAY_COMPENSATION
+	range 1 256
+	---help---
+		At most 2 with Delay Compensation.
+
+config RZV2H_CANFD2_MANUAL_DATA_SEGMENT_1
+	int "Time Segment 1 (Tq)"
+	default 29
+	range 2 32
+
+config RZV2H_CANFD2_MANUAL_DATA_SEGMENT_2
+	int "Time Segment 2 (Tq)"
+	default 10
+	range 2 16
+
+config RZV2H_CANFD2_MANUAL_DATA_SYNC_JUMP
+	int "Sync Jump Width (Tq)"
+	default 4
+	range 1 16
+
+endmenu # Data
+
+endmenu # Manual
+
+config RZV2H_CANFD2_USE_MANUAL_BAUDRATE
+	bool "Use Manual Settings"
+	default n
+	---help---
+		Override automatic baudrate generation and use manual
+		bit timing values instead.
+
+config RZV2H_CANFD2_DELAY_COMPENSATION
+	bool "Delay Compensation"
+	default y
+	---help---
+		Automatically compensate for transceiver or bus delay.
+
+endmenu # Bitrate
+
+config RZV2H_CANFD2_INT_PRIORITY
+	int "Channel Interrupt Priority"
+	default 12
+	range 0 15
+
+config RZV2H_CANFD2_REC_INTSEL
+	int "RX Completion interrupt-select (SEL) IRQ number"
+	default 411
+	range 353 479
+
+config RZV2H_CANFD2_TRX_INTSEL
+	int "TX Completion interrupt-select (SEL) IRQ number"
+	default 410
+	range 353 479
+
+config RZV2H_CANFD2_ERR_INTSEL
+	int "Error interrupt-select (SEL) IRQ number"
+	default 409
+	range 353 479
+
+choice
+	prompt "RX FIFO"
+	default RZV2H_CANFD2_RX_FIFO_TYPE_RXFIFO
+	---help---
+		FIFO(s) this channel receives in. RX FIFO 2 must be
+		Enabled, with Interrupt Mode not Disable (RX FIFO 2
+		menu). Common FIFOs must be set to Receive with RX
+		interrupt enabled (Common FIFOs menu).
+
+config RZV2H_CANFD2_RX_FIFO_TYPE_RXFIFO
+	bool "RX FIFO 2"
+
+config RZV2H_CANFD2_RX_FIFO_TYPE_CFIFO
+	bool "Common FIFO 6"
+
+config RZV2H_CANFD2_RX_PRIORITY_FIFOS
+	bool "Common FIFO 6 (high) + 7 (low priority)"
+
+endchoice # CANFD2 RX FIFO
+
+config RZV2H_CANFD2_RX_FIFO_TYPE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD2_RX_FIFO_TYPE_RXFIFO
+	default 1 if RZV2H_CANFD2_RX_FIFO_TYPE_CFIFO
+	default 2 if RZV2H_CANFD2_RX_PRIORITY_FIFOS
+
+config RZV2H_CANFD2_TXMB_NUM
+	int "Number of TX Message Buffers"
+	default 8
+	range 1 16
+	---help---
+		Number of TX message buffers used for transmission:
+		TX MB0 .. TX MB(n-1). The driver enables the TX complete
+		interrupt of these buffers.
+
+menu "Channel Error Interrupts"
+
+choice
+	prompt "Error Warning Interrupt"
+	default RZV2H_CANFD2_ERR_INT_ERR_WARN_DISABLED
+
+config RZV2H_CANFD2_ERR_INT_ERR_WARN_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD2_ERR_INT_ERR_WARN_DISABLED
+	bool "Disabled"
+
+endchoice # CH2 Error Warning Interrupt
+
+config RZV2H_CANFD2_ERR_INT_ERR_WARN
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD2_ERR_INT_ERR_WARN_ENABLED
+	default 0 if RZV2H_CANFD2_ERR_INT_ERR_WARN_DISABLED
+
+choice
+	prompt "Error Passive Interrupt"
+	default RZV2H_CANFD2_ERR_INT_ERR_PASSIVE_DISABLED
+
+config RZV2H_CANFD2_ERR_INT_ERR_PASSIVE_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD2_ERR_INT_ERR_PASSIVE_DISABLED
+	bool "Disabled"
+
+endchoice # CH2 Error Passive Interrupt
+
+config RZV2H_CANFD2_ERR_INT_ERR_PASSIVE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD2_ERR_INT_ERR_PASSIVE_ENABLED
+	default 0 if RZV2H_CANFD2_ERR_INT_ERR_PASSIVE_DISABLED
+
+choice
+	prompt "Bus-Off Entry Interrupt"
+	default RZV2H_CANFD2_ERR_INT_BUS_OFF_ENTRY_DISABLED
+
+config RZV2H_CANFD2_ERR_INT_BUS_OFF_ENTRY_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD2_ERR_INT_BUS_OFF_ENTRY_DISABLED
+	bool "Disabled"
+
+endchoice # CH2 Bus-Off Entry Interrupt
+
+config RZV2H_CANFD2_ERR_INT_BUS_OFF_ENTRY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD2_ERR_INT_BUS_OFF_ENTRY_ENABLED
+	default 0 if RZV2H_CANFD2_ERR_INT_BUS_OFF_ENTRY_DISABLED
+
+choice
+	prompt "Bus-Off Recovery Interrupt"
+	default RZV2H_CANFD2_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+
+config RZV2H_CANFD2_ERR_INT_BUS_OFF_RECOVERY_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD2_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+	bool "Disabled"
+
+endchoice # CH2 Bus-Off Recovery Interrupt
+
+config RZV2H_CANFD2_ERR_INT_BUS_OFF_RECOVERY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD2_ERR_INT_BUS_OFF_RECOVERY_ENABLED
+	default 0 if RZV2H_CANFD2_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+
+choice
+	prompt "Overload Interrupt"
+	default RZV2H_CANFD2_ERR_INT_OVERLOAD_DISABLED
+
+config RZV2H_CANFD2_ERR_INT_OVERLOAD_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD2_ERR_INT_OVERLOAD_DISABLED
+	bool "Disabled"
+
+endchoice # CH2 Overload Interrupt
+
+config RZV2H_CANFD2_ERR_INT_OVERLOAD
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD2_ERR_INT_OVERLOAD_ENABLED
+	default 0 if RZV2H_CANFD2_ERR_INT_OVERLOAD_DISABLED
+
+endmenu # Channel Error Interrupts
+
+config RZV2H_CANFD2_STB_PIN
+	bool "Transceiver STB pin"
+	default n
+	---help---
+		The transceiver has an STB pin (BOARD_CANFD2_STB_GPIO).
+
+endif # RZV2H_CANFD2
+# =========================================================================
+# Per-Channel Settings: Channel 3
+# =========================================================================
+
+config RZV2H_CANFD3
+	bool "CANFD Channel 3"
+	default n
+
+if RZV2H_CANFD3
+
+menu "Bitrate"
+
+menu "Automatic"
+
+config RZV2H_CANFD3_AUTO_CLOCK_SOURCE_FREQ
+	int "Clock Source Frequency"
+	default 0
+	---help---
+		Input clock source frequency. Set 0 if PCLK is used.
+
+config RZV2H_CANFD3_AUTO_NORM_RATE
+	int "Nominal Rate (bps)"
+	default 500000
+	range 1 1000000
+	---help---
+		Nominal bitrate in bits per second (max 1 MHz).
+
+config RZV2H_CANFD3_AUTO_DATA_RATE
+	int "Data Rate (bps)"
+	default 2000000
+	range 1 8000000
+	---help---
+		Data bitrate in bits per second.
+
+config RZV2H_CANFD3_AUTO_SAMPLE_POINT
+	int "Sample Point (%)"
+	default 75
+	range 60 99
+	---help---
+		Desired sample point percentage.
+
+endmenu # Automatic
+
+menu "Manual"
+
+menu "Nominal"
+
+config RZV2H_CANFD3_MANUAL_NORM_PRESCALER
+	int "Prescaler (divisor)"
+	default 1
+	range 1 1024
+
+config RZV2H_CANFD3_MANUAL_NORM_SEGMENT_1
+	int "Time Segment 1 (Tq)"
+	default 119
+	range 2 256
+
+config RZV2H_CANFD3_MANUAL_NORM_SEGMENT_2
+	int "Time Segment 2 (Tq)"
+	default 40
+	range 2 128
+
+config RZV2H_CANFD3_MANUAL_NORM_SYNC_JUMP
+	int "Sync Jump Width (Tq)"
+	default 4
+	range 1 128
+
+endmenu # Nominal
+
+menu "Data"
+
+config RZV2H_CANFD3_MANUAL_DATA_PRESCALER
+	int "Prescaler (divisor)"
+	default 1
+	range 1 2 if RZV2H_CANFD3_DELAY_COMPENSATION
+	range 1 256
+	---help---
+		At most 2 with Delay Compensation.
+
+config RZV2H_CANFD3_MANUAL_DATA_SEGMENT_1
+	int "Time Segment 1 (Tq)"
+	default 29
+	range 2 32
+
+config RZV2H_CANFD3_MANUAL_DATA_SEGMENT_2
+	int "Time Segment 2 (Tq)"
+	default 10
+	range 2 16
+
+config RZV2H_CANFD3_MANUAL_DATA_SYNC_JUMP
+	int "Sync Jump Width (Tq)"
+	default 4
+	range 1 16
+
+endmenu # Data
+
+endmenu # Manual
+
+config RZV2H_CANFD3_USE_MANUAL_BAUDRATE
+	bool "Use Manual Settings"
+	default n
+	---help---
+		Override automatic baudrate generation and use manual
+		bit timing values instead.
+
+config RZV2H_CANFD3_DELAY_COMPENSATION
+	bool "Delay Compensation"
+	default y
+	---help---
+		Automatically compensate for transceiver or bus delay.
+
+endmenu # Bitrate
+
+config RZV2H_CANFD3_INT_PRIORITY
+	int "Channel Interrupt Priority"
+	default 12
+	range 0 15
+
+config RZV2H_CANFD3_REC_INTSEL
+	int "RX Completion interrupt-select (SEL) IRQ number"
+	default 408
+	range 353 479
+
+config RZV2H_CANFD3_TRX_INTSEL
+	int "TX Completion interrupt-select (SEL) IRQ number"
+	default 407
+	range 353 479
+
+config RZV2H_CANFD3_ERR_INTSEL
+	int "Error interrupt-select (SEL) IRQ number"
+	default 406
+	range 353 479
+
+choice
+	prompt "RX FIFO"
+	default RZV2H_CANFD3_RX_FIFO_TYPE_RXFIFO
+	---help---
+		FIFO(s) this channel receives in. RX FIFO 3 must be
+		Enabled, with Interrupt Mode not Disable (RX FIFO 3
+		menu). Common FIFOs must be set to Receive with RX
+		interrupt enabled (Common FIFOs menu).
+
+config RZV2H_CANFD3_RX_FIFO_TYPE_RXFIFO
+	bool "RX FIFO 3"
+
+config RZV2H_CANFD3_RX_FIFO_TYPE_CFIFO
+	bool "Common FIFO 9"
+
+config RZV2H_CANFD3_RX_PRIORITY_FIFOS
+	bool "Common FIFO 9 (high) + 10 (low priority)"
+
+endchoice # CANFD3 RX FIFO
+
+config RZV2H_CANFD3_RX_FIFO_TYPE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD3_RX_FIFO_TYPE_RXFIFO
+	default 1 if RZV2H_CANFD3_RX_FIFO_TYPE_CFIFO
+	default 2 if RZV2H_CANFD3_RX_PRIORITY_FIFOS
+
+config RZV2H_CANFD3_TXMB_NUM
+	int "Number of TX Message Buffers"
+	default 8
+	range 1 16
+	---help---
+		Number of TX message buffers used for transmission:
+		TX MB0 .. TX MB(n-1). The driver enables the TX complete
+		interrupt of these buffers.
+
+menu "Channel Error Interrupts"
+
+choice
+	prompt "Error Warning Interrupt"
+	default RZV2H_CANFD3_ERR_INT_ERR_WARN_DISABLED
+
+config RZV2H_CANFD3_ERR_INT_ERR_WARN_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD3_ERR_INT_ERR_WARN_DISABLED
+	bool "Disabled"
+
+endchoice # CH3 Error Warning Interrupt
+
+config RZV2H_CANFD3_ERR_INT_ERR_WARN
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD3_ERR_INT_ERR_WARN_ENABLED
+	default 0 if RZV2H_CANFD3_ERR_INT_ERR_WARN_DISABLED
+
+choice
+	prompt "Error Passive Interrupt"
+	default RZV2H_CANFD3_ERR_INT_ERR_PASSIVE_DISABLED
+
+config RZV2H_CANFD3_ERR_INT_ERR_PASSIVE_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD3_ERR_INT_ERR_PASSIVE_DISABLED
+	bool "Disabled"
+
+endchoice # CH3 Error Passive Interrupt
+
+config RZV2H_CANFD3_ERR_INT_ERR_PASSIVE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD3_ERR_INT_ERR_PASSIVE_ENABLED
+	default 0 if RZV2H_CANFD3_ERR_INT_ERR_PASSIVE_DISABLED
+
+choice
+	prompt "Bus-Off Entry Interrupt"
+	default RZV2H_CANFD3_ERR_INT_BUS_OFF_ENTRY_DISABLED
+
+config RZV2H_CANFD3_ERR_INT_BUS_OFF_ENTRY_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD3_ERR_INT_BUS_OFF_ENTRY_DISABLED
+	bool "Disabled"
+
+endchoice # CH3 Bus-Off Entry Interrupt
+
+config RZV2H_CANFD3_ERR_INT_BUS_OFF_ENTRY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD3_ERR_INT_BUS_OFF_ENTRY_ENABLED
+	default 0 if RZV2H_CANFD3_ERR_INT_BUS_OFF_ENTRY_DISABLED
+
+choice
+	prompt "Bus-Off Recovery Interrupt"
+	default RZV2H_CANFD3_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+
+config RZV2H_CANFD3_ERR_INT_BUS_OFF_RECOVERY_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD3_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+	bool "Disabled"
+
+endchoice # CH3 Bus-Off Recovery Interrupt
+
+config RZV2H_CANFD3_ERR_INT_BUS_OFF_RECOVERY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD3_ERR_INT_BUS_OFF_RECOVERY_ENABLED
+	default 0 if RZV2H_CANFD3_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+
+choice
+	prompt "Overload Interrupt"
+	default RZV2H_CANFD3_ERR_INT_OVERLOAD_DISABLED
+
+config RZV2H_CANFD3_ERR_INT_OVERLOAD_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD3_ERR_INT_OVERLOAD_DISABLED
+	bool "Disabled"
+
+endchoice # CH3 Overload Interrupt
+
+config RZV2H_CANFD3_ERR_INT_OVERLOAD
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD3_ERR_INT_OVERLOAD_ENABLED
+	default 0 if RZV2H_CANFD3_ERR_INT_OVERLOAD_DISABLED
+
+endmenu # Channel Error Interrupts
+
+config RZV2H_CANFD3_STB_PIN
+	bool "Transceiver STB pin"
+	default n
+	---help---
+		The transceiver has an STB pin (BOARD_CANFD3_STB_GPIO).
+
+endif # RZV2H_CANFD3
+# =========================================================================
+# Per-Channel Settings: Channel 4
+# =========================================================================
+
+config RZV2H_CANFD4
+	bool "CANFD Channel 4"
+	default n
+
+if RZV2H_CANFD4
+
+menu "Bitrate"
+
+menu "Automatic"
+
+config RZV2H_CANFD4_AUTO_CLOCK_SOURCE_FREQ
+	int "Clock Source Frequency"
+	default 0
+	---help---
+		Input clock source frequency. Set 0 if PCLK is used.
+
+config RZV2H_CANFD4_AUTO_NORM_RATE
+	int "Nominal Rate (bps)"
+	default 500000
+	range 1 1000000
+	---help---
+		Nominal bitrate in bits per second (max 1 MHz).
+
+config RZV2H_CANFD4_AUTO_DATA_RATE
+	int "Data Rate (bps)"
+	default 2000000
+	range 1 8000000
+	---help---
+		Data bitrate in bits per second.
+
+config RZV2H_CANFD4_AUTO_SAMPLE_POINT
+	int "Sample Point (%)"
+	default 75
+	range 60 99
+	---help---
+		Desired sample point percentage.
+
+endmenu # Automatic
+
+menu "Manual"
+
+menu "Nominal"
+
+config RZV2H_CANFD4_MANUAL_NORM_PRESCALER
+	int "Prescaler (divisor)"
+	default 1
+	range 1 1024
+
+config RZV2H_CANFD4_MANUAL_NORM_SEGMENT_1
+	int "Time Segment 1 (Tq)"
+	default 119
+	range 2 256
+
+config RZV2H_CANFD4_MANUAL_NORM_SEGMENT_2
+	int "Time Segment 2 (Tq)"
+	default 40
+	range 2 128
+
+config RZV2H_CANFD4_MANUAL_NORM_SYNC_JUMP
+	int "Sync Jump Width (Tq)"
+	default 4
+	range 1 128
+
+endmenu # Nominal
+
+menu "Data"
+
+config RZV2H_CANFD4_MANUAL_DATA_PRESCALER
+	int "Prescaler (divisor)"
+	default 1
+	range 1 2 if RZV2H_CANFD4_DELAY_COMPENSATION
+	range 1 256
+	---help---
+		At most 2 with Delay Compensation.
+
+config RZV2H_CANFD4_MANUAL_DATA_SEGMENT_1
+	int "Time Segment 1 (Tq)"
+	default 29
+	range 2 32
+
+config RZV2H_CANFD4_MANUAL_DATA_SEGMENT_2
+	int "Time Segment 2 (Tq)"
+	default 10
+	range 2 16
+
+config RZV2H_CANFD4_MANUAL_DATA_SYNC_JUMP
+	int "Sync Jump Width (Tq)"
+	default 4
+	range 1 16
+
+endmenu # Data
+
+endmenu # Manual
+
+config RZV2H_CANFD4_USE_MANUAL_BAUDRATE
+	bool "Use Manual Settings"
+	default n
+	---help---
+		Override automatic baudrate generation and use manual
+		bit timing values instead.
+
+config RZV2H_CANFD4_DELAY_COMPENSATION
+	bool "Delay Compensation"
+	default y
+	---help---
+		Automatically compensate for transceiver or bus delay.
+
+endmenu # Bitrate
+
+config RZV2H_CANFD4_INT_PRIORITY
+	int "Channel Interrupt Priority"
+	default 12
+	range 0 15
+
+config RZV2H_CANFD4_REC_INTSEL
+	int "RX Completion interrupt-select (SEL) IRQ number"
+	default 405
+	range 353 479
+
+config RZV2H_CANFD4_TRX_INTSEL
+	int "TX Completion interrupt-select (SEL) IRQ number"
+	default 404
+	range 353 479
+
+config RZV2H_CANFD4_ERR_INTSEL
+	int "Error interrupt-select (SEL) IRQ number"
+	default 403
+	range 353 479
+
+choice
+	prompt "RX FIFO"
+	default RZV2H_CANFD4_RX_FIFO_TYPE_RXFIFO
+	---help---
+		FIFO(s) this channel receives in. RX FIFO 4 must be
+		Enabled, with Interrupt Mode not Disable (RX FIFO 4
+		menu). Common FIFOs must be set to Receive with RX
+		interrupt enabled (Common FIFOs menu).
+
+config RZV2H_CANFD4_RX_FIFO_TYPE_RXFIFO
+	bool "RX FIFO 4"
+
+config RZV2H_CANFD4_RX_FIFO_TYPE_CFIFO
+	bool "Common FIFO 12"
+
+config RZV2H_CANFD4_RX_PRIORITY_FIFOS
+	bool "Common FIFO 12 (high) + 13 (low priority)"
+
+endchoice # CANFD4 RX FIFO
+
+config RZV2H_CANFD4_RX_FIFO_TYPE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD4_RX_FIFO_TYPE_RXFIFO
+	default 1 if RZV2H_CANFD4_RX_FIFO_TYPE_CFIFO
+	default 2 if RZV2H_CANFD4_RX_PRIORITY_FIFOS
+
+config RZV2H_CANFD4_TXMB_NUM
+	int "Number of TX Message Buffers"
+	default 8
+	range 1 16
+	---help---
+		Number of TX message buffers used for transmission:
+		TX MB0 .. TX MB(n-1). The driver enables the TX complete
+		interrupt of these buffers.
+
+menu "Channel Error Interrupts"
+
+choice
+	prompt "Error Warning Interrupt"
+	default RZV2H_CANFD4_ERR_INT_ERR_WARN_DISABLED
+
+config RZV2H_CANFD4_ERR_INT_ERR_WARN_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD4_ERR_INT_ERR_WARN_DISABLED
+	bool "Disabled"
+
+endchoice # CH4 Error Warning Interrupt
+
+config RZV2H_CANFD4_ERR_INT_ERR_WARN
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD4_ERR_INT_ERR_WARN_ENABLED
+	default 0 if RZV2H_CANFD4_ERR_INT_ERR_WARN_DISABLED
+
+choice
+	prompt "Error Passive Interrupt"
+	default RZV2H_CANFD4_ERR_INT_ERR_PASSIVE_DISABLED
+
+config RZV2H_CANFD4_ERR_INT_ERR_PASSIVE_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD4_ERR_INT_ERR_PASSIVE_DISABLED
+	bool "Disabled"
+
+endchoice # CH4 Error Passive Interrupt
+
+config RZV2H_CANFD4_ERR_INT_ERR_PASSIVE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD4_ERR_INT_ERR_PASSIVE_ENABLED
+	default 0 if RZV2H_CANFD4_ERR_INT_ERR_PASSIVE_DISABLED
+
+choice
+	prompt "Bus-Off Entry Interrupt"
+	default RZV2H_CANFD4_ERR_INT_BUS_OFF_ENTRY_DISABLED
+
+config RZV2H_CANFD4_ERR_INT_BUS_OFF_ENTRY_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD4_ERR_INT_BUS_OFF_ENTRY_DISABLED
+	bool "Disabled"
+
+endchoice # CH4 Bus-Off Entry Interrupt
+
+config RZV2H_CANFD4_ERR_INT_BUS_OFF_ENTRY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD4_ERR_INT_BUS_OFF_ENTRY_ENABLED
+	default 0 if RZV2H_CANFD4_ERR_INT_BUS_OFF_ENTRY_DISABLED
+
+choice
+	prompt "Bus-Off Recovery Interrupt"
+	default RZV2H_CANFD4_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+
+config RZV2H_CANFD4_ERR_INT_BUS_OFF_RECOVERY_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD4_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+	bool "Disabled"
+
+endchoice # CH4 Bus-Off Recovery Interrupt
+
+config RZV2H_CANFD4_ERR_INT_BUS_OFF_RECOVERY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD4_ERR_INT_BUS_OFF_RECOVERY_ENABLED
+	default 0 if RZV2H_CANFD4_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+
+choice
+	prompt "Overload Interrupt"
+	default RZV2H_CANFD4_ERR_INT_OVERLOAD_DISABLED
+
+config RZV2H_CANFD4_ERR_INT_OVERLOAD_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD4_ERR_INT_OVERLOAD_DISABLED
+	bool "Disabled"
+
+endchoice # CH4 Overload Interrupt
+
+config RZV2H_CANFD4_ERR_INT_OVERLOAD
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD4_ERR_INT_OVERLOAD_ENABLED
+	default 0 if RZV2H_CANFD4_ERR_INT_OVERLOAD_DISABLED
+
+endmenu # Channel Error Interrupts
+
+config RZV2H_CANFD4_STB_PIN
+	bool "Transceiver STB pin"
+	default n
+	---help---
+		The transceiver has an STB pin (BOARD_CANFD4_STB_GPIO).
+
+endif # RZV2H_CANFD4
+# =========================================================================
+# Per-Channel Settings: Channel 5
+# =========================================================================
+
+config RZV2H_CANFD5
+	bool "CANFD Channel 5"
+	default n
+
+if RZV2H_CANFD5
+
+menu "Bitrate"
+
+menu "Automatic"
+
+config RZV2H_CANFD5_AUTO_CLOCK_SOURCE_FREQ
+	int "Clock Source Frequency"
+	default 0
+	---help---
+		Input clock source frequency. Set 0 if PCLK is used.
+
+config RZV2H_CANFD5_AUTO_NORM_RATE
+	int "Nominal Rate (bps)"
+	default 500000
+	range 1 1000000
+	---help---
+		Nominal bitrate in bits per second (max 1 MHz).
+
+config RZV2H_CANFD5_AUTO_DATA_RATE
+	int "Data Rate (bps)"
+	default 2000000
+	range 1 8000000
+	---help---
+		Data bitrate in bits per second.
+
+config RZV2H_CANFD5_AUTO_SAMPLE_POINT
+	int "Sample Point (%)"
+	default 75
+	range 60 99
+	---help---
+		Desired sample point percentage.
+
+endmenu # Automatic
+
+menu "Manual"
+
+menu "Nominal"
+
+config RZV2H_CANFD5_MANUAL_NORM_PRESCALER
+	int "Prescaler (divisor)"
+	default 1
+	range 1 1024
+
+config RZV2H_CANFD5_MANUAL_NORM_SEGMENT_1
+	int "Time Segment 1 (Tq)"
+	default 119
+	range 2 256
+
+config RZV2H_CANFD5_MANUAL_NORM_SEGMENT_2
+	int "Time Segment 2 (Tq)"
+	default 40
+	range 2 128
+
+config RZV2H_CANFD5_MANUAL_NORM_SYNC_JUMP
+	int "Sync Jump Width (Tq)"
+	default 4
+	range 1 128
+
+endmenu # Nominal
+
+menu "Data"
+
+config RZV2H_CANFD5_MANUAL_DATA_PRESCALER
+	int "Prescaler (divisor)"
+	default 1
+	range 1 2 if RZV2H_CANFD5_DELAY_COMPENSATION
+	range 1 256
+	---help---
+		At most 2 with Delay Compensation.
+
+config RZV2H_CANFD5_MANUAL_DATA_SEGMENT_1
+	int "Time Segment 1 (Tq)"
+	default 29
+	range 2 32
+
+config RZV2H_CANFD5_MANUAL_DATA_SEGMENT_2
+	int "Time Segment 2 (Tq)"
+	default 10
+	range 2 16
+
+config RZV2H_CANFD5_MANUAL_DATA_SYNC_JUMP
+	int "Sync Jump Width (Tq)"
+	default 4
+	range 1 16
+
+endmenu # Data
+
+endmenu # Manual
+
+config RZV2H_CANFD5_USE_MANUAL_BAUDRATE
+	bool "Use Manual Settings"
+	default n
+	---help---
+		Override automatic baudrate generation and use manual
+		bit timing values instead.
+
+config RZV2H_CANFD5_DELAY_COMPENSATION
+	bool "Delay Compensation"
+	default y
+	---help---
+		Automatically compensate for transceiver or bus delay.
+
+endmenu # Bitrate
+
+config RZV2H_CANFD5_INT_PRIORITY
+	int "Channel Interrupt Priority"
+	default 12
+	range 0 15
+
+config RZV2H_CANFD5_REC_INTSEL
+	int "RX Completion interrupt-select (SEL) IRQ number"
+	default 402
+	range 353 479
+
+config RZV2H_CANFD5_TRX_INTSEL
+	int "TX Completion interrupt-select (SEL) IRQ number"
+	default 401
+	range 353 479
+
+config RZV2H_CANFD5_ERR_INTSEL
+	int "Error interrupt-select (SEL) IRQ number"
+	default 400
+	range 353 479
+
+choice
+	prompt "RX FIFO"
+	default RZV2H_CANFD5_RX_FIFO_TYPE_RXFIFO
+	---help---
+		FIFO(s) this channel receives in. RX FIFO 5 must be
+		Enabled, with Interrupt Mode not Disable (RX FIFO 5
+		menu). Common FIFOs must be set to Receive with RX
+		interrupt enabled (Common FIFOs menu).
+
+config RZV2H_CANFD5_RX_FIFO_TYPE_RXFIFO
+	bool "RX FIFO 5"
+
+config RZV2H_CANFD5_RX_FIFO_TYPE_CFIFO
+	bool "Common FIFO 15"
+
+config RZV2H_CANFD5_RX_PRIORITY_FIFOS
+	bool "Common FIFO 15 (high) + 16 (low priority)"
+
+endchoice # CANFD5 RX FIFO
+
+config RZV2H_CANFD5_RX_FIFO_TYPE
+	int
+	range 0 2
+	default 0 if RZV2H_CANFD5_RX_FIFO_TYPE_RXFIFO
+	default 1 if RZV2H_CANFD5_RX_FIFO_TYPE_CFIFO
+	default 2 if RZV2H_CANFD5_RX_PRIORITY_FIFOS
+
+config RZV2H_CANFD5_TXMB_NUM
+	int "Number of TX Message Buffers"
+	default 8
+	range 1 16
+	---help---
+		Number of TX message buffers used for transmission:
+		TX MB0 .. TX MB(n-1). The driver enables the TX complete
+		interrupt of these buffers.
+
+menu "Channel Error Interrupts"
+
+choice
+	prompt "Error Warning Interrupt"
+	default RZV2H_CANFD5_ERR_INT_ERR_WARN_DISABLED
+
+config RZV2H_CANFD5_ERR_INT_ERR_WARN_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD5_ERR_INT_ERR_WARN_DISABLED
+	bool "Disabled"
+
+endchoice # CH5 Error Warning Interrupt
+
+config RZV2H_CANFD5_ERR_INT_ERR_WARN
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD5_ERR_INT_ERR_WARN_ENABLED
+	default 0 if RZV2H_CANFD5_ERR_INT_ERR_WARN_DISABLED
+
+choice
+	prompt "Error Passive Interrupt"
+	default RZV2H_CANFD5_ERR_INT_ERR_PASSIVE_DISABLED
+
+config RZV2H_CANFD5_ERR_INT_ERR_PASSIVE_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD5_ERR_INT_ERR_PASSIVE_DISABLED
+	bool "Disabled"
+
+endchoice # CH5 Error Passive Interrupt
+
+config RZV2H_CANFD5_ERR_INT_ERR_PASSIVE
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD5_ERR_INT_ERR_PASSIVE_ENABLED
+	default 0 if RZV2H_CANFD5_ERR_INT_ERR_PASSIVE_DISABLED
+
+choice
+	prompt "Bus-Off Entry Interrupt"
+	default RZV2H_CANFD5_ERR_INT_BUS_OFF_ENTRY_DISABLED
+
+config RZV2H_CANFD5_ERR_INT_BUS_OFF_ENTRY_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD5_ERR_INT_BUS_OFF_ENTRY_DISABLED
+	bool "Disabled"
+
+endchoice # CH5 Bus-Off Entry Interrupt
+
+config RZV2H_CANFD5_ERR_INT_BUS_OFF_ENTRY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD5_ERR_INT_BUS_OFF_ENTRY_ENABLED
+	default 0 if RZV2H_CANFD5_ERR_INT_BUS_OFF_ENTRY_DISABLED
+
+choice
+	prompt "Bus-Off Recovery Interrupt"
+	default RZV2H_CANFD5_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+
+config RZV2H_CANFD5_ERR_INT_BUS_OFF_RECOVERY_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD5_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+	bool "Disabled"
+
+endchoice # CH5 Bus-Off Recovery Interrupt
+
+config RZV2H_CANFD5_ERR_INT_BUS_OFF_RECOVERY
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD5_ERR_INT_BUS_OFF_RECOVERY_ENABLED
+	default 0 if RZV2H_CANFD5_ERR_INT_BUS_OFF_RECOVERY_DISABLED
+
+choice
+	prompt "Overload Interrupt"
+	default RZV2H_CANFD5_ERR_INT_OVERLOAD_DISABLED
+
+config RZV2H_CANFD5_ERR_INT_OVERLOAD_ENABLED
+	bool "Enabled"
+
+config RZV2H_CANFD5_ERR_INT_OVERLOAD_DISABLED
+	bool "Disabled"
+
+endchoice # CH5 Overload Interrupt
+
+config RZV2H_CANFD5_ERR_INT_OVERLOAD
+	int
+	range 0 1
+	default 1 if RZV2H_CANFD5_ERR_INT_OVERLOAD_ENABLED
+	default 0 if RZV2H_CANFD5_ERR_INT_OVERLOAD_DISABLED
+
+endmenu # Channel Error Interrupts
+
+config RZV2H_CANFD5_STB_PIN
+	bool "Transceiver STB pin"
+	default n
+	---help---
+		The transceiver has an STB pin (BOARD_CANFD5_STB_GPIO).
+
+endif # RZV2H_CANFD5
+
+endmenu # Channels
+
+endif # RZV2H_CANFD
+
 config RZV2H_QSPI
 	bool "QSPI (xSPI) support"
 	default n

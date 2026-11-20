@@ -66,6 +66,15 @@
 
 #define RZV2H_PINMUX_OUTPUT(port, pin, mode)  RZV2H_PINMUX(port, pin, mode)
 
+/* GPIO output pin. Set the level with rzv2h_gpiowrite(). */
+
+#define RZV2H_GPIO_OUTPUT(port, pin) \
+  ((gpio_pinset_t) \
+    { \
+      (uint32_t)(((port) << 8) | (pin)), \
+      IOPORT_CFG_DRIVE_B01 | IOPORT_CFG_PORT_DIRECTION_OUTPUT \
+    })
+
 /* SCI-B UART pin configurations. */
 
 /* SCI-B channel 0. */
@@ -553,5 +562,37 @@
 #define GPIO_XSPI0_IO3 \
   (gpio_pinset_t){BSP_IO_XSPI0_IO3, \
     (IOPORT_CFG_SPECIAL_PURPOSE_PORT_INPUT_ENABLE | IOPORT_CFG_DRIVE_B11)}
+
+/* CANFD pin configurations. */
+
+/* CANFD channel 0. */
+
+#define GPIO_CANFD0_TX_P8_0_M5  RZV2H_PINMUX(8, 0, 5)
+#define GPIO_CANFD0_RX_P8_1_M5  RZV2H_PINMUX(8, 1, 5)
+
+/* CANFD channel 1. */
+
+#define GPIO_CANFD1_TX_P8_2_M5  RZV2H_PINMUX(8, 2, 5)
+#define GPIO_CANFD1_RX_P8_3_M5  RZV2H_PINMUX(8, 3, 5)
+
+/* CANFD channel 2. */
+
+#define GPIO_CANFD2_TX_P8_4_M5  RZV2H_PINMUX(8, 4, 5)
+#define GPIO_CANFD2_RX_P8_5_M5  RZV2H_PINMUX(8, 5, 5)
+
+/* CANFD channel 3. */
+
+#define GPIO_CANFD3_TX_P8_6_M5  RZV2H_PINMUX(8, 6, 5)
+#define GPIO_CANFD3_RX_P8_7_M5  RZV2H_PINMUX(8, 7, 5)
+
+/* CANFD channel 4. */
+
+#define GPIO_CANFD4_TX_P4_2_M5  RZV2H_PINMUX(4, 2, 5)
+#define GPIO_CANFD4_RX_P4_3_M5  RZV2H_PINMUX(4, 3, 5)
+
+/* CANFD channel 5. */
+
+#define GPIO_CANFD5_TX_P4_6_M5  RZV2H_PINMUX(4, 6, 5)
+#define GPIO_CANFD5_RX_P4_7_M5  RZV2H_PINMUX(4, 7, 5)
 
 #endif /* __ARCH_ARM_SRC_RZV2H_HARDWARE_RZV2H_PINMAP_H */
