@@ -37,6 +37,10 @@ if(CONFIG_RZV2H_SCI_B)
   list(APPEND SRCS rzv2h_serial.c)
 endif()
 
+if(CONFIG_RZV2H_CANFD)
+  list(APPEND SRCS rzv2h_canfd.c)
+endif()
+
 if(CONFIG_RZV2H_QSPI)
   list(APPEND SRCS rzv2h_qspi.c)
 endif()
