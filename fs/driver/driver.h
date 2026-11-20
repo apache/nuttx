@@ -76,6 +76,22 @@ int register_partition_with_inode(FAR const char *partition,
 #endif
 
 /****************************************************************************
+ * Name: unique_devname
+ *
+ * Description:
+ *   Build a temporary device name "/dev/tmp<prefix><6 hex digits>" that
+ *   is not in use: prefix 'c' for block_proxy(), 'b' for mtd_proxy().
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+int unique_devname(char prefix, FAR char *devbuf, size_t len);
+#endif
+
+/****************************************************************************
  * Name: block_proxy
  *
  * Description:
