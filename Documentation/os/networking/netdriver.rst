@@ -120,6 +120,11 @@ over an IPC:
    with ``CONFIG_NET_SEND_BUFSIZE``.  That same cap limits UDP read-ahead, so a
    UDP-throughput-critical socket should raise its own buffer via
    ``setsockopt(SO_RCVBUF)`` rather than changing the TCP-safe default.
+   When an option is 0, a TCP connection still has a limit: its read-ahead
+   and its write buffers each use 1/8 of the IOBs above
+   ``CONFIG_IOB_THROTTLE``, and at least one segment of the largest MSS.  So
+   one connection cannot take the whole pool.  ``SO_RCVBUF`` and
+   ``SO_SNDBUF`` change the limit of a TCP socket also then.
    Enlarging the buffer helps only up to the rate the socket can be drained;
    sustained overload is dropped regardless.  Keeping out-of-order reassembly
    (``CONFIG_NET_TCP_OUT_OF_ORDER``) enabled lets a single loss recover in one
