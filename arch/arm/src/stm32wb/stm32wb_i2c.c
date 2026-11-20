@@ -231,7 +231,8 @@
 #define MKI2C_OUTPUT(p)   (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
 #define I2C_CR1_TXRX      (I2C_CR1_RXIE | I2C_CR1_TXIE)
-#define I2C_CR1_ALLINTS   (I2C_CR1_TXRX | I2C_CR1_TCIE | I2C_CR1_ERRIE)
+#define I2C_CR1_ALLINTS   (I2C_CR1_TXRX | I2C_CR1_TCIE | I2C_CR1_ERRIE | \
+                           I2C_CR1_NACKIE)
 
 /* I2C event tracing
  *
@@ -631,8 +632,8 @@ static uint32_t stm32_i2c_toticks(int msgc, struct i2c_msg_s *msgs)
 static inline
 void stm32_i2c_enableinterrupts(struct stm32_i2c_priv_s *priv)
 {
-    stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0,
-                            (I2C_CR1_TXRX | I2C_CR1_NACKIE));
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0,
+                        (I2C_CR1_TXRX | I2C_CR1_NACKIE));
 }
 #endif
 
@@ -2227,7 +2228,7 @@ static int stm32_i2c_process(struct i2c_master_s *dev,
         }
       else if (status & I2C_INT_PECERR)
         {
-      /* PEC Error in reception (SMBus Only) */
+          /* PEC Error in reception (SMBus Only) */
 
           i2cerr("ERROR: I2C PEC Error\n");
           errval = EPROTO;
