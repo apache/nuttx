@@ -37,6 +37,10 @@
 
 #include "rzv2h-evk.h"
 
+#if defined(CONFIG_RZV2H_GPT_PWM)
+#include "rzv2h_pwm.h"
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -94,6 +98,16 @@ int rzv2h_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_RZV2H_GPT_PWM
+  /* Initialize PWM and register the PWM device */
+
+  ret = rzv2h_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rzv2h_pwm_setup() failed: %d\n", ret);
     }
 #endif
 
