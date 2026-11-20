@@ -1601,24 +1601,44 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg);
 #endif
 
 /****************************************************************************
- * Name: tcp_backlogdestroy
+ * Name: tcp_backlogdetach
  *
  * Description:
- *   (1) Called from tcp_free() whenever a connection is freed.
- *   (2) Called from tcp_backlogcreate() to destroy any old backlog
+ *   Take the backlog of a connection away from it, with the pending
+ *   connections in it: their blparent is set to NULL.  tcp_backlogfree()
+ *   frees them later.  (1) Called from tcp_free() whenever a connection is
+ *   freed, with the TCP connection list locked.  (2) Called from
+ *   tcp_backlogcreate() for the old backlog, with the connection locked.
  *
- *   NOTE: This function may re-enter tcp_free when a connection that
- *   is freed that has pending connections.
- *
- * Assumptions:
- *   Called from network socket logic with the network stack locked
+ * Returned Value:
+ *   The backlog that was detached, or NULL if there was none.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCPBACKLOG
-int tcp_backlogdestroy(FAR struct tcp_conn_s *conn);
+FAR struct tcp_backlog_s *tcp_backlogdetach(FAR struct tcp_conn_s *conn);
 #else
-#  define tcp_backlogdestroy(conn)     (-ENOSYS)
+#  define tcp_backlogdetach(conn)      (NULL)
+#endif
+
+/****************************************************************************
+ * Name: tcp_backlogfree
+ *
+ * Description:
+ *   Free a backlog that tcp_backlogdetach() returned, and the pending
+ *   connections in it.
+ *
+ *   NOTE: This function re-enters tcp_free() for each pending connection,
+ *   which takes the device lock of that connection.  So the caller holds
+ *   no lock of the network: not the TCP connection list lock, which the
+ *   input path takes under a device lock, and not the lock of a connection.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCPBACKLOG
+void tcp_backlogfree(FAR struct tcp_backlog_s *blg);
+#else
+#  define tcp_backlogfree(blg)
 #endif
 
 /****************************************************************************
