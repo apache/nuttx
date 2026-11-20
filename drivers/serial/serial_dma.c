@@ -121,18 +121,25 @@ static int uart_recvchars_check_special(FAR uart_dev_t *dev)
 void uart_xmitchars_dma(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmatx;
+  sbuf_size_t head;
 
-  if (dev->xmit.head == dev->xmit.tail)
+  /* The writer advances xmit.head without the uart lock, so on SMP it can
+   * move and wrap while we are here.  Read it once: a stale value only
+   * sends less now, whereas reading it twice can make the length negative.
+   */
+
+  head = dev->xmit.head;
+  if (head == dev->xmit.tail)
     {
       /* No data to transfer. */
 
       return;
     }
 
-  if (dev->xmit.tail < dev->xmit.head)
+  if (dev->xmit.tail < head)
     {
       xfer->buffer  = &dev->xmit.buffer[dev->xmit.tail];
-      xfer->length  = dev->xmit.head - dev->xmit.tail;
+      xfer->length  = head - dev->xmit.tail;
       xfer->nbuffer = NULL;
       xfer->nlength = 0;
     }
@@ -140,10 +147,10 @@ void uart_xmitchars_dma(FAR uart_dev_t *dev)
     {
       xfer->buffer  = &dev->xmit.buffer[dev->xmit.tail];
       xfer->length  = dev->xmit.size - dev->xmit.tail;
-      if (dev->xmit.head > 0)
+      if (head > 0)
         {
           xfer->nbuffer = dev->xmit.buffer;
-          xfer->nlength = dev->xmit.head;
+          xfer->nlength = head;
         }
       else
         {
@@ -218,8 +225,17 @@ void uart_recvchars_dma(FAR uart_dev_t *dev)
   unsigned int nbuffered;
   unsigned int watermark;
 #endif
+  sbuf_size_t tail;
   bool is_full;
   int nexthead;
+
+  /* The reader advances recv.tail without the uart lock, so on SMP it can
+   * move and wrap while we are here.  Read it once: a stale value only
+   * receives less now, whereas reading it twice can make the length
+   * negative.
+   */
+
+  tail = rxbuf->tail;
 
   /* Get the next head index and check if there is room to adding another
    * byte to the buffer.
@@ -231,7 +247,7 @@ void uart_recvchars_dma(FAR uart_dev_t *dev)
       nexthead = 0;
     }
 
-  is_full = nexthead == rxbuf->tail;
+  is_full = nexthead == tail;
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   /* Pre-calculate the watermark level that we will need to test against. */
@@ -244,13 +260,13 @@ void uart_recvchars_dma(FAR uart_dev_t *dev)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
   /* How many bytes are buffered */
 
-  if (rxbuf->head >= rxbuf->tail)
+  if (rxbuf->head >= tail)
     {
-      nbuffered = rxbuf->head - rxbuf->tail;
+      nbuffered = rxbuf->head - tail;
     }
   else
     {
-      nbuffered = rxbuf->size - rxbuf->tail + rxbuf->head;
+      nbuffered = rxbuf->size - tail + rxbuf->head;
     }
 
   /* Is the level now above the watermark level that we need to report? */
@@ -295,15 +311,15 @@ void uart_recvchars_dma(FAR uart_dev_t *dev)
       return;
     }
 
-  if (rxbuf->tail <= rxbuf->head)
+  if (tail <= rxbuf->head)
     {
       xfer->buffer  = &rxbuf->buffer[rxbuf->head];
       xfer->nbuffer = rxbuf->buffer;
 
-      if (rxbuf->tail > 0)
+      if (tail > 0)
         {
           xfer->length  = rxbuf->size - rxbuf->head;
-          xfer->nlength = rxbuf->tail - 1;
+          xfer->nlength = tail - 1;
         }
       else
         {
@@ -314,7 +330,7 @@ void uart_recvchars_dma(FAR uart_dev_t *dev)
   else
     {
       xfer->buffer  = &rxbuf->buffer[rxbuf->head];
-      xfer->length  = rxbuf->tail - rxbuf->head - 1;
+      xfer->length  = tail - rxbuf->head - 1;
       xfer->nbuffer = NULL;
       xfer->nlength = 0;
     }
