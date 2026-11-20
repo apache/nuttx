@@ -44,6 +44,8 @@ Help is also available:
         Do not prompt for new default selections; accept all recommended default values
      --nocopy
         Do not copy defconfig from nuttx/boards/<board>/configs to nuttx/.config
+     --cmake
+        Use CMake refresh target instead of make refresh to refresh the defconfig
      --help
         Show this help message and exit
      <board>
@@ -88,6 +90,23 @@ The steps to refresh the configurations and/or files given to ``refresh.sh`` are
    depending on the ``--silent`` and ``--prompt`` options).
 
 5. Restore the ``.config`` and ``Make.defs`` files from step 1.
+
+With the ``--cmake`` option, the configuration is refreshed with the CMake build
+instead, so it also works for board configurations that have no ``Make.defs``
+file.  For each configuration, ``refresh.sh``:
+
+1. Configures a temporary CMake build directory ``refresh/`` in the top-level
+   NuttX directory with ``cmake -B refresh -DBOARD_CONFIG=<config> -GNinja``.
+
+2. Runs ``cmake --build refresh -t refreshsilent``, which updates the
+   configuration with the default values and creates the new defconfig file.
+
+3. Copies the new defconfig file out of ``refresh/``, removes ``refresh/``, and
+   compares and saves the new defconfig file in the same way as the Make-based
+   refresh.
+
+The ``.config`` and ``Make.defs`` files in the top-level directory are not used
+or modified in this mode.
 
 
 Usage examples
@@ -136,3 +155,9 @@ configuration subdirectory:
 .. code:: console
 
   $ ./tools/refresh.sh --defaults boards/arm/stm32f1/stm32f103-minimum/configs/nsh
+
+Update the `nsh` config from the ``qemu-armv7a`` board with the CMake build:
+
+.. code:: console
+
+  $ ./tools/refresh.sh --silent --cmake qemu-armv7a:nsh
