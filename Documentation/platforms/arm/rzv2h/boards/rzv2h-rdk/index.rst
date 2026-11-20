@@ -412,6 +412,214 @@ These definitions are in ``boards/arm/rzv2h/rzv2h-rdk/include/board.h``.
 The ``pwm`` board configuration (``rzv2h-rdk:pwm``) enables GPT6
 (PWM output on ``PA_4``) and the ``pwm`` application for interactive testing.
 
+CAN
+===
+
+The RZV2H-RDK board port defines pins for four CAN-FD channels
+(CANFD0-CANFD3). CANFD0 and CANFD3 go through the on-board TCAN1046
+transceiver to connectors J2 and J3; with ``CONFIG_RZV2H_CANFDn_STB_PIN``,
+the driver drives its standby pins (``PA_2``, ``PA_3``) low when the
+channel is opened. CANFD1 and CANFD2 are on the 40-pin header J1 and need
+an external transceiver.
+
+CAN Pin Assignments
+-------------------
+
+Each CAN-FD channel is routed to the following board pins.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Channel
+     - TX Pin
+     - RX Pin
+   * - CANFD0
+     - ``P8_0``
+     - ``P8_1``
+   * - CANFD1
+     - ``P8_2``
+     - ``P8_3``
+   * - CANFD2
+     - ``P8_4``
+     - ``P8_5``
+   * - CANFD3
+     - ``P8_6``
+     - ``P8_7``
+
+These definitions are in ``boards/arm/rzv2h/rzv2h-rdk/include/board.h``.
+
+CAN Default Interrupt Select IDs
+--------------------------------
+
+All CAN-FD interrupts are routed through the programmable INTC
+interrupt-select (SEL) lines. Each channel uses three: REC (reception
+into a Common FIFO), TRX (transmit complete or abort) and ERR (channel
+error). Two more lines are shared by all channels: GERR (global error)
+and GRECC (reception into an RX FIFO).
+
+**SEL IRQ numbers** (configurable via Kconfig, valid range 353-479):
+
+.. list-table::
+   :header-rows: 1
+
+   * - Channel
+     - REC SEL (GIC IRQ)
+     - TRX SEL (GIC IRQ)
+     - ERR SEL (GIC IRQ)
+   * - CANFD0
+     - 417 (SEL64)
+     - 416 (SEL63)
+     - 415 (SEL62)
+   * - CANFD1
+     - 414 (SEL61)
+     - 413 (SEL60)
+     - 412 (SEL59)
+   * - CANFD2
+     - 411 (SEL58)
+     - 410 (SEL57)
+     - 409 (SEL56)
+   * - CANFD3
+     - 408 (SEL55)
+     - 407 (SEL54)
+     - 406 (SEL53)
+
+The shared lines default to 419 (SEL66) for GERR
+(``CONFIG_RZV2H_CANFD_GERR_INTSEL``) and 418 (SEL65) for GRECC
+(``CONFIG_RZV2H_CANFD_GREEC_INTSEL``).
+
+The relevant options for enabling CANFD0 in external loopback mode, as in
+the ``can-loopback`` configuration, are::
+
+   CONFIG_CAN=y
+   CONFIG_CAN_EXTID=y
+   CONFIG_CAN_FD=y
+   CONFIG_CAN_ERRORS=y
+   CONFIG_CAN_LOOPBACK=y
+   CONFIG_RZV2H_CANFD=y
+   CONFIG_RZV2H_CANFD_LOOPBACK_EXTERNAL=y
+   CONFIG_RZV2H_CANFD0=y
+   CONFIG_RZV2H_CANFD_RXFIFO0_ENABLED=y
+   CONFIG_EXAMPLES_CAN=y
+   CONFIG_EXAMPLES_CAN_NMSGS=100
+
+By default channel n receives in RX FIFO n, so RX FIFO n must be enabled
+(``CONFIG_RZV2H_CANFD_RXFIFOn_ENABLED``) for each enabled channel. Each
+channel has additional Kconfig options for bit rates, receive FIFO, TX
+message buffers, error interrupts, REC/TRX/ERR interrupt-select (SEL) IRQ
+numbers, and interrupt priority.
+
+After boot, enabled CAN-FD channels are registered as ``/dev/canX``
+devices, where X is the channel number. Verify with ``ls /dev`` that
+``can0`` is listed.
+
+The ``can-loopback`` board configuration (``rzv2h-rdk:can-loopback``)
+enables CANFD0 in external loopback mode and the ``can`` example. Other
+channels can be enabled by adding the corresponding
+``CONFIG_RZV2H_CANFDn`` options.
+
+Using the ``can`` Application
+-----------------------------
+
+In the ``can-loopback`` configuration CANFD0 runs in external loopback
+mode: it receives its own frames back through the on-board CAN
+transceiver and sends its own acknowledge, so no other node is needed on
+the bus.
+
+Send and check 100 frames (``CONFIG_EXAMPLES_CAN_NMSGS``)::
+
+   nsh> can
+
+Send and check 20 frames::
+
+   nsh> can -n 20
+
+Use standard IDs instead of extended IDs::
+
+   nsh> can -s
+
+Send CAN FD frames without bit rate switching::
+
+   nsh> can -e
+
+Each frame is printed when it is sent, then again with ``-- OK`` when the
+frame read back matches it.
+
+SocketCAN
+---------
+
+With ``CONFIG_RZV2H_CANFD_SOCKET`` (CAN-FD option "CAN character driver or
+SocketCAN support"), channel n is the SocketCAN network interface
+``can<n>`` instead of ``/dev/can<n>``.
+The ``can-socketcan`` board configuration (``rzv2h-rdk:can-socketcan``)
+enables CANFD0 (``can0``, J2) and CANFD3 (``can3``, J3) with the
+``candump`` and ``cansend`` tools. Connect J2 to J3, then::
+
+   nsh> ifup can0
+   nsh> ifup can3
+   nsh> candump can3 &
+   nsh> cansend can0 123#DEADBEEF
+   nsh> cansend can0 12345678#1122
+   nsh> cansend can0 456##1DEADBEEF
+
+The last command sends a CAN FD frame with bit rate switching. Bit rates
+(``SIOCSCANBITRATE``, while the interface is down), filters
+(``SIOCACANSTDFILTER``, ``SIOCACANEXTFILTER``) and bus-off recovery
+(``SIOCCANRECOVERY``) are set with ioctl() on a CAN socket.
+
+DroneCAN
+--------
+
+The ``can-dronecan`` board configuration (``rzv2h-rdk:can-dronecan``)
+enables CANFD0 (``/dev/can0``, J2) and CANFD3 (``/dev/can3``, J3) with the
+``dronecan`` example. Connect J2 to J3, then listen on ``/dev/can3`` and
+start the example::
+
+   nsh> hexdump /dev/can3 &
+   nsh> dronecan
+
+OpenCyphal
+----------
+
+The ``can-opencyphal`` board configuration (``rzv2h-rdk:can-opencyphal``)
+enables CANFD0 (``can0``, J2) and CANFD3 (``can3``, J3) with the
+``opencyphal`` example and the ``candump`` and ``cansend`` tools. Connect
+J2 to J3, bring up both interfaces, listen on ``can3`` and start the
+example::
+
+   nsh> ifup can0
+   nsh> ifup can3
+   nsh> candump can3 &
+   nsh> opencyphal
+
+SLCAN
+-----
+
+The ``can-slcan`` board configuration (``rzv2h-rdk:can-slcan``) enables
+CANFD0 (``can0``, J2), CANFD3 (``can3``, J3) and SCI1 (``/dev/ttyS1``,
+TXD1 on ``P5_2``, RXD1 on ``P5_3``) with the ``slcan`` tool, which bridges
+a CAN interface to a serial line using the SLCAN protocol. Connect J2 to
+J3 and a host serial terminal to SCI1. Bridge ``can3`` to ``/dev/ttyS1``
+and listen on ``can0``, both in the background::
+
+   nsh> ifup can0
+   nsh> ifup can3
+   nsh> slcan can3 /dev/ttyS1 &
+   nsh> candump can0 &
+
+On the terminal, send ``O`` to open the channel so ``slcan`` accepts send
+commands. Frames typed after that are sent on ``can3``. ``t`` sends a
+standard ID frame and ``T`` an extended ID frame, each followed by the ID
+(3 or 8 hex digits), the data length and the data bytes::
+
+   O
+   t7FF3010299
+   t1238DEADBEEF11223344
+
+``candump`` shows each frame received on ``can0``::
+
+   can0  7FF   [3]  01 02 99
+   can0  123   [8]  DE AD BE EF 11 22 33 44
+
 QSPI Flash
 ==========
 
@@ -526,6 +734,42 @@ SCI I2C configuration enabling SCI channel 7 in simple I2C mode with the
 boot. SDA is on J1 pin 3 (``P7_6``) and SCL on J1 pin 5 (``P7_7``), which
 have on-board pull-ups. Bus reset recovery (``CONFIG_I2C_RESET``) is
 enabled.
+
+can-loopback
+------------
+
+CAN configuration enabling CANFD0 in external loopback mode with the
+``can`` example, which sends 100 CAN FD frames and checks that each one is
+read back unchanged. The channel is registered as ``/dev/can0`` at boot.
+CANFD0 uses the on-board transceiver (J2); no other node is needed on the
+bus.
+
+can-socketcan
+-------------
+
+SocketCAN configuration: CANFD0 and CANFD3 are the network interfaces
+``can0`` (J2) and ``can3`` (J3), with the ``candump`` and ``cansend``
+tools. Bring them up with ``ifup can0`` and ``ifup can3``.
+
+can-dronecan
+------------
+
+DroneCAN configuration: CANFD0 and CANFD3 are the character devices
+``/dev/can0`` (J2) and ``/dev/can3`` (J3), with the ``dronecan`` example
+node on ``/dev/can0``.
+
+can-opencyphal
+--------------
+
+OpenCyphal configuration: CANFD0 and CANFD3 are the network interfaces
+``can0`` (J2) and ``can3`` (J3), with the ``opencyphal`` example node on
+``can0`` and the ``candump`` and ``cansend`` tools.
+
+can-slcan
+---------
+
+SLCAN configuration: CANFD0 and CANFD3 are the network interfaces ``can0``
+(J2) and ``can3`` (J3), with the ``slcan`` tool on SCI1 (``/dev/ttyS1``).
 
 nsh-xspi
 --------
