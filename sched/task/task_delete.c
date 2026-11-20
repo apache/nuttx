@@ -169,6 +169,7 @@ int nxtask_delete(pid_t pid)
 int task_delete(pid_t pid)
 {
   int ret = nxtask_delete(pid);
+
   if (ret < 0)
     {
       set_errno(-ret);
