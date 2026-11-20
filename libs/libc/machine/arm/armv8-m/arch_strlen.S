@@ -92,6 +92,78 @@
 #define S2HI		lsl
 #endif
 
+/* Pointer-authentication prologue shared by both variants.  */
+	.macro pac_prologue
+#if __ARM_FEATURE_PAC_DEFAULT
+#  if __ARM_FEATURE_BTI_DEFAULT
+	pacbti	ip, lr, sp
+#  else
+	pac	ip, lr, sp
+#  endif
+#endif
+	.endm
+
+#if defined(__ARM_FEATURE_MVE)
+
+/* MVE path: scan one 16-byte aligned block per iteration.  The head is
+ * scanned byte-by-byte until aligned (so the MVE loads never cross a page
+ * boundary); the horizontal minimum is zero iff a NUL is present.  On a
+ * hit the block is re-scanned byte-by-byte to locate the NUL.
+ */
+
+#define s		r0		/* start, kept for length */
+#define p		r1		/* moving pointer */
+#define data		r2
+#define tmp		r3
+
+	.thumb
+	.syntax unified
+	.global ARCH_LIBCFUN(strlen)
+	.thumb_func
+	.type ARCH_LIBCFUN(strlen), %function
+ARCH_LIBCFUN(strlen):
+	.cfi_sections .debug_frame
+	.cfi_startproc
+	pac_prologue
+	mov	p, s			/* p = start of string */
+
+	/* Byte-scan the misaligned head until aligned or NUL.  */
+.Lmve_head:
+	ldrb	data, [p]
+	cmp	data, #0
+	beq	.Lmve_ret
+	adds	p, p, #1
+	ands	tmp, p, #15
+	bne	.Lmve_head
+
+.Lmve_loop:
+	vldrb.8	q0, [p], #16
+	vminv.u8 data, q0		/* 0 iff a NUL is present */
+	cmp	data, #0
+	beq	.Lmve_found
+	b	.Lmve_loop
+
+.Lmve_found:
+	subs	p, p, #16		/* back to the start of the block */
+.Lmve_block_scan:
+	ldrb	data, [p]
+	cmp	data, #0
+	beq	.Lmve_ret
+	adds	p, p, #1
+	b	.Lmve_block_scan
+
+.Lmve_ret:
+	subs	s, p, s			/* length = NUL position - start */
+#if __ARM_FEATURE_PAC_DEFAULT
+	aut	ip, lr, sp
+#endif
+	bx	lr
+
+	.cfi_endproc
+	.size ARCH_LIBCFUN(strlen), . - ARCH_LIBCFUN(strlen)
+
+#else
+
 	/* This code requires Thumb.  */
 #if __ARM_ARCH_PROFILE == 'M'
 	.arch   armv7e-m
@@ -116,13 +188,7 @@
 #define tmp2		r5
 
 def_fn	ARCH_LIBCFUN(strlen) p2align=6
-#if __ARM_FEATURE_PAC_DEFAULT
-#  if __ARM_FEATURE_BTI_DEFAULT
-	pacbti	ip, lr, sp
-#  else
-	pac	ip, lr, sp
-#  endif /* __ARM_FEATURE_BTI_DEFAULT */
-#endif /* __ARM_FEATURE_PAC_DEFAULT */
+	pac_prologue
 	pld	[srcin, #0]
 	strd	r4, r5, [sp, #-8]!
 	bic	src, srcin, #7
@@ -204,5 +270,7 @@ def_fn	ARCH_LIBCFUN(strlen) p2align=6
 	mov	const_0, #0
 	b	.Lstart_realigned
 	.size	ARCH_LIBCFUN(strlen), . - ARCH_LIBCFUN(strlen)
+
+#endif /* __ARM_FEATURE_MVE */
 
 #endif
