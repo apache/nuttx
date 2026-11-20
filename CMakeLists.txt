@@ -826,11 +826,12 @@ get_property(nuttx_extra_libs GLOBAL PROPERTY NUTTX_EXTRA_LIBRARIES)
 
 if(CONFIG_BUILD_FLAT)
   get_property(nuttx_system_libs GLOBAL PROPERTY NUTTX_SYSTEM_LIBRARIES)
+  get_property(nuttx_user_libs GLOBAL PROPERTY NUTTX_USER_LIBRARIES)
   get_property(nuttx_apps_libs GLOBAL PROPERTY NUTTX_APPS_LIBRARIES)
 endif()
 
-set(nuttx_libs ${nuttx_kernel_libs} ${nuttx_system_libs} ${nuttx_apps_libs}
-               ${nuttx_extra_libs})
+set(nuttx_libs ${nuttx_apps_libs} ${nuttx_user_libs} ${nuttx_system_libs}
+               ${nuttx_kernel_libs} ${nuttx_extra_libs})
 
 if(NOT CONFIG_ARCH_SIM)
   # TODO: nostart/nodefault not applicable to nuttx toolchain
@@ -973,6 +974,8 @@ if(CONFIG_BUILD_PROTECTED)
 
   get_property(nuttx_system_libs GLOBAL PROPERTY NUTTX_SYSTEM_LIBRARIES)
 
+  get_property(nuttx_user_libs GLOBAL PROPERTY NUTTX_USER_LIBRARIES)
+
   get_property(nuttx_apps_libs GLOBAL PROPERTY NUTTX_APPS_LIBRARIES)
 
   get_property(nuttx_user_extra_libs GLOBAL PROPERTY NUTTX_USER_EXTRA_LIBRARIES)
@@ -1035,8 +1038,9 @@ if(CONFIG_BUILD_PROTECTED)
     target_link_libraries(
       nuttx_user
       PRIVATE ${user_ldscript_lsl}
-              ${nuttx_system_libs}
               ${nuttx_apps_libs}
+              ${nuttx_user_libs}
+              ${nuttx_system_libs}
               ${nuttx_user_extra_libs}
               -lc_fpu
               -lfp_fpu
@@ -1046,8 +1050,9 @@ if(CONFIG_BUILD_PROTECTED)
       nuttx_user
       PRIVATE ${user_ldscript}
               $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--start-group>
-              ${nuttx_system_libs}
               ${nuttx_apps_libs}
+              ${nuttx_user_libs}
+              ${nuttx_system_libs}
               ${nuttx_user_extra_libs}
               $<$<BOOL:${CONFIG_HAVE_CXX}>:supc++>
               $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--end-group>)
