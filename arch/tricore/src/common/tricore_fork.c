@@ -243,6 +243,10 @@ pid_t up_fork(bool vfork)
   struct fork_s context;
   uintptr_t *csa_addr;
 
+  /* Preserve the return value across the lower context restore. */
+
+  volatile pid_t ret;
+
   __asm__ __volatile__ ("svlcx" ::: "memory");
   csa_addr = tricore_csa2addr(tricore_mfcr(TRICORE_CPU_PCXI));
   memcpy((void *)context.lcsa, csa_addr, TC_CONTEXT_SIZE);
@@ -252,15 +256,13 @@ pid_t up_fork(bool vfork)
   context.ra = context.pucsa[REG_RA];
   context.sp = context.pucsa[REG_SP];
 
-  /* If the rslcx instrument before get pucsa will
-   * case trap because of csa_addr[0] inconsistent value
-   */
-
-  __asm__ __volatile__ ("rslcx" ::: "memory");
-
   sinfo("lcsa=0x%zX pucsa=%p recalc=%p\n",
         context.lcsa[TRICORE_CSA_NEXT], context.pucsa,
         tricore_csa2addr(context.lcsa[TRICORE_CSA_NEXT]));
 
-  return tricore_fork(vfork, &context);
+  ret = tricore_fork(vfork, &context);
+
+  __asm__ __volatile__ ("rslcx" ::: "memory");
+
+  return ret;
 }
