@@ -1131,6 +1131,10 @@ static int UART_RAMCODE tlsr82_interrupt(int irq, void *context, void *arg)
           /* Post the tx dma sem, the next dma transfer can start */
 
           nxsem_post(priv->txdmasem);
+
+          /* Send what was written while the DMA was busy */
+
+          tlsr82_uart_dma_txavail(dev);
         }
     }
 #else
@@ -1547,10 +1551,15 @@ static void tlsr82_uart_dma_txavail(struct uart_dev_s *dev)
       return;
     }
 
-  /* Wait for the previous dma transfer finish */
+  /* This is called with the uart spinlock held, so it must not wait for
+   * the previous transfer.  If the DMA is busy, the TX done interrupt
+   * starts the next transfer.
+   */
 
-  nxsem_wait(priv->txdmasem);
-  uart_xmitchars_dma(dev);
+  if (nxsem_trywait(priv->txdmasem) == OK)
+    {
+      uart_xmitchars_dma(dev);
+    }
 }
 #endif
 
