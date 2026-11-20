@@ -261,6 +261,54 @@ devices in ascending hardware-channel order. Their TX and RX pin choices are
 board-specific and are defined by ``BOARD_SCIn_TXD_GPIO`` and
 ``BOARD_SCIn_RXD_GPIO`` in ``boards/arm/rzv2h/rzv2h-rdk/include/board.h``.
 
+SPI
+===
+
+The RZ/V2H-RDK board logic configures pins and registers the RZ/V2H SPI-B
+lower half.  All three channels can be enabled independently.  A channel
+selected as master uses the NuttX master interface; a channel selected as
+slave uses the separate NuttX slave-controller interface.
+
+SPI Pin Assignments
+-------------------
+
+The SPI-B channels use the following board-defined pin assignments.  The SSL
+column shows the default route selected in
+``boards/arm/rzv2h/rzv2h-rdk/include/board.h``.  SSL is configured only in
+4-wire mode.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Channel
+     - RSPCK Pin
+     - MOSI Pin
+     - MISO Pin
+     - Default SSL Pin
+   * - SPI-B 0
+     - ``P9_2``
+     - ``P9_0``
+     - ``P9_1``
+     - ``SSLA0`` on ``P9_3``
+   * - SPI-B 1
+     - ``PB_0``
+     - ``PB_1``
+     - ``PB_2``
+     - ``SSLB0`` on ``PA_4``
+   * - SPI-B 2
+     - ``PB_5``
+     - ``PB_4``
+     - ``PB_3``
+     - ``SSLC0`` on ``PA_7``
+
+SPI Configuration
+-----------------
+
+Start from the dedicated configuration when validating SPI::
+
+   tools/configure.sh rzv2h-rdk:nsh-spi
+   make
+
 SCI I2C
 =======
 
@@ -899,6 +947,12 @@ and includes the standard NuttX ``leds`` example.  Run ``leds`` to cycle the
 active-low ``P11_4`` and ``P11_5`` LED outputs.  The generic ``/dev/gpio0``,
 ``/dev/gpio1``, and ``/dev/gpio2`` interfaces are also available for
 individual read/write testing.
+
+nsh-spi
+-------
+
+NuttShell configuration for SPI-B loopback testing on channel 0 only.
+SPI-B channel 0 is configured as a master at 1 MHz, mode 0, 8-bit words.
 
 sci-i2c
 -------
