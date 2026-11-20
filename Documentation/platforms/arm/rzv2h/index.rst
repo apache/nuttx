@@ -39,6 +39,7 @@ MPU         Yes      Static PMSAv7 region table (ITCM/DTCM/SRAM/code)
 TIMER       Yes      MPCore Private Timer used as the system tick source
 SCI         Yes      Interrupt-driven SCI-B asynchronous UART on channels 0-9
 GPIO        Yes      Basic operations (config/read/write), no interrupt support
+OpenAMP     Yes      RPTUN/RPMsg transport using shared memory and MHU-B (Mailbox)
 ==========  =======  ============================================================
 
 CLOCK
@@ -114,6 +115,27 @@ Module  Count                IRQ range (>= 353)
 ======  ==================  ================================
 TINT    32 (tint0-tint31)    479-448
 ======  ==================  ================================
+
+OpenAMP
+-------
+
+NuttX on CR8_0 can communicate with Linux on CA55 through the generic
+RPTUN/OpenAMP RPMsg stack. Linux is the VirtIO master and NuttX is the
+device. Shared memory holds the resource table, vrings and message
+buffers; the RZ/V2H lower half uses MHU-B (Mailbox) for notifications.
+
+``CONFIG_RZV2H_RPTUN`` enables the transport. The current EVK and RDK
+``nsh-openamp`` configurations select channel 1 and provide the
+``rpmsg-service-1`` echo endpoint for a compatible Renesas Multi-OS
+v3.3.0 Linux peer. NuttX activates one channel at a time, and the
+Linux peer must use matching memory reservations and mailbox routing.
+
+Boot and test procedures are board-specific. The EVK and RDK configuration
+generates single uboot images for U-Boot. Neither documented flow uses Linux
+kernel RemoteProc to load NuttX. See the
+:doc:`EVK board guide </platforms/arm/rzv2h/boards/rzv2h-evk/index>`
+and :doc:`RDK board guide </platforms/arm/rzv2h/boards/rzv2h-rdk/index>`
+for configuration, boot, Linux peer requirements and RPMsg testing.
 
 Supported Boards
 ================
