@@ -84,6 +84,21 @@ void board_button_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: rzv2h_adc_setup
+ *
+ * Description:
+ *   Initialize the selected ADC0 channels and register /dev/adc0.
+ *
+ * Return Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV2H_ADC
+int rzv2h_adc_setup(void);
+#endif
+
+/****************************************************************************
  * Name: rzv2h_appexamples
  *
  * Description:

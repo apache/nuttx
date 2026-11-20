@@ -109,6 +109,10 @@
 #define BOARD_SCI9_TXD_GPIO   GPIO_TXD9_MOSI9_SDA9_P8_2_M6
 #define BOARD_SCI9_RXD_GPIO   GPIO_RXD9_MISO9_SCL9_P8_3_M6
 
+/* ADC_E external trigger input. */
+
+#define BOARD_ADC0_ADTRG_GPIO  GPIO_ADTRG_P0_5_M4
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

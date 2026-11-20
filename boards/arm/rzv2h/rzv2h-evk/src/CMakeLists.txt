@@ -49,6 +49,10 @@ endif()
 
 # Peripheral driver initialization
 
+if(CONFIG_RZV2H_ADC)
+  list(APPEND SRCS rzv2h_adc.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 # Set linker script based on core configuration
