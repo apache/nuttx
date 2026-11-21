@@ -2891,6 +2891,13 @@ config ARCH_BOARD_TRIBOARD_TC4X9_COM
 		This options selects support for NuttX on the Infineon's AURIX board
 		board featuring the TC4DA 6Quad CPU.
 
+config ARCH_BOARD_A3G_TC4D7_LITE
+	bool "Infineon's AURIX TC4D7 board: KIT_A3G_TC4D7_LITE"
+	depends on ARCH_CHIP_TC4DX
+	---help---
+		This options selects support for NuttX on the Infineon's AURIX board
+		board featuring the TC4D7 6-core CPU.
+
 config ARCH_BOARD_QEMU_ARMV7A
 	bool "Qemu ARMv7a CPUs board"
 	depends on ARCH_CHIP_QEMU_ARM
@@ -4501,6 +4508,7 @@ config ARCH_BOARD
 	default "a2g-tc397-5v-tft"             if ARCH_BOARD_A2G_TC397_5V_TFT
 	default "a2g-tc375-lite"               if ARCH_BOARD_A2G_TC375_LITE
 	default "triboard_tc4x9_com"           if ARCH_BOARD_TRIBOARD_TC4X9_COM
+	default "a3g-tc4d7-lite"               if ARCH_BOARD_A3G_TC4D7_LITE
 	default "qemu-armv7a"                  if ARCH_BOARD_QEMU_ARMV7A
 	default "rtl8730e_evb"                     if ARCH_BOARD_RTL8730E_EVB
 	default "qemu-armv7r"                  if ARCH_BOARD_QEMU_ARMV7R
@@ -4754,6 +4762,9 @@ source "boards/tricore/tc3x/a2g-tc397-5v-tft/Kconfig"
 endif
 if ARCH_BOARD_A2G_TC375_LITE
 source "boards/tricore/tc3x/a2g-tc375-lite/Kconfig"
+endif
+if ARCH_BOARD_A3G_TC4D7_LITE
+source "boards/tricore/tc4x/a3g-tc4d7-lite/Kconfig"
 endif
 if ARCH_BOARD_MPS2_AN500
 source "boards/arm/mps/mps2-an500/Kconfig"
