@@ -49,6 +49,14 @@ nsh
 
 NuttShell on the RLIN311 console, ticked system timer.
 
+citest
+------
+
+The ``nsh`` configuration with ``ostest``, a tmpfs at ``/tmp`` and the high
+priority work queue, for the NTFC tests in CI.  ``run.sh`` runs NTFC with
+``config.yaml`` and ``session.json`` from this directory and fails when
+``test_os`` did not pass, so a run where every test is skipped cannot pass.
+
 Building
 ========
 
