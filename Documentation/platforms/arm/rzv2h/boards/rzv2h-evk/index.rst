@@ -373,6 +373,235 @@ devices in ascending hardware-channel order. Their TX and RX pin choices are
 board-specific and are defined by ``BOARD_SCIn_TXD_GPIO`` and
 ``BOARD_SCIn_RXD_GPIO`` in ``boards/arm/rzv2h/rzv2h-evk/include/board.h``.
 
+RIIC I2C
+========
+
+The RZV2H-EVK exposes nine RIIC I2C master channels (RIIC0-RIIC8).
+
+RIIC Pin Assignments
+--------------------
+
+Each RIIC channel is routed to the following board pins.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Channel
+     - SCL Pin
+     - SDA Pin
+   * - RIIC0
+     - ``P3_1``
+     - ``P3_0``
+   * - RIIC1
+     - ``P3_3``
+     - ``P3_2``
+   * - RIIC2
+     - ``P2_1``
+     - ``P2_0``
+   * - RIIC3
+     - ``P3_7``
+     - ``P3_6``
+   * - RIIC4
+     - ``P4_1``
+     - ``P4_0``
+   * - RIIC5
+     - ``P4_3``
+     - ``P4_2``
+   * - RIIC6
+     - ``P4_5``
+     - ``P4_4``
+   * - RIIC7
+     - ``P4_7``
+     - ``P4_6``
+   * - RIIC8
+     - ``P0_7``
+     - ``P0_6``
+
+These definitions are in ``boards/arm/rzv2h/rzv2h-evk/include/board.h``.
+
+Default Interrupt Select IDs
+-----------------------------
+
+Each RIIC channel uses eight interrupt sources. TXI and RXI are routed
+through the programmable INTC interrupt-select (SEL) lines; the remaining
+six (TEI, NAKI, SPI, STI, ALI, TMOI) are fixed GIC interrupts.
+
+**TXI / RXI SEL IRQ numbers** (configurable via Kconfig, valid range
+353-479):
+
+.. list-table::
+   :header-rows: 1
+
+   * - Channel
+     - TXI SEL (GIC IRQ)
+     - RXI SEL (GIC IRQ)
+   * - RIIC0
+     - 447 (SEL94)
+     - 446 (SEL93)
+   * - RIIC1
+     - 445 (SEL92)
+     - 444 (SEL91)
+   * - RIIC2
+     - 443 (SEL90)
+     - 442 (SEL89)
+   * - RIIC3
+     - 441 (SEL88)
+     - 440 (SEL87)
+   * - RIIC4
+     - 439 (SEL86)
+     - 438 (SEL85)
+   * - RIIC5
+     - 437 (SEL84)
+     - 436 (SEL83)
+   * - RIIC6
+     - 435 (SEL82)
+     - 434 (SEL81)
+   * - RIIC7
+     - 433 (SEL80)
+     - 432 (SEL79)
+   * - RIIC8
+     - 431 (SEL78)
+     - 430 (SEL77)
+
+The relevant options for enabling RIIC2 as an example are::
+
+   CONFIG_I2C=y
+   CONFIG_RZV2H_RIIC_I2C=y
+   CONFIG_RZV2H_RIIC2=y
+   CONFIG_I2C_RESET=y
+   CONFIG_SYSTEM_I2CTOOL=y
+
+Each channel has additional Kconfig options for bitrate, SCL rise/fall
+times, duty cycle, noise filter stages, TXI/RXI interrupt-select (SEL) IRQ
+numbers, and interrupt priority.
+
+After boot, enabled RIIC I2C channels are registered as ``/dev/i2cN``
+devices.
+Verify with::
+
+   nsh> ls /dev
+   /dev:
+    console
+    i2c2
+    null
+    zero
+
+The ``riic-i2c`` board configuration (``rzv2h-evk:riic-i2c``) enables
+RIIC2 and the ``i2ctool`` application for interactive testing. Other
+channels can be enabled by adding the corresponding ``CONFIG_RZV2H_RIICn``
+options.
+
+Using the ``i2ctool`` Application with RIIC
+-------------------------------------------
+
+Scan for devices on bus 2 from address 0x00 to 0x20::
+
+   nsh> i2c dev -b 2 0 0x20
+
+Get the register at address 0x2D from a device at address 0x1D on bus 2::
+
+   nsh> i2c get -b 2 -a 0x1D -r 0x2D
+
+Set value 0x08 to the register at address 0x2D of a device at address 0x1D
+on bus 2::
+
+   nsh> i2c set -b 2 -a 0x1D -r 0x2D 0x08
+
+Dump 6 consecutive bytes starting at register address 0x32 from a device at
+address 0x1D on bus 2::
+
+   nsh> i2c dump -b 2 -a 0x1D -r 0x32 6
+
+SCI I2C
+=======
+
+The SCI channels listed below can run as I2C masters in simple I2C mode,
+provided that the channel's SCI UART is disabled. SCI channel ``n`` is
+registered as ``/dev/i2c<CONFIG_RZV2H_SCI_I2C_BUS_OFFSET + n>``. The
+default offset is 10, so the SCI I2C buses do not overlap the RIIC I2C
+buses.
+
+SCI I2C Pin Assignments
+-----------------------
+
+SDA uses the TXDn pin and SCL uses the RXDn pin of each SCI channel.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Channel
+     - SDA Pin
+     - SCL Pin
+   * - SCI0
+     - ``P5_0``
+     - ``P5_1``
+   * - SCI1
+     - ``P5_2``
+     - ``P5_3``
+   * - SCI2
+     - ``P5_4``
+     - ``P5_5``
+   * - SCI4
+     - ``P8_4``
+     - ``P8_5``
+   * - SCI5
+     - ``P7_2``
+     - ``P7_3``
+   * - SCI6
+     - ``P7_4``
+     - ``P7_5``
+   * - SCI7
+     - ``P7_6``
+     - ``P7_7``
+   * - SCI8
+     - ``P8_0``
+     - ``P8_1``
+   * - SCI9
+     - ``P8_2``
+     - ``P8_3``
+
+Configuration
+-------------
+
+The relevant options for enabling SCI7 as an example are::
+
+   CONFIG_I2C=y
+   CONFIG_RZV2H_SCI_I2C=y
+   CONFIG_RZV2H_SCI_I2C7=y
+   CONFIG_I2C_RESET=y
+   CONFIG_SYSTEM_I2CTOOL=y
+   CONFIG_I2CTOOL_MAXBUS=19
+
+``CONFIG_I2CTOOL_MAXBUS`` must be at least
+``CONFIG_RZV2H_SCI_I2C_BUS_OFFSET`` plus the SCI channel number, or
+``i2ctool`` rejects the bus number.
+
+Each channel has additional Kconfig options for bit rate, SDA output delay,
+noise filter clock, bit-rate modulation, and interrupt priority. TXI and
+TEI are fixed GIC interrupts, so SCI I2C has no interrupt-select (SEL)
+options.
+
+After boot, verify that the channel is registered::
+
+   nsh> ls /dev
+   /dev:
+    ...
+    i2c17
+    ...
+
+Using the ``i2ctool`` Application with SCI I2C
+----------------------------------------------
+
+The ``sci-i2c`` board configuration (``rzv2h-evk:sci-i2c``) enables
+SCI7 and the ``i2ctool`` application. Use the same ``i2c`` commands as for
+RIIC I2C, with the SCI I2C bus number::
+
+   nsh> i2c bus
+   nsh> i2c dev -b 17 0x03 0x77
+   nsh> i2c get -b 17 -a 0x50 -r 0x00
+   nsh> i2c set -b 17 -a 0x50 -r 0x10 0x5a
+   nsh> i2c reset -b 17
+
 QSPI Flash
 ==========
 
@@ -543,6 +772,23 @@ active-low ``P0_0`` and ``P0_1`` LED outputs.  The generic ``/dev/gpio1`` and
 ``/dev/gpio2`` interfaces are also available for individual read/write
 testing.  Automatic OS-status LED control through ``CONFIG_ARCH_LEDS`` is
 not yet implemented.
+
+riic-i2c
+--------
+
+RIIC I2C configuration enabling RIIC2 with the
+``i2ctool`` application for interactive bus scanning and device
+read/write testing.  The channel is registered as ``/dev/i2c2`` at boot.
+Bus reset recovery (``CONFIG_I2C_RESET``) is enabled.
+
+sci-i2c
+-------
+
+SCI I2C configuration enabling SCI channel 7 in simple I2C mode with the
+``i2ctool`` application. The channel is registered as ``/dev/i2c17`` at
+boot. SDA is on ``P7_6`` (CN3 pin 9) and SCL on ``P7_7`` (CN3 pin 10);
+external pull-up resistors are required. Bus reset recovery
+(``CONFIG_I2C_RESET``) is enabled. RIIC is not enabled.
 
 nsh-xspi
 --------

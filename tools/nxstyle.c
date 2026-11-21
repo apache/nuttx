@@ -238,6 +238,8 @@ static const char *g_white_prefix[] =
 
   "R_IOPORT_",
   "R_SCI_B_UART_",
+  "R_SCI_B_I2C_",
+  "R_RIIC_",
   "R_FSP_",
   "RCR",
   "R_BSP",

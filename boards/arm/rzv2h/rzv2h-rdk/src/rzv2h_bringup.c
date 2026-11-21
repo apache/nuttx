@@ -35,9 +35,87 @@
 
 #include "rzv2h-rdk.h"
 
+#if defined(CONFIG_I2C) && defined(CONFIG_RZV2H_SCI_I2C)
+#include <nuttx/i2c/i2c_master.h>
+#include "rzv2h_sci_i2c.h"
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: rzv2h_sci_i2c_initialize
+ *
+ * Description:
+ *   Initialize the SCI channels used in simple I2C mode and register
+ *   SCI channel n as /dev/i2c<CONFIG_RZV2H_SCI_I2C_BUS_OFFSET + n>.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_RZV2H_SCI_I2C)
+static void rzv2h_sci_i2c_register(int channel)
+{
+  struct i2c_master_s *i2c;
+
+  i2c = rzv2h_sci_i2cbus_initialize(channel);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get SCI%d I2C interface\n",
+             channel);
+    }
+#ifdef CONFIG_I2C_DRIVER
+  else
+    {
+      int bus = RZV2H_SCI_I2C_BUS(channel);
+      int ret;
+
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: Failed to register SCI%d I2C as I2C%d: %d\n",
+                 channel, bus, ret);
+          rzv2h_sci_i2cbus_uninitialize(i2c);
+        }
+    }
+#endif
+}
+
+static void rzv2h_sci_i2c_initialize(void)
+{
+#ifdef CONFIG_RZV2H_SCI_I2C0
+  rzv2h_sci_i2c_register(0);
+#endif
+#ifdef CONFIG_RZV2H_SCI_I2C1
+  rzv2h_sci_i2c_register(1);
+#endif
+#ifdef CONFIG_RZV2H_SCI_I2C2
+  rzv2h_sci_i2c_register(2);
+#endif
+#ifdef CONFIG_RZV2H_SCI_I2C3
+  rzv2h_sci_i2c_register(3);
+#endif
+#ifdef CONFIG_RZV2H_SCI_I2C4
+  rzv2h_sci_i2c_register(4);
+#endif
+#ifdef CONFIG_RZV2H_SCI_I2C5
+  rzv2h_sci_i2c_register(5);
+#endif
+#ifdef CONFIG_RZV2H_SCI_I2C6
+  rzv2h_sci_i2c_register(6);
+#endif
+#ifdef CONFIG_RZV2H_SCI_I2C7
+  rzv2h_sci_i2c_register(7);
+#endif
+#ifdef CONFIG_RZV2H_SCI_I2C8
+  rzv2h_sci_i2c_register(8);
+#endif
+#ifdef CONFIG_RZV2H_SCI_I2C9
+  rzv2h_sci_i2c_register(9);
+#endif
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -91,6 +169,10 @@ int rzv2h_bringup(void)
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
       return ret;
     }
+#endif
+
+#if defined(CONFIG_I2C) && defined(CONFIG_RZV2H_SCI_I2C)
+  rzv2h_sci_i2c_initialize();
 #endif
 
   return OK;
