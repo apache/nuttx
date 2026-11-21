@@ -65,6 +65,7 @@
 #define RPMSG_GET_OUTGOING_FLOWCONTROL  _RPMSGIOC(12)
 #define RPMSG_SET_INCOMING_FLOWCONTROL  _RPMSGIOC(13)
 
+#define RPMSG_SIGNAL_ALLOC_LOCAL        1
 #define RPMSG_SIGNAL_RUNNING            TIOCM_CD
 
 #if CONFIG_RPMSG_POOL_COUNT <= 0
@@ -150,6 +151,11 @@ void rpmsg_free_buf(FAR struct rpmsg_device *rdev, FAR void *addr);
 static inline_function bool rpmsg_is_running(FAR struct rpmsg_device *rdev)
 {
   return rpmsg_get_signals(rdev) & RPMSG_SIGNAL_RUNNING;
+}
+
+static inline_function bool rpmsg_alloc_local(FAR struct rpmsg_device *rdev)
+{
+  return rpmsg_get_signals(rdev) & RPMSG_SIGNAL_ALLOC_LOCAL;
 }
 
 #if CONFIG_RPMSG_POOL_COUNT > 0

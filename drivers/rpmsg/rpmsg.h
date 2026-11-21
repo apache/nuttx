@@ -47,10 +47,28 @@
  * Public Types
  ****************************************************************************/
 
+/* Forward declarations */
+
+struct rpmsg_s;
+
+CODE typedef int (*rpmsg_foreach_t)(FAR struct rpmsg_s *rpmsg,
+                                    FAR void *args);
+CODE typedef void (*rpmsg_worker_t)(FAR struct rpmsg_s *rpmsg,
+                                    FAR void *arg);
+
 struct rpmsg_wqueue_s
 {
   FAR struct kwork_wqueue_s    *kwqueue;
   int                          recursive;
+  int                          priority;
+};
+
+struct rpmsg_work_s
+{
+  struct work_s                work;
+  FAR struct rpmsg_s           *rpmsg;
+  rpmsg_worker_t               worker;
+  FAR void                     *arg;
 };
 
 struct rpmsg_s
@@ -62,7 +80,10 @@ struct rpmsg_s
   char                         local_cpuname[RPMSG_NAME_SIZE];
   char                         cpuname[RPMSG_NAME_SIZE];
   FAR const struct rpmsg_ops_s *ops;
+#ifndef CONFIG_RPMSG_WQUEUE_GLOBAL
   struct rpmsg_wqueue_s        wqueues[CONFIG_RPMSG_WQUEUE_NUMBER];
+#endif
+  int                          priority;
   FAR void                     *workrx;
   struct list_node             freerx;
 #ifdef CONFIG_RPMSG_PING
@@ -107,25 +128,9 @@ struct rpmsg_ops_s
   CODE void (*free_buf)(FAR struct rpmsg_s *rpmsg, FAR void *addr);
 };
 
-CODE typedef int (*rpmsg_foreach_t)(FAR struct rpmsg_s *rpmsg,
-                                    FAR void *args);
-CODE typedef void (*rpmsg_worker_t)(FAR struct rpmsg_s *rpmsg,
-                                    FAR void *arg);
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-static inline FAR struct rpmsg_device *
-rpmsg_get_rdev_by_rpmsg(FAR struct rpmsg_s *rpmsg)
-{
-  if (!rpmsg)
-    {
-      return NULL;
-    }
-
-  return (FAR struct rpmsg_device *)(rpmsg + 1);
-}
 
 void rpmsg_modify_signals(FAR struct rpmsg_s *rpmsg,
                           int setflags, int clrflags);
@@ -142,19 +147,13 @@ int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
                    FAR const struct rpmsg_ops_s *ops, uint16_t nrx);
 void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg);
 
-#ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
-#  define rpmsg_init_wqueues(rpmsg) (0)
-#  define rpmsg_deinit_wqueues(rpmsg)
-#else
-int rpmsg_init_wqueues(FAR struct rpmsg_s *rpmsg);
+int rpmsg_init_wqueues(FAR struct rpmsg_s *rpmsg, uint8_t priority);
 void rpmsg_deinit_wqueues(FAR struct rpmsg_s *rpmsg);
-#endif
 
-int rpmsg_queue_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
+int rpmsg_queue_work(FAR struct rpmsg_s *rpmsg, int priority,
                      FAR struct work_s *work, worker_t worker,
                      FAR void *arg);
-void rpmsg_queue_rx_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
-                         rpmsg_worker_t worker, FAR void *arg);
+void rpmsg_rx_worker(FAR void *arg);
 
 int rpmsg_foreach(rpmsg_foreach_t handler, FAR void *args);
 void rpmsg_dump_epts(FAR struct rpmsg_device *rdev);
@@ -170,6 +169,56 @@ void rpmsg_heap_free(FAR struct rpmsg_endpoint *ept, FAR void *addr);
 #  define rpmsg_heap_alloc(ept, size, align) (NULL)
 #  define rpmsg_heap_free(ept, addr)
 #endif
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: rpmsg_get_rdev_by_rpmsg
+ *
+ * Description:
+ *   Return the rpmsg device that follows struct rpmsg_s in memory.
+ *
+ ****************************************************************************/
+
+static inline FAR struct rpmsg_device *
+rpmsg_get_rdev_by_rpmsg(FAR struct rpmsg_s *rpmsg)
+{
+  if (!rpmsg)
+    {
+      return NULL;
+    }
+
+  return (FAR struct rpmsg_device *)(rpmsg + 1);
+}
+
+/****************************************************************************
+ * Name: rpmsg_queue_rx_work
+ *
+ * Description:
+ *   Queue a received message to an rx worker.  Inline to keep the rx
+ *   dispatch, which may recurse, one stack frame shorter.
+ *
+ ****************************************************************************/
+
+static inline_function
+void rpmsg_queue_rx_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
+                         rpmsg_worker_t worker, FAR void *arg)
+{
+  FAR struct rpmsg_work_s *work;
+
+  /* Called by the transport rx dispatch with rdev->lock held */
+
+  work = list_remove_head_type(&rpmsg->freerx, struct rpmsg_work_s,
+                               work.node);
+  DEBUGASSERT(work != NULL);
+  work->arg = arg;
+  work->rpmsg = rpmsg;
+  work->worker = worker;
+
+  rpmsg_queue_work(rpmsg, priority, &work->work, rpmsg_rx_worker, work);
+}
 
 #endif /* CONFIG_RPMSG */
 #endif /* __DRIVERS_RPMSG_RPMSG_H */

@@ -90,6 +90,7 @@ open-amp.zip:
 	$(Q) patch -p0 < 0022-rpmsg_virtio-export-the-rx-buffer-helpers.patch
 	$(Q) patch -p0 < 0023-rpmsg_virtio-let-the-caller-provide-the-virtqueue-ca.patch
 	$(Q) patch -p0 < 0024-virtio-restore-the-virtio_dev_name-declaration.patch
+	$(Q) patch -p0 < 0025-rpmsg_virtio-add-priority-in-the-rpmsg-virtio-config.patch
 
 .openamp_headers: open-amp.zip
 else

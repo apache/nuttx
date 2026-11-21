@@ -29,7 +29,9 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <syslog.h>
+#include <sys/param.h>
 #include <time.h>
 
 #include <metal/sys.h>
@@ -41,6 +43,7 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/rwsem.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 
@@ -53,9 +56,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define RPMSG_RECURSIVE_LIMIT    8
-#define RPMSG_DEFAULT_WQUEUE_IDX (CONFIG_RPMSG_WQUEUE_NUMBER / 2)
 
 #ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
 #  define rpmsg_get_wqueues(rpmsg) g_rpmsg_wqueues
@@ -91,14 +91,6 @@ struct rpmsg_ioctl_s
   unsigned long   arg;
 };
 
-struct rpmsg_work_s
-{
-  struct work_s       work;
-  rpmsg_worker_t      worker;
-  FAR struct rpmsg_s *rpmsg;
-  FAR void           *arg;
-};
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -122,6 +114,7 @@ MEMPOOL_DEFINE(g_rpmsg_pool, CONFIG_RPMSG_POOL_SIZE,
 
 #ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
 static struct rpmsg_wqueue_s g_rpmsg_wqueues[CONFIG_RPMSG_WQUEUE_NUMBER];
+static spinlock_t g_rpmsg_wqueue_lock = SP_UNLOCKED;
 #endif
 
 /****************************************************************************
@@ -295,7 +288,45 @@ rpmsg_get_current_wqueue(FAR struct rpmsg_s *rpmsg)
   return wqueue;
 }
 
-static void rpmsg_rx_worker(FAR void *arg)
+static int rpmsg_create_wqueues(FAR struct rpmsg_wqueue_s *wqueues,
+                                FAR const char *name, uint8_t priority)
+{
+  FAR struct rpmsg_wqueue_s *wqueue;
+  char wqname[64];
+  int ret = OK;
+  int i;
+
+  for (i = 0; i < CONFIG_RPMSG_WQUEUE_NUMBER; i++)
+    {
+      snprintf(wqname, sizeof(wqname), "rpmsg-%.*s-%d", RPMSG_NAME_SIZE,
+               name, i);
+      wqueue = &wqueues[i];
+      wqueue->kwqueue = work_queue_create(wqname, priority, NULL,
+                                          CONFIG_RPMSG_WQUEUE_STACKSIZE, 1);
+      if (wqueue->kwqueue == NULL)
+        {
+          rpmsgerr("rpmsg wqueue [%d] create failed\n", i);
+#if CONFIG_RPMSG_WQUEUE_NUMBER > 1
+          while (--i >= 0)
+            {
+              work_queue_free(wqueues[i].kwqueue);
+              wqueues[i].kwqueue = NULL;
+            }
+#endif
+
+          ret = -ENOMEM;
+          break;
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+void rpmsg_rx_worker(FAR void *arg)
 {
   FAR struct rpmsg_work_s *work = arg;
   FAR struct rpmsg_s *rpmsg = work->rpmsg;
@@ -311,49 +342,12 @@ static void rpmsg_rx_worker(FAR void *arg)
   worker(rpmsg, arg);
 }
 
-static int rpmsg_create_wqueues(FAR struct rpmsg_wqueue_s *wqueues,
-                                FAR const char *name)
-{
-  FAR struct rpmsg_wqueue_s *wqueue;
-  char wqname[64];
-  int ret = OK;
-  int i;
-
-  for (i = 0; i < CONFIG_RPMSG_WQUEUE_NUMBER; i++)
-    {
-      snprintf(wqname, sizeof(wqname), "rpmsg-%.*s-%d", RPMSG_NAME_SIZE,
-               name, i);
-      wqueue = &wqueues[i];
-      wqueue->kwqueue = work_queue_create(wqname,
-                                          CONFIG_RPMSG_WQUEUE_PRIORITY + i,
-                                          NULL,
-                                          CONFIG_RPMSG_WQUEUE_STACKSIZE,
-                                          1);
-      if (wqueue->kwqueue == NULL)
-        {
-          rpmsgerr("rpmsg wqueue [%d] create failed\n", i);
-          while (--i >= 0)
-            {
-              work_queue_free(wqueues[i].kwqueue);
-            }
-
-          ret = -ENOMEM;
-          break;
-        }
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
 void rpmsg_initialize(void)
 {
   rpmsg_procfs_initialize();
 #ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
-  rpmsg_create_wqueues(g_rpmsg_wqueues, "glb");
+  DEBUGVERIFY(rpmsg_create_wqueues(g_rpmsg_wqueues, "glb",
+              CONFIG_RPMSG_WQUEUE_PRIORITY) == 0);
 #endif
 }
 
@@ -410,7 +404,7 @@ int rpmsg_tickwait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem,
                */
 
               rpmsg->ops->wait(rpmsg, delay);
-              if (wqueue->recursive < RPMSG_RECURSIVE_LIMIT)
+              if (wqueue->recursive < CONFIG_RPMSG_RECURSIVE_LIMIT)
                 {
                   wqueue->recursive++;
                   work_queue_dispatch(wqueue->kwqueue);
@@ -848,7 +842,7 @@ int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
               list_initialize(&rpmsg->bind);
               nxrmutex_init(&rpmsg->lock);
               rpmsg->ops = ops;
-              atomic_set(&rpmsg->signals, RPMSG_SIGNAL_RUNNING);
+              atomic_or(&rpmsg->signals, RPMSG_SIGNAL_RUNNING);
 
               /* Add priv to list */
 
@@ -1015,14 +1009,19 @@ void rpmsg_modify_signals(FAR struct rpmsg_s *rpmsg,
     }
 }
 
-#ifndef CONFIG_RPMSG_WQUEUE_GLOBAL
-int rpmsg_init_wqueues(FAR struct rpmsg_s *rpmsg)
+int rpmsg_init_wqueues(FAR struct rpmsg_s *rpmsg, uint8_t priority)
 {
-  return rpmsg_create_wqueues(rpmsg->wqueues, rpmsg->cpuname);
+  rpmsg->priority = priority;
+
+#ifndef CONFIG_RPMSG_WQUEUE_GLOBAL
+  return rpmsg_create_wqueues(rpmsg->wqueues, rpmsg->cpuname, priority);
+#endif
+  return OK;
 }
 
 void rpmsg_deinit_wqueues(FAR struct rpmsg_s *rpmsg)
 {
+#ifndef CONFIG_RPMSG_WQUEUE_GLOBAL
   int i;
 
   for (i = 0; i < CONFIG_RPMSG_WQUEUE_NUMBER; i++)
@@ -1032,41 +1031,52 @@ void rpmsg_deinit_wqueues(FAR struct rpmsg_s *rpmsg)
           work_queue_free(rpmsg->wqueues[i].kwqueue);
         }
     }
-}
 #endif
+}
 
-int rpmsg_queue_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
+int rpmsg_queue_work(FAR struct rpmsg_s *rpmsg, int priority,
                      FAR struct work_s *work, worker_t worker, FAR void *arg)
 {
   FAR struct rpmsg_wqueue_s *wqueues = rpmsg_get_wqueues(rpmsg);
-  int idx;
+#ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
+  irqstate_t flags;
+#endif
+  int idx = 0;
+  int i;
 
-  idx = (int)priority - RPMSG_PRIO_DEFAULT + RPMSG_DEFAULT_WQUEUE_IDX;
-  if (idx < 0)
+  priority = priority - RPMSG_PRIO_DEFAULT + rpmsg->priority;
+  priority = CLAMP(priority, SCHED_PRIORITY_MIN, SCHED_PRIORITY_MAX);
+
+#ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
+  flags = spin_lock_irqsave(&g_rpmsg_wqueue_lock);
+#endif
+  for (i = 0; i < CONFIG_RPMSG_WQUEUE_NUMBER; i++)
     {
-      idx = 0;
+      if (priority == wqueues[i].priority)
+        {
+          idx = i;
+          break;
+        }
+
+      if (wqueues[i].priority == 0)
+        {
+          DEBUGVERIFY(work_queue_setpriority_wq(wqueues[i].kwqueue,
+                                                priority) == 0);
+          wqueues[i].priority = priority;
+          idx = i;
+          break;
+        }
+
+      if (i != idx && abs(priority - wqueues[i].priority) <
+          abs(priority - wqueues[idx].priority))
+        {
+          idx = i;
+        }
     }
-  else if (idx >= CONFIG_RPMSG_WQUEUE_NUMBER)
-    {
-      idx = CONFIG_RPMSG_WQUEUE_NUMBER - 1;
-    }
+
+#ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
+  spin_unlock_irqrestore(&g_rpmsg_wqueue_lock, flags);
+#endif
 
   return work_queue_wq(wqueues[idx].kwqueue, work, worker, arg, 0);
-}
-
-void rpmsg_queue_rx_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
-                         rpmsg_worker_t worker, FAR void *arg)
-{
-  FAR struct rpmsg_work_s *work;
-
-  /* Called by the transport rx dispatch with rdev->lock held */
-
-  work = list_remove_head_type(&rpmsg->freerx, struct rpmsg_work_s,
-                               work.node);
-  DEBUGASSERT(work != NULL);
-  work->arg = arg;
-  work->rpmsg = rpmsg;
-  work->worker = worker;
-
-  rpmsg_queue_work(rpmsg, priority, &work->work, rpmsg_rx_worker, work);
 }

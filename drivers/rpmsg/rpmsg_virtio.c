@@ -51,7 +51,8 @@
                                       1 << VIRTIO_RPMSG_F_ACK | \
                                       1 << VIRTIO_RPMSG_F_BUFSZ | \
                                       1 << VIRTIO_RPMSG_F_CPUNAME | \
-                                      1 << VIRTIO_RPMSG_F_BUFADDR)
+                                      1 << VIRTIO_RPMSG_F_BUFADDR | \
+                                      1 << VIRTIO_RPMSG_F_PRIORITY)
 
 #ifdef CONFIG_OPENAMP_CACHE
 #  define RPMSG_VIRTIO_INVALIDATE(x) metal_cache_invalidate(&x, sizeof(x))
@@ -74,6 +75,7 @@ struct rpmsg_virtio_priv_s
   vq_notify                       notifytx;
   uint16_t                        headrx;
   uint16_t                        headtx;
+  int                             sleepertx;
   struct work_s                   startwork;
 #ifdef CONFIG_RPMSG_VIRTIO_PM
   spinlock_t                      lock;
@@ -213,9 +215,10 @@ rpmsg_virtio_pm_action(FAR struct rpmsg_virtio_priv_s *priv, bool stay)
  * Note: this function must be called with the rdev->lock held
  ****************************************************************************/
 
-static int rpmsg_virtio_process_rx_buffer(FAR struct rpmsg_device *rdev,
-                                          FAR struct rpmsg_endpoint *ept,
-                                          FAR struct rpmsg_hdr *hdr)
+static inline_function int
+rpmsg_virtio_process_rx_buffer(FAR struct rpmsg_device *rdev,
+                               FAR struct rpmsg_endpoint *ept,
+                               FAR struct rpmsg_hdr *hdr)
 {
   size_t len = hdr->len + sizeof(*hdr);
   int status;
@@ -581,7 +584,13 @@ static void rpmsg_virtio_rx_dispatch(FAR struct rpmsg_virtio_priv_s *priv)
               ns_msg = (FAR struct rpmsg_ns_msg *)RPMSG_LOCATE_DATA(hdr);
               ept_ = rpmsg_get_endpoint(rdev, ns_msg->name, RPMSG_ADDR_ANY,
                                         hdr->dst);
-              if (ept_)
+
+              /* Only inherit non-RT priority from the matched endpoint,
+               * ns_ept should not use RT priority to avoid overflow in
+               * priority calculation.
+               */
+
+              if (ept_ && ept_->priority != RPMSG_PRIO_RT)
                 {
                   priority = ept_->priority;
                 }
@@ -687,10 +696,39 @@ static int rpmsg_virtio_notify_wait(FAR struct rpmsg_device *rdev,
 {
   FAR struct rpmsg_virtio_priv_s *priv =
     container_of(rdev, struct rpmsg_virtio_priv_s, rvdev);
-  int ret;
+  FAR struct virtqueue *vq = priv->rvdev.svq;
+  int ret = 0;
 
-  ret = rpmsg_tickwait(&priv->rvdev.rdev.ns_ept, &priv->semtx,
-                       MSEC2TICK(RPMSG_VIRTIO_TIMEOUT_MS));
+  metal_mutex_acquire(&rdev->lock);
+  if (priv->sleepertx++ == 0)
+    {
+      /* We are the first sleeping context, enable tx-complete interrupts */
+
+      virtqueue_enable_cb(vq);
+    }
+
+  if ((priv->vdev->role == VIRTIO_DEV_DRIVER && virtqueue_nused(vq) == 0) ||
+      (priv->vdev->role == VIRTIO_DEV_DEVICE && virtqueue_navail(vq) == 0))
+    {
+      metal_mutex_release(&rdev->lock);
+      ret = rpmsg_tickwait(&priv->rvdev.rdev.ns_ept, &priv->semtx,
+                           MSEC2TICK(RPMSG_VIRTIO_TIMEOUT_MS));
+      metal_mutex_acquire(&rdev->lock);
+    }
+
+  /* Disable "tx-complete" interrupts after waking up if we're the last
+   * sleeper. This avoids redundant interrupt overhead when buffers are
+   * available.
+   */
+
+  if (--priv->sleepertx == 0)
+    {
+      /* We are the last sleeping context, disable tx-complete interrupts */
+
+      virtqueue_disable_cb(vq);
+    }
+
+  metal_mutex_release(&rdev->lock);
   return ret == -ETIMEDOUT ? 0 : ret;
 }
 
@@ -739,6 +777,7 @@ static void rpmsg_virtio_start_worker(FAR void *arg)
 
   if (vdev->role == VIRTIO_DEV_DRIVER)
     {
+      atomic_or(&rpmsg->signals, RPMSG_SIGNAL_ALLOC_LOCAL);
       if (virtio_has_feature(vdev, VIRTIO_RPMSG_F_BUFADDR))
         {
           FAR void *shmbuf_va0;
@@ -798,12 +837,6 @@ static void rpmsg_virtio_start_worker(FAR void *arg)
           rpmsg_virtio_rx_dispatch(priv);
           priv->init = true;
 
-          /* Open tx buffer return callback before the services created
-           * below can wait for a tx buffer.
-           */
-
-          virtqueue_enable_cb(priv->rvdev.svq);
-
           /* Broadcast device_created to all registers */
 
           rpmsg_device_created(&priv->rpmsg);
@@ -833,6 +866,7 @@ int rpmsg_virtio_probe_cpuname(FAR struct virtio_device *vdev,
 {
   FAR struct rpmsg_virtio_priv_s *priv;
   uint64_t features;
+  uint8_t priority;
 #ifdef CONFIG_RPMSG_VIRTIO_PM
   char name[64];
 #endif
@@ -889,7 +923,17 @@ int rpmsg_virtio_probe_cpuname(FAR struct virtio_device *vdev,
           strlcpy(priv->rpmsg.cpuname, cpuname, VIRTIO_RPMSG_CPUNAME_SIZE);
         }
 
-      ret = rpmsg_init_wqueues(&priv->rpmsg);
+      if (virtio_has_feature(vdev, VIRTIO_RPMSG_F_PRIORITY))
+        {
+          virtio_read_config(vdev, offsetof(struct fw_rsc_config, priority),
+                             &priority, sizeof(priority));
+        }
+      else
+        {
+          priority = CONFIG_RPMSG_WQUEUE_PRIORITY;
+        }
+
+      ret = rpmsg_init_wqueues(&priv->rpmsg, priority);
       if (ret >= 0)
         {
 #ifdef CONFIG_RPMSG_VIRTIO_PM
