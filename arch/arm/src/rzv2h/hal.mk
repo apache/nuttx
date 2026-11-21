@@ -72,6 +72,10 @@ ifeq ($(CONFIG_RZV2H_SCI_B),y)
 CHIP_CSRCS += $(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)src$(DELIM)rzv$(DELIM)r_sci_b_uart$(DELIM)r_sci_b_uart.c
 endif
 
+ifeq ($(CONFIG_RZV2H_CANFD),y)
+CHIP_CSRCS += $(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)src$(DELIM)rzv$(DELIM)r_canfd$(DELIM)r_canfd.c
+endif
+
 ifeq ($(CONFIG_RZV2H_QSPI),y)
 CHIP_CSRCS += $(HAL_INDIR)$(DELIM)drivers$(DELIM)rz$(DELIM)fsp$(DELIM)src$(DELIM)rzv$(DELIM)r_xspi_qspi$(DELIM)r_xspi_qspi.c
 endif
