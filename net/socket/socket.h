@@ -124,6 +124,14 @@
 #  define _SO_SETERRNO(s,e)
 #endif /* CONFIG_NET_SOCKOPTS */
 
+/* True if the address family of the socket sets the connection state of
+ * the socket in accept() and connect() (SOCKCAP_CONNSTATE).
+ */
+
+#define psock_connstate(s) \
+  ((s)->s_sockif->si_sockcaps != NULL && \
+   ((s)->s_sockif->si_sockcaps(s) & SOCKCAP_CONNSTATE) != 0)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

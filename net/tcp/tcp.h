@@ -801,8 +801,8 @@ int psock_tcp_connect(FAR struct socket *psock,
  * Returned Value:
  *   On success, tcp_start_monitor returns OK; On any failure,
  *   tcp_start_monitor will return a negated errno value.  The only failure
- *   that can occur is if the socket has already been closed and, in this
- *   case, -ENOTCONN is returned.
+ *   that can occur is if the connection has already been lost:
+ *   -ECONNRESET if the peer reset it, else -ENOTCONN.
  *
  * Assumptions:
  *   The caller holds the network lock (if not, it will be locked momentarily

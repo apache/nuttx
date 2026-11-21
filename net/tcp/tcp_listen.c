@@ -256,6 +256,14 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
 #endif
   if (listener != NULL)
     {
+      /* psock_tcp_accept() looks at the backlog and installs its accept
+       * callback with the listener's lock held: look at the callback and
+       * add to the backlog under the same lock, or a connection added
+       * between the two would wait in the backlog with accept() asleep.
+       */
+
+      conn_lock(&listener->sconn);
+
       /* Yes, there is a listener.  Is it accepting connections now? */
 
       if (listener->accept)
@@ -272,16 +280,15 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
            * available.
            */
 
-          conn_lock(&listener->sconn);
           ret = tcp_backlogadd(listener, conn);
           if (ret == OK)
             {
               tcp_callback(dev, listener, TCP_BACKLOG);
             }
-
-          conn_unlock(&listener->sconn);
         }
 #endif
+
+      conn_unlock(&listener->sconn);
     }
 
   return ret;

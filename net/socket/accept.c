@@ -148,7 +148,11 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
     }
 
   ret = psock->s_sockif->si_accept(psock, addr, addrlen, newsock, flags);
-  if (ret >= 0)
+  if (ret < 0)
+    {
+      nerr("ERROR: si_accept failed: %d\n", ret);
+    }
+  else if (!psock_connstate(newsock))
     {
       /* Mark the new socket as connected. */
 
@@ -159,10 +163,6 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
         {
           conn->s_flags |= _SF_NONBLOCK;
         }
-    }
-  else
-    {
-      nerr("ERROR: si_accept failed: %d\n", ret);
     }
 
   return ret;

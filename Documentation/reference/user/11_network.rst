@@ -143,6 +143,9 @@ the following paragraphs.
 
   ``ECONNREFUSED`` No one listening on the remote address.
 
+  ``ECONNRESET`` The peer reset the connection after the handshake, before
+  ``connect()`` returned.
+
   ``EFAULT`` The socket structure address is outside the user's address
   space.
 

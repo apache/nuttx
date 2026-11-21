@@ -240,8 +240,8 @@ static void tcp_shutdown_monitor(FAR struct tcp_conn_s *conn, uint32_t flags)
  * Returned Value:
  *   On success, tcp_start_monitor returns OK; On any failure,
  *   tcp_start_monitor will return a negated errno value.  The only failure
- *   that can occur is if the socket has already been closed and, in this
- *   case, -ENOTCONN is returned.
+ *   that can occur is if the connection has already been lost:
+ *   -ECONNRESET if the peer reset it, else -ENOTCONN.
  *
  * Assumptions:
  *   The caller holds the network lock (if not, it will be locked momentarily
@@ -257,43 +257,70 @@ int tcp_start_monitor(FAR struct socket *psock)
 
   conn = psock->s_conn;
 
+  /* The check of the state and the start of the monitor are one step under
+   * the lock of the device: an event of the peer that came between them
+   * (TCP_RXCLOSE of a FIN, handled on another CPU) would be seen by no
+   * monitor, and a read would then wait for ever.
+   */
+
+  conn_dev_lock(&conn->sconn, conn->dev);
+
   /* Non-blocking connection ? */
 
   nonblock_conn = (conn->tcpstateflags == TCP_SYN_SENT &&
                    _SS_ISNONBLOCK(conn->sconn.s_flags));
+
+  /* The peer can close its half of the connection (FIN: TCP_CLOSE_WAIT)
+   * before the monitor is started: a server that accepts and closes at
+   * once, before the connect() of the client returns, or a client that
+   * closes before accept().  The connection is still connected: data can
+   * go to the peer.  Only the TCP_RXCLOSE event of the FIN came before the
+   * monitor, so do what the monitor does for it: reads give end-of-file.
+   */
+
+  if (conn->tcpstateflags == TCP_CLOSE_WAIT)
+    {
+      conn->shutdown |= SHUT_RD;
+    }
 
   /* Check if the connection has already been closed before any callbacks
    * have been registered. (Maybe the connection is lost before accept has
    * registered the monitoring callback.)
    */
 
-  if (!(conn->tcpstateflags == TCP_ESTABLISHED ||
-        conn->tcpstateflags == TCP_SYN_RCVD || nonblock_conn))
+  else if (!(conn->tcpstateflags == TCP_ESTABLISHED ||
+             conn->tcpstateflags == TCP_SYN_RCVD || nonblock_conn))
     {
-      /* Invoke the TCP_ABORT connection event now */
+      /* Invoke the TCP_ABORT connection event now: the socket is not
+       * connected.
+       */
 
       tcp_shutdown_monitor(conn, TCP_ABORT);
+      tcp_close_connection(conn, TCP_ABORT);
+
+      /* The peer reset the connection (TCP_RESET), for example with a
+       * close with SO_LINGER {1, 0} at once after the handshake.  The
+       * caller decides: accept() gives the socket, connect() fails.  A
+       * receive gives the data that came before the RST, then ECONNRESET.
+       */
+
+      if ((conn->flags & TCP_RESET) != 0)
+        {
+          conn_dev_unlock(&conn->sconn, conn->dev);
+          return -ECONNRESET;
+        }
 
       /* If the peer closed the connection before we called accept, and
        * there is buffered read-ahead data, return OK so that the caller
        * still gets a socket from which the pending data can be drained
        * (followed by EOF).
-       *
-       * If there is no buffered data, however, the connection is dead:
-       * presenting it to the caller as a successfully-accepted socket
-       * makes accept() mark it _SF_CONNECTED (see net/socket/accept.c),
-       * and a subsequent blocking send() would then wait forever on a
-       * connection that will never post another event.  This happens when
-       * a peer resets the connection immediately after the handshake (for
-       * example a close with SO_LINGER {1, 0}).  Report it as not-connected
-       * instead so accept() fails cleanly rather than handing back a wedged
-       * socket.
        */
 
       if ((conn->tcpstateflags == TCP_CLOSED ||
            conn->tcpstateflags == TCP_LAST_ACK) &&
           conn->readahead != NULL)
         {
+          conn_dev_unlock(&conn->sconn, conn->dev);
           return OK;
         }
 
@@ -301,6 +328,7 @@ int tcp_start_monitor(FAR struct socket *psock)
        * because the socket was already disconnected.
        */
 
+      conn_dev_unlock(&conn->sconn, conn->dev);
       return -ENOTCONN;
     }
 
@@ -308,7 +336,6 @@ int tcp_start_monitor(FAR struct socket *psock)
    * the network goes down.
    */
 
-  conn_dev_lock(&conn->sconn, conn->dev);
   cb = devif_callback_alloc(conn->dev,
                             &conn->connevents,
                             &conn->connevents_tail);
@@ -324,6 +351,18 @@ int tcp_start_monitor(FAR struct socket *psock)
         {
           cb->flags |= TCP_CONNECTED;
         }
+    }
+
+  /* Mark the socket connected here, with the device locked: an event of
+   * the peer handled by the monitor after the unlock (a RST, a time-out)
+   * then changes the state for good.  accept() and connect() do not mark
+   * the socket after it (SOCKCAP_CONNSTATE).
+   */
+
+  if (!nonblock_conn)
+    {
+      conn->sconn.s_flags |= _SF_CONNECTED;
+      conn->sconn.s_flags &= ~_SF_CLOSED;
     }
 
   conn_dev_unlock(&conn->sconn, conn->dev);

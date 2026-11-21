@@ -433,14 +433,15 @@ int psock_tcp_connect(FAR struct socket *psock,
           ret2 = tcp_start_monitor(psock);
           if (ret2 < 0)
             {
-              /* tcp_start_monitor() can only fail on certain race
-               * conditions where the connection was lost just before
-               * this function was called.  That is not expected to
-               * happen in this context, but just in case...
+              /* tcp_start_monitor() fails when the connection was lost
+               * after the handshake, before this call: connect() fails
+               * and the socket is not connected.  A reset of the peer
+               * gives ECONNRESET, which is now reported.
                */
 
               tcp_stop_monitor(conn, TCP_ABORT);
-              ret = ret2;
+              conn->sconn.s_flags &= ~(_SF_CONNECTED | _SF_CLOSED);
+              ret = tcp_reset_report(conn, ret2);
             }
 
           /* Notify the device driver that new connection is available. */
