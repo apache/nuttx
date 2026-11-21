@@ -103,7 +103,7 @@ int ipv6_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
         {
           FAR struct tcp_conn_s *tcp_conn = psock->s_conn;
 
-          outaddr->sin6_port = tcp_conn->lport; /* Already in network byte order */
+          outaddr->sin6_port = tcp_conn->rport; /* Already in network byte order */
           ripaddr            = &tcp_conn->u.ipv6.raddr;
         }
         break;
@@ -114,7 +114,7 @@ int ipv6_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
         {
           FAR struct udp_conn_s *udp_conn = psock->s_conn;
 
-          outaddr->sin6_port = udp_conn->lport; /* Already in network byte order */
+          outaddr->sin6_port = udp_conn->rport; /* Already in network byte order */
           ripaddr            = &udp_conn->u.ipv6.raddr;
         }
         break;
