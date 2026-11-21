@@ -1466,6 +1466,25 @@ skip_rtt:
                   return;
                 }
             }
+          else if (((conn->tcpstateflags & TCP_STATE_MASK) <=
+                    TCP_FIN_WAIT_2) && dev->d_len == 0 &&
+                   (tcp->flags & (TCP_SYN | TCP_FIN)) == 0 &&
+                   TCP_SEQ_LT(seq, conn->rcv_adv))
+            {
+              /* A segment without data, SYN or FIN is acceptable if
+               * RCV.NXT =< SEG.SEQ < RCV.NXT+RCV.WND (RFC 9293, 3.10.7.4).
+               * Pass a new ACK to the application, but do not answer it.
+               */
+
+              if ((flags & TCP_ACKDATA) != 0)
+                {
+                  dev->d_sndlen = 0;
+                  tcp_appsend(dev, conn,
+                              tcp_callback(dev, conn, TCP_ACKDATA));
+                }
+
+              return;
+            }
           else if ((conn->tcpstateflags & TCP_STATE_MASK) <= TCP_FIN_WAIT_2)
             {
               tcp_recvwindow_loss(dev, conn);
