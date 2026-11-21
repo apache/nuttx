@@ -172,10 +172,10 @@ void neighbor_ethernet_out(FAR struct net_driver_s *dev)
 
           icmpv6_solicit(dev, ipaddr);
 #else
-          /* What to do here? We need the laddr, but no way to get it. */
+          /* No Neighbor Solicitation without ICMPv6: drop the packet */
 
           nerr("ERROR: IPv6 needs link layer address for ethernet.\n");
-          DEBUGPANIC();
+          dev->d_len = 0;
           return;
 #endif
         }
