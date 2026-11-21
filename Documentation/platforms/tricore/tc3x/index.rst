@@ -12,6 +12,7 @@ consists of the following features:
 This kernel with ostest have been tested with
 
 -  Infineon's AURIX™ TC397 Evaluation Board: KIT_A2G_TC397_5V_TFT
+-  Infineon's AURIX™ TC375 Lite Kit: KIT_A2G_TC375_LITE
 
 Supported Boards
 ================
