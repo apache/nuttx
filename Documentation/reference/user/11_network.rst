@@ -147,7 +147,9 @@ the following paragraphs.
   space.
 
   ``EINPROGRESS`` The socket is non-blocking and the connection cannot be
-  completed immediately.
+  completed immediately, or the send timeout of the socket
+  (``SO_SNDTIMEO``) expired first.  The connection goes on: ``poll()``
+  reports ``POLLOUT`` when it completes.
 
   ``EINTR`` The system call was interrupted by a signal that was caught.
 
