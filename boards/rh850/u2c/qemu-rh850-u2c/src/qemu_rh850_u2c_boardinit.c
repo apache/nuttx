@@ -74,20 +74,30 @@ static void qemu_test_exit(int status, uint32_t zero)
  * Name: board_late_initialize
  *
  * Description:
- *   Board initialization after the OS is up: mount procfs.
+ *   Board initialization after the OS is up: mount procfs and tmpfs.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-#ifdef CONFIG_FS_PROCFS
+#if defined(CONFIG_FS_PROCFS) || defined(CONFIG_FS_TMPFS)
   int ret;
+#endif
 
+#ifdef CONFIG_FS_PROCFS
   ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_FS_TMPFS
+  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount tmpfs: %d\n", ret);
     }
 #endif
 }
