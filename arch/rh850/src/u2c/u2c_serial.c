@@ -148,7 +148,7 @@ static int u2c_setup(FAR struct uart_dev_s *dev)
 
   if (!dev->isconsole)
     {
-      u2c_rlin3_setup(priv->base, priv->baud);
+      return u2c_rlin3_setup(priv->base, priv->baud);
     }
 
   return OK;
