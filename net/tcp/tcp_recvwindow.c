@@ -356,6 +356,13 @@ bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn)
   uint32_t adv;
   uint16_t mss;
 
+  /* A socket that never connected has no device and no peer */
+
+  if (dev == NULL)
+    {
+      return false;
+    }
+
   /* Note: rcv_adv can be smaller than rcvseq.
    * For examples, when:
    *
