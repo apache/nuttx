@@ -812,11 +812,10 @@ skipload:
 #ifdef HAVE_LIBC_ELF_PIN
 static int libelf_pinhold(FAR struct mod_loadinfo_s *loadinfo)
 {
-  FAR struct file *filep;
   int ret;
 
-  /* The descriptor belongs to the task that called the loader, and the
-   * unload runs on another task.  Hold the file instead.
+  /* The loader closes its file when the load ends, and the unload runs
+   * later.  Hold the pin through a file of its own.
    */
 
   loadinfo->pinfile = lib_zalloc(sizeof(struct file));
@@ -825,13 +824,7 @@ static int libelf_pinhold(FAR struct mod_loadinfo_s *loadinfo)
       return -ENOMEM;
     }
 
-  ret = file_get(loadinfo->filfd, &filep);
-  if (ret >= 0)
-    {
-      ret = file_dup2(filep, loadinfo->pinfile);
-      file_put(filep);
-    }
-
+  ret = file_dup2(&loadinfo->file, loadinfo->pinfile);
   if (ret < 0)
     {
       lib_free(loadinfo->pinfile);
@@ -848,14 +841,15 @@ static int libelf_xipacquire(FAR struct mod_loadinfo_s *loadinfo)
   uintptr_t base = 0;
 
 #ifdef HAVE_LIBC_ELF_PIN
-  if (ioctl(loadinfo->filfd, XIPFSIOC_PIN, (unsigned long)&base) >= 0)
+  if (_NX_FILE_IOCTL(&loadinfo->file, XIPFSIOC_PIN,
+                     (unsigned long)&base) >= 0)
     {
       int ret = libelf_pinhold(loadinfo);
 
       if (ret < 0)
         {
           berr("ERROR: Failed to hold the pinned file: %d\n", ret);
-          ioctl(loadinfo->filfd, XIPFSIOC_UNPIN, 0);
+          _NX_FILE_IOCTL(&loadinfo->file, XIPFSIOC_UNPIN, 0);
           return ret;
         }
 
@@ -865,7 +859,8 @@ static int libelf_xipacquire(FAR struct mod_loadinfo_s *loadinfo)
     }
 #endif
 
-  if (ioctl(loadinfo->filfd, FIOC_XIPBASE, (unsigned long)&base) >= 0)
+  if (_NX_FILE_IOCTL(&loadinfo->file, FIOC_XIPBASE,
+                     (unsigned long)&base) >= 0)
     {
       loadinfo->xipbase = base;
       binfo("can use xipbase %" PRIxPTR "\n", loadinfo->xipbase);
@@ -921,7 +916,7 @@ int libelf_load(FAR struct mod_loadinfo_s *loadinfo)
   int i;
 
   binfo("loadinfo: %p\n", loadinfo);
-  DEBUGASSERT(loadinfo && loadinfo->filfd >= 0);
+  DEBUGASSERT(loadinfo != NULL);
 
   /* Load section and program headers into memory */
 
@@ -1188,7 +1183,7 @@ int libelf_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo)
   int ret;
 
   binfo("loadinfo: %p\n", loadinfo);
-  DEBUGASSERT(loadinfo && loadinfo->filfd >= 0);
+  DEBUGASSERT(loadinfo != NULL);
 
   /* Load section and program headers into memory */
 

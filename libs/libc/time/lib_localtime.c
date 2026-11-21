@@ -602,7 +602,7 @@ static int tzload(FAR const char *name,
                   FAR struct state_s *sp, int doextend)
 {
   int i;
-  int fid;
+  _NX_FILE file;
   int stored;
   ssize_t nread;
 
@@ -709,14 +709,13 @@ static int tzload(FAR const char *name,
       goto oops;
     }
 
-  fid = _NX_OPEN(name, O_RDONLY | O_CLOEXEC);
-  if (fid < 0)
+  if (_NX_FILE_OPEN(&file, name, O_RDONLY | O_CLOEXEC, 0) < 0)
     {
       goto oops;
     }
 
-  nread = _NX_READ(fid, up->buf, sizeof(up->buf));
-  if (_NX_CLOSE(fid) < 0 || nread < tzheadsize)
+  nread = _NX_FILE_READ(&file, up->buf, sizeof(up->buf));
+  if (_NX_FILE_CLOSE(&file) < 0 || nread < tzheadsize)
     {
       goto oops;
     }

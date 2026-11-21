@@ -62,13 +62,12 @@ static inline int libelf_fileinfo(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Get the file stats */
 
-  ret = _NX_STAT(loadinfo->filfd, &buf);
+  ret = _NX_FILE_STAT(&loadinfo->file, &buf);
   if (ret < 0)
     {
-      int errval = _NX_GETERRNO(ret);
-
-      berr("ERROR: Failed to stat file: %d\n", errval);
-      return -errval;
+      ret = _NX_FILE_ERRVAL(ret);
+      berr("ERROR: Failed to stat file: %d\n", ret);
+      return ret;
     }
 
   /* Return some stats info of the file in the loadinfo structure */
@@ -110,13 +109,12 @@ int libelf_initialize(FAR const char *filename,
 
   /* Open the binary file for reading (only) */
 
-  loadinfo->filfd = _NX_OPEN(filename, O_RDONLY);
-  if (loadinfo->filfd < 0)
+  ret = _NX_FILE_OPEN(&loadinfo->file, filename, O_RDONLY, 0);
+  if (ret < 0)
     {
-      int errval = _NX_GETERRNO(loadinfo->filfd);
-
-      berr("ERROR: Failed to open ELF binary %s: %d\n", filename, errval);
-      return -errval;
+      ret = _NX_FILE_ERRVAL(ret);
+      berr("ERROR: Failed to open ELF binary %s: %d\n", filename, ret);
+      return ret;
     }
 
   /* Get some stats info of the file. */

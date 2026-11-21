@@ -86,7 +86,6 @@
 #  define _NX_READ(f,b,s)      nx_read(f,b,s)
 #  define _NX_WRITE(f,b,s)     nx_write(f,b,s)
 #  define _NX_SEEK(f,o,w)      nx_seek(f,o,w)
-#  define _NX_STAT(f,s)        nx_fstat(f,s)
 #  define _NX_GETERRNO(r)      (-(r))
 #  define _NX_SETERRNO(r)      set_errno(-(r))
 #  define _NX_GETERRVAL(r)     (r)
@@ -96,10 +95,39 @@
 #  define _NX_READ(f,b,s)      read(f,b,s)
 #  define _NX_WRITE(f,b,s)     write(f,b,s)
 #  define _NX_SEEK(f,o,w)      lseek(f,o,w)
-#  define _NX_STAT(f,s)        fstat(f,s)
 #  define _NX_GETERRNO(r)      errno
 #  define _NX_SETERRNO(r)      ((void)(r))
 #  define _NX_GETERRVAL(r)     (-errno)
+#endif
+
+/* The library code uses these interfaces for a file that it opens itself.
+ * The flat build and the kernel use a struct file: it takes no descriptor
+ * of the calling task and does not set its errno.  The user space of the
+ * protected and kernel builds uses a descriptor.  A result < 0 is an error,
+ * and _NX_FILE_ERRVAL() gives its negated errno value.  _NX_FILE_CLOSE() of
+ * a file that did not open does nothing.
+ */
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  define _NX_FILE                  struct file
+#  define _NX_FILE_OPEN(f,p,o,m)    file_open(f,p,o,m)
+#  define _NX_FILE_CLOSE(f)         file_close(f)
+#  define _NX_FILE_READ(f,b,s)      file_read(f,b,s)
+#  define _NX_FILE_WRITE(f,b,s)     file_write(f,b,s)
+#  define _NX_FILE_SEEK(f,o,w)      file_seek(f,o,w)
+#  define _NX_FILE_STAT(f,s)        file_fstat(f,s)
+#  define _NX_FILE_IOCTL(f,r,a)     file_ioctl(f,r,a)
+#  define _NX_FILE_ERRVAL(r)        (r)
+#else
+#  define _NX_FILE                  int
+#  define _NX_FILE_OPEN(f,p,o,m)    (*(f) = open(p,o,m))
+#  define _NX_FILE_CLOSE(f)         (*(f) < 0 ? 0 : close(*(f)))
+#  define _NX_FILE_READ(f,b,s)      read(*(f),b,s)
+#  define _NX_FILE_WRITE(f,b,s)     write(*(f),b,s)
+#  define _NX_FILE_SEEK(f,o,w)      lseek(*(f),o,w)
+#  define _NX_FILE_STAT(f,s)        fstat(*(f),s)
+#  define _NX_FILE_IOCTL(f,r,a)     ioctl(*(f),r,a)
+#  define _NX_FILE_ERRVAL(r)        (-errno)
 #endif
 
 /* Inode i_flags values:

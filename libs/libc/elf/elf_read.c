@@ -88,32 +88,32 @@ int libelf_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
 
   /* Seek to the read position */
 
-  rpos = _NX_SEEK(loadinfo->filfd, offset, SEEK_SET);
+  rpos = _NX_FILE_SEEK(&loadinfo->file, offset, SEEK_SET);
   if (rpos != offset)
     {
-      errval = _NX_GETERRNO(rpos);
+      errval = rpos < 0 ? _NX_FILE_ERRVAL(rpos) : -EIO;
       berr("ERROR: Failed to seek to position %" PRIdOFF ": %d\n",
            offset, errval);
-      return -errval;
+      return errval;
     }
 
   while (readsize > 0)
     {
       /* Read the file data at offset into the user buffer */
 
-      nbytes = _NX_READ(loadinfo->filfd,
-                        buffer + nsize - readsize, readsize);
+      nbytes = _NX_FILE_READ(&loadinfo->file,
+                             buffer + nsize - readsize, readsize);
       if (nbytes < 0)
         {
-          errval = _NX_GETERRNO(nbytes);
+          errval = _NX_FILE_ERRVAL(nbytes);
 
           /* EINTR just means that we received a signal */
 
-          if (errval != EINTR)
+          if (errval != -EINTR)
             {
               berr("ERROR: Read from offset %" PRIdOFF " failed: %d\n",
                    (off_t)(offset + nsize - readsize), errval);
-              return -errval;
+              return errval;
             }
         }
       else if (nbytes == 0)
