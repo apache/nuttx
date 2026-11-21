@@ -298,6 +298,7 @@ int psock_tcp_connect(FAR struct socket *psock,
   FAR struct tcp_conn_s *conn;
   struct tcp_connect_s   state;
   struct tcp_callback_s  info;
+  unsigned int           timeout;
   int                    ret = OK;
 
   /* Interrupts must be disabled through all of the following because
@@ -388,11 +389,12 @@ int psock_tcp_connect(FAR struct socket *psock,
               /* Wait for either the connect to complete or for an
                * error/timeout to occur.
                * NOTES:  conn_dev_sem_timedwait will also terminate if a
-               * signal is received.
+               * signal is received or the send timeout expires.
                */
 
               tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
-              ret = conn_dev_sem_timedwait(&state.tc_sem, true, UINT_MAX,
+              timeout = _SO_TIMEOUT(conn->sconn.s_sndtimeo);
+              ret = conn_dev_sem_timedwait(&state.tc_sem, true, timeout,
                                            &conn->sconn, conn->dev);
 
               tls_cleanup_pop(tls_get_info(), 0);
@@ -401,22 +403,26 @@ int psock_tcp_connect(FAR struct socket *psock,
 
               nxsem_destroy(&state.tc_sem);
 
-              /* If conn_dev_sem_timedwait failed, negated errno was
-               * returned.
+              /* The event handler may have set the result before the wait
+               * ended.  SO_SNDTIMEO ends the wait, not the connection: the
+               * connection goes on as for a non-blocking socket.
                */
 
-              if (ret >= 0)
+              if (ret >= 0 || state.tc_result != -EAGAIN)
                 {
-                  /* If the wait succeeded, then get the new error
-                   * value from the state structure
-                   */
-
                   ret = state.tc_result;
                 }
+              else if (ret == -ETIMEDOUT)
+                {
+                  ret = -EINPROGRESS;
+                }
 
-              /* Make sure that no further events are processed */
+              /* Make sure that no further events are processed.  With
+               * EINPROGRESS the connection goes on, as after a success.
+               */
 
-              psock_teardown_callbacks(&state, ret);
+              psock_teardown_callbacks(&state,
+                                       ret != -EINPROGRESS ? ret : OK);
             }
         }
 

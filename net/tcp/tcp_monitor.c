@@ -268,7 +268,7 @@ int tcp_start_monitor(FAR struct socket *psock)
   /* Non-blocking connection ? */
 
   nonblock_conn = (conn->tcpstateflags == TCP_SYN_SENT &&
-                   _SS_ISNONBLOCK(conn->sconn.s_flags));
+                   _SS_ISCONNECTING(conn->sconn.s_flags));
 
   /* The peer can close its half of the connection (FIN: TCP_CLOSE_WAIT)
    * before the monitor is started: a server that accepts and closes at
