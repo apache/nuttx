@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <stdbool.h>
 #include <sched.h>
 
@@ -43,6 +44,11 @@
  ****************************************************************************/
 
 #define PIDHASH(pid)             ((pid) & (g_npidhash - 1))
+
+/* The wait() status of a stopped child and of a continued child */
+
+#define WAIT_STOPPED(signo)      ((((signo) & 0xff) << 8) | 0x7f)
+#define WAIT_CONTINUED           0xffff
 
 /* The state of a task is indicated both by the task_state field of the TCB
  * and by a series of task lists.  All of these tasks lists are declared
@@ -382,6 +388,11 @@ void nxsched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
 void nxsched_suspend(FAR struct tcb_s *tcb);
+#endif
+
+#if defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_SCHED_HAVE_PARENT)
+int  nxsched_waitid(idtype_t idtype, pid_t id, FAR siginfo_t *info,
+                    int options);
 #endif
 
 #if defined(up_this_task)

@@ -41,62 +41,270 @@
 #if defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_SCHED_HAVE_PARENT)
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* The search state of child_running() */
+
+struct child_search_s
+{
+  FAR struct task_group_s *group;   /* The parent task group */
+  idtype_t idtype;                  /* P_ALL, P_PID or P_PGID */
+  pid_t id;                         /* The process ID or process group ID */
+  bool found;                       /* A child that idtype and id select */
+};
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: exited_child
+ * Name: report_child
  *
  * Description:
- *   Handle the case where a child exited properlay was we (apparently) lost
- *   the detch of child signal.
+ *   Give the event of a child (see group_child_event()) in info.  The
+ *   event is then forgotten, and a child that exited is discarded, unless
+ *   WNOWAIT keeps the child in a waitable state.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
-static void exited_child(FAR struct tcb_s *rtcb,
+static void report_child(FAR struct tcb_s *rtcb,
                          FAR struct child_status_s *child,
                          FAR siginfo_t *info, int options)
 {
-  /* The child has exited. Return the saved exit status (and some fudged
-   * information).
-   */
+  uint8_t event = group_child_event(child, options);
 
-  if (info)
-    {
-      info->si_signo           = SIGCHLD;
-      info->si_code            = CLD_EXITED;
-      info->si_errno           = OK;
-      info->si_value.sival_ptr = NULL;
-      info->si_pid             = child->ch_pid;
+  info->si_signo           = SIGCHLD;
+  info->si_errno           = OK;
+  info->si_value.sival_ptr = NULL;
+  info->si_pid             = child->ch_pid;
 #ifdef CONFIG_SCHED_USER_IDENTITY
-      info->si_uid             = child->ch_uid;
+  info->si_uid             = child->ch_uid;
 #else
-      info->si_uid             = 0;
+  info->si_uid             = 0;
 #endif
-      info->si_status          = child->ch_status;
-    }
 
-  /* Discard the child entry unless WNOWAIT is set (the caller wants the
-   * child to remain in a waitable state).
-   */
+  if (event == CHILD_FLAG_STOPPED)
+    {
+      info->si_code   = CLD_STOPPED;
+      info->si_status = child->ch_stopsig;
+    }
+  else if (event == CHILD_FLAG_CONTINUED)
+    {
+      info->si_code   = CLD_CONTINUED;
+      info->si_status = SIGCONT;
+    }
+  else
+    {
+      info->si_code   = CLD_EXITED;
+      info->si_status = child->ch_status;
+    }
 
   if ((options & WNOWAIT) == 0)
     {
-      group_remove_child(rtcb->group, child->ch_pid);
-      group_free_child(child);
+      if (event == CHILD_FLAG_EXITED)
+        {
+          group_remove_child(rtcb->group, child->ch_pid);
+          group_free_child(child);
+        }
+      else
+        {
+          child->ch_flags &= ~event;
+        }
     }
 }
 #endif
 
-static inline_function
-int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
-            id_t id, FAR siginfo_t *info, bool retains)
+/****************************************************************************
+ * Name: child_handler
+ *
+ * Description:
+ *   The nxsched_foreach() handler of child_running().
+ *
+ ****************************************************************************/
+
+static void child_handler(FAR struct tcb_s *tcb, FAR void *arg)
+{
+  FAR struct child_search_s *search = arg;
+  FAR struct task_group_s *group = tcb->group;
+
+  if (group == NULL || group == search->group ||
+      group->tg_ppid != search->group->tg_pid)
+    {
+      return;
+    }
+
+#ifdef CONFIG_SCHED_CHILD_STATUS
+  /* A child that sent SIGCHLD can still be found during its exit */
+
+  if ((tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      return;
+    }
+#endif
+
+  if (search->idtype == P_ALL ||
+      (search->idtype == P_PID && group->tg_pid == search->id) ||
+      (search->idtype == P_PGID &&
+       group_getpgid(group) == search->id))
+    {
+      search->found = true;
+    }
+}
+
+/****************************************************************************
+ * Name: child_running
+ *
+ * Description:
+ *   Return true if a child that idtype and id select still runs.  This
+ *   also finds the children that have no child status structure.
+ *
+ ****************************************************************************/
+
+static bool child_running(FAR struct tcb_s *rtcb, idtype_t idtype, pid_t id)
+{
+  struct child_search_s search;
+
+#ifndef CONFIG_SCHED_CHILD_STATUS
+  if (rtcb->group->tg_nchildren == 0)
+    {
+      return false;
+    }
+
+  if (idtype == P_ALL)
+    {
+      return true;
+    }
+
+  if (idtype == P_PID)
+    {
+      return nxsched_get_tcb(id) != NULL;
+    }
+#endif
+
+  search.group  = rtcb->group;
+  search.idtype = idtype;
+  search.id     = id;
+  search.found  = false;
+  nxsched_foreach(child_handler, &search);
+  return search.found;
+}
+
+/****************************************************************************
+ * Name: child_selected
+ *
+ * Description:
+ *   Without a child status: return true if the SIGCHLD in info is an event
+ *   that options wait for, of a child that idtype and id select.  A child
+ *   that is gone is taken to be in the process group.
+ *
+ ****************************************************************************/
+
+static bool child_selected(FAR siginfo_t *info, idtype_t idtype, pid_t id,
+                           int options)
+{
+  FAR struct task_group_s *chgrp;
+
+  if (info->si_signo != SIGCHLD)
+    {
+      return false;
+    }
+
+  if (info->si_code == CLD_STOPPED)
+    {
+      if ((options & (WUNTRACED | WSTOPPED)) == 0)
+        {
+          return false;
+        }
+    }
+  else if (info->si_code == CLD_CONTINUED)
+    {
+      if ((options & WCONTINUED) == 0)
+        {
+          return false;
+        }
+    }
+  else
+    {
+#ifdef CONFIG_SCHED_CHILD_STATUS
+      /* The exit status is not kept (XSI): wait for all children */
+
+      return false;
+#else
+      if ((options & WEXITED) == 0)
+        {
+          return false;
+        }
+#endif
+    }
+
+  if (idtype == P_PGID)
+    {
+      chgrp = task_getgroup(info->si_pid);
+      return chgrp == NULL || group_getpgid(chgrp) == id;
+    }
+
+  return idtype == P_ALL || info->si_pid == id;
+}
+
+/****************************************************************************
+ * Name: check_children
+ *
+ * Description:
+ *   Return -ECHILD if idtype and id select no child of the caller.
+ *
+ ****************************************************************************/
+
+static int check_children(FAR struct tcb_s *rtcb, idtype_t idtype, pid_t id)
+{
+#ifdef CONFIG_SCHED_CHILD_STATUS
+  bool found;
+
+  /* Without the child status, the wait loop checks the running children */
+
+  if ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) != 0)
+    {
+      return OK;
+    }
+
+  group_wait_child(rtcb->group, idtype, id, 0, &found);
+  return found ? OK : -ECHILD;
+#else
+  FAR struct tcb_s *ctcb;
+
+  if (idtype == P_PID)
+    {
+      ctcb = nxsched_get_tcb(id);
+      if (ctcb == NULL || ctcb->group == NULL ||
+          ctcb->group->tg_ppid != rtcb->group->tg_pid ||
+          (ctcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+        {
+          return -ECHILD;
+        }
+    }
+
+  return child_running(rtcb, idtype, id) ? OK : -ECHILD;
+#endif
+}
+
+/****************************************************************************
+ * Name: waittcb
+ *
+ * Description:
+ *   Wait until a child that idtype and id select has an event that options
+ *   wait for.
+ *
+ ****************************************************************************/
+
+static int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, pid_t id,
+                   FAR siginfo_t *info, int options)
 {
 #ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *child;
 #endif
-  int errcode = OK;
+  bool retains = false;
+  bool found = false;
   sigset_t set;
   int ret;
 
@@ -105,94 +313,39 @@ int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
   sigemptyset(&set);
   nxsig_addset(&set, SIGCHLD);
 
-  /* Loop until the child that we are waiting for dies */
-
-  while (errcode == OK)
+  for (; ; )
     {
 #ifdef CONFIG_SCHED_CHILD_STATUS
       /* Another thread can change the action for SIGCHLD while we wait */
 
-      retains = ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0);
-
-      /* Check if the task has already died. Signals are not queued in
-       * NuttX.  So a possibility is that the child has died and we
-       * missed the death of child signal (we got some other signal
-       * instead).
-       */
-
-      if (idtype == P_ALL)
+      retains = (rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0;
+      found   = false;
+      if (retains)
         {
-          /* We are waiting for any child to exit */
-
-          if (retains && (child = group_exit_child(rtcb->group)) != NULL)
-            {
-              /* A child has exited.  Apparently we missed the signal.
-               * Return the exit status and break out of the loop.
-               */
-
-              exited_child(rtcb, child, info, options);
-              break;
-            }
-
-          /* Without an exit status to wait for (XSI), wait until all
-           * children exit
+          /* Signals are not queued in NuttX, so a SIGCHLD can be lost.
+           * The child status keeps each event: look there first.
            */
 
-          if ((!retains || rtcb->group->tg_children == NULL) &&
-              !group_has_child(rtcb->group, INVALID_PROCESS_ID))
+          child = group_wait_child(rtcb->group, idtype, id, options,
+                                   &found);
+          if (child != NULL)
             {
-              errcode = ECHILD;
-              break;
+              report_child(rtcb, child, info, options);
+              return OK;
             }
-        }
-
-      /* We are waiting for a specific PID.  Does this task retain child
-       * status?
-       */
-
-      else if (retains &&
-               (child = group_find_child(rtcb->group, id)) != NULL)
-        {
-          /* Yes ... Did the child exit? */
-
-          if ((child->ch_flags & CHILD_FLAG_EXITED) != 0)
-            {
-              /* The child has exited. Return the exit status and break out
-               * of the loop.
-               */
-
-              exited_child(rtcb, child, info, options);
-              break;
-            }
-        }
-      else if (!group_has_child(rtcb->group, id))
-        {
-          /* It is no longer running and there is no exit status (XSI, or
-           * another thread took it)
-           */
-
-          errcode = ECHILD;
-          break;
-        }
-#else
-      /* Check if the task has already died. Signals are not queued in
-       * NuttX.  So a possibility is that the child has died and we
-       * missed the death of child signal (we got some other signal
-       * instead).
-       */
-
-      if (rtcb->group->tg_nchildren == 0 ||
-          (idtype == P_PID && nxsched_get_tcb((pid_t)id) == NULL))
-        {
-          /* We know that the child task was running okay we started,
-           * so we must have lost the signal.  What can we do?
-           * Let's return ECHILD.. that is at least informative.
-           */
-
-          errcode = ECHILD;
-          break;
         }
 #endif
+
+      /* Without a child status (XSI, or another thread took it), wait
+       * while a child runs.  Without the child status option, the child
+       * ended and the SIGCHLD was lost: ECHILD is better than a wrong
+       * status.
+       */
+
+      if (!found && !child_running(rtcb, idtype, id))
+        {
+          return -ECHILD;
+        }
 
       if ((options & WNOHANG) != 0)
         {
@@ -206,96 +359,80 @@ int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
            */
 
           info->si_signo = 0;
-          info->si_pid = 0;
-          break;
+          info->si_pid   = 0;
+          return OK;
         }
 
-      /* Wait for any death-of-child signal */
+      /* Wait for the next SIGCHLD */
 
       ret = nxsig_timedwait(&set, info, NULL);
       if (ret < 0)
         {
-          errcode = -ret;
-          break;
+          return ret;
         }
 
-      /* Make there this was SIGCHLD */
+      /* Without a child status, the SIGCHLD tells the event */
 
-      if (info->si_signo == SIGCHLD)
+      if (!retains && child_selected(info, idtype, id, options))
         {
-#ifdef CONFIG_SCHED_CHILD_STATUS
-          if (!retains && idtype != P_PGID)
-            {
-              /* No exit status (XSI): check the children again */
-
-              continue;
-            }
-#endif
-
-          /* Yes.. Are we waiting for the death of a specific child? */
-
-          if (idtype == P_PID)
-            {
-              /* Was this the death of the thread we were waiting for? */
-
-              if (info->si_pid == (pid_t)id)
-                {
-                  /* Yes... return success */
-
-#ifdef CONFIG_SCHED_CHILD_STATUS
-                  if (retains)
-                    {
-                      child = group_find_child(rtcb->group, info->si_pid);
-                      if (child != NULL &&
-                          (child->ch_flags & CHILD_FLAG_EXITED) != 0)
-                        {
-                          exited_child(rtcb, child, NULL, options);
-                        }
-                    }
-#endif
-
-                  break;
-                }
-            }
-
-          /* Are we waiting for any child to change state? */
-
-          else if (idtype == P_ALL)
-            {
-              /* Return success */
-
-#ifdef CONFIG_SCHED_CHILD_STATUS
-              if (retains)
-                {
-                  child = group_find_child(rtcb->group, info->si_pid);
-
-                  if (child &&
-                      (child->ch_flags & CHILD_FLAG_EXITED) != 0)
-                    {
-                      exited_child(rtcb, child, NULL, options);
-                    }
-                }
-#endif
-
-              break;
-            }
-
-          /* Other ID types are not supported */
-
-          else /* if (idtype == P_PGID) */
-            {
-              errcode = ENOSYS;
-              break;
-            }
+          return OK;
         }
     }
-
-  return errcode;
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsched_waitid
+ *
+ * Description:
+ *   The common part of waitid() and waitpid(): wait until a child that
+ *   idtype and id select exited (WEXITED), stopped (WSTOPPED or WUNTRACED)
+ *   or continued (WCONTINUED), and give the event in info as the SIGCHLD of
+ *   the event.  P_PGID with an id of 0 selects the process group of the
+ *   caller.
+ *
+ * Input Parameters:
+ *   idtype  - P_PID, P_PGID or P_ALL
+ *   id      - The process ID or the process group ID
+ *   info    - The location for the event
+ *   options - See waitid(); WUNTRACED is the same as WSTOPPED
+ *
+ * Returned Value:
+ *   OK (0) on success; with WNOHANG and no event, si_pid in info is 0.
+ *   A negated errno value on failure (ECHILD, EINTR).
+ *
+ ****************************************************************************/
+
+int nxsched_waitid(idtype_t idtype, pid_t id, FAR siginfo_t *info,
+                   int options)
+{
+  FAR struct tcb_s *rtcb = this_task();
+  irqstate_t flags;
+  int ret;
+
+  if (idtype == P_PGID && id == 0)
+    {
+      id = group_getpgid(rtcb->group);
+    }
+
+  /* NOTE: sched_lock() is not enough for SMP
+   * because the child task is running on another CPU
+   */
+
+  flags = enter_critical_section();
+
+  ret = check_children(rtcb, idtype, id);
+  if (ret == OK)
+    {
+      ret = waittcb(rtcb, idtype, id, info, options);
+    }
+
+  leave_critical_section(flags);
+  return ret;
+}
 
 /****************************************************************************
  * Name: waitid
@@ -362,125 +499,32 @@ int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
 
 int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct tcb_s *ctcb;
-  bool retains = false;
-  int errcode = ENOSYS;
-  irqstate_t flags;
   int ret;
 
   /* waitid() is a cancellation point */
 
   enter_cancellation_point();
-  flags = enter_critical_section();
 
-  /* MISSING LOGIC:   If WNOHANG is provided in the options, then this
-   * function should returned immediately.  However, there is no mechanism
-   * available now know if the thread has child:  The children remember
-   * their parents (if CONFIG_SCHED_HAVE_PARENT) but the parents do not
-   * remember their children.
-   */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  /* Only ID types P_PID and P_ALL are supported */
-
-  if ((idtype == P_PID || idtype == P_ALL) &&
-      (options & WEXITED) != 0 &&
-      (options & ~(WEXITED | WNOHANG | WNOWAIT)) == 0)
-#endif
+  if ((idtype != P_PID && idtype != P_PGID && idtype != P_ALL) ||
+      (options & ~(WEXITED | WSTOPPED | WCONTINUED | WNOHANG |
+                   WNOWAIT)) != 0 ||
+      (options & (WEXITED | WSTOPPED | WCONTINUED)) == 0)
     {
-      errcode = OK;
-
-      /* Verify that this task actually has children and that the requested
-       * TCB is actually a child of this task.
-       */
-
-#ifdef CONFIG_SCHED_CHILD_STATUS
-      /* Does this task retain child status? */
-
-      retains = ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0);
-
-      if (rtcb->group->tg_children == NULL && retains)
-        {
-          /* There are no children */
-
-          errcode = ECHILD;
-        }
-      else if (idtype == P_PID)
-        {
-          /* Get the TCB corresponding to this PID and make sure that the
-           * thread it is our child.
-           */
-
-          ctcb = nxsched_get_tcb((pid_t)id);
-          if (ctcb && ctcb->group)
-            {
-              /* Make sure that the thread it is our child. */
-
-              if (ctcb->group->tg_ppid != rtcb->group->tg_pid)
-                {
-                  errcode = ECHILD;
-                }
-            }
-
-          /* Does this task retain child status? */
-
-          if (retains && errcode == OK)
-            {
-              /* Check if this specific pid has allocated child status? */
-
-              if (group_find_child(rtcb->group, (pid_t)id) == NULL)
-                {
-                  /* This specific pid is not a child */
-
-                  errcode = ECHILD;
-                }
-            }
-        }
-#else
-      /* Child status is not retained. */
-
-      if (rtcb->group->tg_nchildren == 0)
-        {
-          /* There are no children */
-
-          errcode = ECHILD;
-        }
-      else if (idtype == P_PID)
-        {
-          /* Get the TCB corresponding to this PID and make sure that the
-           * thread is our child.
-           */
-
-          ctcb = nxsched_get_tcb((pid_t)id);
-
-          if (!ctcb || !ctcb->group ||
-              ctcb->group->tg_ppid != rtcb->group->tg_pid)
-            {
-              errcode = ECHILD;
-            }
-        }
-#endif
-    }
-
-  if (errcode == OK)
-    {
-      errcode = waittcb(rtcb, idtype, options, id, info, retains);
-    }
-
-  leave_critical_section(flags);
-  leave_cancellation_point();
-  if (errcode != OK)
-    {
-      ret = ERROR;
-      set_errno(errcode);
+      ret = -EINVAL;
     }
   else
     {
-      ret = OK;
+      ret = nxsched_waitid(idtype, id, info, options);
     }
 
-  return ret;
+  leave_cancellation_point();
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  return OK;
 }
 
 #endif /* CONFIG_SCHED_WAITPID && CONFIG_SCHED_HAVE_PARENT */

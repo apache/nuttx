@@ -83,6 +83,13 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
 #ifdef CONFIG_SCHED_USER_IDENTITY
           child->ch_uid    = ctcb->group->tg_uid;
 #endif
+#ifdef CONFIG_SCHED_PROCESS_GROUPS
+          /* waitpid() with a process group finds the child after the
+           * exit.
+           */
+
+          child->ch_pgid   = ctcb->group->tg_pgid;
+#endif
         }
     }
 
@@ -236,9 +243,12 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
 #endif
     {
 #ifdef CONFIG_SCHED_CHILD_STATUS
-      /* Save the exit status now of the main thread */
+      /* Save the exit status now of the main thread.  Without group
+       * members, the main thread is the last thread of the task group.
+       */
 
       nxtask_exitstatus(ptcb->group, ctcb, status);
+      nxtask_groupexit(ptcb->group, ctcb->group->tg_pid);
 
 #else /* CONFIG_SCHED_CHILD_STATUS */
       /* Exit status is not retained.  Just decrement the number of
