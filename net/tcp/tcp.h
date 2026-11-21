@@ -426,6 +426,10 @@ struct tcp_conn_s
    *     accept() handler when it is invoked with a point to this structure
    *     as an argument.
    *   accept: This is the pointer to the accept handler.
+   *
+   *   tcp_accept_connection() calls accept() with the device of the new
+   *   connection and the TCP connection list locked, so accept() must not
+   *   take a device lock.
    */
 
   FAR void *accept_private;
@@ -1265,8 +1269,12 @@ int tcp_listen(FAR struct tcp_conn_s *conn);
  * Description:
  *   Accept the new connection for the specified listening port.
  *
+ *   The listener's accept() handler, or the TCP_BACKLOG event of its
+ *   callbacks, runs with the TCP connection list locked: they must not
+ *   take a device lock, which comes before the list lock.
+ *
  * Assumptions:
- *   Called from network stack logic with the network stack locked
+ *   Called from the input path with the device locked.
  *
  ****************************************************************************/
 

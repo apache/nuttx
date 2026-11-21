@@ -234,7 +234,7 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
  *   Accept the new connection for the specified listening port.
  *
  * Assumptions:
- *   Called with the network locked.
+ *   Called from the input path with the device locked.
  *
  ****************************************************************************/
 
@@ -247,7 +247,14 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
   /* The event processing logic has already allocated and initialized a TCP
    * connection -- now check there if is an application in place to accept
    * the connection.
+   *
+   * Keep the connection list locked until the listener has the new
+   * connection: close() of the listener removes it from the table of
+   * listeners (tcp_unlisten()) and takes its backlog away (tcp_free())
+   * under this lock, and then frees it.
    */
+
+  tcp_conn_list_lock();
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   listener = tcp_findlistener(&conn->u, portno, conn->domain);
@@ -291,6 +298,7 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
       conn_unlock(&listener->sconn);
     }
 
+  tcp_conn_list_unlock();
   return ret;
 }
 
