@@ -118,7 +118,7 @@ static void tricore_gpsrinitialize(void)
 
   /* Cpux gpsr init */
 
-  for (i = 0; i < 6; i++)
+  for (i = 0; i < CONFIG_NCPUS; i++)
     {
       int irq = TRICORE_GPSR_IRQNUM(i, cpu);
 
