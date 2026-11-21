@@ -331,6 +331,9 @@ Retransmission timer
 * At each expiry the timeout doubles (RFC 6298, section 5.5): the next timeout
 	is the initial timeout (``NET_TCP_RTO``) times 2, 4, 8 and then 16.  With
 	``NET_TCP_FIXED_RTO`` it does not change.
+* The first SYN of ``connect()`` is not a retransmission: it goes out with the
+	initial timeout and is not counted.  ``NET_TCP_MAXSYNRTX`` limits the
+	resends of the SYN, as ``NET_TCP_MAXRTX`` limits the resends of data.
 * A duplicate ACK carries no data (RFC 5681, section 2).  A segment with data
 	that repeats the ACK number does not count toward a fast retransmission.
 
