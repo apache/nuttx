@@ -193,7 +193,6 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
  *
  ****************************************************************************/
 
-#if CONFIG_NET_SEND_BUFSIZE > 0
 uint32_t tcp_wrbuffer_inqueue_size(FAR struct tcp_conn_s *conn)
 {
   FAR struct tcp_wrbuffer_s *wrb;
@@ -217,7 +216,6 @@ uint32_t tcp_wrbuffer_inqueue_size(FAR struct tcp_conn_s *conn)
 
   return total;
 }
-#endif /* CONFIG_NET_SEND_BUFSIZE */
 
 /****************************************************************************
  * Name: tcp_wrbuffer_test
