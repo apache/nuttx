@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_i2c_m3m4_v2.c
+ * arch/arm/src/common/stm32/stm32_i2c_v2.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt. All rights reserved.

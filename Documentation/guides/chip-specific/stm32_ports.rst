@@ -413,7 +413,7 @@ EXTI          v1              arch/arm/src/common/stm32/stm32_exti_gpio_m3m4_v1v
 FLASH         F1/F3           arch/arm/src/common/stm32/stm32_flash_m3m4_f1f3.c      
 GPIO          v1              arch/arm/src/common/stm32/stm32_gpio_m3m4_v1v2.c       
 HRTIM         v1              arch/arm/src/common/stm32/stm32_hrtim_m3m4_v1.c        
-I2C           v2              arch/arm/src/common/stm32/stm32_i2c_m3m4_v2.c          
+I2C           v2              arch/arm/src/common/stm32/stm32_i2c_v2.c
 IWDG          v1              arch/arm/src/common/stm32/stm32_iwdg.c
 OPAMP         v1              arch/arm/src/common/stm32/stm32_opamp_m3m4_v1.c        
 RCC           to be done      arch/arm/src/stm32f3/stm32_rcc.c                       
@@ -479,7 +479,7 @@ EXTI          v2            arch/arm/src/common/stm32/stm32_exti_gpio_m3m4_v1v2.
 FLASH         G4            arch/arm/src/common/stm32/stm32_flash_m3m4_g4.c        
 GPIO          v1            arch/arm/src/common/stm32/stm32_gpio_m3m4_v1v2.c       
 HRTIM         v1            arch/arm/src/common/stm32/stm32_hrtim_m3m4_v1.c        
-I2C           v2            arch/arm/src/common/stm32/stm32_i2c_m3m4_v2.c          
+I2C           v2            arch/arm/src/common/stm32/stm32_i2c_v2.c
 IWDG          v2            arch/arm/src/common/stm32/stm32_iwdg.c
 LPTIM         v1            arch/arm/src/common/stm32/stm32_lptim.c
 OPAMP         v1            arch/arm/src/common/stm32/stm32_opamp_m3m4_v1.c        
