@@ -293,6 +293,7 @@ static inline void stm32_i2c_putreg32(struct stm32_i2cslave_s *priv,
 static int stm32_i2c_isr(int irq, void *context, void *arg)
 {
   struct stm32_i2cslave_s *priv = (struct stm32_i2cslave_s *)arg;
+
   DEBUGASSERT(priv != NULL);
   return stm32_i2c_isr_impl(priv);
 }
@@ -309,6 +310,7 @@ static int stm32_i2c_isr(int irq, void *context, void *arg)
 static void stm32_i2c_rxdone_work(void *arg)
 {
   struct stm32_i2cslave_s *priv = (struct stm32_i2cslave_s *)arg;
+
   priv->callback(priv->callback_arg, I2CS_RX_COMPLETE,
                  priv->rx_curptr);
 }
@@ -326,6 +328,7 @@ static void stm32_i2c_rxdone_work(void *arg)
 static void stm32_i2c_txdone_work(void *arg)
 {
   struct stm32_i2cslave_s *priv = (struct stm32_i2cslave_s *)arg;
+
   priv->callback(priv->callback_arg, I2CS_TX_COMPLETE,
                  priv->tx_curptr);
 }
@@ -573,6 +576,7 @@ static int stm32_i2c_setownaddress(struct i2c_slave_s *dev, int addr,
 static int stm32_i2c_setup(struct i2c_slave_s *dev)
 {
   struct stm32_i2cslave_s *priv = (struct stm32_i2cslave_s *)dev;
+
   DEBUGASSERT(dev);
 
   /* Enable the interrupts here. This function is called when the device
@@ -768,22 +772,22 @@ struct i2c_slave_s *stm32_i2cbus_slaveinitialize(int port)
   switch (port)
     {
 #ifdef CONFIG_STM32_I2C1_SLAVE
-    case 1:
-      priv = (struct stm32_i2cslave_s *)&stm32_i2c1_priv;
-      break;
+      case 1:
+        priv = (struct stm32_i2cslave_s *)&stm32_i2c1_priv;
+        break;
 #endif
 #ifdef CONFIG_STM32_I2C2_SLAVE
-    case 2:
-      priv = (struct stm32_i2cslave_s *)&stm32_i2c2_priv;
-      break;
+      case 2:
+        priv = (struct stm32_i2cslave_s *)&stm32_i2c2_priv;
+        break;
 #endif
 #ifdef CONFIG_STM32_I2C3_SLAVE
-    case 3:
-      priv = (struct stm32_i2cslave_s *)&stm32_i2c3_priv;
-      break;
+      case 3:
+        priv = (struct stm32_i2cslave_s *)&stm32_i2c3_priv;
+        break;
 #endif
-    default:
-      return NULL;
+      default:
+        return NULL;
     }
 
   nxmutex_lock(&priv->lock);
@@ -812,6 +816,7 @@ struct i2c_slave_s *stm32_i2cbus_slaveinitialize(int port)
 int stm32_i2cbus_slaveunitialize(struct i2c_slave_s *dev)
 {
   struct stm32_i2cslave_s *priv = (struct stm32_i2cslave_s *)dev;
+
   stm32_i2c_deinit(priv);
   return OK;
 }
