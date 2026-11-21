@@ -29,10 +29,15 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/mm.h>
 
+#ifdef CONFIG_BUILD_PROTECTED
+#  include <nuttx/userspace.h>
+#endif
+
 #include <string.h>
 
 #include "arm_internal.h"
 #include "rp23xx_psram.h"
+#include "rp23xx_heaps.h"
 
 #if defined(CONFIG_RP23XX_PSRAM)
 
@@ -52,7 +57,7 @@
  * Public Functions
  ****************************************************************************/
 #if defined(CONFIG_RP23XX_PSRAM_HEAP_SEPARATE)
-static struct mm_heap_s *g_psramheap;
+struct mm_heap_s *g_psramheap;
 #endif
 
 /* up_initialize() calls arm_addregion() whenever CONFIG_MM_REGIONS > 1.
@@ -91,21 +96,58 @@ void arm_addregion(void)
 
 void up_allocate_kheap(void **heap_start, size_t *heap_size)
 {
-  *heap_start = (void *)g_idle_topstack;
+#ifdef CONFIG_BUILD_PROTECTED
+  uintptr_t base = (uintptr_t) USERSPACE->us_bssend;
+#else
+  uintptr_t base = g_idle_topstack;
+#endif
 
 #ifdef CONFIG_ARCH_PGPOOL_PBASE
-  *heap_size  = CONFIG_ARCH_PGPOOL_PBASE - g_idle_topstack;
+  size_t end = CONFIG_ARCH_PGPOOL_PBASE;
 #else
-  *heap_size  = CONFIG_RAM_END - g_idle_topstack;
+  size_t end = CONFIG_RAM_END;
 #endif
+
+  *heap_start = (void *)base;
+  if (rp23xx_psram_size() > 0)
+    {
+      DEBUGASSERT(base <= end);
+      *heap_size = end - base;
+    }
+  else
+    {
+      *heap_size = CONFIG_MM_KERNEL_HEAPSIZE;
+    }
 }
 
 /* Use the external PSRAM as the default user heap */
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
-  *heap_start = PSRAM_START;
-  *heap_size  = rp23xx_psram_size();
+  size_t psram_size = rp23xx_psram_size();
+
+  if (psram_size > 0)
+    {
+      *heap_start = PSRAM_START;
+      *heap_size  = psram_size;
+    }
+  else
+    {
+#ifdef CONFIG_BUILD_PROTECTED
+      uintptr_t base = (uintptr_t)USERSPACE->us_bssend +
+                       CONFIG_MM_KERNEL_HEAPSIZE;
+#else
+      uintptr_t base = g_idle_topstack + CONFIG_MM_KERNEL_HEAPSIZE;
+#endif
+#ifdef CONFIG_ARCH_PGPOOL_PBASE
+      size_t end = CONFIG_ARCH_PGPOOL_PBASE;
+#else
+      size_t end = CONFIG_RAM_END;
+#endif
+      *heap_start = (void *)base;
+      DEBUGASSERT(base <= end);
+      *heap_size  = end - base;
+    }
 }
 
 #elif defined (CONFIG_RP23XX_PSRAM_HEAP_SEPARATE)
@@ -126,7 +168,7 @@ void up_extraheaps_init(void)
        */
 
       memset(&config, 0, sizeof(config));
-      config.heap  = KRN_HEAP;
+      config.allocheap = true;
       config.name  = "psram";
       config.start = PSRAM_START;
       config.size  = psram_size;
