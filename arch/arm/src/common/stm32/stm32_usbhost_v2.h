@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_usbhost.h
+ * arch/arm/src/common/stm32/stm32_usbhost_v2.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32_USBHOST_H
-#define __ARCH_ARM_SRC_STM32H7_STM32_USBHOST_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_USBHOST_V2_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_USBHOST_V2_H
 
 /* STM32 USB OTG Host Driver Support
  *
@@ -186,4 +186,4 @@ void stm32_usbhost_vbusdrive(int iface, bool enable);
 
 #endif /* __ASSEMBLY__ */
 #endif /* (CONFIG_STM32_OTGFS || CONFIG_STM32_OTGHS) && CONFIG_USBHOST */
-#endif /* __ARCH_ARM_SRC_STM32H7_STM32_USBHOST_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_USBHOST_V2_H */

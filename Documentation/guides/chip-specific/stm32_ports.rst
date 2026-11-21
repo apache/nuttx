@@ -666,7 +666,7 @@ SDMMC         v2            arch/arm/src/common/stm32/stm32_sdmmc_v2.c
 SPI/I2S       to be done    arch/arm/src/stm32h7/stm32_spi.c       
 TIM           v2, H7RS v3   arch/arm/src/common/stm32/stm32_tim.c  
 USART/LPUART  v4            arch/arm/src/stm32h7/stm32_serial.c    
-USB           OTG FS/HS     arch/arm/src/stm32h7/stm32_otgdev.c    
+USB           OTG v2        arch/arm/src/common/stm32/stm32_otgdev_v2.c
 WWDG          v2, H7RS v3   arch/arm/src/common/stm32/stm32_wwdg.c
 AES/CRYP      n/a           arch/arm/src/stm32h7/stm32_aes.c       
 BBSRAM        n/a           arch/arm/src/stm32h7/stm32_bbsram.c    
@@ -675,7 +675,7 @@ LPTIM         v1, H7RS v2   arch/arm/src/common/stm32/stm32_lptim.c
 PULSECOUNT    n/a           arch/arm/src/common/stm32/stm32_pulsecount.c
 PWM           n/a           arch/arm/src/stm32h7/stm32_pwm.c       
 QENCODER      n/a           arch/arm/src/common/stm32/stm32_qencoder.c  
-USB host      n/a           arch/arm/src/stm32h7/stm32_otghost.c   
+USB host      OTG v2        arch/arm/src/common/stm32/stm32_otghost_v2.c
 ============  ============  ============================================
 
 STM32L0
@@ -790,6 +790,7 @@ SPI/I2S       v5            arch/arm/src/common/stm32/stm32_spi_v5.c
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 USB           device        not supported
+USB host      OTG v2        arch/arm/src/common/stm32/stm32_otghost_v2.c
 WWDG          v3            arch/arm/src/common/stm32/stm32_wwdg.c
 XSPI          to be done    not supported
 ============  ============  ==================================================

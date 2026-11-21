@@ -126,6 +126,20 @@ ifeq ($(CONFIG_STM32_SDMMC)$(CONFIG_STM32_HAVE_IP_SDMMC_V2),yy)
 CHIP_CSRCS += stm32_sdmmc_v2.c
 endif
 
+ifeq ($(CONFIG_STM32_HAVE_IP_OTG_V2),y)
+ifneq ($(CONFIG_STM32_OTGFS_USBDEV)$(CONFIG_STM32_OTGHS_USBDEV),)
+CHIP_CSRCS += stm32_otgdev_v2.c
+endif
+ifneq ($(CONFIG_STM32_OTGFS_HOST)$(CONFIG_STM32_OTGHS_HOST),)
+CHIP_CSRCS += stm32_otghost_v2.c
+ifeq ($(CONFIG_USBHOST_TRACE),y)
+CHIP_CSRCS += stm32_usbhost_v2.c
+else ifeq ($(CONFIG_DEBUG_USB),y)
+CHIP_CSRCS += stm32_usbhost_v2.c
+endif
+endif
+endif
+
 ifeq ($(CONFIG_STM32_COMMON_M33),y)
 CHIP_CSRCS += stm32_allocateheap_m33_v1.c
 CHIP_CSRCS += stm32_irq_m33_v1.c

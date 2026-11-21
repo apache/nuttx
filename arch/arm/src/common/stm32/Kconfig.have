@@ -1267,6 +1267,19 @@ config STM32_HAVE_IP_OTGFS_M3M4_V1
 config STM32_HAVE_IP_OTGHS_M3M4_V1
 	bool
 
+config STM32_HAVE_IP_OTG_V2
+	bool
+
+config STM32_HAVE_OTGHS_USBDEV
+	bool
+	---help---
+		The OTG v2 driver supports the OTG HS device role (STM32H7).
+
+config STM32_HAVE_OTGHS_HOST
+	bool
+	---help---
+		The OTG v2 driver supports the OTG HS host role (STM32N6).
+
 config STM32_HAVE_COMMON_USBHOST_DEBUG
 	bool
 	default y if STM32_COMMON_LEGACY

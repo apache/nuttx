@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_usbhost.c
+ * arch/arm/src/common/stm32/stm32_usbhost_v2.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -30,7 +30,7 @@
 #include <stdbool.h>
 #include <sys/types.h>
 
-#include "stm32_usbhost.h"
+#include "stm32_usbhost_v2.h"
 
 #ifdef HAVE_USBHOST_TRACE
 

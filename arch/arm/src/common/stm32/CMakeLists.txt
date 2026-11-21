@@ -115,6 +115,18 @@ if(CONFIG_STM32_SDMMC AND CONFIG_STM32_HAVE_IP_SDMMC_V2)
   list(APPEND SRCS stm32_sdmmc_v2.c)
 endif()
 
+if(CONFIG_STM32_HAVE_IP_OTG_V2)
+  if(CONFIG_STM32_OTGFS_USBDEV OR CONFIG_STM32_OTGHS_USBDEV)
+    list(APPEND SRCS stm32_otgdev_v2.c)
+  endif()
+  if(CONFIG_STM32_OTGFS_HOST OR CONFIG_STM32_OTGHS_HOST)
+    list(APPEND SRCS stm32_otghost_v2.c)
+    if(CONFIG_USBHOST_TRACE OR CONFIG_DEBUG_USB)
+      list(APPEND SRCS stm32_usbhost_v2.c)
+    endif()
+  endif()
+endif()
+
 if(CONFIG_STM32_COMMON_M33)
   list(APPEND SRCS stm32_allocateheap_m33_v1.c stm32_irq_m33_v1.c
        stm32_start_m33_v1.c)

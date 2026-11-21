@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/hardware/stm32_otg.h
+ * arch/arm/src/common/stm32/hardware/stm32_otg_v2.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_OTG_H
-#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_OTG_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_OTG_V2_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_OTG_V2_H
 
 /****************************************************************************
  * Included Files
@@ -457,6 +457,7 @@
 #define OTG_GCCFG_PDEN                (1 << 19) /* Bit 19: Primary detection (PD) mode enable */
 #define OTG_GCCFG_SDEN                (1 << 20) /* Bit 20: Secondary detection (SD) mode enable */
 #define OTG_GCCFG_VBDEN               (1 << 21) /* Bit 21: USB VBUS detection enable */
+#define OTG_GCCFG_PULLDOWNEN          (1 << 25) /* Bit 25: Host pull-down enable (embedded HS PHY) */
                                                 /* Bits 22-31: Reserved */
 
 /* TODO: OTG core LPM configuration register */
@@ -482,6 +483,7 @@
 
 #define OTG_HCFG_FSLSPCS_SHIFT        (0)                           /* Bits 0-1: FS/LS PHY clock select */
 #define OTG_HCFG_FSLSPCS_MASK         (3 << OTG_HCFG_FSLSPCS_SHIFT)
+#  define OTG_HCFG_FSLSPCS_HS3060MHz  (0 << OTG_HCFG_FSLSPCS_SHIFT) /* PHY clock is running at 30/60 MHz (UTMI+ PHY) */
 #  define OTG_HCFG_FSLSPCS_FS48MHz    (1 << OTG_HCFG_FSLSPCS_SHIFT) /* FS host mode, PHY clock is running at 48 MHz */
 #  define OTG_HCFG_FSLSPCS_LS48MHz    (1 << OTG_HCFG_FSLSPCS_SHIFT) /* LS host mode,  Select 48 MHz PHY clock frequency */
 #  define OTG_HCFG_FSLSPCS_LS6MHz     (2 << OTG_HCFG_FSLSPCS_SHIFT) /* LS host mode, Select 6 MHz PHY clock frequency */
@@ -933,4 +935,4 @@
 #define OTG_PCGCCTL_SUSP              (1 << 7)  /* Bit 7: PHY Suspended */
                                                 /* Bits 7-31: Reserved */
 
-#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_OTG_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_OTG_V2_H */

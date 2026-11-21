@@ -31,6 +31,8 @@
 
 #if defined(CONFIG_STM32_COMMON_LEGACY)
 #  include "stm32_usbhost_m3m4_v1.h"
+#elif defined(CONFIG_STM32_HAVE_IP_OTG_V2)
+#  include "stm32_usbhost_v2.h"
 #else
 #  error "Unsupported STM32 stm32_usbhost"
 #endif
