@@ -119,6 +119,11 @@
 #  define __arch_syslog syslog
 #endif
 
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  define _emerg(format, ...) \
+   __arch_syslog(LOG_EMERG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+#endif
+
 #if !defined(CONFIG_DEBUG_ALERT)
 #  define _alert      _none
 #elif defined(CONFIG_CPP_HAVE_VARARGS)
@@ -1470,6 +1475,8 @@ void lib_dumpvfile(int fd, FAR const char *msg, FAR const struct iovec *iov,
  */
 
 #ifndef CONFIG_CPP_HAVE_VARARGS
+void _emerg(FAR const char *format, ...) syslog_like(1, 2);
+
 #ifdef CONFIG_DEBUG_ALERT
 void _alert(FAR const char *format, ...) syslog_like(1, 2);
 #endif
