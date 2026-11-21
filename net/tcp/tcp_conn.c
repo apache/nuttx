@@ -1547,6 +1547,15 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
       FAR const struct sockaddr_in6 *inaddr =
         (FAR const struct sockaddr_in6 *)addr;
 
+      /* A TCP socket is IPv6-only: an IPv4-mapped address is not
+       * reachable (as Linux with IPV6_V6ONLY).
+       */
+
+      if (ip6_is_ipv4addr(&inaddr->sin6_addr))
+        {
+          return -ENETUNREACH;
+        }
+
       conn->rport   = inaddr->sin6_port;
 
       /* The sockaddr address is 128-bits in network order.
