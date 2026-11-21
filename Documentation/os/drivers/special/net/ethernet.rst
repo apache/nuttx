@@ -12,6 +12,11 @@ Ethernet Device Drivers
    Each Ethernet driver registers itself by calling
    ``netdev_register()``.
 
+-  ``include/nuttx/net/netdev_lowerhalf.h``. (Recommended for new
+   drivers, see :ref:`Network Drivers <netdriver>`)
+   A lower half driver registers itself by calling
+   ``netdev_lower_register()``.
+
 -  **Examples**: ``drivers/net/dm90x0.c``,
    ``arch/drivers/arm/src/c5471/c5471_ethernet.c``,
    ``arch/z80/src/ez80/ez80_emac.c``, etc.
