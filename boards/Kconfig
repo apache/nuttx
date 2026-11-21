@@ -2872,7 +2872,7 @@ config ARCH_BOARD_QEMU_RH850_U2C
 
 config ARCH_BOARD_A2G_TC397_5V_TFT
 	bool "Infineon's AURIX TC397 board: KIT_A2G_TC397_5V_TFT"
-	depends on ARCH_CHIP_TC39X
+	depends on ARCH_CHIP_TC397
 	---help---
 		This options selects support for NuttX on the Infineon's AURIX board
 		board featuring the TC397 6Quad CPU.
@@ -4742,7 +4742,7 @@ if ARCH_BOARD_QEMU_RH850_U2C
 source "boards/rh850/u2c/qemu-rh850-u2c/Kconfig"
 endif
 if ARCH_BOARD_A2G_TC397_5V_TFT
-source "boards/tricore/tc3xx/a2g-tc397-5v-tft/Kconfig"
+source "boards/tricore/tc3x/a2g-tc397-5v-tft/Kconfig"
 endif
 if ARCH_BOARD_MPS2_AN500
 source "boards/arm/mps/mps2-an500/Kconfig"
