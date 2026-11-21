@@ -73,6 +73,7 @@
 #include <sys/statfs.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <fcntl.h>
 
 #include <nuttx/fs/fs.h>
 
@@ -102,11 +103,11 @@
 
 #define USERFS_SERVER_PORTBASE 0x8300
 
-/* It looks like the maximum size of a request is 16 bytes.  We will allow a
- * little more for the maximum size of a request structure.
+/* The fixed part of the largest request structure is the flock request
+ * which embeds a struct flock.  Allow a little more than that.
  */
 
-#define USERFS_REQ_MAXSIZE   (32)
+#define USERFS_REQ_MAXSIZE   (64)
 
 /****************************************************************************
  * Public Data
@@ -140,7 +141,12 @@ enum userfs_req_e
   USERFS_REQ_STAT,
   USERFS_REQ_DESTROY,
   USERFS_REQ_FCHSTAT,
-  USERFS_REQ_CHSTAT
+  USERFS_REQ_CHSTAT,
+  USERFS_REQ_GETLK,
+  USERFS_REQ_SETLK,
+#ifdef CONFIG_FS_NOTIFY
+  USERFS_REQ_NOTIFY
+#endif
 };
 
 /* This enumeration provides the type of each response returned from the
@@ -171,7 +177,12 @@ enum userfs_resp_e
   USERFS_RESP_STAT,
   USERFS_RESP_DESTROY,
   USERFS_RESP_FCHSTAT,
-  USERFS_RESP_CHSTAT
+  USERFS_RESP_CHSTAT,
+  USERFS_RESP_GETLK,
+  USERFS_RESP_SETLK,
+#ifdef CONFIG_FS_NOTIFY
+  USERFS_RESP_NOTIFY
+#endif
 };
 
 /* These structures are used by internal UserFS implementation and should not
@@ -229,6 +240,20 @@ struct userfs_operations_s
             FAR const struct stat *buf, int flags);
   int     (*chstat)(FAR void *volinfo, FAR const char *relpath,
             FAR const struct stat *buf, int flags);
+  /* Optional methods; NULL or -ENOSYS falls back to the OS defaults.
+   * setlk is always non-blocking: return -EAGAIN and the VFS retries.
+   * notify reports the watch life cycle; events are injected back with
+   * userfs_notify_event().
+   */
+
+  int     (*getlk)(FAR void *volinfo, FAR void *openinfo,
+            FAR struct flock *fl);
+  int     (*setlk)(FAR void *volinfo, FAR void *openinfo,
+            FAR struct flock *fl);
+#ifdef CONFIG_FS_NOTIFY
+  int     (*notify)(FAR void *volinfo, int wd, FAR const char *relpath,
+            int action, uint32_t mask);
+#endif
 };
 
 /* The following structures describe the header on the marshaled data sent
@@ -554,6 +579,40 @@ struct userfs_chstat_response_s
   int ret;                  /* Result of the operation */
 };
 
+struct userfs_flock_request_s
+{
+  uint8_t req;              /* USERFS_REQ_GETLK or USERFS_REQ_SETLK */
+  FAR void *openinfo;       /* File open information */
+  struct flock lock;        /* Lock description */
+};
+
+struct userfs_flock_response_s
+{
+  uint8_t resp;             /* USERFS_RESP_GETLK or USERFS_RESP_SETLK */
+  int ret;                  /* Result of the operation */
+  struct flock lock;        /* GETLK: conflicting lock or F_UNLCK */
+};
+
+#ifdef CONFIG_FS_NOTIFY
+struct userfs_notify_request_s
+{
+  uint8_t req;              /* Must be USERFS_REQ_NOTIFY */
+  uint8_t action;           /* NOTIFY_WATCH_ADD or NOTIFY_WATCH_RM */
+  int wd;                   /* RM: the handle returned by ADD */
+  uint32_t mask;            /* inotify event mask */
+  char relpath[1];          /* Relative path of the watched object */
+};
+
+#define SIZEOF_USERFS_NOTIFY_REQUEST_S(n) \
+  (sizeof(struct userfs_notify_request_s) + (n) - 1)
+
+struct userfs_notify_response_s
+{
+  uint8_t resp;             /* Must be USERFS_RESP_NOTIFY */
+  int ret;                  /* ADD: daemon watch handle or error */
+};
+#endif /* CONFIG_FS_NOTIFY */
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -626,6 +685,26 @@ int userfs_register(void);
 int userfs_run(FAR const char *mountpt,
                FAR const struct userfs_operations_s *userops,
                FAR void *volinfo, size_t mxwrite);
+
+/****************************************************************************
+ * Name: userfs_notify_event
+ *
+ * Description:
+ *   Inject a file change notification through an inotify descriptor
+ *   (CONFIG_FS_NOTIFY_INJECT).
+ *
+ * Input Parameters:
+ *   abspath - Absolute path of the affected object
+ *   mask    - inotify event mask
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_NOTIFY_INJECT
+int userfs_notify_event(FAR const char *abspath, uint32_t mask);
+#endif
 
 #ifdef __cplusplus
 }

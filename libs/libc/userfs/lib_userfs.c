@@ -34,14 +34,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include <limits.h>
+#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
 
 #include <arpa/inet.h>
+#include <sys/inotify.h>
 #include <netinet/in.h>
 
 #include <nuttx/fs/userfs.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/mutex.h>
 
 #include "libc.h"
@@ -940,6 +944,79 @@ static inline int userfs_chstat_dispatch(FAR struct userfs_info_s *info,
   return nsent < 0 ? nsent : OK;
 }
 
+static inline int userfs_flock_dispatch(FAR struct userfs_info_s *info,
+                   FAR struct userfs_flock_request_s *req, size_t reqlen)
+{
+  struct userfs_flock_response_s resp;
+  ssize_t nsent;
+
+  /* Verify the request size */
+
+  if (reqlen != sizeof(struct userfs_flock_request_s))
+    {
+      return -EINVAL;
+    }
+
+  /* Dispatch the request.  A daemon without the method answers -ENOSYS
+   * and the OS uses its local lock table.
+   */
+
+  resp.lock = req->lock;
+  if (req->req == USERFS_REQ_GETLK)
+    {
+      resp.resp = USERFS_RESP_GETLK;
+      resp.ret  = info->userops->getlk == NULL ? -ENOSYS :
+                  info->userops->getlk(info->volinfo, req->openinfo,
+                                       &resp.lock);
+    }
+  else
+    {
+      resp.resp = USERFS_RESP_SETLK;
+      resp.ret  = info->userops->setlk == NULL ? -ENOSYS :
+                  info->userops->setlk(info->volinfo, req->openinfo,
+                                       &resp.lock);
+    }
+
+  /* Send the response */
+
+  nsent = sendto(info->sockfd, &resp,
+                 sizeof(struct userfs_flock_response_s),
+                 0, (FAR struct sockaddr *)&info->client,
+                 sizeof(struct sockaddr_in));
+  return nsent < 0 ? nsent : OK;
+}
+
+#ifdef CONFIG_FS_NOTIFY
+static inline int userfs_notify_dispatch(FAR struct userfs_info_s *info,
+                   FAR struct userfs_notify_request_s *req, size_t reqlen)
+{
+  struct userfs_notify_response_s resp;
+  ssize_t nsent;
+
+  /* Verify the request size */
+
+  if (reqlen < SIZEOF_USERFS_NOTIFY_REQUEST_S(1))
+    {
+      return -EINVAL;
+    }
+
+  /* Dispatch the request */
+
+  resp.ret = info->userops->notify == NULL ? -ENOSYS :
+             info->userops->notify(info->volinfo, req->wd, req->relpath,
+                                   req->action, req->mask);
+
+  /* Send the response */
+
+  resp.resp = USERFS_RESP_NOTIFY;
+  nsent     = sendto(info->sockfd, &resp,
+                     sizeof(struct userfs_notify_response_s),
+                     0, (FAR struct sockaddr *)&info->client,
+                     sizeof(struct sockaddr_in));
+  return nsent < 0 ? nsent : OK;
+}
+#endif /* CONFIG_FS_NOTIFY */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1224,6 +1301,21 @@ int userfs_run(FAR const char *mountpt,
                    nread);
             break;
 
+          case USERFS_REQ_GETLK:
+          case USERFS_REQ_SETLK:
+            ret = userfs_flock_dispatch(info,
+                   (FAR struct userfs_flock_request_s *)info->iobuffer,
+                   nread);
+            break;
+
+#ifdef CONFIG_FS_NOTIFY
+          case USERFS_REQ_NOTIFY:
+            ret = userfs_notify_dispatch(info,
+                   (FAR struct userfs_notify_request_s *)info->iobuffer,
+                   nread);
+            break;
+#endif
+
           default:
             ferr("ERROR: Unrecognized request received: %u\n",
                  *info->iobuffer);
@@ -1244,3 +1336,63 @@ errout_with_info:
   lib_free(info);
   return ret;
 }
+
+/****************************************************************************
+ * Name: userfs_notify_event
+ *
+ * Description:
+ *   Inject a file change notification through an inotify descriptor
+ *   (CONFIG_FS_NOTIFY_INJECT).
+ *
+ * Input Parameters:
+ *   abspath - Absolute path of the affected object
+ *   mask    - inotify event mask
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_NOTIFY_INJECT
+int userfs_notify_event(FAR const char *abspath, uint32_t mask)
+{
+  FAR struct notify_inject_s *event;
+  size_t pathlen;
+  size_t len;
+  ssize_t nwritten;
+  int fd;
+
+  if (abspath == NULL || abspath[0] != '/')
+    {
+      return -EINVAL;
+    }
+
+  pathlen = strlen(abspath) + 1;
+  len     = sizeof(uint32_t) + pathlen;
+  if (len > PATH_MAX)
+    {
+      return -ENAMETOOLONG;
+    }
+
+  event = lib_get_tempbuffer(PATH_MAX);
+  if (event == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  event->mask = mask;
+  memcpy(event->path, abspath, pathlen);
+
+  fd = inotify_init1(0);
+  if (fd < 0)
+    {
+      lib_put_tempbuffer(event);
+      return -get_errno();
+    }
+
+  nwritten = write(fd, event, len);
+  close(fd);
+  lib_put_tempbuffer(event);
+  return nwritten < 0 ? -get_errno() : OK;
+}
+#endif /* CONFIG_FS_NOTIFY_INJECT */

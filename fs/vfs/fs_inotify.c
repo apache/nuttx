@@ -52,6 +52,21 @@
 #define INOTIFY_NCLASS  14
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* A list with a file system watch handle receives its events from the
+ * file system through notify_event(); locally generated events are
+ * suppressed on it to avoid duplicates.
+ */
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+#  define NOTIFY_IS_REMOTE(list) ((list)->mwd >= 0)
+#else
+#  define NOTIFY_IS_REMOTE(list) false
+#endif
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -77,6 +92,9 @@ struct inotify_watch_list_s
 {
   struct list_node watches;
   FAR char        *path;
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  int              mwd;      /* File system watch handle, -1 if none */
+#endif
 };
 
 struct inotify_watch_s
@@ -109,10 +127,18 @@ static int     inotify_open(FAR struct file *filep);
 static int     inotify_close(FAR struct file *filep);
 static ssize_t inotify_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
+#ifdef CONFIG_FS_NOTIFY_INJECT
+static ssize_t inotify_write(FAR struct file *filep,
+                             FAR const char *buffer, size_t buflen);
+#endif
 static int     inotify_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                             bool setup);
 static int     inotify_ioctl(FAR struct file *filep, int cmd,
                              unsigned long arg);
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+static FAR struct inotify_watch_list_s *
+               inotify_get_watch_list(FAR const char *path);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -123,7 +149,11 @@ static const struct file_operations g_inotify_fops =
   inotify_open,     /* open */
   inotify_close,    /* close */
   inotify_read,     /* read */
+#ifdef CONFIG_FS_NOTIFY_INJECT
+  inotify_write,    /* write */
+#else
   NULL,             /* write */
+#endif
   NULL,             /* seek */
   inotify_ioctl,    /* ioctl */
   NULL,             /* mmap */
@@ -336,6 +366,125 @@ static void inotify_queue_event(FAR struct inotify_device_s *dev, int wd,
 }
 
 /****************************************************************************
+ * Name: inotify_notify_fs
+ *
+ * Description:
+ *   Look up the file system backing path and invoke its notify method.
+ *   Returns the method result, or -ENODEV when path is not on a
+ *   mountpoint with a notify method.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+static int inotify_notify_fs(FAR const char *path, int action, int wd,
+                             uint32_t mask)
+{
+  struct inode_search_s desc;
+  FAR struct inode *inode;
+  int ret;
+
+  ret = inode_search_setup(&desc, path, false);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -ENODEV;
+  if (inode_find(&desc, &inode) >= 0)
+    {
+      if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops->notify != NULL)
+        {
+          ret = inode->u.i_mops->notify(inode, wd, desc.relpath != NULL ?
+                                        desc.relpath : "", action, mask);
+        }
+
+      inode_release(inode);
+    }
+
+  inode_search_release(&desc);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: inotify_update_watch
+ *
+ * Description:
+ *   Add or remove the file system watch that backs abspath.  Must be
+ *   called WITHOUT the inotify locks: the file system method may wait
+ *   on a local server whose own file operations take them.
+ *
+ *   For NOTIFY_WATCH_ADD the file system is (re)told the union of all
+ *   watch masks on the path so a later broader watch widens the file
+ *   system watch; the file system returns the same handle for a path it
+ *   already watches (see the notify method contract).  The list is
+ *   revalidated before the handle is stored; if the watch disappeared
+ *   meanwhile the file system watch is removed again.
+ *
+ ****************************************************************************/
+
+static void inotify_update_watch(FAR struct inotify_watch_list_s *list,
+                                 FAR const char *abspath, int action)
+{
+  FAR struct inotify_watch_s *watch;
+  uint32_t mask = 0;
+  bool present;
+  int wd;
+
+  if (action == NOTIFY_WATCH_RM)
+    {
+      if (list->mwd >= 0)
+        {
+          inotify_notify_fs(abspath, NOTIFY_WATCH_RM, list->mwd, 0);
+        }
+
+      return;
+    }
+
+  /* Compute the union of the watch masks (the list may have gone away) */
+
+  nxmutex_lock(&g_inotify.lock);
+  present = inotify_get_watch_list(abspath) == list;
+  if (present)
+    {
+      list_for_every_entry(&list->watches, watch, struct inotify_watch_s,
+                           l_node)
+        {
+          mask |= watch->mask;
+        }
+    }
+
+  nxmutex_unlock(&g_inotify.lock);
+  if (!present || mask == 0)
+    {
+      return;
+    }
+
+  wd = inotify_notify_fs(abspath, NOTIFY_WATCH_ADD, -1, mask);
+  if (wd < 0)
+    {
+      return;
+    }
+
+  /* Store the handle if the watch list still exists; undo otherwise */
+
+  nxmutex_lock(&g_inotify.lock);
+  present = inotify_get_watch_list(abspath) == list;
+  if (present)
+    {
+      list->mwd = wd;
+    }
+
+  nxmutex_unlock(&g_inotify.lock);
+  if (!present)
+    {
+      inotify_notify_fs(abspath, NOTIFY_WATCH_RM, wd, 0);
+    }
+}
+#else
+#  define inotify_update_watch(list, abspath, action)
+#endif
+
+/****************************************************************************
  * Name: inotify_remove_watch_no_event
  *
  * Description:
@@ -357,6 +506,7 @@ inotify_remove_watch_no_event(FAR struct inotify_watch_s *watch)
     {
       ENTRY item;
 
+      inotify_update_watch(list, list->path, NOTIFY_WATCH_RM);
       item.key = list->path;
       hsearch_r(item, DELETE, NULL, &g_inotify.hash);
     }
@@ -437,6 +587,42 @@ static int inotify_open(FAR struct file *filep)
   nxmutex_unlock(&dev->lock);
   return OK;
 }
+
+/****************************************************************************
+ * Name: inotify_write
+ *
+ * Description:
+ *   Inject one event per write of a struct notify_inject_s payload
+ *   (event mask + NUL terminated absolute path).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_NOTIFY_INJECT
+static ssize_t inotify_write(FAR struct file *filep,
+                             FAR const char *buffer, size_t buflen)
+{
+  FAR const struct notify_inject_s *event;
+  size_t hdrlen = offsetof(struct notify_inject_s, path);
+  size_t pathlen;
+
+  event = (FAR const struct notify_inject_s *)buffer;
+  if (event == NULL || buflen <= hdrlen || buflen > hdrlen + PATH_MAX)
+    {
+      return -EINVAL;
+    }
+
+  pathlen = strnlen(event->path, buflen - hdrlen);
+  if (pathlen == buflen - hdrlen || event->path[0] != '/')
+    {
+      /* Not NUL terminated within the write, or not an absolute path */
+
+      return -EINVAL;
+    }
+
+  notify_event(NULL, event->path, event->mask);
+  return buflen;
+}
+#endif
 
 /****************************************************************************
  * Name: inotify_poll
@@ -794,6 +980,9 @@ inotify_alloc_watch_list(FAR const char *path)
     }
 
   list_initialize(&list->watches);
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  list->mwd = -1;
+#endif
   list->path = fs_heap_strdup(path);
   if (list->path == NULL)
     {
@@ -893,7 +1082,7 @@ inotify_queue_watch_list_event(FAR struct inotify_watch_list_s *list,
  ****************************************************************************/
 
 static void inotify_queue_parent_event(FAR char *path, uint32_t mask,
-                                       uint32_t cookie)
+                                       uint32_t cookie, bool remote)
 {
   FAR struct inotify_watch_list_s *list;
   FAR char *name;
@@ -906,21 +1095,23 @@ static void inotify_queue_parent_event(FAR char *path, uint32_t mask,
 
   *(name - 1) = '\0';
   list = inotify_get_watch_list(path);
-  if (list != NULL)
+  if (list != NULL && (remote || !NOTIFY_IS_REMOTE(list)))
     {
       inotify_queue_watch_list_event(list, mask | IN_ISDIR, cookie, name);
     }
 }
 
 /****************************************************************************
- * Name: notify_queue_path_event
+ * Name: notify_queue_path_event2
  *
  * Description:
- *   Send the notification by the path.
+ *   Send the notification by the path.  remote marks an event injected
+ *   by the file system through notify_event().
  *
  ****************************************************************************/
 
-static void notify_queue_path_event(FAR const char *path, uint32_t mask)
+static void notify_queue_path_event2(FAR const char *path, uint32_t mask,
+                                     bool remote)
 {
   FAR struct inotify_watch_list_s *list;
   FAR char *abspath;
@@ -960,9 +1151,9 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
     }
 
   list = inotify_get_watch_list(abspath);
-  inotify_queue_parent_event(abspath, mask, cookie);
+  inotify_queue_parent_event(abspath, mask, cookie, remote);
   lib_put_pathbuffer(pathbuffer);
-  if (list == NULL)
+  if (list == NULL || (!remote && NOTIFY_IS_REMOTE(list)))
     {
       return;
     }
@@ -988,6 +1179,19 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
     {
       inotify_queue_watch_list_event(list, mask, cookie, NULL);
     }
+}
+
+/****************************************************************************
+ * Name: notify_queue_path_event
+ *
+ * Description:
+ *   Send the notification for a locally generated event.
+ *
+ ****************************************************************************/
+
+static void notify_queue_path_event(FAR const char *path, uint32_t mask)
+{
+  notify_queue_path_event2(path, mask, false);
 }
 
 /****************************************************************************
@@ -1222,6 +1426,15 @@ out:
   nxmutex_unlock(&dev->lock);
   nxmutex_unlock(&g_inotify.lock);
 
+  /* Establish the file system watch (idempotent) without the locks
+   * held (see inotify_update_watch).
+   */
+
+  if (ret >= 0)
+    {
+      inotify_update_watch(list, abspath, NOTIFY_WATCH_ADD);
+    }
+
 out_free:
   file_put(filep);
   lib_put_tempbuffer(tmpbuffer);
@@ -1324,8 +1537,13 @@ int inotify_init1(int flags)
       goto exit_set_errno;
     }
 
+#ifdef CONFIG_FS_NOTIFY_INJECT
+  ret = file_allocate_from_inode(&g_inotify_inode, O_RDWR | flags,
+                                 0, dev, 0);
+#else
   ret = file_allocate_from_inode(&g_inotify_inode, O_RDONLY | flags,
                                  0, dev, 0);
+#endif
   if (ret < 0)
     {
       ferr("Failed to allocate inotify fd\n");
@@ -1583,4 +1801,57 @@ void notify_rename(FAR const char *oldpath, bool oldisdir,
   notify_queue_path_event(oldpath, oldmask);
   notify_queue_path_event(newpath, newmask);
   nxmutex_unlock(&g_inotify.lock);
+}
+
+/****************************************************************************
+ * Name: notify_event
+ *
+ * Description:
+ *   Inject a file change notification that originated outside the local
+ *   VFS.  Must be called from thread context.
+ *
+ ****************************************************************************/
+
+void notify_event(FAR struct inode *mountpt, FAR const char *relpath,
+                  uint32_t mask)
+{
+  FAR char *pathbuffer;
+
+  if (relpath == NULL)
+    {
+      return;
+    }
+
+  pathbuffer = lib_get_pathbuffer();
+  if (pathbuffer == NULL)
+    {
+      return;
+    }
+
+  if (mountpt != NULL)
+    {
+      if (inode_getpath(mountpt, pathbuffer, PATH_MAX) < 0)
+        {
+          lib_put_pathbuffer(pathbuffer);
+          return;
+        }
+
+      /* inode_getpath() terminates a mountpoint path with '/' */
+
+      while (*relpath == '/')
+        {
+          relpath++;
+        }
+
+      strlcat(pathbuffer, relpath, PATH_MAX);
+    }
+  else
+    {
+      strlcpy(pathbuffer, relpath, PATH_MAX);
+    }
+
+  nxmutex_lock(&g_inotify.lock);
+  notify_queue_path_event2(pathbuffer, mask, true);
+  nxmutex_unlock(&g_inotify.lock);
+  lib_put_pathbuffer(pathbuffer);
 }
