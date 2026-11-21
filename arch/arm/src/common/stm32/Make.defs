@@ -284,10 +284,10 @@ CHIP_CSRCS += stm32_i2c_m3m4_v1_f40xxx.c
 else
 CHIP_CSRCS += stm32_i2c_m3m4_v1.c
 endif
-else ifeq ($(CONFIG_STM32_HAVE_IP_I2C_M3M4_V2),y)
-CHIP_CSRCS += stm32_i2c_m3m4_v2.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_I2C_V2),y)
+CHIP_CSRCS += stm32_i2c_v2.c
 ifeq ($(CONFIG_STM32_I2C_SLAVE),y)
-CHIP_CSRCS += stm32_i2c_m3m4_v2_slave.c
+CHIP_CSRCS += stm32_i2c_v2_slave.c
 endif
 endif
 

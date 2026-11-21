@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_i2c_m3m4_v2_slave.c
+ * arch/arm/src/common/stm32/stm32_i2c_v2_slave.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
