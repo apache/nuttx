@@ -236,7 +236,8 @@ struct cryptop
 #define CRYPTO_F_CBIMM 0x0020   /* Do callback immediately */
 #define CRYPTO_F_CANCEL 0x0040  /* Cancel the current crypto operation */
 
-#define CRYPTO_F_NOT_EXPORTABLE 0x0080 /* Mark key unexportable from secure module */
+#define CRYPTO_F_NOT_EXPORTABLE 0x0080  /* Mark key unexportable from secure module */
+#define CRYPTO_F_WRITE_PROTECTED 0x0100 /* Key must reside in write-protected storage */
 
   FAR void *crp_buf;               /* Data to be processed */
   FAR void *crp_opaque;            /* Opaque pointer, passed along */

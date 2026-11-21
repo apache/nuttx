@@ -2623,20 +2623,24 @@ static int swcr_rsa_load(FAR struct cryptkop *krp,
 #ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
       FAR struct swkey_context_s *sctx = swkey_get_context();
       int sret;
+
       if (sctx == NULL)
         {
           return -ENODEV;
         }
+
       sret = swkey_read(&sctx->file, *(FAR uint32_t *)param->crp_p,
                         rsa->comp[comp], len);
       if (sret < 0)
         {
           return sret;
         }
+
       if (sret > (int)len)
         {
           sret = len;
         }
+
       swcr_reverse(rsa->comp[comp], len);
       rsa->len[comp] = len;
       return OK;
@@ -2881,6 +2885,10 @@ static int swcr_ecc256_sign(FAR struct cryptkop *krp)
         {
           return ret;
         }
+
+      /* The key store keeps integers little-endian; ecc.c is big-endian */
+
+      swcr_reverse(d, secp256r1);
 #else
       return -ENOTSUP;
 #endif
@@ -2920,6 +2928,7 @@ static int swcr_ecc256_verify(FAR struct cryptkop *krp)
 {
 #ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
   FAR struct swkey_context_s *ctx;
+  uint8_t point[secp256r1 * 2];
 #endif
   uint8_t publickey[secp256r1 + 1];
   uint8_t signature[secp256r1 * 2];
@@ -2937,17 +2946,22 @@ static int swcr_ecc256_verify(FAR struct cryptkop *krp)
           return -ENODEV;
         }
 
-      /* The public key x||y is stored under the param[0] key id */
+      /* The public key x||y is stored under the param[0] key id,
+       * little-endian; ecc.c is big-endian.
+       */
 
       ret = swkey_read(&ctx->file,
                        *(FAR uint32_t *)krp->krp_param[0].crp_p,
-                       x, sizeof(x) + sizeof(y));
+                       point, sizeof(point));
       if (ret < 0)
         {
           return ret;
         }
 
-      memcpy(y, x + secp256r1, secp256r1);
+      memcpy(x, point, secp256r1);
+      memcpy(y, point + secp256r1, secp256r1);
+      swcr_reverse(x, secp256r1);
+      swcr_reverse(y, secp256r1);
 #else
       return -ENOTSUP;
 #endif
