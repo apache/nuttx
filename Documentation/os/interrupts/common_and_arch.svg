@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" width="900" height="260"
+     font-family="Charter, Georgia, 'Times New Roman', serif" role="img"
+     aria-label="The common OS logic under sched/ holds g_irqvector, irq_attach() and irq_dispatch(), and calls up_switch_context(), up_enable_irq() and up_disable_irq() in the architecture-specific logic under arch/&lt;arch&gt;/, which holds the vector table, the entry code and the interrupt controller driver; the architecture-specific logic calls irq_dispatch() and nxsched_process_timer() in the common OS logic.">
+  <style>
+    .lane   { fill: #f4f6fa; stroke: #c3cbd9; stroke-width: 1.2; }
+    .lane-k { fill: #eef0fb; stroke: #b9bdf0; stroke-width: 1.2; }
+    .lname  { fill: #6b7689; font-size: 11px; letter-spacing: .11em;
+              font-family: system-ui, sans-serif; }
+    .box    { fill: #ffffff; stroke: #3c34e3; stroke-width: 1.5; }
+    .t      { fill: #1b2233; font-size: 12.5px;
+              font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .edge   { stroke: #4a5266; stroke-width: 1.5; fill: none; }
+  </style>
+  <defs>
+    <marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+            orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#4a5266"/></marker>
+  </defs>
+
+  <rect class="lane-k" x="10" y="16" rx="9" width="300" height="228"/>
+  <text class="lname" x="26" y="36">Common OS logic: sched/</text>
+  <rect class="box" x="26" y="52" rx="6" width="268" height="48"/>
+  <text class="t" x="40" y="81">g_irqvector</text>
+  <rect class="box" x="26" y="116" rx="6" width="268" height="48"/>
+  <text class="t" x="40" y="145">irq_attach()</text>
+  <rect class="box" x="26" y="180" rx="6" width="268" height="48"/>
+  <text class="t" x="40" y="209">irq_dispatch()</text>
+
+  <rect class="lane" x="560" y="16" rx="9" width="330" height="228"/>
+  <text class="lname" x="576" y="36">Architecture-specific logic: arch/&lt;arch&gt;/</text>
+  <rect class="box" x="576" y="52" rx="6" width="298" height="48"/>
+  <text class="t" x="590" y="81">vector table</text>
+  <rect class="box" x="576" y="116" rx="6" width="298" height="48"/>
+  <text class="t" x="590" y="145">entry code</text>
+  <rect class="box" x="576" y="180" rx="6" width="298" height="48"/>
+  <text class="t" x="590" y="209">interrupt controller driver</text>
+
+  <path class="edge" d="M 310 66 L 554 66" marker-end="url(#c)"/>
+  <text class="t" x="336" y="59">up_switch_context()</text>
+  <path class="edge" d="M 310 102 L 554 102" marker-end="url(#c)"/>
+  <text class="t" x="336" y="95">up_enable_irq()</text>
+  <path class="edge" d="M 310 138 L 554 138" marker-end="url(#c)"/>
+  <text class="t" x="336" y="131">up_disable_irq()</text>
+
+  <path class="edge" d="M 560 190 L 316 190" marker-end="url(#c)"/>
+  <text class="t" x="336" y="183">irq_dispatch()</text>
+  <path class="edge" d="M 560 226 L 316 226" marker-end="url(#c)"/>
+  <text class="t" x="336" y="219">nxsched_process_timer()</text>
+</svg>

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 344" width="900" height="344"
+     font-family="Charter, Georgia, 'Times New Roman', serif" role="img"
+     aria-label="Timeline: Thread A runs, an interrupt arrives, the handler runs on top of Thread A and calls nxsem_post(), which makes the higher-priority Thread B ready; on return Thread B runs. If Thread A holds sched_lock(), Thread A resumes and Thread B waits. Under SMP, Thread B may run on another CPU instead.">
+  <style>
+    .lane   { fill: #f4f6fa; stroke: #c3cbd9; stroke-width: 1.2; }
+    .lane-k { fill: #eef0fb; stroke: #b9bdf0; stroke-width: 1.2; }
+    .lname  { fill: #6b7689; font-size: 11px; letter-spacing: .11em;
+              font-family: system-ui, sans-serif; }
+    .box    { fill: #ffffff; stroke: #3c34e3; stroke-width: 1.5; }
+    .box-w  { fill: #ffffff; stroke: #5a96bd; stroke-width: 1.4; }
+    .box-hi { fill: #3c34e3; stroke: #2b2787; stroke-width: 1.5; }
+    .t      { fill: #1b2233; font-size: 12.5px;
+              font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .t-on   { fill: #ffffff; font-size: 12.5px;
+              font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+    .s      { fill: #5a6478; font-size: 10.5px; }
+    .s-on   { fill: #d9d7fb; font-size: 10.5px; }
+    .edge   { stroke: #4a5266; stroke-width: 1.5; fill: none; }
+    .note   { fill: #3f4757; font-size: 11.5px; font-style: italic; }
+  </style>
+  <defs>
+    <marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+            orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#4a5266"/></marker>
+  </defs>
+
+  <rect class="lane" x="10" y="16" rx="9" width="880" height="112"/>
+  <text class="lname" x="26" y="36">THREAD A DOES NOT HOLD sched_lock()</text>
+  <rect class="box" x="26" y="52" rx="6" width="160" height="48"/>
+  <text class="t" x="40" y="74">Thread A runs</text>
+  <text class="s" x="40" y="91">interrupted here</text>
+  <path class="edge" d="M 186 82 L 260 82" marker-end="url(#c)"/>
+  <text class="s" x="200" y="74">interrupt</text>
+  <rect class="box-hi" x="266" y="52" rx="6" width="280" height="48"/>
+  <text class="t-on" x="280" y="74">handler, on top of Thread A</text>
+  <text class="s-on" x="280" y="91">nxsem_post(): Thread B ready</text>
+  <path class="edge" d="M 546 82 L 620 82" marker-end="url(#c)"/>
+  <text class="s" x="563" y="74">return</text>
+  <rect class="box" x="626" y="52" rx="6" width="180" height="48"/>
+  <text class="t" x="640" y="74">Thread B runs</text>
+  <text class="s" x="640" y="91">not Thread A</text>
+
+  <rect class="lane" x="10" y="144" rx="9" width="880" height="112"/>
+  <text class="lname" x="26" y="164">THREAD A HOLDS sched_lock()</text>
+  <rect class="box" x="26" y="180" rx="6" width="160" height="48"/>
+  <text class="t" x="40" y="202">Thread A runs</text>
+  <text class="s" x="40" y="219">interrupted here</text>
+  <path class="edge" d="M 186 210 L 260 210" marker-end="url(#c)"/>
+  <text class="s" x="200" y="202">interrupt</text>
+  <rect class="box-hi" x="266" y="180" rx="6" width="280" height="48"/>
+  <text class="t-on" x="280" y="202">handler, on top of Thread A</text>
+  <text class="s-on" x="280" y="219">nxsem_post() wakes Thread B</text>
+  <path class="edge" d="M 546 210 L 620 210" marker-end="url(#c)"/>
+  <text class="s" x="563" y="202">return</text>
+  <rect class="box" x="626" y="180" rx="6" width="180" height="48"/>
+  <text class="t" x="640" y="202">Thread A resumes</text>
+  <text class="s" x="640" y="219">Thread B waits</text>
+
+  <rect class="lane" x="10" y="272" rx="9" width="880" height="60"/>
+  <text class="note" x="26" y="296">Thread B has a higher priority than Thread A. Time runs from left to right.</text>
+  <text class="note" x="26" y="316">Under SMP, Thread B may run on another CPU instead.</text>
+</svg>
