@@ -24,6 +24,15 @@
  * Included Files
  ****************************************************************************/
 
+/* posix_openpt(), grantpt(), unlockpt() and ptsname() are XSI interfaces
+ * that glibc only declares with an explicit feature test macro.  BSD and
+ * macOS expose them by default.
+ */
+
+#if defined(__linux__) && !defined(_GNU_SOURCE)
+#  define _GNU_SOURCE
+#endif
+
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdbool.h>
@@ -147,32 +156,40 @@ int host_uart_open(const char *pathname)
 
 int host_uart_openpty(const char *name)
 {
-#ifdef CONFIG_HOST_LINUX
-  unsigned int ptyno;
-  int lock = 0;
-  int oflags;
+  const char *slave;
+  int flags;
   int ret;
   int fd;
 
-  oflags = O_RDWR | O_NOCTTY | O_NONBLOCK;
-#ifdef O_CLOEXEC
-  oflags |= O_CLOEXEC;
-#endif
-  fd = open("/dev/ptmx", oflags);
+  /* Use the portable POSIX pseudo-terminal interface rather than the
+   * Linux-only TIOCGPTN/TIOCSPTLCK ioctls so that this builds and works on
+   * every POSIX host (Linux, FreeBSD and other BSDs, macOS).
+   */
+
+  fd = posix_openpt(O_RDWR | O_NOCTTY);
   if (fd < 0)
     {
       return -errno;
     }
 
-  ret = ioctl(fd, TIOCGPTN, &ptyno);
-  if (ret < 0)
+  if (grantpt(fd) < 0 || unlockpt(fd) < 0)
     {
       ret = -errno;
       goto errout;
     }
 
-  ret = ioctl(fd, TIOCSPTLCK, &lock);
-  if (ret < 0)
+  slave = ptsname(fd);
+  if (slave == NULL)
+    {
+      ret = -errno;
+      goto errout;
+    }
+
+  /* posix_openpt() does not accept O_NONBLOCK/O_CLOEXEC on all hosts */
+
+  flags = fcntl(fd, F_GETFL);
+  if (flags < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0 ||
+      fcntl(fd, F_SETFD, FD_CLOEXEC) < 0)
     {
       ret = -errno;
       goto errout;
@@ -180,17 +197,13 @@ int host_uart_openpty(const char *name)
 
   setrawmode(fd);
 
-  printf("%s connected to pseudotty: /dev/pts/%u\n", name, ptyno);
+  printf("%s connected to pseudotty: %s\n", name, slave);
 
   return fd;
 
 errout:
   close(fd);
   return ret;
-#else
-  (void)name;
-  return -ENOSYS;
-#endif
 }
 
 /****************************************************************************
