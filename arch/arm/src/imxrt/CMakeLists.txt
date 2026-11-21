@@ -141,6 +141,10 @@ if(CONFIG_IMXRT_ENET)
   list(APPEND SRCS imxrt_enet.c)
 endif()
 
+if(CONFIG_IMXRT_NETC)
+  list(APPEND SRCS imxrt_netc.c imxrt_netc_port.c imxrt_netc_switch.c)
+endif()
+
 if(CONFIG_IMXRT_LPI2C)
   list(APPEND SRCS imxrt_lpi2c.c)
 endif()
