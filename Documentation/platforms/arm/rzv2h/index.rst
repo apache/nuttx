@@ -39,6 +39,7 @@ MPU         Yes      Static PMSAv7 region table (ITCM/DTCM/SRAM/code)
 TIMER       Yes      MPCore Private Timer used as the system tick source
 SCI         Yes      Interrupt-driven SCI-B asynchronous UART on channels 0-9
 GPIO        Yes      Basic operations (config/read/write), no interrupt support
+PWM         Yes      GPT (General PWM Timer) PWM on channels 0-15
 QSPI        Yes      xSPI controller in QSPI mode, manual-command transfers only
 ==========  =======  ============================================================
 
@@ -115,6 +116,18 @@ Module  Count                IRQ range (>= 353)
 ======  ==================  ================================
 TINT    32 (tint0-tint31)    479-448
 ======  ==================  ================================
+
+PWM
+---
+
+The RZ/V2H use the pulsed output control
+implemented using the GPT (General PWM Timer). The driver supports PWM with
+configurable frequency and duty cycle on channels 0 through 15.
+
+``CONFIG_RZV2H_GPT_PWM`` enables the GPT PWM driver. Each channel is
+individually selectable via ``CONFIG_RZV2H_GPTn_PWM``.
+The output pin (GTIOCA or GTIOCB) for each channel is defined in the
+board's ``board.h`` (``BOARD_GPTn_GTIOC_GPIO`` and ``BOARD_GPTn_USE_GTIOCA``).
 
 QSPI
 ----
