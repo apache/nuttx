@@ -31,7 +31,7 @@
   <text class="s" x="40" y="84">by a peripheral</text>
   <rect class="box" x="248" y="46" rx="6" width="200" height="46"/>
   <text class="t" x="262" y="68">vector, save context</text>
-  <text class="s" x="262" y="84">interrupts disabled (most archs)</text>
+  <text class="s" x="262" y="84">nesting is the exception</text>
   <rect class="box" x="490" y="46" rx="6" width="200" height="46"/>
   <text class="t" x="504" y="68">irq_dispatch()</text>
   <text class="s" x="504" y="84">find the handler</text>
@@ -39,16 +39,15 @@
   <path class="edge" d="M 448 69 L 484 69" marker-end="url(#c)"/>
 
   <rect class="lane-k" x="10" y="124" rx="9" width="880" height="112"/>
-  <text class="lname" x="26" y="144">INTERRUPT HANDLER · cannot block, cannot wait, malloc may fail</text>
+  <text class="lname" x="26" y="144">INTERRUPT HANDLER · must not block, wait or allocate</text>
   <rect class="box-hi" x="26" y="156" rx="6" width="280" height="60"/>
-  <text class="t-on" x="40" y="180">the driver's ISR</text>
+  <text class="t-on" x="40" y="180">the driver's handler</text>
   <text class="s-on" x="40" y="198">clear the cause, read the register</text>
   <rect class="box-w" x="352" y="156" rx="6" width="280" height="60"/>
   <text class="t" x="366" y="180">work_queue()</text>
   <text class="s" x="366" y="198">hand off everything that can wait</text>
   <path class="edge" d="M 306 186 L 346 186" marker-end="url(#c)"/>
-  <text class="warn" x="664" y="182">This is the rule the whole</text>
-  <text class="warn" x="664" y="198">section follows.</text>
+  <text class="warn" x="664" y="190">Hand off what can wait.</text>
   <path class="edge" d="M 590 92 L 590 114 L 4 114 L 4 186 L 20 186" marker-end="url(#c)"/>
 
   <rect class="lane" x="10" y="252" rx="9" width="880" height="94"/>
@@ -64,6 +63,7 @@
   <text class="lname" x="26" y="382">RETURN FROM INTERRUPT</text>
   <rect class="box" x="26" y="392" rx="6" width="280" height="30"/>
   <text class="t" x="40" y="412">restore context</text>
-  <text class="note" x="330" y="412">— but not necessarily the same thread: a handler may have</text>
-  <text class="note" x="330" y="428">made a higher-priority thread ready, and NuttX switches to it.</text>
+  <text class="note" x="330" y="396">but not necessarily the same thread: a handler may have made a</text>
+  <text class="note" x="330" y="412">higher-priority thread ready. NuttX switches to it unless sched_lock()</text>
+  <text class="note" x="330" y="428">is held; under SMP the woken thread may go to another CPU instead.</text>
 </svg>
