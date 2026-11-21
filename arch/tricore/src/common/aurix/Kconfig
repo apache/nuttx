@@ -1,0 +1,16 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "AURIX Peripheral Support"
+
+config TRICORE_UART0
+	bool "ASCLIN0 UART"
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Use ASCLIN0 as UART0, on the P14.1 RX and P14.0 TX pins.
+
+endmenu

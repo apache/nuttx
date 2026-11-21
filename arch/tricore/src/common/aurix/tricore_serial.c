@@ -46,10 +46,10 @@
 #include "tricore_internal.h"
 #include "tricore_asclin.h"
 
-#if defined(CONFIG_ARCH_CHIP_TC3XX)
+#if defined(CONFIG_ARCH_CHIP_TC3X)
 #  include "hardware/tc3xx_port.h"
 #  include "tc3xx_wdt.h"
-#elif defined(CONFIG_ARCH_CHIP_TC4XX)
+#elif defined(CONFIG_ARCH_CHIP_TC4X)
 #  include "hardware/tc4xx_port.h"
 #endif
 
@@ -58,10 +58,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#if defined(CONFIG_TC3XX_UART0) || defined(CONFIG_TC4XX_UART0)
-#  define HAVE_UART0 1
-#endif
 
 /* Bit timing: fPD is fASCLINF, 16 times oversampling, sample point 8 */
 
@@ -87,7 +83,7 @@
  * be ttyS0.  If there is no console then will use the lowest numbered UART.
  */
 
-#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(HAVE_UART0)
+#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_TRICORE_UART0)
 #  define HAVE_SERIAL_CONSOLE 1
 #else
 #  undef CONFIG_UART0_SERIAL_CONSOLE
@@ -105,7 +101,7 @@
 #else
 #  undef  CONSOLE_DEV                        /* No console */
 #  undef  CONFIG_UART0_SERIAL_CONSOLE
-#  if defined(HAVE_UART0)
+#  if defined(CONFIG_TRICORE_UART0)
 #    define TTYS0_DEV       g_uart0port     /* UART0 is ttyS0 */
 #    define SERIAL_CONSOLE  1
 #  else
@@ -114,7 +110,7 @@
 #endif
 
 #undef HAVE_UART_DEVICE
-#if defined(HAVE_UART0)
+#if defined(CONFIG_TRICORE_UART0)
 #  define HAVE_UART_DEVICE 1
 #endif
 
@@ -180,12 +176,12 @@ static const struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
-#ifdef HAVE_UART0
+#ifdef CONFIG_TRICORE_UART0
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
 #endif
 
-#ifdef HAVE_UART0
+#ifdef CONFIG_TRICORE_UART0
 
 static struct up_dev_s g_uart0priv =
 {
@@ -240,7 +236,7 @@ static void asclin_modify(uintptr_t reg, uint32_t clear, uint32_t set)
 
 static void asclin_pin_config(uintptr_t port, int pin, bool tx)
 {
-#if defined(CONFIG_ARCH_CHIP_TC3XX)
+#if defined(CONFIG_ARCH_CHIP_TC3X)
   int shift = TC3XX_PORT_IOCR_SHIFT(pin);
 
   asclin_modify(TC3XX_PORT_IOCR(port, pin), TC3XX_PORT_IOCR_MASK << shift,
@@ -251,7 +247,7 @@ static void asclin_pin_config(uintptr_t port, int pin, bool tx)
   asclin_modify(TC3XX_PORT_PDR(port, pin), TC3XX_PORT_PDR_MASK << shift,
                 TC3XX_PORT_PAD_SPEED1 << shift);
   tc3xx_wdt_cpu_endinit(true);
-#elif defined(CONFIG_ARCH_CHIP_TC4XX)
+#elif defined(CONFIG_ARCH_CHIP_TC4X)
   uintptr_t drvcfg = TC4XX_PORT_DRVCFG(port, pin);
 
   asclin_modify(drvcfg, TC4XX_PORT_DRVCFG_MODE_MASK,
@@ -359,11 +355,11 @@ static void asclin_init(struct up_dev_s *priv)
 {
   /* Enable the module, under the CPU ENDINIT on TC3xx */
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_TC3X
   tc3xx_wdt_cpu_endinit(false);
 #endif
   asclin_modify(ASCLIN_REG(priv, CLC), ASCLIN_CLC_DISR, 0);
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_TC3X
   tc3xx_wdt_cpu_endinit(true);
 #endif
 
