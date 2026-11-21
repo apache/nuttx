@@ -85,6 +85,7 @@ config ARCH_CHIP_TC3XX
 	bool "infineon aurix tc3xx"
 	select ARCH_TC1V6
 	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_I2CRESET
 	select ARCH_MINIMAL_VECTORTABLE
 	select ARCH_MINIMAL_VECTORTABLE_DYNAMIC
@@ -99,6 +100,7 @@ config ARCH_CHIP_TC4XX
 	select ARCH_TC1V8
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_FPU if !TRICORE_CSRM
+	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_I2CRESET
 	select ARCH_MINIMAL_VECTORTABLE
 	select ARCH_MINIMAL_VECTORTABLE_DYNAMIC
@@ -171,16 +173,6 @@ config TRICORE_TRAP_ALERT
 	---help---
 		Print the trap name and reason before the trap panics.  The
 		panic message has the trap class and TIN in any case.
-
-config TRICORE_FCU_CSA_NUM
-	int "Context save areas for the FCU trap"
-	default 0
-	---help---
-		Context save areas reserved for a free context list underflow
-		(FCU) trap, so that the trap can still be reported when no free
-		context save area is left.  0 reserves none, then the core stops
-		in the trap unless the board passes its own pool to
-		tricore_fcu_register_pool.  At least 20 are needed.
 
 if ARCH_CHIP_TC3XX
 source "arch/tricore/src/tc3xx/Kconfig"
