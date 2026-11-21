@@ -752,7 +752,12 @@ static int swkey_save(FAR struct swkey_context_s *ctx, uint32_t keyid)
       swkey_promote_cache_data(ctx, data);
     }
 
-  return ret;
+  /* The key is not cached: either it was imported to flash directly for
+   * being larger than the cache buffer, or it does not exist.  There is
+   * nothing to write back either way.
+   */
+
+  return OK;
 }
 
 /****************************************************************************
@@ -859,13 +864,14 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
       goto out;
     }
 
-  if (krp->krp_param[0].crp_nbits != sizeof(uint32_t) * 8)
+  if (krp->krp_param[0].crp_p == NULL ||
+      krp->krp_param[0].crp_nbits != sizeof(uint32_t) * 8)
     {
       ret = -EINVAL;
       goto out;
     }
 
-  keyid = *(uint32_t *)krp->krp_param[0].crp_p;
+  keyid = *(FAR uint32_t *)krp->krp_param[0].crp_p;
 
   /* Go through crypto descriptors, processing as we go */
 
@@ -912,7 +918,7 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
             goto out;
           }
 
-        keylen = *(uint32_t *)krp->krp_param[1].crp_p;
+        keylen = *(FAR uint32_t *)krp->krp_param[1].crp_p;
         if (keylen != 16 && keylen != 24 && keylen != 32)
           {
             ret = -EINVAL;
@@ -929,7 +935,7 @@ static int swkey_kprocess(FAR struct cryptkop *krp)
             goto out;
           }
 
-        pub_keyid = *(uint32_t *)krp->krp_param[1].crp_p;
+        pub_keyid = *(FAR uint32_t *)krp->krp_param[1].crp_p;
         krp->krp_status = swkey_gen_secp256r1_key(ctx, priv_keyid,
                                                        pub_keyid);
         break;
@@ -1673,6 +1679,11 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
   FAR struct swcr_data **swd;
   FAR const struct auth_hash *axf;
   FAR const struct enc_xform *txf;
+  FAR uint8_t *key;
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
+  FAR struct swkey_context_s *ctx = swkey_get_context();
+  uint8_t keybuf[128];
+#endif
   uint8_t hmackey[HMAC_MAX_BLOCK_LEN];
   int keylen;
   uint32_t i;
@@ -1694,6 +1705,9 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
 
   while (cri)
     {
+      key = (FAR uint8_t *)cri->cri_key;
+      keylen = cri->cri_klen / 8;
+
       *swd = kmm_zalloc(sizeof(struct swcr_data));
       if (*swd == NULL)
         {
@@ -1769,16 +1783,36 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
                   }
               }
 
-            if (cri->cri_klen / 8 > txf->maxkey ||
-                cri->cri_klen / 8 < txf->minkey)
+            if (cri->cri_flags & CRD_F_KEYID)
+              {
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
+                if (ctx == NULL)
+                  {
+                    swcr_freesession(i);
+                    return -ENODEV;
+                  }
+
+                keylen = swkey_read(&ctx->file,
+                                    *(FAR uint32_t *)cri->cri_key,
+                                    keybuf, sizeof(keybuf));
+                if (keylen < 0)
+                  {
+                    swcr_freesession(i);
+                    return keylen;
+                  }
+
+                key = keybuf;
+#endif
+              }
+
+            if (keylen > txf->maxkey ||
+                keylen < txf->minkey)
               {
                 swcr_freesession(i);
                 return -EINVAL;
               }
 
-            if (txf->setkey((*swd)->sw_kschedule,
-                (FAR uint8_t *)cri->cri_key,
-                cri->cri_klen / 8) < 0)
+            if (txf->setkey((*swd)->sw_kschedule, key, keylen) < 0)
               {
                 swcr_freesession(i);
                 return -EINVAL;
@@ -1824,23 +1858,43 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
                 return -ENOBUFS;
               }
 
+            if (cri->cri_flags & CRD_F_KEYID)
+              {
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
+                if (ctx == NULL)
+                  {
+                    swcr_freesession(i);
+                    return -ENODEV;
+                  }
+
+                keylen = swkey_read(&ctx->file,
+                                    *(FAR uint32_t *)cri->cri_key,
+                                    keybuf, sizeof(keybuf));
+                if (keylen < 0)
+                  {
+                    swcr_freesession(i);
+                    return keylen;
+                  }
+
+                key = keybuf;
+#endif
+              }
+
             /* Work on a local copy of the key so the caller's key buffer
              * (which may be read-only) is never modified.  If the key is
              * too long, hash it into the local copy first using ictx.
              */
 
-            keylen = cri->cri_klen / 8;
             if (keylen > axf->keysize)
               {
                 axf->init((*swd)->sw_ictx);
-                axf->update((*swd)->sw_ictx,
-                            (FAR uint8_t *)cri->cri_key, keylen);
+                axf->update((*swd)->sw_ictx, key, keylen);
                 axf->final(hmackey, (*swd)->sw_ictx);
                 keylen = axf->hashsize;
               }
             else
               {
-                bcopy(cri->cri_key, hmackey, keylen);
+                bcopy(key, hmackey, keylen);
               }
 
             for (k = 0; k < keylen; k++)
@@ -1950,9 +2004,30 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
                 return -ENOBUFS;
               }
 
+            if (cri->cri_flags & CRD_F_KEYID)
+              {
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
+                if (ctx == NULL)
+                  {
+                    swcr_freesession(i);
+                    return -ENODEV;
+                  }
+
+                keylen = swkey_read(&ctx->file,
+                                    *(FAR uint32_t *)cri->cri_key,
+                                    keybuf, sizeof(keybuf));
+                if (keylen < 0)
+                  {
+                    swcr_freesession(i);
+                    return keylen;
+                  }
+
+                key = keybuf;
+#endif
+              }
+
             axf->init((*swd)->sw_ictx);
-            axf->setkey((*swd)->sw_ictx, (FAR uint8_t *)cri->cri_key,
-                        cri->cri_klen / 8);
+            axf->setkey((*swd)->sw_ictx, key, keylen);
             bcopy((*swd)->sw_ictx, &(*swd)->sw_ctx, axf->ctxsize);
             (*swd)->sw_axf = axf;
             break;
@@ -2479,12 +2554,18 @@ int swcr_pbkdf2(FAR struct cryptop *crp,
 }
 
 /* Load krp_param[slot] into rsa->comp[comp], big-endian.  The component
- * is required and must fit RSA_MAX_BYTES.
+ * is required and must fit RSA_MAX_BYTES.  With CRD_F_KEYID the param
+ * carries a key id and the component comes from the software key store,
+ * in the little-endian order an in-line param uses.
  */
 
 static int swcr_rsa_load(FAR struct cryptkop *krp,
                          FAR struct swcr_rsa_s *rsa, int comp, int slot)
 {
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
+  FAR struct swkey_context_s *ctx;
+  int ret;
+#endif
   FAR struct crparam *param = &krp->krp_param[slot];
   size_t len;
 
@@ -2493,15 +2574,79 @@ static int swcr_rsa_load(FAR struct cryptkop *krp,
       return -EINVAL;
     }
 
-  len = param->crp_nbits / 8;
-  if (len == 0)
+  if (krp->krp_flags & CRD_F_KEYID)
     {
-      return -EINVAL;
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
+      ctx = swkey_get_context();
+      if (ctx == NULL)
+        {
+          return -ENODEV;
+        }
+
+      ret = swkey_read(&ctx->file, *(FAR uint32_t *)param->crp_p,
+                       rsa->comp[comp], RSA_MAX_BYTES);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      len = ret;
+#else
+      return -ENOTSUP;
+#endif
     }
+  else
+    {
+      len = param->crp_nbits / 8;
+      if (len == 0)
+        {
+          return -EINVAL;
+        }
+
+      if (len > RSA_MAX_BYTES)
+        {
+          return -ENOBUFS;
+        }
+
+      memcpy(rsa->comp[comp], param->crp_p, len);
+    }
+
+  /* swkey_read() reports the stored size, which can exceed what it copied */
 
   if (len > RSA_MAX_BYTES)
     {
       return -ENOBUFS;
+    }
+
+  if (krp->krp_flags & CRD_F_KEYID)
+    {
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
+      FAR struct swkey_context_s *sctx = swkey_get_context();
+      int sret;
+
+      if (sctx == NULL)
+        {
+          return -ENODEV;
+        }
+
+      sret = swkey_read(&sctx->file, *(FAR uint32_t *)param->crp_p,
+                        rsa->comp[comp], len);
+      if (sret < 0)
+        {
+          return sret;
+        }
+
+      if (sret > (int)len)
+        {
+          sret = len;
+        }
+
+      swcr_reverse(rsa->comp[comp], len);
+      rsa->len[comp] = len;
+      return OK;
+#else
+      return -ENOTSUP;
+#endif
     }
 
   memcpy(rsa->comp[comp], param->crp_p, len);
@@ -2716,16 +2861,46 @@ static int swcr_ecc256_genkey(FAR struct cryptkop *krp)
 
 static int swcr_ecc256_sign(FAR struct cryptkop *krp)
 {
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
+  FAR struct swkey_context_s *ctx;
+#endif
   uint8_t sig[secp256r1 * 2];
   uint8_t hash[secp256r1];
   uint8_t d[secp256r1];
   int ret;
 
-  ret = swcr_ecc_copy(d, krp->krp_param[0].crp_p,
-                      krp->krp_param[0].crp_nbits / 8);
-  if (ret < 0)
+  if (krp->krp_flags & CRD_F_KEYID)
     {
-      return ret;
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
+      ctx = swkey_get_context();
+      if (ctx == NULL)
+        {
+          return -ENODEV;
+        }
+
+      ret = swkey_read(&ctx->file,
+                       *(FAR uint32_t *)krp->krp_param[0].crp_p,
+                       d, sizeof(d));
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* The key store keeps integers little-endian; ecc.c is big-endian */
+
+      swcr_reverse(d, secp256r1);
+#else
+      return -ENOTSUP;
+#endif
+    }
+  else
+    {
+      ret = swcr_ecc_copy(d, krp->krp_param[0].crp_p,
+                          krp->krp_param[0].crp_nbits / 8);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   ret = swcr_ecc_copy(hash, krp->krp_param[1].crp_p,
@@ -2751,6 +2926,10 @@ out:
 
 static int swcr_ecc256_verify(FAR struct cryptkop *krp)
 {
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
+  FAR struct swkey_context_s *ctx;
+  uint8_t point[secp256r1 * 2];
+#endif
   uint8_t publickey[secp256r1 + 1];
   uint8_t signature[secp256r1 * 2];
   uint8_t hash[secp256r1];
@@ -2758,18 +2937,50 @@ static int swcr_ecc256_verify(FAR struct cryptkop *krp)
   uint8_t y[secp256r1];
   int ret;
 
-  ret = swcr_ecc_copy(x, krp->krp_param[0].crp_p,
-                      krp->krp_param[0].crp_nbits / 8);
-  if (ret < 0)
+  if (krp->krp_flags & CRD_F_KEYID)
     {
-      return ret;
-    }
+#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
+      ctx = swkey_get_context();
+      if (ctx == NULL)
+        {
+          return -ENODEV;
+        }
 
-  ret = swcr_ecc_copy(y, krp->krp_param[1].crp_p,
-                      krp->krp_param[1].crp_nbits / 8);
-  if (ret < 0)
+      /* The public key x||y is stored under the param[0] key id,
+       * little-endian; ecc.c is big-endian.
+       */
+
+      ret = swkey_read(&ctx->file,
+                       *(FAR uint32_t *)krp->krp_param[0].crp_p,
+                       point, sizeof(point));
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      memcpy(x, point, secp256r1);
+      memcpy(y, point + secp256r1, secp256r1);
+      swcr_reverse(x, secp256r1);
+      swcr_reverse(y, secp256r1);
+#else
+      return -ENOTSUP;
+#endif
+    }
+  else
     {
-      return ret;
+      ret = swcr_ecc_copy(x, krp->krp_param[0].crp_p,
+                          krp->krp_param[0].crp_nbits / 8);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ret = swcr_ecc_copy(y, krp->krp_param[1].crp_p,
+                          krp->krp_param[1].crp_nbits / 8);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   ret = swcr_ecc_copy(signature, krp->krp_param[3].crp_p,

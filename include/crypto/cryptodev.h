@@ -163,6 +163,7 @@ struct cryptoini
   int cri_rnd;       /* Algorithm rounds, where relevant */
   int cri_sid;
   int cri_op;
+  int cri_flags;     /* ie. CRD_F_KEYID */
   caddr_t cri_key;   /* key to use */
   union
   {
@@ -192,6 +193,7 @@ struct cryptodesc
   #define CRD_F_ESN 0x20           /* Set when ESN field is provided */
   #define CRD_F_UPDATE 0x40        /* Set just update source */
   #define CRD_F_UPDATE_AAD 0x80    /* Set just update aad */
+  #define CRD_F_KEYID 0x100        /* Use key ID instead of data */
 
   struct cryptoini CRD_INI; /* Initialization/context data */
   #define crd_esn CRD_INI.cri_esn
@@ -234,7 +236,8 @@ struct cryptop
 #define CRYPTO_F_CBIMM 0x0020   /* Do callback immediately */
 #define CRYPTO_F_CANCEL 0x0040  /* Cancel the current crypto operation */
 
-#define CRYPTO_F_NOT_EXPORTABLE 0x0080 /* Mark key unexportable from secure module */
+#define CRYPTO_F_NOT_EXPORTABLE 0x0080  /* Mark key unexportable from secure module */
+#define CRYPTO_F_WRITE_PROTECTED 0x0100 /* Key must reside in write-protected storage */
 
   FAR void *crp_buf;               /* Data to be processed */
   FAR void *crp_opaque;            /* Opaque pointer, passed along */
@@ -434,9 +437,17 @@ struct session_op
   caddr_t key;
   int mackeylen;      /* mac key */
   caddr_t mackey;
+  int flags;          /* ie. SOP_F_KEYID */
 
   uint32_t ses;       /* returns: session # */
 };
+
+/* The key and mackey fields carry a key id of the software key store
+ * instead of the key itself.  The value matches CRD_F_KEYID so that it
+ * also passes through crypt_kop.crk_flags unchanged.
+ */
+
+#define SOP_F_KEYID  0x0100
 
 struct crypt_op
 {
