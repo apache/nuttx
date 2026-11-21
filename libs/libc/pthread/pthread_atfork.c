@@ -68,6 +68,7 @@ int pthread_atfork(CODE void (*prepare)(void),
   FAR struct pthread_atfork_s *entry =
                       (FAR struct pthread_atfork_s *)
                       lib_malloc(sizeof(struct pthread_atfork_s));
+  int ret;
 
   if (entry == NULL)
     {
@@ -79,7 +80,13 @@ int pthread_atfork(CODE void (*prepare)(void),
   entry->parent = parent;
   entry->child = child;
 
-  nxrmutex_lock(&info->ta_lock);
+  ret = nxrmutex_lock(&info->ta_lock);
+  if (ret < 0)
+    {
+      lib_free(entry);
+      return -ret;
+    }
+
   list_add_tail(list, &entry->node);
   nxrmutex_unlock(&info->ta_lock);
 #endif

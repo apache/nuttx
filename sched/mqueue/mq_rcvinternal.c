@@ -42,6 +42,7 @@
 
 #include "sched/sched.h"
 #include "mqueue/mqueue.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Private Functions
@@ -146,6 +147,15 @@ int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
       return -ECANCELED;
     }
 #endif
+
+  /* A thread that the end of its process canceled in a system call does
+   * not start the wait (nxnotify_kcancel()).
+   */
+
+  if (nxtask_kcanceled(rtcb))
+    {
+      return -ECANCELED;
+    }
 
   if (abstime)
     {

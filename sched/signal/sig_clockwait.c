@@ -46,6 +46,7 @@
 #include "sched/sched.h"
 #include "signal/signal.h"
 #include "clock/clock.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -243,6 +244,16 @@ int nxsig_clockwait(int clockid, int flags,
 
   iflags = enter_critical_section();
   rtcb = this_task();
+
+  /* A thread that the end of its process canceled in a system call does
+   * not start the wait (nxnotify_kcancel()).
+   */
+
+  if (nxtask_kcanceled(rtcb))
+    {
+      leave_critical_section(iflags);
+      return -ECANCELED;
+    }
 
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   /* If the caller did not install its own sigunbinfo (only nxsig_timedwait()

@@ -36,6 +36,7 @@
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Public Functions
@@ -153,9 +154,13 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
   DEBUGASSERT(mutex || atomic_read(NXSEM_COUNT(sem)) < 0);
   DEBUGASSERT(!mutex || NXSEM_MBLOCKING(atomic_read(NXSEM_MHOLDER(sem))));
 
-  /* Mutex is never interrupted by a signal or canceled */
+  /* Mutex is never interrupted by a signal or canceled.  Except the wait
+   * for a mutex of user code when the end of the process cancels the
+   * waiter in a system call: the holder can have ended (nxnotify_kcancel()).
+   */
 
-  wakeup = !(mutex && (errcode == EINTR || errcode == ECANCELED));
+  wakeup = !(mutex && (errcode == EINTR || errcode == ECANCELED)) ||
+           nxtask_kcancel_uwait(wtcb);
   if (wakeup)
     {
       /* Restore the correct priority of all threads that hold references

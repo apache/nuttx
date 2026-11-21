@@ -41,6 +41,7 @@
 
 #include "sched/sched.h"
 #include "group/group.h"
+#include "task/task.h"
 
 #ifdef HAVE_GROUP_MEMBERS
 
@@ -178,6 +179,44 @@ static int group_cancel_children_handler(pid_t pid, FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: group_cancel_children
+ *
+ * Description:
+ *   Cancel each member of the group except keep.  A member can leave the
+ *   list while a cancellation blocks: start at the head again after each
+ *   one, and skip the members that are canceled already.
+ *
+ * Input Parameters:
+ *   group - The group.
+ *   keep  - The thread to keep.
+ *
+ * Assumptions:
+ *   Called in a critical section.
+ *
+ ****************************************************************************/
+
+static void group_cancel_children(FAR struct task_group_s *group,
+                                  pid_t keep)
+{
+  FAR struct tcb_s *mtcb;
+  FAR sq_entry_t *curr;
+
+again:
+  sq_for_every(&group->tg_members, curr)
+    {
+      mtcb = container_of(curr, struct tcb_s, member);
+      if (mtcb->pid != keep &&
+          (mtcb->flags & (TCB_FLAG_FORCED_CANCEL |
+                          TCB_FLAG_EXIT_PROCESSING)) == 0)
+        {
+          group_cancel_children_handler(mtcb->pid,
+                                        (FAR void *)((uintptr_t)keep));
+          goto again;
+        }
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -201,7 +240,6 @@ static int group_cancel_children_handler(pid_t pid, FAR void *arg)
 int group_kill_children(FAR struct tcb_s *tcb)
 {
   irqstate_t flags;
-  int ret;
 
   DEBUGASSERT(tcb->group);
 
@@ -221,6 +259,10 @@ int group_kill_children(FAR struct tcb_s *tcb)
 
   if ((tcb->flags & TCB_FLAG_FORCED_CANCEL) == 0)
     {
+#  if CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS > 0
+      int ret = CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS;
+#  endif
+
       /* Send SIGTERM for each first */
 
       group_foreachchild(tcb->group, group_kill_children_handler,
@@ -228,7 +270,6 @@ int group_kill_children(FAR struct tcb_s *tcb)
 
       /* Wait a bit for child exit */
 
-      ret = CONFIG_GROUP_KILL_CHILDREN_TIMEOUT_MS;
       while (1)
         {
           if (sq_empty(&tcb->group->tg_members) ||
@@ -250,13 +291,16 @@ int group_kill_children(FAR struct tcb_s *tcb)
     }
 #endif
 
-  /* Force cancel/delete again */
+  /* Force cancel/delete again.  A woken member ends when its system call
+   * is over: keep it from running during the walk.
+   */
 
-  ret = group_foreachchild(tcb->group, group_cancel_children_handler,
-                           (FAR void *)((uintptr_t)tcb->pid));
+  sched_lock();
+  group_cancel_children(tcb->group, tcb->pid);
+  sched_unlock();
   leave_critical_section(flags);
 
-  return ret;
+  return OK;
 }
 
 #endif /* HAVE_GROUP_MEMBERS */

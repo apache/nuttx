@@ -292,9 +292,25 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
    * pthread to exit.
    */
 
-  nxsem_wait_uninterruptible(&rtcb->join_sem);
+  ret = nxsem_wait_uninterruptible(&rtcb->join_sem);
 
   nxrmutex_lock(&group->tg_mutex);
+
+  if (ret < 0)
+    {
+      /* A cancellation ended the wait.  Leave the join queue of the thread:
+       * this thread can end first, and the thread must not post it then.
+       */
+
+      tcb = nxsched_get_tcb((pid_t)thread);
+      if (tcb != NULL)
+        {
+          sq_rem(&rtcb->join_entry, &tcb->join_queue);
+        }
+
+      ret = -ret;
+      goto errout;
+    }
 
   /* The thread has exited! Get the thread exit value */
 

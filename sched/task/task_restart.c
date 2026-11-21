@@ -131,6 +131,12 @@ static void nxtask_reset_task(FAR struct tcb_s *tcb, bool remove)
   sigemptyset(&tcb->sigprocmask); /* Reset sigprocmask */
 #endif
 
+#ifdef HAVE_TASK_KCANCEL
+  /* A cancellation in a system call does not apply to the new start */
+
+  tcb->kcancel = 0;
+#endif
+
   /* Reset the current task priority  */
 
   tcb->sched_priority = tcb->init_priority;

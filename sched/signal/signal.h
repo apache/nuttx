@@ -39,6 +39,8 @@
 #include <nuttx/queue.h>
 #include <nuttx/spinlock.h>
 
+#include "task/task.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -238,6 +240,7 @@ void               nxsig_restoremask(FAR struct tcb_s *rtcb,
 #else
 static inline bool nxsig_unmask_pendingsignal(void)
 {
+  nxtask_kcancel();
   return false;
 }
 #endif

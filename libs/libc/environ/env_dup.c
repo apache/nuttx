@@ -72,7 +72,11 @@ int env_dup(FAR struct task_info_s *info, FAR char * const *envcp)
 
   if (envcp != NULL && info->ta_envp == NULL)
     {
-      nxrmutex_lock(&info->ta_lock);
+      ret = nxrmutex_lock(&info->ta_lock);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Count the strings and their size */
 

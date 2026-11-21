@@ -61,7 +61,11 @@ void openlog(FAR const char *ident, int option, int facility)
       return;
     }
 
-  nxrmutex_lock(&info->ta_lock);
+  if (nxrmutex_lock(&info->ta_lock) < 0)
+    {
+      return;
+    }
+
   state = &info->ta_openlog;
   if (ident != NULL)
     {
