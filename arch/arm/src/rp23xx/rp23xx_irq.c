@@ -145,8 +145,7 @@ static void rp23xx_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: rp23xx_nmi, rp23xx_busfault, rp23xx_usagefault, rp23xx_pendsv,
- *       rp23xx_dbgmonitor, rp23xx_pendsv, rp23xx_reserved
+ * Name: rp23xx_nmi, rp23xx_pendsv, rp23xx_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -365,13 +364,13 @@ void up_disable_irq(int irq)
 
   /* Check for an external interrupt */
 
-  if (irq - RP23XX_IRQ_EXTINT >= RP23XX_IRQ_EXTINT && irq < RP23XX_IRQ_NIRQS)
+  if (irq >= RP23XX_IRQ_EXTINT && irq < RP23XX_IRQ_NIRQS)
     {
       /* Set the appropriate bit in the ICER register to disable the
        * interrupt
        */
 
-      if (irq < 32)
+      if (irq - RP23XX_IRQ_EXTINT < 32)
         {
           putreg32((1 << (irq - RP23XX_IRQ_EXTINT)), NVIC_IRQ0_31_CLEAR);
         }
@@ -478,6 +477,7 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regaddr;
   uint32_t regval;
   int shift;
+  int irq_ext;
 
   DEBUGASSERT(irq == RP23XX_IRQ_SVCALL ||
               irq == RP23XX_IRQ_PENDSV ||
@@ -488,14 +488,15 @@ int up_prioritize_irq(int irq, int priority)
 
   /* Check for external interrupt */
 
-  if (irq >= RP23XX_IRQ_EXTINT && irq < RP23XX_IRQ_EXTINT + 32)
+  if (irq >= RP23XX_IRQ_EXTINT && irq < RP23XX_IRQ_NIRQS)
     {
       /* NVIC_IRQ_PRIORITY maps register IPR0-IPR7 with four settings per
        * register.
        */
 
-      regaddr = NVIC_IRQ_PRIORITY(irq);
-      shift   = (irq & 3) << 3;
+      irq_ext = irq - RP23XX_IRQ_EXTINT;
+      regaddr = NVIC_IRQ_PRIORITY(irq_ext);
+      shift   = (irq_ext & 3) << 3;
     }
 
   /* Handle processor exceptions.  Only SVCall, PendSV, and SysTick can be
