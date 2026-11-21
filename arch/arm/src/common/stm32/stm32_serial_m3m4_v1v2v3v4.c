@@ -1555,14 +1555,24 @@ static void up_set_format(struct uart_dev_s *dev)
   uint32_t fraction;
 #endif
   uint32_t regval;
+  uint32_t cr1_ue;
   uint32_t brr;
+  irqstate_t flags;
 
   /* Load CR1 */
 
   regval = up_serialin(priv, STM32_USART_CR1_OFFSET);
 
-#if defined(CONFIG_STM32_STM32G4XXX)
-  regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+
+  /* Disable UE: the parity and word-length bits in CR1 can not be
+   * written while UE = 1.
+   */
+
+  flags = enter_critical_section();
+  cr1_ue = regval & USART_CR1_UE;
+  regval &= ~USART_CR1_UE;
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 #endif
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)|| \
@@ -1832,10 +1842,16 @@ static void up_set_format(struct uart_dev_s *dev)
 #endif
 
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
-#if defined(CONFIG_STM32_STM32G4XXX)
-  regval      = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval     |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+
+  /* Restore UE */
+
+  regval = up_serialin(priv, STM32_USART_CR1_OFFSET);
+  regval |= cr1_ue;
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
+
+  leave_critical_section(flags);
 #endif
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
