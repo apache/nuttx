@@ -520,6 +520,38 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
+ * Name: tcp_reclaimable
+ *
+ * Description:
+ *   Return true if the connection can be freed to make room: no socket
+ *   refers to it, and it is closed with its close work still queued, or
+ *   it only waits for the end of its close with its close callback.  Any
+ *   other connection without a socket is freed by tcp_close_work() or by
+ *   tcp_close(), maybe at this moment.
+ *
+ ****************************************************************************/
+
+static bool tcp_reclaimable(FAR struct tcp_conn_s *conn)
+{
+  if (conn->crefs != 0 || conn->dev == NULL)
+    {
+      return false;
+    }
+
+  if (conn->tcpstateflags == TCP_CLOSED)
+    {
+      return (conn->flags & TCP_CLOSE_ARRANGED) != 0;
+    }
+
+  return conn->clscb != NULL &&
+         (conn->tcpstateflags == TCP_CLOSING    ||
+          conn->tcpstateflags == TCP_FIN_WAIT_1 ||
+          conn->tcpstateflags == TCP_FIN_WAIT_2 ||
+          conn->tcpstateflags == TCP_TIME_WAIT  ||
+          conn->tcpstateflags == TCP_LAST_ACK);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -618,17 +650,147 @@ int tcp_selectport(uint8_t domain,
 }
 
 /****************************************************************************
- * Name: tcp_alloc
+ * Name: tcp_reclaim
  *
  * Description:
- *   Find a free TCP/IP connection structure and allocate it
- *   for use.  This is normally something done by the implementation of the
- *   socket() API but is also called from the event processing logic when a
- *   TCP packet is received while "listening"
+ *   Free the oldest connection that no socket refers to and that only
+ *   waits for the end of its close (for example in TIME_WAIT).  This gives
+ *   back the connection structure and the callbacks that it holds.
+ *
+ * Input Parameters:
+ *   dev - The device whose lock the caller holds, or NULL if it holds no
+ *         device lock and no connection lock.
+ *
+ * Returned Value:
+ *   true if a connection was freed.
  *
  ****************************************************************************/
 
-FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
+bool tcp_reclaim(FAR struct net_driver_s *dev)
+{
+  FAR struct devif_callback_s *cb;
+  FAR struct devif_callback_s *next;
+  FAR struct net_driver_s *conndev;
+  FAR struct tcp_conn_s *conn = NULL;
+  FAR struct tcp_conn_s *tmp;
+
+  /* Search the active connection list for the oldest connection that is
+   * about to be closed anyway.
+   */
+
+  tcp_conn_list_lock();
+  for (tmp = (FAR struct tcp_conn_s *)g_active_tcp_connections.head;
+       tmp != NULL;
+       tmp = (FAR struct tcp_conn_s *)tmp->sconn.s_node.flink)
+    {
+      if (tcp_reclaimable(tmp) &&
+          (conn == NULL || tmp->timer < conn->timer))
+        {
+          conn = tmp;
+        }
+    }
+
+  conndev = conn != NULL ? conn->dev : NULL;
+  tcp_conn_list_unlock();
+
+  if (conn == NULL)
+    {
+      return false;
+    }
+
+  /* The poll takes the device lock, then the list lock: do the same here.
+   * With the lock of another device held, only try it: two such callers
+   * could wait for each other.
+   */
+
+  if (dev == NULL || dev == conndev)
+    {
+      netdev_lock(conndev);
+    }
+  else if (netdev_trylock(conndev) < 0)
+    {
+      return false;
+    }
+
+  /* The connection may be gone meanwhile: look again */
+
+  tcp_conn_list_lock();
+  for (tmp = (FAR struct tcp_conn_s *)g_active_tcp_connections.head;
+       tmp != NULL && tmp != conn;
+       tmp = (FAR struct tcp_conn_s *)tmp->sconn.s_node.flink)
+    {
+    }
+
+  tcp_conn_list_unlock();
+
+  if (tmp == NULL || conn->dev != conndev || !tcp_reclaimable(conn))
+    {
+      netdev_unlock(conndev);
+      return false;
+    }
+
+  /* A closed connection: take its close work from the queue.  If the work
+   * runs already, it frees the connection itself.
+   */
+
+  if ((conn->flags & TCP_CLOSE_ARRANGED) != 0)
+    {
+      if (work_cancel(LPWORK, &conn->clswork) < 0)
+        {
+          netdev_unlock(conndev);
+          return false;
+        }
+
+      conn->flags &= ~TCP_CLOSE_ARRANGED;
+    }
+
+  nwarn("WARNING: Closing unestablished connection: %p\n", conn);
+
+  /* No other path frees the connection now: its close work is not queued,
+   * and the events that start it need the device lock.  Take its
+   * callbacks and mark it closed: then no event uses it, and its close
+   * never starts tcp_close_work().  Release the locks taken here before
+   * tcp_free(), as tcp_close_work() does.  A caller in the input path
+   * (tcp_alloc_accept()) still holds the lock of its own device.
+   */
+
+  conn_lock(&conn->sconn);
+  tcp_stop_monitor(conn, TCP_ABORT);
+  for (cb = conn->sconn.s_list; cb != NULL; cb = next)
+    {
+      next = cb->nxtconn;
+      tcp_callback_free(conn, cb);
+    }
+
+  conn->clscb = NULL;
+  conn->shdcb = NULL;
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  conn->sndcb = NULL;
+#endif
+  conn->tcpstateflags = TCP_CLOSED;
+  conn_unlock(&conn->sconn);
+  netdev_unlock(conndev);
+
+  /* No socket refers to it any more (crefs == 0) and close() does not
+   * wait for the close callback, also not with SO_LINGER, so nobody needs
+   * to be informed.
+   */
+
+  tcp_free(conn);
+  return true;
+}
+
+/****************************************************************************
+ * Name: tcp_alloc_conn
+ *
+ * Description:
+ *   Find a free TCP/IP connection structure and allocate it for use.  dev
+ *   is the device whose lock the caller holds, or NULL.
+ *
+ ****************************************************************************/
+
+static FAR struct tcp_conn_s *tcp_alloc_conn(uint8_t domain,
+                                             FAR struct net_driver_s *dev)
 {
   FAR struct tcp_conn_s *conn;
 
@@ -642,78 +804,25 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
   /* Return the entry from the head of the free list */
 
   conn = NET_BUFPOOL_TRYALLOC(g_tcp_connections);
+  tcp_conn_list_unlock();
 
-  /* Is the free list empty? */
+  /* Is the free list empty?  As a fall-back, free the oldest connection
+   * that is about to be closed anyway.
+   */
 
-  if (!conn)
+  if (!conn && tcp_reclaim(dev))
     {
-      /* As a fall-back, check for connection structures which can be
-       * stalled.
-       * Search the active connection list for the oldest connection
-       * that is about to be closed anyway.
+      /* Now there should be one free connection. If dynamic connections
+       * allocation is disabled, it is guaranteed so. In case that
+       * dynamic connections are used, it may be already in the free
+       * list, or at least there should be enough space in the heap for
+       * a new connection.
        */
 
-      FAR struct tcp_conn_s *tmp =
-        (FAR struct tcp_conn_s *)g_active_tcp_connections.head;
-
-      while (tmp)
-        {
-          ninfo("conn: %p state: %02x\n", tmp, tmp->tcpstateflags);
-
-          /* Is this connection in a state we can sacrifice. */
-
-          if ((tmp->crefs == 0) &&
-              (tmp->tcpstateflags == TCP_CLOSED    ||
-              tmp->tcpstateflags == TCP_CLOSING    ||
-              tmp->tcpstateflags == TCP_FIN_WAIT_1 ||
-              tmp->tcpstateflags == TCP_FIN_WAIT_2 ||
-              tmp->tcpstateflags == TCP_TIME_WAIT  ||
-              tmp->tcpstateflags == TCP_LAST_ACK))
-            {
-              /* Yes.. Is it the oldest one we have seen so far? */
-
-              if (!conn || tmp->timer < conn->timer)
-                {
-                  /* Yes.. remember it */
-
-                  conn = tmp;
-                }
-            }
-
-          /* Look at the next active connection */
-
-          tmp = (FAR struct tcp_conn_s *)tmp->sconn.s_node.flink;
-        }
-
-      /* Did we find a connection that we can reuse? */
-
-      if (conn != NULL)
-        {
-          nwarn("WARNING: Closing unestablished connection: %p\n", conn);
-
-          /* Yes... free it.  This will remove the connection from the list
-           * of active connections and release all resources held by the
-           * connection.
-           *
-           * No socket refers to it any more (crefs == 0) and close()
-           * does not wait for the close callback, also not with
-           * SO_LINGER, so nobody needs to be informed.
-           */
-
-          tcp_free(conn);
-
-          /* Now there should be one free connection. If dynamic connections
-           * allocation is disabled, it is guaranteed so. In case that
-           * dynamic connections are used, it may be already in the free
-           * list, or at least there should be enough space in the heap for
-           * a new connection.
-           */
-
-          conn = NET_BUFPOOL_TRYALLOC(g_tcp_connections);
-        }
+      tcp_conn_list_lock();
+      conn = NET_BUFPOOL_TRYALLOC(g_tcp_connections);
+      tcp_conn_list_unlock();
     }
-
-  tcp_conn_list_unlock();
 
   /* Mark the connection allocated */
 
@@ -766,6 +875,22 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
     }
 
   return conn;
+}
+
+/****************************************************************************
+ * Name: tcp_alloc
+ *
+ * Description:
+ *   Find a free TCP/IP connection structure and allocate it
+ *   for use.  This is normally something done by the implementation of the
+ *   socket() API but is also called from the event processing logic when a
+ *   TCP packet is received while "listening"
+ *
+ ****************************************************************************/
+
+FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
+{
+  return tcp_alloc_conn(domain, NULL);
 }
 
 /****************************************************************************
@@ -1077,7 +1202,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
 
   /* Allocate the connection structure */
 
-  conn = tcp_alloc(domain);
+  conn = tcp_alloc_conn(domain, dev);
   if (conn)
     {
       /* Set up the local address (laddr) and the remote address (raddr)

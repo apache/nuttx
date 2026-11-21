@@ -56,21 +56,43 @@ static uint32_t tcp_shutdown_eventhandler(FAR struct net_driver_s *dev,
 
   ninfo("flags: %" PRIx32 "\n", flags);
 
+  /* The connection is gone: nothing more to send */
+
+  if ((flags & TCP_DISCONN_EVENTS) != 0)
+    {
+      tcp_callback_free(conn, conn->shdcb);
+      conn->shdcb = NULL;
+      return flags;
+    }
+
+  /* The FIN goes after the data that the application wrote before
+   * shutdown(): wait while data waits in the write queue or is not yet
+   * acknowledged, as close() does.  The send callback still sends it.
+   * An ACK can come with new data: leave it to the reader (no d_len = 0).
+   */
+
+  if ((conn->shutdown & SHUT_WR) != 0 &&
+      (conn->tx_unacked != 0
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  /* We don't need the send callback anymore. */
+       || !sq_empty(&conn->write_q)
+#endif
+      ))
+    {
+      return flags;
+    }
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  /* We don't need the send callback anymore.  Free it now: the
+   * connection can stay in TIME_WAIT for a long time.
+   */
 
   if (conn->sndcb != NULL)
     {
-      conn->sndcb->flags = 0;
-      conn->sndcb->event = NULL;
-
-      /* The callback will be freed by tcp_free. */
-
+      tcp_callback_free(conn, conn->sndcb);
       conn->sndcb = NULL;
     }
 #endif
 
-  dev->d_len = 0;
   if ((conn->shutdown & SHUT_WR) != 0)
     {
       flags |= TCP_TXCLOSE;
@@ -123,7 +145,12 @@ static inline int tcp_send_fin(FAR struct socket *psock)
        conn->tcpstateflags == TCP_SYN_RCVD ||
        conn->tcpstateflags == TCP_CLOSE_WAIT))
     {
-      if ((conn->shdcb = tcp_callback_alloc(conn)) == NULL)
+      /* A callback of an earlier shutdown() may still wait for the queued
+       * data: it reads conn->shutdown when it runs, so use it again.
+       */
+
+      if (conn->shdcb == NULL &&
+          (conn->shdcb = tcp_callback_alloc(conn)) == NULL)
         {
           ret = -EBUSY;
           goto out;
@@ -131,7 +158,7 @@ static inline int tcp_send_fin(FAR struct socket *psock)
 
       /* Set up to receive TCP data event callbacks */
 
-      conn->shdcb->flags = TCP_POLL;
+      conn->shdcb->flags = TCP_POLL | TCP_ACKDATA | TCP_DISCONN_EVENTS;
       conn->shdcb->event = tcp_shutdown_eventhandler;
       conn->shdcb->priv  = conn; /* reference for event handler to free cb */
 

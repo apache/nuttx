@@ -54,16 +54,47 @@ static void tcp_close_work(FAR void *param)
 {
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)param;
 
+  /* The close event handler queues this work before tcp_appsend() acts on
+   * its result: a TCP_ABORT sets TCP_CLOSED only after the handler
+   * returns.  Look at the state under the same locks, or the work, run
+   * on another CPU at once, would see the old state, free nothing, and
+   * no one would free the connection later.
+   */
+
+  conn_dev_lock(&conn->sconn, conn->dev);
   conn->flags &= ~TCP_CLOSE_ARRANGED;
   if (conn->crefs == 0 && conn->tcpstateflags == TCP_CLOSED)
     {
       /* Stop the network monitor for all sockets */
 
-      conn_dev_lock(&conn->sconn, conn->dev);
       tcp_stop_monitor(conn, TCP_TXCLOSE);
       conn_dev_unlock(&conn->sconn, conn->dev);
       tcp_free(conn);
+      return;
     }
+
+  conn_dev_unlock(&conn->sconn, conn->dev);
+}
+
+/****************************************************************************
+ * Name: tcp_close_abortive
+ *
+ * Description:
+ *   Return true if the close is abortive: SO_LINGER is on with a time of
+ *   zero.  POSIX and Linux: the connection is then reset (RST), the queued
+ *   data is dropped, and no FIN is sent.
+ *
+ ****************************************************************************/
+
+static bool tcp_close_abortive(FAR struct tcp_conn_s *conn)
+{
+#ifdef CONFIG_NET_SOLINGER
+  return _SO_GETOPT(conn->sconn.s_options, SO_LINGER) &&
+         conn->sconn.s_linger == 0;
+#else
+  UNUSED(conn);
+  return false;
+#endif
 }
 
 /****************************************************************************
@@ -81,9 +112,15 @@ static uint32_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
    *   TCP_ABORT:    The remote host has aborted the connection
    *   TCP_TIMEDOUT: The remote did not respond, the connection timed out
    *   NETDEV_DOWN:  The network device went down
+   *
+   * TCP_TXCLOSE ends the close only when the peer acknowledged our FIN in
+   * LAST_ACK (the state is TCP_CLOSED then).  The callback of shutdown()
+   * runs before this one and sets TCP_TXCLOSE to send its FIN: this
+   * callback must stay until the connection ends, or no one frees it.
    */
 
-  if ((flags & (TCP_TXCLOSE | TCP_DISCONN_EVENTS)) != 0)
+  if ((flags & TCP_DISCONN_EVENTS) != 0 ||
+      ((flags & TCP_TXCLOSE) != 0 && conn->tcpstateflags == TCP_CLOSED))
     {
       /* The disconnection is complete.  Wake up the waiting thread with an
        * appropriate result.  Success is returned in these cases:
@@ -107,6 +144,46 @@ static uint32_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
        *   NETWORK_DOWN event is processed further.
        */
 
+      if ((flags & NETDEV_DOWN) != 0)
+        {
+          /* No socket refers to the connection and its device sends
+           * nothing more.  Close it now: tcp_close_work() frees only a
+           * connection in TCP_CLOSED, and after this callback is freed no
+           * one frees it.  A connection in TIME_WAIT, for example, would
+           * become TCP_CLOSED later and stay in the active list.
+           */
+
+          conn->tcpstateflags = TCP_CLOSED;
+        }
+
+      goto end_wait;
+    }
+
+  /* Data that the application did not read, or that comes after the
+   * close, ends the connection with a RST at once (RFC 1122, section
+   * 4.2.2.13), also while our own data waits to be sent: the peer may
+   * wait for us to read before it reads, and the two connections would
+   * keep their buffers for ever.  An abortive close (SO_LINGER with a
+   * time of zero) also sends a RST at once, not a FIN.
+   */
+
+  else if (conn->readahead != NULL || (flags & TCP_NEWDATA) != 0 ||
+           tcp_close_abortive(conn))
+    {
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      if (conn->sndcb != NULL)
+        {
+          conn->sndcb->flags = 0;
+          conn->sndcb->event = NULL;
+          conn->sndcb = NULL;
+        }
+#endif
+
+      /* Set TCP_ABORT to send the RST, and free the rx buffers now */
+
+      dev->d_len = 0;
+      flags = (flags & ~TCP_NEWDATA) | TCP_ABORT;
+      tcp_free_rx_buffers(conn);
       goto end_wait;
     }
 
@@ -146,42 +223,22 @@ static uint32_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
                   conn->tcpstateflags == TCP_FIN_WAIT_1 ||
                   conn->tcpstateflags == TCP_FIN_WAIT_2);
 
-      /* Drop data received in this state and make sure that TCP_TXCLOSE
-       * is set in the response
-       */
+      /* Make sure that TCP_TXCLOSE is set in the response */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      /* We don't need the send callback anymore. */
+      /* We don't need the send callback anymore.  Free it now: the
+       * connection can stay in TIME_WAIT for a long time.
+       */
 
       if (conn->sndcb != NULL)
         {
-          conn->sndcb->flags = 0;
-          conn->sndcb->event = NULL;
-
-          /* The callback will be freed by tcp_free. */
-
+          tcp_callback_free(conn, conn->sndcb);
           conn->sndcb = NULL;
         }
 #endif
 
       dev->d_len = 0;
-      if (conn->readahead != NULL || (flags & TCP_NEWDATA) != 0)
-        {
-          /* We need to send RST when read-ahead buffer data is not consumed
-           * or new data is coming.
-           * Set TCP_ABORT flag to trigger sending RST.
-           */
-
-          flags = flags & ~TCP_NEWDATA;
-          flags |= TCP_ABORT;
-
-          /* Free rx buffers of the connection immediately */
-
-          tcp_free_rx_buffers(conn);
-
-          goto end_wait;
-        }
-      else if ((conn->shutdown & SHUT_WR) == 0)
+      if ((conn->shutdown & SHUT_WR) == 0)
         {
           flags |= TCP_TXCLOSE;
 
@@ -210,6 +267,25 @@ end_wait:
 }
 
 /****************************************************************************
+ * Name: tcp_close_waits
+ *
+ * Description:
+ *   Return true if a close of the connection must wait for its close
+ *   callback (to send the queued data and the FIN, or to see the FIN
+ *   acknowledged).
+ *
+ ****************************************************************************/
+
+static bool tcp_close_waits(FAR struct tcp_conn_s *conn)
+{
+  return conn->tcpstateflags == TCP_ESTABLISHED ||
+         conn->tcpstateflags == TCP_FIN_WAIT_1 ||
+         conn->tcpstateflags == TCP_FIN_WAIT_2 ||
+         conn->tcpstateflags == TCP_LAST_ACK ||
+         conn->tcpstateflags == TCP_CLOSE_WAIT;
+}
+
+/****************************************************************************
  * Name: tcp_close_disconnect
  *
  * Description:
@@ -229,6 +305,7 @@ end_wait:
 static inline int tcp_close_disconnect(FAR struct socket *psock)
 {
   FAR struct tcp_conn_s *conn;
+  bool reclaimed;
   int ret = OK;
 
   /* Interrupts are disabled here to avoid race conditions */
@@ -237,9 +314,12 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 
   conn_dev_lock(&conn->sconn, conn->dev);
 
-  /* Discard our reference to the connection */
+  /* No socket refers to the connection any more: stop the monitor now, not
+   * when the connection is freed after TIME_WAIT.  The close callback can
+   * then use its callback structure.
+   */
 
-  conn->crefs = 0;
+  tcp_stop_monitor(conn, TCP_TXCLOSE);
 
   /* TCP_ESTABLISHED
    *   We need to initiate an active close and wait for its completion.
@@ -249,12 +329,35 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
    *   retransmitting the FIN, before disposing the connection.
    */
 
-  if ((conn->tcpstateflags == TCP_ESTABLISHED ||
-       conn->tcpstateflags == TCP_FIN_WAIT_1 ||
-       conn->tcpstateflags == TCP_FIN_WAIT_2 ||
-       conn->tcpstateflags == TCP_LAST_ACK ||
-       conn->tcpstateflags == TCP_CLOSE_WAIT) &&
-      (conn->clscb = tcp_callback_alloc(conn)) != NULL)
+  if (tcp_close_waits(conn))
+    {
+      conn->clscb = tcp_callback_alloc(conn);
+      if (conn->clscb == NULL)
+        {
+          /* All callbacks are in use: free a connection that only waits
+           * for the end of its close (for example in TIME_WAIT), or this
+           * one goes without a FIN and its queued data is lost.
+           * tcp_reclaim() takes a device lock and the list lock: not with
+           * our locks held.  It does not take this connection: it has no
+           * close callback.
+           */
+
+          conn_dev_unlock(&conn->sconn, conn->dev);
+          reclaimed = tcp_reclaim(NULL);
+          conn_dev_lock(&conn->sconn, conn->dev);
+
+          if (reclaimed && tcp_close_waits(conn))
+            {
+              conn->clscb = tcp_callback_alloc(conn);
+            }
+        }
+    }
+
+  /* Discard our reference to the connection */
+
+  conn->crefs = 0;
+
+  if (conn->clscb != NULL)
     {
       /* Set up to receive TCP data event callbacks */
 
@@ -316,9 +419,6 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
     }
   else
     {
-      /* Stop the network monitor for all sockets */
-
-      tcp_stop_monitor(conn, TCP_TXCLOSE);
       conn_dev_unlock(&conn->sconn, conn->dev);
 
       /* Free network resources */
