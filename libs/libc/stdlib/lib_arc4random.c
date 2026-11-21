@@ -25,14 +25,18 @@
  ****************************************************************************/
 
 #include <errno.h>
+#include <fcntl.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/param.h>
 #include <sys/random.h>
 #include <time.h>
+#include <unistd.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/hashtable.h>
+#include <nuttx/random.h>
 
 /****************************************************************************
  * Private Functions
@@ -42,26 +46,37 @@
 static int getrandom_all(FAR void *buf, size_t size, int flags)
 {
   FAR char *tmp = buf;
+  _NX_FILE file;
+  ssize_t nread;
+  int ret;
+
+  ret = _NX_FILE_OPEN(&file, (flags & GRND_RANDOM) != 0 ?
+                      "/dev/random" : "/dev/urandom", O_RDONLY, 0);
+  if (ret < 0)
+    {
+      return _NX_FILE_ERRVAL(ret);
+    }
 
   while (size > 0)
     {
-      ssize_t ret = getrandom(tmp, size, flags);
-
-      if (ret < 0)
+      nread = _NX_FILE_READ(&file, tmp, size);
+      if (nread <= 0)
         {
-          if (get_errno() == EINTR)
+          ret = nread < 0 ? _NX_FILE_ERRVAL(nread) : -EIO;
+          if (ret == -EINTR)
             {
               continue;
             }
 
-          return ret;
+          break;
         }
 
-      tmp += ret;
-      size -= ret;
+      tmp  += nread;
+      size -= nread;
     }
 
-  return 0;
+  _NX_FILE_CLOSE(&file);
+  return size > 0 ? ret : 0;
 }
 #endif
 
@@ -101,6 +116,14 @@ void arc4random_buf(FAR void *bytes, size_t nbytes)
     {
       return;
     }
+#endif
+
+#if defined(CONFIG_CRYPTO_RANDOM_POOL) && \
+    (defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__))
+  /* No random device could be read: use the entropy pool */
+
+  up_rngbuf(bytes, nbytes);
+  return;
 #endif
 
   /* Fallback to hash of clock_systime_ticks(), minus nbytes to avoid getting
