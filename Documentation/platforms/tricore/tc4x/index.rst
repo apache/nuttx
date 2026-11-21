@@ -12,6 +12,7 @@ consists of the following features:
 This kernel with ostest have been tested with
 
 -  Infineon's AURIX™ TC4DA Evaluation Board: TRIBOARD_TC4X9_COM
+-  Infineon's AURIX™ TC4D7 Lite Kit: KIT_A3G_TC4D7_LITE
 
 Supported Boards
 ================
