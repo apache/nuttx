@@ -260,7 +260,7 @@ int tcp_start_monitor(FAR struct socket *psock)
   /* Non-blocking connection ? */
 
   nonblock_conn = (conn->tcpstateflags == TCP_SYN_SENT &&
-                   _SS_ISNONBLOCK(conn->sconn.s_flags));
+                   _SS_ISCONNECTING(conn->sconn.s_flags));
 
   /* Check if the connection has already been closed before any callbacks
    * have been registered. (Maybe the connection is lost before accept has
