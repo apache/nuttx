@@ -908,7 +908,20 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
       FAR void *buf = msg->msg_iov[i].iov_base;
       size_t len = msg->msg_iov[i].iov_len;
 
-      ret = tcp_recvfrom_one(conn, buf, len, from, fromlen, flags);
+      /* An empty buffer takes no data.  The last one still does a receive,
+       * so that a receive of zero bytes reports the connection state.
+       */
+
+      if (len == 0 && i + 1 < msg->msg_iovlen)
+        {
+          continue;
+        }
+
+      /* After data, the next buffers take only the data that is there */
+
+      ret = tcp_recvfrom_one(conn, buf, len, from, fromlen,
+                             nrecv > 0 && (flags & MSG_WAITALL) == 0 ?
+                             flags | MSG_DONTWAIT : flags);
       if (ret <= 0)
         {
           break;
