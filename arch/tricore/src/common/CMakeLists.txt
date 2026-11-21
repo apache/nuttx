@@ -42,7 +42,7 @@ set(SRCS
     tricore_svcall.c
     tricore_tcbinfo.c
     tricore_trapcall.c
-    tricore_systimer.c
+    tricore_stm.c
     tricore_usestack.c
     tricore_fork.c)
 

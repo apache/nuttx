@@ -75,7 +75,7 @@ static void tricore_core_sync(volatile uint32_t *sync)
 {
   uint32_t core = tricore_core_id();
 #if TRICORE_CORE_SYNC_TIMEOUT > 0
-  uint32_t start = getreg32(TRICORE_STM0_BASE + TRICORE_STM_TIM0_OFFSET);
+  uint32_t start = getreg32(TRICORE_STM_BASE(0) + TRICORE_STM_TIM0_OFFSET);
 #endif
 
 #ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
@@ -91,7 +91,7 @@ static void tricore_core_sync(volatile uint32_t *sync)
   while ((*sync & TRICORE_CORE_SYNC_MASK) != TRICORE_CORE_SYNC_MASK)
     {
 #if TRICORE_CORE_SYNC_TIMEOUT > 0
-      if (getreg32(TRICORE_STM0_BASE + TRICORE_STM_TIM0_OFFSET) - start >=
+      if (getreg32(TRICORE_STM_BASE(0) + TRICORE_STM_TIM0_OFFSET) - start >=
           TRICORE_CORE_SYNC_TIMEOUT)
         {
           break;
