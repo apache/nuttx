@@ -50,10 +50,8 @@
  *      Standard-mode (up to 100 kHz)
  *      Fast-mode (up to 400 kHz)
  *      Fast-mode Plus (up to 1 MHz)
- *      An instance whose I2C kernel clock frequency STM32_I2Cn_FREQUENCY
- *      is defined in board.h gets its timing calculated from it.  The
- *      other instances must run from HSI and use fixed timings (STM32F3,
- *      STM32G4, STM32F7 and STM32H7 only).
+ *      The timing is calculated from the I2C kernel clock frequency
+ *      STM32_I2Cn_FREQUENCY.
  *
  *  - Multiple instances (shared bus)
  *  - Interrupt based operation
@@ -251,109 +249,25 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* An instance whose kernel clock frequency STM32_I2Cn_FREQUENCY is defined
- * in board.h gets its timing calculated from it.  The other instances must
- * run from HSI and use fixed timings.
+/* The timing of each instance is computed from its kernel clock
+ * frequency STM32_I2Cn_FREQUENCY (board.h, else stm32_i2c_clk.h).
  */
 
-#ifdef CONFIG_STM32_I2C1
-#  ifdef STM32_I2C1_FREQUENCY
-#    define STM32_I2C_CALC_TIMING
-#  else
-#    define STM32_I2C1_HSI_TIMING
-#    define STM32_I2C_HSI_TIMING
-#  endif
+#if defined(CONFIG_STM32_I2C1) && !defined(STM32_I2C1_FREQUENCY)
+#  error "STM32_I2C1_FREQUENCY must be defined in board.h"
 #endif
 
-#ifdef CONFIG_STM32_I2C2
-#  ifdef STM32_I2C2_FREQUENCY
-#    define STM32_I2C_CALC_TIMING
-#  else
-#    define STM32_I2C2_HSI_TIMING
-#    define STM32_I2C_HSI_TIMING
-#  endif
+#if defined(CONFIG_STM32_I2C2) && !defined(STM32_I2C2_FREQUENCY)
+#  error "STM32_I2C2_FREQUENCY must be defined in board.h"
 #endif
 
-#ifdef CONFIG_STM32_I2C3
-#  ifdef STM32_I2C3_FREQUENCY
-#    define STM32_I2C_CALC_TIMING
-#  else
-#    define STM32_I2C3_HSI_TIMING
-#    define STM32_I2C_HSI_TIMING
-#  endif
+#if defined(CONFIG_STM32_I2C3) && !defined(STM32_I2C3_FREQUENCY)
+#  error "STM32_I2C3_FREQUENCY must be defined in board.h"
 #endif
 
-#ifdef CONFIG_STM32_I2C4
-#  ifdef STM32_I2C4_FREQUENCY
-#    define STM32_I2C_CALC_TIMING
-#  else
-#    define STM32_I2C4_HSI_TIMING
-#    define STM32_I2C_HSI_TIMING
-#  endif
+#if defined(CONFIG_STM32_I2C4) && !defined(STM32_I2C4_FREQUENCY)
+#  error "STM32_I2C4_FREQUENCY must be defined in board.h"
 #endif
-
-#ifdef STM32_I2C_HSI_TIMING
-#warning TODO: check I2C clock source. It must be HSI!
-#undef INVALID_CLOCK_SOURCE
-
-#if defined(CONFIG_ARCH_CHIP_STM32F7)
-#  ifdef STM32_I2C1_HSI_TIMING
-#    if STM32_RCC_DCKCFGR2_I2C1SRC != RCC_DCKCFGR2_I2C1SEL_HSI
-#      warning "Clock Source STM32_RCC_DCKCFGR2_I2C1SRC must be HSI"
-#      define INVALID_CLOCK_SOURCE
-#    endif
-#  endif
-#  ifdef STM32_I2C2_HSI_TIMING
-#    if STM32_RCC_DCKCFGR2_I2C2SRC != RCC_DCKCFGR2_I2C2SEL_HSI
-#      warning "Clock Source STM32_RCC_DCKCFGR2_I2C2SRC must be HSI"
-#      define INVALID_CLOCK_SOURCE
-#    endif
-#  endif
-#  ifdef STM32_I2C3_HSI_TIMING
-#    if STM32_RCC_DCKCFGR2_I2C3SRC != RCC_DCKCFGR2_I2C3SEL_HSI
-#      warning "Clock Source STM32_RCC_DCKCFGR2_I2C3SRC must be HSI"
-#      define INVALID_CLOCK_SOURCE
-#    endif
-#  endif
-#  ifdef STM32_I2C4_HSI_TIMING
-#    if STM32_RCC_DCKCFGR2_I2C4SRC != RCC_DCKCFGR2_I2C4SEL_HSI
-#      warning "Clock Source STM32_RCC_DCKCFGR2_I2C4SRC must be HSI"
-#      define INVALID_CLOCK_SOURCE
-#    endif
-#  endif
-#  if STM32_HSI_FREQUENCY != 16000000 || defined(INVALID_CLOCK_SOURCE)
-#    error STM32_I2C: Peripheral clock is HSI and it must be 16MHz or the speed/timing calculations need to be redone.
-#  endif
-#elif defined(CONFIG_ARCH_CHIP_STM32H7)
-#  if defined(STM32_I2C1_HSI_TIMING) || defined(STM32_I2C2_HSI_TIMING) || \
-      defined(STM32_I2C3_HSI_TIMING)
-#    if STM32_RCC_D2CCIP2R_I2C123SRC != RCC_D2CCIP2R_I2C123SEL_HSI
-#      warning "Clock Source STM32_RCC_D2CCIP2R_I2C123SRC must be HSI"
-#      define INVALID_CLOCK_SOURCE
-#    endif
-#  endif
-#  ifdef STM32_I2C4_HSI_TIMING
-#    if STM32_RCC_D3CCIPR_I2C4SRC != RCC_D3CCIPR_I2C4SEL_HSI
-#      warning "Clock Source STM32_RCC_D3CCIPR_I2C4SRC must be HSI"
-#      define INVALID_CLOCK_SOURCE
-#    endif
-#  endif
-#  if STM32_HSI_FREQUENCY != 16000000 || defined(INVALID_CLOCK_SOURCE)
-#    error STM32_I2C: Peripheral clock is HSI and it must be 16MHz or the speed/timing calculations need to be redone.
-#  endif
-#elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX)
-#  if STM32_HSI_FREQUENCY != 8000000 || defined(INVALID_CLOCK_SOURCE)
-#    error STM32_I2C: Peripheral clock is HSI and it must be 8MHz or the speed/timing calculations need to be redone.
-#  endif
-#elif defined(CONFIG_STM32_STM32G4XXX)
-#  if STM32_HSI_FREQUENCY != 16000000 || defined(INVALID_CLOCK_SOURCE)
-#    error STM32_I2C: Peripheral clock is HSI and it must be 16MHz or the speed/timing calculations need to be redone.
-#  endif
-#else
-#  error "STM32_I2Cn_FREQUENCY must be defined in board.h"
-#endif
-#endif /* STM32_I2C_HSI_TIMING */
 
 /* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.
  * Instead, CPU-intensive polling will be used.
@@ -489,14 +403,12 @@ struct stm32_i2c_config_s
   uint32_t reset_bit;         /* Reset bit */
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
-#ifdef STM32_I2C_CALC_TIMING
-  uint32_t kerclk;            /* Kernel clock frequency, 0 for HSI timing */
+  uint32_t kerclk;            /* Kernel clock frequency */
   uint16_t rise;              /* Rise time override in ns */
   uint16_t fall;              /* Fall time override in ns */
   bool rf_override;           /* Use the rise and fall time override */
   uint8_t anfoff;             /* Analog filter off */
   uint8_t dnf;                /* Digital noise filter */
-#endif
 #ifndef CONFIG_I2C_POLLED
   uint32_t ev_irq;            /* Event IRQ */
   uint32_t er_irq;            /* Error IRQ */
@@ -617,16 +529,14 @@ static const struct stm32_i2c_config_s stm32_i2c1_config =
   .reset_bit     = STM32_RCC_I2C1_RST,
   .scl_pin       = GPIO_I2C1_SCL,
   .sda_pin       = GPIO_I2C1_SDA,
-#ifdef STM32_I2C1_FREQUENCY
   .kerclk        = STM32_I2C1_FREQUENCY,
-#  ifdef CONFIG_STM32_I2C1_RF_OVERRIDE
+#ifdef CONFIG_STM32_I2C1_RF_OVERRIDE
   .rise          = CONFIG_STM32_I2C1_RISE,
   .fall          = CONFIG_STM32_I2C1_FALL,
   .rf_override   = true,
-#  endif
+#endif
   .anfoff        = CONFIG_STM32_I2C1_ANFOFF,
   .dnf           = CONFIG_STM32_I2C1_DNF,
-#endif
 #ifndef CONFIG_I2C_POLLED
   .ev_irq        = STM32_IRQ_I2C1EV,
   .er_irq        = STM32_IRQ_I2C1ER
@@ -665,16 +575,14 @@ static const struct stm32_i2c_config_s stm32_i2c2_config =
   .reset_bit     = STM32_RCC_I2C2_RST,
   .scl_pin       = GPIO_I2C2_SCL,
   .sda_pin       = GPIO_I2C2_SDA,
-#ifdef STM32_I2C2_FREQUENCY
   .kerclk        = STM32_I2C2_FREQUENCY,
-#  ifdef CONFIG_STM32_I2C2_RF_OVERRIDE
+#ifdef CONFIG_STM32_I2C2_RF_OVERRIDE
   .rise          = CONFIG_STM32_I2C2_RISE,
   .fall          = CONFIG_STM32_I2C2_FALL,
   .rf_override   = true,
-#  endif
+#endif
   .anfoff        = CONFIG_STM32_I2C2_ANFOFF,
   .dnf           = CONFIG_STM32_I2C2_DNF,
-#endif
 #ifndef CONFIG_I2C_POLLED
   .ev_irq        = STM32_IRQ_I2C2EV,
   .er_irq        = STM32_IRQ_I2C2ER
@@ -713,16 +621,14 @@ static const struct stm32_i2c_config_s stm32_i2c3_config =
   .reset_bit     = STM32_RCC_I2C3_RST,
   .scl_pin       = GPIO_I2C3_SCL,
   .sda_pin       = GPIO_I2C3_SDA,
-#ifdef STM32_I2C3_FREQUENCY
   .kerclk        = STM32_I2C3_FREQUENCY,
-#  ifdef CONFIG_STM32_I2C3_RF_OVERRIDE
+#ifdef CONFIG_STM32_I2C3_RF_OVERRIDE
   .rise          = CONFIG_STM32_I2C3_RISE,
   .fall          = CONFIG_STM32_I2C3_FALL,
   .rf_override   = true,
-#  endif
+#endif
   .anfoff        = CONFIG_STM32_I2C3_ANFOFF,
   .dnf           = CONFIG_STM32_I2C3_DNF,
-#endif
 #ifndef CONFIG_I2C_POLLED
   .ev_irq        = STM32_IRQ_I2C3EV,
   .er_irq        = STM32_IRQ_I2C3ER
@@ -761,16 +667,14 @@ static const struct stm32_i2c_config_s stm32_i2c4_config =
   .reset_bit     = STM32_RCC_I2C4_RST,
   .scl_pin       = GPIO_I2C4_SCL,
   .sda_pin       = GPIO_I2C4_SDA,
-#ifdef STM32_I2C4_FREQUENCY
   .kerclk        = STM32_I2C4_FREQUENCY,
-#  ifdef CONFIG_STM32_I2C4_RF_OVERRIDE
+#ifdef CONFIG_STM32_I2C4_RF_OVERRIDE
   .rise          = CONFIG_STM32_I2C4_RISE,
   .fall          = CONFIG_STM32_I2C4_FALL,
   .rf_override   = true,
-#  endif
+#endif
   .anfoff        = CONFIG_STM32_I2C4_ANFOFF,
   .dnf           = CONFIG_STM32_I2C4_DNF,
-#endif
 #ifndef CONFIG_I2C_POLLED
   .ev_irq        = STM32_IRQ_I2C4EV,
   .er_irq        = STM32_IRQ_I2C4ER
@@ -1312,138 +1216,13 @@ static void stm32_i2c_tracedump(struct stm32_i2c_priv_s *priv)
 }
 #endif /* CONFIG_I2C_TRACE */
 
-#ifdef STM32_I2C_HSI_TIMING
 /****************************************************************************
- * Name: stm32_i2c_setclock_hsi
+ * Name: stm32_i2c_setclock
  *
  * Description:
- *
- *  Sets the I2C bus clock frequency by configuring the I2C_TIMINGR register.
- *
- *  This function supports bus clock frequencies of:
- *
- *      1000Khz (Fast Mode+)
- *      400Khz  (Fast Mode)
- *      100Khz  (Standard Mode)
- *      10Khz   (Standard Mode)
- *
- *  Attempts to set a different frequency will quietly provision the default
- *  of 10Khz.
- *
- *  The only differences between the various modes of operation (std, fast,
- *  fast+) are the bus clock speed and setup/hold times.  Setup/hold times
- *  are specified as a MINIMUM time for the given mode, and naturally std
- *  mode has the longest minimum times.  As a result, by provisioning
- *  setup/hold times for std mode they are also compatible with fast/fast+,
- *  though some performance degradation occurs in fast/fast+ as a result of
- *  the times being somewhat longer than strictly required.  The values
- *  remain as they are because reliability is favored over performance.
- *
- * Clock Selection:
- *
- *  The I2C peripheral clock can be provided by either PCLK1, SYSCLK or the
- *   HSI.
- *
- *    PCLK1 >------|\   I2CCLK
- *   SYSCLK >------| |--------->
- *      HSI >------|/
- *
- *   HSI is the default and is always 8Mhz.
- *
- *   SYSCLK can, in turn, be derived from the HSI, HSE, PPLCLK.
- *
- *      HSI >------|\
- *                 | |  SYSCLK
- *      PLL >------| |--------->
- *                 | |
- *      HSE >------|/
- *
- *
- * References:
- *
- *  App Note AN4235 and the associated software STSW-STM32126.
- *
- ****************************************************************************/
-
-static void stm32_i2c_setclock_hsi(struct stm32_i2c_priv_s *priv,
-                                   uint32_t frequency)
-{
-  uint8_t presc;
-  uint8_t scl_delay;
-  uint8_t sda_delay;
-  uint8_t scl_h_period;
-  uint8_t scl_l_period;
-
-  /* I2C peripheral must be disabled to update clocking configuration.
-   * This will SW reset the device.
-   */
-
-  stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
-
-  if (frequency != priv->frequency)
-    {
-      /*  The Speed and timing calculation are based on the following
-       *  fI2CCLK = HSI and is 16Mhz
-       *  Analog filter is on,
-       *  Digital filter off
-       *  Rise Time is 120 ns and fall is 10ns
-       *  Mode is FastMode
-       */
-
-      if (frequency == 100000)
-        {
-          presc        = 0;
-          scl_delay    = 5;
-          sda_delay    = 0;
-          scl_h_period = 61;
-          scl_l_period = 89;
-        }
-      else if (frequency == 400000)
-        {
-          presc        = 0;
-          scl_delay    = 3;
-          sda_delay    = 0;
-          scl_h_period = 6;
-          scl_l_period = 24;
-        }
-      else if (frequency == 1000000)
-        {
-          presc        = 0;
-          scl_delay    = 2;
-          sda_delay    = 0;
-          scl_h_period = 1;
-          scl_l_period = 5;
-        }
-      else
-        {
-          presc        = 7;
-          scl_delay    = 0;
-          sda_delay    = 0;
-          scl_h_period = 35;
-          scl_l_period = 162;
-        }
-
-      uint32_t timingr =
-        (presc << I2C_TIMINGR_PRESC_SHIFT) |
-        (scl_delay << I2C_TIMINGR_SCLDEL_SHIFT) |
-        (sda_delay << I2C_TIMINGR_SDADEL_SHIFT) |
-        (scl_h_period << I2C_TIMINGR_SCLH_SHIFT) |
-        (scl_l_period << I2C_TIMINGR_SCLL_SHIFT);
-
-      stm32_i2c_putreg32(priv, STM32_I2C_TIMINGR_OFFSET, timingr);
-      priv->frequency = frequency;
-    }
-}
-#endif
-
-#ifdef STM32_I2C_CALC_TIMING
-/****************************************************************************
- * Name: stm32_i2c_setclock_calc
- *
- * Description:
- *
  *   Sets the I2C bus clock frequency by configuring the I2C_TIMINGR
- *   register.
+ *   register from the kernel clock of the instance, then enables the
+ *   I2C peripheral.
  *
  *   This function supports bus clock frequencies of 0-1MHz. However,
  *   high input i2c clock speeds will result in higher minimum frequencies.
@@ -1456,26 +1235,7 @@ static void stm32_i2c_setclock_hsi(struct stm32_i2c_priv_s *priv,
  *
  *   Attempts to set a frequency below the calculated minimum frequency
  *   will quietly provision the minimum frequency. Use care in selecting
- *   the input clock for the given application. .
- *
- * Clock Selection:
- *
- *   The I2C peripheral clock can be provided by either PCLK1 (or PCLK3),
- *   PLL3_R, HSI, or CSI.
- *
- *    PCLK1 >------|\   I2CCLK12
- *   PLL3_R >------| |--------->
- *      HSI >------| |
- *      CSI >------|/
- *
- *   PCLK1 is the default.
- *
- *    PCLK3 >------|\   I2CCLK34
- *   PLL3_R >------| |--------->
- *      HSI >------| |
- *      CSI >------|/
- *
- *   PCLK3 is the default.
+ *   the input clock for the given application.
  *
  * References:
  *
@@ -1483,8 +1243,8 @@ static void stm32_i2c_setclock_hsi(struct stm32_i2c_priv_s *priv,
  *
  ****************************************************************************/
 
-static void stm32_i2c_setclock_calc(struct stm32_i2c_priv_s *priv,
-                                    uint32_t frequency)
+static void stm32_i2c_setclock(struct stm32_i2c_priv_s *priv,
+                               uint32_t frequency)
 {
   uint8_t presc;
   uint32_t t_presc_ns;
@@ -1515,6 +1275,12 @@ static void stm32_i2c_setclock_calc(struct stm32_i2c_priv_s *priv,
   uint32_t tr_max;
   uint32_t tf_max;
   bool rf_override = false;
+
+  /* I2C peripheral must be disabled to update clocking configuration.
+   * This will SW reset the device.
+   */
+
+  stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
 
   /* Calculate timingr only if frequency changes */
 
@@ -1661,12 +1427,6 @@ static void stm32_i2c_setclock_calc(struct stm32_i2c_priv_s *priv,
        * Additionally, take care setting the digital and analog filters.
        */
 
-      /* I2C peripheral must be disabled to update clocking configuration.
-       * This will SW reset the device.
-       */
-
-      stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_PE, 0);
-
       uint32_t timingr =
         (presc << I2C_TIMINGR_PRESC_SHIFT) |
         (scl_delay << I2C_TIMINGR_SCLDEL_SHIFT) |
@@ -1687,32 +1447,6 @@ static void stm32_i2c_setclock_calc(struct stm32_i2c_priv_s *priv,
 
       stm32_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET,
                             cr1_reg_clr, cr1_reg_set);
-    }
-}
-#endif
-
-/****************************************************************************
- * Name: stm32_i2c_setclock
- *
- * Description:
- *   Sets the I2C bus clock frequency and enables the I2C peripheral.
- *
- ****************************************************************************/
-
-static void stm32_i2c_setclock(struct stm32_i2c_priv_s *priv,
-                               uint32_t frequency)
-{
-#ifdef STM32_I2C_CALC_TIMING
-  if (priv->config->kerclk != 0)
-    {
-      stm32_i2c_setclock_calc(priv, frequency);
-    }
-  else
-#endif
-    {
-#ifdef STM32_I2C_HSI_TIMING
-      stm32_i2c_setclock_hsi(priv, frequency);
-#endif
     }
 
   /* Enable I2C peripheral */

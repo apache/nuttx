@@ -9,8 +9,6 @@ config STM32_I2C_SLAVE
 menu "I2C v2 Configuration"
 	depends on STM32_HAVE_IP_I2C_V2
 
-comment "Used by instances with STM32_I2Cn_FREQUENCY in board.h"
-
 menu "Rise/Fall Override"
 
 config STM32_I2C1_RF_OVERRIDE
@@ -121,25 +119,25 @@ menu "Analog Filters"
 
 config STM32_I2C1_ANFOFF
 	int "Turn off I2C1 Analog Filter (0=on, 1=off)"
-	default 1
+	default 0
 	range 0 1
 	depends on STM32_I2C1
 
 config STM32_I2C2_ANFOFF
 	int "Turn off I2C2 Analog Filter (0=on, 1=off)"
-	default 1
+	default 0
 	range 0 1
 	depends on STM32_I2C2
 
 config STM32_I2C3_ANFOFF
 	int "Turn off I2C3 Analog Filter (0=on, 1=off)"
-	default 1
+	default 0
 	range 0 1
 	depends on STM32_I2C3
 
 config STM32_I2C4_ANFOFF
 	int "Turn off I2C4 Analog Filter (0=on, 1=off)"
-	default 1
+	default 0
 	range 0 1
 	depends on STM32_I2C4
 
