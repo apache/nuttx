@@ -29,19 +29,18 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <net/if.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
 #include <fcntl.h>
 #include <fnmatch.h>
-#include <libgen.h>
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
 
 #include <sys/param.h>
 
-#include <nuttx/lib/lib.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
@@ -97,6 +96,8 @@ static int     netprocfs_readdir(FAR struct fs_dirent_s *dir,
 static int     netprocfs_rewinddir(FAR struct fs_dirent_s *dir);
 
 static int     netprocfs_stat(FAR const char *relpath, FAR struct stat *buf);
+static FAR const char *netprocfs_devname(FAR const char *relpath,
+                                         FAR char *buffer, size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -232,23 +233,20 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
 
   if (i == nitems(g_net_entries) - 1)
     {
-      FAR char *devname;
-      FAR char *copy;
+      char devname[IFNAMSIZ];
+      FAR const char *name;
 
       /* Otherwise, we need to search the list of registered network devices
        * to determine if the name corresponds to a network device.
        */
 
-      copy = strdup(relpath);
-      if (copy == NULL)
+      name = netprocfs_devname(relpath, devname, sizeof(devname));
+      if (name == NULL)
         {
-          ferr("ERROR: strdup failed\n");
-          return -ENOMEM;
+          return -ENOENT;
         }
 
-      devname = basename(copy);
-      dev     = netdev_findbyname(devname);
-      lib_free(copy);
+      dev = netdev_findbyname(name);
 
       if (dev == NULL)
         {
@@ -278,6 +276,40 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
 
   filep->f_priv = (FAR void *)priv;
   return OK;
+}
+
+/****************************************************************************
+ * Name: netprocfs_devname
+ ****************************************************************************/
+
+static FAR const char *netprocfs_devname(FAR const char *relpath,
+                                         FAR char *buffer, size_t buflen)
+{
+  FAR const char *start;
+  FAR const char *end;
+  size_t length;
+
+  end = relpath + strlen(relpath);
+  while (end > relpath && *(end - 1) == '/')
+    {
+      end--;
+    }
+
+  start = end;
+  while (start > relpath && *(start - 1) != '/')
+    {
+      start--;
+    }
+
+  length = end - start;
+  if (length == 0 || length >= buflen)
+    {
+      return NULL;
+    }
+
+  memcpy(buffer, start, length);
+  buffer[length] = '\0';
+  return buffer;
 }
 
 /****************************************************************************
@@ -658,23 +690,20 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
   if (buf->st_mode == 0)
     {
       FAR struct net_driver_s *dev;
-      FAR char *devname;
-      FAR char *copy;
+      char devname[IFNAMSIZ];
+      FAR const char *name;
 
       /* Otherwise, we need to search the list of registered network devices
        * to determine if the name corresponds to a network device.
        */
 
-      copy = strdup(relpath);
-      if (copy == NULL)
+      name = netprocfs_devname(relpath, devname, sizeof(devname));
+      if (name == NULL)
         {
-          ferr("ERROR: strdup failed\n");
-          return -ENOMEM;
+          return -ENOENT;
         }
 
-      devname = basename(copy);
-      dev     = netdev_findbyname(devname);
-      lib_free(copy);
+      dev = netdev_findbyname(name);
 
       if (dev == NULL)
         {
