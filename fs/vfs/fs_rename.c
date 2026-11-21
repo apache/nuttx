@@ -276,6 +276,13 @@ errout_with_lock:
     }
 #endif
 
+  /* A current directory at or below the directory follows it */
+
+  if (ret >= 0 && isdir)
+    {
+      fs_cwd_renamed(oldpath, newpath);
+    }
+
   if (subdir != NULL)
     {
       fs_heap_free(subdir);
@@ -519,6 +526,13 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
       notify_rename(oldpath, oldisdir, newpath, newisdir);
     }
 #endif
+
+  /* A current directory at or below the directory follows it */
+
+  if (ret >= 0 && oldisdir)
+    {
+      fs_cwd_renamed(oldpath, newpath);
+    }
 
 errout_with_newinode:
   inode_release(newinode);

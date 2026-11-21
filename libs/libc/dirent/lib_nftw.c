@@ -32,6 +32,8 @@
 #include <string.h>
 #include <limits.h>
 
+#include <nuttx/lib/lib.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -47,11 +49,26 @@ call_nftw(FAR char *path, nftw_cb_t fn, int flags, int base,
     base, level
   };
 
+  FAR char *cwd = NULL;
   int r;
 
-#ifndef CONFIG_DISABLE_ENVIRON
   if (flags & FTW_CHDIR)
     {
+      /* Keep the current directory to go back to it after fn() */
+
+      cwd = lib_get_pathbuffer();
+      if (cwd == NULL)
+        {
+          set_errno(ENOMEM);
+          return -1;
+        }
+
+      if (getcwd(cwd, PATH_MAX) == NULL)
+        {
+          lib_put_pathbuffer(cwd);
+          return -1;
+        }
+
       if (base > 1)
         {
           path[base - 1] = '\0';
@@ -65,19 +82,18 @@ call_nftw(FAR char *path, nftw_cb_t fn, int flags, int base,
 
       if (r < 0)
         {
+          lib_put_pathbuffer(cwd);
           return r;
         }
     }
-#endif
 
   r = fn(path, buf, info, &ftw);
 
-#ifndef CONFIG_DISABLE_ENVIRON
-  if (flags & FTW_CHDIR)
+  if (cwd != NULL)
     {
-      lib_restoredir();
+      chdir(cwd);
+      lib_put_pathbuffer(cwd);
     }
-#endif
 
   return r;
 }

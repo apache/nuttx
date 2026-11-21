@@ -132,13 +132,14 @@ static inline void group_release(FAR struct task_group_s *group)
 
   fdlist_free(&group->tg_fdlist);
 
-  /* Then the task information (environment, streams).  A file that closes
-   * above can still use it: with CONFIG_FS_NOTIFY, the close queues a
-   * notification with the path of the file, and a relative path needs the
-   * current directory from the environment (getcwd()).
+  /* Then the task information (environment, streams) and the current
+   * directory.  A file that closes above can still use the directory: with
+   * CONFIG_FS_NOTIFY, the close queues a notification with the path of the
+   * file, and a relative path needs it.
    */
 
   task_uninit_info(group);
+  fs_cwd_release(group);
 
 #ifdef CONFIG_FS_CHROOT
   /* Drop the chroot jail path */

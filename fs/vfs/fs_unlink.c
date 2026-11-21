@@ -188,6 +188,13 @@ int nx_unlink(FAR const char *pathname)
         {
           goto errout_with_inode;
         }
+
+      /* An empty pseudo directory can be a current directory */
+
+      if (INODE_IS_PSEUDODIR(inode))
+        {
+          fs_cwd_removed(pathname);
+        }
 #endif
     }
 

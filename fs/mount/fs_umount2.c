@@ -28,11 +28,13 @@
 
 #include <sys/mount.h>
 #include <stdbool.h>
+#include <string.h>
 #include <errno.h>
 #include <assert.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/sched.h>
 
 #include "inode/inode.h"
@@ -110,6 +112,8 @@ int nx_umount2(FAR const char *target, unsigned int flags)
   FAR struct inode *mountpt_inode;
   FAR struct inode *blkdrvr_inode = NULL;
   struct inode_search_s desc;
+  FAR char *path;
+  size_t len;
   int ret;
 
   if (!nxsched_capable(PR_CAP_RAWIO))
@@ -178,6 +182,38 @@ int nx_umount2(FAR const char *target, unsigned int flags)
   inode_lock();
 
   ret = inode_checkpathperm(mountpt_inode, W_OK | X_OK, INODE_CHECK_LOCKED);
+  if (ret < 0)
+    {
+      goto errout_with_lock;
+    }
+
+  /* A file system that holds the current directory of a task group is
+   * busy.  The tree lock keeps the mount point path as it is.
+   */
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      ret = -ENOMEM;
+      goto errout_with_lock;
+    }
+
+  ret = inode_getpath(mountpt_inode, path, PATH_MAX);
+  if (ret >= 0)
+    {
+      len = strlen(path);
+      if (len > 1 && path[len - 1] == '/')
+        {
+          path[len - 1] = '\0';
+        }
+
+      if (fs_cwd_busy(path))
+        {
+          ret = -EBUSY;
+        }
+    }
+
+  lib_put_pathbuffer(path);
   if (ret < 0)
     {
       goto errout_with_lock;

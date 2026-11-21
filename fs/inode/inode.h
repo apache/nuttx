@@ -252,6 +252,49 @@ int inode_search_setup(FAR struct inode_search_s *desc,
 void inode_search_release(FAR struct inode_search_s *desc);
 
 /****************************************************************************
+ * Name: fs_cwd_join
+ *
+ * Description:
+ *   Write the host path "<current directory>/<path>" of the caller to
+ *   'buffer' for a relative 'path'.  The current directory is the kernel
+ *   state of the task group, not the environment.
+ *
+ * Returned Value:
+ *   The size that the result needs, with its NUL: if it is larger than
+ *   'buflen', the result in 'buffer' is cut short and the caller tries
+ *   again with a larger buffer.  -ENOENT if the current directory was
+ *   removed, or if it is outside the chroot() root of the caller.
+ *
+ ****************************************************************************/
+
+int fs_cwd_join(FAR const char *path, FAR char *buffer, size_t buflen);
+
+/****************************************************************************
+ * Name: fs_cwd_renamed, fs_cwd_removed, fs_cwd_busy
+ *
+ * Description:
+ *   fs_cwd_renamed(): rename() moved the directory 'oldpath' to 'newpath'
+ *   (the paths of the caller).  Each current directory at or below the
+ *   old path gets the new path, and a current directory at the new path
+ *   (an empty directory that the rename replaced) is removed.
+ *
+ *   fs_cwd_removed(): the directory 'path' (a path of the caller) was
+ *   removed.  A current directory there gives ENOENT from now on.
+ *
+ *   Call them after the operation, without a lock of the inode tree.
+ *   They resolve the directory of each path, and only when a task group
+ *   has set a current directory.
+ *
+ *   fs_cwd_busy(): return true if a current directory is at or below the
+ *   host path 'path'.
+ *
+ ****************************************************************************/
+
+void fs_cwd_renamed(FAR const char *oldpath, FAR const char *newpath);
+void fs_cwd_removed(FAR const char *path);
+bool fs_cwd_busy(FAR const char *path);
+
+/****************************************************************************
  * Name: inode_find
  *
  * Description:

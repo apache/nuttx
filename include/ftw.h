@@ -60,10 +60,8 @@
 #define FTW_MOUNT  2  /* The walk does not cross a mount point. */
 #define FTW_DEPTH  4  /* All subdirectories are visited before the directory
                        * itself. */
-#ifndef CONFIG_DISABLE_ENVIRON
 #define FTW_CHDIR  8  /* The walk changes to each directory before reading
                        * it.  */
-#endif
 
 #if defined(CONFIG_FS_LARGEFILE)
 #  define ftw64    ftw
