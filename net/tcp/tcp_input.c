@@ -1195,6 +1195,15 @@ found:
 
   dev->d_len -= (len + iplen);
 
+  /* No data is queued for the response yet.  d_sndlen can still hold the
+   * length of the last segment that the device sent (over the loopback
+   * device: the segment that is this input).  The paths below that do not
+   * clear it (FIN_WAIT_1, FIN_WAIT_2, a FIN in ESTABLISHED) would then send
+   * that many bytes of the input buffer back to the peer as our data.
+   */
+
+  dev->d_sndlen = 0;
+
 #if defined(CONFIG_NET_STATISTICS) && \
     defined(CONFIG_NET_TCP_DEBUG_DROP_RECV)
 
