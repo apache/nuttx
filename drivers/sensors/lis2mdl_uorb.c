@@ -671,7 +671,7 @@ static int lis2mdl_get_info(FAR struct sensor_lowerhalf_s *lower,
   info->version = 0;
   info->power = CURRENT_CONS[dev->odr][dev->lowpower][dev->offsets];
   memcpy(info->name, "LIS2MDL", sizeof("LIS2MDL"));
-  memcpy(info->name, "STMicro", sizeof("STMicro"));
+  memcpy(info->vendor, "STMicro", sizeof("STMicro"));
 
   info->min_delay = ODR_TO_INTERVAL[ODR_10HZ];
   info->max_delay = ODR_TO_INTERVAL[ODR_10HZ];
@@ -937,7 +937,7 @@ static int lis2mdl_selftest(FAR struct sensor_lowerhalf_s *lower,
 
   /* Turn off self-test for normal operation */
 
-  err = lis2mdl_set_bit(dev, REG_CFG_REG_C, BIT_SELF_TEST, true);
+  err = lis2mdl_set_bit(dev, REG_CFG_REG_C, BIT_SELF_TEST, false);
   if (err < 0)
     {
       goto end_test;
