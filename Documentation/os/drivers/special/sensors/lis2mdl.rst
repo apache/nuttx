@@ -89,10 +89,10 @@ debugging enabled. Running it will show the sensor measurements.
    measure continuously in low power mode, you will need to use the
    ``SNIOC_SET_POWER_MODE`` command explained below.
 
-The ``set_calibvalue`` interface to this sensor takes an array of three `float`
-types, representing hard-iron offsets in micro Teslas. This offset is set on the
-sensor and is subtracted from measurements to compensate for environmental
-effects.
+The ``set_calibvalue`` interface to this sensor takes an array of three
+``sensor_data_t`` values, representing hard-iron offsets in micro Teslas.
+This offset is set on the sensor and is subtracted from measurements to
+compensate for environmental effects.
 
 Some additional control commands for the LIS2MDL are listed below.
 

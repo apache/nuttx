@@ -49,12 +49,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Only float data type supported now */
-
-#ifdef CONFIG_SENSORS_USE_B16
-#  error fixed-point data type not supported yet
-#endif
-
 /* The value that should be in the "who am I" register */
 
 #define WHO_AM_I_VAL 0x40
@@ -97,17 +91,18 @@
 #define BIT_OFFSET_CANC 1 /* Offset cancellation enable */
 #define BIT_LPF 0         /* Low pass filter enable */
 
-/* Unit conversion of Gauss to micro Tesla */
+/* Sensitivity of magnetometer (1.5 milligauss/LSB = 0.15 uT/LSB) */
 
-#define GAUSS_TO_UTESLA 100.0f
-
-/* Sensitivity of magnetometer (1.5 milligauss/LSB) */
-
-#define MAG_SENSITIVITY 0.0015f
+#define MAG_SENSITIVITY sensor_data_ftof(0.15f)
 
 /* The number of samples required during a self-test */
 
 #define SELFTEST_SAMPLES 50
+
+/* Self-test limits of the field change: 15 to 500 milligauss */
+
+#define SELFTEST_MIN sensor_data_ftof(1.5f)
+#define SELFTEST_MAX sensor_data_itof(50)
 
 /****************************************************************************
  * Private Types
@@ -198,27 +193,27 @@ static const uint32_t ODR_TO_INTERVAL[] =
  * Current values in mA.
  */
 
-static const float CURRENT_CONS[][2][2] =
+static const sensor_data_t CURRENT_CONS[][2][2] =
 {
     [ODR_10HZ] =
         {
-            {0.1f, 0.12f},
-            {0.025f, 0.05f},
+            {sensor_data_ftof(0.1f), sensor_data_ftof(0.12f)},
+            {sensor_data_ftof(0.025f), sensor_data_ftof(0.05f)},
         },
     [ODR_20HZ] =
         {
-            {0.2f, 0.235f},
-            {0.05f, 0.1f},
+            {sensor_data_ftof(0.2f), sensor_data_ftof(0.235f)},
+            {sensor_data_ftof(0.05f), sensor_data_ftof(0.1f)},
         },
     [ODR_50HZ] =
         {
-            {0.475f, 0.575f},
-            {0.125f, 0.235f},
+            {sensor_data_ftof(0.475f), sensor_data_ftof(0.575f)},
+            {sensor_data_ftof(0.125f), sensor_data_ftof(0.235f)},
         },
     [ODR_100HZ] =
         {
-            {0.95f, 1.13f},
-            {0.25f, 0.46f},
+            {sensor_data_ftof(0.95f), sensor_data_ftof(1.13f)},
+            {sensor_data_ftof(0.25f), sensor_data_ftof(0.46f)},
         },
 };
 
@@ -325,10 +320,12 @@ static int lis2mdl_read_data(FAR struct lis2mdl_dev_s *dev,
     }
 
   data->timestamp = sensor_get_timestamp();
-  data->temperature = ((float)(raw_data[3]) / 256.0f) + 25.0f;
-  data->x = (float)(raw_data[0]) * MAG_SENSITIVITY * GAUSS_TO_UTESLA;
-  data->y = (float)(raw_data[1]) * MAG_SENSITIVITY * GAUSS_TO_UTESLA;
-  data->z = (float)(raw_data[2]) * MAG_SENSITIVITY * GAUSS_TO_UTESLA;
+  data->temperature =
+    sensor_data_add(sensor_data_divi(sensor_data_itof(raw_data[3]), 256),
+                    sensor_data_itof(25));
+  data->x = sensor_data_muli(MAG_SENSITIVITY, raw_data[0]);
+  data->y = sensor_data_muli(MAG_SENSITIVITY, raw_data[1]);
+  data->z = sensor_data_muli(MAG_SENSITIVITY, raw_data[2]);
   data->status = 0; /* TODO what is this for? */
 
   /* It is possible to check status register to see if there even is new
@@ -677,8 +674,8 @@ static int lis2mdl_get_info(FAR struct sensor_lowerhalf_s *lower,
   info->max_delay = ODR_TO_INTERVAL[ODR_10HZ];
   info->fifo_reserved_event_count = 0;
   info->fifo_max_event_count = 0;
-  info->max_range = 49.152f * GAUSS_TO_UTESLA; /* +/- 49.152 gauss */
-  info->resolution = MAG_SENSITIVITY * GAUSS_TO_UTESLA;
+  info->max_range = sensor_data_itof(4915); /* +/- 49.152 gauss in uT */
+  info->resolution = MAG_SENSITIVITY;
 
   return 0;
 }
@@ -812,6 +809,22 @@ static int lis2mdl_activate(FAR struct sensor_lowerhalf_s *lower,
 }
 
 /****************************************************************************
+ * Name: lis2mdl_ut_to_mgauss
+ *
+ * Description:
+ *   Convert micro-teslas to milligauss.
+ ****************************************************************************/
+
+static int16_t lis2mdl_ut_to_mgauss(sensor_data_t ut)
+{
+#ifdef CONFIG_SENSORS_USE_B16
+  return (int16_t)b16toi(sensor_data_muli(ut, 10));
+#else
+  return (int16_t)sensor_data_muli(ut, 10);
+#endif
+}
+
+/****************************************************************************
  * Name: lis2mdl_selftest
  *
  * Description:
@@ -883,9 +896,9 @@ static int lis2mdl_selftest(FAR struct sensor_lowerhalf_s *lower,
 
       /* Add up samples */
 
-      pre_avg.x += data.x;
-      pre_avg.y += data.y;
-      pre_avg.z += data.z;
+      pre_avg.x = sensor_data_add(pre_avg.x, data.x);
+      pre_avg.y = sensor_data_add(pre_avg.y, data.y);
+      pre_avg.z = sensor_data_add(pre_avg.z, data.z);
 
       /* Wait for the measurement interval */
 
@@ -924,9 +937,9 @@ static int lis2mdl_selftest(FAR struct sensor_lowerhalf_s *lower,
 
       /* Add up samples */
 
-      post_avg.x += data.x;
-      post_avg.y += data.y;
-      post_avg.z += data.z;
+      post_avg.x = sensor_data_add(post_avg.x, data.x);
+      post_avg.y = sensor_data_add(post_avg.y, data.y);
+      post_avg.z = sensor_data_add(post_avg.z, data.z);
 
       /* Wait for the measurement interval */
 
@@ -965,28 +978,29 @@ static int lis2mdl_selftest(FAR struct sensor_lowerhalf_s *lower,
 
   /* Average samples */
 
-  pre_avg.x /= SELFTEST_SAMPLES;
-  pre_avg.y /= SELFTEST_SAMPLES;
-  pre_avg.z /= SELFTEST_SAMPLES;
+  pre_avg.x = sensor_data_divi(pre_avg.x, SELFTEST_SAMPLES);
+  pre_avg.y = sensor_data_divi(pre_avg.y, SELFTEST_SAMPLES);
+  pre_avg.z = sensor_data_divi(pre_avg.z, SELFTEST_SAMPLES);
 
-  post_avg.x /= SELFTEST_SAMPLES;
-  post_avg.y /= SELFTEST_SAMPLES;
-  post_avg.z /= SELFTEST_SAMPLES;
+  post_avg.x = sensor_data_divi(post_avg.x, SELFTEST_SAMPLES);
+  post_avg.y = sensor_data_divi(post_avg.y, SELFTEST_SAMPLES);
+  post_avg.z = sensor_data_divi(post_avg.z, SELFTEST_SAMPLES);
 
   /* Calculate diffs */
 
-  data.x = post_avg.x - pre_avg.x;
-  data.y = post_avg.y - pre_avg.y;
-  data.z = post_avg.z - pre_avg.z;
+  data.x = sensor_data_sub(post_avg.x, pre_avg.x);
+  data.y = sensor_data_sub(post_avg.y, pre_avg.y);
+  data.z = sensor_data_sub(post_avg.z, pre_avg.z);
 
   /* Check if difference is within tolerance. */
 
-  if (data.x < 0.015f * GAUSS_TO_UTESLA || data.x > 0.5f * GAUSS_TO_UTESLA ||
-      data.y < 0.015f * GAUSS_TO_UTESLA || data.y > 0.5f * GAUSS_TO_UTESLA ||
-      data.z < 0.015f * GAUSS_TO_UTESLA || data.z > 0.5f * GAUSS_TO_UTESLA)
+  if (data.x < SELFTEST_MIN || data.x > SELFTEST_MAX ||
+      data.y < SELFTEST_MIN || data.y > SELFTEST_MAX ||
+      data.z < SELFTEST_MIN || data.z > SELFTEST_MAX)
     {
-      snerr("LIS2MDL failed self-test (%.2fX, %.2fY, %.2fZ)", data.x, data.y,
-            data.z);
+      snerr("LIS2MDL failed self-test (%d, %d, %d mG)\n",
+            lis2mdl_ut_to_mgauss(data.x), lis2mdl_ut_to_mgauss(data.y),
+            lis2mdl_ut_to_mgauss(data.z));
       err = -EAGAIN;
     }
 
@@ -1000,8 +1014,9 @@ end_test:
  * Name: lis2mdl_set_calibvalue
  *
  * Description:
- *   Sets the hard-iron offset calibration values. Argument is three floats
- *   representing X, Y, Z offsets in micro-teslas (SI units)
+ *   Sets the hard-iron offset calibration values. Argument is three
+ *   sensor_data_t values representing X, Y, Z offsets in micro-teslas
+ *   (SI units)
  ****************************************************************************/
 
 static int lis2mdl_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
@@ -1020,7 +1035,7 @@ static int lis2mdl_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
 
   /* Get user calibration values */
 
-  FAR float *vals = (float *)(arg);
+  FAR sensor_data_t *vals = (FAR sensor_data_t *)(arg);
 
   if (vals == NULL)
     {
@@ -1030,9 +1045,9 @@ static int lis2mdl_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
 
   /* Convert to offsets in 1.5 milligauss per LSB */
 
-  hardirons[0] = (int16_t)(vals[0] * (1.0f / GAUSS_TO_UTESLA) * 1000.0f);
-  hardirons[1] = (int16_t)(vals[1] * (1.0f / GAUSS_TO_UTESLA) * 1000.0f);
-  hardirons[2] = (int16_t)(vals[2] * (1.0f / GAUSS_TO_UTESLA) * 1000.0f);
+  hardirons[0] = lis2mdl_ut_to_mgauss(vals[0]);
+  hardirons[1] = lis2mdl_ut_to_mgauss(vals[1]);
+  hardirons[2] = lis2mdl_ut_to_mgauss(vals[2]);
 
   /* Set values */
 
