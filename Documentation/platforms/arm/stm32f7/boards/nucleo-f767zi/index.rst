@@ -384,6 +384,13 @@ NOTES:
      Default values for other settings associated with the select USART should
      be correct.
 
+iks01a2
+-------
+
+NSH with an X-NUCLEO-IKS01A2 sensor shield on the Arduino connector
+(I2C1).  The sensors are registered as uORB topics and can be read with
+``sensortest``, the bus can be scanned with ``i2c dev``.
+
 evalos:
 -------
 

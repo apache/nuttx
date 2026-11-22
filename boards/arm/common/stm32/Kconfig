@@ -91,6 +91,30 @@ config BOARD_STM32_HALL3PHASE_SAMPLES
 
 endif # SENSORS_HALL3PHASE
 
+menuconfig BOARD_STM32_IKS01A2
+	bool "X-NUCLEO-IKS01A2 sensor shield"
+	default n
+	depends on SENSORS && STM32_I2C
+	select SENSORS_HTS221
+	select SENSORS_LPS22HB
+	select SENSORS_LSM6DS3TRC
+	select SENSORS_LSM303AGR_UORB
+	---help---
+		Register the LSM6DSL, LSM303AGR, HTS221 and LPS22HB of the
+		X-NUCLEO-IKS01A2 shield as uORB sensors.
+
+if BOARD_STM32_IKS01A2
+
+config BOARD_STM32_IKS01A2_I2CBUS
+	int "I2C bus of the Arduino connector"
+	default 1
+
+config BOARD_STM32_IKS01A2_DEVNO
+	int "First uORB device number"
+	default 0
+
+endif # BOARD_STM32_IKS01A2
+
 config STM32_ROMFS
 	bool "Automount baked-in ROMFS image"
 	default n
