@@ -190,6 +190,15 @@ config NCP5623C
 		Enable support for the onsemi NCP5623C LED driver which can be
 		utilized to drive up to 3 LED's.
 
+config LEDS_LED1642GW
+	bool "LED1642GW LED Driver"
+	default n
+	depends on PWM
+	---help---
+		Enable support for the STMicroelectronics LED1642GW LED driver
+		which can be utilized to drive up to 16 LED's.  The device is
+		a PWM lower-half driver with one channel for each output.
+
 config WS2812
 	bool "WS2812 LED Driver"
 	default n
