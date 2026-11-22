@@ -34,6 +34,10 @@ if(CONFIG_LEDS_APA102)
   list(APPEND SRCS stm32_apa102.c)
 endif()
 
+if(CONFIG_LEDS_LED1642GW AND CONFIG_RGBLED)
+  list(APPEND SRCS stm32_led1642gw.c)
+endif()
+
 if(CONFIG_WS2812)
   list(APPEND SRCS stm32_ws2812.c)
 endif()
