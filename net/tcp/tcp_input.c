@@ -1361,7 +1361,6 @@ found:
                     tcp_getsequence(conn->sndseq), ackseq, unackseq,
                     (uint32_t)conn->tx_unacked);
               tcp_setsequence(conn->sndseq, ackseq);
-              conn->nrtx = 0;
             }
         }
 #endif
@@ -1387,6 +1386,20 @@ found:
           m = m - (conn->sv >> 2);
           conn->sv += m;
           conn->rto = (conn->sa >> 3) + conn->sv;
+        }
+#endif
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      /* The peer acknowledges new data: reset the retry count, also when
+       * it does not acknowledge all the data sent.  RFC 1122, section
+       * 4.2.3.5, counts the retransmissions of the same segment.  Do it
+       * after the RTT estimate: the ACK of a retransmission gives no RTT
+       * sample (Karn's algorithm).
+       */
+
+      if (conn->tx_unacked < lasttxunacked)
+        {
+          conn->nrtx = 0;
         }
 #endif
 
