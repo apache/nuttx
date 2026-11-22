@@ -368,6 +368,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr);
 uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr);
 uint32_t *arm_syscall(uint32_t *regs);
 uint32_t *arm_undefinedinsn(uint32_t *regs);
+bool arm_fault_kill(uint32_t *regs);
 
 /* Exception handling logic common to other ARM7 and ARM9 family. */
 
