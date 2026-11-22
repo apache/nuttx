@@ -51,6 +51,20 @@ Enabled features:
 
 - button with software debouncing enabled (no RC filter on the board)
 
+led16a1
+-------
+
+Configures the NuttShell with support for the X-NUCLEO-LED16A1 expansion
+board (LED1642GW 16-channel LED driver).  The five RGB LEDs of the
+expansion board are registered as ``/dev/rgbled0`` - ``/dev/rgbled4``.
+Use the ``rgbled`` example to test.
+
+Pins: CLK - PA5 (D13), SDI - PA7 (D11), LE - PA10 (D2), PWCLK - PC8 (D6,
+TIM3_CH3).  CLK is shared with LD1, so ``CONFIG_ARCH_LEDS`` is disabled.
+
+The PWCLK timer is also registered as ``/dev/pwm2``.  Do not use this
+device: closing it stops PWCLK and the LED brightness control.
+
 analogscope
 -----------
 
