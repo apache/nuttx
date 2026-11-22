@@ -26,7 +26,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -115,8 +114,9 @@ static int foreach_inodelevel(FAR struct inode *inode,
 
           /* Append the path segment to this inode and recurse */
 
-          snprintf(&info->path[pathlen], sizeof(info->path) - pathlen,
-                   "/%s", inode->i_name);
+          info->path[pathlen] = '/';
+          strlcpy(&info->path[pathlen + 1], inode->i_name,
+                  sizeof(info->path) - pathlen - 1);
           ret = foreach_inodelevel(inode->i_child, info);
 
           /* Truncate the path name back to the correct length */
