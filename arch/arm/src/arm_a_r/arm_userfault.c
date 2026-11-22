@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/arm_userfault.c
+ * arch/arm/src/arm_a_r/arm_userfault.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

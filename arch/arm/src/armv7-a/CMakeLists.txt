@@ -41,7 +41,6 @@ list(
   arm_initialstate.c
   arm_mmu.c
   arm_undefinedinsn.c
-  arm_userfault.c
   arm_perf.c
   cp15_cacheops.c)
 

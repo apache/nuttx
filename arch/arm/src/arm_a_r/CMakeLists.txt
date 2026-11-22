@@ -39,6 +39,7 @@ list(
   arm_doirq.c
   arm_dataabort.c
   arm_syscall.c
-  arm_prefetchabort.c)
+  arm_prefetchabort.c
+  arm_userfault.c)
 
 target_sources(arch PRIVATE ${CSRCS})
