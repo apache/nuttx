@@ -29,6 +29,7 @@
 #if defined(CONFIG_NET_IPv4) && defined (CONFIG_NET_IPFRAG)
 
 #include <sys/ioctl.h>
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <nuttx/debug.h>
@@ -129,6 +130,12 @@ static uint32_t ipv4_fragin_reassemble(FAR struct ip_fragsnode_s *node)
    * the fraglink list was ordered by fragment offset value
    */
 
+  /* ip_fragin_check() guarantees that the list starts with the zero
+   * fragment, which becomes the head of the reassembled IOB chain.
+   */
+
+  DEBUGASSERT(node->frags != NULL && node->frags->fragoff == 0);
+
   fraglink    = node->frags;
   node->frags = NULL;
 
@@ -222,6 +229,7 @@ ipv4_fragout_buildipv4header(FAR struct ipv4_hdr_s *ref,
   if (ref != ipv4)
     {
       uint32_t iphdrlen = (ref->vhl & IPv4_HLMASK) << 2;
+
       memcpy(ipv4, ref, iphdrlen);
     }
 

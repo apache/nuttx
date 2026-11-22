@@ -28,6 +28,7 @@
 #if defined(CONFIG_NET_IPv6) && defined (CONFIG_NET_IPFRAG)
 
 #include <sys/ioctl.h>
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <nuttx/debug.h>
@@ -180,6 +181,12 @@ static uint32_t ipv6_fragin_reassemble(FAR struct ip_fragsnode_s *node)
   /* Loop to walk through the fragment list and reassemble those fragments,
    * the fraglink list was ordered by fragment offset value
    */
+
+  /* ip_fragin_check() guarantees that the list starts with the zero
+   * fragment, which becomes the head of the reassembled IOB chain.
+   */
+
+  DEBUGASSERT(node->frags != NULL && node->frags->fragoff == 0);
 
   fraglink = node->frags;
   node->frags = NULL;
@@ -430,9 +437,9 @@ static uint16_t ipv6_fragout_getunfraginfo(FAR struct iob_s *iob,
 
           case NEXT_ROUTING_EH:
           case NEXT_HOPBYBOT_EH:
-              unfraglen = delta + extlen;
-              *hdroff = delta;
-              *hdrtype = exthdr->nxthdr;
+            unfraglen = delta + extlen;
+            *hdroff = delta;
+            *hdrtype = exthdr->nxthdr;
         }
 
       payload += extlen;
