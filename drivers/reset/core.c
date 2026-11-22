@@ -968,8 +968,8 @@ int reset_control_assert(FAR struct reset_control *rstc)
 
       if (!rstc->acquired)
         {
-           rsterr("reset %s (ID: %u) is not acquired\n",
-               rstc->rcdev->name, rstc->id);
+          rsterr("reset %s (ID: %u) is not acquired\n",
+                 rstc->rcdev->name, rstc->id);
           return -EPERM;
         }
     }
@@ -1029,7 +1029,7 @@ int reset_control_deassert(FAR struct reset_control *rstc)
       if (!rstc->acquired)
         {
           rsterr("reset %s (ID: %u) is not acquired\n",
-               rstc->rcdev->name, rstc->id);
+                 rstc->rcdev->name, rstc->id);
           return -EPERM;
         }
     }
