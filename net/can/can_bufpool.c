@@ -89,6 +89,9 @@ FAR struct iob_s *can_iob_timedalloc(bool throttled, unsigned int timeout,
   unsigned int count2 = 0;
   int          blresult1 = -ENOENT;
   int          blresult2 = -ENOENT;
+  FAR void    *buf;
+
+  UNUSED(throttled);
 
   if (sconn != NULL)
     {
@@ -100,9 +103,7 @@ FAR struct iob_s *can_iob_timedalloc(bool throttled, unsigned int timeout,
       blresult2 = nxrmutex_breaklock(&dev->d_lock, &count2);
     }
 
-  FAR void *buf = mempool_zallocate_throttled(&g_can_buffer, timeout,
-                                              throttled);
-
+  buf = NET_BUFPOOL_TIMEDALLOC(g_can_buffer, timeout);
   if (buf != NULL)
     {
       buf = iob_init_with_data(buf, CAN_BUFFER_SIZE, can_buf_free);
@@ -137,7 +138,7 @@ FAR struct iob_s *can_iob_clone(FAR struct net_driver_s *dev)
 {
   FAR struct iob_s *iob;
 
-  iob = can_iob_timedalloc(throttled, 0, NULL, NULL);
+  iob = can_iob_timedalloc(false, 0, NULL, NULL);
   if (iob == NULL)
     {
       return NULL;
