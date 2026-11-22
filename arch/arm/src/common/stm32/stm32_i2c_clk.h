@@ -29,6 +29,8 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
+
 #include "stm32.h"
 
 /****************************************************************************
@@ -37,7 +39,7 @@
 
 /* Map each I2C instance to its RCC enable and reset register and bit.  The
  * bus differs between families: I2C1/2 sit on APB1 everywhere, I2C3 on
- * APB1 (H7, N6) or APB3 (H5), I2C4 on APB4 (H7, N6) or APB3 (H5).
+ * APB1 or APB3 (H5), I2C4 on APB1 (F7, G4), APB3 (H5) or APB4 (H7, N6).
  */
 
 #if defined(RCC_APB1LENR_I2C1EN)
@@ -116,6 +118,38 @@
 #  define STM32_RCC_I2C4_EN        RCC_APB1ENR1_I2C4EN
 #  define STM32_RCC_I2C4_RST_REG   STM32_RCC_APB1RSTR1
 #  define STM32_RCC_I2C4_RST       RCC_APB1RSTR1_I2C4RST
+#elif defined(RCC_APB1ENR2_I2C4EN)
+#  define STM32_RCC_I2C4_EN_REG    STM32_RCC_APB1ENR2
+#  define STM32_RCC_I2C4_EN        RCC_APB1ENR2_I2C4EN
+#  define STM32_RCC_I2C4_RST_REG   STM32_RCC_APB1RSTR2
+#  define STM32_RCC_I2C4_RST       RCC_APB1RSTR2_I2C4RST
+#elif defined(RCC_APB1ENR_I2C4EN)
+#  define STM32_RCC_I2C4_EN_REG    STM32_RCC_APB1ENR
+#  define STM32_RCC_I2C4_EN        RCC_APB1ENR_I2C4EN
+#  define STM32_RCC_I2C4_RST_REG   STM32_RCC_APB1RSTR
+#  define STM32_RCC_I2C4_RST       RCC_APB1RSTR_I2C4RST
+#endif
+
+/* Interrupt names of the families that spell them STM32_IRQ_I2Cn_EV/ER */
+
+#if !defined(STM32_IRQ_I2C1EV) && defined(STM32_IRQ_I2C1_EV)
+#  define STM32_IRQ_I2C1EV         STM32_IRQ_I2C1_EV
+#  define STM32_IRQ_I2C1ER         STM32_IRQ_I2C1_ER
+#endif
+
+#if !defined(STM32_IRQ_I2C2EV) && defined(STM32_IRQ_I2C2_EV)
+#  define STM32_IRQ_I2C2EV         STM32_IRQ_I2C2_EV
+#  define STM32_IRQ_I2C2ER         STM32_IRQ_I2C2_ER
+#endif
+
+#if !defined(STM32_IRQ_I2C3EV) && defined(STM32_IRQ_I2C3_EV)
+#  define STM32_IRQ_I2C3EV         STM32_IRQ_I2C3_EV
+#  define STM32_IRQ_I2C3ER         STM32_IRQ_I2C3_ER
+#endif
+
+#if !defined(STM32_IRQ_I2C4EV) && defined(STM32_IRQ_I2C4_EV)
+#  define STM32_IRQ_I2C4EV         STM32_IRQ_I2C4_EV
+#  define STM32_IRQ_I2C4ER         STM32_IRQ_I2C4_ER
 #endif
 
 #endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_I2C_CLK_H */

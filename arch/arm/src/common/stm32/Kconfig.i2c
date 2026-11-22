@@ -7,7 +7,9 @@ config STM32_I2C_SLAVE
 	default n
 
 menu "I2C v2 Configuration"
-	depends on STM32_HAVE_IP_I2C_M33M55_V2
+	depends on STM32_HAVE_IP_I2C_V2
+
+comment "Used by instances with STM32_I2Cn_FREQUENCY in board.h"
 
 menu "Rise/Fall Override"
 
@@ -147,8 +149,6 @@ endmenu # Filtering
 
 endmenu # I2C v2 Configuration
 
-if !STM32_HAVE_I2C_H5
-
 config STM32_I2C_DYNTIMEO
 	bool "Use dynamic timeouts"
 	depends on STM32_I2C
@@ -227,5 +227,3 @@ config STM32_I2C_SLAVE_RETRANSFER
 		the tx pointer is reset to 0.
 
 endmenu
-
-endif # !STM32_HAVE_I2C_H5
