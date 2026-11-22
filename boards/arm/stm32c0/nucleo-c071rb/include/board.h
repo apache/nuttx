@@ -186,6 +186,37 @@
 
 #define GPIO_TIM14_CH1OUT   (GPIO_TIM14_CH1OUT_2|GPIO_SPEED_HIGH)
 
+/* X-NUCLEO-LED16A1 expansion board (LED1642GW):
+ *   CLK   - PA5 (D13), shared with LD1
+ *   SDI   - PA7 (D11)
+ *   LE    - PA10 (D2)
+ *   PWCLK - PC8 (D6), TIM3_CH3
+ *
+ * SDI conflicts with PWM on TIM14 and PWCLK with Qencoder on TIM3.
+ */
+
+#define GPIO_LED1642GW_CLK  (GPIO_OUTPUT | GPIO_PUSHPULL |          \
+                             GPIO_SPEED_HIGH | GPIO_OUTPUT_CLEAR | \
+                             GPIO_PORTA | GPIO_PIN5)
+#define GPIO_LED1642GW_SDI  (GPIO_OUTPUT | GPIO_PUSHPULL |          \
+                             GPIO_SPEED_HIGH | GPIO_OUTPUT_CLEAR | \
+                             GPIO_PORTA | GPIO_PIN7)
+#define GPIO_LED1642GW_LE   (GPIO_OUTPUT | GPIO_PUSHPULL |          \
+                             GPIO_SPEED_HIGH | GPIO_OUTPUT_CLEAR | \
+                             GPIO_PORTA | GPIO_PIN10)
+
+#define GPIO_TIM3_CH3OUT    (GPIO_TIM3_CH3OUT_5|GPIO_SPEED_HIGH)
+
+/* PWCLK at 1 MHz gives 244 Hz PWM in the 12-bit brightness mode */
+
+#define BOARD_LED1642GW_PWCLK_TIM     3
+#define BOARD_LED1642GW_PWCLK_CHANNEL 3
+#define BOARD_LED1642GW_PWCLK_FREQ    1000000
+
+/* Number of RGB LEDs on the X-NUCLEO-LED16A1 expansion board */
+
+#define BOARD_LED1642GW_NRGBLEDS      5
+
 /* DMA channels *************************************************************/
 
 /* ADC */
