@@ -28,14 +28,15 @@
 
 #include <nuttx/config.h>
 
+#include <sched.h>
 #include <semaphore.h>
 #include <sys/types.h>
 #include <stdbool.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/irq.h>
 #include <nuttx/list.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 
@@ -77,7 +78,6 @@ struct kwork_wqueue_s
   struct list_node pending;   /* The queue of pending work. */
   sem_t            sem;       /* The counting semaphore of the wqueue */
   sem_t            exsem;     /* Sync waiting for thread exit */
-  spinlock_t       lock;      /* Spinlock */
   int              nthreads;  /* Number of worker threads */
   bool             exit;      /* A flag to request the thread to exit */
   bool             dynamic;   /* Dynamically allocated queue */
@@ -153,6 +153,38 @@ static inline_function FAR struct kwork_wqueue_s *work_qid2wq(int qid)
     {
       return NULL;
     }
+}
+
+/****************************************************************************
+ * Name: work_lock/work_unlock
+ *
+ * Description:
+ *   Lock and unlock the work queues and the work notifier.
+ *
+ *   With the queue locked, the work queue code starts and stops the queue
+ *   timer and wakes the workers: wd_start(), wd_cancel() and nxsem_post()
+ *   enter the critical section.  Code that is in the critical section
+ *   (task exit, watchdog callbacks, drivers) queues and cancels work.  So
+ *   the critical section is the lock: a separate spinlock, taken in the
+ *   two orders, stops two CPUs.
+ *
+ *   Preemption stays disabled, so that a woken worker cannot run on this
+ *   CPU before the caller unlocks.
+ *
+ ****************************************************************************/
+
+static inline_function irqstate_t work_lock(void)
+{
+  irqstate_t flags = enter_critical_section();
+
+  sched_lock();
+  return flags;
+}
+
+static inline_function void work_unlock(irqstate_t flags)
+{
+  leave_critical_section(flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -241,7 +273,7 @@ bool work_insert_pending(FAR struct kwork_wqueue_s *wqueue,
  *
  * Description:
  *   Internal public function to remove the work from the workqueue.
- *   The caller must hold wqueue->lock, and work must be queued on wqueue.
+ *   The caller must hold work_lock(), and work must be queued on wqueue.
  *   Require wqueue != NULL and work != NULL.
  *
  * Input Parameters:
