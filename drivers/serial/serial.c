@@ -134,9 +134,11 @@ static inline ssize_t uart_irqwritev(FAR uart_dev_t *dev,
 static int     uart_tcdrain(FAR uart_dev_t *dev,
                             bool cancelable, clock_t timeout);
 
+#ifdef CONFIG_SERIAL_BREAK
 static int     uart_tcsendbreak(FAR uart_dev_t *dev,
                                 FAR struct file *filep,
                                 unsigned int ms);
+#endif
 
 /* Character driver methods */
 
@@ -810,6 +812,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
   return ret;
 }
 
+#ifdef CONFIG_SERIAL_BREAK
 /****************************************************************************
  * Name: uart_tcsendbreak
  *
@@ -875,6 +878,7 @@ static int uart_tcsendbreak(FAR uart_dev_t *dev, FAR struct file *filep,
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: uart_open
@@ -2071,6 +2075,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
             break;
 
+#ifdef CONFIG_SERIAL_BREAK
           case TCSBRK:
             {
               /* Non-standard Break specifies duration in milliseconds */
@@ -2086,6 +2091,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               ret = uart_tcsendbreak(dev, filep, arg * 100);
             }
             break;
+#endif
 
           case TIOCGWINSZ:
             {
