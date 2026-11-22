@@ -366,8 +366,15 @@ ip_fragin_freelink(FAR struct ip_fraglink_s *fraglink)
  * Name: ip_fragin_check
  *
  * Description:
- *   Check whether the zero fragment has been received or all fragments have
- *   been received.
+ *   Check whether all fragments of an IP datagram have been received.
+ *
+ *   The datagram is only considered complete when the fragment list,
+ *   which is ordered by fragment offset, starts with the zero fragment,
+ *   every fragment begins exactly where the previous one ended (no holes
+ *   and no overlaps) and the list ends with the tail fragment (the only
+ *   one with the more-fragments flag cleared).  The reassembly functions
+ *   rely on all of these properties; in particular they use the zero
+ *   fragment as the head of the reassembled IOB chain.
  *
  * Input Parameters:
  *   fragsnode - node of the upper-level linked list, it maintains
@@ -380,30 +387,40 @@ ip_fragin_freelink(FAR struct ip_fraglink_s *fraglink)
 
 static void ip_fragin_check(FAR struct ip_fragsnode_s *fragsnode)
 {
-  uint16_t formerlen = 0;
+  uint32_t expected = 0;
   FAR struct ip_fraglink_s *entry;
 
-  if (fragsnode->verifyflag & IP_FRAGVERIFY_RECVDTAILFRAG)
+  if ((fragsnode->verifyflag &
+       (IP_FRAGVERIFY_RECVDZEROFRAG | IP_FRAGVERIFY_RECVDTAILFRAG)) !=
+      (IP_FRAGVERIFY_RECVDZEROFRAG | IP_FRAGVERIFY_RECVDTAILFRAG))
     {
-      entry = fragsnode->frags;
-      while (entry != NULL)
+      return;
+    }
+
+  for (entry = fragsnode->frags; entry != NULL; entry = entry->flink)
+    {
+      if (entry->fragoff != expected)
         {
-          if (entry->morefrags)
-            {
-              formerlen += entry->fraglen;
-            }
-          else
-            {
-              /* Only the last entry has a 0 morefrags flag */
+          /* A hole or an overlap, not complete (yet) */
 
-              if (entry->fragoff == formerlen)
-                {
-                  fragsnode->verifyflag |= IP_FRAGVERIFY_RECVDALLFRAGS;
-                }
-            }
-
-          entry = entry->flink;
+          return;
         }
+
+      if (!entry->morefrags)
+        {
+          /* The tail fragment must be the last one in the list, nothing
+           * may follow the end of the datagram.
+           */
+
+          if (entry->flink == NULL)
+            {
+              fragsnode->verifyflag |= IP_FRAGVERIFY_RECVDALLFRAGS;
+            }
+
+          return;
+        }
+
+      expected += entry->fraglen;
     }
 }
 
@@ -1124,6 +1141,7 @@ void ip_frag_stop(FAR struct net_driver_s *dev)
   while (entry != NULL)
     {
       FAR struct ip_fragsnode_s *node = (FAR struct ip_fragsnode_s *)entry;
+
       entrynext = sq_next(entry);
 
       if (dev == node->dev)
@@ -1179,6 +1197,7 @@ void ip_frag_remallfrags(void)
   while (entry != NULL)
     {
       FAR struct ip_fragsnode_s *node = (FAR struct ip_fragsnode_s *)entry;
+
       entrynext = sq_next(entry);
 
       if (node->frags != NULL)
