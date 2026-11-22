@@ -134,6 +134,10 @@
 #define BOARD_PWR_VDDIO  (PWR_SVMCR3_VDDIO2SV    | PWR_SVMCR3_VDDIO3SV | \
                           PWR_SVMCR3_VDDIO2VRSEL | PWR_SVMCR3_VDDIO3VRSEL)
 
+/* The Arduino I2C pins (D15 PH9, D14 PC1) are on the VddIO4 domain */
+
+#define BOARD_PWR_VDDIO4 PWR_SVMCR1_VDDIO4SV
+
 /* LED definitions **********************************************************/
 
 /* The Nucleo-N657X0-Q has three user LEDs (UM3417 silkscreen):
@@ -195,6 +199,16 @@
 
 #define GPIO_USART1_TX   (GPIO_USART1_TX_3 | GPIO_SPEED_50MHZ)
 #define GPIO_USART1_RX   (GPIO_USART1_RX_3 | GPIO_SPEED_50MHZ)
+
+/* I2C GPIOs ****************************************************************/
+
+/* I2C1: Arduino D15/D14 (PH9 SCL, PC1 SDA), kernel clock from the HSI */
+
+#define GPIO_I2C1_SCL     (GPIO_I2C1_SCL_2 | GPIO_SPEED_50MHZ)
+#define GPIO_I2C1_SDA     (GPIO_I2C1_SDA_1 | GPIO_SPEED_50MHZ)
+
+#define STM32_RCC_CCIPR4_I2C1SEL RCC_CCIPR4_I2C1SEL_HSI
+#define STM32_I2C1_FREQUENCY     STM32_HSI_FREQUENCY
 
 /* Ethernet GPIOs ***********************************************************/
 

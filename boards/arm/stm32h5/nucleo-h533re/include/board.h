@@ -230,6 +230,13 @@
 #define GPIO_USART2_RX   GPIO_USART2_RX_1    /* PA3 */
 #define GPIO_USART2_TX   GPIO_USART2_TX_1    /* PA2 */
 
+/* I2C1 GPIOs ***************************************************************/
+
+/* I2C1 on Arduino D15 (SCL) and D14 (SDA) */
+
+#define GPIO_I2C1_SCL    GPIO_I2C1_SCL_1     /* PB6 */
+#define GPIO_I2C1_SDA    GPIO_I2C1_SDA_1     /* PB7 */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
