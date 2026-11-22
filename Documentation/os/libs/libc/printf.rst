@@ -309,7 +309,8 @@ Option                         Minimal     Default      Full
 =============================  ==========  ===========  ======
 
 In Default, ``LIBC_FLOATINGPOINT`` is on when ``DEFAULT_SMALL`` is off and the
-CPU has an FPU, as before the profiles existed.  In Minimal,
+CPU has an FPU, as before the profiles existed.  ``LIBC_PRINTF_OCTAL`` is on
+unless ``DEFAULT_SMALL`` is enabled.  In Minimal,
 ``LIBC_PRINTF_LONG_LONG`` stays on with ``SYSLOG_TIMESTAMP`` or ``FS_PROCFS``,
 because the log time stamps and ``/proc`` print ``time_t`` and ``uint64_t``.
 

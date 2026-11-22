@@ -125,7 +125,7 @@ config LIBC_PRINTF_ALT_FORM
 
 config LIBC_PRINTF_OCTAL
 	bool "Enable %o in printf"
-	default y
+	default LIBC_PRINTF_FULL || !DEFAULT_SMALL
 	---help---
 		Without it, printf() reads the argument of %o and prints "?".
 
