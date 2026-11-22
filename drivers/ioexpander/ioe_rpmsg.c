@@ -567,6 +567,7 @@ static void ioe_rpmsg_client_created(FAR struct rpmsg_device *rdev,
   if (!strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)))
     {
       char eptname[RPMSG_NAME_SIZE];
+
       snprintf(eptname, RPMSG_NAME_SIZE, IOE_RPMSG_EPT_FORMAT, priv->name);
 
       priv->ept.priv = priv;
