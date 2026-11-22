@@ -46,6 +46,7 @@
 #include "hardware/stm32_i2c_v2.h"
 #include "stm32.h"
 #include "stm32_rcc.h"
+#include "stm32_i2c_clk.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -70,30 +71,6 @@
 #  endif
 #endif
 
-/* The I2C peripherals sit on different RCC buses depending on the family.
- * Dispatch on the RCC register macros the family header provides.
- */
-
-#if defined(RCC_APB1LENR_I2C1EN)
-#  define STM32_I2C123_CLK_REG    STM32_RCC_APB1LENR
-#  define STM32_I2C123_RST_REG    STM32_RCC_APB1LRSTR
-#  define STM32_I2C1_CLK_BIT      RCC_APB1LENR_I2C1EN
-#  define STM32_I2C1_RST_BIT      RCC_APB1LRSTR_I2C1RST
-#  define STM32_I2C2_CLK_BIT      RCC_APB1LENR_I2C2EN
-#  define STM32_I2C2_RST_BIT      RCC_APB1LRSTR_I2C2RST
-#  define STM32_I2C3_CLK_BIT      RCC_APB1LENR_I2C3EN
-#  define STM32_I2C3_RST_BIT      RCC_APB1LRSTR_I2C3RST
-#else
-#  define STM32_I2C123_CLK_REG    STM32_RCC_APB1ENR
-#  define STM32_I2C123_RST_REG    STM32_RCC_APB1RSTR
-#  define STM32_I2C1_CLK_BIT      RCC_APB1ENR_I2C1EN
-#  define STM32_I2C1_RST_BIT      RCC_APB1RSTR_I2C1RST
-#  define STM32_I2C2_CLK_BIT      RCC_APB1ENR_I2C2EN
-#  define STM32_I2C2_RST_BIT      RCC_APB1RSTR_I2C2RST
-#  define STM32_I2C3_CLK_BIT      RCC_APB1ENR_I2C3EN
-#  define STM32_I2C3_RST_BIT      RCC_APB1RSTR_I2C3RST
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -105,7 +82,9 @@ struct stm32_i2cslave_s
   mutex_t lock;
   uint32_t frequency;
   uint32_t base;
+  uint32_t clk_reg;
   uint32_t clk_bit;
+  uint32_t reset_reg;
   uint32_t reset_bit;
   uint32_t ev_irq;
   uint32_t scl_pin;
@@ -167,8 +146,10 @@ static struct stm32_i2cslave_s stm32_i2c1_priv =
   .lock = NXMUTEX_INITIALIZER,
   .frequency = 0,
   .base = STM32_I2C1_BASE,
-  .clk_bit = STM32_I2C1_CLK_BIT,
-  .reset_bit = STM32_I2C1_RST_BIT,
+  .clk_reg = STM32_RCC_I2C1_EN_REG,
+  .clk_bit = STM32_RCC_I2C1_EN,
+  .reset_reg = STM32_RCC_I2C1_RST_REG,
+  .reset_bit = STM32_RCC_I2C1_RST,
   .ev_irq = STM32_IRQ_I2C1EV,
   .scl_pin = GPIO_I2C1_SCL,
   .sda_pin = GPIO_I2C1_SDA,
@@ -188,8 +169,10 @@ static struct stm32_i2cslave_s stm32_i2c2_priv =
   .lock = NXMUTEX_INITIALIZER,
   .frequency = 0,
   .base = STM32_I2C2_BASE,
-  .clk_bit = STM32_I2C2_CLK_BIT,
-  .reset_bit = STM32_I2C2_RST_BIT,
+  .clk_reg = STM32_RCC_I2C2_EN_REG,
+  .clk_bit = STM32_RCC_I2C2_EN,
+  .reset_reg = STM32_RCC_I2C2_RST_REG,
+  .reset_bit = STM32_RCC_I2C2_RST,
   .ev_irq = STM32_IRQ_I2C2EV,
   .scl_pin = GPIO_I2C2_SCL,
   .sda_pin = GPIO_I2C2_SDA,
@@ -209,8 +192,10 @@ static struct stm32_i2cslave_s stm32_i2c3_priv =
   .lock = NXMUTEX_INITIALIZER,
   .frequency = 0,
   .base = STM32_I2C3_BASE,
-  .clk_bit = STM32_I2C3_CLK_BIT,
-  .reset_bit = STM32_I2C3_RST_BIT,
+  .clk_reg = STM32_RCC_I2C3_EN_REG,
+  .clk_bit = STM32_RCC_I2C3_EN,
+  .reset_reg = STM32_RCC_I2C3_RST_REG,
+  .reset_bit = STM32_RCC_I2C3_RST,
   .ev_irq = STM32_IRQ_I2C3EV,
   .scl_pin = GPIO_I2C3_SCL,
   .sda_pin = GPIO_I2C3_SDA,
@@ -713,9 +698,9 @@ static int stm32_i2c_init(struct stm32_i2cslave_s *priv)
 {
   DEBUGASSERT(priv);
 
-  modifyreg32(STM32_I2C123_CLK_REG, 0, priv->clk_bit);
-  modifyreg32(STM32_I2C123_RST_REG, 0, priv->reset_bit);
-  modifyreg32(STM32_I2C123_RST_REG, priv->reset_bit, 0);
+  modifyreg32(priv->clk_reg, 0, priv->clk_bit);
+  modifyreg32(priv->reset_reg, 0, priv->reset_bit);
+  modifyreg32(priv->reset_reg, priv->reset_bit, 0);
 
   if (stm32_configgpio(priv->scl_pin) < 0)
     {
@@ -742,8 +727,8 @@ static int stm32_i2c_deinit(struct stm32_i2cslave_s *priv)
 {
   DEBUGASSERT(priv);
 
-  modifyreg32(STM32_I2C123_CLK_REG, priv->clk_bit, 0);
-  modifyreg32(STM32_I2C123_RST_REG, 0, priv->reset_bit);
+  modifyreg32(priv->clk_reg, priv->clk_bit, 0);
+  modifyreg32(priv->reset_reg, 0, priv->reset_bit);
   stm32_unconfiggpio(priv->scl_pin);
   stm32_configgpio(priv->sda_pin);
 

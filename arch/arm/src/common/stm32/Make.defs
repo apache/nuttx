@@ -102,10 +102,6 @@ ifeq ($(CONFIG_STM32_LTDC)$(CONFIG_STM32_HAVE_IP_LTDC_V2),yy)
 CHIP_CSRCS += stm32_ltdc_v1v2.c
 endif
 
-ifeq ($(CONFIG_STM32_I2C)$(CONFIG_STM32_HAVE_IP_I2C_M33M55_V2),yy)
-CHIP_CSRCS += stm32_i2c_m33m55_v2.c
-endif
-
 ifeq ($(CONFIG_STM32_SPI)$(CONFIG_STM32_HAVE_IP_SPI_V5),yy)
 CHIP_CSRCS += stm32_spi_v5.c
 endif
