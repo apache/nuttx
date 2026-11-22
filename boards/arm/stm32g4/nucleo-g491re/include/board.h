@@ -153,6 +153,11 @@
 #define GPIO_USART3_TX                 GPIO_USART3_TX_3    /* PC10 */
 #define GPIO_USART3_RX                 GPIO_USART3_RX_3    /* PC11 */
 
+/* I2C1 on Arduino D15 (SCL) and D14 (SDA). */
+
+#define GPIO_I2C1_SCL                  GPIO_I2C1_SCL_3     /* PB8 */
+#define GPIO_I2C1_SDA                  GPIO_I2C1_SDA_3     /* PB9 */
+
 /* User LEDs */
 
 #define BOARD_LED1                     0 /* User LD2 */
