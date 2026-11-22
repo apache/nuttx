@@ -34,6 +34,10 @@ ifeq ($(CONFIG_SENSORS_BMP280),y)
   CSRCS += stm32_bmp280.c
 endif
 
+ifeq ($(CONFIG_BOARD_STM32_IKS01A2),y)
+  CSRCS += stm32_iks01a2.c
+endif
+
 ifeq ($(CONFIG_SENSORS_MS56XX),y)
   CSRCS += stm32_ms5611.c
 endif

@@ -23,3 +23,10 @@ nsh
 
 Configures the NuttShell (nsh) located at apps/examples/nsh. This
 configuration enables a serial console on USART2 (Nucleo Virtual Console).
+
+iks01a2
+-------
+
+NSH with an X-NUCLEO-IKS01A2 sensor shield on the Arduino connector
+(I2C1).  The sensors are registered as uORB topics and can be read with
+``sensortest``, the bus can be scanned with ``i2c dev``.

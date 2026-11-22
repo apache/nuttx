@@ -82,6 +82,10 @@
 #  include "board_timer.h"
 #endif
 
+#ifdef CONFIG_BOARD_STM32_IKS01A2
+#  include "stm32_iks01a2.h"
+#endif
+
 #include "board_common.h"
 
 /****************************************************************************
@@ -234,6 +238,18 @@ int stm32_common_initialize(void)
   /* Register the timer and oneshot devices selected in the board config */
 
   stm32_timer_setup();
+#endif
+
+#ifdef CONFIG_BOARD_STM32_IKS01A2
+  /* Register the sensors of the X-NUCLEO-IKS01A2 shield */
+
+  ret = board_iks01a2_initialize(CONFIG_BOARD_STM32_IKS01A2_DEVNO,
+                                 CONFIG_BOARD_STM32_IKS01A2_I2CBUS);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_iks01a2_initialize() failed: %d\n",
+             ret);
+    }
 #endif
 
   UNUSED(ret);

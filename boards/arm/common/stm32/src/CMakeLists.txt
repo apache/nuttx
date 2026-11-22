@@ -30,6 +30,10 @@ if(CONFIG_SENSORS_BMP280)
   list(APPEND SRCS stm32_bmp280.c)
 endif()
 
+if(CONFIG_BOARD_STM32_IKS01A2)
+  list(APPEND SRCS stm32_iks01a2.c)
+endif()
+
 if(CONFIG_LEDS_APA102)
   list(APPEND SRCS stm32_apa102.c)
 endif()

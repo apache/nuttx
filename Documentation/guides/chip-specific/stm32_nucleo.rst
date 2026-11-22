@@ -57,6 +57,8 @@ SocketCAN  ``CONFIG_STM32_CAN_SOCKET``         interfaces for all enabled
            ``CONFIG_STM32_FDCAN_SOCKET``       instances
 I2C        ``CONFIG_I2C_DRIVER``               ``/dev/i2cN`` for every enabled
                                                ``CONFIG_STM32_I2CN``
+IKS01A2    ``CONFIG_BOARD_STM32_IKS01A2``      X-NUCLEO-IKS01A2 sensors, see
+                                               `Shields`_
 =========  ==================================  ================================
 
 The file systems are not mounted when ``CONFIG_DISABLE_MOUNTPOINT`` is
@@ -90,3 +92,34 @@ Rules for boards:
   ``stm32_common_initialize()``, not to individual boards.
 - ``board.h`` defines ``STM32_LPTIMn_CLKIN`` for every LPTIM instance of
   the chip.
+
+Shields
+=======
+
+Shields on the Arduino connector are supported by the common board
+code: enable the shield option and the I2C instance of the board's
+Arduino connector.
+
+X-NUCLEO-IKS01A2
+----------------
+
+Motion MEMS and environmental sensor shield, enabled with
+``CONFIG_BOARD_STM32_IKS01A2``. The sensors are on the I2C bus
+``CONFIG_BOARD_STM32_IKS01A2_I2CBUS`` (default 1) and are registered as
+uORB topics, N being ``CONFIG_BOARD_STM32_IKS01A2_DEVNO`` (default 0):
+
+=========  =======  =============================================
+Sensor     Address  Topics
+=========  =======  =============================================
+LSM6DSL    0x6b     ``sensor_accelN``, ``sensor_gyroN``
+HTS221     0x5f     ``sensor_humiN``, ``sensor_ambient_tempN``
+LPS22HB    0x5d     ``sensor_baroN``
+LSM303AGR  0x19     ``sensor_accelN+1``
+LSM303AGR  0x1e     ``sensor_magN+1``
+=========  =======  =============================================
+
+The LSM6DSL is register-compatible with the LSM6DS3TR-C and uses its
+driver.
+
+Boards with an ``iks01a2`` configuration: nucleo-f303re, nucleo-f767zi,
+nucleo-g491re, nucleo-h533re, nucleo-h743zi and nucleo-n657x0-q.
