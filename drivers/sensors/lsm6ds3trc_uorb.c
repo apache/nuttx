@@ -44,12 +44,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Only float data type supported now */
-
-#ifdef CONFIG_SENSORS_USE_B16
-#  error fixed-point data type not supported yet
-#endif
-
 /* The value that should be in the WHO_AM_I register. */
 
 #define WHO_AM_I_VAL 0x6a
@@ -273,25 +267,25 @@ static const uint32_t ODR_INTERVAL[] =
 
 /* Accelerometer FSR sensitivities in m/s^2 per LSB */
 
-static const float FSR_XL_SENS[] =
+static const sensor_data_t FSR_XL_SENS[] =
 {
-  0.061f * MILLIG_TO_MS2, /* 2g */
-  0.488f * MILLIG_TO_MS2, /* 16g */
-  0.122f * MILLIG_TO_MS2, /* 4g */
-  0.244f * MILLIG_TO_MS2, /* 8g */
+  sensor_data_ftof(0.061f * MILLIG_TO_MS2), /* 2g */
+  sensor_data_ftof(0.488f * MILLIG_TO_MS2), /* 16g */
+  sensor_data_ftof(0.122f * MILLIG_TO_MS2), /* 4g */
+  sensor_data_ftof(0.244f * MILLIG_TO_MS2), /* 8g */
 };
 
 /* Gyro FSR sensitivities in rad/s per LSB */
 
-static const float FSR_GYRO_SENS[] =
+static const sensor_data_t FSR_GYRO_SENS[] =
 {
-  8.75f * MDPS_TO_RADS,  /* LSM6DS3TRC_FSR_GY_245DPS */
-  4.375f * MDPS_TO_RADS, /* LSM6DS3TRC_FSR_GY_125DPS */
-  17.50f * MDPS_TO_RADS, /* LSM6DS3TRC_FSR_GY_500DPS */
-  0.0f,                  /* No such setting (3) */
-  35.0f * MDPS_TO_RADS,  /* LSM6DS3TRC_FSR_GY_1000DPS */
-  0.0f,                  /* No such setting (5) */
-  70.0f * MDPS_TO_RADS,  /* LSM6DS3TRC_FSR_GY_2000DPS */
+  sensor_data_ftof(8.75f * MDPS_TO_RADS),  /* LSM6DS3TRC_FSR_GY_245DPS */
+  sensor_data_ftof(4.375f * MDPS_TO_RADS), /* LSM6DS3TRC_FSR_GY_125DPS */
+  sensor_data_ftof(17.50f * MDPS_TO_RADS), /* LSM6DS3TRC_FSR_GY_500DPS */
+  sensor_data_itof(0),                     /* No such setting (3) */
+  sensor_data_ftof(35.0f * MDPS_TO_RADS),  /* LSM6DS3TRC_FSR_GY_1000DPS */
+  sensor_data_itof(0),                     /* No such setting (5) */
+  sensor_data_ftof(70.0f * MDPS_TO_RADS),  /* LSM6DS3TRC_FSR_GY_2000DPS */
 };
 
 /* Interrupt control registers, indexed by lsm6ds3trc_int_e */
@@ -632,9 +626,9 @@ static int lsm6ds3trc_fifo_configure(FAR struct lsm6ds3trc_dev_s *dev)
  * Name: lsm6ds3trc_convert_temp
  ****************************************************************************/
 
-static float lsm6ds3trc_convert_temp(int16_t temp)
+static sensor_data_t lsm6ds3trc_convert_temp(int16_t temp)
 {
-  return (float)((temp / 256) + 25);
+  return sensor_data_itof((temp / 256) + 25);
 }
 
 /****************************************************************************
@@ -655,9 +649,9 @@ static int lsm6ds3trc_read_gyro(FAR struct lsm6ds3trc_dev_s *dev,
 
   data->timestamp = sensor_get_timestamp();
   data->temperature = lsm6ds3trc_convert_temp(raw_data[0]);
-  data->x = (float)(raw_data[1]) * FSR_GYRO_SENS[dev->gyro.fsr];
-  data->y = (float)(raw_data[2]) * FSR_GYRO_SENS[dev->gyro.fsr];
-  data->z = (float)(raw_data[3]) * FSR_GYRO_SENS[dev->gyro.fsr];
+  data->x = sensor_data_muli(FSR_GYRO_SENS[dev->gyro.fsr], raw_data[1]);
+  data->y = sensor_data_muli(FSR_GYRO_SENS[dev->gyro.fsr], raw_data[2]);
+  data->z = sensor_data_muli(FSR_GYRO_SENS[dev->gyro.fsr], raw_data[3]);
 
   return err;
 }
@@ -687,9 +681,9 @@ static int lsm6ds3trc_read_accel(FAR struct lsm6ds3trc_dev_s *dev,
 
   data->timestamp = sensor_get_timestamp();
   data->temperature = lsm6ds3trc_convert_temp(raw_temp);
-  data->x = (float)(raw_data[0]) * FSR_XL_SENS[dev->accel.fsr];
-  data->y = (float)(raw_data[1]) * FSR_XL_SENS[dev->accel.fsr];
-  data->z = (float)(raw_data[2]) * FSR_XL_SENS[dev->accel.fsr];
+  data->x = sensor_data_muli(FSR_XL_SENS[dev->accel.fsr], raw_data[0]);
+  data->y = sensor_data_muli(FSR_XL_SENS[dev->accel.fsr], raw_data[1]);
+  data->z = sensor_data_muli(FSR_XL_SENS[dev->accel.fsr], raw_data[2]);
 
   return err;
 }
@@ -857,7 +851,7 @@ static void lsm6ds3trc_fifo_worker_body(FAR struct lsm6ds3trc_dev_s *dev)
   uint8_t status[2];
   FAR int16_t *raw = dev->fifo_raw;
   int16_t raw_temp;
-  float temp_c;
+  sensor_data_t temp_c;
   uint16_t diff_words;
   uint16_t nwords;
   uint32_t interval;
@@ -982,13 +976,13 @@ static void lsm6ds3trc_fifo_worker_body(FAR struct lsm6ds3trc_dev_s *dev)
       if (dev->gyro.enabled)
         {
           struct sensor_gyro gyro_data;
-          float sens = FSR_GYRO_SENS[dev->gyro.fsr];
+          sensor_data_t sens = FSR_GYRO_SENS[dev->gyro.fsr];
 
           gyro_data.timestamp = timestamp;
           gyro_data.temperature = temp_c;
-          gyro_data.x = (float)sample[off + 0] * sens;
-          gyro_data.y = (float)sample[off + 1] * sens;
-          gyro_data.z = (float)sample[off + 2] * sens;
+          gyro_data.x = sensor_data_muli(sens, sample[off + 0]);
+          gyro_data.y = sensor_data_muli(sens, sample[off + 1]);
+          gyro_data.z = sensor_data_muli(sens, sample[off + 2]);
 
           dev->gyro.lower.push_event(dev->gyro.lower.priv, &gyro_data,
                                      sizeof(gyro_data));
@@ -998,13 +992,13 @@ static void lsm6ds3trc_fifo_worker_body(FAR struct lsm6ds3trc_dev_s *dev)
       if (dev->accel.enabled)
         {
           struct sensor_accel accel_data;
-          float sens = FSR_XL_SENS[dev->accel.fsr];
+          sensor_data_t sens = FSR_XL_SENS[dev->accel.fsr];
 
           accel_data.timestamp = timestamp;
           accel_data.temperature = temp_c;
-          accel_data.x = (float)sample[off + 0] * sens;
-          accel_data.y = (float)sample[off + 1] * sens;
-          accel_data.z = (float)sample[off + 2] * sens;
+          accel_data.x = sensor_data_muli(sens, sample[off + 0]);
+          accel_data.y = sensor_data_muli(sens, sample[off + 1]);
+          accel_data.z = sensor_data_muli(sens, sample[off + 2]);
 
           dev->accel.lower.push_event(dev->accel.lower.priv, &accel_data,
                                       sizeof(accel_data));
@@ -1048,7 +1042,7 @@ static void lsm6ds3trc_worker_body(FAR struct lsm6ds3trc_dev_s *dev)
   int16_t raw[7]; /* temp, gx, gy, gz, ax, ay, az */
   struct sensor_gyro gyro_data;
   struct sensor_accel accel_data;
-  float temp_c;
+  sensor_data_t temp_c;
   int err;
 
   err = nxmutex_lock(&dev->devlock);
@@ -1072,9 +1066,9 @@ static void lsm6ds3trc_worker_body(FAR struct lsm6ds3trc_dev_s *dev)
     {
       gyro_data.timestamp = dev->timestamp;
       gyro_data.temperature = temp_c;
-      gyro_data.x = (float)raw[1] * FSR_GYRO_SENS[dev->gyro.fsr];
-      gyro_data.y = (float)raw[2] * FSR_GYRO_SENS[dev->gyro.fsr];
-      gyro_data.z = (float)raw[3] * FSR_GYRO_SENS[dev->gyro.fsr];
+      gyro_data.x = sensor_data_muli(FSR_GYRO_SENS[dev->gyro.fsr], raw[1]);
+      gyro_data.y = sensor_data_muli(FSR_GYRO_SENS[dev->gyro.fsr], raw[2]);
+      gyro_data.z = sensor_data_muli(FSR_GYRO_SENS[dev->gyro.fsr], raw[3]);
 
       dev->gyro.lower.push_event(dev->gyro.lower.priv, &gyro_data,
                                  sizeof(gyro_data));
@@ -1084,9 +1078,9 @@ static void lsm6ds3trc_worker_body(FAR struct lsm6ds3trc_dev_s *dev)
     {
       accel_data.timestamp = dev->timestamp;
       accel_data.temperature = temp_c;
-      accel_data.x = (float)raw[4] * FSR_XL_SENS[dev->accel.fsr];
-      accel_data.y = (float)raw[5] * FSR_XL_SENS[dev->accel.fsr];
-      accel_data.z = (float)raw[6] * FSR_XL_SENS[dev->accel.fsr];
+      accel_data.x = sensor_data_muli(FSR_XL_SENS[dev->accel.fsr], raw[4]);
+      accel_data.y = sensor_data_muli(FSR_XL_SENS[dev->accel.fsr], raw[5]);
+      accel_data.z = sensor_data_muli(FSR_XL_SENS[dev->accel.fsr], raw[6]);
 
       dev->accel.lower.push_event(dev->accel.lower.priv, &accel_data,
                                   sizeof(accel_data));
@@ -1419,7 +1413,10 @@ static int lsm6ds3trc_get_info(FAR struct sensor_lowerhalf_s *lower,
 
   memset(info, 0, sizeof(struct sensor_device_info_s));
   info->version = 0;
-  info->power = 0.29f; /* 0.29mA combo LP @52Hz, AN5130 typical @1.8V */
+
+  /* 0.29mA combo LP @52Hz, AN5130 typical @1.8V */
+
+  info->power = sensor_data_ftof(0.29f);
   memcpy(info->name, "LSM6DS3TR-C", sizeof("LSM6DS3TR-C"));
   memcpy(info->vendor, "STMicro", sizeof("STMicro"));
 
@@ -1439,14 +1436,16 @@ static int lsm6ds3trc_get_info(FAR struct sensor_lowerhalf_s *lower,
   if (lower->type == SENSOR_TYPE_GYROSCOPE)
     {
       info->resolution = FSR_GYRO_SENS[sens->fsr];
-      info->max_range = FSR_GYRO_SENS[sens->fsr] * INT16_MAX;
+      info->max_range = sensor_data_muli(FSR_GYRO_SENS[sens->fsr],
+                                         INT16_MAX);
       info->min_delay = (int32_t)ODR_INTERVAL[ODR_12_5HZ];
       info->max_delay = (int32_t)ODR_INTERVAL[ODR_12_5HZ];
     }
   else if (lower->type == SENSOR_TYPE_ACCELEROMETER)
     {
       info->resolution = FSR_XL_SENS[sens->fsr];
-      info->max_range = FSR_XL_SENS[sens->fsr] * INT16_MAX;
+      info->max_range = sensor_data_muli(FSR_XL_SENS[sens->fsr],
+                                         INT16_MAX);
       info->max_delay = (int32_t)ODR_INTERVAL[ODR_12_5HZ];
       info->min_delay = (int32_t)ODR_INTERVAL[ODR_12_5HZ];
     }
