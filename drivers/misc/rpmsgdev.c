@@ -36,7 +36,9 @@
 #include <nuttx/debug.h>
 #include <net/if.h>
 
+#include <nuttx/list.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/video/fb.h>
@@ -77,15 +79,18 @@ struct rpmsgdev_s
                                       * operation until the connection
                                       * between two cpu established.
                                       */
+  struct list_node      cookies;     /* Requests waiting for a reply */
+  spinlock_t            lock;        /* Protect the cookie list */
 };
 
 /* Rpmsg device cookie used to handle the response from the remote cpu */
 
 struct rpmsgdev_cookie_s
 {
-  sem_t     sem;     /* Semaphore used for rpmsg */
-  int       result;  /* The return value of the remote call */
-  FAR void *data;    /* The return data buffer of the remote call */
+  struct list_node node;    /* Node in rpmsgdev_s::cookies */
+  sem_t            sem;     /* Semaphore used for rpmsg */
+  int              result;  /* The return value of the remote call */
+  FAR void        *data;    /* The return data buffer of the remote call */
 };
 
 /****************************************************************************
@@ -144,6 +149,7 @@ static int     rpmsgdev_ept_cb(FAR struct rpmsg_endpoint *ept,
                                FAR void *data, size_t len, uint32_t src,
                                FAR void *priv);
 static void    rpmsgdev_ns_bound(struct rpmsg_endpoint *ept);
+static void    rpmsgdev_ns_unbind(FAR struct rpmsg_endpoint *ept);
 
 /****************************************************************************
  * Private Data
@@ -795,6 +801,7 @@ static int rpmsgdev_send_recv(FAR struct rpmsgdev_s *priv,
                               int len, FAR void *data)
 {
   struct rpmsgdev_cookie_s cookie;
+  irqstate_t flags;
   int ret;
 
   memset(&cookie, 0, sizeof(cookie));
@@ -812,6 +819,10 @@ static int rpmsgdev_send_recv(FAR struct rpmsgdev_s *priv,
   msg->command = command;
   msg->result  = -ENXIO;
   msg->cookie  = (uintptr_t)&cookie;
+
+  flags = spin_lock_irqsave(&priv->lock);
+  list_add_tail(&priv->cookies, &cookie.node);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   if (copy)
     {
@@ -839,6 +850,9 @@ static int rpmsgdev_send_recv(FAR struct rpmsgdev_s *priv,
     }
 
 fail:
+  flags = spin_lock_irqsave(&priv->lock);
+  list_delete(&cookie.node);
+  spin_unlock_irqrestore(&priv->lock, flags);
   nxsem_destroy(&cookie.sem);
   return ret;
 }
@@ -1011,6 +1025,45 @@ static void rpmsgdev_ns_bound(FAR struct rpmsg_endpoint *ept)
 }
 
 /****************************************************************************
+ * Name: rpmsgdev_fail_cookies
+ *
+ * Description:
+ *   Complete every request still waiting for a reply with -ENOTCONN.  The
+ *   server is gone and no reply will come, so without this a blocking
+ *   read would never return.
+ *
+ ****************************************************************************/
+
+static void rpmsgdev_fail_cookies(FAR struct rpmsgdev_s *priv)
+{
+  FAR struct rpmsgdev_cookie_s *cookie;
+  irqstate_t flags;
+
+  /* rpmsg_post() may switch to a waiter, which then takes priv->lock */
+
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
+  list_for_every_entry(&priv->cookies, cookie, struct rpmsgdev_cookie_s,
+                       node)
+    {
+      cookie->result = -ENOTCONN;
+      rpmsg_post(&priv->ept, &cookie->sem);
+    }
+
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
+}
+
+/****************************************************************************
+ * Name: rpmsgdev_ns_unbind
+ ****************************************************************************/
+
+static void rpmsgdev_ns_unbind(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct rpmsgdev_s *priv = ept->priv;
+
+  rpmsgdev_fail_cookies(priv);
+}
+
+/****************************************************************************
  * Name: rpmsgdev_device_created
  *
  * Description:
@@ -1040,7 +1093,7 @@ static void rpmsgdev_device_created(FAR struct rpmsg_device *rdev,
                priv->remotepath);
       rpmsg_create_ept(&priv->ept, rdev, buf,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                       rpmsgdev_ept_cb, NULL);
+                       rpmsgdev_ept_cb, rpmsgdev_ns_unbind);
     }
 }
 
@@ -1067,6 +1120,7 @@ static void rpmsgdev_device_destroy(FAR struct rpmsg_device *rdev,
 
   if (strcmp(priv->remotecpu, rpmsg_get_cpuname(rdev)) == 0)
     {
+      rpmsgdev_fail_cookies(priv);
       rpmsg_wait(&priv->ept, &priv->wait);
       rpmsg_destroy_ept(&priv->ept);
     }
@@ -1157,6 +1211,8 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
   dev->remotepath = remotepath;
 
   nxsem_init(&dev->wait, 0, 0);
+  spin_lock_init(&dev->lock);
+  list_initialize(&dev->cookies);
 
   /* Register the rpmsg callback */
 

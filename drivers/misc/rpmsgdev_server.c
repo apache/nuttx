@@ -98,6 +98,7 @@ static int  rpmsgdev_open_handler(FAR struct rpmsg_endpoint *ept,
 static int  rpmsgdev_close_handler(FAR struct rpmsg_endpoint *ept,
                                    FAR void *data, size_t len,
                                    uint32_t src, FAR void *priv);
+static void rpmsgdev_read_cancel(FAR struct rpmsgdev_device_s *dev);
 static int  rpmsgdev_read_nonblock_handler(FAR struct rpmsg_endpoint *ept,
                                            FAR void *data, size_t len,
                                            uint32_t src, FAR void *priv);
@@ -196,6 +197,25 @@ out:
 }
 
 /****************************************************************************
+ * Name: rpmsgdev_read_cancel
+ *
+ * Description:
+ *   Drop a blocking read that is still waiting for data, so that the
+ *   device no longer calls back into the slot.
+ *
+ ****************************************************************************/
+
+static void rpmsgdev_read_cancel(FAR struct rpmsgdev_device_s *dev)
+{
+  if (dev->readpend.fd.priv != NULL)
+    {
+      file_poll(&dev->file, &dev->readpend.fd, false);
+    }
+
+  work_cancel_sync_wq(g_rpmsgdev_wqueue, &dev->readpend.work);
+}
+
+/****************************************************************************
  * Name: rpmsgdev_close_handler
  ****************************************************************************/
 
@@ -208,6 +228,7 @@ static int rpmsgdev_close_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgdev_device_s *dev =
     (FAR struct rpmsgdev_device_s *)(uintptr_t)msg->filep;
 
+  rpmsgdev_read_cancel(dev);
   msg->header.result = file_close(&dev->file);
   if (msg->header.result == 0)
     {
@@ -540,6 +561,13 @@ static void rpmsgdev_ept_release(FAR struct rpmsg_endpoint *ept)
         {
           file_poll(&dev->file, &dev->fd, false);
         }
+
+      /* dev is freed below: nothing may still point at it from the
+       * device poll list or the work queue.
+       */
+
+      rpmsgdev_read_cancel(dev);
+      work_cancel_sync_wq(g_rpmsgdev_wqueue, &dev->work);
 
       if (dev->file.f_inode != NULL)
         {
