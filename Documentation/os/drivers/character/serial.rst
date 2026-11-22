@@ -79,6 +79,15 @@ Serial Device Drivers
    for the master and the slave; the signal goes to the foreground
    process group of the slave.
 
+-  **Serial line break**. When ``CONFIG_SERIAL_BREAK`` is enabled
+   (the default except for ``DEFAULT_SMALL``), ``TCSBRK`` and
+   ``TCSBRKP`` (used by POSIX ``tcsendbreak()``) request a line
+   break via the lower half driver's ``TIOCSBRK`` and ``TIOCCBRK``
+   ioctls.  When disabled, the driver returns ``-ENOTTY`` (causing
+   ``ioctl()`` and ``tcsendbreak()`` to return -1 with ``errno``
+   set to ``ENOTTY``), reducing code size on memory-constrained
+   targets.
+
 -  **User Access**. Serial drivers are, ultimately, normal
    `character drivers <#chardrivers>`__ and are accessed as other
    character drivers.

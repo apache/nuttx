@@ -344,6 +344,15 @@ config SERIAL_TERMIOS
 		Note: other software settings (echo, \r\n<->\n, break, tcflush)
 		are always supported.
 
+config SERIAL_BREAK
+	bool "Serial line break (tcsendbreak) support"
+	default !DEFAULT_SMALL
+	---help---
+		Enable TCSBRK and TCSBRKP ioctl handling and the
+		uart_tcsendbreak() function.  When disabled, the break
+		ioctls return -ENOTTY (and tcsendbreak() returns -1 with
+		errno set to ENOTTY), saving Flash on small targets.
+
 config TTY_LAUNCH
 	bool "Enable feature TTY launch program"
 	depends on SCHED_HPWORK
