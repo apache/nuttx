@@ -1182,8 +1182,10 @@ static int lsm6ds3trc_activate(FAR struct sensor_lowerhalf_s *lower,
 
   if (enable && !sens->enabled)
     {
+#ifdef CONFIG_SENSORS_LSM6DS3TRC_FIFO
       FAR struct lsm6ds3trc_sens_s *other = is_gyro ? &dev->accel
                                                      : &dev->gyro;
+#endif
       enum lsm6ds3trc_odr_e odr;
 
       start_thread = true;
