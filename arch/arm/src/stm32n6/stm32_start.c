@@ -318,6 +318,18 @@ void __start_c(void)
 #ifdef CONFIG_STM32_USART10
   putreg32(RCC_APB2LPENR_USART10LPEN, STM32_RCC_APB2LPENSR);
 #endif
+#ifdef CONFIG_STM32_I2C1
+  putreg32(RCC_APB1LLPENR_I2C1LPEN, STM32_RCC_APB1LLPENSR);
+#endif
+#ifdef CONFIG_STM32_I2C2
+  putreg32(RCC_APB1LLPENR_I2C2LPEN, STM32_RCC_APB1LLPENSR);
+#endif
+#ifdef CONFIG_STM32_I2C3
+  putreg32(RCC_APB1LLPENR_I2C3LPEN, STM32_RCC_APB1LLPENSR);
+#endif
+#ifdef CONFIG_STM32_I2C4
+  putreg32(RCC_APB4LLPENR_I2C4LPEN, STM32_RCC_APB4LLPENSR);
+#endif
 #ifdef CONFIG_STM32_TIM
   putreg32(RCC_APB1LLPENR_ALLTIM, STM32_RCC_APB1LLPENSR);
   putreg32(RCC_APB2LPENR_ALLTIM, STM32_RCC_APB2LPENSR);
@@ -334,22 +346,30 @@ void __start_c(void)
 
   stm32_pwr_enablevddio(BOARD_PWR_VDDIO);
 
-  /* VDDIO5 (SDMMC2 pads) is validated in PWR SVMCR2 when the board
-   * provides BOARD_PWR_VDDIO5 (PWR_SVMCR2_* bits).
+  /* VDDIO4 and VDDIO5 (SDMMC2 pads) are validated in PWR SVMCR1 and
+   * SVMCR2 when the board provides BOARD_PWR_VDDIO4 (PWR_SVMCR1_* bits)
+   * and BOARD_PWR_VDDIO5 (PWR_SVMCR2_* bits).
    */
+
+#ifdef BOARD_PWR_VDDIO4
+  modifyreg32(STM32_PWR_SVMCR1, 0, BOARD_PWR_VDDIO4);
+#endif
 
 #ifdef BOARD_PWR_VDDIO5
   modifyreg32(STM32_PWR_SVMCR2, 0, BOARD_PWR_VDDIO5);
 #endif
 
   /* Apply the ES0620 I/O-compensation mitigation (write 0x287) to the
-   * domains we use.  Only VDDIO2, VDDIO3 and the board's VDDIO5 are
+   * domains we use.  Only VDDIO2, VDDIO3 and the board's VDDIO4/5 are
    * touched: the other VDDIOxCCCR registers cannot be accessed without
    * their VDDIOxSV bit set first (separate ES0620 erratum).
    */
 
   putreg32(SYSCFG_CCCR_ES0620_MANUAL, STM32_SYSCFG_VDDIO2CCCR);
   putreg32(SYSCFG_CCCR_ES0620_MANUAL, STM32_SYSCFG_VDDIO3CCCR);
+#ifdef BOARD_PWR_VDDIO4
+  putreg32(SYSCFG_CCCR_ES0620_MANUAL, STM32_SYSCFG_VDDIO4CCCR);
+#endif
 #ifdef BOARD_PWR_VDDIO5
   putreg32(SYSCFG_CCCR_ES0620_MANUAL, STM32_SYSCFG_VDDIO5CCCR);
 #endif

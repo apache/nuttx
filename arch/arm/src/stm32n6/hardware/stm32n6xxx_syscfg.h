@@ -37,6 +37,7 @@
 /* Register Offsets *********************************************************/
 
 #define STM32_SYSCFG_INITSVTORCR_OFFSET  0x010 /* Secure vector table base address register */
+#define STM32_SYSCFG_VDDIO4CCCR_OFFSET   0x044 /* VDDIO4 compensation cell control register */
 #define STM32_SYSCFG_VDDIO5CCCR_OFFSET   0x04c /* VDDIO5 compensation cell control register */
 #define STM32_SYSCFG_VDDIO2CCCR_OFFSET   0x054 /* VDDIO2 compensation cell control register */
 #define STM32_SYSCFG_VDDIO3CCCR_OFFSET   0x05c /* VDDIO3 compensation cell control register */
@@ -45,6 +46,7 @@
 /* Register Addresses *******************************************************/
 
 #define STM32_SYSCFG_INITSVTORCR         (STM32_SYSCFG_BASE + STM32_SYSCFG_INITSVTORCR_OFFSET)
+#define STM32_SYSCFG_VDDIO4CCCR          (STM32_SYSCFG_BASE + STM32_SYSCFG_VDDIO4CCCR_OFFSET)
 #define STM32_SYSCFG_VDDIO5CCCR          (STM32_SYSCFG_BASE + STM32_SYSCFG_VDDIO5CCCR_OFFSET)
 #define STM32_SYSCFG_VDDIO2CCCR          (STM32_SYSCFG_BASE + STM32_SYSCFG_VDDIO2CCCR_OFFSET)
 #define STM32_SYSCFG_VDDIO3CCCR          (STM32_SYSCFG_BASE + STM32_SYSCFG_VDDIO3CCCR_OFFSET)
