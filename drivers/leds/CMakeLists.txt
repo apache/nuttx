@@ -58,6 +58,10 @@ if(CONFIG_NCP5623C)
   list(APPEND SRCS ncp5623c.c)
 endif()
 
+if(CONFIG_LEDS_LED1642GW)
+  list(APPEND SRCS led1642gw.c)
+endif()
+
 if(CONFIG_WS2812)
   list(APPEND SRCS ws2812.c)
 endif()

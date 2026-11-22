@@ -127,3 +127,4 @@ The ``include/nuttx/board.h`` includes the following declarations:
   userled.rst
   ws2812.rst
   ktd2052.rst
+  led1642gw.rst
