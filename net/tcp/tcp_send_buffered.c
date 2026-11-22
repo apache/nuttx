@@ -174,15 +174,29 @@ static void psock_writebuffer_notify(FAR struct tcp_conn_s *conn)
 #  define psock_writebuffer_notify(conn)
 #endif
 
-static void retransmit_segment(FAR struct tcp_conn_s *conn,
-                               FAR struct tcp_wrbuffer_s *wrb)
+/****************************************************************************
+ * Name: rewind_segment
+ *
+ * Description:
+ *   Count a retransmission of a write buffer and reset the number of bytes
+ *   sent from it, so that its data is sent again from the start.  The
+ *   write buffer stays until its data is acknowledged: tcp_timer() closes
+ *   the connection when the retry count of the connection reaches
+ *   TCP_MAXRTX.
+ *
+ * Input Parameters:
+ *   conn     The connection structure of the write buffer
+ *   wrb      The write buffer to send again
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void rewind_segment(FAR struct tcp_conn_s *conn,
+                           FAR struct tcp_wrbuffer_s *wrb)
 {
   uint16_t sent;
-
-  /* Count the retransmission.  The write buffer stays until its data is
-   * acknowledged: tcp_timer() closes the connection when the retry count
-   * of the connection reaches TCP_MAXRTX.
-   */
 
   if (TCP_WBNRTX(wrb) < UINT8_MAX)
     {
@@ -195,7 +209,7 @@ static void retransmit_segment(FAR struct tcp_conn_s *conn,
         "conn tx_unacked=%" PRId32 " sent=%" PRId32 "\n",
         wrb, TCP_WBSENT(wrb), conn->tx_unacked, conn->sent);
 
-  /* Reset the number of bytes sent sent from the write buffer */
+  /* Reset the number of bytes sent from the write buffer */
 
   if (conn->sent > sent)
     {
@@ -207,6 +221,28 @@ static void retransmit_segment(FAR struct tcp_conn_s *conn,
     }
 
   TCP_WBSENT(wrb) = 0;
+}
+
+/****************************************************************************
+ * Name: retransmit_segment
+ *
+ * Description:
+ *   Rewind a write buffer of the unacked_q and put it back into the
+ *   write_q, so that it is sent again.
+ *
+ * Input Parameters:
+ *   conn     The connection structure of the write buffer
+ *   wrb      The write buffer to send again
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void retransmit_segment(FAR struct tcp_conn_s *conn,
+                               FAR struct tcp_wrbuffer_s *wrb)
+{
+  rewind_segment(conn, wrb);
 
   /* Insert the write buffer into the write_q (in sequence
    * number order).  The retransmission will occur below
@@ -846,34 +882,11 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
       if (wrb != NULL && TCP_WBSENT(wrb) > 0)
         {
-          uint16_t sent;
-
-          /* Increment the retransmit count on this write buffer. */
-
-          if (TCP_WBNRTX(wrb) < UINT8_MAX)
-            {
-              TCP_WBNRTX(wrb)++;
-            }
-
-          sent = TCP_WBSENT(wrb);
-          ninfo("REXMIT: wrb=%p sent=%u, "
-                "conn tx_unacked=%" PRId32 " sent=%" PRId32 "\n",
-                wrb, TCP_WBSENT(wrb), conn->tx_unacked, conn->sent);
-
-          /* Yes.. Reset the number of bytes sent sent from
-           * the write buffer
+          /* Yes.. Send it again from the start.  It stays at the head of
+           * the write_q.
            */
 
-          if (conn->sent > sent)
-            {
-              conn->sent -= sent;
-            }
-          else
-            {
-              conn->sent = 0;
-            }
-
-          TCP_WBSENT(wrb) = 0;
+          rewind_segment(conn, wrb);
         }
 
       /* Move all segments that have been sent but not ACKed to the write
