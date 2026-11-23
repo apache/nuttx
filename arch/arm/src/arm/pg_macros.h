@@ -99,12 +99,12 @@
 
 /* MMU Flags for each memory region */
 
-#  define MMU_L1_TEXTFLAGS      (PMD_TYPE_PXN|PMD_BIT4)
+#  define MMU_L1_TEXTFLAGS      (PMD_TYPE_FINE|PMD_BIT4)
 #  define MMU_L2_TEXTFLAGS      (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRO|PTE_C)
-#  define MMU_L1_DATAFLAGS      (PMD_TYPE_PXN|PMD_BIT4)
+#  define MMU_L1_DATAFLAGS      (PMD_TYPE_FINE|PMD_BIT4)
 #  define MMU_L2_DATAFLAGS      (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW|PTE_C|PTE_B)
 #  define MMU_L2_ALLOCFLAGS     (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW)
-#  define MMU_L1_PGTABFLAGS     (PMD_TYPE_PXN|PMD_BIT4)
+#  define MMU_L1_PGTABFLAGS     (PMD_TYPE_FINE|PMD_BIT4)
 #  define MMU_L2_PGTABFLAGS     (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW)
 
 #  define MMU_L2_VECTRWFLAGS    (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRW)
@@ -123,7 +123,7 @@
 
 /* Mask to get the page table physical address from an L1 entry */
 
-#  define PG_L1_PADDRMASK       PMD_SECT_PADDR_MASK
+#  define PG_L1_PADDRMASK       PMD_COARSE_TEX_MASK
 
 /* MMU Flags for each memory region. */
 
