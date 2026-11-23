@@ -401,7 +401,6 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
               if (!noassign)
                 {
                   tv = next_arg_width(varg, vabuf, FAR char *, width);
-                  tv[0] = '\0';
                 }
 
               /* Skip over white space */
@@ -461,7 +460,6 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
               if (!noassign)
                 {
                   tv = next_arg_width(varg, vabuf, FAR char *, width);
-                  tv[0] = '\0';
                 }
 
               /* But we only perform the data conversion is we still have
@@ -518,7 +516,6 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
               if (!noassign)
                 {
                   tv = next_arg_width(varg, vabuf, FAR char *, width);
-                  tv[0] = '\0';
                 }
 
               /* But we only perform the data conversion is we still have
@@ -612,29 +609,24 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                     {
                       case HH_MOD:
                         pchar = next_arg(varg, vabuf, FAR unsigned char *);
-                        *pchar = 0;
                         break;
 
                       case H_MOD:
                         pshort = next_arg(varg, vabuf, FAR unsigned short *);
-                        *pshort = 0;
                         break;
 
                       case NO_MOD:
                         pint = next_arg(varg, vabuf, FAR unsigned int *);
-                        *pint = 0;
                         break;
 
                       default:
                       case L_MOD:
                         plong = next_arg(varg, vabuf, FAR unsigned long *);
-                        *plong = 0;
                         break;
 
                       case LL_MOD:
                         plonglong = next_arg(varg, vabuf,
                                              FAR unsigned long long *);
-                        *plonglong = 0;
                         break;
                     }
                 }
@@ -983,7 +975,6 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                   if (modifier == LL_MOD)
                     {
                       pld = next_arg(varg, vabuf, FAR long double *);
-                      *pld = 0.0;
                     }
                   else
 #endif
@@ -991,14 +982,12 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                   if (modifier >= L_MOD)
                     {
                       pd = next_arg(varg, vabuf, FAR double *);
-                      *pd = 0.0;
                     }
                   else
 #endif
 #ifdef CONFIG_HAVE_FLOAT
                     {
                       pf = next_arg(varg, vabuf, FAR float *);
-                      *pf = 0.0;
                     }
 #endif
                 }
