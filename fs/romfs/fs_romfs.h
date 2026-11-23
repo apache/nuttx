@@ -157,6 +157,7 @@ struct romfs_file_s
   uint32_t rf_ncachesector;       /* Number of sectors in the rf_buffer */
   FAR uint8_t *rf_buffer;         /* File sector buffer, allocated if rm_xipbase==0 */
   uint8_t rf_type;                /* File type (for fstat()) */
+  mutex_t rf_lock;                /* Serializes read/seek in XIP mode */
   char rf_path[1];                /* Path of open file */
 };
 

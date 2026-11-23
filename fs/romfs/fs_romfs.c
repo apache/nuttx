@@ -157,6 +157,46 @@ const struct mountpt_operations g_romfs_operations =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: romfs_rdlock
+ *
+ * Description:
+ *   Take the lock that serializes read() and lseek() on one open file.  In
+ *   XIP mode a read only copies from the mapped media, so the lock of the
+ *   file is enough and reads of other files proceed in parallel.  Otherwise
+ *   the read goes to the block driver, which may rely on the file system to
+ *   serialize its requests, so the mount lock is taken.
+ *
+ ****************************************************************************/
+
+static int romfs_rdlock(FAR struct romfs_mountpt_s *rm,
+                        FAR struct romfs_file_s *rf)
+{
+  if (rm->rm_xipbase != NULL)
+    {
+      return nxmutex_lock(&rf->rf_lock);
+    }
+
+  return nxrmutex_lock(&rm->rm_lock);
+}
+
+/****************************************************************************
+ * Name: romfs_rdunlock
+ ****************************************************************************/
+
+static void romfs_rdunlock(FAR struct romfs_mountpt_s *rm,
+                           FAR struct romfs_file_s *rf)
+{
+  if (rm->rm_xipbase != NULL)
+    {
+      nxmutex_unlock(&rf->rf_lock);
+    }
+  else
+    {
+      nxrmutex_unlock(&rm->rm_lock);
+    }
+}
+
+/****************************************************************************
  * Name: romfs_open
  ****************************************************************************/
 
@@ -291,6 +331,8 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
       goto errout_with_lock;
     }
 
+  nxmutex_init(&rf->rf_lock);
+
   /* Attach the private date to the struct file instance */
 
   filep->f_priv = rf;
@@ -352,6 +394,7 @@ static int romfs_close(FAR struct file *filep)
 
   /* Then free the file structure itself. */
 
+  nxmutex_destroy(&rf->rf_lock);
   fs_heap_free(rf);
   filep->f_priv = NULL;
   return ret;
@@ -391,7 +434,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Make sure that the mount is still healthy */
 
-  ret = nxrmutex_lock(&rm->rm_lock);
+  ret = romfs_rdlock(rm, rf);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -495,7 +538,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
     }
 
 errout_with_lock:
-  nxrmutex_unlock(&rm->rm_lock);
+  romfs_rdunlock(rm, rf);
   return readsize ? readsize : ret;
 }
 
@@ -550,7 +593,7 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Make sure that the mount is still healthy */
 
-  ret = nxrmutex_lock(&rm->rm_lock);
+  ret = romfs_rdlock(rm, rf);
   if (ret < 0)
     {
       return (off_t)ret;
@@ -585,7 +628,7 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
   finfo("New file position: %jd\n", (intmax_t)filep->f_pos);
 
 errout_with_lock:
-  nxrmutex_unlock(&rm->rm_lock);
+  romfs_rdunlock(rm, rf);
   return ret < 0 ? ret : position;
 }
 
@@ -747,6 +790,8 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
       ferr("ERROR: Failed configure buffering: %d\n", ret);
       goto errout_with_lock;
     }
+
+  nxmutex_init(&newrf->rf_lock);
 
   /* Attach the new private date to the new struct file instance */
 
