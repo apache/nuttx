@@ -200,6 +200,14 @@ config MMCSD_BLOCK_WDATADELAY
 		Some hardware needs to configure this delay to write one data block, because
 		the hardware needs more time for wear leveling and bad block management.
 
+config MMCSD_BLOCK_RDATADELAY
+	int "The wait timeout to read one data block"
+	default 100
+	---help---
+		Timeout in milliseconds to read one data block.  100MS matches the
+		worst case read access time of SD/MMC cards; emulated controllers on
+		a loaded host may need more.
+
 config MMCSD_CHECK_READY_STATUS_WITHOUT_SLEEP
 	bool "No sleep in ready-check function."
 	default n
