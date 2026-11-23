@@ -577,6 +577,7 @@ retry:
 FAR void *mempool_zallocate(FAR struct mempool_s *pool, unsigned int timeout)
 {
   FAR void *blk = mempool_allocate(pool, timeout);
+
   if (blk != NULL)
     {
       memset(blk, 0, pool->blocksize);
