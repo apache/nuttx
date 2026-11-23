@@ -79,6 +79,7 @@
 #define VIRTIO_CRYPTO_CIPHER_AES_F8                         12
 #define VIRTIO_CRYPTO_CIPHER_AES_XTS                        13
 #define VIRTIO_CRYPTO_CIPHER_ZUC_EEA3                       14
+#define VIRTIO_CRYPTO_CIPHER_CHACHA20                       15
 
 /* HASH services */
 
@@ -115,6 +116,8 @@
 #define VIRTIO_CRYPTO_MAC_CBCMAC_KASUMI_F9                  50
 #define VIRTIO_CRYPTO_MAC_XCBC_AES                          53
 #define VIRTIO_CRYPTO_MAC_ZUC_EIA3                          54
+#define VIRTIO_CRYPTO_MAC_PBKDF2_HMAC_SHA1                  55
+#define VIRTIO_CRYPTO_MAC_PBKDF2_HMAC_SHA256                56
 
 /* AEAD services */
 
@@ -128,6 +131,7 @@
 #define VIRTIO_CRYPTO_NO_AKCIPHER                           0
 #define VIRTIO_CRYPTO_AKCIPHER_RSA                          1
 #define VIRTIO_CRYPTO_AKCIPHER_ECDSA                        2
+#define VIRTIO_CRYPTO_AKCIPHER_ECDH                         3
 
 #define VIRTIO_CRYPTO_S_HW_READY                            (1 << 0)
 
@@ -238,6 +242,10 @@
   VIRTIO_CRYPTO_OPCODE(VIRTIO_CRYPTO_SERVICE_AKCIPHER, 0x02)
 #define VIRTIO_CRYPTO_AKCIPHER_VERIFY \
   VIRTIO_CRYPTO_OPCODE(VIRTIO_CRYPTO_SERVICE_AKCIPHER, 0x03)
+#define VIRTIO_CRYPTO_AKCIPHER_GENKEY \
+  VIRTIO_CRYPTO_OPCODE(VIRTIO_CRYPTO_SERVICE_AKCIPHER, 0x04)
+#define VIRTIO_CRYPTO_AKCIPHER_DERIVE \
+  VIRTIO_CRYPTO_OPCODE(VIRTIO_CRYPTO_SERVICE_AKCIPHER, 0x05)
 
 #define VIRTIO_CRYPTO_FLAG_SESSION_MODE                     1
 
@@ -523,6 +531,12 @@ begin_packed_struct struct virtio_crypto_hash_data_flf_s
   /* hash result length */
 
   uint32_t hash_result_len;
+
+  /* PBKDF2 iteration count (0 for plain hash/mac). Fits within the spare
+   * room of the op_flf union padding, so the wire layout is unchanged.
+   */
+
+  uint32_t iterations;
 } end_packed_struct;
 
 begin_packed_struct struct virtio_crypto_hash_data_flf_stateless_s
@@ -910,6 +924,7 @@ begin_packed_struct struct virtio_crypto_op_data_req_s
 begin_packed_struct struct virtio_key_op_req_s
 {
   uint32_t cmd;
+  uint32_t flag;
   uint32_t name_len;
   uint32_t src_data_len;
   uint32_t dst_data_len;
