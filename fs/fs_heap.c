@@ -91,6 +91,7 @@ FAR char *fs_heap_strdup(FAR const char *s)
 {
   size_t len = strlen(s) + 1;
   FAR char *copy = fs_heap_malloc(len);
+
   if (copy != NULL)
     {
       memcpy(copy, s, len);
@@ -103,6 +104,7 @@ FAR char *fs_heap_strndup(FAR const char *s, size_t size)
 {
   size_t len = strnlen(s, size) + 1;
   FAR char *copy = fs_heap_malloc(len);
+
   if (copy != NULL)
     {
       memcpy(copy, s, len);
