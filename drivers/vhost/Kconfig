@@ -115,6 +115,19 @@ config DRIVERS_VHOST_CRYPTO
 		each data-queue request into a crypto_invoke()/crypto_kinvoke()
 		call against the locally registered backends.
 
+if DRIVERS_VHOST_CRYPTO
+
+config DRIVERS_VHOST_CRYPTO_RSA_KEYBUF_SIZE
+	int "RSA key buffer size for vhost crypto"
+	default 1536
+	---help---
+		Size of the RSA key DER buffer used for ASN1 key encoding.
+		This buffer holds DER-encoded key parameters. Recommended values:
+		  80   - KeyID mode (4B per parameter + ASN1 overhead, 16-byte aligned)
+		  1536 - Raw RSA-2048 CRT key (n+e+d+p+q+dp+dq+qp in plaintext)
+
+endif # DRIVERS_VHOST_CRYPTO
+
 config DRIVERS_VHOST_NET
 	bool "Virtual Host Network Device Support"
 	default n
