@@ -20,6 +20,12 @@
 #
 # ##############################################################################
 
-target_sources(board PRIVATE stm32_boot.c stm32_bringup.c)
+set(SRCS stm32_boot.c stm32_bringup.c)
+
+if(CONFIG_DAC AND CONFIG_STM32_DAC1)
+  list(APPEND SRCS stm32_dac.c)
+endif()
+
+target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")
