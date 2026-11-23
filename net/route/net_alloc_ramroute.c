@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
+
 #include <stdint.h>
 #include <errno.h>
 #include <assert.h>
@@ -110,6 +112,11 @@ FAR struct net_route_ipv4_s *net_allocroute_ipv4(void)
    */
 
   route = mempool_allocate(&g_ipv4routes, 0);
+  if (route != NULL)
+    {
+      memset(route, 0, sizeof(*route));
+    }
+
   if (!route)
     {
       return NULL;
@@ -129,6 +136,11 @@ FAR struct net_route_ipv6_s *net_allocroute_ipv6(void)
    */
 
   route = mempool_allocate(&g_ipv6routes, 0);
+  if (route != NULL)
+    {
+      memset(route, 0, sizeof(*route));
+    }
+
   if (!route)
     {
       return NULL;

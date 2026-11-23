@@ -169,6 +169,8 @@ FAR struct netlink_conn_s *netlink_alloc(void)
   conn = mempool_allocate(&g_netlink_connections, 0);
   if (conn != NULL)
     {
+      memset(conn, 0, sizeof(*conn));
+
       /* Use conn_init to initialize the connection structure */
 
       conn_init(&conn->sconn);

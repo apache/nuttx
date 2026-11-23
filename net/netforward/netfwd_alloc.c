@@ -97,7 +97,14 @@ MEMPOOL_DEFINE(g_fwdpool, sizeof(struct forward_s),
 
 FAR struct forward_s *netfwd_alloc(void)
 {
-  return mempool_allocate(&g_fwdpool, 0);
+  FAR struct forward_s *fwd = mempool_allocate(&g_fwdpool, 0);
+
+  if (fwd != NULL)
+    {
+      memset(fwd, 0, sizeof(*fwd));
+    }
+
+  return fwd;
 }
 
 /****************************************************************************
