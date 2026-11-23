@@ -482,10 +482,12 @@ uint32_t *arm_syscall(uint32_t *regs)
            * arm_fork().
            */
 
+#ifdef CONFIG_ARCH_HAVE_FORK
           if (index == 0)
             {
               rtcb->xcp.sregs = regs;
             }
+#endif
 
           regs[REG_PC]   = (uint32_t)arm_dispatch_syscall;
 #ifndef CONFIG_BUILD_FLAT
