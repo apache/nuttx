@@ -117,7 +117,10 @@
  */
 
 #define MMCSD_SCR_SPEC_1_10          (1)
-#define MMCSD_BLOCK_RDATADELAY  (100)      /* Wait up to 100MS to get one data block */
+
+/* Wait timeout to read one data block */
+
+#define MMCSD_BLOCK_RDATADELAY  CONFIG_MMCSD_BLOCK_RDATADELAY
 
 /* Wait timeout to write one data block */
 
