@@ -52,30 +52,15 @@ complex that more needs to be said. How can a feature that can be
 described by a single, simple sentence require such a complex
 implementation:
 
-  -  ``CONFIG_SEM_PREALLOCHOLDERS``. First of all, in NuttX priority
-     inheritance is implement on POSIX counting semaphores. The reason for
-     this is that these semaphores are the most primitive waiting
-     mechanism in NuttX; Most other waiting facilities are based on
-     semaphores. So if priority inheritance is implemented for POSIX
-     counting semaphores, then most NuttX waiting mechanisms will have
-     this capability.
-
-     Complexity arises because counting semaphores can have numerous
-     holders of semaphore counts. Therefore, in order to implement
-     priority inheritance across all holders, then internal data
-     structures must be allocated to manage the various holders associated
-     with a semaphore. The setting ``CONFIG_SEM_PREALLOCHOLDERS`` defines
-     the maximum number of different threads (minus one per semaphore
-     instance) that can take counts on a semaphore with priority
-     inheritance support. This setting defines the size of a single pool
-     of pre-allocated structures. It may be set to zero if priority
-     inheritance is disabled OR if you are only using semaphores as
-     mutexes (only one holder) OR if no more than two threads participate
-     using a counting semaphore.
-
-     The cost associated with setting ``CONFIG_SEM_PREALLOCHOLDERS`` is
-     slightly increased code size and around 6-12 bytes times the value of
-     ``CONFIG_SEM_PREALLOCHOLDERS``.
+  -  **Mutexes only**. Priority inheritance and priority protection are
+     supported only for semaphores that are used as mutexes
+     (``SEM_TYPE_MUTEX``, as set up by ``nxmutex_init()`` and
+     ``pthread_mutex_init()``). A mutex has exactly one holder, so each
+     semaphore embeds a single holder record and no pool of holder
+     structures has to be configured. ``sem_setprotocol()`` returns
+     ``EINVAL`` when ``SEM_PRIO_INHERIT`` or ``SEM_PRIO_PROTECT`` is
+     requested on a counting semaphore; use a mutex for resource locking
+     instead.
 
   -  **Increased Susceptibility to Bad Thread Behavior**. These various
      structures tie the semaphore implementation more tightly to the

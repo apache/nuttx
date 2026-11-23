@@ -24,7 +24,6 @@ configurable. About related kernel configurations, see
    cxd56_start.c --> nx_start.c : nx_start()
 
    note over nx_start.c : Initialize IDLE task TCB
-   note over nx_start.c : nxsem_initialize()
    note over nx_start.c : Initialize HEAP
    note over nx_start.c : Create and initialize IDLE group instance
    note over nx_start.c : sched_lock()

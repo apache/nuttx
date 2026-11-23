@@ -298,34 +298,30 @@ file and in that case those operations are not performed:
 2. Initializes the TCB for the IDLE (i.e, the thread that the initialization
    is performed on),
 
-3. ``nxsem_initialize()`` - Initialize the POSIX semaphore facilities.
-   This needs to be done first because almost all other OS features depend
-   on POSIX counting semaphores.
-
-4. Memory organization - This includes heap configuration, memory manager,
+3. Memory organization - This includes heap configuration, memory manager,
    paging, I/O buffers, etc.
 
-5. ``task_initialize()`` - Initialize task data structures.
+4. ``task_initialize()`` - Initialize task data structures.
 
-6. ``fs_initialize()`` - Initialize the file system (needed to support
+5. ``fs_initialize()`` - Initialize the file system (needed to support
    device drivers).
 
-7. ``irq_initialize()`` - Initialize the interrupt handler subsystem.
+6. ``irq_initialize()`` - Initialize the interrupt handler subsystem.
    This initializes only data structures; CPU interrupts are still disabled.
 
-8. ``wd_initialize()`` - Initialize the NuttX watchdog timer facility,
+7. ``wd_initialize()`` - Initialize the NuttX watchdog timer facility,
 
-9. ``clock_initialize()`` - Initialize the system clock,
+8. ``clock_initialize()`` - Initialize the system clock,
 
-10. ``timer_initialize()`` - Initialize the POSIX timer facilities,
+9. ``timer_initialize()`` - Initialize the POSIX timer facilities,
 
-11. ``nxsig_initialize()`` - Initialize the POSIX signal facilities,
+10. ``nxsig_initialize()`` - Initialize the POSIX signal facilities,
 
-12. ``nxmq_initialize()`` - Initialize the POSIX message queue facilities,
+11. ``nxmq_initialize()`` - Initialize the POSIX message queue facilities,
 
-13. ``pthread_initialize()`` - Initialize the POSIX pthread facilities,
+12. ``pthread_initialize()`` - Initialize the POSIX pthread facilities,
 
-14. ``net_initialize()`` - Initialize networking facilities,
+13. ``net_initialize()`` - Initialize networking facilities,
 
 .. note:: Up to this point, all of the initialization steps have only been
           software initializations. Nothing has interacted with the hardware.
@@ -333,7 +329,7 @@ file and in that case those operations are not performed:
           things like interrupts and threads can function properly.
           The next phases depend upon that setup.
 
-15. ``up_initialize()`` - The processor specific details of running
+14. ``up_initialize()`` - The processor specific details of running
     the operating system will be handled here. Such things as setting up
     interrupt service routines and starting the clock are some of the things
     that are different for each processor and hardware platform.
@@ -394,7 +390,7 @@ file and in that case those operations are not performed:
       illuminates board-specific LEDs to indicate the IRQs are now enabled.
 
 
-16. ``board_early_initialize()`` - If ``CONFIG_BOARD_EARLY_INITIALIZE`` is
+15. ``board_early_initialize()`` - If ``CONFIG_BOARD_EARLY_INITIALIZE`` is
     selected, then an additional initialization call will be performed in the
     boot-up sequence to a function called ``board_early_initialize()``.
     It will be called immediately after ``up_initialize()`` (and may be
@@ -402,27 +398,27 @@ file and in that case those operations are not performed:
     and well ``before board_late_initialize()`` is called and the initial
     application is started.
 
-17. ``g_nx_initstate = OSINIT_HARDWARE`` - This signals that basic
+16. ``g_nx_initstate = OSINIT_HARDWARE`` - This signals that basic
     hardware setup is complete.
 
-18. ``shm_initialize()`` - Initialize shared memory support.
+17. ``shm_initialize()`` - Initialize shared memory support.
 
-19. ``lib_initialize()`` - Initialize the C libraries. This is done last
+18. ``lib_initialize()`` - Initialize the C libraries. This is done last
     because the libraries may depend on the above.
 
-20. ``binfmt_initialize()`` - Initialize binary loader subsystem.
+19. ``binfmt_initialize()`` - Initialize binary loader subsystem.
 
-21. Start SMP support in multi-core MCUs. This is not the case
+20. Start SMP support in multi-core MCUs. This is not the case
     in STM32F4Discovery but relevant because here are created ``stdin``,
     ``stdout`` and ``stderr`` for each CPU's (even if there is only one)
     IDLE task. All tasks subsequently created by the IDLE thread will inherit
     these file descriptors.
 
-22. ``syslog_initialize()`` - Late initialization of the system logging
+21. ``syslog_initialize()`` - Late initialization of the system logging
     device. Some SYSLOG channel must be initialized late in the initialization
     sequence because it may depend on having IDLE task file structures setup.
 
-23. ``nx_bringup()`` - Create the initial tasks. This will be described
+22. ``nx_bringup()`` - Create the initial tasks. This will be described
     in more detail below.
 
 ``nx_bringup()``
