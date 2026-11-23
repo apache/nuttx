@@ -44,6 +44,7 @@
 
 #include "vhost-blk.h"
 #include "vhost-can.h"
+#include "vhost-crypto.h"
 #include "vhost-gpio.h"
 #include "vhost-i2c.h"
 #include "vhost-spi.h"
@@ -712,6 +713,14 @@ void vhost_register_drivers(void)
   if (ret < 0)
     {
       vhosterr("vhost_register_rng_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VHOST_CRYPTO
+  ret = vhost_register_crypto_driver();
+  if (ret < 0)
+    {
+      vhosterr("vhost_register_crypto_driver failed, ret=%d\n", ret);
     }
 #endif
 

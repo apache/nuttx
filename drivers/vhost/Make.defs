@@ -33,6 +33,9 @@ endif
 ifeq ($(CONFIG_DRIVERS_VHOST_CAN),y)
   CSRCS += vhost-can.c
 endif
+ifeq ($(CONFIG_DRIVERS_VHOST_CRYPTO),y)
+  CSRCS += vhost-crypto.c
+endif
 
 ifeq ($(CONFIG_DRIVERS_VHOST_I2C),y)
   CSRCS += vhost-i2c.c
