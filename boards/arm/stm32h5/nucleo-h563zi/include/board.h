@@ -289,6 +289,10 @@
 #  define STM32_ADC_CLK_FREQUENCY    STM32_PLL2R_FREQUENCY
 #endif
 
+/* DAC: DAC1_OUT2 only; PA4 (DAC1_OUT1) is VBUS sense */
+
+#define GPIO_DAC1_OUT2        GPIO_DAC1_OUT2_0  /* PA5 */
+
 /* LED definitions **********************************************************/
 
 /* The Nucleo board has numerous LEDs but only three, LD1 a Green LED,

@@ -235,6 +235,9 @@ config STM32_HAVE_IP_DAC_M3M4_V2
 config STM32_HAVE_IP_DAC_M0_V1
 	bool
 
+config STM32_HAVE_IP_DAC_M33_V1
+	bool
+
 config STM32_HAVE_DAC1
 	bool
 

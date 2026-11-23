@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_dac.c
+ * arch/arm/src/common/stm32/stm32_dac_m33_v1.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -57,6 +57,30 @@
 
 #if !defined(CONFIG_STM32_DAC1CH1) && !defined(CONFIG_STM32_DAC1CH2)
 #  error "At least one DAC1 channel must be enabled"
+#endif
+
+#if defined(CONFIG_STM32_DAC1CH1) && !defined(GPIO_DAC1_OUT1)
+#  error "GPIO_DAC1_OUT1 must be defined in board.h"
+#endif
+
+#if defined(CONFIG_STM32_DAC1CH2) && !defined(GPIO_DAC1_OUT2)
+#  error "GPIO_DAC1_OUT2 must be defined in board.h"
+#endif
+
+/* DAC1 clock enable and reset bits (AHB2 on H5, AHB2 bank 1 on U3) */
+
+#if defined(RCC_AHB2ENR_DAC1EN)
+#  define STM32_RCC_DAC1_EN_REG   STM32_RCC_AHB2ENR
+#  define STM32_RCC_DAC1_EN       RCC_AHB2ENR_DAC1EN
+#  define STM32_RCC_DAC1_RST_REG  STM32_RCC_AHB2RSTR
+#  define STM32_RCC_DAC1_RST      RCC_AHB2RSTR_DACRST
+#elif defined(RCC_AHB2ENR1_DAC1EN)
+#  define STM32_RCC_DAC1_EN_REG   STM32_RCC_AHB2ENR1
+#  define STM32_RCC_DAC1_EN       RCC_AHB2ENR1_DAC1EN
+#  define STM32_RCC_DAC1_RST_REG  STM32_RCC_AHB2RSTR1
+#  define STM32_RCC_DAC1_RST      RCC_AHB2RSTR1_DAC1RST
+#else
+#  error "Unknown DAC1 RCC registers"
 #endif
 
 /* Helper macros for register bits */
@@ -117,7 +141,6 @@ struct stm32_chan_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void stm32_dac_dumpregs(struct stm32_chan_s *chan);
 static void stm32_dac_enable(struct stm32_chan_s *chan);
 
 static void stm32_dac_reset(struct dac_dev_s *dev);
@@ -132,6 +155,7 @@ static int  stm32_dac_chaninit(struct stm32_chan_s *chan);
 static void stm32_dac_blockinit(void);
 
 #ifdef CONFIG_STM32_DAC_LL_OPS
+static void stm32_dac_dumpregs(struct stm32_chan_s *chan);
 static void stm32_dac_llops_enable(struct stm32_dac_dev_s *dev,
                                    bool enabled);
 static void stm32_dac_llops_writedro(struct stm32_dac_dev_s *dev,
@@ -171,7 +195,7 @@ static struct stm32_chan_s g_dac1ch1priv =
   .llops      = &g_dac_llops,
 #endif
   .ch         = 1,
-  .pin        = GPIO_DAC1_OUT1_0,
+  .pin        = GPIO_DAC1_OUT1,
   .dro        = DAC_DHR12R(1),
 };
 
@@ -191,7 +215,7 @@ static struct stm32_chan_s g_dac1ch2priv =
   .llops      = &g_dac_llops,
 #endif
   .ch         = 2,
-  .pin        = GPIO_DAC1_OUT2_0,
+  .pin        = GPIO_DAC1_OUT2,
   .dro        = DAC_DHR12R(2),
 };
 
@@ -207,22 +231,6 @@ static struct stm32_dac_s g_dacblock;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: stm32_dac_dumpregs
- ****************************************************************************/
-
-static void stm32_dac_dumpregs(struct stm32_chan_s *chan)
-{
-  UNUSED(chan);
-
-  ainfo("CR:   0x%08" PRIx32 "  SR:  0x%08" PRIx32 "  MCR: 0x%08" PRIx32
-        "\n",
-        getreg32(STM32_DAC1_CR), getreg32(STM32_DAC1_SR),
-        getreg32(STM32_DAC1_MCR));
-  ainfo("DOR1: 0x%08" PRIx32 "  DOR2: 0x%08" PRIx32 "\n",
-        getreg32(STM32_DAC1_DOR1), getreg32(STM32_DAC1_DOR2));
-}
 
 /****************************************************************************
  * Name: stm32_dac_enable
@@ -388,17 +396,33 @@ static void stm32_dac_blockinit(void)
 
   flags = enter_critical_section();
 
-  /* Enable the DAC1 clock (AHB2) and pulse its reset */
+  /* Enable the DAC1 clock and pulse its reset */
 
-  modifyreg32(STM32_RCC_AHB2ENR, 0, RCC_AHB2ENR_DAC1EN);
-  modifyreg32(STM32_RCC_AHB2RSTR, 0, RCC_AHB2RSTR_DACRST);
-  modifyreg32(STM32_RCC_AHB2RSTR, RCC_AHB2RSTR_DACRST, 0);
+  modifyreg32(STM32_RCC_DAC1_EN_REG, 0, STM32_RCC_DAC1_EN);
+  modifyreg32(STM32_RCC_DAC1_RST_REG, 0, STM32_RCC_DAC1_RST);
+  modifyreg32(STM32_RCC_DAC1_RST_REG, STM32_RCC_DAC1_RST, 0);
 
   g_dacblock.init = 1;
   leave_critical_section(flags);
 }
 
 #ifdef CONFIG_STM32_DAC_LL_OPS
+
+/****************************************************************************
+ * Name: stm32_dac_dumpregs
+ ****************************************************************************/
+
+static void stm32_dac_dumpregs(struct stm32_chan_s *chan)
+{
+  UNUSED(chan);
+
+  ainfo("CR:   0x%08" PRIx32 "  SR:  0x%08" PRIx32 "  MCR: 0x%08" PRIx32
+        "\n",
+        getreg32(STM32_DAC1_CR), getreg32(STM32_DAC1_SR),
+        getreg32(STM32_DAC1_MCR));
+  ainfo("DOR1: 0x%08" PRIx32 "  DOR2: 0x%08" PRIx32 "\n",
+        getreg32(STM32_DAC1_DOR1), getreg32(STM32_DAC1_DOR2));
+}
 
 /****************************************************************************
  * Name: stm32_dac_llops_enable

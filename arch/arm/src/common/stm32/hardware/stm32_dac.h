@@ -29,7 +29,8 @@
 
 #if (defined(CONFIG_STM32_HAVE_IP_DAC_M0_V1) + \
      defined(CONFIG_STM32_HAVE_IP_DAC_M3M4_V1) + \
-     defined(CONFIG_STM32_HAVE_IP_DAC_M3M4_V2)) > 1
+     defined(CONFIG_STM32_HAVE_IP_DAC_M3M4_V2) + \
+     defined(CONFIG_STM32_HAVE_IP_DAC_M33_V1)) > 1
 #  error Only one STM32 DAC IP version must be selected
 #endif
 
@@ -38,6 +39,8 @@
 #elif defined(CONFIG_STM32_HAVE_IP_DAC_M3M4_V1) || \
       defined(CONFIG_STM32_HAVE_IP_DAC_M3M4_V2)
 #  include "hardware/stm32_dac_v1v2.h"
+#elif defined(CONFIG_STM32_HAVE_IP_DAC_M33_V1)
+#  include "hardware/stm32_dac_m33_v1.h"
 #else
 #  error "Unsupported STM32 DAC"
 #endif
