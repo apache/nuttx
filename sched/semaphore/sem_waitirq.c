@@ -162,7 +162,7 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
        * to this semaphore.
        */
 
-      nxsem_canceled(wtcb, sem);
+      nxsem_canceled(sem);
 
       /* Remove task from waiting list */
 

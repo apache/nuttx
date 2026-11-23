@@ -178,15 +178,6 @@ int nxsem_wait_slow(FAR sem_t *sem)
           return ret;
         }
 #endif
-
-      /* For mutexes, we only add the holder to the tasks list at the
-       * time when a task blocks on the mutex, for priority restoration
-       */
-
-      if (!mutex)
-        {
-          nxsem_add_holder(sem);
-        }
     }
 
   /* The semaphore is NOT available, We will have to block the
@@ -295,8 +286,8 @@ int nxsem_wait_slow(FAR sem_t *sem)
        * sem_timedwait().
        *
        * If we were not awakened by a signal or a timeout, then
-       * nxsem_add_holder() was called by logic in sem_wait() fore this
-       * thread was restarted.
+       * nxsem_add_holder_tcb() was called by logic in sem_post() before
+       * this thread was restarted.
        */
 
       ret = rtcb->errcode != OK ? -rtcb->errcode : OK;

@@ -42,11 +42,7 @@
 struct __lock
 {
 #ifdef CONFIG_PRIORITY_INHERITANCE
-#  if CONFIG_SEM_PREALLOCHOLDERS > 0
-  int reserved[6];
-#  else
   int reserved[9];
-#  endif
 #else
   int reserved[5];
 #endif
