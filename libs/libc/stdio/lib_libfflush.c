@@ -37,6 +37,33 @@
 #include "libc.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: lib_fflush_rdflush
+ *
+ * Description:
+ *   Discard the read-ahead data of a stream and set the file offset of
+ *   the underlying file to the stream position.  A stream that cannot
+ *   seek (a pipe or a terminal) has no offset to restore, which is not
+ *   an error.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+static ssize_t lib_fflush_rdflush(FAR FILE *stream)
+{
+  if (lib_rdflush_unlocked(stream) < 0 && get_errno() != ESPIPE)
+    {
+      return -get_errno();
+    }
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -64,11 +91,14 @@ ssize_t lib_fflush_unlocked(FAR FILE *stream)
   ssize_t bytes_written;
   ssize_t nbuffer;
 
-  /* Return EBADF if the file is not opened for writing */
+  /* A stream that is not opened for writing has no write data to flush,
+   * but its read-ahead data is discarded and the file offset is moved
+   * back to the stream position.
+   */
 
   if ((stream->fs_oflags & O_ACCMODE) == O_RDONLY)
     {
-      return -EBADF;
+      return lib_fflush_rdflush(stream);
     }
 
   /* Check if there is an allocated I/O buffer */
@@ -90,11 +120,13 @@ ssize_t lib_fflush_unlocked(FAR FILE *stream)
 
       if (stream->fs_bufread != stream->fs_bufstart)
         {
-          /* The buffer holds read data... just return zero meaning "no bytes
-           * remaining in the buffer."
+          /* The buffer holds read data.  Discard it, including any
+           * characters pushed back with ungetc(), and set the file offset
+           * to the stream position.  There are no bytes remaining in the
+           * buffer.
            */
 
-          return 0;
+          return lib_fflush_rdflush(stream);
         }
 
       /* How many bytes of write data are used in the buffer now */
