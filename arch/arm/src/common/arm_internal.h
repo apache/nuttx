@@ -296,11 +296,7 @@ void weak_function arm_initialize_stack(void);
 
 /* Interrupt acknowledge and dispatch */
 
-#if defined(CONFIG_ARCH_ARMV7A) || defined(CONFIG_ARCH_ARMV7R) || defined(CONFIG_ARCH_ARMV8R)
-#  define arm_ack_irq(i)
-#else
 void arm_ack_irq(int irq);
-#endif
 
 uint32_t *arm_doirq(int irq, uint32_t *regs);
 
@@ -368,7 +364,6 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr);
 uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr);
 uint32_t *arm_syscall(uint32_t *regs);
 uint32_t *arm_undefinedinsn(uint32_t *regs);
-bool arm_fault_kill(uint32_t *regs);
 
 /* Exception handling logic common to other ARM7 and ARM9 family. */
 
@@ -392,6 +387,8 @@ uint32_t *arm_syscall(uint32_t *regs);
 void arm_undefinedinsn(uint32_t *regs);
 
 #endif /* CONFIG_ARCH_ARMV[6-8]M */
+
+bool arm_fault_kill(uint32_t *regs);
 
 void arm_vectorundefinsn(void);
 void arm_vectorsvc(void);
