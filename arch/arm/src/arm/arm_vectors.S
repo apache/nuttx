@@ -28,6 +28,7 @@
 #include <nuttx/irq.h>
 
 #include "arm.h"
+#include "mmu.h"
 
 	.file	"arm_vectors.S"
 

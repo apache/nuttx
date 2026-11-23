@@ -36,6 +36,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#if defined(CONFIG_ARCH_ARM7TDMI) || defined(CONFIG_ARCH_ARM920T) || \
+    defined(CONFIG_ARCH_ARM926EJS) || defined(CONFIG_ARCH_ARM1136J) || \
+    defined(CONFIG_ARCH_ARM1156T2) || defined(CONFIG_ARCH_ARM1176JZ)
+
+#  include "mmu_v5.h"
+
+#else
+
 #include <sys/types.h>
 #include <arch/barriers.h>
 #include "sctlr.h"
@@ -1772,5 +1781,7 @@ void mmu_invalidate_region(uintptr_t vstart, size_t size);
 }
 #endif
 #endif /* __ASSEMBLY__ */
+
+#endif /* Classic ARM or ARMv7-A/R MMU */
 
 #endif /* __ARCH_ARM_SRC_ARM_A_R_MMU_H */
