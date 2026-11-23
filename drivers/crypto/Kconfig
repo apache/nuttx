@@ -95,6 +95,39 @@ endchoice # /dev/urandom algorithm
 
 endif # DEV_URANDOM
 
+config CRYPTO_RPMSG
+	bool "RPMSG Crypto Driver Client Support"
+	default n
+	depends on RPMSG
+	depends on CRYPTO
+	select CRYPTO_BACKENDS
+	---help---
+		Offload the NuttX crypto API to a remote core over rpmsg. The
+		client core registers the transport as a crypto driver and
+		forwards session and operation requests to the server core.
+
+config CRYPTO_RPMSG_SESSIONS_NUM
+	int "Number of pre-allocated rpmsg crypto session slots"
+	default 8
+	depends on CRYPTO_RPMSG
+	---help---
+		Number of session slots pre-allocated at registration time for
+		the rpmsg crypto client. The slot array has a fixed size and is
+		never reallocated, because relocating it would move the embedded
+		per-session semaphore and dangle any in-flight waiter and response
+		handler cookie (use-after-free). Set this to the maximum number of
+		concurrent crypto sessions plus in-flight async operations. When
+		all slots are busy, new session requests fail with -ENOMEM.
+
+config CRYPTO_RPMSG_CONNECT_TIMEOUT_MS
+	int "Timeout (ms) waiting for rpmsg crypto server connection"
+	default -1
+	depends on CRYPTO_RPMSG
+	---help---
+		Maximum time in milliseconds to wait for the remote rpmsg crypto
+		server endpoint to bind before returning -ENOTCONN. A value of -1
+		means wait indefinitely (original behaviour).
+
 menuconfig DEV_SE05X
 	bool "Enable secure element (SE05X)"
 	depends on I2C

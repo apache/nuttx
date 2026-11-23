@@ -35,6 +35,10 @@ ifeq ($(CONFIG_DEV_RNG90),y)
   CSRCS += rng90.c
 endif
 
+ifeq ($(CONFIG_CRYPTO_RPMSG),y)
+  CSRCS += rpmsg_crypto.c
+endif
+
 # Include crypto device driver build support
 
 DEPPATH += --dep-path crypto
