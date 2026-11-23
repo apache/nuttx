@@ -68,7 +68,7 @@
  *   Upon successful completion, fallocate() returns zero; otherwise -1
  *   is returned and errno is set to indicate the error.
  *
- *   EINVAL      - offset or len was less than 0.
+ *   EINVAL      - offset was less than 0, or len was 0 or less.
  *   EFBIG       - offset+len exceeds the maximum file size.
  *   EOPNOTSUPP  - mode contains flags other than FALLOC_FL_KEEP_SIZE.
  *   EBADF       - fd is not a valid file descriptor (via fstat()).
@@ -80,7 +80,7 @@ int fallocate(int fd, int mode, off_t offset, off_t len)
 {
   struct stat st;
 
-  if (offset < 0 || len < 0)
+  if (offset < 0 || len <= 0)
     {
       set_errno(EINVAL);
       return ERROR;
