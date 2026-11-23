@@ -136,6 +136,7 @@ static int do_ioctl_request(FAR struct usrsock_conn_s *conn, int cmd,
   if (WL_IS80211POINTERCMD(cmd))
     {
       FAR struct iwreq *wlreq = arg;
+
       bufs[2].iov_base = wlreq->u.data.pointer;
       bufs[2].iov_len = wlreq->u.data.length;
     }
@@ -224,6 +225,7 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg_)
   if (WL_IS80211POINTERCMD(cmd))
     {
       FAR struct iwreq *wlreq = arg;
+
       inbufs[1].iov_base = wlreq->u.data.pointer;
       inbufs[1].iov_len = wlreq->u.data.length;
     }
