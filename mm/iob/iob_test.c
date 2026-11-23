@@ -183,7 +183,11 @@ int main(int argc, char **argv)
       fprintf(stderr, "Offset or packet length wrong\n");
     }
 
-  while (iob) iob = iob_free(iob);
+  while (iob)
+    {
+      iob = iob_free(iob);
+    }
+
   return EXIT_SUCCESS;
 }
 
