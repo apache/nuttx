@@ -31,5 +31,9 @@
 
 int stm32_bringup(void);
 
+#if defined(CONFIG_DAC) && defined(CONFIG_STM32_DAC1)
+int stm32_dac_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32U3_NUCLEO_U3C5ZI_Q_SRC_NUCLEO_U3C5ZI_Q_H */

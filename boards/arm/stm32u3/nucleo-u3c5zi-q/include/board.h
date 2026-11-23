@@ -108,6 +108,11 @@
 #define GPIO_USART1_RX               GPIO_USART1_RX_1
 #define GPIO_USART1_TX               GPIO_USART1_TX_1
 
+/* DAC1 outputs.  PA5 is also the green LED. */
+
+#define GPIO_DAC1_OUT1               GPIO_DAC1_OUT1_1  /* PA4 */
+#define GPIO_DAC1_OUT2               GPIO_DAC1_OUT2_1  /* PA5 */
+
 /* User LEDs */
 
 #define GPIO_LED_GREEN               (GPIO_OUTPUT | GPIO_PUSHPULL | \

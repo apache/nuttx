@@ -32,6 +32,7 @@
 #include <nuttx/board.h>
 
 #include "board_common.h"
+#include "nucleo-u3c5zi-q.h"
 
 /****************************************************************************
  * Public Functions
@@ -49,6 +50,14 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: stm32_common_initialize() failed: %d\n",
              ret);
     }
+
+#if defined(CONFIG_DAC) && defined(CONFIG_STM32_DAC1)
+  ret = stm32_dac_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_dac_setup() failed: %d\n", ret);
+    }
+#endif
 
   return OK;
 }

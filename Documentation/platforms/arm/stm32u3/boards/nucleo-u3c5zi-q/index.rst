@@ -27,4 +27,5 @@ jumbo
 -----
 
 Enables a broad set of NuttX features to provide additional build and runtime
-coverage.
+coverage.  DAC1 channel 1 (PA4) is registered as ``/dev/dac0`` and can be
+driven with the ``dac`` example.
