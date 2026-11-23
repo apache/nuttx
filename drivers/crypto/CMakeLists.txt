@@ -27,3 +27,7 @@ endif()
 if(CONFIG_DEV_RNG90)
   target_sources(drivers PRIVATE rng90.c)
 endif()
+
+if(CONFIG_CRYPTO_RPMSG)
+  target_sources(drivers PRIVATE rpmsg_crypto.c)
+endif()
