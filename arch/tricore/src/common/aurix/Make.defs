@@ -25,4 +25,8 @@
 
 CHIP_CSRCS += tricore_serial.c
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CHIP_CSRCS += tricore_gpio_lower.c
+endif
+
 VPATH += common$(DELIM)aurix
