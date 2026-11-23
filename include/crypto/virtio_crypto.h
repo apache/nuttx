@@ -28,8 +28,12 @@
  ****************************************************************************/
 
 #include <errno.h>
+#include <string.h>
+#include <sys/endian.h>
+
 #include <crypto/asn1.h>
 #include <crypto/cryptodev.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/virtio/virtio-crypto.h>
 
 /****************************************************************************
@@ -100,6 +104,65 @@
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
+
+static inline_function void
+virtio_crypto_read_binary(FAR unsigned char **p, FAR unsigned char *mpi,
+                          size_t len)
+{
+  FAR uint32_t *left;
+  FAR uint32_t *right;
+  uint32_t tmp;
+
+  memset(mpi, 0, len);
+  if (len != 0)
+    {
+      memcpy(mpi, *p, len);
+    }
+
+  for (left = (FAR uint32_t *)mpi,
+       right = (FAR uint32_t *)(mpi + len - sizeof(*right));
+       left <= right; left++, right--)
+    {
+      tmp    = betoh32(*left);
+      *left  = betoh32(*right);
+      *right = tmp;
+    }
+
+  *p += len;
+}
+
+static inline_function int
+virtio_crypto_read_mpi(FAR unsigned char **pos, FAR unsigned char *end,
+                       FAR unsigned char *buf, FAR struct crparam *mpi)
+{
+  size_t len;
+  int ret;
+
+  ret = asn1_get_tag(pos, end, &len, ASN1_INTEGER);
+  if (ret != 0)
+    {
+      return ret;
+    }
+
+  /* Strip DER sign-extension: a leading 0x00 is only padding when the
+   * next byte has MSB set.
+   */
+
+  if (len > 1 && **pos == 0 && ((*pos)[1] & 0x80) != 0)
+    {
+      (*pos)++;
+      len--;
+    }
+
+  virtio_crypto_read_binary(pos, buf, len);
+  if (len != 1 || *buf != 0)
+    {
+      mpi->crp_p = (caddr_t)buf;
+      mpi->crp_nbits = len * 8;
+    }
+
+  return ALIGN_UP(len, 4); /* round up to aligned size */
+}
 
 /* RSAPublicKey ::= SEQUENCE {
  *     modulus           INTEGER,  -- n
@@ -530,6 +593,49 @@ int virtio_crypto_get_aead_alg(int alg)
       return CRYPTO_AES_GCM_16;
     case VIRTIO_CRYPTO_AEAD_CHACHA20_POLY1305:
       return CRYPTO_CHACHA20_POLY1305;
+  }
+
+  return -EINVAL;
+}
+
+static inline_function
+int virtio_crypto_ecdsa_get_curve(int kalg)
+{
+  switch (kalg)
+    {
+      case CRK_ECDSA_SECP256R1_SIGN:
+      case CRK_ECDSA_SECP256R1_VERIFY:
+      case CRK_ECDSA_SECP256R1_GENKEY:
+      case CRK_ECDH_GEN_PUBLIC:
+      case CRK_ECDH_COMPUTE_SHARED:
+        return VIRTIO_CRYPTO_CURVE_NIST_P256;
+    }
+
+  return -EINVAL;
+}
+
+/* Per-curve field element length in bytes, per the virtio-crypto spec's
+ * VIRTIO_CRYPTO_CURVE_* IDs. Only NIST_P256 has a backing cryptodev
+ * implementation today; the rest are wired up so adding a new curve is
+ * a matter of adding a case here plus the cryptodev/cryptosoft support,
+ * not hunting down every hardcoded 32.
+ */
+
+static inline_function
+int virtio_crypto_curve_get_len(uint32_t curve_id)
+{
+  switch (curve_id)
+  {
+    case VIRTIO_CRYPTO_CURVE_NIST_P192:
+      return 24;
+    case VIRTIO_CRYPTO_CURVE_NIST_P224:
+      return 28;
+    case VIRTIO_CRYPTO_CURVE_NIST_P256:
+      return 32;
+    case VIRTIO_CRYPTO_CURVE_NIST_P384:
+      return 48;
+    case VIRTIO_CRYPTO_CURVE_NIST_P521:
+      return 66;
   }
 
   return -EINVAL;
