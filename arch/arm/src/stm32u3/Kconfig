@@ -51,6 +51,8 @@ config STM32_U3_PERIPHERALS
 	select STM32_HAVE_UART4
 	select STM32_HAVE_UART5
 	select STM32_HAVE_LPUART1
+	select STM32_HAVE_IP_DAC_M33_V1
+	select STM32_HAVE_DAC1
 
 choice
 	prompt "STM32U3 Chip Selection"

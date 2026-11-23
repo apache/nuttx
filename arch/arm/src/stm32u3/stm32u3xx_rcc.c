@@ -209,6 +209,12 @@ void stm32_rcc_enableperipherals(void)
            RCC_AHB2ENR1_GPIOGEN | RCC_AHB2ENR1_GPIOHEN;
   modifyreg32(STM32_RCC_AHB2ENR1, 0, regval);
 
+#ifdef CONFIG_STM32_DAC1
+  /* Analog peripherals need VDDA to be marked valid */
+
+  modifyreg32(STM32_PWR_SVMCR, 0, PWR_SVMCR_ASV);
+#endif
+
 #ifdef CONFIG_STM32_USART1
   modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_USART1EN);
 #endif
