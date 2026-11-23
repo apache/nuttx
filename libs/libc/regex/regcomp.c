@@ -404,6 +404,7 @@ static reg_errcode_t tre_stack_push(tre_stack_t *s,
         {
           union tre_stack_item  *new_buffer;
           int                   new_size;
+
           new_size = s->size + s->increment;
           if (new_size > s->max_size)
             {
@@ -741,6 +742,7 @@ static reg_errcode_t parse_bracket_terms(tre_parse_ctx_t *ctx, const char *s,
       if (*s == '[' && s[1] == ':')
         {
           char tmp[CHARCLASS_NAME_MAX + 1];
+
           s += 2;
           for (len = 0; len < CHARCLASS_NAME_MAX && s[len]; len++)
             {
@@ -797,6 +799,7 @@ static reg_errcode_t parse_bracket_terms(tre_parse_ctx_t *ctx, const char *s,
       else
         {
           tre_literal_t *lit = tre_new_lit(ls);
+
           if (!lit)
             {
               return REG_ESPACE;
@@ -834,7 +837,8 @@ static reg_errcode_t parse_bracket(tre_parse_ctx_t *ctx, const char *s)
   int               min;
   int               negmax;
   int               negmin;
-  tre_ast_node_t    *node = 0, *n;
+  tre_ast_node_t    *node = 0;
+  tre_ast_node_t    *n;
   tre_ctype_t       *nc = 0;
   tre_literal_t     *lit;
   struct literals   ls;
@@ -1027,6 +1031,7 @@ static reg_errcode_t marksub(tre_parse_ctx_t *ctx, tre_ast_node_t *node,
   if (node->submatch_id >= 0)
     {
       tre_ast_node_t *n = tre_ast_new_literal(ctx->mem, EMPTY, -1, -1);
+
       if (!n)
         {
           return REG_ESPACE;
@@ -1081,242 +1086,252 @@ static reg_errcode_t parse_atom(tre_parse_ctx_t *ctx, const char *s)
 
   switch (*s)
     {
-    case '[':
-    {
-      return parse_bracket(ctx, s + 1);
-    }
-
-    case '\\':
-    {
-      p = tre_expand_macro(s + 1);
-      if (p)
+      case '[':
         {
-          /* assume \X expansion is a single atom */
-
-          reg_errcode_t err = parse_atom(ctx, p);
-          ctx->s = s + 2;
-          return err;
+          return parse_bracket(ctx, s + 1);
         }
 
-      /* extensions: \b, \B, \<, \>, \xHH \x{HHHH} */
+      case '\\':
+        {
+          p = tre_expand_macro(s + 1);
+          if (p)
+            {
+              /* assume \X expansion is a single atom */
 
-      switch (*++s)
-        {
-        case 0:
-        {
-          return REG_EESCAPE;
-        }
+              reg_errcode_t err = parse_atom(ctx, p);
 
-        case 'b':
-        {
-          node = tre_ast_new_literal(ctx->mem, ASSERTION, ASSERT_AT_WB, -1);
-        }
-        break;
+              ctx->s = s + 2;
+              return err;
+            }
 
-        case 'B':
-        {
-          node =
-            tre_ast_new_literal(ctx->mem, ASSERTION, ASSERT_AT_WB_NEG, -1);
-        }
-        break;
+          /* extensions: \b, \B, \<, \>, \xHH \x{HHHH} */
 
-        case '<':
-        {
-          node = tre_ast_new_literal(ctx->mem, ASSERTION, ASSERT_AT_BOW, -1);
-        }
-        break;
+          switch (*++s)
+            {
+              case 0:
+                {
+                  return REG_EESCAPE;
+                }
 
-        case '>':
-        {
-          node = tre_ast_new_literal(ctx->mem, ASSERTION, ASSERT_AT_EOW, -1);
-        }
-        break;
+              case 'b':
+                {
+                  node = tre_ast_new_literal(ctx->mem, ASSERTION,
+                                             ASSERT_AT_WB, -1);
+                }
+                break;
 
-        case 'x':
-        {
+              case 'B':
+                {
+                  node = tre_ast_new_literal(ctx->mem, ASSERTION,
+                                             ASSERT_AT_WB_NEG, -1);
+                }
+                break;
+
+              case '<':
+                {
+                  node = tre_ast_new_literal(ctx->mem, ASSERTION,
+                                             ASSERT_AT_BOW, -1);
+                }
+                break;
+
+              case '>':
+                {
+                  node = tre_ast_new_literal(ctx->mem, ASSERTION,
+                                             ASSERT_AT_EOW, -1);
+                }
+                break;
+
+              case 'x':
+                {
+                  s++;
+                  int   i;
+                  int   v = 0;
+                  int   c;
+
+                  len = 2;
+                  if (*s == '{')
+                    {
+                      len = 8;
+                      s++;
+                    }
+
+                  for (i = 0; i < len && v < 0x110000; i++)
+                    {
+                      c = hexval(s[i]);
+                      if (c < 0)
+                        {
+                          break;
+                        }
+
+                      v = 16 * v + c;
+                    }
+
+                  s += i;
+                  if (len == 8)
+                    {
+                      if (*s != '}')
+                        {
+                          return REG_EBRACE;
+                        }
+
+                      s++;
+                    }
+
+                  node = tre_ast_new_literal(ctx->mem, v, v, ctx->position);
+                  ctx->position++;
+                  s--;
+                }
+                break;
+
+              default:
+                if (isdigit(*s))
+                  {
+                    /* back reference */
+
+                    int val = *s - '0';
+
+                    node = tre_ast_new_literal(ctx->mem, BACKREF, val,
+                                               ctx->position);
+                    ctx->max_backref = MAX(val, ctx->max_backref);
+                  }
+                else
+                  {
+                    /* extension: accept unknown escaped char
+                     * as a literal
+                     */
+
+                    node = tre_ast_new_literal(ctx->mem, *s, *s,
+                                               ctx->position);
+                  }
+
+                ctx->position++;
+            }
+
           s++;
-          int   i;
-          int   v = 0;
-          int   c;
-          len = 2;
-          if (*s == '{')
-            {
-              len = 8;
-              s++;
-            }
-
-          for (i = 0; i < len && v < 0x110000; i++)
-            {
-              c = hexval(s[i]);
-              if (c < 0)
-                {
-                  break;
-                }
-
-              v = 16 * v + c;
-            }
-
-          s += i;
-          if (len == 8)
-            {
-              if (*s != '}')
-                {
-                  return REG_EBRACE;
-                }
-
-              s++;
-            }
-
-          node = tre_ast_new_literal(ctx->mem, v, v, ctx->position);
-          ctx->position++;
-          s--;
         }
         break;
 
-        default:
-          if (isdigit(*s))
+      case '.':
+        {
+          if (ctx->cflags & REG_NEWLINE)
             {
-              /* back reference */
+              tre_ast_node_t    *tmp1;
+              tre_ast_node_t    *tmp2;
 
-              int val = *s - '0';
-              node = tre_ast_new_literal(ctx->mem, BACKREF, val,
-                                         ctx->position);
-              ctx->max_backref = MAX(val, ctx->max_backref);
+              tmp1  = tre_ast_new_literal(ctx->mem, 0, '\n' - 1,
+                                          ctx->position++);
+              tmp2  = tre_ast_new_literal(ctx->mem, '\n' + 1, TRE_CHAR_MAX,
+                                          ctx->position++);
+              if (tmp1 && tmp2)
+                {
+                  node = tre_ast_new_union(ctx->mem, tmp1, tmp2);
+                }
+              else
+                {
+                  node = 0;
+                }
             }
           else
             {
-              /* extension: accept unknown escaped char
-               * as a literal
-               */
+              node = tre_ast_new_literal(ctx->mem, 0, TRE_CHAR_MAX,
+                                         ctx->position++);
+            }
 
-              node = tre_ast_new_literal(ctx->mem, *s, *s, ctx->position);
+          s++;
+        }
+        break;
+
+      case '^':
+        {
+          /* '^' has a special meaning everywhere in EREs, and at beginning
+           * of BRE.
+           */
+
+          if (!ere && s != ctx->re)
+            {
+              goto parse_literal;
+            }
+
+          node = tre_ast_new_literal(ctx->mem, ASSERTION, ASSERT_AT_BOL, -1);
+          s++;
+        }
+        break;
+
+      case '$':
+        {
+          /* '$' is special everywhere in EREs, and in the end of the string
+           * in BREs.
+           */
+
+          if (!ere && s[1])
+            {
+              goto parse_literal;
+            }
+
+          node = tre_ast_new_literal(ctx->mem, ASSERTION, ASSERT_AT_EOL, -1);
+          s++;
+        }
+        break;
+
+      case '*':
+      case '|':
+      case '{':
+      case '+':
+      case '?':
+        {
+          if (!ere)
+            {
+              goto parse_literal;
+            }
+        }
+
+      case 0:
+        {
+          node = tre_ast_new_literal(ctx->mem, EMPTY, -1, -1);
+        }
+        break;
+
+      default:
+        {
+parse_literal:
+          len = mbtowc(&wc, s, -1);
+          if (len < 0)
+            {
+              return REG_BADPAT;
+            }
+
+          if (ctx->cflags & REG_ICASE &&
+              (tre_isupper(wc) || tre_islower(wc)))
+            {
+              tre_ast_node_t *tmp1;
+              tre_ast_node_t *tmp2;
+
+              /* multiple opposite case characters are not supported */
+
+              tmp1 =
+                tre_ast_new_literal(ctx->mem, tre_toupper(wc), tre_toupper(
+                                      wc), ctx->position);
+              tmp2 =
+                tre_ast_new_literal(ctx->mem, tre_tolower(wc), tre_tolower(
+                                      wc), ctx->position);
+              if (tmp1 && tmp2)
+                {
+                  node = tre_ast_new_union(ctx->mem, tmp1, tmp2);
+                }
+              else
+                {
+                  node = 0;
+                }
+            }
+          else
+            {
+              node = tre_ast_new_literal(ctx->mem, wc, wc, ctx->position);
             }
 
           ctx->position++;
+          s += len;
         }
-
-      s++;
-    }
-    break;
-
-    case '.':
-    {
-      if (ctx->cflags & REG_NEWLINE)
-        {
-          tre_ast_node_t    *tmp1;
-          tre_ast_node_t    *tmp2;
-          tmp1  = tre_ast_new_literal(ctx->mem, 0, '\n' - 1,
-                                      ctx->position++);
-          tmp2  = tre_ast_new_literal(ctx->mem, '\n' + 1, TRE_CHAR_MAX,
-                                      ctx->position++);
-          if (tmp1 && tmp2)
-            {
-              node = tre_ast_new_union(ctx->mem, tmp1, tmp2);
-            }
-          else
-            {
-              node = 0;
-            }
-        }
-      else
-        {
-          node = tre_ast_new_literal(ctx->mem, 0, TRE_CHAR_MAX,
-                                     ctx->position++);
-        }
-
-      s++;
-    }
-    break;
-
-    case '^':
-    {
-      /* '^' has a special meaning everywhere in EREs, and at beginning of
-       * BRE.
-       */
-
-      if (!ere && s != ctx->re)
-        {
-          goto parse_literal;
-        }
-
-      node = tre_ast_new_literal(ctx->mem, ASSERTION, ASSERT_AT_BOL, -1);
-      s++;
-    }
-    break;
-
-    case '$':
-    {
-      /* '$' is special everywhere in EREs, and in the end of the string in
-       * BREs.
-       */
-
-      if (!ere && s[1])
-        {
-          goto parse_literal;
-        }
-
-      node = tre_ast_new_literal(ctx->mem, ASSERTION, ASSERT_AT_EOL, -1);
-      s++;
-    }
-    break;
-
-    case '*':
-    case '|':
-    case '{':
-    case '+':
-    case '?':
-    {
-      if (!ere)
-        {
-          goto parse_literal;
-        }
-    }
-
-    case 0:
-    {
-      node = tre_ast_new_literal(ctx->mem, EMPTY, -1, -1);
-    }
-    break;
-
-    default:
-    {
-parse_literal:
-      len = mbtowc(&wc, s, -1);
-      if (len < 0)
-        {
-          return REG_BADPAT;
-        }
-
-      if (ctx->cflags & REG_ICASE && (tre_isupper(wc) || tre_islower(wc)))
-        {
-          tre_ast_node_t *tmp1, *tmp2;
-
-          /* multiple opposite case characters are not supported */
-
-          tmp1 =
-            tre_ast_new_literal(ctx->mem, tre_toupper(wc), tre_toupper(
-                                  wc), ctx->position);
-          tmp2 =
-            tre_ast_new_literal(ctx->mem, tre_tolower(wc), tre_tolower(
-                                  wc), ctx->position);
-          if (tmp1 && tmp2)
-            {
-              node = tre_ast_new_union(ctx->mem, tmp1, tmp2);
-            }
-          else
-            {
-              node = 0;
-            }
-        }
-      else
-        {
-          node = tre_ast_new_literal(ctx->mem, wc, wc, ctx->position);
-        }
-
-      ctx->position++;
-      s += len;
-    }
-    break;
+        break;
     }
 
   if (!node)
@@ -1396,73 +1411,74 @@ parse_iter:
 
       switch (*s)
         {
-        case '+':
-        case '?':
-        {
-          if (!ere)
+          case '+':
+          case '?':
             {
-              break;
+              if (!ere)
+                {
+                  break;
+                }
+
+              /* fallthrough */
             }
 
-          /* fallthrough */
-        }
-
-        case '*':
-        {
-          int min = 0;
-          int max = -1;
-          if (*s == '+')
+          case '*':
             {
-              min = 1;
+              int min = 0;
+              int max = -1;
+
+              if (*s == '+')
+                {
+                  min = 1;
+                }
+
+              if (*s == '?')
+                {
+                  max = 1;
+                }
+
+              s++;
+              ctx->n = tre_ast_new_iter(ctx->mem, ctx->n, min, max, 0);
+              if (!ctx->n)
+                {
+                  return REG_ESPACE;
+                }
+
+              /* extension: multiple consecutive *+?{,} is unspecified,
+               * but (a+)+ has to be supported so accepting a++ makes
+               * sense, note however that the RE_DUP_MAX limit can be
+               * circumvented: (a{255}){255} uses a lot of memory..
+               */
+
+              goto parse_iter;
             }
 
-          if (*s == '?')
+          case '\\':
             {
-              max = 1;
+              if (ere || s[1] != '{')
+                {
+                  break;
+                }
+
+              s++;
+              goto parse_brace;
             }
 
-          s++;
-          ctx->n = tre_ast_new_iter(ctx->mem, ctx->n, min, max, 0);
-          if (!ctx->n)
-            {
-              return REG_ESPACE;
-            }
-
-          /* extension: multiple consecutive *+?{,} is unspecified,
-           * but (a+)+ has to be supported so accepting a++ makes
-           * sense, note however that the RE_DUP_MAX limit can be
-           * circumvented: (a{255}){255} uses a lot of memory..
-           */
-
-          goto parse_iter;
-        }
-
-        case '\\':
-        {
-          if (ere || s[1] != '{')
-            {
-              break;
-            }
-
-          s++;
-          goto parse_brace;
-        }
-
-        case '{':
-          if (!ere)
-            {
-              break;
-            }
+          case '{':
+            if (!ere)
+              {
+                break;
+              }
 
 parse_brace:
-          err = parse_dup(ctx, s + 1);
-          if (err != REG_OK)
-            {
-              return err;
-            }
+            err = parse_dup(ctx, s + 1);
+            if (err != REG_OK)
+              {
+                return err;
+              }
 
-          s = ctx->s;
-          goto parse_iter;
+            s = ctx->s;
+            goto parse_iter;
         }
 
       nbranch = tre_ast_new_catenation(ctx->mem, nbranch, ctx->n);
@@ -1474,6 +1490,7 @@ parse_brace:
            */
 
           int c = *s;
+
           nunion    = tre_ast_new_union(ctx->mem, nunion, nbranch);
           nbranch   = 0;
           if (c != '|')
@@ -1639,6 +1656,7 @@ static void tre_purge_regset(int *regset, tre_tnfa_t *tnfa, int tag)
     {
       int   id      = regset[i] / 2;
       int   start   = !(regset[i] % 2);
+
       if (start)
         {
           tnfa->submatch_data[id].so_tag = tag;
@@ -1723,6 +1741,7 @@ static reg_errcode_t tre_add_tags(tre_mem_t mem, tre_stack_t *stack,
   else
     {
       unsigned int i;
+
       for (i = 0; i <= tnfa->num_submatches; i++)
         {
           saved_states[i].tag = -1;
@@ -1742,487 +1761,500 @@ static reg_errcode_t tre_add_tags(tre_mem_t mem, tre_stack_t *stack,
       symbol = (tre_addtags_symbol_t)tre_stack_pop_int(stack);
       switch (symbol)
         {
-        case ADDTAGS_SET_SUBMATCH_END:
-        {
-          int   id = tre_stack_pop_int(stack);
-          int   i;
-
-          /* Add end of this submatch to regset. */
-
-          for (i = 0; regset[i] >= 0; i++)
+          case ADDTAGS_SET_SUBMATCH_END:
             {
-            }
-
-          regset[i]     = id * 2 + 1;
-          regset[i + 1] = -1;
-
-          /* Pop this submatch from the parents stack. */
-
-          for (i = 0; parents[i] >= 0; i++)
-            {
-            }
-
-          parents[i - 1] = -1;
-          break;
-        }
-
-        case ADDTAGS_RECURSE:
-        {
-          node = tre_stack_pop_voidptr(stack);
-
-          if (node->submatch_id >= 0)
-            {
-              int   id = node->submatch_id;
+              int   id = tre_stack_pop_int(stack);
               int   i;
 
-              /* Add start of this submatch to regset. */
+              /* Add end of this submatch to regset. */
 
               for (i = 0; regset[i] >= 0; i++)
                 {
                 }
 
-              regset[i]     = id * 2;
+              regset[i]     = id * 2 + 1;
               regset[i + 1] = -1;
 
-              if (!first_pass)
-                {
-                  for (i = 0; parents[i] >= 0; i++)
-                    {
-                    }
-
-                  tnfa->submatch_data[id].parents = NULL;
-                  if (i > 0)
-                    {
-                      int *p = xmalloc(sizeof(*p) * (i + 1));
-                      if (p == NULL)
-                        {
-                          status = REG_ESPACE;
-                          break;
-                        }
-
-                      ASSERT(tnfa->submatch_data[id].parents == NULL);
-                      tnfa->submatch_data[id].parents = p;
-                      for (i = 0; parents[i] >= 0; i++)
-                        {
-                          p[i] = parents[i];
-                        }
-
-                      p[i] = -1;
-                    }
-                }
-
-              /* Add end of this submatch to regset after processing this
-               *  node.
-               */
-
-              STACK_PUSHX(stack, int, node->submatch_id);
-              STACK_PUSHX(stack, int, ADDTAGS_SET_SUBMATCH_END);
-            }
-
-          switch (node->type)
-            {
-            case LITERAL:
-            {
-              tre_literal_t *lit = node->obj;
-
-              if (!IS_SPECIAL(lit) || IS_BACKREF(lit))
-                {
-                  int i;
-                  if (regset[0] >= 0)
-                    {
-                      /* Regset is not empty, so add a tag before the
-                       *  literal or backref.
-                       */
-
-                      if (!first_pass)
-                        {
-                          status = tre_add_tag_left(mem,
-                                                    node,
-                                                    tag);
-                          tnfa->tag_directions[tag] = direction;
-                          if (minimal_tag >= 0)
-                            {
-                              for (i = 0; tnfa->minimal_tags[i] >= 0; i++)
-                                {
-                                }
-
-                              tnfa->minimal_tags[i]     = tag;
-                              tnfa->minimal_tags[i + 1] = minimal_tag;
-                              tnfa->minimal_tags[i + 2] = -1;
-                              minimal_tag               = -1;
-                              num_minimals++;
-                            }
-
-                          tre_purge_regset(regset, tnfa, tag);
-                        }
-                      else
-                        {
-                          node->num_tags = 1;
-                        }
-
-                      regset[0] = -1;
-                      tag       = next_tag;
-                      num_tags++;
-                      next_tag++;
-                    }
-                }
-              else
-                {
-                  ASSERT(!IS_TAG(lit));
-                }
-              break;
-            }
-
-            case CATENATION:
-            {
-              tre_catenation_t  *cat            = node->obj;
-              tre_ast_node_t    *left           = cat->left;
-              tre_ast_node_t    *right          = cat->right;
-              int               reserved_tag    = -1;
-
-              /* After processing right child. */
-
-              STACK_PUSHX(stack, voidptr, node);
-              STACK_PUSHX(stack, int, ADDTAGS_AFTER_CAT_RIGHT);
-
-              /* Process right child. */
-
-              STACK_PUSHX(stack, voidptr, right);
-              STACK_PUSHX(stack, int, ADDTAGS_RECURSE);
-
-              /* After processing left child. */
-
-              STACK_PUSHX(stack, int, next_tag + left->num_tags);
-              if (left->num_tags > 0 && right->num_tags > 0)
-                {
-                  /* Reserve the next tag to the right child. */
-
-                  reserved_tag = next_tag;
-                  next_tag++;
-                }
-
-              STACK_PUSHX(stack, int, reserved_tag);
-              STACK_PUSHX(stack, int, ADDTAGS_AFTER_CAT_LEFT);
-
-              /* Process left child. */
-
-              STACK_PUSHX(stack, voidptr, left);
-              STACK_PUSHX(stack, int, ADDTAGS_RECURSE);
-            }
-
-            break;
-
-            case ITERATION:
-            {
-              tre_iteration_t *iter = node->obj;
-
-              if (first_pass)
-                {
-                  STACK_PUSHX(stack, int, regset[0] >= 0 || iter->minimal);
-                }
-              else
-                {
-                  STACK_PUSHX(stack, int, tag);
-                  STACK_PUSHX(stack, int, iter->minimal);
-                }
-
-              STACK_PUSHX(stack, voidptr, node);
-              STACK_PUSHX(stack, int, ADDTAGS_AFTER_ITERATION);
-
-              STACK_PUSHX(stack, voidptr, iter->arg);
-              STACK_PUSHX(stack, int, ADDTAGS_RECURSE);
-
-              /* Regset is not empty, so add a tag here. */
-
-              if (regset[0] >= 0 || iter->minimal)
-                {
-                  if (!first_pass)
-                    {
-                      int i;
-                      status = tre_add_tag_left(mem, node, tag);
-                      if (iter->minimal)
-                        {
-                          tnfa->tag_directions[tag] = TRE_TAG_MAXIMIZE;
-                        }
-                      else
-                        {
-                          tnfa->tag_directions[tag] = direction;
-                        }
-
-                      if (minimal_tag >= 0)
-                        {
-                          for (i = 0; tnfa->minimal_tags[i] >= 0; i++)
-                            {
-                            }
-
-                          tnfa->minimal_tags[i]     = tag;
-                          tnfa->minimal_tags[i + 1] = minimal_tag;
-                          tnfa->minimal_tags[i + 2] = -1;
-                          minimal_tag               = -1;
-                          num_minimals++;
-                        }
-
-                      tre_purge_regset(regset, tnfa, tag);
-                    }
-
-                  regset[0] = -1;
-                  tag       = next_tag;
-                  num_tags++;
-                  next_tag++;
-                }
-
-              direction = TRE_TAG_MINIMIZE;
-            }
-            break;
-
-            case UNION:
-            {
-              tre_union_t       *uni    = node->obj;
-              tre_ast_node_t    *left   = uni->left;
-              tre_ast_node_t    *right  = uni->right;
-              int               left_tag;
-              int               right_tag;
-
-              if (regset[0] >= 0)
-                {
-                  left_tag  = next_tag;
-                  right_tag = next_tag + 1;
-                }
-              else
-                {
-                  left_tag  = tag;
-                  right_tag = next_tag;
-                }
-
-              /* After processing right child. */
-
-              STACK_PUSHX(stack, int, right_tag);
-              STACK_PUSHX(stack, int, left_tag);
-              STACK_PUSHX(stack, voidptr, regset);
-              STACK_PUSHX(stack, int, regset[0] >= 0);
-              STACK_PUSHX(stack, voidptr, node);
-              STACK_PUSHX(stack, voidptr, right);
-              STACK_PUSHX(stack, voidptr, left);
-              STACK_PUSHX(stack, int, ADDTAGS_AFTER_UNION_RIGHT);
-
-              /* Process right child. */
-
-              STACK_PUSHX(stack, voidptr, right);
-              STACK_PUSHX(stack, int, ADDTAGS_RECURSE);
-
-              /* After processing left child. */
-
-              STACK_PUSHX(stack, int, ADDTAGS_AFTER_UNION_LEFT);
-
-              /* Process left child. */
-
-              STACK_PUSHX(stack, voidptr, left);
-              STACK_PUSHX(stack, int, ADDTAGS_RECURSE);
-
-              /* Regset is not empty, so add a tag here. */
-
-              if (regset[0] >= 0)
-                {
-                  if (!first_pass)
-                    {
-                      int i;
-                      status = tre_add_tag_left(mem, node,
-                                                tag);
-                      tnfa->tag_directions[tag] = direction;
-                      if (minimal_tag >= 0)
-                        {
-                          for (i = 0; tnfa->minimal_tags[i] >= 0; i++)
-                            {
-                            }
-
-                          tnfa->minimal_tags[i]     = tag;
-                          tnfa->minimal_tags[i + 1] = minimal_tag;
-                          tnfa->minimal_tags[i + 2] = -1;
-                          minimal_tag               = -1;
-                          num_minimals++;
-                        }
-
-                      tre_purge_regset(regset, tnfa, tag);
-                    }
-
-                  regset[0] = -1;
-                  tag       = next_tag;
-                  num_tags++;
-                  next_tag++;
-                }
-
-              if (node->num_submatches > 0)
-                {
-                  /* The next two tags are reserved for markers. */
-
-                  next_tag++;
-                  tag = next_tag;
-                  next_tag++;
-                }
-
-              break;
-            }
-            }
-
-          if (node->submatch_id >= 0)
-            {
-              int i;
-
-              /* Push this submatch on the parents stack. */
+              /* Pop this submatch from the parents stack. */
 
               for (i = 0; parents[i] >= 0; i++)
                 {
                 }
 
-              parents[i]        = node->submatch_id;
-              parents[i + 1]    = -1;
+              parents[i - 1] = -1;
+              break;
             }
-        }
 
-        break; /* end case: ADDTAGS_RECURSE */
+          case ADDTAGS_RECURSE:
+            {
+              node = tre_stack_pop_voidptr(stack);
 
-        case ADDTAGS_AFTER_ITERATION:
-        {
-          int   minimal = 0;
-          int   enter_tag;
-          node = tre_stack_pop_voidptr(stack);
-          if (first_pass)
-            {
-              node->num_tags =
-                ((tre_iteration_t *)node->obj)->arg->num_tags +
-                tre_stack_pop_int(
-                  stack);
-              minimal_tag = -1;
-            }
-          else
-            {
-              minimal   = tre_stack_pop_int(stack);
-              enter_tag = tre_stack_pop_int(stack);
-              if (minimal)
+              if (node->submatch_id >= 0)
                 {
-                  minimal_tag = enter_tag;
+                  int   id = node->submatch_id;
+                  int   i;
+
+                  /* Add start of this submatch to regset. */
+
+                  for (i = 0; regset[i] >= 0; i++)
+                    {
+                    }
+
+                  regset[i]     = id * 2;
+                  regset[i + 1] = -1;
+
+                  if (!first_pass)
+                    {
+                      for (i = 0; parents[i] >= 0; i++)
+                        {
+                        }
+
+                      tnfa->submatch_data[id].parents = NULL;
+                      if (i > 0)
+                        {
+                          int *p = xmalloc(sizeof(*p) * (i + 1));
+
+                          if (p == NULL)
+                            {
+                              status = REG_ESPACE;
+                              break;
+                            }
+
+                          ASSERT(tnfa->submatch_data[id].parents == NULL);
+                          tnfa->submatch_data[id].parents = p;
+                          for (i = 0; parents[i] >= 0; i++)
+                            {
+                              p[i] = parents[i];
+                            }
+
+                          p[i] = -1;
+                        }
+                    }
+
+                  /* Add end of this submatch to regset after processing this
+                   *  node.
+                   */
+
+                  STACK_PUSHX(stack, int, node->submatch_id);
+                  STACK_PUSHX(stack, int, ADDTAGS_SET_SUBMATCH_END);
+                }
+
+              switch (node->type)
+                {
+                  case LITERAL:
+                    {
+                      tre_literal_t *lit = node->obj;
+
+                      if (!IS_SPECIAL(lit) || IS_BACKREF(lit))
+                        {
+                          int i;
+
+                          if (regset[0] >= 0)
+                            {
+                              /* Regset is not empty, so add a tag before the
+                               *  literal or backref.
+                               */
+
+                              if (!first_pass)
+                                {
+                                  status = tre_add_tag_left(mem,
+                                                            node,
+                                                            tag);
+                                  tnfa->tag_directions[tag] = direction;
+                                  if (minimal_tag >= 0)
+                                    {
+                                      for (i = 0; tnfa->minimal_tags[i] >= 0;
+                                           i++)
+                                        {
+                                        }
+
+                                      tnfa->minimal_tags[i]     = tag;
+                                      tnfa->minimal_tags[i + 1] =
+                                          minimal_tag;
+                                      tnfa->minimal_tags[i + 2] = -1;
+                                      minimal_tag               = -1;
+                                      num_minimals++;
+                                    }
+
+                                  tre_purge_regset(regset, tnfa, tag);
+                                }
+                              else
+                                {
+                                  node->num_tags = 1;
+                                }
+
+                              regset[0] = -1;
+                              tag       = next_tag;
+                              num_tags++;
+                              next_tag++;
+                            }
+                        }
+                      else
+                        {
+                          ASSERT(!IS_TAG(lit));
+                        }
+                      break;
+                    }
+
+                  case CATENATION:
+                    {
+                      tre_catenation_t  *cat            = node->obj;
+                      tre_ast_node_t    *left           = cat->left;
+                      tre_ast_node_t    *right          = cat->right;
+                      int               reserved_tag    = -1;
+
+                      /* After processing right child. */
+
+                      STACK_PUSHX(stack, voidptr, node);
+                      STACK_PUSHX(stack, int, ADDTAGS_AFTER_CAT_RIGHT);
+
+                      /* Process right child. */
+
+                      STACK_PUSHX(stack, voidptr, right);
+                      STACK_PUSHX(stack, int, ADDTAGS_RECURSE);
+
+                      /* After processing left child. */
+
+                      STACK_PUSHX(stack, int, next_tag + left->num_tags);
+                      if (left->num_tags > 0 && right->num_tags > 0)
+                        {
+                          /* Reserve the next tag to the right child. */
+
+                          reserved_tag = next_tag;
+                          next_tag++;
+                        }
+
+                      STACK_PUSHX(stack, int, reserved_tag);
+                      STACK_PUSHX(stack, int, ADDTAGS_AFTER_CAT_LEFT);
+
+                      /* Process left child. */
+
+                      STACK_PUSHX(stack, voidptr, left);
+                      STACK_PUSHX(stack, int, ADDTAGS_RECURSE);
+                    }
+
+                    break;
+
+                  case ITERATION:
+                    {
+                      tre_iteration_t *iter = node->obj;
+
+                      if (first_pass)
+                        {
+                          STACK_PUSHX(stack, int, regset[0] >= 0 ||
+                                      iter->minimal);
+                        }
+                      else
+                        {
+                          STACK_PUSHX(stack, int, tag);
+                          STACK_PUSHX(stack, int, iter->minimal);
+                        }
+
+                      STACK_PUSHX(stack, voidptr, node);
+                      STACK_PUSHX(stack, int, ADDTAGS_AFTER_ITERATION);
+
+                      STACK_PUSHX(stack, voidptr, iter->arg);
+                      STACK_PUSHX(stack, int, ADDTAGS_RECURSE);
+
+                      /* Regset is not empty, so add a tag here. */
+
+                      if (regset[0] >= 0 || iter->minimal)
+                        {
+                          if (!first_pass)
+                            {
+                              int i;
+
+                              status = tre_add_tag_left(mem, node, tag);
+                              if (iter->minimal)
+                                {
+                                  tnfa->tag_directions[tag] =
+                                      TRE_TAG_MAXIMIZE;
+                                }
+                              else
+                                {
+                                  tnfa->tag_directions[tag] = direction;
+                                }
+
+                              if (minimal_tag >= 0)
+                                {
+                                  for (i = 0; tnfa->minimal_tags[i] >= 0;
+                                       i++)
+                                    {
+                                    }
+
+                                  tnfa->minimal_tags[i]     = tag;
+                                  tnfa->minimal_tags[i + 1] = minimal_tag;
+                                  tnfa->minimal_tags[i + 2] = -1;
+                                  minimal_tag               = -1;
+                                  num_minimals++;
+                                }
+
+                              tre_purge_regset(regset, tnfa, tag);
+                            }
+
+                          regset[0] = -1;
+                          tag       = next_tag;
+                          num_tags++;
+                          next_tag++;
+                        }
+
+                      direction = TRE_TAG_MINIMIZE;
+                    }
+                    break;
+
+                  case UNION:
+                    {
+                      tre_union_t       *uni    = node->obj;
+                      tre_ast_node_t    *left   = uni->left;
+                      tre_ast_node_t    *right  = uni->right;
+                      int               left_tag;
+                      int               right_tag;
+
+                      if (regset[0] >= 0)
+                        {
+                          left_tag  = next_tag;
+                          right_tag = next_tag + 1;
+                        }
+                      else
+                        {
+                          left_tag  = tag;
+                          right_tag = next_tag;
+                        }
+
+                      /* After processing right child. */
+
+                      STACK_PUSHX(stack, int, right_tag);
+                      STACK_PUSHX(stack, int, left_tag);
+                      STACK_PUSHX(stack, voidptr, regset);
+                      STACK_PUSHX(stack, int, regset[0] >= 0);
+                      STACK_PUSHX(stack, voidptr, node);
+                      STACK_PUSHX(stack, voidptr, right);
+                      STACK_PUSHX(stack, voidptr, left);
+                      STACK_PUSHX(stack, int, ADDTAGS_AFTER_UNION_RIGHT);
+
+                      /* Process right child. */
+
+                      STACK_PUSHX(stack, voidptr, right);
+                      STACK_PUSHX(stack, int, ADDTAGS_RECURSE);
+
+                      /* After processing left child. */
+
+                      STACK_PUSHX(stack, int, ADDTAGS_AFTER_UNION_LEFT);
+
+                      /* Process left child. */
+
+                      STACK_PUSHX(stack, voidptr, left);
+                      STACK_PUSHX(stack, int, ADDTAGS_RECURSE);
+
+                      /* Regset is not empty, so add a tag here. */
+
+                      if (regset[0] >= 0)
+                        {
+                          if (!first_pass)
+                            {
+                              int i;
+
+                              status = tre_add_tag_left(mem, node,
+                                                        tag);
+                              tnfa->tag_directions[tag] = direction;
+                              if (minimal_tag >= 0)
+                                {
+                                  for (i = 0; tnfa->minimal_tags[i] >= 0;
+                                       i++)
+                                    {
+                                    }
+
+                                  tnfa->minimal_tags[i]     = tag;
+                                  tnfa->minimal_tags[i + 1] = minimal_tag;
+                                  tnfa->minimal_tags[i + 2] = -1;
+                                  minimal_tag               = -1;
+                                  num_minimals++;
+                                }
+
+                              tre_purge_regset(regset, tnfa, tag);
+                            }
+
+                          regset[0] = -1;
+                          tag       = next_tag;
+                          num_tags++;
+                          next_tag++;
+                        }
+
+                      if (node->num_submatches > 0)
+                        {
+                          /* The next two tags are reserved for markers. */
+
+                          next_tag++;
+                          tag = next_tag;
+                          next_tag++;
+                        }
+
+                      break;
+                    }
+                }
+
+              if (node->submatch_id >= 0)
+                {
+                  int i;
+
+                  /* Push this submatch on the parents stack. */
+
+                  for (i = 0; parents[i] >= 0; i++)
+                    {
+                    }
+
+                  parents[i]        = node->submatch_id;
+                  parents[i + 1]    = -1;
                 }
             }
 
-          if (!first_pass)
+            break; /* end case: ADDTAGS_RECURSE */
+
+          case ADDTAGS_AFTER_ITERATION:
             {
-              if (minimal)
+              int   minimal = 0;
+              int   enter_tag;
+
+              node = tre_stack_pop_voidptr(stack);
+              if (first_pass)
                 {
-                  direction = TRE_TAG_MINIMIZE;
+                  node->num_tags =
+                    ((tre_iteration_t *)node->obj)->arg->num_tags +
+                    tre_stack_pop_int(
+                      stack);
+                  minimal_tag = -1;
                 }
               else
                 {
-                  direction = TRE_TAG_MAXIMIZE;
+                  minimal   = tre_stack_pop_int(stack);
+                  enter_tag = tre_stack_pop_int(stack);
+                  if (minimal)
+                    {
+                      minimal_tag = enter_tag;
+                    }
                 }
-            }
-          break;
-        }
 
-        case ADDTAGS_AFTER_CAT_LEFT:
-        {
-          int new_tag = tre_stack_pop_int(stack);
-          next_tag = tre_stack_pop_int(stack);
-          if (new_tag >= 0)
-            {
-              tag = new_tag;
-            }
-          break;
-        }
-
-        case ADDTAGS_AFTER_CAT_RIGHT:
-        {
-          node = tre_stack_pop_voidptr(stack);
-          if (first_pass)
-            {
-              node->num_tags =
-                ((tre_catenation_t *)node->obj)->left->num_tags +
-                ((tre_catenation_t *)node->obj)->right->num_tags;
-            }
-        }
-        break;
-
-        case ADDTAGS_AFTER_UNION_LEFT:
-        {
-          /* Lift the bottom of the `regset' array so that when processing
-           *  the right operand the items currently in the array are
-           *  invisible. The original bottom was saved at ADDTAGS_UNION
-           * and
-           *  will be restored at ADDTAGS_AFTER_UNION_RIGHT below.
-           */
-
-          while (*regset >= 0)
-            {
-              regset++;
-            }
-        }
-        break;
-
-        case ADDTAGS_AFTER_UNION_RIGHT:
-        {
-          int               added_tags;
-          int               tag_left;
-          int               tag_right;
-          tre_ast_node_t    *left   = tre_stack_pop_voidptr(stack);
-          tre_ast_node_t    *right  = tre_stack_pop_voidptr(stack);
-          node          = tre_stack_pop_voidptr(stack);
-          added_tags    = tre_stack_pop_int(stack);
-          if (first_pass)
-            {
-              node->num_tags = ((tre_union_t *)node->obj)->left->num_tags +
-                               ((tre_union_t *)node->obj)->right->num_tags +
-                               added_tags +
-                               ((node->num_submatches > 0) ? 2 : 0);
-            }
-
-          regset    = tre_stack_pop_voidptr(stack);
-          tag_left  = tre_stack_pop_int(stack);
-          tag_right = tre_stack_pop_int(stack);
-
-          /* Add tags after both children, the left child gets a smaller
-           *  tag than the right child.  This guarantees that we prefer
-           *  the left child over the right child.
-           */
-
-          /* XXX - This is not always necessary (if the children have
-           *  tags which must be seen for every match of that child).
-           */
-
-          /* XXX - Check if this is the only place where tre_add_tag_right
-           *  is used. If so, use tre_add_tag_left (putting the tag before
-           *  the child as opposed after the child) and throw away
-           *  tre_add_tag_right.
-           */
-
-          if (node->num_submatches > 0)
-            {
               if (!first_pass)
                 {
-                  status = tre_add_tag_right(mem,
-                                             left,
-                                             tag_left);
-                  tnfa->tag_directions[tag_left]    = TRE_TAG_MAXIMIZE;
-                  status                            = tre_add_tag_right(
-                                                          mem,
-                                                          right,
-                                                          tag_right);
-                  tnfa->tag_directions[tag_right] = TRE_TAG_MAXIMIZE;
+                  if (minimal)
+                    {
+                      direction = TRE_TAG_MINIMIZE;
+                    }
+                  else
+                    {
+                      direction = TRE_TAG_MAXIMIZE;
+                    }
                 }
-
-              num_tags += 2;
+              break;
             }
 
-          direction = TRE_TAG_MAXIMIZE;
-          break;
-        }
+          case ADDTAGS_AFTER_CAT_LEFT:
+            {
+              int new_tag = tre_stack_pop_int(stack);
 
-        default:
-        {
-          ASSERT(0);
-        }
-        break;
+              next_tag = tre_stack_pop_int(stack);
+              if (new_tag >= 0)
+                {
+                  tag = new_tag;
+                }
+              break;
+            }
 
-          /* end switch(symbol)
-           */
+          case ADDTAGS_AFTER_CAT_RIGHT:
+            {
+              node = tre_stack_pop_voidptr(stack);
+              if (first_pass)
+                {
+                  node->num_tags =
+                    ((tre_catenation_t *)node->obj)->left->num_tags +
+                    ((tre_catenation_t *)node->obj)->right->num_tags;
+                }
+            }
+            break;
+
+          case ADDTAGS_AFTER_UNION_LEFT:
+            {
+              /* Lift the bottom of the `regset' array so that when
+               * processing the right operand the items currently in the
+               * array are invisible. The original bottom was saved at
+               * ADDTAGS_UNION and will be restored at
+               * ADDTAGS_AFTER_UNION_RIGHT below.
+               */
+
+              while (*regset >= 0)
+                {
+                  regset++;
+                }
+            }
+            break;
+
+          case ADDTAGS_AFTER_UNION_RIGHT:
+            {
+              int               added_tags;
+              int               tag_left;
+              int               tag_right;
+              tre_ast_node_t    *left   = tre_stack_pop_voidptr(stack);
+              tre_ast_node_t    *right  = tre_stack_pop_voidptr(stack);
+
+              node          = tre_stack_pop_voidptr(stack);
+              added_tags    = tre_stack_pop_int(stack);
+              if (first_pass)
+                {
+                  node->num_tags =
+                    ((tre_union_t *)node->obj)->left->num_tags +
+                    ((tre_union_t *)node->obj)->right->num_tags +
+                    added_tags + ((node->num_submatches > 0) ? 2 : 0);
+                }
+
+              regset    = tre_stack_pop_voidptr(stack);
+              tag_left  = tre_stack_pop_int(stack);
+              tag_right = tre_stack_pop_int(stack);
+
+              /* Add tags after both children, the left child gets a smaller
+               *  tag than the right child.  This guarantees that we prefer
+               *  the left child over the right child.
+               */
+
+              /* XXX - This is not always necessary (if the children have
+               *  tags which must be seen for every match of that child).
+               */
+
+              /* XXX - Check if this is the only place where
+               * tre_add_tag_right is used. If so, use tre_add_tag_left
+               * (putting the tag before the child as opposed after the
+               * child) and throw away tre_add_tag_right.
+               */
+
+              if (node->num_submatches > 0)
+                {
+                  if (!first_pass)
+                    {
+                      status = tre_add_tag_right(mem,
+                                                 left,
+                                                 tag_left);
+                      tnfa->tag_directions[tag_left]    = TRE_TAG_MAXIMIZE;
+                      status                            = tre_add_tag_right(
+                                                              mem,
+                                                              right,
+                                                              tag_right);
+                      tnfa->tag_directions[tag_right] = TRE_TAG_MAXIMIZE;
+                    }
+
+                  num_tags += 2;
+                }
+
+              direction = TRE_TAG_MAXIMIZE;
+              break;
+            }
+
+          default:
+            {
+              ASSERT(0);
+            }
+            break;
+
+            /* end switch(symbol)
+             */
         }
 
       /* end while(tre_stack_num_objects(stack) > bottom)
@@ -2237,6 +2269,7 @@ static reg_errcode_t tre_add_tags(tre_mem_t mem, tre_stack_t *stack,
   if (!first_pass && minimal_tag >= 0)
     {
       int i;
+
       for (i = 0; tnfa->minimal_tags[i] >= 0; i++)
         {
         }
@@ -2294,136 +2327,143 @@ static reg_errcode_t tre_copy_ast(tre_mem_t mem, tre_stack_t *stack,
       symbol = (tre_copyast_symbol_t)tre_stack_pop_int(stack);
       switch (symbol)
         {
-        case COPY_SET_RESULT_PTR:
-        {
-          result = tre_stack_pop_voidptr(stack);
-        }
-        break;
-
-        case COPY_RECURSE:
-        {
-          node = tre_stack_pop_voidptr(stack);
-          switch (node->type)
+          case COPY_SET_RESULT_PTR:
             {
-            case LITERAL:
+              result = tre_stack_pop_voidptr(stack);
+            }
+            break;
+
+          case COPY_RECURSE:
             {
-              tre_literal_t *lit    = node->obj;
-              int           pos     = lit->position;
-              int           min     = lit->code_min;
-              int           max     = lit->code_max;
-              if (!IS_SPECIAL(lit) || IS_BACKREF(lit))
+              node = tre_stack_pop_voidptr(stack);
+              switch (node->type)
                 {
-                  /* XXX - e.g. [ab] has only one position but two
-                   *  nodes, so we are creating holes in the state space
-                   *  here.  Not fatal, just wastes memory.
-                   */
+                  case LITERAL:
+                    {
+                      tre_literal_t *lit    = node->obj;
+                      int           pos     = lit->position;
+                      int           min     = lit->code_min;
+                      int           max     = lit->code_max;
 
-                  pos += *pos_add;
-                  num_copied++;
-                }
-              else if (IS_TAG(lit) && (flags & COPY_REMOVE_TAGS))
-                {
-                  /* Change this tag to empty. */
+                      if (!IS_SPECIAL(lit) || IS_BACKREF(lit))
+                        {
+                          /* XXX - e.g. [ab] has only one position but two
+                           * nodes, so we are creating holes in the state
+                           * space here. Not fatal, just wastes memory.
+                           */
 
-                  min   = EMPTY;
-                  max   = pos = -1;
-                }
-              else if (IS_TAG(lit) && (flags & COPY_MAXIMIZE_FIRST_TAG) &&
-                       first_tag)
-                {
-                  /* Maximize the first tag. */
+                          pos += *pos_add;
+                          num_copied++;
+                        }
+                      else if (IS_TAG(lit) && (flags & COPY_REMOVE_TAGS))
+                        {
+                          /* Change this tag to empty. */
 
-                  tag_directions[max]   = TRE_TAG_MAXIMIZE;
-                  first_tag             = 0;
-                }
+                          min   = EMPTY;
+                          max   = pos = -1;
+                        }
+                      else if (IS_TAG(lit) &&
+                               (flags & COPY_MAXIMIZE_FIRST_TAG) &&
+                               first_tag)
+                        {
+                          /* Maximize the first tag. */
 
-              *result = tre_ast_new_literal(mem, min, max, pos);
-              if (*result == NULL)
-                {
-                  status = REG_ESPACE;
-                }
+                          tag_directions[max]   = TRE_TAG_MAXIMIZE;
+                          first_tag             = 0;
+                        }
 
-              if (pos > *max_pos)
-                {
-                  *max_pos = pos;
+                      *result = tre_ast_new_literal(mem, min, max, pos);
+                      if (*result == NULL)
+                        {
+                          status = REG_ESPACE;
+                        }
+
+                      if (pos > *max_pos)
+                        {
+                          *max_pos = pos;
+                        }
+                      break;
+                    }
+
+                  case UNION:
+                    {
+                      tre_union_t   *uni = node->obj;
+                      tre_union_t   *tmp;
+
+                      *result = tre_ast_new_union(mem, uni->left,
+                                                  uni->right);
+                      if (*result == NULL)
+                        {
+                          status = REG_ESPACE;
+                          break;
+                        }
+
+                      tmp       = (*result)->obj;
+                      result    = &tmp->left;
+                      STACK_PUSHX(stack, voidptr, uni->right);
+                      STACK_PUSHX(stack, int, COPY_RECURSE);
+                      STACK_PUSHX(stack, voidptr, &tmp->right);
+                      STACK_PUSHX(stack, int, COPY_SET_RESULT_PTR);
+                      STACK_PUSHX(stack, voidptr, uni->left);
+                      STACK_PUSHX(stack, int, COPY_RECURSE);
+                      break;
+                    }
+
+                  case CATENATION:
+                    {
+                      tre_catenation_t  *cat = node->obj;
+                      tre_catenation_t  *tmp;
+
+                      *result = tre_ast_new_catenation(mem, cat->left,
+                                                       cat->right);
+                      if (*result == NULL)
+                        {
+                          status = REG_ESPACE;
+                          break;
+                        }
+
+                      tmp           = (*result)->obj;
+                      tmp->left     = NULL;
+                      tmp->right    = NULL;
+                      result        = &tmp->left;
+
+                      STACK_PUSHX(stack, voidptr, cat->right);
+                      STACK_PUSHX(stack, int, COPY_RECURSE);
+                      STACK_PUSHX(stack, voidptr, &tmp->right);
+                      STACK_PUSHX(stack, int, COPY_SET_RESULT_PTR);
+                      STACK_PUSHX(stack, voidptr, cat->left);
+                      STACK_PUSHX(stack, int, COPY_RECURSE);
+                      break;
+                    }
+
+                  case ITERATION:
+                    {
+                      tre_iteration_t *iter = node->obj;
+
+                      STACK_PUSHX(stack, voidptr, iter->arg);
+                      STACK_PUSHX(stack, int, COPY_RECURSE);
+                      *result = tre_ast_new_iter(mem, iter->arg, iter->min,
+                                                 iter->max,
+                                                 iter->minimal);
+                      if (*result == NULL)
+                        {
+                          status = REG_ESPACE;
+                          break;
+                        }
+
+                      iter      = (*result)->obj;
+                      result    = &iter->arg;
+                      break;
+                    }
+
+                  default:
+                    {
+                      ASSERT(0);
+                      break;
+                    }
                 }
-              break;
             }
-
-            case UNION:
-            {
-              tre_union_t   *uni = node->obj;
-              tre_union_t   *tmp;
-              *result = tre_ast_new_union(mem, uni->left, uni->right);
-              if (*result == NULL)
-                {
-                  status = REG_ESPACE;
-                  break;
-                }
-
-              tmp       = (*result)->obj;
-              result    = &tmp->left;
-              STACK_PUSHX(stack, voidptr, uni->right);
-              STACK_PUSHX(stack, int, COPY_RECURSE);
-              STACK_PUSHX(stack, voidptr, &tmp->right);
-              STACK_PUSHX(stack, int, COPY_SET_RESULT_PTR);
-              STACK_PUSHX(stack, voidptr, uni->left);
-              STACK_PUSHX(stack, int, COPY_RECURSE);
-              break;
-            }
-
-            case CATENATION:
-            {
-              tre_catenation_t  *cat = node->obj;
-              tre_catenation_t  *tmp;
-              *result = tre_ast_new_catenation(mem, cat->left, cat->right);
-              if (*result == NULL)
-                {
-                  status = REG_ESPACE;
-                  break;
-                }
-
-              tmp           = (*result)->obj;
-              tmp->left     = NULL;
-              tmp->right    = NULL;
-              result        = &tmp->left;
-
-              STACK_PUSHX(stack, voidptr, cat->right);
-              STACK_PUSHX(stack, int, COPY_RECURSE);
-              STACK_PUSHX(stack, voidptr, &tmp->right);
-              STACK_PUSHX(stack, int, COPY_SET_RESULT_PTR);
-              STACK_PUSHX(stack, voidptr, cat->left);
-              STACK_PUSHX(stack, int, COPY_RECURSE);
-              break;
-            }
-
-            case ITERATION:
-            {
-              tre_iteration_t *iter = node->obj;
-              STACK_PUSHX(stack, voidptr, iter->arg);
-              STACK_PUSHX(stack, int, COPY_RECURSE);
-              *result = tre_ast_new_iter(mem, iter->arg, iter->min,
-                                         iter->max,
-                                         iter->minimal);
-              if (*result == NULL)
-                {
-                  status = REG_ESPACE;
-                  break;
-                }
-
-              iter      = (*result)->obj;
-              result    = &iter->arg;
-              break;
-            }
-
-            default:
-            {
-              ASSERT(0);
-              break;
-            }
-            }
-        }
-        break;
+            break;
         }
     }
 
@@ -2463,219 +2503,230 @@ static reg_errcode_t tre_expand_ast(tre_mem_t mem, tre_stack_t *stack,
       node      = tre_stack_pop_voidptr(stack);
       switch (symbol)
         {
-        case EXPAND_RECURSE:
-        {
-          switch (node->type)
+          case EXPAND_RECURSE:
             {
-            case LITERAL:
-            {
-              tre_literal_t *lit = node->obj;
-              if (!IS_SPECIAL(lit) || IS_BACKREF(lit))
+              switch (node->type)
                 {
-                  lit->position += pos_add;
-                  if (lit->position > max_pos)
+                  case LITERAL:
                     {
-                      max_pos = lit->position;
+                      tre_literal_t *lit = node->obj;
+
+                      if (!IS_SPECIAL(lit) || IS_BACKREF(lit))
+                        {
+                          lit->position += pos_add;
+                          if (lit->position > max_pos)
+                            {
+                              max_pos = lit->position;
+                            }
+                        }
+                      break;
+                    }
+
+                  case UNION:
+                    {
+                      tre_union_t *uni = node->obj;
+
+                      STACK_PUSHX(stack, voidptr, uni->right);
+                      STACK_PUSHX(stack, int, EXPAND_RECURSE);
+                      STACK_PUSHX(stack, voidptr, uni->left);
+                      STACK_PUSHX(stack, int, EXPAND_RECURSE);
+                      break;
+                    }
+
+                  case CATENATION:
+                    {
+                      tre_catenation_t *cat = node->obj;
+
+                      STACK_PUSHX(stack, voidptr, cat->right);
+                      STACK_PUSHX(stack, int, EXPAND_RECURSE);
+                      STACK_PUSHX(stack, voidptr, cat->left);
+                      STACK_PUSHX(stack, int, EXPAND_RECURSE);
+                      break;
+                    }
+
+                  case ITERATION:
+                    {
+                      tre_iteration_t *iter = node->obj;
+
+                      STACK_PUSHX(stack, int, pos_add);
+                      STACK_PUSHX(stack, voidptr, node);
+                      STACK_PUSHX(stack, int, EXPAND_AFTER_ITER);
+                      STACK_PUSHX(stack, voidptr, iter->arg);
+                      STACK_PUSHX(stack, int, EXPAND_RECURSE);
+
+                      /* If we are going to expand this node at
+                       * EXPAND_AFTER_ITER then don't increase the `pos'
+                       * fields of the nodes now, it will get done when
+                       * expanding.
+                       */
+
+                      if (iter->min > 1 || iter->max > 1)
+                        {
+                          pos_add = 0;
+                        }
+
+                      iter_depth++;
+                      break;
+                    }
+
+                  default:
+                    {
+                      ASSERT(0);
+                      break;
                     }
                 }
-              break;
             }
+            break;
 
-            case UNION:
+          case EXPAND_AFTER_ITER:
             {
-              tre_union_t *uni = node->obj;
-              STACK_PUSHX(stack, voidptr, uni->right);
-              STACK_PUSHX(stack, int, EXPAND_RECURSE);
-              STACK_PUSHX(stack, voidptr, uni->left);
-              STACK_PUSHX(stack, int, EXPAND_RECURSE);
-              break;
-            }
+              tre_iteration_t   *iter = node->obj;
+              int               pos_add_last;
 
-            case CATENATION:
-            {
-              tre_catenation_t *cat = node->obj;
-              STACK_PUSHX(stack, voidptr, cat->right);
-              STACK_PUSHX(stack, int, EXPAND_RECURSE);
-              STACK_PUSHX(stack, voidptr, cat->left);
-              STACK_PUSHX(stack, int, EXPAND_RECURSE);
-              break;
-            }
-
-            case ITERATION:
-            {
-              tre_iteration_t *iter = node->obj;
-              STACK_PUSHX(stack, int, pos_add);
-              STACK_PUSHX(stack, voidptr, node);
-              STACK_PUSHX(stack, int, EXPAND_AFTER_ITER);
-              STACK_PUSHX(stack, voidptr, iter->arg);
-              STACK_PUSHX(stack, int, EXPAND_RECURSE);
-
-              /* If we are going to expand this node at EXPAND_AFTER_ITER
-               *  then don't increase the `pos' fields of the nodes now, it
-               *  will get done when expanding.
-               */
-
+              pos_add       = tre_stack_pop_int(stack);
+              pos_add_last  = pos_add;
               if (iter->min > 1 || iter->max > 1)
                 {
-                  pos_add = 0;
-                }
+                  tre_ast_node_t    *seq1 = NULL;
+                  tre_ast_node_t    *seq2 = NULL;
+                  int               j;
+                  int               pos_add_save = pos_add;
 
-              iter_depth++;
-              break;
-            }
+                  /* Create a catenated sequence of copies of the node. */
 
-            default:
-            {
-              ASSERT(0);
-              break;
-            }
-            }
-        }
-        break;
-
-        case EXPAND_AFTER_ITER:
-        {
-          tre_iteration_t   *iter = node->obj;
-          int               pos_add_last;
-          pos_add       = tre_stack_pop_int(stack);
-          pos_add_last  = pos_add;
-          if (iter->min > 1 || iter->max > 1)
-            {
-              tre_ast_node_t    *seq1 = NULL, *seq2 = NULL;
-              int               j;
-              int               pos_add_save = pos_add;
-
-              /* Create a catenated sequence of copies of the node. */
-
-              for (j = 0; j < iter->min; j++)
-                {
-                  tre_ast_node_t *copy;
-
-                  /* Remove tags from all but the last copy. */
-
-                  int flags =
-                    ((j + 1 <
-                      iter->min) ? COPY_REMOVE_TAGS :
-                                   COPY_MAXIMIZE_FIRST_TAG);
-                  pos_add_save  = pos_add;
-                  status        = tre_copy_ast(mem, stack, iter->arg, flags,
-                                               &pos_add, tag_directions,
-                                               &copy, &max_pos);
-                  if (status != REG_OK)
+                  for (j = 0; j < iter->min; j++)
                     {
-                      return status;
-                    }
+                      tre_ast_node_t *copy;
 
-                  if (seq1 != NULL)
-                    {
-                      seq1 = tre_ast_new_catenation(mem, seq1, copy);
-                    }
-                  else
-                    {
-                      seq1 = copy;
-                    }
+                      /* Remove tags from all but the last copy. */
 
-                  if (seq1 == NULL)
-                    {
-                      return REG_ESPACE;
-                    }
-                }
+                      int flags =
+                        ((j + 1 <
+                          iter->min) ? COPY_REMOVE_TAGS :
+                                       COPY_MAXIMIZE_FIRST_TAG);
 
-              if (iter->max == -1)
-                {
-                  /* No upper limit. */
-
-                  pos_add_save  = pos_add;
-                  status        = tre_copy_ast(mem, stack, iter->arg, 0,
-                                               &pos_add, NULL, &seq2,
-                                               &max_pos);
-                  if (status != REG_OK)
-                    {
-                      return status;
-                    }
-
-                  seq2 = tre_ast_new_iter(mem, seq2, 0, -1, 0);
-                  if (seq2 == NULL)
-                    {
-                      return REG_ESPACE;
-                    }
-                }
-              else
-                {
-                  for (j = iter->min; j < iter->max; j++)
-                    {
-                      tre_ast_node_t *tmp, *copy;
                       pos_add_save  = pos_add;
-                      status        = tre_copy_ast(mem, stack, iter->arg, 0,
-                                                   &pos_add, NULL, &copy,
+                      status        = tre_copy_ast(mem, stack, iter->arg,
+                                                   flags, &pos_add,
+                                                   tag_directions, &copy,
                                                    &max_pos);
                       if (status != REG_OK)
                         {
                           return status;
                         }
 
-                      if (seq2 != NULL)
+                      if (seq1 != NULL)
                         {
-                          seq2 = tre_ast_new_catenation(mem, copy, seq2);
+                          seq1 = tre_ast_new_catenation(mem, seq1, copy);
                         }
                       else
                         {
-                          seq2 = copy;
+                          seq1 = copy;
                         }
 
-                      if (seq2 == NULL)
+                      if (seq1 == NULL)
                         {
                           return REG_ESPACE;
                         }
+                    }
 
-                      tmp = tre_ast_new_literal(mem, EMPTY, -1, -1);
-                      if (tmp == NULL)
+                  if (iter->max == -1)
+                    {
+                      /* No upper limit. */
+
+                      pos_add_save  = pos_add;
+                      status        = tre_copy_ast(mem, stack, iter->arg, 0,
+                                                   &pos_add, NULL, &seq2,
+                                                   &max_pos);
+                      if (status != REG_OK)
                         {
-                          return REG_ESPACE;
+                          return status;
                         }
 
-                      seq2 = tre_ast_new_union(mem, tmp, seq2);
+                      seq2 = tre_ast_new_iter(mem, seq2, 0, -1, 0);
                       if (seq2 == NULL)
                         {
                           return REG_ESPACE;
                         }
                     }
+                  else
+                    {
+                      for (j = iter->min; j < iter->max; j++)
+                        {
+                          tre_ast_node_t *tmp;
+                          tre_ast_node_t *copy;
+
+                          pos_add_save  = pos_add;
+                          status        = tre_copy_ast(mem, stack, iter->arg,
+                                                       0, &pos_add, NULL,
+                                                       &copy, &max_pos);
+                          if (status != REG_OK)
+                            {
+                              return status;
+                            }
+
+                          if (seq2 != NULL)
+                            {
+                              seq2 = tre_ast_new_catenation(mem, copy, seq2);
+                            }
+                          else
+                            {
+                              seq2 = copy;
+                            }
+
+                          if (seq2 == NULL)
+                            {
+                              return REG_ESPACE;
+                            }
+
+                          tmp = tre_ast_new_literal(mem, EMPTY, -1, -1);
+                          if (tmp == NULL)
+                            {
+                              return REG_ESPACE;
+                            }
+
+                          seq2 = tre_ast_new_union(mem, tmp, seq2);
+                          if (seq2 == NULL)
+                            {
+                              return REG_ESPACE;
+                            }
+                        }
+                    }
+
+                  pos_add = pos_add_save;
+                  if (seq1 == NULL)
+                    {
+                      seq1 = seq2;
+                    }
+                  else if (seq2 != NULL)
+                    {
+                      seq1 = tre_ast_new_catenation(mem, seq1, seq2);
+                    }
+
+                  if (seq1 == NULL)
+                    {
+                      return REG_ESPACE;
+                    }
+
+                  node->obj     = seq1->obj;
+                  node->type    = seq1->type;
                 }
 
-              pos_add = pos_add_save;
-              if (seq1 == NULL)
+              iter_depth--;
+              pos_add_total += pos_add - pos_add_last;
+              if (iter_depth == 0)
                 {
-                  seq1 = seq2;
-                }
-              else if (seq2 != NULL)
-                {
-                  seq1 = tre_ast_new_catenation(mem, seq1, seq2);
+                  pos_add = pos_add_total;
                 }
 
-              if (seq1 == NULL)
-                {
-                  return REG_ESPACE;
-                }
-
-              node->obj     = seq1->obj;
-              node->type    = seq1->type;
+              break;
             }
 
-          iter_depth--;
-          pos_add_total += pos_add - pos_add_last;
-          if (iter_depth == 0)
+          default:
             {
-              pos_add = pos_add_total;
+              ASSERT(0);
+              break;
             }
-
-          break;
-        }
-
-        default:
-        {
-          ASSERT(0);
-          break;
-        }
         }
     }
 
@@ -2886,114 +2937,121 @@ static reg_errcode_t tre_match_empty(tre_stack_t *stack,
 
       switch (node->type)
         {
-        case LITERAL:
-        {
-          lit = (tre_literal_t *)node->obj;
-          switch (lit->code_min)
+          case LITERAL:
             {
-            case TAG:
-            {
-              if (lit->code_max >= 0)
+              lit = (tre_literal_t *)node->obj;
+              switch (lit->code_min)
                 {
-                  if (tags != NULL)
+                  case TAG:
                     {
-                      /* Add the tag to `tags'. */
-
-                      for (i = 0; tags[i] >= 0; i++)
+                      if (lit->code_max >= 0)
                         {
-                          if (tags[i] == lit->code_max)
+                          if (tags != NULL)
                             {
-                              break;
+                              /* Add the tag to `tags'. */
+
+                              for (i = 0; tags[i] >= 0; i++)
+                                {
+                                  if (tags[i] == lit->code_max)
+                                    {
+                                      break;
+                                    }
+                                }
+
+                              if (tags[i] < 0)
+                                {
+                                  tags[i]       = lit->code_max;
+                                  tags[i + 1]   = -1;
+                                }
+                            }
+
+                          if (num_tags_seen)
+                            {
+                              (*num_tags_seen)++;
                             }
                         }
+                    }
+                    break;
 
-                      if (tags[i] < 0)
+                  case ASSERTION:
+                    {
+                      ASSERT(lit->code_max >= 1 ||
+                             lit->code_max <= ASSERT_LAST);
+                      if (assertions != NULL)
                         {
-                          tags[i]       = lit->code_max;
-                          tags[i + 1]   = -1;
+                          *assertions |= lit->code_max;
                         }
                     }
+                    break;
 
-                  if (num_tags_seen)
+                  case EMPTY:
                     {
-                      (*num_tags_seen)++;
                     }
+                    break;
+
+                  default:
+                    {
+                      ASSERT(0);
+                    }
+                    break;
                 }
             }
             break;
 
-            case ASSERTION:
+          case UNION:
             {
-              ASSERT(lit->code_max >= 1 || lit->code_max <= ASSERT_LAST);
-              if (assertions != NULL)
+              /* Subexpressions starting earlier take priority over ones
+               * starting later, so we prefer the left subexpression over the
+               * right subexpression.
+               */
+
+              uni = (tre_union_t *)node->obj;
+              if (uni->left->nullable)
                 {
-                  *assertions |= lit->code_max;
+                  STACK_PUSHX(stack, voidptr, uni->left)
+                }
+              else if (uni->right->nullable)
+                {
+                  STACK_PUSHX(stack, voidptr, uni->right)
+                }
+              else
+                {
+                  ASSERT(0);
                 }
             }
             break;
 
-            case EMPTY:
+          case CATENATION:
             {
+              /* The path must go through both children. */
+
+              cat = (tre_catenation_t *)node->obj;
+              ASSERT(cat->left->nullable);
+              ASSERT(cat->right->nullable);
+              STACK_PUSHX(stack, voidptr, cat->left);
+              STACK_PUSHX(stack, voidptr, cat->right);
             }
             break;
 
-            default:
+          case ITERATION:
+            {
+              /* A match with an empty string is preferred over no match at
+               *  all, so we go through the argument if possible.
+               */
+
+              iter = (tre_iteration_t *)node->obj;
+              if (iter->arg->nullable)
+                {
+                  STACK_PUSHX(stack, voidptr, iter->arg);
+                }
+            }
+            break;
+
+          default:
             {
               ASSERT(0);
             }
             break;
-            }
-        }
-        break;
-
-        case UNION:
-        {
-          /* Subexpressions starting earlier take priority over ones
-           *  starting later, so we prefer the left subexpression over the
-           *  right subexpression.
-           */
-
-          uni = (tre_union_t *)node->obj;
-          if (uni->left->nullable)
-              STACK_PUSHX(stack, voidptr, uni->left)
-          else if (uni->right->nullable)
-              STACK_PUSHX(stack, voidptr, uni->right)
-          else
-              ASSERT(0);
-        }
-        break;
-
-        case CATENATION:
-        {
-          /* The path must go through both children. */
-
-          cat = (tre_catenation_t *)node->obj;
-          ASSERT(cat->left->nullable);
-          ASSERT(cat->right->nullable);
-          STACK_PUSHX(stack, voidptr, cat->left);
-          STACK_PUSHX(stack, voidptr, cat->right);
-        }
-        break;
-
-        case ITERATION:
-        {
-          /* A match with an empty string is preferred over no match at
-           *  all, so we go through the argument if possible.
-           */
-
-          iter = (tre_iteration_t *)node->obj;
-          if (iter->arg->nullable)
-            {
-              STACK_PUSHX(stack, voidptr, iter->arg);
-            }
-        }
-        break;
-
-        default:
-        {
-          ASSERT(0);
-        }
-        break;
         }
     }
 
@@ -3029,49 +3087,286 @@ static reg_errcode_t tre_compute_nfl(tre_mem_t mem, tre_stack_t *stack,
       node      = tre_stack_pop_voidptr(stack);
       switch (symbol)
         {
-        case NFL_RECURSE:
-        {
-          switch (node->type)
+          case NFL_RECURSE:
             {
-            case LITERAL:
-            {
-              tre_literal_t *lit = (tre_literal_t *)node->obj;
-              if (IS_BACKREF(lit))
+              switch (node->type)
                 {
-                  /* Back references: nullable = false, firstpos = {i},
-                   *  lastpos = {i}.
+                  case LITERAL:
+                    {
+                      tre_literal_t *lit = (tre_literal_t *)node->obj;
+
+                      if (IS_BACKREF(lit))
+                        {
+                          /* Back references: nullable = false, firstpos =
+                           * {i}, lastpos = {i}.
+                           */
+
+                          node->nullable    = 0;
+                          node->firstpos    = tre_set_one(mem, lit->position,
+                                                          0, TRE_CHAR_MAX, 0,
+                                                          NULL, -1);
+                          if (!node->firstpos)
+                            {
+                              return REG_ESPACE;
+                            }
+
+                          node->lastpos = tre_set_one(mem, lit->position, 0,
+                                                      TRE_CHAR_MAX, 0, NULL,
+                                                      (int)lit->code_max);
+                          if (!node->lastpos)
+                            {
+                              return REG_ESPACE;
+                            }
+                        }
+                      else if (lit->code_min < 0)
+                        {
+                          /* Tags, empty strings, params, and zero width
+                           * assertions: nullable = true, firstpos = {}, and
+                           * lastpos = {}.
+                           */
+
+                          node->nullable    = 1;
+                          node->firstpos    = tre_set_empty(mem);
+                          if (!node->firstpos)
+                            {
+                              return REG_ESPACE;
+                            }
+
+                          node->lastpos = tre_set_empty(mem);
+                          if (!node->lastpos)
+                            {
+                              return REG_ESPACE;
+                            }
+                        }
+                      else
+                        {
+                          /* Literal at position i: nullable = false,
+                           * firstpos = {i}, lastpos = {i}.
+                           */
+
+                          node->nullable    = 0;
+                          node->firstpos    = tre_set_one(mem, lit->position,
+                                                          (int)lit->code_min,
+                                                          (int)lit->code_max,
+                                                          0, NULL,
+                                                          -1);
+                          if (!node->firstpos)
+                            {
+                              return REG_ESPACE;
+                            }
+
+                          node->lastpos = tre_set_one(mem, lit->position,
+                                                      (int)lit->code_min,
+                                                      (int)lit->code_max,
+                                                      lit->class,
+                                                      lit->neg_classes, -1);
+                          if (!node->lastpos)
+                            {
+                              return REG_ESPACE;
+                            }
+                        }
+                      break;
+                    }
+
+                  case UNION:
+                    {
+                      /* Compute the attributes for the two subtrees, and
+                       * after that for this node.
+                       */
+
+                      STACK_PUSHR(stack, voidptr, node);
+                      STACK_PUSHR(stack, int, NFL_POST_UNION);
+                      STACK_PUSHR(stack, voidptr,
+                                  ((tre_union_t *)node->obj)->right);
+                      STACK_PUSHR(stack, int, NFL_RECURSE);
+                      STACK_PUSHR(stack, voidptr,
+                                  ((tre_union_t *)node->obj)->left);
+                      STACK_PUSHR(stack, int, NFL_RECURSE);
+                    }
+                    break;
+
+                  case CATENATION:
+                    {
+                      /* Compute the attributes for the two subtrees, and
+                       * after that for this node.
+                       */
+
+                      STACK_PUSHR(stack, voidptr, node);
+                      STACK_PUSHR(stack, int, NFL_POST_CATENATION);
+                      STACK_PUSHR(stack, voidptr,
+                                  ((tre_catenation_t *)node->obj)->right);
+                      STACK_PUSHR(stack, int, NFL_RECURSE);
+                      STACK_PUSHR(stack, voidptr,
+                                  ((tre_catenation_t *)node->obj)->left);
+                      STACK_PUSHR(stack, int, NFL_RECURSE);
+                    }
+                    break;
+
+                  case ITERATION:
+                    {
+                      /* Compute the attributes for the subtree, and after
+                       * that for this node.
+                       */
+
+                      STACK_PUSHR(stack, voidptr, node);
+                      STACK_PUSHR(stack, int, NFL_POST_ITERATION);
+                      STACK_PUSHR(stack, voidptr,
+                                  ((tre_iteration_t *)node->obj)->arg);
+                      STACK_PUSHR(stack, int, NFL_RECURSE);
+                    }
+                    break;
+                }
+            }
+            break; /* end case: NFL_RECURSE */
+
+          case NFL_POST_UNION:
+            {
+              tre_union_t *uni = (tre_union_t *)node->obj;
+
+              node->nullable    = uni->left->nullable ||
+                                  uni->right->nullable;
+              node->firstpos    = tre_set_union(mem,
+                                                uni->left->firstpos,
+                                                uni->right->firstpos,
+                                                NULL, 0);
+              if (!node->firstpos)
+                {
+                  return REG_ESPACE;
+                }
+
+              node->lastpos = tre_set_union(mem, uni->left->lastpos,
+                                            uni->right->lastpos, NULL, 0);
+              if (!node->lastpos)
+                {
+                  return REG_ESPACE;
+                }
+              break;
+            }
+
+          case NFL_POST_ITERATION:
+            {
+              tre_iteration_t *iter = (tre_iteration_t *)node->obj;
+
+              if (iter->min == 0 || iter->arg->nullable)
+                {
+                  node->nullable = 1;
+                }
+              else
+                {
+                  node->nullable = 0;
+                }
+
+              node->firstpos    = iter->arg->firstpos;
+              node->lastpos     = iter->arg->lastpos;
+              break;
+            }
+
+          case NFL_POST_CATENATION:
+            {
+              int               num_tags;
+              int               *tags;
+              int               assertions;
+              reg_errcode_t     status;
+              tre_catenation_t  *cat = node->obj;
+
+              node->nullable = cat->left->nullable && cat->right->nullable;
+
+              /* Compute firstpos. */
+
+              if (cat->left->nullable)
+                {
+                  /* The left side matches the empty string. Make a first
+                   * pass with tre_match_empty() to get the number of tags
+                   * and parameters.
                    */
 
-                  node->nullable    = 0;
-                  node->firstpos    = tre_set_one(mem, lit->position, 0,
-                                                  TRE_CHAR_MAX, 0, NULL, -1);
-                  if (!node->firstpos)
+                  status =
+                    tre_match_empty(stack, cat->left, NULL, NULL, &num_tags);
+                  if (status != REG_OK)
+                    {
+                      return status;
+                    }
+
+                  /* Allocate arrays for the tags and parameters. */
+
+                  tags = xmalloc(sizeof(*tags) * (num_tags + 1));
+                  if (!tags)
                     {
                       return REG_ESPACE;
                     }
 
-                  node->lastpos = tre_set_one(mem, lit->position, 0,
-                                              TRE_CHAR_MAX, 0, NULL,
-                                              (int)lit->code_max);
-                  if (!node->lastpos)
+                  tags[0]       = -1;
+                  assertions    = 0;
+
+                  /* Second pass with tre_mach_empty() to get the list of
+                   *  tags and parameters.
+                   */
+
+                  status = tre_match_empty(stack, cat->left, tags,
+                                           &assertions, NULL);
+                  if (status != REG_OK)
+                    {
+                      xfree(tags);
+                      return status;
+                    }
+
+                  node->firstpos = tre_set_union(mem, cat->right->firstpos,
+                                                 cat->left->firstpos, tags,
+                                                 assertions);
+                  xfree(tags);
+                  if (!node->firstpos)
                     {
                       return REG_ESPACE;
                     }
                 }
-              else if (lit->code_min < 0)
+              else
                 {
-                  /* Tags, empty strings, params, and zero width assertions:
-                   *  nullable = true, firstpos = {}, and lastpos = {}.
+                  node->firstpos = cat->left->firstpos;
+                }
+
+              /* Compute lastpos. */
+
+              if (cat->right->nullable)
+                {
+                  /* The right side matches the empty string. Make a first
+                   * pass with tre_match_empty() to get the number of tags
+                   * and parameters.
                    */
 
-                  node->nullable    = 1;
-                  node->firstpos    = tre_set_empty(mem);
-                  if (!node->firstpos)
+                  status = tre_match_empty(stack, cat->right, NULL, NULL,
+                                           &num_tags);
+                  if (status != REG_OK)
+                    {
+                      return status;
+                    }
+
+                  /* Allocate arrays for the tags and parameters. */
+
+                  tags = xmalloc(sizeof(int) * (num_tags + 1));
+                  if (!tags)
                     {
                       return REG_ESPACE;
                     }
 
-                  node->lastpos = tre_set_empty(mem);
+                  tags[0]       = -1;
+                  assertions    = 0;
+
+                  /* Second pass with tre_mach_empty() to get the list of
+                   *  tags and parameters.
+                   */
+
+                  status = tre_match_empty(stack, cat->right, tags,
+                                           &assertions, NULL);
+                  if (status != REG_OK)
+                    {
+                      xfree(tags);
+                      return status;
+                    }
+
+                  node->lastpos = tre_set_union(mem, cat->left->lastpos,
+                                                cat->right->lastpos, tags,
+                                                assertions);
+                  xfree(tags);
                   if (!node->lastpos)
                     {
                       return REG_ESPACE;
@@ -3079,242 +3374,16 @@ static reg_errcode_t tre_compute_nfl(tre_mem_t mem, tre_stack_t *stack,
                 }
               else
                 {
-                  /* Literal at position i: nullable = false, firstpos = {i},
-                   *  lastpos = {i}.
-                   */
-
-                  node->nullable    = 0;
-                  node->firstpos    = tre_set_one(mem, lit->position,
-                                                  (int)lit->code_min,
-                                                  (int)lit->code_max,
-                                                  0, NULL,
-                                                  -1);
-                  if (!node->firstpos)
-                    {
-                      return REG_ESPACE;
-                    }
-
-                  node->lastpos = tre_set_one(mem, lit->position,
-                                              (int)lit->code_min,
-                                              (int)lit->code_max, lit->class,
-                                              lit->neg_classes, -1);
-                  if (!node->lastpos)
-                    {
-                      return REG_ESPACE;
-                    }
+                  node->lastpos = cat->right->lastpos;
                 }
               break;
             }
 
-            case UNION:
+          default:
             {
-              /* Compute the attributes for the two subtrees, and after that
-               *  for this node.
-               */
-
-              STACK_PUSHR(stack, voidptr, node);
-              STACK_PUSHR(stack, int, NFL_POST_UNION);
-              STACK_PUSHR(stack, voidptr, ((tre_union_t *)node->obj)->right);
-              STACK_PUSHR(stack, int, NFL_RECURSE);
-              STACK_PUSHR(stack, voidptr, ((tre_union_t *)node->obj)->left);
-              STACK_PUSHR(stack, int, NFL_RECURSE);
+              ASSERT(0);
             }
             break;
-
-            case CATENATION:
-            {
-              /* Compute the attributes for the two subtrees, and after that
-               *  for this node.
-               */
-
-              STACK_PUSHR(stack, voidptr, node);
-              STACK_PUSHR(stack, int, NFL_POST_CATENATION);
-              STACK_PUSHR(stack, voidptr,
-                          ((tre_catenation_t *)node->obj)->right);
-              STACK_PUSHR(stack, int, NFL_RECURSE);
-              STACK_PUSHR(stack, voidptr,
-                          ((tre_catenation_t *)node->obj)->left);
-              STACK_PUSHR(stack, int, NFL_RECURSE);
-            }
-            break;
-
-            case ITERATION:
-            {
-              /* Compute the attributes for the subtree, and after that for
-               *  this node.
-               */
-
-              STACK_PUSHR(stack, voidptr, node);
-              STACK_PUSHR(stack, int, NFL_POST_ITERATION);
-              STACK_PUSHR(stack, voidptr,
-                          ((tre_iteration_t *)node->obj)->arg);
-              STACK_PUSHR(stack, int, NFL_RECURSE);
-            }
-            break;
-            }
-        }
-        break; /* end case: NFL_RECURSE */
-
-        case NFL_POST_UNION:
-        {
-          tre_union_t *uni = (tre_union_t *)node->obj;
-          node->nullable    = uni->left->nullable || uni->right->nullable;
-          node->firstpos    = tre_set_union(mem, uni->left->firstpos,
-                                            uni->right->firstpos, NULL, 0);
-          if (!node->firstpos)
-            {
-              return REG_ESPACE;
-            }
-
-          node->lastpos = tre_set_union(mem, uni->left->lastpos,
-                                        uni->right->lastpos, NULL, 0);
-          if (!node->lastpos)
-            {
-              return REG_ESPACE;
-            }
-          break;
-        }
-
-        case NFL_POST_ITERATION:
-        {
-          tre_iteration_t *iter = (tre_iteration_t *)node->obj;
-
-          if (iter->min == 0 || iter->arg->nullable)
-            {
-              node->nullable = 1;
-            }
-          else
-            {
-              node->nullable = 0;
-            }
-
-          node->firstpos    = iter->arg->firstpos;
-          node->lastpos     = iter->arg->lastpos;
-          break;
-        }
-
-        case NFL_POST_CATENATION:
-        {
-          int               num_tags;
-          int               *tags;
-          int               assertions;
-          reg_errcode_t     status;
-          tre_catenation_t  *cat = node->obj;
-          node->nullable = cat->left->nullable && cat->right->nullable;
-
-          /* Compute firstpos. */
-
-          if (cat->left->nullable)
-            {
-              /* The left side matches the empty string.  Make a first pass
-               *  with tre_match_empty() to get the number of tags and
-               *  parameters.
-               */
-
-              status =
-                tre_match_empty(stack, cat->left, NULL, NULL, &num_tags);
-              if (status != REG_OK)
-                {
-                  return status;
-                }
-
-              /* Allocate arrays for the tags and parameters. */
-
-              tags = xmalloc(sizeof(*tags) * (num_tags + 1));
-              if (!tags)
-                {
-                  return REG_ESPACE;
-                }
-
-              tags[0]       = -1;
-              assertions    = 0;
-
-              /* Second pass with tre_mach_empty() to get the list of
-               *  tags and parameters.
-               */
-
-              status = tre_match_empty(stack, cat->left, tags, &assertions,
-                                       NULL);
-              if (status != REG_OK)
-                {
-                  xfree(tags);
-                  return status;
-                }
-
-              node->firstpos = tre_set_union(mem, cat->right->firstpos,
-                                             cat->left->firstpos, tags,
-                                             assertions);
-              xfree(tags);
-              if (!node->firstpos)
-                {
-                  return REG_ESPACE;
-                }
-            }
-          else
-            {
-              node->firstpos = cat->left->firstpos;
-            }
-
-          /* Compute lastpos. */
-
-          if (cat->right->nullable)
-            {
-              /* The right side matches the empty string.  Make a first pass
-               * with tre_match_empty() to get the number of tags and
-               * parameters.
-               */
-
-              status = tre_match_empty(stack, cat->right, NULL, NULL,
-                                       &num_tags);
-              if (status != REG_OK)
-                {
-                  return status;
-                }
-
-              /* Allocate arrays for the tags and parameters. */
-
-              tags = xmalloc(sizeof(int) * (num_tags + 1));
-              if (!tags)
-                {
-                  return REG_ESPACE;
-                }
-
-              tags[0]       = -1;
-              assertions    = 0;
-
-              /* Second pass with tre_mach_empty() to get the list of
-               *  tags and parameters.
-               */
-
-              status = tre_match_empty(stack, cat->right, tags, &assertions,
-                                       NULL);
-              if (status != REG_OK)
-                {
-                  xfree(tags);
-                  return status;
-                }
-
-              node->lastpos = tre_set_union(mem, cat->left->lastpos,
-                                            cat->right->lastpos, tags,
-                                            assertions);
-              xfree(tags);
-              if (!node->lastpos)
-                {
-                  return REG_ESPACE;
-                }
-            }
-          else
-            {
-              node->lastpos = cat->right->lastpos;
-            }
-          break;
-        }
-
-        default:
-        {
-          ASSERT(0);
-        }
-        break;
         }
     }
 
@@ -3667,13 +3736,16 @@ static reg_errcode_t tre_ast_to_tnfa(tre_ast_node_t *node,
 int regcomp(regex_t *restrict preg, const char *restrict regex, int cflags)
 {
   tre_stack_t           *stack;
-  tre_ast_node_t        *tree, *tmp_ast_l, *tmp_ast_r;
+  tre_ast_node_t        *tree;
+  tre_ast_node_t        *tmp_ast_l;
+  tre_ast_node_t        *tmp_ast_r;
   tre_pos_and_tags_t    *p;
   int                   *counts = NULL;
   int                   *offs = NULL;
   int                   i;
   int                   add = 0;
-  tre_tnfa_transition_t *transitions, *initial;
+  tre_tnfa_transition_t *transitions;
+  tre_tnfa_transition_t *initial;
   tre_tnfa_t            *tnfa = NULL;
   tre_submatch_data_t   *submatch_data;
   tre_tag_direction_t   *tag_directions = NULL;
@@ -3903,6 +3975,7 @@ int regcomp(regex_t *restrict preg, const char *restrict regex, int cflags)
       if (p->tags)
         {
           int j;
+
           for (j = 0; p->tags[j] >= 0; j++)
             {
             }
