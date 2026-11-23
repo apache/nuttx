@@ -102,6 +102,8 @@ tcp_wrbuffer_timedalloc(FAR struct socket_conn_s *sconn,
       return NULL;
     }
 
+  memset(wrb, 0, sizeof(*wrb));
+
   /* Now get the first I/O buffer for the write buffer structure */
 
   wrb->wb_iob = conn_dev_iobtimedalloc(true, timeout, sconn, dev);

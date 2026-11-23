@@ -92,6 +92,11 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_timedalloc(unsigned int timeout)
    */
 
   wrb = mempool_allocate(&g_wrbuffer, timeout);
+  if (wrb != NULL)
+    {
+      memset(wrb, 0, sizeof(*wrb));
+    }
+
   if (wrb == NULL)
     {
       return NULL;
@@ -150,6 +155,11 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(void)
    */
 
   wrb = mempool_allocate(&g_wrbuffer, 0);
+  if (wrb != NULL)
+    {
+      memset(wrb, 0, sizeof(*wrb));
+    }
+
   if (wrb == NULL)
     {
       return NULL;

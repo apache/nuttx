@@ -25,6 +25,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <string.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_PKT)
 
 #include <assert.h>
@@ -106,6 +108,8 @@ FAR struct pkt_conn_s *pkt_alloc(void)
   conn = mempool_allocate(&g_pkt_connections, 0);
   if (conn)
     {
+      memset(conn, 0, sizeof(*conn));
+
       /* Use conn_init to initialize the connection structure */
 
       conn_init(&conn->sconn);

@@ -308,6 +308,8 @@ devif_callback_alloc(FAR struct net_driver_s *dev,
   ret = mempool_allocate(&g_cbprealloc, 0);
   if (ret)
     {
+      memset(ret, 0, sizeof(*ret));
+
       /* Add the newly allocated instance to the head of the device event
        * list.
        */
