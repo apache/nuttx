@@ -2241,7 +2241,9 @@ static int tmpfs_msync(FAR struct mm_map_entry_s *entry, FAR void *start,
 static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 {
   FAR struct tmpfs_file_s *tfo;
-  int ret = -EINVAL;
+  FAR struct mm_map_s *mm;
+  size_t mapend;
+  int ret;
 
   DEBUGASSERT(filep->f_priv != NULL);
 
@@ -2251,27 +2253,112 @@ static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 
   DEBUGASSERT(tfo != NULL);
 
-  if (map->offset >= 0 && map->offset < tfo->tfo_size &&
-      map->length && map->offset + map->length <= tfo->tfo_size)
+  mm = get_current_mm();
+
+  tmpfs_lock_file(tfo);
+
+  if (map->offset < 0 || map->offset >= tfo->tfo_size || map->length == 0)
     {
-      map->vaddr = tfo->tfo_data + map->offset;
-      map->priv.p = tfo;
-      map->munmap = tmpfs_unmap;
-      map->msync = tmpfs_msync;
-      ret = mm_map_add(get_current_mm(), map);
+      tmpfs_unlock_file(tfo);
+      return -EINVAL;
+    }
 
-      if (ret >= 0)
+  mapend = map->offset + map->length;
+
+  /* A mapping that extends past the end of the file must have the region
+   * beyond EOF zero-filled (POSIX).  Make the backing buffer cover the
+   * mapping and zero the region past EOF, but keep the logical file size
+   * unchanged so read()/stat() are unaffected.
+   */
+
+  if (mapend > tfo->tfo_size)
+    {
+      size_t orig = tfo->tfo_size;
+
+      if (mapend > tfo->tfo_alloc)
         {
-          tmpfs_lock_file(tfo);
-          tfo->tfo_refs++;
+          FAR void *data = tfo->tfo_data;
+          size_t alloc = tfo->tfo_alloc;
+          bool mapped;
 
-          /* POSIX marks st_atime for update on the first access to the
-           * mapping.  tmpfs cannot trap that access, so mark it here.
+          /* Growing the allocation may move the shared buffer, which
+           * would invalidate an existing mapping, so reject it while the
+           * object is mapped.  mm_map_exist() takes the mm_map lock, which
+           * is acquired before the file lock elsewhere (munmap() ->
+           * tmpfs_unmap() -> tmpfs_lock_file()), so drop the file lock
+           * while querying to avoid inverting the order.
            */
 
-          tmpfs_update_atime((FAR struct tmpfs_object_s *)tfo);
           tmpfs_unlock_file(tfo);
+          mapped = mm_map_exist(mm, data, alloc);
+          tmpfs_lock_file(tfo);
+
+          if (mapped)
+            {
+              tmpfs_unlock_file(tfo);
+              return -ENOMEM;
+            }
+
+          /* The file may have changed while the lock was dropped */
+
+          if (map->offset >= tfo->tfo_size)
+            {
+              tmpfs_unlock_file(tfo);
+              return -EINVAL;
+            }
+
+          orig = tfo->tfo_size;
+          if (mapend > orig && mapend > tfo->tfo_alloc)
+            {
+              ret = tmpfs_realloc_file(tfo, mapend);
+              if (ret < 0)
+                {
+                  tmpfs_unlock_file(tfo);
+                  return ret;
+                }
+
+              /* tmpfs_realloc_file() sets the logical size; restore it so
+               * that mmap() does not change the file size (POSIX).
+               */
+
+              tfo->tfo_size = orig;
+            }
         }
+
+      /* realloc() does not clear the grown region and the allocation may
+       * hold stale bytes past EOF.
+       */
+
+      if (mapend > orig)
+        {
+          memset(tfo->tfo_data + orig, 0, mapend - orig);
+        }
+    }
+
+  map->vaddr = tfo->tfo_data + map->offset;
+
+  /* Release the file lock before mm_map_add(): munmap() holds the mm_map
+   * lock while calling tmpfs_unmap() -> tmpfs_lock_file().
+   */
+
+  tmpfs_unlock_file(tfo);
+
+  map->priv.p = tfo;
+  map->munmap = tmpfs_unmap;
+  map->msync = tmpfs_msync;
+  ret = mm_map_add(mm, map);
+
+  if (ret >= 0)
+    {
+      tmpfs_lock_file(tfo);
+      tfo->tfo_refs++;
+
+      /* POSIX marks st_atime for update on the first access to the
+       * mapping.  tmpfs cannot trap that access, so mark it here.
+       */
+
+      tmpfs_update_atime((FAR struct tmpfs_object_s *)tfo);
+      tmpfs_unlock_file(tfo);
     }
 
   return ret;
