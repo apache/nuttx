@@ -102,6 +102,19 @@ config DRIVERS_VHOST_RNG
 	default n
 	select DRIVERS_VHOST
 
+config DRIVERS_VHOST_CRYPTO
+	bool "Virtual Host Crypto Device Support"
+	depends on CRYPTO
+	default n
+	select DRIVERS_VHOST
+	select CRYPTO_BACKENDS
+	---help---
+		Enable the vhost (device-side) crypto backend.  It serves a VirtIO
+		crypto device (device ID 20) exposed in the device role, turning
+		each control-queue session request into a cryptodev session and
+		each data-queue request into a crypto_invoke()/crypto_kinvoke()
+		call against the locally registered backends.
+
 config DRIVERS_VHOST_NET
 	bool "Virtual Host Network Device Support"
 	default n
