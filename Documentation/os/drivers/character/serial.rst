@@ -92,6 +92,12 @@ Serial Device Drivers
    set to ``ENOTTY``), reducing code size on memory-constrained
    targets.
 
+-  **Poll waiters**. ``CONFIG_SERIAL_NPOLLWAITERS`` sets the maximum
+   number of threads that can wait simultaneously for ``POLLIN`` or
+   ``POLLOUT`` events on a serial device. The default is 2,
+   reducing the ``struct uart_dev_s`` waiter array size and saving
+   RAM across all platforms.
+
 -  **User Access**. Serial drivers are, ultimately, normal
    `character drivers <#chardrivers>`__ and are accessed as other
    character drivers.
