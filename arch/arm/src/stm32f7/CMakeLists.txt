@@ -116,10 +116,6 @@ if(CONFIG_STM32_QSPI)
   list(APPEND SRCS stm32_qspi.c)
 endif()
 
-if(CONFIG_STM32_ETHMAC)
-  list(APPEND SRCS stm32_ethernet.c)
-endif()
-
 if(CONFIG_DEBUG_FEATURES)
   list(APPEND SRCS stm32_dumpgpio.c)
 endif()

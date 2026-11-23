@@ -189,7 +189,7 @@ An Example
 ----------
 
 There is a good example in the STM32 Ethernet driver. The STM32 F7 
-Ethernet driver (``arch/arm/src/stm32f7/stm32_ethernet.c``) derives 
+Ethernet driver (formerly ``arch/arm/src/stm32f7/stm32_ethernet.c``) derived
 directly from the STM32 F4 Ethernet driver 
 (``arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c``). These two Ethernet MAC peripherals
 are nearly identical. Only changes that are a direct consequence of the 
@@ -198,10 +198,10 @@ Those changes are summarized below.
 
 .. note::
 
-   Both drivers now send and receive the IOBs of the network in place (see
-   :doc:`stm32_ports`): the RX and TX packet buffers described below are
-   gone.  The F7 driver keeps the padded descriptors, cleans the TX IOBs
-   and invalidates the RX IOBs.
+   The F7 now uses the F4 driver, which sends and receives the IOBs of the
+   network in place (see :doc:`stm32_ports`): the RX and TX packet buffers
+   described below are gone.  With the D-Cache, the driver pads the
+   descriptors, cleans the TX IOBs and invalidates the RX IOBs.
 
 Reorganize DMA Data Structure
 -----------------------------
