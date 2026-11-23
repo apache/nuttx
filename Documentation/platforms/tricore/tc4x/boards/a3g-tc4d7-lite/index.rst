@@ -29,6 +29,15 @@ NuttShell with the ostest and hello examples::
 
     tools/configure.sh a3g-tc4d7-lite:nsh
 
+User LEDs
+=========
+
+LED1 (P03.9) and LED2 (P03.10) are on when their pin is low.  With
+``CONFIG_DEV_GPIO`` the board registers them as ``/dev/gpio0`` and
+``/dev/gpio1``, off at boot, for example for the ``gpio`` example::
+
+    nsh> gpio -o 0 /dev/gpio0
+
 Flashing
 ========
 

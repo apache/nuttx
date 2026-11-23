@@ -29,6 +29,15 @@ NuttShell with the ostest and hello examples::
 
     tools/configure.sh a2g-tc375-lite:nsh
 
+User LEDs
+=========
+
+LED1 (P00.5) and LED2 (P00.6) are on when their pin is low.  With
+``CONFIG_DEV_GPIO`` the board registers them as ``/dev/gpio0`` and
+``/dev/gpio1``, off at boot, for example for the ``gpio`` example::
+
+    nsh> gpio -o 0 /dev/gpio0
+
 Flashing
 ========
 

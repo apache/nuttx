@@ -78,6 +78,22 @@ int tc4d7_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_DEV_GPIO
+  /* The user LEDs as /dev/gpio0 and /dev/gpio1, off at boot */
+
+  ret = tricore_gpio_register(0, GPIO_LED1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register LED1: %d\n", ret);
+    }
+
+  ret = tricore_gpio_register(1, GPIO_LED2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register LED2: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
