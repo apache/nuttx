@@ -38,7 +38,10 @@
 #include <sched/sched.h>
 
 #include "arm_internal.h"
-#include "gic.h"
+
+#ifdef CONFIG_SMP
+#  include "gic.h"
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -64,10 +67,6 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   /* Nested interrupts are not supported */
 
   DEBUGASSERT(!up_interrupt_context());
-
-  /* Acknowledge the interrupt */
-
-  arm_ack_irq(irq);
 
   /* if irq == GIC_SMP_CPUSTART
    * We are initiating the multi-core jumping state to up_idle,
