@@ -50,6 +50,13 @@
 
 FAR char *setlocale(int category, FAR const char *locale)
 {
+  /* An invalid category is an error, whatever the locale name is. */
+
+  if (category < LC_CTYPE || category > LC_ALL)
+    {
+      return NULL;
+    }
+
   if (locale == NULL || strcmp(locale, "POSIX") == 0 ||
       strcmp(locale, "C") == 0 || strcmp(locale, "") == 0)
     {
