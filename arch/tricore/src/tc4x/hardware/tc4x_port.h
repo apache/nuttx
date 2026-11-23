@@ -57,8 +57,4 @@
 #define TC4X_PORT_DRVCFG_PD_SHIFT  8           /* Pad driver */
 #define TC4X_PORT_DRVCFG_PL_SHIFT  12          /* Pad level */
 
-#define TC4X_PORT_IN_PULLUP        0x20        /* Input with pull-up */
-#define TC4X_PORT_OUT_ALT2         0x21        /* Push-pull, alternate 2 */
-#define TC4X_PORT_PAD_SPEED1       0           /* CMOS automotive speed 1 */
-
 #endif /* __ARCH_TRICORE_SRC_TC4X_HARDWARE_TC4X_PORT_H */

@@ -64,8 +64,4 @@
 
 #define TC3X_PORT_PDR_PL_SHIFT     2
 
-#define TC3X_PORT_IN_PULLUP        0x10        /* Input with pull-up */
-#define TC3X_PORT_OUT_ALT2         0x90        /* Push-pull, alternate 2 */
-#define TC3X_PORT_PAD_SPEED1       0           /* CMOS automotive speed 1 */
-
 #endif /* __ARCH_TRICORE_SRC_TC3X_HARDWARE_TC3X_PORT_H */
