@@ -114,6 +114,10 @@ ifeq ($(CONFIG_STM32_DAC)$(CONFIG_STM32_HAVE_IP_DAC_M33_V1),yy)
 CHIP_CSRCS += stm32_dac_m33_v1.c
 endif
 
+ifeq ($(CONFIG_STM32_ETHMAC)$(CONFIG_STM32_HAVE_IP_ETHMAC_M3M4_V1),yy)
+CHIP_CSRCS += stm32_eth_m3m4_v1.c
+endif
+
 ifeq ($(CONFIG_STM32_ETHMAC)$(CONFIG_STM32_HAVE_IP_ETHMAC_V2),yy)
 CHIP_CSRCS += stm32_eth_v2.c
 endif
@@ -318,12 +322,6 @@ ifeq ($(CONFIG_DEBUG_USB),y)
 CHIP_CSRCS += stm32_usbhost_m3m4_v1.c
 endif
 endif
-endif
-endif
-
-ifeq ($(CONFIG_STM32_ETHMAC),y)
-ifeq ($(CONFIG_STM32_HAVE_IP_ETHMAC_M3M4_V1),y)
-CHIP_CSRCS += stm32_eth_m3m4_v1.c
 endif
 endif
 

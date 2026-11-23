@@ -233,8 +233,8 @@ STM32F10xx/STM32F30xx - simply leave them unset.
 Ethernet drivers
 ================
 
-The Ethernet MAC drivers of F1, F2, F4 (``common/stm32/stm32_eth_m3m4_v1.c``),
-F7 (``stm32f7/stm32_ethernet.c``) and H5, H7, N6
+The Ethernet MAC drivers of F1, F2, F4, F7
+(``common/stm32/stm32_eth_m3m4_v1.c``) and H5, H7, N6
 (``common/stm32/stm32_eth_v2.c``) are lower half drivers of the network upper
 half (``include/nuttx/net/netdev_lowerhalf.h``, see
 :ref:`Network Drivers <netdriver>`).  New STM32 network drivers must use this
@@ -573,7 +573,7 @@ CAN/FDCAN     bxCAN         arch/arm/src/stm32f7/stm32_can.c
 DAC           to be done    not supported                          
 DMA           v2 style      arch/arm/src/stm32f7/stm32_dma.c       
 DMA2D         v1            arch/arm/src/common/stm32/stm32_dma2d_v1.c
-ETH           to be done    arch/arm/src/stm32f7/stm32_ethernet.c  
+ETH           v1            arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c
 EXTI          to be done    arch/arm/src/stm32f7/stm32_exti_gpio.c 
 FLASH         to be done    arch/arm/src/stm32f7/stm32_flash.c     
 FMC/FSMC      to be done    arch/arm/src/stm32f7/stm32_fmc.c       

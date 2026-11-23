@@ -3879,7 +3879,6 @@ arch/arm/src/stm32f7/hardware/stm32_adc.h alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32_can.h alin.jerpelea@sony.com petro.karashchenko@gmail.com
 arch/arm/src/stm32f7/hardware/stm32_dma.h alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32_dma2d.h 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com
-arch/arm/src/stm32f7/hardware/stm32_ethernet.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32f7/hardware/stm32_exti.h alin.jerpelea@sony.com
 arch/arm/src/stm32f7/hardware/stm32_flash.h alin.jerpelea@sony.com anthony@vergeaero.com abdelatif.guettouche@gmail.com
 arch/arm/src/stm32f7/hardware/stm32_fmc.h ghn@certi.org.br alin.jerpelea@sony.com
@@ -3952,8 +3951,6 @@ arch/arm/src/stm32f7/stm32_dma2d.h titus@elbe-informatik.de alin.jerpelea@sony.c
 arch/arm/src/stm32f7/stm32_dtcm.c alin.jerpelea@sony.com spudarnia@yahoo.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32f7/stm32_dtcm.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com david_s5@nscdg.com daniel@agar.ca
 arch/arm/src/stm32f7/stm32_dumpgpio.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com bob.feretich@rafresearch.com david_s5@usa.net
-arch/arm/src/stm32f7/stm32_ethernet.c xiaoxiang@xiaomi.com anchao@xiaomi.com zhanghongyu@xiaomi.com wengzhe@xiaomi.com
-arch/arm/src/stm32f7/stm32_ethernet.h 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32f7/stm32_exti.h alin.jerpelea@sony.com juha.niskanen@haltian.com
 arch/arm/src/stm32f7/stm32_exti_alarm.c alin.jerpelea@sony.com juha.niskanen@haltian.com xiaoxiang@xiaomi.com mark@mjs.pw
 arch/arm/src/stm32f7/stm32_exti_gpio.c alin.jerpelea@sony.com bob.feretich@rafresearch.com david_s5@usa.net xiaoxiang@xiaomi.com

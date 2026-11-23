@@ -38,6 +38,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <arch/barriers.h>
 #include <arpa/inet.h>
 
 #include <nuttx/arch.h>
@@ -51,6 +52,8 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/cache.h>
+#include <nuttx/crc64.h>
 
 #if defined(CONFIG_NET_PKT)
 #  include <nuttx/net/pkt.h>
@@ -62,12 +65,10 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32_gpio.h"
+#include "stm32.h"
 #include "stm32_eth_m3m4_v1.h"
-#include "stm32_rcc.h"
 #include "stm32_syscfg.h"
-#include "stm32_gpio.h"
-#include "stm32_eth_m3m4_v1.h"
+#include "stm32_uid.h"
 
 #include <arch/board/board.h>
 
@@ -246,6 +247,22 @@
 #  error "The Ethernet DMA buffers must be word aligned"
 #endif
 
+/* With the D-Cache, the data of each IOB must fill whole D-Cache lines:
+ * the RX DMA corrupts other data in the lines of its buffers, also in the
+ * write-through mode.
+ */
+
+#ifdef CONFIG_ARMV7M_DCACHE
+#  define ETH_DCACHE_LINESIZE ARMV7M_DCACHE_LINESIZE
+#  if (CONFIG_IOB_ALIGNMENT % ETH_DCACHE_LINESIZE) != 0 || \
+      (CONFIG_IOB_BUFSIZE % ETH_DCACHE_LINESIZE) != 0 || \
+      defined(CONFIG_IOB_ALLOC)
+#    error "The IOBs must be aligned to the D-Cache lines"
+#  endif
+#else
+#  define ETH_DCACHE_LINESIZE 4
+#endif
+
 #define STM32_ETH_BUFSIZE \
   ((CONFIG_IOB_BUFSIZE - (CONFIG_NET_LL_GUARDSIZE - ETH_HDRLEN)) & ~3)
 
@@ -287,6 +304,13 @@
 #  define CONFIG_STM32_ETH_TXTIMEOUT 60
 #endif
 
+/* The descriptors are padded to the D-Cache line size, so that D-Cache
+ * clean and invalidate operations have no effect on other descriptors.
+ */
+
+#define DESC_ALIGN_UP(n) \
+  (((n) + ETH_DCACHE_LINESIZE - 1) & ~(ETH_DCACHE_LINESIZE - 1))
+
 /* Extremely detailed register debug that you would normally never want
  * enabled.
  */
@@ -307,8 +331,8 @@
 #  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_60_100
 #elif STM32_HCLK_FREQUENCY >= 100000000 && STM32_HCLK_FREQUENCY < 150000000
 #  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_100_150
-#elif STM32_HCLK_FREQUENCY >= 150000000 && STM32_HCLK_FREQUENCY <= 180000000
-#  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_150_180
+#elif STM32_HCLK_FREQUENCY >= 150000000 && STM32_HCLK_FREQUENCY <= 216000000
+#  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_150_216
 #else
 #  error "STM32_HCLK_FREQUENCY not supportable"
 #endif
@@ -617,6 +641,20 @@
  * Private Types
  ****************************************************************************/
 
+/* Descriptors padded to the D-Cache line size */
+
+union stm32_txdesc_u
+{
+  uint8_t             pad[DESC_ALIGN_UP(sizeof(struct eth_txdesc_s))];
+  struct eth_txdesc_s txdesc;
+};
+
+union stm32_rxdesc_u
+{
+  uint8_t             pad[DESC_ALIGN_UP(sizeof(struct eth_rxdesc_s))];
+  struct eth_rxdesc_s rxdesc;
+};
+
 /* The stm32_ethmac_s encapsulates all state information for a single
  * hardware interface
  */
@@ -673,10 +711,15 @@ struct stm32_ethmac_s
 
 /* Descriptor allocations */
 
-static struct eth_rxdesc_s g_rxtable[STM32_ETH_NRXBUF]
-  aligned_data(4);
-static struct eth_txdesc_s g_txtable[STM32_ETH_NTXBUF]
-  aligned_data(4);
+static union stm32_rxdesc_u g_rxtable[STM32_ETH_NRXBUF]
+  aligned_data(ETH_DCACHE_LINESIZE);
+static union stm32_txdesc_u g_txtable[STM32_ETH_NTXBUF]
+  aligned_data(ETH_DCACHE_LINESIZE);
+
+/* Index of a descriptor in its ring */
+
+#define STM32_RXINDEX(desc) ((union stm32_rxdesc_u *)(desc) - g_rxtable)
+#define STM32_TXINDEX(desc) ((union stm32_txdesc_u *)(desc) - g_txtable)
 
 static struct stm32_ethmac_s g_stm32ethmac[STM32_NETHERNET];
 
@@ -761,9 +804,9 @@ static int  stm32_ioctl(struct netdev_lowerhalf_s *dev, int cmd,
 /* Descriptor Initialization */
 
 static void stm32_txdescinit(struct stm32_ethmac_s *priv,
-                             struct eth_txdesc_s *txtable);
+                             union stm32_txdesc_u *txtable);
 static int  stm32_rxdescinit(struct stm32_ethmac_s *priv,
-                             struct eth_rxdesc_s *rxtable);
+                             union stm32_rxdesc_u *rxtable);
 
 /* PHY Initialization */
 
@@ -1179,6 +1222,11 @@ static int stm32_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
   txdesc = txfirst;
   for (i = 0; i < nsegs; i++)
     {
+      /* Flush the contents of the TX buffer into physical memory */
+
+      up_clean_dcache((uintptr_t)iov[i].iov_base,
+                      (uintptr_t)iov[i].iov_base + iov[i].iov_len);
+
       tdes0 = ETH_TDES0_TCH;
 #ifdef CHECKSUM_BY_HARDWARE
       tdes0 |= ETH_TDES0_CIC_ALL;
@@ -1197,7 +1245,7 @@ static int stm32_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
 
       if (i == nsegs - 1)
         {
-          uint32_t txindex = txdesc - g_txtable;
+          uint32_t txindex = STM32_TXINDEX(txdesc);
 
           /* This is the last segment.  Hold the packet here and ask for
            * an interrupt when the transfer completes.
@@ -1219,10 +1267,18 @@ static int stm32_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
         }
 
       txdesc->tdes0 = tdes0;
+
+      /* Flush the modified TX descriptor into physical memory */
+
+      up_clean_dcache((uintptr_t)txdesc,
+                      (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
+
       txdesc = (struct eth_txdesc_s *)txdesc->tdes3;
     }
 
   txfirst->tdes0 |= ETH_TDES0_OWN;
+  up_clean_dcache((uintptr_t)txfirst,
+                  (uintptr_t)txfirst + sizeof(struct eth_txdesc_s));
 
   /* If there is no other TX buffer, in flight, then remember the location
    * of the TX descriptor.  This is the location to check for TX done events.
@@ -1242,6 +1298,8 @@ static int stm32_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
         priv->txhead, priv->txtail, priv->inflight);
 
   /* Check if the TX Buffer unavailable flag is set */
+
+  UP_MB();
 
   if ((stm32_getreg(STM32_ETH_DMASR) & ETH_DMAINT_TBUI) != 0)
     {
@@ -1368,6 +1426,12 @@ static void stm32_freesegment(struct stm32_ethmac_s *priv,
   for (i = 0; i < segments; i++)
     {
       rxdesc->rdes0 = ETH_RDES0_OWN;
+
+      /* Write the modified RX descriptor to physical memory */
+
+      up_clean_dcache((uintptr_t)rxdesc,
+                      (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+
       rxdesc = (struct eth_rxdesc_s *)rxdesc->rdes3;
     }
 
@@ -1472,12 +1536,27 @@ static netpkt_t *stm32_rxframe(struct stm32_ethmac_s *priv,
 
   for (i = 0; i < segments; i++)
     {
-      uint32_t rxindex = rxdesc - g_rxtable;
+      uint32_t rxindex = STM32_RXINDEX(rxdesc);
       netpkt_t *iob = priv->rxpkt[rxindex];
       unsigned int seglen = MIN(remain, STM32_ETH_BUFSIZE);
+      uint8_t *buffer;
+
+      /* Force the received data to be re-read from physical memory */
+
+      buffer = netpkt_getdata(dev, iob);
+      up_invalidate_dcache((uintptr_t)buffer,
+                           (uintptr_t)buffer + STM32_ETH_BUFSIZE);
+
+      /* No cached data of the new buffer may be written over the received
+       * data.
+       */
+
+      buffer = netpkt_getdata(dev, newpkt[i]);
+      up_invalidate_dcache((uintptr_t)buffer,
+                           (uintptr_t)buffer + STM32_ETH_BUFSIZE);
 
       priv->rxpkt[rxindex] = newpkt[i];
-      rxdesc->rdes2 = (uint32_t)netpkt_getdata(dev, newpkt[i]);
+      rxdesc->rdes2 = (uint32_t)buffer;
 
       if (i == 0)
         {
@@ -1616,13 +1695,19 @@ static netpkt_t *stm32_receive(struct netdev_lowerhalf_s *dev)
    */
 
   rxdesc = priv->rxhead;
-  for (i = 0;
-       priv->ifup && pkt == NULL &&
-       (rxdesc->rdes0 & ETH_RDES0_OWN) == 0 &&
-       i < STM32_ETH_NRXBUF;
-       i++)
+  for (i = 0; priv->ifup && pkt == NULL && i < STM32_ETH_NRXBUF; i++)
     {
       struct eth_rxdesc_s *next = (struct eth_rxdesc_s *)rxdesc->rdes3;
+
+      /* Force the RX descriptor to be re-read from physical memory */
+
+      up_invalidate_dcache((uintptr_t)rxdesc,
+                           (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+
+      if ((rxdesc->rdes0 & ETH_RDES0_OWN) != 0)
+        {
+          break;
+        }
 
       /* Check if this is the first segment in the frame */
 
@@ -1738,6 +1823,11 @@ static int stm32_freeframe(struct stm32_ethmac_s *priv)
     {
       DEBUGASSERT(priv->inflight > 0);
 
+      /* Force re-reading of the TX descriptor from physical memory */
+
+      up_invalidate_dcache((uintptr_t)txdesc,
+                           (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
+
       while ((txdesc->tdes0 & ETH_TDES0_OWN) == 0)
         {
           /* There should be a buffer assigned to all in-flight
@@ -1754,11 +1844,16 @@ static int stm32_freeframe(struct stm32_ethmac_s *priv)
 
           txdesc->tdes2 = 0;
 
+          /* Flush the modified TX descriptor into physical memory */
+
+          up_clean_dcache((uintptr_t)txdesc,
+                          (uintptr_t)txdesc + sizeof(struct eth_txdesc_s));
+
           /* Check if this is the last segment of a TX frame */
 
           if ((txdesc->tdes0 & ETH_TDES0_LS) != 0)
             {
-              uint32_t tail = txdesc - g_txtable;
+              uint32_t tail = STM32_TXINDEX(txdesc);
 #ifdef CONFIG_STM32_ETH_TIMESTAMP_TX
               struct iob_s *clone = priv->txmeta[tail];
 
@@ -1804,6 +1899,12 @@ static int stm32_freeframe(struct stm32_ethmac_s *priv)
           /* Try the next descriptor in the TX chain */
 
           txdesc = (struct eth_txdesc_s *)txdesc->tdes3;
+
+          /* Force re-reading of the TX descriptor from physical memory */
+
+          up_invalidate_dcache((uintptr_t)txdesc,
+                               (uintptr_t)txdesc +
+                               sizeof(struct eth_txdesc_s));
         }
 
       /* We get here if (1) there are still frames "in-flight". Remember
@@ -2563,7 +2664,7 @@ static int stm32_rmmac(struct netdev_lowerhalf_s *dev, const uint8_t *mac)
  ****************************************************************************/
 
 static void stm32_txdescinit(struct stm32_ethmac_s *priv,
-                             struct eth_txdesc_s *txtable)
+                             union stm32_txdesc_u *txtable)
 {
   struct eth_txdesc_s *txdesc;
   int i;
@@ -2572,7 +2673,7 @@ static void stm32_txdescinit(struct stm32_ethmac_s *priv,
    * Set the priv->txhead pointer to the first descriptor in the table.
    */
 
-  priv->txhead = txtable;
+  priv->txhead = &txtable[0].txdesc;
 
   /* priv->txtail will point to the first segment of the oldest pending
    * "in-flight" TX transfer.  NULL means that there are no active TX
@@ -2586,7 +2687,7 @@ static void stm32_txdescinit(struct stm32_ethmac_s *priv,
 
   for (i = 0; i < STM32_ETH_NTXBUF; i++)
     {
-      txdesc = &txtable[i];
+      txdesc = &txtable[i].txdesc;
 
       /* Set Second Address Chained bit */
 
@@ -2614,7 +2715,7 @@ static void stm32_txdescinit(struct stm32_ethmac_s *priv,
            * address
            */
 
-          txdesc->tdes3 = (uint32_t)&txtable[i + 1];
+          txdesc->tdes3 = (uint32_t)&txtable[i + 1].txdesc;
         }
       else
         {
@@ -2622,13 +2723,18 @@ static void stm32_txdescinit(struct stm32_ethmac_s *priv,
            * to the first descriptor base address
            */
 
-          txdesc->tdes3 = (uint32_t)txtable;
+          txdesc->tdes3 = (uint32_t)&txtable[0].txdesc;
         }
     }
 
+  /* Flush all of the initialized TX descriptors to physical memory */
+
+  up_clean_dcache((uintptr_t)txtable,
+                  (uintptr_t)&txtable[STM32_ETH_NTXBUF]);
+
   /* Set Transmit Descriptor List Address Register */
 
-  stm32_putreg((uint32_t)txtable, STM32_ETH_DMATDLAR);
+  stm32_putreg((uint32_t)&txtable[0].txdesc, STM32_ETH_DMATDLAR);
 }
 
 /****************************************************************************
@@ -2648,7 +2754,7 @@ static void stm32_txdescinit(struct stm32_ethmac_s *priv,
  ****************************************************************************/
 
 static int stm32_rxdescinit(struct stm32_ethmac_s *priv,
-                            struct eth_rxdesc_s *rxtable)
+                            union stm32_rxdesc_u *rxtable)
 {
   struct eth_rxdesc_s *rxdesc;
   int i;
@@ -2657,7 +2763,7 @@ static int stm32_rxdescinit(struct stm32_ethmac_s *priv,
    * This will be where we receive the first incomplete frame.
    */
 
-  priv->rxhead = rxtable;
+  priv->rxhead = &rxtable[0].rxdesc;
 
   /* If we accumulate the frame in segments, priv->rxcurr points to the
    * RX descriptor of the first segment in the current TX frame.
@@ -2670,7 +2776,9 @@ static int stm32_rxdescinit(struct stm32_ethmac_s *priv,
 
   for (i = 0; i < STM32_ETH_NRXBUF; i++)
     {
-      rxdesc = &rxtable[i];
+      uint8_t *buffer;
+
+      rxdesc = &rxtable[i].rxdesc;
 
       /* Each descriptor owns one packet */
 
@@ -2684,6 +2792,12 @@ static int stm32_rxdescinit(struct stm32_ethmac_s *priv,
             }
         }
 
+      /* No cached data may be written over the received data */
+
+      buffer = netpkt_getdata(&priv->dev, priv->rxpkt[i]);
+      up_invalidate_dcache((uintptr_t)buffer,
+                           (uintptr_t)buffer + STM32_ETH_BUFSIZE);
+
       /* Set Own bit of the RX descriptor rdes0 */
 
       rxdesc->rdes0 = ETH_RDES0_OWN;
@@ -2696,7 +2810,7 @@ static int stm32_rxdescinit(struct stm32_ethmac_s *priv,
 
       /* Set Buffer1 address pointer */
 
-      rxdesc->rdes2 = (uint32_t)netpkt_getdata(&priv->dev, priv->rxpkt[i]);
+      rxdesc->rdes2 = (uint32_t)buffer;
 
       /* Initialize the next descriptor with
        * the Next Descriptor Polling Enable
@@ -2708,7 +2822,7 @@ static int stm32_rxdescinit(struct stm32_ethmac_s *priv,
            * address
            */
 
-          rxdesc->rdes3 = (uint32_t)&rxtable[i + 1];
+          rxdesc->rdes3 = (uint32_t)&rxtable[i + 1].rxdesc;
         }
       else
         {
@@ -2716,13 +2830,18 @@ static int stm32_rxdescinit(struct stm32_ethmac_s *priv,
            * to the first descriptor base address
            */
 
-          rxdesc->rdes3 = (uint32_t)rxtable;
+          rxdesc->rdes3 = (uint32_t)&rxtable[0].rxdesc;
         }
     }
 
+  /* Flush all of the initialized RX descriptors to physical memory */
+
+  up_clean_dcache((uintptr_t)rxtable,
+                  (uintptr_t)&rxtable[STM32_ETH_NRXBUF]);
+
   /* Set Receive Descriptor List Address Register */
 
-  stm32_putreg((uint32_t)rxtable, STM32_ETH_DMARDLAR);
+  stm32_putreg((uint32_t)&rxtable[0].rxdesc, STM32_ETH_DMARDLAR);
   return OK;
 }
 
@@ -4006,19 +4125,18 @@ static int stm32_ethreset(struct stm32_ethmac_s *priv)
 
   /* Wait for software reset to complete. The SR bit is cleared automatically
    * after the reset operation has completed in all core clock domains.
+   * Wait up to 100 us.
    */
 
-  retries = 10;
-  while (((stm32_getreg(STM32_ETH_DMABMR) & ETH_DMABMR_SR) != 0) &&
-         retries > 0)
+  retries = 100;
+  while ((stm32_getreg(STM32_ETH_DMABMR) & ETH_DMABMR_SR) != 0)
     {
-      retries--;
-      up_udelay(1);
-    }
+      if (retries-- == 0)
+        {
+          return -ETIMEDOUT;
+        }
 
-  if (retries == 0)
-    {
-      return -ETIMEDOUT;
+      up_udelay(1);
     }
 
   return 0;
@@ -4344,6 +4462,10 @@ static inline
 int stm32_ethinitialize(int intf)
 {
   struct stm32_ethmac_s *priv;
+#ifdef CONFIG_ARCH_CHIP_STM32F7
+  uint8_t uid[12];
+  uint64_t crc;
+#endif
   int ret;
 
   ninfo("intf: %d\n", intf);
@@ -4360,6 +4482,22 @@ int stm32_ethinitialize(int intf)
   priv->dev.rxtype           = NETDEV_RX_DIRECT; /* From the IRQ work */
   priv->dev.priority         = ETHWORK;
   nxmutex_init(&priv->lock);
+
+#ifdef CONFIG_ARCH_CHIP_STM32F7
+  stm32_get_uniqueid(uid);
+  crc = crc64(uid, 12);
+
+  /* Specify as locally administrated address */
+
+  priv->dev.netdev.d_mac.ether.ether_addr_octet[0]  = (crc >> 0) | 0x02;
+  priv->dev.netdev.d_mac.ether.ether_addr_octet[0] &= ~0x1;
+
+  priv->dev.netdev.d_mac.ether.ether_addr_octet[1]  = crc >> 8;
+  priv->dev.netdev.d_mac.ether.ether_addr_octet[2]  = crc >> 16;
+  priv->dev.netdev.d_mac.ether.ether_addr_octet[3]  = crc >> 24;
+  priv->dev.netdev.d_mac.ether.ether_addr_octet[4]  = crc >> 32;
+  priv->dev.netdev.d_mac.ether.ether_addr_octet[5]  = crc >> 40;
+#endif
 
   /* Configure GPIO pins to support Ethernet */
 

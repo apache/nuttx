@@ -624,7 +624,7 @@ The following lower-half drivers are available in the tree:
   enabled with ``CONFIG_PTP_CLOCK_DUMMY``. It is registered as ``/dev/ptp0``
   at start-up.
 - ``arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c`` - The Ethernet MAC of the
-  STM32 (the legacy driver), registered with ``CONFIG_PTP_CLOCK`` and
+  STM32 F1, F2, F4 and F7, registered with ``CONFIG_PTP_CLOCK`` and
   ``CONFIG_STM32_ETH_PTP`` as ``/dev/ptpN``, where N is the number of the
   Ethernet interface. The clock is the PTP counter of the MAC. It is also the
   time base of the hardware timestamps of the received packets, so those are

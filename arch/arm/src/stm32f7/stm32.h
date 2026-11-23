@@ -54,6 +54,8 @@
 #include "stm32_i2s.h"
 #include "stm32_uart.h"
 #include "stm32_lowputc.h"
-#include "stm32_ethernet.h"
+#ifdef CONFIG_STM32_HAVE_IP_ETHMAC_M3M4_V1
+#  include "stm32_eth.h"
+#endif
 
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_H */

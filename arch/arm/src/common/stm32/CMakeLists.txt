@@ -103,6 +103,10 @@ if(CONFIG_STM32_DAC AND CONFIG_STM32_HAVE_IP_DAC_M33_V1)
   list(APPEND SRCS stm32_dac_m33_v1.c)
 endif()
 
+if(CONFIG_STM32_ETHMAC AND CONFIG_STM32_HAVE_IP_ETHMAC_M3M4_V1)
+  list(APPEND SRCS stm32_eth_m3m4_v1.c)
+endif()
+
 if(CONFIG_STM32_ETHMAC AND CONFIG_STM32_HAVE_IP_ETHMAC_V2)
   list(APPEND SRCS stm32_eth_v2.c)
 endif()
@@ -297,10 +301,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
                                                    OR CONFIG_DEBUG_USB))
       list(APPEND SRCS stm32_usbhost_m3m4_v1.c)
     endif()
-  endif()
-
-  if(CONFIG_STM32_ETHMAC AND CONFIG_STM32_HAVE_IP_ETHMAC_M3M4_V1)
-    list(APPEND SRCS stm32_eth_m3m4_v1.c)
   endif()
 
   if(CONFIG_STM32_PWR AND CONFIG_STM32_HAVE_IP_PWR_M3M4_V1)
