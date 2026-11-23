@@ -1267,7 +1267,8 @@ int pty_register2(int minor, bool susv1)
   nxsem_init(&devpair->pp_slavesem, 0, 0);
   nxmutex_init(&devpair->pp_lock);
 
-  /* Map CR -> NL from terminal input (master)
+  /* Map CR -> NL from terminal input (master) with ICRNL of the slave, so
+   * that a raw mode set through either end turns it off.
    * For some usage like adb shell:
    *   adb shell write \r -> nsh read \n and echo input
    *   nsh write \n -> adb shell read \r\n
@@ -1279,8 +1280,8 @@ int pty_register2(int minor, bool susv1)
   devpair->pp_master.pd_devpair = devpair;
   devpair->pp_master.pd_master  = true;
   devpair->pp_slave.pd_devpair  = devpair;
-  uart_termios_init(&devpair->pp_master.pd_termios, 0, OPOST | OCRNL, 0);
-  uart_termios_init(&devpair->pp_slave.pd_termios, 0, OPOST | ONLCR,
+  uart_termios_init(&devpair->pp_master.pd_termios, 0, OPOST, 0);
+  uart_termios_init(&devpair->pp_slave.pd_termios, ICRNL, OPOST | ONLCR,
                     ECHO | ICANON | ISIG);
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   /* Initialize  of the task that will receive SIGINT signals. */
