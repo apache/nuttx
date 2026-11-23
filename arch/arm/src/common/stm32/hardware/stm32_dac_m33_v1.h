@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/hardware/stm32_dac.h
+ * arch/arm/src/common/stm32/hardware/stm32_dac_m33_v1.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_DAC_H
-#define __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_DAC_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_DAC_M33_V1_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_DAC_M33_V1_H
 
 /****************************************************************************
  * Included Files
@@ -155,4 +155,4 @@
 #  define DAC_MCR_HFSEL_AHB_80MHZ  (1 << DAC_MCR_HFSEL_SHIFT) /* HCLK > 80 MHz */
 #  define DAC_MCR_HFSEL_AHB_160MHZ (2 << DAC_MCR_HFSEL_SHIFT) /* HCLK > 160 MHz */
 
-#endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_DAC_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_DAC_M33_V1_H */

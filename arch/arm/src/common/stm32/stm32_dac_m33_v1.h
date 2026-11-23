@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_dac.h
+ * arch/arm/src/common/stm32/stm32_dac_m33_v1.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_DAC_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_DAC_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_DAC_M33_V1_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_DAC_M33_V1_H
 
 /****************************************************************************
  * Included Files
@@ -117,4 +117,4 @@ struct dac_dev_s *stm32_dacinitialize(int intf);
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_DAC_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_DAC_M33_V1_H */
