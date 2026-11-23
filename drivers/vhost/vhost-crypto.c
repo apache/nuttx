@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include <crypto/asn1.h>
 #include <crypto/cryptodev.h>
 #include <crypto/virtio_crypto.h>
 #include <nuttx/kmalloc.h>
@@ -46,6 +47,10 @@
 
 #define VHOST_CRYPTO_MAX_DATAQUEUES    8
 
+/* Sanity bound for akcipher src/dst data length (peer-controlled). */
+
+#define VHOST_CRYPTO_AKCIPHER_LEN_MAX  4096
+
 /* Max descriptors per request: header, iv, src, aad, dst, mac, inhdr. */
 
 #define VHOST_CRYPTO_MAX_SEGS          8
@@ -58,10 +63,34 @@
 
 struct vhost_crypto_session_s
 {
-  uint64_t tid;             /* crypto_newsession returned handle */
-  struct cryptop    crp;    /* Symmetric/hash/MAC/AEAD op descriptor */
-  struct cryptodesc crda;   /* Auth descriptor (hash/MAC/AEAD) */
-  struct cryptodesc crde;   /* Encrypt descriptor (cipher/AEAD) */
+  uint64_t tid;       /* crypto_newsession returned handle */
+
+  /* Session data is exclusive to either the symmetric (cipher/hash/
+   * MAC/AEAD) or the akcipher (RSA/ECDSA) path, decided once at
+   * CREATE_SESSION and never mixed for the lifetime of the session.
+   */
+
+  union
+  {
+    struct
+    {
+      struct cryptop    crp;    /* Symmetric/hash/MAC/AEAD op descriptor */
+      struct cryptodesc crda;   /* Auth descriptor (hash/MAC/AEAD) */
+      struct cryptodesc crde;   /* Encrypt descriptor (cipher/AEAD) */
+    } sym;
+
+    struct
+    {
+      struct cryptkop   krp;        /* Akcipher op descriptor */
+      FAR void         *akkey;      /* DER key buf */
+      uint32_t          akkeylen;   /* DER key length */
+      uint32_t          curve_id;   /* VIRTIO_CRYPTO_CURVE_* (ECDSA/ECDH) */
+
+      /* DER scratch for ASN1 key encoding, reused across requests */
+
+      unsigned char     keybuf[CONFIG_DRIVERS_VHOST_CRYPTO_RSA_KEYBUF_SIZE];
+    } ak;
+  } u;
 };
 
 /* One descriptor chain collected up-front; process_* consume in order. */
@@ -239,7 +268,7 @@ static int vhost_crypto_create_session_sym(
       crie.cri_alg = txform;
       crie.cri_klen = keylen * 8;
       crie.cri_key = key;
-      sess->crde.crd_alg = txform;
+      sess->u.sym.crde.crd_alg = txform;
 
       if (thash)
         {
@@ -253,10 +282,58 @@ static int vhost_crypto_create_session_sym(
       cria.cri_sid = -1;
       cria.cri_klen = keylen * 8;
       cria.cri_key = key;
-      sess->crda.crd_alg = thash;
+      sess->u.sym.crda.crd_alg = thash;
     }
 
   return crypto_newsession(&sess->tid, txform ? &crie : &cria, 1);
+}
+
+/****************************************************************************
+ * Name: vhost_crypto_create_session_akcipher
+ *
+ * Description:
+ *   Handle CREATE_SESSION for akcipher (asymmetric) sessions. The key is
+ *   just stashed on the session here; RSA/ECDSA parse it lazily on first
+ *   use (see vhost_crypto_process_rsa/ecdsa).
+ *
+ ****************************************************************************/
+
+static int vhost_crypto_create_session_akcipher(
+    FAR struct vhost_crypto_session_s *sess,
+    FAR struct virtio_crypto_op_ctrl_req_s *ctrl,
+    FAR void *key, uint32_t keylen)
+{
+  sess->u.ak.krp.krp_padding =
+    ctrl->op_flf.akcipher.algo_flf.rsa.padding_algo;
+  sess->u.ak.krp.krp_hash = ctrl->op_flf.akcipher.algo_flf.rsa.hash_algo;
+  sess->u.ak.krp.krp_keytype =
+    ctrl->op_flf.akcipher.key_type ==
+    VIRTIO_CRYPTO_AKCIPHER_KEY_TYPE_PRIVATE ?
+    CRYPTO_KEY_TYPE_PRIVATE : CRYPTO_KEY_TYPE_PUBLIC;
+
+  if (ctrl->header.algo == VIRTIO_CRYPTO_AKCIPHER_ECDSA ||
+      ctrl->header.algo == VIRTIO_CRYPTO_AKCIPHER_ECDH)
+    {
+      sess->u.ak.curve_id = ctrl->op_flf.akcipher.algo_flf.ecdsa.curve_id;
+      if (virtio_crypto_curve_get_len(sess->u.ak.curve_id) < 0)
+        {
+          return -ENOTSUP;
+        }
+    }
+
+  if (key != NULL && keylen > 0)
+    {
+      sess->u.ak.akkey = kmm_malloc(keylen);
+      if (sess->u.ak.akkey == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      memcpy(sess->u.ak.akkey, key, keylen);
+      sess->u.ak.akkeylen = keylen;
+    }
+
+  return 0;
 }
 
 /****************************************************************************
@@ -264,7 +341,7 @@ static int vhost_crypto_create_session_sym(
  *
  * Description:
  *   Handle CREATE_SESSION request from controlq.
- *   Supports cipher/hash/MAC/AEAD session types.
+ *   Supports cipher/hash/MAC/AEAD/akcipher session types.
  *
  ****************************************************************************/
 
@@ -283,7 +360,14 @@ static int vhost_crypto_create_session(
       return -ENOMEM;
     }
 
-  ret = vhost_crypto_create_session_sym(sess, ctrl, key, keylen);
+  if (ctrl->header.opcode == VIRTIO_CRYPTO_AKCIPHER_CREATE_SESSION)
+    {
+      ret = vhost_crypto_create_session_akcipher(sess, ctrl, key, keylen);
+    }
+  else
+    {
+      ret = vhost_crypto_create_session_sym(sess, ctrl, key, keylen);
+    }
 
   if (ret != 0)
     {
@@ -318,7 +402,17 @@ static int vhost_crypto_destroy_session(
       return -EINVAL;
     }
 
-  crypto_freesession(sess->tid);
+  if (ctrl->header.opcode == VIRTIO_CRYPTO_AKCIPHER_DESTROY_SESSION)
+    {
+      if (sess->u.ak.akkey != NULL)
+        {
+          kmm_free(sess->u.ak.akkey);
+        }
+    }
+  else
+    {
+      crypto_freesession(sess->tid);
+    }
 
   kmm_free(sess);
   input->status = VIRTIO_CRYPTO_OK;
@@ -391,10 +485,6 @@ again:
                 keylen = req.vb[1].len;
               }
 
-            /* AKCIPHER is rejected by create_session_sym's default case
-             * until the asymmetric backend support is compiled in.
-             */
-
             vhost_crypto_create_session(ctrl, key, keylen, result);
 
             break;
@@ -452,8 +542,8 @@ static int vhost_crypto_process_cipher(
     FAR struct virtio_crypto_op_data_req_s *data,
     FAR struct vhost_crypto_req_s *req)
 {
-  FAR struct cryptodesc *crde = &sess->crde;
-  FAR struct cryptop *crp = &sess->crp;
+  FAR struct cryptodesc *crde = &sess->u.sym.crde;
+  FAR struct cryptop *crp = &sess->u.sym.crp;
   FAR void *buf;
   uint32_t len;
 
@@ -544,8 +634,8 @@ static int vhost_crypto_process_hash(
     FAR struct virtio_crypto_op_data_req_s *data,
     FAR struct vhost_crypto_req_s *req)
 {
-  FAR struct cryptodesc *crda = &sess->crda;
-  FAR struct cryptop *crp = &sess->crp;
+  FAR struct cryptodesc *crda = &sess->u.sym.crda;
+  FAR struct cryptop *crp = &sess->u.sym.crp;
   FAR void *buf;
   uint32_t len;
 
@@ -615,9 +705,9 @@ static int vhost_crypto_process_mac(
     FAR struct virtio_crypto_op_data_req_s *data,
     FAR struct vhost_crypto_req_s *req)
 {
-  FAR struct cryptodesc *crda = &sess->crda;
-  FAR struct cryptodesc *crde = &sess->crde;
-  FAR struct cryptop *crp = &sess->crp;
+  FAR struct cryptodesc *crda = &sess->u.sym.crda;
+  FAR struct cryptodesc *crde = &sess->u.sym.crde;
+  FAR struct cryptop *crp = &sess->u.sym.crp;
   FAR void *buf;
   uint32_t len;
 
@@ -691,8 +781,8 @@ static int vhost_crypto_process_aead_update_aad(
     FAR struct virtio_crypto_op_data_req_s *data,
     FAR struct vhost_crypto_req_s *req)
 {
-  FAR struct cryptodesc *crda = &sess->crda;
-  FAR struct cryptop *crp = &sess->crp;
+  FAR struct cryptodesc *crda = &sess->u.sym.crda;
+  FAR struct cryptop *crp = &sess->u.sym.crp;
   FAR void *buf;
   uint32_t len;
   int ret;
@@ -756,9 +846,9 @@ static int vhost_crypto_process_aead_update(
     FAR struct virtio_crypto_op_data_req_s *data,
     FAR struct vhost_crypto_req_s *req)
 {
-  FAR struct cryptodesc *crda = &sess->crda;
-  FAR struct cryptodesc *crde = &sess->crde;
-  FAR struct cryptop *crp = &sess->crp;
+  FAR struct cryptodesc *crda = &sess->u.sym.crda;
+  FAR struct cryptodesc *crde = &sess->u.sym.crde;
+  FAR struct cryptop *crp = &sess->u.sym.crp;
   FAR void *buf;
   uint32_t datalen;
   uint32_t len;
@@ -809,9 +899,9 @@ static int vhost_crypto_process_aead_final(
     FAR struct vhost_crypto_session_s *sess,
     FAR struct vhost_crypto_req_s *req)
 {
-  FAR struct cryptodesc *crda = &sess->crda;
-  FAR struct cryptodesc *crde = &sess->crde;
-  FAR struct cryptop *crp = &sess->crp;
+  FAR struct cryptodesc *crda = &sess->u.sym.crda;
+  FAR struct cryptodesc *crde = &sess->u.sym.crde;
+  FAR struct cryptop *crp = &sess->u.sym.crp;
   FAR void *buf;
   uint32_t len;
   int ret;
@@ -867,9 +957,9 @@ static int vhost_crypto_process_aead(
     FAR struct virtio_crypto_op_data_req_s *data,
     FAR struct vhost_crypto_req_s *req)
 {
-  FAR struct cryptodesc *crda = &sess->crda;
-  FAR struct cryptodesc *crde = &sess->crde;
-  FAR struct cryptop *crp = &sess->crp;
+  FAR struct cryptodesc *crda = &sess->u.sym.crda;
+  FAR struct cryptodesc *crde = &sess->u.sym.crde;
+  FAR struct cryptop *crp = &sess->u.sym.crp;
   uint32_t flags = data->header.flag;
 
   crp->crp_sid = sess->tid;
@@ -900,6 +990,615 @@ static int vhost_crypto_process_aead(
   else
     {
       return vhost_crypto_process_aead_final(sess, req);
+    }
+}
+
+/****************************************************************************
+ * Name: vhost_crypto_rsa_parse_private_key
+ *
+ * Description:
+ *   Parse DER-encoded RSA private key into krp params.
+ *
+ ****************************************************************************/
+
+static int vhost_crypto_rsa_parse_private_key(
+    FAR struct vhost_crypto_session_s *sess,
+    FAR unsigned char *keybuf,
+    FAR struct cryptkop *krp)
+{
+  FAR unsigned char *pos = sess->u.ak.akkey;
+  FAR unsigned char *end = pos + sess->u.ak.akkeylen;
+  size_t buflen = 0;
+  size_t tlen;
+  int ver;
+  int ret;
+
+  while (pos < end && *pos == 0)
+    {
+      pos++;
+    }
+
+  ret = asn1_get_tag(&pos, end, &tlen,
+                     ASN1_CONSTRUCTED | ASN1_SEQUENCE);
+  if (ret != 0)
+    {
+      return ret;
+    }
+
+  ret = asn1_get_int(&pos, end, &ver);
+  if (ret != 0)
+    {
+      return ret;
+    }
+
+  buflen += virtio_crypto_read_mpi(&pos, end,
+              keybuf + buflen, &krp->krp_param[1]);
+  buflen += virtio_crypto_read_mpi(&pos, end,
+              keybuf + buflen, &krp->krp_param[2]);
+  buflen += virtio_crypto_read_mpi(&pos, end,
+              keybuf + buflen, &krp->krp_param[3]);
+  buflen += virtio_crypto_read_mpi(&pos, end,
+              keybuf + buflen, &krp->krp_param[4]);
+  buflen += virtio_crypto_read_mpi(&pos, end,
+              keybuf + buflen, &krp->krp_param[5]);
+  buflen += virtio_crypto_read_mpi(&pos, end,
+              keybuf + buflen, &krp->krp_param[6]);
+  buflen += virtio_crypto_read_mpi(&pos, end,
+              keybuf + buflen, &krp->krp_param[7]);
+  buflen += virtio_crypto_read_mpi(&pos, end,
+              keybuf + buflen, &krp->krp_param[8]);
+  return 0;
+}
+
+/****************************************************************************
+ * Name: vhost_crypto_rsa_parse_public_key
+ *
+ * Description:
+ *   Parse DER-encoded RSA public key into krp params.
+ *
+ ****************************************************************************/
+
+static int vhost_crypto_rsa_parse_public_key(
+    FAR struct vhost_crypto_session_s *sess,
+    FAR unsigned char *keybuf,
+    FAR struct cryptkop *krp)
+{
+  FAR unsigned char *pos = sess->u.ak.akkey;
+  FAR unsigned char *end = pos + sess->u.ak.akkeylen;
+  size_t buflen = 0;
+  size_t tlen;
+  int ret;
+
+  while (pos < end && *pos == 0)
+    {
+      pos++;
+    }
+
+  ret = asn1_get_tag(&pos, end, &tlen,
+                     ASN1_CONSTRUCTED | ASN1_SEQUENCE);
+  if (ret != 0)
+    {
+      return ret;
+    }
+
+  buflen += virtio_crypto_read_mpi(&pos, end,
+              keybuf + buflen, &krp->krp_param[1]);
+  buflen += virtio_crypto_read_mpi(&pos, end,
+              keybuf + buflen, &krp->krp_param[2]);
+  return 0;
+}
+
+/****************************************************************************
+ * Name: vhost_crypto_process_rsa
+ *
+ * Description:
+ *   Process RSA akcipher request (encrypt/decrypt/sign/verify).
+ *
+ ****************************************************************************/
+
+static int vhost_crypto_process_rsa(
+    FAR struct vhost_crypto_session_s *sess,
+    FAR struct virtio_crypto_op_data_req_s *data,
+    FAR struct vhost_crypto_req_s *req)
+{
+  FAR struct cryptkop *krp = &sess->u.ak.krp;
+  FAR struct crparam *output;
+  FAR struct crparam *input;
+  FAR void *src_buf;
+  FAR void *dst_buf;
+  uint32_t src_len;
+  uint32_t dst_len;
+  uint32_t len;
+  int ret;
+
+  src_len = data->op_flf.akcipher.src_data_len;
+  dst_len = data->op_flf.akcipher.dst_data_len;
+
+  if (src_len > VHOST_CRYPTO_AKCIPHER_LEN_MAX ||
+      dst_len > VHOST_CRYPTO_AKCIPHER_LEN_MAX)
+    {
+      return -EINVAL;
+    }
+
+  memset(krp->krp_param, 0, sizeof(krp->krp_param));
+
+  if (krp->krp_keytype == CRYPTO_KEY_TYPE_PRIVATE)
+    {
+      ret = vhost_crypto_rsa_parse_private_key(sess, sess->u.ak.keybuf, krp);
+    }
+  else
+    {
+      ret = vhost_crypto_rsa_parse_public_key(sess, sess->u.ak.keybuf, krp);
+    }
+
+  if (ret != 0)
+    {
+      return ret;
+    }
+
+  /* Descriptors map shared memory directly, so pass the buffers as-is */
+
+  src_buf = vhost_crypto_next_buf(req, &len);
+  if (src_len > 0 && (src_buf == NULL || len < src_len))
+    {
+      return -EINVAL;
+    }
+
+  input = &krp->krp_param[0];
+  input->crp_p = src_buf;
+  input->crp_nbits = src_len * 8;
+
+  /* Every opcode needs dst: output for non-VERIFY, signature for VERIFY */
+
+  dst_buf = vhost_crypto_next_buf(req, &len);
+  if (dst_len > 0 && (dst_buf == NULL || len < dst_len))
+    {
+      return -EINVAL;
+    }
+
+  switch (data->header.opcode)
+    {
+      case VIRTIO_CRYPTO_AKCIPHER_DECRYPT:
+        if (krp->krp_keytype == CRYPTO_KEY_TYPE_PRIVATE)
+          {
+            krp->krp_op = CRK_MOD_EXP_CRT;
+            krp->krp_iparams = 9;
+          }
+        else
+          {
+            krp->krp_op = CRK_MOD_EXP;
+            krp->krp_iparams = 3;
+          }
+
+        krp->krp_oparams = 1;
+        krp->krp_optype = CRYPTO_OP_DECRYPT;
+        break;
+
+      case VIRTIO_CRYPTO_AKCIPHER_ENCRYPT:
+        krp->krp_op = CRK_MOD_EXP;
+        krp->krp_iparams = 3;
+        krp->krp_oparams = 1;
+        krp->krp_optype = CRYPTO_OP_ENCRYPT;
+        break;
+
+      case VIRTIO_CRYPTO_AKCIPHER_SIGN:
+        if (krp->krp_padding == CRYPTO_RSA_PKCS1_PADDING)
+          {
+            krp->krp_op = CRK_RSA_PKCS15_SIGN;
+          }
+        else if (krp->krp_padding == CRYPTO_RSA_OAEP_PADDING)
+          {
+            krp->krp_op = CRK_RSA_PSS_SIGN;
+          }
+        else
+          {
+            return -EINVAL;
+          }
+
+        krp->krp_iparams = 9;
+        krp->krp_oparams = 1;
+        krp->krp_optype = CRYPTO_OP_SIGN;
+        break;
+
+      case VIRTIO_CRYPTO_AKCIPHER_VERIFY:
+        if (krp->krp_padding == CRYPTO_RSA_PKCS1_PADDING)
+          {
+            krp->krp_op = CRK_RSA_PKCS15_VERIFY;
+            krp->krp_iparams = 5;
+            krp->krp_oparams = 0;
+          }
+        else if (krp->krp_padding == CRYPTO_RSA_OAEP_PADDING)
+          {
+            krp->krp_op = CRK_RSA_PSS_VERIFY;
+            krp->krp_iparams = 4;
+            krp->krp_oparams = 0;
+          }
+        else
+          {
+            return -EINVAL;
+          }
+
+        krp->krp_optype = CRYPTO_OP_VERIFY;
+        break;
+
+      default:
+        return -ENOTSUP;
+    }
+
+  output = &krp->krp_param[krp->krp_iparams + krp->krp_oparams - 1];
+  output->crp_p = dst_buf;
+  output->crp_nbits = dst_len * 8;
+
+  ret = crypto_kinvoke(krp);
+  if (ret == 0)
+    {
+      ret = krp->krp_status;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: vhost_crypto_ecdsa_get_op
+ *
+ * Description:
+ *   Map a negotiated curve_id + operation type to the CRK_* op code.
+ *   Only secp256r1 has a backing cryptodev implementation today; other
+ *   curves are rejected instead of silently treated as P256.
+ *
+ ****************************************************************************/
+
+static int vhost_crypto_ecdsa_get_op(uint32_t curve_id, uint32_t optype)
+{
+  if (curve_id != VIRTIO_CRYPTO_CURVE_NIST_P256)
+    {
+      return -ENOTSUP;
+    }
+
+  switch (optype)
+    {
+      case CRYPTO_OP_SIGN:
+        return CRK_ECDSA_SECP256R1_SIGN;
+      case CRYPTO_OP_VERIFY:
+        return CRK_ECDSA_SECP256R1_VERIFY;
+      case CRYPTO_OP_GENKEY:
+        return CRK_ECDSA_SECP256R1_GENKEY;
+      default:
+        return -EINVAL;
+    }
+}
+
+/****************************************************************************
+ * Name: vhost_crypto_process_ecdsa
+ *
+ * Description:
+ *   Process ECDSA akcipher request (sign/verify/genkey).
+ *
+ ****************************************************************************/
+
+static int vhost_crypto_process_ecdsa(
+    FAR struct vhost_crypto_session_s *sess,
+    FAR struct virtio_crypto_op_data_req_s *data,
+    FAR struct vhost_crypto_req_s *req)
+{
+  FAR struct cryptkop *krp = &sess->u.ak.krp;
+  FAR struct crparam *dst;
+  FAR struct crparam *d;
+  FAR struct crparam *x;
+  FAR struct crparam *y;
+  FAR struct crparam *r;
+  FAR struct crparam *s;
+  FAR void *src_buf = NULL;
+  FAR void *dst_buf;
+  uint32_t curve_id = sess->u.ak.curve_id;
+  uint32_t src_len;
+  uint32_t dst_len;
+  uint32_t keylen;
+  uint32_t len;
+  int curve_len;
+  int krp_op;
+  int ret;
+
+  src_len = data->op_flf.akcipher.src_data_len;
+  dst_len = data->op_flf.akcipher.dst_data_len;
+  keylen = sess->u.ak.akkeylen;
+
+  if (src_len > VHOST_CRYPTO_AKCIPHER_LEN_MAX ||
+      dst_len > VHOST_CRYPTO_AKCIPHER_LEN_MAX)
+    {
+      return -EINVAL;
+    }
+
+  curve_len = virtio_crypto_curve_get_len(curve_id);
+  if (curve_len < 0)
+    {
+      return curve_len;
+    }
+
+  memset(krp->krp_param, 0, sizeof(krp->krp_param));
+
+  /* Descriptors map shared memory directly, so pass the buffers as-is */
+
+  if (src_len > 0)
+    {
+      src_buf = vhost_crypto_next_buf(req, &len);
+      if (src_buf == NULL || len < src_len)
+        {
+          return -EINVAL;
+        }
+    }
+
+  switch (data->header.opcode)
+    {
+      case VIRTIO_CRYPTO_AKCIPHER_SIGN:
+        d = &krp->krp_param[0];
+        dst = &krp->krp_param[1];
+        r = &krp->krp_param[2];
+        s = &krp->krp_param[3];
+        krp_op = vhost_crypto_ecdsa_get_op(curve_id, CRYPTO_OP_SIGN);
+        if (krp_op < 0)
+          {
+            return krp_op;
+          }
+
+        krp->krp_op = krp_op;
+        krp->krp_optype = CRYPTO_OP_SIGN;
+        krp->krp_keytype = CRYPTO_KEY_TYPE_PRIVATE;
+        krp->krp_iparams = 2;
+        krp->krp_oparams = 2;
+
+        /* Private key */
+
+        d->crp_p = sess->u.ak.akkey;
+        d->crp_nbits = keylen * 8;
+
+        /* Hash to sign */
+
+        dst->crp_p = src_buf;
+        dst->crp_nbits = src_len * 8;
+
+        /* Signature is r || s, each fixed curve_len bytes */
+
+        if (dst_len != curve_len * 2)
+          {
+            return -EINVAL;
+          }
+
+        dst_buf = vhost_crypto_next_buf(req, &len);
+        if (dst_buf == NULL || len < dst_len)
+          {
+            return -EINVAL;
+          }
+
+        r->crp_p = dst_buf;
+        r->crp_nbits = curve_len * 8;
+        s->crp_p = (FAR char *)dst_buf + curve_len;
+        s->crp_nbits = curve_len * 8;
+        break;
+
+      case VIRTIO_CRYPTO_AKCIPHER_VERIFY:
+        x = &krp->krp_param[0];
+        y = &krp->krp_param[1];
+        r = &krp->krp_param[3];
+        s = &krp->krp_param[4];
+        dst = &krp->krp_param[5];
+        krp_op = vhost_crypto_ecdsa_get_op(curve_id, CRYPTO_OP_VERIFY);
+        if (krp_op < 0)
+          {
+            return krp_op;
+          }
+
+        krp->krp_op = krp_op;
+        krp->krp_optype = CRYPTO_OP_VERIFY;
+        krp->krp_keytype = CRYPTO_KEY_TYPE_PUBLIC;
+        krp->krp_iparams = 6;
+        krp->krp_oparams = 0;
+
+        /* Public key (x || y) */
+
+        x->crp_p = sess->u.ak.akkey;
+        x->crp_nbits = keylen / 2 * 8;
+        y->crp_p = (FAR char *)sess->u.ak.akkey + keylen / 2;
+        y->crp_nbits = keylen / 2 * 8;
+
+        /* Signature is r || s, each fixed curve_len bytes */
+
+        if (src_len != curve_len * 2)
+          {
+            return -EINVAL;
+          }
+
+        r->crp_p = src_buf;
+        r->crp_nbits = curve_len * 8;
+        s->crp_p = (FAR char *)src_buf + curve_len;
+        s->crp_nbits = curve_len * 8;
+
+        dst_buf = vhost_crypto_next_buf(req, &len);
+        if (dst_len > 0 && (dst_buf == NULL || len < dst_len))
+          {
+            return -EINVAL;
+          }
+
+        dst->crp_p = dst_buf;
+        dst->crp_nbits = dst_len * 8;
+        break;
+
+      case VIRTIO_CRYPTO_AKCIPHER_GENKEY:
+        d = &krp->krp_param[0];
+        x = &krp->krp_param[1];
+        y = &krp->krp_param[2];
+        krp_op = vhost_crypto_ecdsa_get_op(curve_id, CRYPTO_OP_GENKEY);
+        if (krp_op < 0)
+          {
+            return krp_op;
+          }
+
+        krp->krp_op = krp_op;
+        krp->krp_iparams = 0;
+        krp->krp_oparams = 3;
+
+        /* GENKEY produces d, x, y, each fixed curve_len bytes */
+
+        if (dst_len != curve_len * 3)
+          {
+            return -EINVAL;
+          }
+
+        dst_buf = vhost_crypto_next_buf(req, &len);
+        if (dst_buf == NULL || len < dst_len)
+          {
+            return -EINVAL;
+          }
+
+        d->crp_p = dst_buf;
+        d->crp_nbits = curve_len * 8;
+        x->crp_p = (FAR char *)dst_buf + curve_len;
+        x->crp_nbits = curve_len * 8;
+        y->crp_p = (FAR char *)dst_buf + curve_len * 2;
+        y->crp_nbits = curve_len * 8;
+        break;
+
+      default:
+        return -ENOTSUP;
+    }
+
+  ret = crypto_kinvoke(krp);
+  if (ret == 0)
+    {
+      ret = krp->krp_status;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: vhost_crypto_process_ecdh
+ *
+ * Description:
+ *   Process ECDH GENKEY (dst = d || x || y) and DERIVE
+ *   (src = d || peer.x || peer.y, dst = shared secret).
+ *
+ ****************************************************************************/
+
+static int vhost_crypto_process_ecdh(
+    FAR struct vhost_crypto_session_s *sess,
+    FAR struct virtio_crypto_op_data_req_s *data,
+    FAR struct vhost_crypto_req_s *req)
+{
+  FAR struct cryptkop *krp = &sess->u.ak.krp;
+  FAR uint8_t *src_buf;
+  FAR uint8_t *dst_buf;
+  uint32_t src_len = data->op_flf.akcipher.src_data_len;
+  uint32_t dst_len = data->op_flf.akcipher.dst_data_len;
+  uint32_t len;
+  int curve_len;
+  int ret;
+
+  curve_len = virtio_crypto_curve_get_len(sess->u.ak.curve_id);
+  if (curve_len < 0)
+    {
+      return curve_len;
+    }
+
+  if (sess->u.ak.curve_id != VIRTIO_CRYPTO_CURVE_NIST_P256)
+    {
+      return -ENOTSUP;
+    }
+
+  memset(krp->krp_param, 0, sizeof(krp->krp_param));
+
+  switch (data->header.opcode)
+    {
+      case VIRTIO_CRYPTO_AKCIPHER_GENKEY:
+        if (dst_len != curve_len * 3)
+          {
+            return -EINVAL;
+          }
+
+        dst_buf = vhost_crypto_next_buf(req, &len);
+        if (dst_buf == NULL || len < dst_len)
+          {
+            return -EINVAL;
+          }
+
+        krp->krp_op = CRK_ECDH_GEN_PUBLIC;
+        krp->krp_iparams = 0;
+        krp->krp_oparams = 3;
+        krp->krp_param[0].crp_p = (caddr_t)dst_buf;
+        krp->krp_param[0].crp_nbits = curve_len * 8;
+        krp->krp_param[1].crp_p = (caddr_t)(dst_buf + curve_len);
+        krp->krp_param[1].crp_nbits = curve_len * 8;
+        krp->krp_param[2].crp_p = (caddr_t)(dst_buf + curve_len * 2);
+        krp->krp_param[2].crp_nbits = curve_len * 8;
+        break;
+
+      case VIRTIO_CRYPTO_AKCIPHER_DERIVE:
+        if (src_len != curve_len * 3 || dst_len != curve_len)
+          {
+            return -EINVAL;
+          }
+
+        src_buf = vhost_crypto_next_buf(req, &len);
+        if (src_buf == NULL || len < src_len)
+          {
+            return -EINVAL;
+          }
+
+        dst_buf = vhost_crypto_next_buf(req, &len);
+        if (dst_buf == NULL || len < dst_len)
+          {
+            return -EINVAL;
+          }
+
+        krp->krp_op = CRK_ECDH_COMPUTE_SHARED;
+        krp->krp_iparams = 3;
+        krp->krp_oparams = 1;
+        krp->krp_param[0].crp_p = (caddr_t)src_buf;
+        krp->krp_param[0].crp_nbits = curve_len * 8;
+        krp->krp_param[1].crp_p = (caddr_t)(src_buf + curve_len);
+        krp->krp_param[1].crp_nbits = curve_len * 8;
+        krp->krp_param[2].crp_p = (caddr_t)(src_buf + curve_len * 2);
+        krp->krp_param[2].crp_nbits = curve_len * 8;
+        krp->krp_param[3].crp_p = (caddr_t)dst_buf;
+        krp->krp_param[3].crp_nbits = curve_len * 8;
+        break;
+
+      default:
+        return -ENOTSUP;
+    }
+
+  ret = crypto_kinvoke(krp);
+  if (ret == 0)
+    {
+      ret = krp->krp_status;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: vhost_crypto_process_akcipher
+ *
+ * Description:
+ *   Dispatch akcipher request to RSA or ECDSA handler.
+ *
+ ****************************************************************************/
+
+static int vhost_crypto_process_akcipher(
+    FAR struct vhost_crypto_session_s *sess,
+    FAR struct virtio_crypto_op_data_req_s *data,
+    FAR struct vhost_crypto_req_s *req)
+{
+  switch (data->header.algo)
+    {
+      case VIRTIO_CRYPTO_AKCIPHER_RSA:
+        return vhost_crypto_process_rsa(sess, data, req);
+      case VIRTIO_CRYPTO_AKCIPHER_ECDSA:
+        return vhost_crypto_process_ecdsa(sess, data, req);
+      case VIRTIO_CRYPTO_AKCIPHER_ECDH:
+        return vhost_crypto_process_ecdh(sess, data, req);
+      default:
+        return -ENOTSUP;
     }
 }
 
@@ -972,6 +1671,10 @@ again:
 
           case VIRTIO_CRYPTO_SERVICE_AEAD:
             ret = vhost_crypto_process_aead(sess, data, &req);
+            break;
+
+          case VIRTIO_CRYPTO_SERVICE_AKCIPHER:
+            ret = vhost_crypto_process_akcipher(sess, data, &req);
             break;
 
           default:
