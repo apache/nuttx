@@ -227,8 +227,11 @@ static int get_week_year(FAR const struct tm *time)
  *   %A     The full weekday name according to the current locale.
  *   %b     The abbreviated month name according to the current locale.
  *   %B     The full month name according to the current locale.
+ *   %c     The preferred date and time representation for the current
+ *          locale ("%a %b %e %H:%M:%S %Y" in the C locale).
  *   %C     The century number (year/100) as a 2-digit integer. (SU)
  *   %d     The day of the month as a decimal number (range 01 to 31).
+ *   %D     Equivalent to %m/%d/%y.
  *   %e     Like %d, the day of the month as a decimal number, but a leading
  *          zero is replaced by a space.
  *   %F     The full date format but with no time fields
@@ -533,13 +536,31 @@ process_next:
             }
             break;
 
+          /* %c: Locale date and time, "%a %b %e %H:%M:%S %Y" in the C
+           * locale.
+           */
+
+          case 'c':
+            {
+              if (tm->tm_wday < 7 && tm->tm_mon < 12)
+                {
+                  len = snprintf(dest, chleft,
+                                 "%s %s %2d %02d:%02d:%02d %04d",
+                                 g_abbrev_wdayname[tm->tm_wday],
+                                 g_abbrev_monthname[tm->tm_mon],
+                                 tm->tm_mday, tm->tm_hour, tm->tm_min,
+                                 tm->tm_sec, tm->tm_year + TM_YEAR_BASE);
+                }
+            }
+            break;
+
           /* %x Locale date without time */
 
           case 'x':
             {
-              len = snprintf(dest, chleft, "%02d/%02d/%04d",
-                             tm->tm_mon, tm->tm_mday,
-                             tm->tm_year + TM_YEAR_BASE);
+              len = snprintf(dest, chleft, "%02d/%02d/%02d",
+                             tm->tm_mon + 1, tm->tm_mday,
+                             (tm->tm_year + TM_YEAR_BASE) % 100);
             }
             break;
 
@@ -583,7 +604,8 @@ process_next:
 
           case 'C':
             {
-              len = snprintf(dest, chleft, "%02d", tm->tm_year / 100);
+              len = snprintf(dest, chleft, "%02d",
+                             (tm->tm_year + TM_YEAR_BASE) / 100);
             }
             break;
 
@@ -594,6 +616,16 @@ process_next:
           case 'e':
             {
               len = snprintf(dest, chleft, "%2d", tm->tm_mday);
+            }
+            break;
+
+          /* %D: Date in "%m/%d/%y" format */
+
+          case 'D':
+            {
+              len = snprintf(dest, chleft, "%02d/%02d/%02d",
+                             tm->tm_mon + 1, tm->tm_mday,
+                             (tm->tm_year + TM_YEAR_BASE) % 100);
             }
             break;
 
@@ -639,16 +671,18 @@ process_next:
             {
               if (tm->tm_hour >= 12)
                 {
-                  str = "pm";
+                  str = "PM";
                 }
               else
                 {
-                  str = "am";
+                  str = "AM";
                 }
 
-              value = tm->tm_hour == 12 ?
-                         tm->tm_hour == 12 :
-                         tm->tm_hour % (HOURSPERDAY / 2);
+              value = tm->tm_hour % (HOURSPERDAY / 2);
+              if (value == 0)
+                {
+                  value = HOURSPERDAY / 2;
+                }
 
               len = snprintf(dest, chleft, "%02d:%02d:%02d %s",
                              value, tm->tm_min, tm->tm_sec, str);
