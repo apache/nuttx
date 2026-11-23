@@ -840,7 +840,7 @@ CCB           to be done    not supported
 COMP          to be done    not supported
 CRC           to be done    not supported
 CRS           to be done    not supported
-DAC           to be done    not supported
+DAC           M33 v1        arch/arm/src/common/stm32/stm32_dac_m33_v1.c
 DBGMCU        v5            not supported
 DLYB          to be done    not supported
 EXTI          M33M55 v1     arch/arm/src/common/stm32/stm32_exti_gpio_m33m55_v1.c

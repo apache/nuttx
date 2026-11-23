@@ -28,6 +28,7 @@ GPIO        Yes
 EXTI        Yes
 USART/UART  Yes
 LPUART      Yes
+DAC         Yes
 
 ADC         No
 ADF         No
@@ -36,7 +37,6 @@ CCB         No
 COMP        No
 CRC         No
 CRS         No
-DAC         No
 DBGMCU      No
 DLYB        No
 FDCAN       No
