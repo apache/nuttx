@@ -79,12 +79,7 @@
  */
 
 #define LOG2_FLOOR(n) (FLS(n) - 1)
-
-#ifdef CONFIG_HAVE_BUILTIN_CLZ
-#  define LOG2_CEIL(n) log2ceil(n)
-#else
-#  define LOG2_CEIL(n) (FLS((n) - 1))
-#endif
+#define LOG2_CEIL(n)  (FLS((n) - 1))
 
 /****************************************************************************
  * Public Types
