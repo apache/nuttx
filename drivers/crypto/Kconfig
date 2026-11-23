@@ -128,6 +128,15 @@ config CRYPTO_RPMSG_CONNECT_TIMEOUT_MS
 		server endpoint to bind before returning -ENOTCONN. A value of -1
 		means wait indefinitely (original behaviour).
 
+config CRYPTO_RPMSG_RSA_KEYBUF_SIZE
+	int "RSA key buffer size for rpmsg crypto"
+	default 80
+	---help---
+		Size of the RSA key DER buffer used for ASN1 key encoding.
+		This buffer holds DER-encoded key parameters. Recommended values:
+		  80   - KeyID mode (4B per parameter + ASN1 overhead, 16-byte aligned)
+		  1536 - Raw RSA-2048 CRT key (n+e+d+p+q+dp+dq+qp in plaintext)
+
 menuconfig DEV_SE05X
 	bool "Enable secure element (SE05X)"
 	depends on I2C
