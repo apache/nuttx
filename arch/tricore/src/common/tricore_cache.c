@@ -50,7 +50,7 @@
 #define PCON1_INVALIDATE (1 << 0)
 #define DCON1_INVALIDATE (1 << 0)
 
-/* PCON2/DCON2 bits 15:0: cache size field. */
+/* PCON2/DCON2 bits 15:0: cache size in KB. */
 
 #define ICACHE_SIZE_MASK (0xffff << 0)
 #define DCACHE_SIZE_MASK (0xffff << 0)
@@ -110,7 +110,7 @@ size_t up_get_icache_linesize(void)
 
 size_t up_get_icache_size(void)
 {
-  return (tricore_mfcr(TRICORE_CPU_PCON2) & ICACHE_SIZE_MASK) * 1000;
+  return (tricore_mfcr(TRICORE_CPU_PCON2) & ICACHE_SIZE_MASK) * 1024;
 }
 
 /****************************************************************************
@@ -236,7 +236,7 @@ size_t up_get_dcache_linesize(void)
 
 size_t up_get_dcache_size(void)
 {
-  return (tricore_mfcr(TRICORE_CPU_DCON2) & DCACHE_SIZE_MASK) * 1000;
+  return (tricore_mfcr(TRICORE_CPU_DCON2) & DCACHE_SIZE_MASK) * 1024;
 }
 
 /****************************************************************************
