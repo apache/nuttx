@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdarg.h>
 #include <stdint.h>
 #include <syslog.h>
 
@@ -112,4 +113,25 @@ int nx_setlogmask(int mask)
 
   nxsched_foreach(task_syslogmask, &mask);
   return oldmask;
+}
+
+/****************************************************************************
+ * Name: nx_syslog
+ *
+ * Description:
+ *   The syslog() of the kernel, see include/syslog.h.  Only the system wide
+ *   mask filters it.
+ *
+ ****************************************************************************/
+
+void nx_syslog(int priority, FAR const IPTR char *fmt, ...)
+{
+  va_list ap;
+
+  if ((g_syslog_mask & LOG_MASK(LOG_PRI(priority))) != 0)
+    {
+      va_start(ap, fmt);
+      nx_vsyslog(priority, fmt, &ap);
+      va_end(ap);
+    }
 }

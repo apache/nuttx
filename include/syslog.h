@@ -219,6 +219,26 @@ void syslog(int priority, FAR const IPTR char *fmt, ...) syslog_like(2, 3);
 void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
      syslog_like(2, 0);
 
+/****************************************************************************
+ * Name: nx_syslog
+ *
+ * Description:
+ *   nx_syslog() is the syslog() of the kernel.  The kernel logs on behalf
+ *   of the whole system, not of the task it happens to run in, so it is
+ *   filtered by the system wide mask that nx_setlogmask() sets, not by the
+ *   setlogmask() mask of the current task.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG
+void nx_syslog(int priority, FAR const IPTR char *fmt, ...)
+     syslog_like(2, 3);
+#  ifdef __KERNEL__
+#    define syslog(priority, fmt, ...) \
+            nx_syslog(priority, fmt, ##__VA_ARGS__)
+#  endif
+#endif
+
 /* With CONFIG_SYSLOG_TO_SCHED_NOTE, these macros replace the calls.  The
  * functions remain for code that takes their address.
  */
