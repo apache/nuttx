@@ -220,7 +220,7 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
 
   /* Get the type of the fork'ed task (kernel or user) */
 
-  if ((ptcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((ptcb->exec_flags & TCB_EXEC_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
       /* Fork'ed from a kernel thread */
 
@@ -232,7 +232,7 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
       /* Fork'ed from a user task or pthread */
 
       ttype = TCB_FLAG_TTYPE_TASK;
-      if ((ptcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_TASK)
+      if ((ptcb->exec_flags & TCB_EXEC_TTYPE_MASK) == TCB_FLAG_TTYPE_TASK)
         {
           parent = ptcb;
         }
@@ -554,7 +554,7 @@ pid_t nxtask_start_fork(FAR struct tcb_s *child, bool vfork)
    */
 
   if (!vfork &&
-      (child->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      (child->exec_flags & TCB_EXEC_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       fork_restore_parent_env();
     }
@@ -660,6 +660,6 @@ void nxtask_abort_fork(FAR struct tcb_s *child, int errcode)
 
   /* Release the TCB */
 
-  nxsched_release_tcb(child, child->flags & TCB_FLAG_TTYPE_MASK);
+  nxsched_release_tcb(child, child->exec_flags & TCB_EXEC_TTYPE_MASK);
   set_errno(errcode);
 }

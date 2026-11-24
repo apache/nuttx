@@ -79,7 +79,7 @@ size_t nxtask_argvstr(FAR struct tcb_s *tcb, FAR char *args, size_t size)
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+  if ((tcb->exec_flags & TCB_EXEC_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
     {
       FAR struct pthread_entry_s *entry =
         (FAR struct pthread_entry_s *)(tcb + 1);

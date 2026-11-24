@@ -41,7 +41,8 @@ Here is the body of some function.  It expects to have the following inputs:
     * stack will be used.
     */
 
-    tcb->flags = TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CUSTOM_STACK;
+    tcb->exec_flags = TCB_FLAG_TTYPE_KERNEL;
+    tcb->flags      = TCB_FLAG_CUSTOM_STACK;
 
     /* Allocate the custom stack for the new kernel thread.
     *

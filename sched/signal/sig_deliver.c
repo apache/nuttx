@@ -143,7 +143,7 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
         }
       else
 #endif
-      if ((stcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      if ((stcb->exec_flags & TCB_EXEC_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
         {
           siginfo_t info;
 

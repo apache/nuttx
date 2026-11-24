@@ -301,9 +301,9 @@ int exec_module(FAR struct binary_s *binp,
   umm_initialize(vheap, up_addrenv_heapsize(addrenv));
 #endif
 
-  /* Note that tcb->flags are not modified.  0=normal task */
+  /* Note that tcb->exec_flags is not modified.  0=normal task */
 
-  /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
+  /* tcb->exec_flags |= TCB_FLAG_TTYPE_TASK; */
 
   tcb->flags |= TCB_FLAG_FREE_TCB;
 

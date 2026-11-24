@@ -183,5 +183,5 @@ int nxtask_terminate(pid_t pid)
 
   /* Deallocate its TCB */
 
-  return nxsched_release_tcb(dtcb, dtcb->flags & TCB_FLAG_TTYPE_MASK);
+  return nxsched_release_tcb(dtcb, dtcb->exec_flags & TCB_EXEC_TTYPE_MASK);
 }

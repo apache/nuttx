@@ -256,7 +256,7 @@ static inline void nxtask_save_parent(FAR struct tcb_s *tcb, uint8_t ttype)
    */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+  if ((tcb->exec_flags & TCB_EXEC_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
 #endif
     {
       /* Get the TCB of the parent task.  In this case, the calling task. */
@@ -428,9 +428,8 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
        * up_initial_state() is called.
        */
 
-      ttype              &= TCB_FLAG_TTYPE_MASK;
-      tcb->flags         &= ~TCB_FLAG_TTYPE_MASK;
-      tcb->flags         |= ttype;
+      ttype              &= TCB_EXEC_TTYPE_MASK;
+      tcb->exec_flags     = (tcb->exec_flags & ~TCB_EXEC_TTYPE_MASK) | ttype;
 
       /* Set the appropriate scheduling policy in the TCB */
 

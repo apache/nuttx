@@ -156,7 +156,8 @@ static int group_cancel_children_handler(pid_t pid, FAR void *arg)
            * will appear in the group member list as well!
            */
 
-          if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+          if ((rtcb->exec_flags & TCB_EXEC_TTYPE_MASK) ==
+              TCB_FLAG_TTYPE_PTHREAD)
             {
               ret = pthread_cancel(pid);
             }

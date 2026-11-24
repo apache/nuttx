@@ -188,7 +188,7 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
 
   DEBUGASSERT(tcb && !tcb->group);
 
-  ttype &= TCB_FLAG_TTYPE_MASK;
+  ttype &= TCB_EXEC_TTYPE_MASK;
 
   /* Initialize group pointer and assign to TCB */
 
@@ -219,7 +219,7 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
    * elements of the group must be created for privileged access.
    */
 
-  if ((ttype & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((ttype & TCB_EXEC_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
       group->tg_flags |= GROUP_FLAG_PRIVILEGED;
     }
@@ -352,7 +352,7 @@ void group_initialize(FAR struct tcb_s *tcb)
   /* Allocate mm_map list if required */
 
   mm_map_initialize(&group->tg_mm_map,
-                    (tcb->flags & TCB_FLAG_TTYPE_KERNEL) != 0);
+                    (tcb->exec_flags & TCB_FLAG_TTYPE_KERNEL) != 0);
 
 #ifdef HAVE_GROUP_MEMBERS
   /* Assign the PID of this new task as a member of the group. */
@@ -382,7 +382,7 @@ void group_initialize(FAR struct tcb_s *tcb)
 
   rtcb = this_task();
   if (group != &g_kthread_group && rtcb->group != NULL &&
-      (rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      (rtcb->exec_flags & TCB_EXEC_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       group->tg_pgid = rtcb->group->tg_pgid;
       group->tg_sid  = rtcb->group->tg_sid;

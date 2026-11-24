@@ -67,7 +67,7 @@ void _exit(int status)
    * exit through a different mechanism.
    */
 
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+  if ((tcb->exec_flags & TCB_EXEC_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       group_kill_children(tcb);
     }

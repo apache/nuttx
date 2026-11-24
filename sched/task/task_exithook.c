@@ -226,7 +226,7 @@ static inline void nxtask_sigchild(pid_t ppid, FAR struct tcb_s *ctcb,
    */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  if ((ctcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+  if ((ctcb->exec_flags & TCB_EXEC_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
 #endif
     {
       nxtask_exitstatus(pgrp, ctcb, status);
@@ -285,7 +285,7 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
    */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  if ((ctcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+  if ((ctcb->exec_flags & TCB_EXEC_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
 #endif
     {
 #ifdef CONFIG_SCHED_CHILD_STATUS
@@ -418,7 +418,7 @@ static inline void nxtask_exitwakeup(FAR struct tcb_s *tcb, int status)
        */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-      if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+      if ((tcb->exec_flags & TCB_EXEC_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
 #endif
         {
           /* Report the exit status.  We do not nullify tg_statloc here
@@ -565,7 +565,7 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
 #endif
 
 #ifdef CONFIG_SCHED_DUMP_LEAK
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((tcb->exec_flags & TCB_EXEC_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
       kmm_memdump(&dump);
     }

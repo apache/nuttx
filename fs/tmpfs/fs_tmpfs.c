@@ -738,7 +738,7 @@ static void tmpfs_init_object(FAR struct tmpfs_object_s *to, mode_t mode)
 
   to->to_mode = mode & 07777;
   rtcb = nxsched_self();
-  if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL ||
+  if ((rtcb->exec_flags & TCB_EXEC_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL ||
       rtcb->group == NULL)
     {
       to->to_uid = 0;
@@ -842,7 +842,7 @@ static int tmpfs_chstat_object(FAR struct tmpfs_object_s *to,
   uid_t euid;
 
   rtcb = nxsched_self();
-  if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL &&
+  if ((rtcb->exec_flags & TCB_EXEC_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL &&
       rtcb->group != NULL)
     {
       euid = rtcb->group->tg_euid;

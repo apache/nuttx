@@ -452,7 +452,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #endif
          , tcb->sched_priority
          , g_policy[tcb->sched_policy]
-         , g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK)
+         , g_ttypenames[(tcb->exec_flags & TCB_EXEC_TTYPE_MASK)
                         >> TCB_FLAG_TTYPE_SHIFT]
          , tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-'
          , state
@@ -735,7 +735,7 @@ static void dump_assert_info(FAR struct tcb_s *rtcb,
   struct utsname name;
 
   if (rtcb->group &&
-      (rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      (rtcb->exec_flags & TCB_EXEC_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       ptcb = nxsched_get_tcb(rtcb->group->tg_pid);
     }
@@ -900,7 +900,7 @@ void _assert(FAR const char *filename, int linenum,
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
   if (up_interrupt_context() ||
-      (rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+      (rtcb->exec_flags & TCB_EXEC_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
 #endif
     {
       /* Fatal error, enter panic state. */

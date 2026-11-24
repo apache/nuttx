@@ -476,7 +476,7 @@ class Ps(gdb.Command):
 
         task_type = eval2str(
             TaskType,
-            (tcb["flags"] & get_macro("TCB_FLAG_TTYPE_MASK"))
+            (tcb["exec_flags"] & get_macro("TCB_EXEC_TTYPE_MASK"))
             >> get_macro("TCB_FLAG_TTYPE_SHIFT"),
         )
 
@@ -530,7 +530,7 @@ class Ps(gdb.Command):
         cmd = ""
         name = utils.get_task_name(tcb)
 
-        if int(tcb["flags"] & get_macro("TCB_FLAG_TTYPE_MASK")) == int(
+        if int(tcb["exec_flags"] & get_macro("TCB_EXEC_TTYPE_MASK")) == int(
             get_macro("TCB_FLAG_TTYPE_PTHREAD")
         ):
             entry = tcb["entry"]["main"]

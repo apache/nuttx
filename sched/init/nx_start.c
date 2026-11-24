@@ -339,7 +339,8 @@ static void idle_task_initialize(void)
        */
 
 #ifdef CONFIG_SMP
-      tcb->flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_LOCKED);
+      tcb->exec_flags = TCB_FLAG_TTYPE_KERNEL;
+      tcb->flags      = TCB_FLAG_CPU_LOCKED;
       tcb->cpu   = i;
 
       /* Set the affinity mask to allow the thread to run on all CPUs.  No,
@@ -353,7 +354,7 @@ static void idle_task_initialize(void)
       tcb->affinity =
         (cpu_set_t)(CONFIG_SMP_DEFAULT_CPUSET & SCHED_ALL_CPUS);
 #else
-      tcb->flags = TCB_FLAG_TTYPE_KERNEL;
+      tcb->exec_flags = TCB_FLAG_TTYPE_KERNEL;
 #endif
 
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -414,7 +415,7 @@ static void idle_group_initialize(void)
       /* Allocate the IDLE group */
 
       DEBUGVERIFY(
-        group_allocate(tcb, tcb->flags));
+        group_allocate(tcb, tcb->exec_flags));
 
       /* Initialize the task join */
 

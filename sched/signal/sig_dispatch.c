@@ -736,7 +736,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
    */
 
   if (masked == 0 &&
-      (stcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      (stcb->exec_flags & TCB_EXEC_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       ignored = nxsig_find_action(stcb->group, info->si_signo) == NULL;
     }

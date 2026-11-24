@@ -62,7 +62,7 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 
   if (tcb->stack_alloc_ptr)
     {
-      up_release_stack(tcb, tcb->flags & TCB_FLAG_TTYPE_MASK);
+      up_release_stack(tcb, tcb->exec_flags & TCB_EXEC_TTYPE_MASK);
     }
 
   tcb->stack_alloc_ptr = stack;

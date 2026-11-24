@@ -478,7 +478,7 @@ int up_addrenv_select(const arch_addrenv_t *addrenv)
 #if defined(CONFIG_MM_TASK_HEAP) && !defined(CONFIG_ARCH_STACK_PROTECT)
   struct tcb_s *tcb = this_task();
 
-  if ((atomic_read(&tcb->flags) & TCB_FLAG_TTYPE_MASK) !=
+  if ((tcb->exec_flags & TCB_EXEC_TTYPE_MASK) !=
        TCB_FLAG_TTYPE_KERNEL)
     {
       mpu_update(tcb);

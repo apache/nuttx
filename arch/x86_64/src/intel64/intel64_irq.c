@@ -545,7 +545,7 @@ static int x86_64_fault_user_isr(int irq, void *c, void *arg)
    * into the recovery path with a stale selector.
    */
 
-  if (((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL) ||
+  if (((tcb->exec_flags & TCB_EXEC_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL) ||
       ((regs[REG_CS] & X86_GDT_PL_MASK) != X86_GDT_RPL_USER))
     {
       return x86_64_fault_panic_isr(irq, c, arg);
@@ -633,7 +633,7 @@ static int x86_64_fault_kill_isr(int irq, void *c, void *arg)
 {
   struct tcb_s *tcb = this_task();
 
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL
+  if ((tcb->exec_flags & TCB_EXEC_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL
 #ifndef CONFIG_BUILD_FLAT
       || (tcb->xcp.regs[REG_CS] & X86_GDT_PL_MASK) != X86_GDT_RPL_USER
 #endif

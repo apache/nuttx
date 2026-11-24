@@ -516,8 +516,9 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
                              "Type:",
-                             g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK)
-                             >>  TCB_FLAG_TTYPE_SHIFT]);
+                             g_ttypenames[(tcb->exec_flags &
+                                           TCB_EXEC_TTYPE_MASK) >>
+                                          TCB_FLAG_TTYPE_SHIFT]);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 
@@ -1003,7 +1004,7 @@ static ssize_t proc_heap(FAR struct proc_file_s *procfile,
   task.seqmin = 0;
   task.seqmax = ULONG_MAX;
 #ifdef CONFIG_MM_KERNEL_HEAP
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((tcb->exec_flags & TCB_EXEC_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
       info = kmm_mallinfo_task(&task);
     }

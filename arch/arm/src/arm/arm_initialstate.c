@@ -121,7 +121,7 @@ void up_initial_state(struct tcb_s *tcb)
    */
 
 #ifdef CONFIG_BUILD_KERNEL
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((tcb->exec_flags & TCB_EXEC_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
       /* It is a kernel thread.. set supervisor mode */
 

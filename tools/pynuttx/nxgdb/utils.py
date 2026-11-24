@@ -883,10 +883,10 @@ def get_thread_tls(pid, key):
 def get_task_argvstr(tcb: Tcb) -> List[str]:
     args = []
     try:
-        TCB_FLAG_TTYPE_MASK = get_symbol_value("TCB_FLAG_TTYPE_MASK")
+        TCB_EXEC_TTYPE_MASK = get_symbol_value("TCB_EXEC_TTYPE_MASK")
         TCB_FLAG_TTYPE_PTHREAD = get_symbol_value("TCB_FLAG_TTYPE_PTHREAD")
 
-        if tcb.flags & TCB_FLAG_TTYPE_MASK == TCB_FLAG_TTYPE_PTHREAD:
+        if tcb.exec_flags & TCB_EXEC_TTYPE_MASK == TCB_FLAG_TTYPE_PTHREAD:
             if tcb.type.code != gdb.TYPE_CODE_PTR:
                 tcb = tcb.address
             return ["", f"{tcb['entry']['main']}", f'{tcb["arg"]}']

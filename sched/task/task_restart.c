@@ -215,7 +215,7 @@ static int nxtask_restart(pid_t pid)
 
   tcb = nxsched_get_tcb(pid);
 #ifndef CONFIG_DISABLE_PTHREAD
-  if (!tcb || (tcb->flags & TCB_FLAG_TTYPE_MASK) ==
+  if (!tcb || (tcb->exec_flags & TCB_EXEC_TTYPE_MASK) ==
       TCB_FLAG_TTYPE_PTHREAD)
 #else
   if (!tcb)

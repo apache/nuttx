@@ -81,7 +81,7 @@ int pthread_cancel(pthread_t thread)
 
   /* Only pthreads should use this interface */
 
-  DEBUGASSERT((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
+  DEBUGASSERT((tcb->exec_flags & TCB_EXEC_TTYPE_MASK) ==
                TCB_FLAG_TTYPE_PTHREAD);
 
   /* Notify the target if the non-cancelable or deferred cancellation set */

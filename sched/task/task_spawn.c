@@ -110,7 +110,9 @@ static int nxtask_spawn_create(FAR const char *name, int priority,
 
   /* Setup the task type */
 
-  tcb->flags = TCB_FLAG_TTYPE_TASK | TCB_FLAG_FREE_TCB;
+  tcb->exec_flags = TCB_FLAG_TTYPE_TASK;
+
+  tcb->flags      = TCB_FLAG_FREE_TCB;
 
   /* Initialize the task */
 
