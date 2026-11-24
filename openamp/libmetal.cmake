@@ -42,6 +42,8 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libmetal)
       ${CMAKE_CURRENT_LIST_DIR}/0002-libmetal-atomic-enable-64-bit-atomic-by-toolchain-bu.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0003-mutex-make-the-libmetal-nuttx-mutex-a-recursive-spinlock.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0004-lib-atomic.h-skip-atomic_wchar_t-when-libc-has-no-wi.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 

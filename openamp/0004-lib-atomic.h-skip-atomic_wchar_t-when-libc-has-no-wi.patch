@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Wed, 14 Oct 2026 21:35:23 +0800
+Subject: [PATCH] lib/atomic.h: skip atomic_wchar_t when libc++ has no wide
+ characters
+
+libc++ declares std::atomic_wchar_t only with wide character support,
+which NuttX leaves off by default, so any C++ file including
+metal/atomic.h fails:
+
+  include/metal/atomic.h:50:12: error: 'atomic_wchar_t' has not been
+  declared in 'std'
+
+Export it only when libc++ provides it. libc++ 17 spells the switch
+_LIBCPP_HAS_NO_WIDE_CHARACTERS and libc++ 21 _LIBCPP_HAS_WIDE_CHARACTERS,
+so both are checked.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/atomic.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/lib/atomic.h libmetal/lib/atomic.h
+index 7f38a08..a017b09 100644
+--- a/lib/atomic.h
++++ libmetal/lib/atomic.h
+@@ -47,7 +47,11 @@ using std::atomic_llong;
+ using std::atomic_ullong;
+ using std::atomic_char16_t;
+ using std::atomic_char32_t;
++/* libc++ leaves atomic_wchar_t out when wide character support is off */
++#if !defined(_LIBCPP_HAS_NO_WIDE_CHARACTERS) && \
++    (!defined(_LIBCPP_HAS_WIDE_CHARACTERS) || _LIBCPP_HAS_WIDE_CHARACTERS)
+ using std::atomic_wchar_t;
++#endif
+ using std::atomic_int_least8_t;
+ using std::atomic_uint_least8_t;
+ using std::atomic_int_least16_t;
+-- 
+2.34.1
+

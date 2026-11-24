@@ -85,6 +85,7 @@ libmetal.zip:
 	$(Q) patch -p0 < 0001-libmetal-cmake-set-HAVE_STDATOMIC_H-default-true-in-.patch
 	$(Q) patch -p0 < 0002-libmetal-atomic-enable-64-bit-atomic-by-toolchain-bu.patch
 	$(Q) patch -p0 < 0003-mutex-make-the-libmetal-nuttx-mutex-a-recursive-spinlock.patch
+	$(Q) patch -p0 < 0004-lib-atomic.h-skip-atomic_wchar_t-when-libc-has-no-wi.patch
 
 .libmetal_headers: libmetal.zip
 else
