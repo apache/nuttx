@@ -61,6 +61,10 @@ static struct tricore_trap_s g_trapinfo;
 
 static tricore_bustrap_hook_t g_bustrap_hook;
 
+/* Internal protection trap hook (e.g., memory protection tests). */
+
+static tricore_intprottrap_hook_t g_intprottrap_hook;
+
 /* Trap reason description tables. */
 
 #ifdef CONFIG_TRICORE_TRAP_ALERT
@@ -242,9 +246,43 @@ static int tricore_bustrap(uint32_t tid, void *context)
   return OK;
 }
 
+static void tricore_intprottrap(uint32_t tid, void *context)
+{
+  /* Let the registered hook claim an expected protection fault, e.g. a
+   * test deliberately writing outside its MPU range.
+   */
+
+  if (g_intprottrap_hook != NULL && g_intprottrap_hook(tid, context) == OK)
+    {
+      return;
+    }
+
+  tricore_defaulttrap(TRICORE_TRAP_CLASS_INTPROT, tid, context);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tricore_intprottrap_register_hook
+ *
+ * Description:
+ *   Register a hook for internal protection (class 1) traps.  The hook
+ *   gets the trap ID and the lower context saved at trap entry; returning
+ *   OK resumes execution at the trap return address held in that
+ *   context's A11 (REG_LA11, the hook may advance it to skip the faulting
+ *   instruction), ERROR falls back to the default panic.
+ *
+ * Input Parameters:
+ *   hook - The hook function to register, or NULL to unregister
+ *
+ ****************************************************************************/
+
+void tricore_intprottrap_register_hook(tricore_intprottrap_hook_t hook)
+{
+  g_intprottrap_hook = hook;
+}
 
 /****************************************************************************
  * Name: tricore_bustrap_register_hook
@@ -312,6 +350,10 @@ void tricore_trapcall(void *taddr, uint32_t tid, uint32_t tclass)
 
   switch (tclass)
     {
+      case TRICORE_TRAP_CLASS_INTPROT:
+        tricore_intprottrap(tid, regs);
+        break;
+
       case TRICORE_TRAP_CLASS_INSTERR:
         tricore_insterrorstrap(tid, regs);
         break;

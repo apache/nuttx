@@ -44,6 +44,13 @@
 
 typedef int (*tricore_bustrap_hook_t)(uint32_t tid, void *context);
 
+/* Internal protection (class 1) trap hook, e.g. for memory protection
+ * tests.  Same contract as the bus trap hook: return OK if the trap was
+ * handled and execution may resume, ERROR to fall back to the panic.
+ */
+
+typedef int (*tricore_intprottrap_hook_t)(uint32_t tid, void *context);
+
 /* Arch-native TriCore trap definitions. */
 
 enum tricore_trap_class_e
@@ -156,6 +163,7 @@ void tricore_svcall(volatile void *trap);
 void tricore_trapcall(void *taddr, uint32_t tid, uint32_t tclass);
 void tricore_trapinit(void);
 void tricore_bustrap_register_hook(tricore_bustrap_hook_t hook);
+void tricore_intprottrap_register_hook(tricore_intprottrap_hook_t hook);
 void tricore_fcu_register_pool(void *base, size_t num);
 void tricore_fcutrap_recover(void);
 
