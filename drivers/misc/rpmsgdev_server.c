@@ -55,6 +55,7 @@ struct rpmsgdev_read_pend_s
   struct pollfd_s        fd;
   struct rpmsgdev_read_s rsp;
   struct work_s          work;
+  bool                   cancel;
 };
 
 struct rpmsgdev_device_s
@@ -207,6 +208,13 @@ out:
 
 static void rpmsgdev_read_cancel(FAR struct rpmsgdev_device_s *dev)
 {
+  /* A running read work may poll the device again: stop it first, then
+   * tear down the poll, then drop a work the poll queued meanwhile.
+   */
+
+  dev->readpend.cancel = true;
+  work_cancel_sync_wq(g_rpmsgdev_wqueue, &dev->readpend.work);
+
   if (dev->readpend.fd.priv != NULL)
     {
       file_poll(&dev->file, &dev->readpend.fd, false);
@@ -273,6 +281,12 @@ static int rpmsgdev_read_nonblock_handler(FAR struct rpmsg_endpoint *ept,
     }
 
   ret = file_read(filep, rsp->buf, space);
+  if (ret == -EAGAIN && msg->header.command == RPMSGDEV_READ)
+    {
+      rpmsg_release_tx_buffer(ept, rsp);
+      return ret;
+    }
+
   rsp->header.result = ret;
   if (ret < 0)
     {
@@ -301,10 +315,19 @@ static void rpmsgdev_read_work(FAR void *arg)
     {
       rpmsg_send(&server->ept, rsp, sizeof(*rsp) - 1);
     }
-  else
+  else if (rpmsgdev_read_nonblock_handler(&server->ept, rsp, sizeof(*rsp),
+                                          0, NULL) == -EAGAIN &&
+           !pend->cancel)
     {
-      rpmsgdev_read_nonblock_handler(&server->ept, rsp,
-                                     sizeof(*rsp), 0, NULL);
+      /* Another reader took the data: wait for the next POLLIN */
+
+      pend->fd.revents = 0;
+      pend->fd.cb      = rpmsgdev_read_cb;
+      rsp->header.result = file_poll(&dev->file, &pend->fd, true);
+      if (rsp->header.result < 0)
+        {
+          rpmsg_send(&server->ept, rsp, sizeof(*rsp) - 1);
+        }
     }
 }
 
@@ -353,6 +376,7 @@ static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
   pend->fd.revents = 0;
   pend->fd.cb      = rpmsgdev_read_cb;
   pend->fd.arg     = server;
+  pend->cancel     = false;
 
   memcpy(rsp, msg, sizeof(*msg));
 
