@@ -312,6 +312,12 @@ void x86_64_tlb_shootdown(void);
 
 void x86_64_icr_write(uint8_t cpu, uint32_t delivery);
 
+/* Defined in x86_64_getintstack.c */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+uintptr_t x86_64_get_isrstackbase(int cpu);
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 #endif  /* __ARCH_X86_64_SRC_COMMON_UP_INTERNAL_H */

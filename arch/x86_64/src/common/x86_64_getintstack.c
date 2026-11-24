@@ -43,4 +43,17 @@ uintptr_t up_get_intstackbase(int cpu)
 {
   return (uintptr_t)(g_intstackalloc + (cpu * IRQ_STACK_SIZE));
 }
+
+/****************************************************************************
+ * Name: x86_64_get_isrstackbase
+ *
+ * Description:
+ *   Return the base of the stack the CPU exceptions of this CPU run on.
+ *
+ ****************************************************************************/
+
+uintptr_t x86_64_get_isrstackbase(int cpu)
+{
+  return (uintptr_t)(g_isrstackalloc + (cpu * IRQ_STACK_SIZE));
+}
 #endif
