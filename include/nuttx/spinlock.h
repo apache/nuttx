@@ -618,10 +618,15 @@ bool rspin_lock_is_hold(FAR volatile rspinlock_t *lock)
    * leading to incorrect judgment.
    */
 
-  irqstate_t flags = up_irq_save();
-  ret = (RSPINLOCK_OWNER(atomic_read(&lock->val)) ==
-         (uint32_t)this_cpu() + 1u);
-  up_irq_restore(flags);
+#ifdef CONFIG_SPINLOCK
+  irqstate_t flags = irq_save();
+  ret = RSPINLOCK_OWNER(atomic_read(&lock->val)) ==
+                        (uint32_t)this_cpu() + 1u;
+  irq_restore(flags);
+#else
+  ret = RSPINLOCK_COUNT(lock->local_val) > 0u;
+#endif
+
   return ret;
 }
 
