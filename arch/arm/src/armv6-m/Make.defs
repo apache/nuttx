@@ -25,14 +25,8 @@
 include common/Make.defs
 include arm_m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
 CMN_CSRCS += arm_cpuinfo.c arm_doirq.c arm_hardfault.c arm_initialstate.c
 CMN_CSRCS += arm_svcall.c arm_systemreset.c arm_trigger_irq.c
-
-ifneq ($(CONFIG_ARCH_HAVE_CUSTOM_VECTORS),y)
-  CMN_CSRCS += arm_vectors.c
-endif
 
 ifneq ($(filter y,$(CONFIG_DEBUG_FEATURES)$(CONFIG_ARM_COREDUMP_REGION)),)
   CMN_CSRCS += arm_dumpnvic.c

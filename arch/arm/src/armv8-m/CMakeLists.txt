@@ -21,7 +21,6 @@
 # ##############################################################################
 
 set(SRCS
-    arm_exception.S
     arm_busfault.c
     arm_dbgmonitor.c
     arm_cache.c
@@ -39,10 +38,6 @@ set(SRCS
     arm_systemreset.c
     arm_trigger_irq.c
     arm_usagefault.c)
-
-if(NOT CONFIG_ARCH_HAVE_CUSTOM_VECTORS)
-  list(APPEND SRCS arm_vectors.c)
-endif()
 
 if(CONFIG_ARMV8M_SYSTICK)
   list(APPEND SRCS arm_systick.c)

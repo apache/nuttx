@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_exception.S
+ * arch/arm/src/arm_m/arm_exception.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2009-2013, 2015-2016, 2018 Gregory Nutt.
@@ -46,6 +46,7 @@
 
 #include "chip.h"
 #include "exc_return.h"
+#include "ghs_compat.S"
 #include "psr.h"
 
 /****************************************************************************
@@ -80,9 +81,12 @@
  ****************************************************************************/
 
 	.globl		exception_common
-
+#ifdef __ghs__
+	.thumb2
+#else
 	.syntax		unified
 	.thumb
+#endif
 	.file		"arm_exception.S"
 
 /****************************************************************************
@@ -111,43 +115,59 @@
  */
 
 	.text
+	.align 2
+	.section    .text.exception_common, "ax"
+#ifdef __ghs__
+	.type	exception_common, $function
+#else
 	.thumb_func
+	.syntax	unified
 	.type	exception_common, function
+#endif
 exception_common:
 	.cfi_sections	.debug_frame
 	.cfi_startproc
 	mrs		r12, control				/* R12=control */
 
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+	mov		r3, #0x0
+#endif
 	/* Complete the context save */
 
 	/* The EXC_RETURN value tells us whether the context is on the MSP or PSP */
 
-	tst		r14, #EXC_RETURN_PROCESS_STACK		/* Nonzero if context on process stack */
-	beq		1f					/* Branch if context already on the MSP */
+	mov		r0, r14					/* Copy EXC_RETURN */
+	lsls		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
+	bpl		1f					/* Test bit 31 */
 	mrs		r1, psp					/* R1=The process stack pointer (PSP) */
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+	mrs		r0, psplim
+	msr		psplim, r3
+#endif
 	b		2f
 1:
 	mrs		r1, msp					/* R1=The main stack pointer (MSP) */
-	sub		r2, r1, #SW_XCPT_SIZE			/* Reserve the stack space */
-	msr		msp, r2
+	mov		r0, r1					/* Keep r1 not changed for push */
+	subs		r0, #SW_XCPT_SIZE			/* Reserve MSP for SW_XCPT_SIZE */
+	msr		msp, r0					/* Reserved stack space */
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+	mrs		r0, msplim
+	msr		msplim, r3
+#endif
 	isb		sy
 2:
 	mov		r2, r1					/* R2=Copy of the main/process stack pointer */
-	add		r2, #HW_XCPT_SIZE			/* R2=MSP/PSP before the interrupt was taken */
+	adds		r2, #HW_XCPT_SIZE			/* R2=MSP/PSP before the interrupt was taken */
 								/* (ignoring the xPSR[9] alignment bit) */
 #ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
-	mov		r3, #0x0
-
-	ittee		eq
-	mrseq		r0, msplim
-	msreq		msplim, r3
-	mrsne		r0, psplim
-	msrne		psplim, r3
-
 	stmdb		r1!, {r0, r3}
 #endif
 
+#ifdef CONFIG_ARCH_ARMV6M
+	mrs		r3, primask				/* R3=Current PRIMASK setting */
+#else
 	mrs		r3, basepri				/* R3=Current BASEPRI setting */
+#endif /* CONFIG_ARCH_ARMV6M */
 
 #ifdef CONFIG_ARCH_FPU
 
@@ -179,7 +199,23 @@ exception_common:
 #endif
 #endif
 
+#ifdef CONFIG_ARCH_ARMV6M
+	subs		r1, #(4*SW_INT_REGS)		/* Move cursor to base, for save low regs first */
+	mov		r0, r1				/* Copy the context array pointer */
+	stmia		r0!, {r2-r7}			/* Save the SP, PRIMASK, and R4-R7 in the context array */
+
+	/* Save R8-R11 control and the EXEC_RETURN value in the context array */
+
+	mov		r2, r8				/* Copy high registers to low */
+	mov		r3, r9
+	mov		r4, r10
+	mov		r5, r11
+	mrs		r6, control			/* R6=control */
+	mov		r7, r14
+	stmia		r0!, {r2-r7}			/* Save the high registers r8-r11 control and r14 */
+#else
 	stmdb		r1!, {r2-r12,r14}		/* Save the remaining registers plus the SP/PRIMASK values */
+#endif /* CONFIG_ARCH_ARMV6M */
 
 	/* There are two arguments to arm_doirq:
 	 *
@@ -187,7 +223,7 @@ exception_common:
 	 *   R1 = The top of the stack points to the saved state
 	 */
 
-	mrs		r0, ipsr
+	mrs		r0, ipsr			/* R0=exception number */
 
 #if CONFIG_ARCH_INTERRUPTSTACK < 7
 	/* If CONFIG_ARCH_INTERRUPTSTACK is not defined, we will reuse the
@@ -200,15 +236,20 @@ exception_common:
 	 * signal context (reference: arm_schedulesigaction.c):
 	 *      ----------------------
 	 *     |    IRQ XCP context   |
-	 *      -------------------
+	 *      ----------------------
 	 *     |  Signal XCP context  |
 	 *      ----------------------   <- SP
 	 * also the sp should be restore after arm_doirq()
 	 */
-	tst		r14, #EXC_RETURN_THREAD_MODE		/* Nonzero if context on thread mode */
-	beq		3f					/* Branch if context already on the handle mode */
+
+	mov		r2, r14
+	lsls		r2, #(31 - EXC_RETURN_THREAD_BITNO)	/* Move to bit 31 */
+	bpl		3f					/* Test bit 31 */
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
-	sub		r2, r1, #XCPTCONTEXT_SIZE		/* Reserve signal context */
+	mov		r2, r1
+	subs		r2, #XCPTCONTEXT_SIZE			/* Reserve signal context */
+	movs		r4, #7
+	bics		r2, r4					/* Get the stack pointer with 8-byte alignment */
 	mov		sp, r2					/* Instantiate the aligned stack */
 #endif
 3:
@@ -224,7 +265,29 @@ exception_common:
 	 * array to use for the interrupt return.
 	 */
 
+#ifdef CONFIG_ARCH_ARMV6M
+	/* Recover R8-R11 and EXEC_RETURN (5 registers) */
+
+	movs		r2, #(4*REG_R8)		/* R2=Offset to R8 storage */
+	adds		r1, r0, r2		/* R1=Address of R8 storage */
+	ldmia		r1!, {r2-r7}		/* Recover R8-R11 control and R14 (6 registers)*/
+	mov		r8, r2			/* Move to position in high registers */
+	mov		r9, r3
+	mov		r10, r4
+	mov		r11, r5
+	msr		control, r6
+	mov		r14, r7			/* EXEC_RETURN */
+
+	/* Recover SP (R2), PRIMASK (R3), and R4-R7. Determine the value of
+	 * the stack pointer as it was on entry to the exception handler.
+	 */
+
+	movs		r1, #(4*REG_R8)		/* Already restored offset */
+	ldmia		r0!, {r2-r7}		/* Recover R4-R7 + 2 temp values */
+	adds		r0, r0, r1		/* Fix already restored R8-R11 and R14 popped address */
+#else
 	ldmia		r0!, {r2-r12,r14}	/* Recover R4-R12, r14 + 2 temp values */
+#endif /* CONFIG_ARCH_ARMV6M */
 #ifdef CONFIG_ARCH_FPU
 	/* Switched-in task including volatile FP registers ? */
 
@@ -242,22 +305,30 @@ exception_common:
 	/* The EXC_RETURN value tells us whether we are returning on the MSP or PSP
 	 */
 
-	tst		r14, #EXC_RETURN_PROCESS_STACK		/* Nonzero if context on process stack */
+	mov		r2, r14					/* Copy EXC_RETURN */
+	lsls		r2, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
+	bmi		4f					/* Test bit 31 */
+	msr		msp, r0					/* R1=The main stack pointer */
 #ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
-	itete		eq
-	msreq		msplim, r1
-	msrne		psplim, r1
-#else
-	ite		eq					/* Next two instructions conditional */
+	msr		msplim, r1
 #endif
-	msreq		msp, r0					/* R0=The main stack pointer */
-	msrne		psp, r0					/* R0=The process stack pointer */
+	b		5f
+4:
+	msr		psp, r0					/* R1=The process stack pointer */
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+	msr		psplim, r1
+#endif
+5:
+	isb		sy
 
 	/* Restore the interrupt state */
 
+#ifdef CONFIG_ARCH_ARMV6M
+	msr		primask, r3				/* Restore interrupts priority masking*/
+#else
 	msr		basepri, r3				/* Restore interrupts priority masking */
-
-	msr		control, r12
+	msr		control, r12				/* Restore control */
+#endif /* CONFIG_ARCH_ARMV6M */
 
 	/* Always return with R14 containing the special value that will: (1)
 	 * return to thread mode, and (2) select the correct stack.

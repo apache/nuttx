@@ -25,17 +25,11 @@
 include common/Make.defs
 include arm_m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
 CMN_CSRCS += arm_busfault.c arm_cache.c arm_cpuinfo.c arm_doirq.c
 CMN_CSRCS += arm_hardfault.c arm_initialstate.c arm_itm.c
 CMN_CSRCS += arm_memfault.c arm_perf.c
 CMN_CSRCS += arm_svcall.c arm_systemreset.c
 CMN_CSRCS += arm_trigger_irq.c arm_usagefault.c arm_dbgmonitor.c
-
-ifneq ($(CONFIG_ARCH_HAVE_CUSTOM_VECTORS),y)
-  CMN_CSRCS += arm_vectors.c
-endif
 
 ifeq ($(CONFIG_ARMV7M_SYSTICK),y)
   CMN_CSRCS += arm_systick.c

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/ghs_compat.S
+ * arch/arm/src/arm_m/ghs_compat.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

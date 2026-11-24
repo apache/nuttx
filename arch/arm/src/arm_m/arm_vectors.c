@@ -1,8 +1,10 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_vectors.c
+ * arch/arm/src/arm_m/arm_vectors.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013 Gregory Nutt. All rights reserved.
  * SPDX-FileCopyrightText: 2012 Michael Smith. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,6 +50,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_ARMV6M
+#  define ARM_PERIPHERAL_INTERRUPTS ARMV6M_PERIPHERAL_INTERRUPTS
+#elif defined(CONFIG_ARCH_ARMV7M)
+#  define ARM_PERIPHERAL_INTERRUPTS ARMV7M_PERIPHERAL_INTERRUPTS
+#elif defined(CONFIG_ARCH_ARMV8M)
+#  define ARM_PERIPHERAL_INTERRUPTS ARMV8M_PERIPHERAL_INTERRUPTS
+#endif
+
 /* The base of the IDLE stack.  Boards may override this to place the
  * IDLE stack at a specific address; defaults to the end of .bss.
  */
@@ -58,8 +68,8 @@
 
 #define IDLE_STACK      (IDLE_STACK_BASE + CONFIG_IDLETHREAD_STACKSIZE)
 
-#ifndef ARMV8M_PERIPHERAL_INTERRUPTS
-#  error ARMV8M_PERIPHERAL_INTERRUPTS must be defined to the number of I/O interrupts to be supported
+#ifndef ARM_PERIPHERAL_INTERRUPTS
+#  error ARM_PERIPHERAL_INTERRUPTS must be defined to the number of I/O interrupts to be supported
 #endif
 
 /****************************************************************************
@@ -74,8 +84,10 @@ static void noinstrument_function start(void)
 {
   /* Zero lr to mark the end of backtrace */
 
-  asm volatile ("mov lr, #0\n\t"
-                "b  __start\n\t");
+  asm volatile ("mov lr, %0\n\t"
+                "bx      %1\n\t"
+                :
+                : "r"(0), "r"(__start));
 }
 
 /****************************************************************************
@@ -91,7 +103,7 @@ extern void exception_direct(void);
  * Public data
  ****************************************************************************/
 
-/* The v8m vector table consists of an array of function pointers, with the
+/* The arm_m vector table consists of an array of function pointers, with the
  * first slot (vector zero) used to hold the initial stack pointer.
  *
  * As all exceptions (interrupts) are routed via exception_common, we just
@@ -111,17 +123,9 @@ const void * const _vectors[] locate_data(".vectors")
 
   start,
 
-  /* Vectors 2 - n point directly at the generic handler.
-   * Reserved slots (7 in Non-Secure, 8-10, and 13) are left unassigned,
-   * which C guarantees to be zero-initialized (NULL).
-   */
+  /* Vectors 2 - n point directly at the generic handler */
 
-  [NVIC_IRQ_NMI ... NVIC_IRQ_USAGEFAULT]    = &exception_common,
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
-  [NVIC_IRQ_SECUREFAULT]                    = &exception_common,
-#endif
-  [NVIC_IRQ_SVCALL ... NVIC_IRQ_DBGMONITOR] = &exception_common,
-  [NVIC_IRQ_PENDSV]                         = &exception_common,
-  [NVIC_IRQ_SYSTICK ... (15 + ARMV8M_PERIPHERAL_INTERRUPTS)]
-                                            = &exception_direct
+  [2 ... NVIC_IRQ_PENDSV] = &exception_common,
+  [(NVIC_IRQ_PENDSV + 1) ... (15 + ARM_PERIPHERAL_INTERRUPTS)]
+                          = &exception_direct
 };
