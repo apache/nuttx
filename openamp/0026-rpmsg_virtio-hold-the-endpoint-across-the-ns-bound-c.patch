@@ -1,0 +1,63 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Mon, 15 Jun 2026 15:06:07 +0800
+Subject: [PATCH] rpmsg_virtio: hold the endpoint across the ns bound callback
+
+rpmsg_virtio_ns_callback() drops rdev->lock before it calls
+ns_bound_cb() for NS_CREATE and NS_CREATE_ACK, so a concurrent close()
+can drop the last reference and free the endpoint while the callback
+still uses it.
+
+Take a reference around the callback, as the NS_DESTROY path already
+does around ns_unbind_cb().
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/rpmsg/rpmsg_virtio.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 44e95ba..971543b 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -614,12 +614,19 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 				rdev->ns_bind_cb(rdev, ns_msg.name, dest);
+ 		} else if (_ept->dest_addr == RPMSG_ADDR_ANY) {
+ 			_ept->dest_addr = dest;
++			if (ept_to_release)
++				rpmsg_ept_incref(_ept);
+ 			metal_mutex_release(&rdev->lock);
+ 			if (_ept->name[0] && rdev->support_ack)
+ 				rpmsg_send_ns_message(_ept, RPMSG_NS_CREATE_ACK);
+ 			/* notify application that the endpoint has been bound */
+ 			if (_ept->ns_bound_cb)
+ 				_ept->ns_bound_cb(_ept);
++			if (ept_to_release) {
++				metal_mutex_acquire(&rdev->lock);
++				rpmsg_ept_decref(_ept);
++				metal_mutex_release(&rdev->lock);
++			}
+ 		}
+ 		else
+ 			metal_mutex_release(&rdev->lock);
+@@ -627,10 +634,17 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 		/* save the received destination address */
+ 		if (_ept && _ept->dest_addr == RPMSG_ADDR_ANY) {
+ 			_ept->dest_addr = dest;
++			if (ept_to_release)
++				rpmsg_ept_incref(_ept);
+ 			metal_mutex_release(&rdev->lock);
+ 			/* notify application that the endpoint has been bound */
+ 			if (_ept->ns_bound_cb)
+ 				_ept->ns_bound_cb(_ept);
++			if (ept_to_release) {
++				metal_mutex_acquire(&rdev->lock);
++				rpmsg_ept_decref(_ept);
++				metal_mutex_release(&rdev->lock);
++			}
+ 		}
+ 		else
+ 			metal_mutex_release(&rdev->lock);
+-- 
+2.34.1
+
