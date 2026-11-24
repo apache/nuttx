@@ -275,6 +275,15 @@ int nxrmutex_lock(FAR rmutex_t *rmutex)
   if (!nxrmutex_is_hold(rmutex))
     {
       ret = nxmutex_lock(&rmutex->mutex);
+      if (ret >= 0)
+        {
+          /* The mutex can be taken over from a holder that exited without
+           * unlocking it.  That holder's count is still here and would
+           * keep the mutex locked after our last unlock, so start again.
+           */
+
+          rmutex->count = 0;
+        }
     }
 
   if (ret >= 0)
@@ -360,6 +369,10 @@ int nxrmutex_ticklock(FAR rmutex_t *rmutex, uint32_t delay)
   if (!nxrmutex_is_hold(rmutex))
     {
       ret = nxmutex_ticklock(&rmutex->mutex, delay);
+      if (ret >= 0)
+        {
+          rmutex->count = 0; /* See nxrmutex_lock() */
+        }
     }
 
   if (ret >= 0)
@@ -404,6 +417,10 @@ int nxrmutex_clocklock(FAR rmutex_t *rmutex, clockid_t clockid,
   if (!nxrmutex_is_hold(rmutex))
     {
       ret = nxmutex_clocklock(&rmutex->mutex, clockid, abstime);
+      if (ret >= 0)
+        {
+          rmutex->count = 0; /* See nxrmutex_lock() */
+        }
     }
 
   if (ret >= 0)
@@ -447,6 +464,10 @@ int nxrmutex_timedlock(FAR rmutex_t *rmutex, unsigned int timeout)
   if (!nxrmutex_is_hold(rmutex))
     {
       ret = nxmutex_timedlock(&rmutex->mutex, timeout);
+      if (ret >= 0)
+        {
+          rmutex->count = 0; /* See nxrmutex_lock() */
+        }
     }
 
   if (ret >= 0)
