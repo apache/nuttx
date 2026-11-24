@@ -851,7 +851,23 @@ void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg)
       ept = container_of(node, struct rpmsg_endpoint, node);
       if (ept->ns_unbind_cb)
         {
-          ept->ns_unbind_cb(ept);
+          /* Unregister first so ept->rdev cannot outlive the device.
+           * Without release_cb the callback may free ept, so it is not
+           * touched afterwards.
+           */
+
+          if (ept->release_cb)
+            {
+              rpmsg_ept_incref(ept);
+              rpmsg_unregister_endpoint(ept);
+              ept->ns_unbind_cb(ept);
+              rpmsg_ept_decref(ept);
+            }
+          else
+            {
+              rpmsg_unregister_endpoint(ept);
+              ept->ns_unbind_cb(ept);
+            }
         }
       else
         {
