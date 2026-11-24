@@ -28,6 +28,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <nuttx/irq.h>
 #include "chip.h"
 #include <arch/board/board.h>
 #include "hardware/n32h7_tim.h"

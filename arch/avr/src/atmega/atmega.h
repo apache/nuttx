@@ -28,6 +28,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <nuttx/irq.h>
 #include "atmega_config.h"
 
 #ifdef CONFIG_AVR_GPIOIRQ

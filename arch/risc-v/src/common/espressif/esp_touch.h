@@ -29,6 +29,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/types.h>
