@@ -61,6 +61,10 @@ struct shmfs_object_s
    */
 
   FAR void *paddr;
+
+  /* Number of mappings; paddr must not be freed while it is non-zero. */
+
+  atomic_t nmaps;
 };
 
 /****************************************************************************
