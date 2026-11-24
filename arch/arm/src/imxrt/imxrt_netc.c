@@ -165,7 +165,6 @@ static const struct netdev_ops_s g_netc_ops =
   .ifdown   = imxrt_netc_ifdown,
   .transmit = imxrt_netc_transmit,
   .receive  = imxrt_netc_receive,
-  .reclaim  = imxrt_netc_reclaim,
 #ifdef CONFIG_NET_MCASTGROUP
   .addmac   = imxrt_netc_multicast,
   .rmmac    = imxrt_netc_multicast,

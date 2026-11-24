@@ -247,7 +247,6 @@ static const struct netdev_ops_s g_ctucanfd_net_ops =
   .ifdown   = ctucanfd_sock_ifdown,
   .transmit = ctucanfd_sock_transmit,
   .receive  = ctucanfd_sock_recv,
-  .reclaim  = ctucanfd_sock_reclaim,
 #ifdef CONFIG_NETDEV_IOCTL
   .ioctl    = ctucanfd_sock_ioctl,
 #endif
@@ -1165,6 +1164,13 @@ static int ctucanfd_sock_transmit(FAR struct netdev_lowerhalf_s *dev,
   int                         wirelen;
 #endif
 
+  /* Release the TXT buffers the hardware has finished with, so that a
+   * buffer freed since the last TX-done interrupt can be used right away
+   * instead of making the upper half wait for the next one.
+   */
+
+  ctucanfd_sock_reclaim(dev);
+
   /* Get TX empty buffer */
 
   regval = ctucanfd_getreg(priv, CTUCANFD_TXSTAT);
@@ -1651,10 +1657,13 @@ static void ctucanfd_sock_interrupt(FAR struct ctucanfd_driver_s *priv)
           netdev_lower_rxready(&priv->devs[i].dev);
         }
 
-      /* Frame transmitted, the upper half reclaims the TXT buffers */
+      /* Frame transmitted: release the TXT buffers the hardware is done
+       * with, then let the upper half offer the next packet.
+       */
 
       if (stat & CTUCANFD_INT_TXI)
         {
+          ctucanfd_sock_reclaim(&priv->devs[i].dev);
           netdev_lower_txdone(&priv->devs[i].dev);
         }
 

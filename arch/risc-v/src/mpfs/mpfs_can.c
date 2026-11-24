@@ -586,11 +586,10 @@ static const struct netdev_ops_s g_netdev_ops =
   NULL,          /* rmmac */
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  mpfs_ioctl,    /* ioctl */
+  mpfs_ioctl     /* ioctl */
 #else
-  NULL,          /* ioctl */
+  NULL           /* ioctl */
 #endif
-  NULL           /* reclaim */
 };
 
 /****************************************************************************

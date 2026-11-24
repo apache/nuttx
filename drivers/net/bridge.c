@@ -119,7 +119,6 @@ static int bridge_addmac(FAR struct netdev_lowerhalf_s *dev,
 static int bridge_rmmac(FAR struct netdev_lowerhalf_s *dev,
                         FAR const uint8_t *mac);
 #endif
-static void bridge_reclaim(FAR struct netdev_lowerhalf_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -136,9 +135,8 @@ static const struct netdev_ops_s g_bridge_ops =
   bridge_rmmac,    /* rmmac */
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  NULL,            /* ioctl */
+  NULL             /* ioctl */
 #endif
-  bridge_reclaim   /* reclaim */
 };
 
 /* All bridges, protected by g_bridge_lock */
@@ -459,11 +457,10 @@ static int bridge_port_send(FAR struct bridge_port_s *port,
       return -EMSGSIZE;
     }
 
-  if (atomic_read(&dev->quota_ptr[NETPKT_TX]) <= 0 &&
-      dev->ops->reclaim != NULL)
-    {
-      dev->ops->reclaim(dev);
-    }
+  /* The port reclaims its finished transmissions by itself, in its
+   * transmit operation and when it reports a completed one, so a port with
+   * no room is simply reported busy here.
+   */
 
   if (atomic_sub(&dev->quota_ptr[NETPKT_TX], 1) <= 0)
     {
@@ -760,40 +757,6 @@ static int bridge_rmmac(FAR struct netdev_lowerhalf_s *dev,
   return OK;
 }
 #endif
-
-/****************************************************************************
- * Name: bridge_reclaim
- *
- * Description:
- *   The network stack found no room on the bridge device: let the ports
- *   reclaim their sent packets, then look at the room again.
- *
- ****************************************************************************/
-
-static void bridge_reclaim(FAR struct netdev_lowerhalf_s *dev)
-{
-  FAR struct bridge_s *br = (FAR struct bridge_s *)dev;
-  int i;
-
-  nxmutex_lock(&br->br_lock);
-  for (i = 0; i < CONFIG_NET_BRIDGE_MAX_PORTS; i++)
-    {
-      FAR struct netdev_lowerhalf_s *port = br->br_ports[i].bp_dev;
-
-      if (port == NULL)
-        {
-          break;
-        }
-
-      if (port->ops->reclaim != NULL)
-        {
-          port->ops->reclaim(port);
-        }
-    }
-
-  bridge_update_quota(br);
-  nxmutex_unlock(&br->br_lock);
-}
 
 /****************************************************************************
  * Name: bridge_find

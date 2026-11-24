@@ -226,8 +226,6 @@ static FAR netpkt_t *cdcecm_net_receive(FAR struct netdev_lowerhalf_s *dev);
 static int cdcecm_net_ioctl(FAR struct netdev_lowerhalf_s *dev,
                             int cmd, unsigned long arg);
 #endif
-static void cdcecm_net_reclaim(FAR struct netdev_lowerhalf_s *dev);
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -276,7 +274,6 @@ static const struct netdev_ops_s g_cdcecm_netdev_ops =
 #ifdef CONFIG_NETDEV_IOCTL
     .ioctl    = cdcecm_net_ioctl,
 #endif
-    .reclaim  = cdcecm_net_reclaim,
 };
 
 /****************************************************************************
@@ -1845,19 +1842,6 @@ static int cdcecm_net_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
   return -ENOTTY;
 }
 #endif
-
-/****************************************************************************
- * Name: cdcecm_net_reclaim
- *
- * Description:
- *   Lowerhalf reclaim callback. TX is synchronous via DRVR_TRANSFER
- *   so there are no queued TX packets to reclaim.
- *
- ****************************************************************************/
-
-static void cdcecm_net_reclaim(FAR struct netdev_lowerhalf_s *dev)
-{
-}
 
 /****************************************************************************
  * Name: cdcecm_ifup
