@@ -165,6 +165,7 @@ struct tmpfs_file_s
   /* Remaining fields are unique to a directory object */
 
   uint8_t       tfo_flags; /* See TFO_FLAG_* definitions */
+  uint8_t       tfo_maps;  /* Number of mappings of tfo_data */
   size_t        tfo_size;  /* Valid file size */
   FAR uint8_t  *tfo_data;  /* File data starts here */
 };
