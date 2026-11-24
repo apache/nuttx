@@ -634,6 +634,7 @@ static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset)
 static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset)
 {
   const struct stm32_config_s *config = priv->config;
+
   return getreg32(config->base + offset);
 }
 
@@ -676,6 +677,7 @@ static void fdcan_putreg(struct stm32_fdcan_s *priv, int offset,
                          uint32_t regval)
 {
   const struct stm32_config_s *config = priv->config;
+
   putreg32(regval, config->base + offset);
 }
 
