@@ -471,12 +471,20 @@ static int shmfs_mmap(FAR struct file *filep,
 #endif
 
   ret = shmfs_map_object(object, &entry->vaddr);
+  if (ret >= 0)
+    {
+      atomic_add(&object->nmaps, 1);
+    }
 
 out:
   nxmutex_unlock(&object->lock);
 
-  if (ret < 0 ||
-      (ret = shmfs_add_map(entry, filep->f_inode)) < 0)
+  if (ret >= 0 && (ret = shmfs_add_map(entry, filep->f_inode)) < 0)
+    {
+      atomic_sub(&object->nmaps, 1);
+    }
+
+  if (ret < 0)
     {
       inode_release(filep->f_inode);
     }
@@ -536,6 +544,7 @@ static int shmfs_munmap_partial(FAR struct task_group_s *group,
                                 FAR void *start, size_t length)
 {
   FAR struct mm_map_s *mm = get_group_mm(group);
+  FAR struct shmfs_object_s *object;
   FAR char *entry_end = (FAR char *)entry->vaddr + entry->length;
   FAR char *unmap_end = (FAR char *)start + length;
   off_t head;
@@ -600,6 +609,9 @@ static int shmfs_munmap_partial(FAR struct task_group_s *group,
 
       entry->length = head;
       inode_addref((FAR struct inode *)entry->priv.p);
+
+      object = ((FAR struct inode *)entry->priv.p)->i_private;
+      atomic_add(&object->nmaps, 1);
       return OK;
     }
 
@@ -632,6 +644,7 @@ static int shmfs_munmap(FAR struct task_group_s *group,
                         FAR void *start,
                         size_t length)
 {
+  FAR struct shmfs_object_s *object;
   FAR struct inode *inode;
   int ret;
 
@@ -653,6 +666,9 @@ static int shmfs_munmap(FAR struct task_group_s *group,
 
   if (ret == OK)
     {
+      object = inode->i_private;
+      atomic_sub(&object->nmaps, 1);
+
       ret = shmfs_release(inode);
     }
 

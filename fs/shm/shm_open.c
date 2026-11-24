@@ -133,6 +133,17 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
         {
           object = inode->i_private;
           nxmutex_lock(&object->lock);
+
+          /* A mapping points into the backing store, so keep it */
+
+          if (atomic_read(&object->nmaps) > 0)
+            {
+              nxmutex_unlock(&object->lock);
+              ret = -EBUSY;
+              inode_release(inode);
+              goto errout_with_lock;
+            }
+
           shmfs_free_buffer(object);
           nxmutex_unlock(&object->lock);
           inode->i_size = 0;
