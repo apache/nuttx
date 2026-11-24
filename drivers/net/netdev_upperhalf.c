@@ -1741,10 +1741,12 @@ int netdev_lower_unregister(FAR struct netdev_lowerhalf_s *dev)
 #endif
 
 #ifdef CONFIG_NET_BRIDGE
-  if (upper->bridge != NULL)
-    {
-      bridge_port_detach(dev);
-    }
+  /* Unconditionally, because the port is looked up under the lock of the
+   * bridges: reading upper->bridge here would race with a SIOCBRADDIF that
+   * is attaching this very device.
+   */
+
+  bridge_port_detach(dev);
 #endif
 
   ret = netdev_unregister(&dev->netdev);

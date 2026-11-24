@@ -93,8 +93,10 @@ void bridge_input(FAR struct bridge_port_s *port, FAR netpkt_t *pkt);
  * Description:
  *   Called by the upper half of a bridge port when the port has completed a
  *   transmission, so that the bridge device resumes its own transmission.
- *   The bridge device receives and polls in the context of the caller
- *   (NETDEV_RX_DIRECT), so the caller must not be an interrupt handler.
+ *   The bridge device polls in the context of the caller
+ *   (NETDEV_RX_DIRECT), except when the caller is an interrupt handler or
+ *   holds the lock of the bridge, in which case the resume is deferred to
+ *   the work queue.
  *
  ****************************************************************************/
 
