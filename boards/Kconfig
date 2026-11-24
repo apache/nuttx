@@ -4114,6 +4114,14 @@ config ARCH_BOARD_PHY6222
 	---help---
 		none
 
+config ARCH_BOARD_APPLE_IPOD_VIDEO
+	bool "Apple iPod Video (5G and 5.5G)"
+	depends on ARCH_CHIP_PP502X
+	---help---
+		The Apple iPod Video, 5th generation and 5.5G (model A1136), with a
+		PortalPlayer PP502x and 32 MiB or 64 MiB of SDRAM.  The console is
+		UART0 on the dock connector.
+
 config ARCH_BOARD_XX3803
 	bool "Sparc Bm3803 XX3803 Board"
 	depends on ARCH_CHIP_BM3803
@@ -4673,6 +4681,7 @@ config ARCH_BOARD
 	default "zp214xpa"                     if ARCH_BOARD_ZP214XPA
 	default "zkit-arm-1769"                if ARCH_BOARD_ZKITARM
 	default "phy6222"                      if ARCH_BOARD_PHY6222
+	default "apple-ipod-video"             if ARCH_BOARD_APPLE_IPOD_VIDEO
 	default "sim"                          if ARCH_BOARD_SIM
 	default "moxa"                         if ARCH_BOARD_MOXA
 	default "n32h762iil7"                  if ARCH_BOARD_N32H762IIL7
@@ -5946,6 +5955,9 @@ source "boards/risc-v/gd32vw55x/gd32vw553-hmq/Kconfig"
 endif
 if ARCH_BOARD_PHY6222
 source "boards/arm/phy62xx/phy6222/Kconfig"
+endif
+if ARCH_BOARD_APPLE_IPOD_VIDEO
+source "boards/arm/pp502x/apple-ipod-video/Kconfig"
 endif
 if ARCH_BOARD_XX3803
 source "boards/sparc/bm3803/xx3803/Kconfig"
