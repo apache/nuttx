@@ -1,0 +1,266 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Thu, 20 Aug 2026 00:23:25 +0800
+Subject: [PATCH] rpmsg: extract the name service handling into a common file
+
+The name service handling in rpmsg_virtio_ns_callback() does not depend
+on virtio once the message is out of the receive buffer: it looks up the
+local endpoint of the announced service and creates, destroys or
+acknowledges the binding.
+
+Move that part into lib/rpmsg/rpmsg_ns.c as rpmsg_ns_handle_msg(), so
+that other transports can call it instead of keeping their own copy.
+The virtio callback still copies the message out and releases the
+receive buffer before any user callback runs. No functional change.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/rpmsg/CMakeLists.txt   |  1 +
+ lib/rpmsg/rpmsg_internal.h | 21 +++++++++
+ lib/rpmsg/rpmsg_ns.c       | 95 ++++++++++++++++++++++++++++++++++++++
+ lib/rpmsg/rpmsg_virtio.c   | 79 +------------------------------
+ 4 files changed, 118 insertions(+), 78 deletions(-)
+ create mode 100644 lib/rpmsg/rpmsg_ns.c
+
+diff --git a/lib/rpmsg/CMakeLists.txt open-amp/lib/rpmsg/CMakeLists.txt
+index e2bd8d8..ffe5bad 100644
+--- a/lib/rpmsg/CMakeLists.txt
++++ open-amp/lib/rpmsg/CMakeLists.txt
+@@ -1,2 +1,3 @@
+ collect (PROJECT_LIB_SOURCES rpmsg.c)
++collect (PROJECT_LIB_SOURCES rpmsg_ns.c)
+ collect (PROJECT_LIB_SOURCES rpmsg_virtio.c)
+diff --git a/lib/rpmsg/rpmsg_internal.h open-amp/lib/rpmsg/rpmsg_internal.h
+index 52eeaf0..9a9d2cd 100644
+--- a/lib/rpmsg/rpmsg_internal.h
++++ open-amp/lib/rpmsg/rpmsg_internal.h
+@@ -113,6 +113,27 @@ struct rpmsg_ns_msg {
+ 
+ int rpmsg_send_ns_message(struct rpmsg_endpoint *ept, unsigned long flags);
+ 
++/**
++ * @internal
++ *
++ * @brief Handle a received name service announcement message
++ *
++ * This function implements the transport independent part of the name
++ * service announcement handling: it looks up the local endpoint matching
++ * the announced service and creates/destroys/acknowledges the binding
++ * accordingly.
++ *
++ * The caller is responsible for extracting the message out of the received
++ * buffer (the way to do so is transport specific) and should release the
++ * receive buffer before calling this function, so that the buffer is not
++ * held across the user callbacks invoked from here.
++ *
++ * @param rdev		Pointer to the rpmsg device
++ * @param ns_msg	Pointer to the received name service message
++ */
++void rpmsg_ns_handle_msg(struct rpmsg_device *rdev,
++			 const struct rpmsg_ns_msg *ns_msg);
++
+ struct rpmsg_endpoint *rpmsg_get_endpoint(struct rpmsg_device *rvdev,
+ 					  const char *name, uint32_t addr,
+ 					  uint32_t dest_addr);
+diff --git a/lib/rpmsg/rpmsg_ns.c open-amp/lib/rpmsg/rpmsg_ns.c
+new file mode 100644
+index 0000000..2102c7c
+--- /dev/null
++++ open-amp/lib/rpmsg/rpmsg_ns.c
+@@ -0,0 +1,95 @@
++/*
++ * Copyright (c) 2014, Mentor Graphics Corporation
++ * All rights reserved.
++ * Copyright (c) 2016 Freescale Semiconductor, Inc. All rights reserved.
++ * Copyright (c) 2018 Linaro, Inc. All rights reserved.
++ * Copyright (c) 2021 Nordic Semiconductor ASA
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++
++#include <openamp/rpmsg.h>
++
++#include "rpmsg_internal.h"
++
++void rpmsg_ns_handle_msg(struct rpmsg_device *rdev,
++			 const struct rpmsg_ns_msg *ns_msg)
++{
++	struct rpmsg_endpoint *ept;
++	uint32_t dest = ns_msg->addr;
++	bool ept_to_release;
++
++	/* check if a Ept has been locally registered */
++	metal_mutex_acquire(&rdev->lock);
++	ept = rpmsg_get_endpoint(rdev, ns_msg->name, RPMSG_ADDR_ANY, dest);
++
++	/*
++	 * If ept-release callback is not implemented, ns_unbind_cb() can free the ept.
++	 * Test ept->release_cb before calling ns_unbind_cb() callbacks.
++	 */
++	ept_to_release = ept && ept->release_cb;
++
++	if (ns_msg->flags == RPMSG_NS_DESTROY) {
++		if (ept)
++			ept->dest_addr = RPMSG_ADDR_ANY;
++		if (ept_to_release)
++			rpmsg_ept_incref(ept);
++		metal_mutex_release(&rdev->lock);
++		if (ept && ept->ns_unbind_cb)
++			ept->ns_unbind_cb(ept);
++		if (rdev->ns_unbind_cb)
++			rdev->ns_unbind_cb(rdev, ns_msg->name, dest);
++		if (ept_to_release) {
++			metal_mutex_acquire(&rdev->lock);
++			rpmsg_ept_decref(ept);
++			metal_mutex_release(&rdev->lock);
++		}
++	} else if (ns_msg->flags == RPMSG_NS_CREATE) {
++		if (!ept) {
++			/*
++			 * send callback to application, that can
++			 * - create the associated endpoints.
++			 * - store information for future use.
++			 * - just ignore the request as service not supported.
++			 */
++			metal_mutex_release(&rdev->lock);
++			if (rdev->ns_bind_cb)
++				rdev->ns_bind_cb(rdev, ns_msg->name, dest);
++		} else if (ept->dest_addr == RPMSG_ADDR_ANY) {
++			ept->dest_addr = dest;
++			if (ept_to_release)
++				rpmsg_ept_incref(ept);
++			metal_mutex_release(&rdev->lock);
++			if (ept->name[0] && rdev->support_ack)
++				rpmsg_send_ns_message(ept, RPMSG_NS_CREATE_ACK);
++			/* notify application that the endpoint has been bound */
++			if (ept->ns_bound_cb)
++				ept->ns_bound_cb(ept);
++			if (ept_to_release) {
++				metal_mutex_acquire(&rdev->lock);
++				rpmsg_ept_decref(ept);
++				metal_mutex_release(&rdev->lock);
++			}
++		}
++		else
++			metal_mutex_release(&rdev->lock);
++	} else { /* RPMSG_NS_CREATE_ACK */
++		/* save the received destination address */
++		if (ept && ept->dest_addr == RPMSG_ADDR_ANY) {
++			ept->dest_addr = dest;
++			if (ept_to_release)
++				rpmsg_ept_incref(ept);
++			metal_mutex_release(&rdev->lock);
++			/* notify application that the endpoint has been bound */
++			if (ept->ns_bound_cb)
++				ept->ns_bound_cb(ept);
++			if (ept_to_release) {
++				metal_mutex_acquire(&rdev->lock);
++				rpmsg_ept_decref(ept);
++				metal_mutex_release(&rdev->lock);
++			}
++		}
++		else
++			metal_mutex_release(&rdev->lock);
++	}
++}
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 971543b..8fd79ef 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -554,10 +554,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 							       struct rpmsg_virtio_device,
+ 							       rdev);
+ 	struct metal_io_region *io = rvdev->shbuf_io;
+-	struct rpmsg_endpoint *_ept;
+ 	struct rpmsg_ns_msg ns_msg;
+-	uint32_t dest;
+-	bool ept_to_release;
+ 
+ 	(void)ept;
+ 	(void)src;
+@@ -574,81 +571,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 			    &ns_msg, sizeof(ns_msg));
+ 	rpmsg_virtio_release_rx_buffer(rdev, data);
+ 
+-	dest = ns_msg.addr;
+-
+-	/* check if a Ept has been locally registered */
+-	metal_mutex_acquire(&rdev->lock);
+-	_ept = rpmsg_get_endpoint(rdev, ns_msg.name, RPMSG_ADDR_ANY, dest);
+-
+-	/*
+-	 * If ept-release callback is not implemented, ns_unbind_cb() can free the ept.
+-	 * Test _ept->release_cb before calling ns_unbind_cb() callbacks.
+-	 */
+-	ept_to_release = _ept && _ept->release_cb;
+-
+-	if (ns_msg.flags == RPMSG_NS_DESTROY) {
+-		if (_ept)
+-			_ept->dest_addr = RPMSG_ADDR_ANY;
+-		if (ept_to_release)
+-			rpmsg_ept_incref(_ept);
+-		metal_mutex_release(&rdev->lock);
+-		if (_ept && _ept->ns_unbind_cb)
+-			_ept->ns_unbind_cb(_ept);
+-		if (rdev->ns_unbind_cb)
+-			rdev->ns_unbind_cb(rdev, ns_msg.name, dest);
+-		if (ept_to_release) {
+-			metal_mutex_acquire(&rdev->lock);
+-			rpmsg_ept_decref(_ept);
+-			metal_mutex_release(&rdev->lock);
+-		}
+-	} else if (ns_msg.flags == RPMSG_NS_CREATE) {
+-		if (!_ept) {
+-			/*
+-			 * send callback to application, that can
+-			 * - create the associated endpoints.
+-			 * - store information for future use.
+-			 * - just ignore the request as service not supported.
+-			 */
+-			metal_mutex_release(&rdev->lock);
+-			if (rdev->ns_bind_cb)
+-				rdev->ns_bind_cb(rdev, ns_msg.name, dest);
+-		} else if (_ept->dest_addr == RPMSG_ADDR_ANY) {
+-			_ept->dest_addr = dest;
+-			if (ept_to_release)
+-				rpmsg_ept_incref(_ept);
+-			metal_mutex_release(&rdev->lock);
+-			if (_ept->name[0] && rdev->support_ack)
+-				rpmsg_send_ns_message(_ept, RPMSG_NS_CREATE_ACK);
+-			/* notify application that the endpoint has been bound */
+-			if (_ept->ns_bound_cb)
+-				_ept->ns_bound_cb(_ept);
+-			if (ept_to_release) {
+-				metal_mutex_acquire(&rdev->lock);
+-				rpmsg_ept_decref(_ept);
+-				metal_mutex_release(&rdev->lock);
+-			}
+-		}
+-		else
+-			metal_mutex_release(&rdev->lock);
+-	} else { /* RPMSG_NS_CREATE_ACK */
+-		/* save the received destination address */
+-		if (_ept && _ept->dest_addr == RPMSG_ADDR_ANY) {
+-			_ept->dest_addr = dest;
+-			if (ept_to_release)
+-				rpmsg_ept_incref(_ept);
+-			metal_mutex_release(&rdev->lock);
+-			/* notify application that the endpoint has been bound */
+-			if (_ept->ns_bound_cb)
+-				_ept->ns_bound_cb(_ept);
+-			if (ept_to_release) {
+-				metal_mutex_acquire(&rdev->lock);
+-				rpmsg_ept_decref(_ept);
+-				metal_mutex_release(&rdev->lock);
+-			}
+-		}
+-		else
+-			metal_mutex_release(&rdev->lock);
+-	}
++	rpmsg_ns_handle_msg(rdev, &ns_msg);
+ 
+ 	return RPMSG_SUCCESS_BUFFER_RELEASED;
+ }
+-- 
+2.34.1
+
