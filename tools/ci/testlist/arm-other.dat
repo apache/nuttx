@@ -21,6 +21,7 @@
 /arm/n32h7,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 /arm/nuc1xx,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 /arm/phy62xx,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/pp502x,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 /arm/qemu,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 /arm/ra4,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 /arm/ra8m1,CONFIG_ARM_TOOLCHAIN_GNU_EABI
@@ -37,6 +38,7 @@
 
 # Boards build by CMake
 
+CMake,apple-ipod-video:nsh
 CMake,arduino-nano-33ble-rev2:nsh
 CMake,arduino-nano-33ble-rev2:usbnsh
 CMake,arduino-nano-33ble:nsh
