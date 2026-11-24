@@ -1,0 +1,93 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Thu, 27 Aug 2026 12:00:00 +0800
+Subject: [PATCH] rpmsg: take the ns endpoint reference just once
+
+rpmsg_ns_handle_msg() takes and drops a reference to the matched
+endpoint separately in each of its three branches. Take it once right
+after the lookup and drop it once at the end, so that a new branch
+cannot forget it.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/rpmsg/rpmsg_ns.c | 29 ++++++++---------------------
+ 1 file changed, 8 insertions(+), 21 deletions(-)
+
+diff --git a/lib/rpmsg/rpmsg_ns.c open-amp/lib/rpmsg/rpmsg_ns.c
+index 2102c7c..7e6831b 100644
+--- a/lib/rpmsg/rpmsg_ns.c
++++ open-amp/lib/rpmsg/rpmsg_ns.c
+@@ -28,22 +28,17 @@ void rpmsg_ns_handle_msg(struct rpmsg_device *rdev,
+ 	 * Test ept->release_cb before calling ns_unbind_cb() callbacks.
+ 	 */
+ 	ept_to_release = ept && ept->release_cb;
++	if (ept_to_release)
++		rpmsg_ept_incref(ept);
+ 
+ 	if (ns_msg->flags == RPMSG_NS_DESTROY) {
+ 		if (ept)
+ 			ept->dest_addr = RPMSG_ADDR_ANY;
+-		if (ept_to_release)
+-			rpmsg_ept_incref(ept);
+ 		metal_mutex_release(&rdev->lock);
+ 		if (ept && ept->ns_unbind_cb)
+ 			ept->ns_unbind_cb(ept);
+ 		if (rdev->ns_unbind_cb)
+ 			rdev->ns_unbind_cb(rdev, ns_msg->name, dest);
+-		if (ept_to_release) {
+-			metal_mutex_acquire(&rdev->lock);
+-			rpmsg_ept_decref(ept);
+-			metal_mutex_release(&rdev->lock);
+-		}
+ 	} else if (ns_msg->flags == RPMSG_NS_CREATE) {
+ 		if (!ept) {
+ 			/*
+@@ -57,19 +52,12 @@ void rpmsg_ns_handle_msg(struct rpmsg_device *rdev,
+ 				rdev->ns_bind_cb(rdev, ns_msg->name, dest);
+ 		} else if (ept->dest_addr == RPMSG_ADDR_ANY) {
+ 			ept->dest_addr = dest;
+-			if (ept_to_release)
+-				rpmsg_ept_incref(ept);
+ 			metal_mutex_release(&rdev->lock);
+ 			if (ept->name[0] && rdev->support_ack)
+ 				rpmsg_send_ns_message(ept, RPMSG_NS_CREATE_ACK);
+ 			/* notify application that the endpoint has been bound */
+ 			if (ept->ns_bound_cb)
+ 				ept->ns_bound_cb(ept);
+-			if (ept_to_release) {
+-				metal_mutex_acquire(&rdev->lock);
+-				rpmsg_ept_decref(ept);
+-				metal_mutex_release(&rdev->lock);
+-			}
+ 		}
+ 		else
+ 			metal_mutex_release(&rdev->lock);
+@@ -77,19 +65,18 @@ void rpmsg_ns_handle_msg(struct rpmsg_device *rdev,
+ 		/* save the received destination address */
+ 		if (ept && ept->dest_addr == RPMSG_ADDR_ANY) {
+ 			ept->dest_addr = dest;
+-			if (ept_to_release)
+-				rpmsg_ept_incref(ept);
+ 			metal_mutex_release(&rdev->lock);
+ 			/* notify application that the endpoint has been bound */
+ 			if (ept->ns_bound_cb)
+ 				ept->ns_bound_cb(ept);
+-			if (ept_to_release) {
+-				metal_mutex_acquire(&rdev->lock);
+-				rpmsg_ept_decref(ept);
+-				metal_mutex_release(&rdev->lock);
+-			}
+ 		}
+ 		else
+ 			metal_mutex_release(&rdev->lock);
+ 	}
++
++	if (ept_to_release) {
++		metal_mutex_acquire(&rdev->lock);
++		rpmsg_ept_decref(ept);
++		metal_mutex_release(&rdev->lock);
++	}
+ }
+-- 
+2.34.1
+
