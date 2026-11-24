@@ -90,6 +90,10 @@ struct rptun_priv_s
   dq_entry_t                  entry;
   bool                        rreset;
   bool                        stop;
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  bool                        unlinked;
+  int                         crefs;
+#endif
   pid_t                       pid;
   FAR const void             *trace_va;
   struct work_s               work;
@@ -133,6 +137,8 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc);
 static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int rptun_dev_open(FAR struct file *filep);
+static int rptun_dev_close(FAR struct file *filep);
 static int rptun_dev_unlink(FAR struct inode *inode);
 #endif
 
@@ -188,6 +194,10 @@ static const struct remoteproc_ops g_rptun_ops =
 
 static const struct file_operations g_rptun_fops =
 {
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  .open   = rptun_dev_open,
+  .close  = rptun_dev_close,
+#endif
   .ioctl  = rptun_dev_ioctl,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   .unlink = rptun_dev_unlink,
@@ -1375,9 +1385,37 @@ static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
 }
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int rptun_dev_open(FAR struct file *filep)
+{
+  FAR struct rptun_priv_s *priv = filep->f_inode->i_private;
+
+  nxrmutex_lock(&g_rptun_lock);
+  priv->crefs++;
+  nxrmutex_unlock(&g_rptun_lock);
+  return OK;
+}
+
+static int rptun_dev_close(FAR struct file *filep)
+{
+  FAR struct rptun_priv_s *priv = filep->f_inode->i_private;
+  bool release;
+
+  nxrmutex_lock(&g_rptun_lock);
+  release = --priv->crefs == 0 && priv->unlinked;
+  nxrmutex_unlock(&g_rptun_lock);
+
+  if (release)
+    {
+      kmm_free(priv);
+    }
+
+  return OK;
+}
+
 static int rptun_dev_unlink(FAR struct inode *inode)
 {
   FAR struct rptun_priv_s *priv = inode->i_private;
+  bool release;
   int ret;
 
   ret = rptun_dev_stop(&priv->rproc);
@@ -1398,7 +1436,19 @@ static int rptun_dev_unlink(FAR struct inode *inode)
 
   remoteproc_remove(&priv->rproc);
   work_cancel_sync(HPWORK, &priv->work);
-  kmm_free(priv);
+
+  /* An open file keeps the inode, and so priv, until its last close */
+
+  nxrmutex_lock(&g_rptun_lock);
+  priv->unlinked = true;
+  release = priv->crefs == 0;
+  nxrmutex_unlock(&g_rptun_lock);
+
+  if (release)
+    {
+      kmm_free(priv);
+    }
+
   return OK;
 }
 #endif
@@ -1406,9 +1456,16 @@ static int rptun_dev_unlink(FAR struct inode *inode)
 static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
+  FAR struct rptun_priv_s *priv = filep->f_inode->i_private;
 
-  return rptun_do_ioctl(inode->i_private, cmd, arg);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  if (priv->unlinked)
+    {
+      return -ENODEV;
+    }
+#endif
+
+  return rptun_do_ioctl(priv, cmd, arg);
 }
 
 static int rptun_ioctl_foreach(FAR const char *cpuname, int cmd,
