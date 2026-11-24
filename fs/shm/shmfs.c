@@ -496,7 +496,9 @@ static int shmfs_unmap_area(FAR struct task_group_s *group,
 #ifdef CONFIG_BUILD_KERNEL
   unsigned int npages;
 
-  /* Convert the region size to pages */
+  /* A NULL group means the process is exiting and its MMU mappings must
+   * not be touched; only the bookkeeping is left, as in shmdt().
+   */
 
   if (group)
     {
@@ -513,10 +515,6 @@ static int shmfs_unmap_area(FAR struct task_group_s *group,
       /* Free the virtual address space */
 
       vm_release_region(get_group_mm(group), vaddr, length);
-    }
-  else
-    {
-      return -EINVAL;
     }
 #endif
 
