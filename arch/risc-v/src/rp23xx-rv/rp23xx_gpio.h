@@ -29,6 +29,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
+
 #include <stdint.h>
 #include <assert.h>
 #include <nuttx/debug.h>

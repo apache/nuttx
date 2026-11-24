@@ -29,6 +29,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
+
 #include "chip.h"
 #include <arch/board/board.h>
 #include "hardware/stm32_tim.h"

@@ -28,6 +28,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <nuttx/irq.h>
 #include "bm3823-config.h"
 
 #ifdef CONFIG_SPARC_GPIOIRQ

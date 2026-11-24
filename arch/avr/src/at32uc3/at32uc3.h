@@ -28,6 +28,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <nuttx/irq.h>
 #include "at32uc3_config.h"
 
 #ifdef CONFIG_AVR32_GPIOIRQ

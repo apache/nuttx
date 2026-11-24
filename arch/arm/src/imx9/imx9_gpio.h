@@ -30,6 +30,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 
