@@ -860,6 +860,7 @@ static void dump_core_info(void)
 static void reset_board(void)
 {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
+  up_flush_dcache_all();
   board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #else
   for (; ; )
