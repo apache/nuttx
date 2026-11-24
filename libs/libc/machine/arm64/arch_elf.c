@@ -57,6 +57,10 @@
 
 #define AARCH64_BREAK_FAULT     (AARCH64_BREAK_MON | (FAULT_BRK_IMM << 5))
 
+/* NOP instruction encoding */
+
+#define AARCH64_INSN_NOP        0xd503201f
+
 #define ADR_IMM_HILOSPLIT       2
 #define ADR_IMM_SIZE            (2 * 1024 * 1024)
 #define ADR_IMM_LOMASK          ((1 << ADR_IMM_HILOSPLIT) - 1)
@@ -799,6 +803,18 @@ int up_relocateadd(const Elf64_Rela *rel, const Elf64_Sym *sym,
       case R_AARCH64_JUMP26:
       case R_AARCH64_CALL26:
         {
+          /* A branch to an undefined weak symbol becomes a NOP, as in a
+           * static link.  The symbol has the value 0, which is out of
+           * the branch range of a program at a high address.
+           */
+
+          if (sym->st_shndx == SHN_UNDEF && sym->st_value == 0 &&
+              ELF64_ST_BIND(sym->st_info) == STB_WEAK)
+            {
+              *(uint32_t *)addr = htole32(AARCH64_INSN_NOP);
+              break;
+            }
+
           ret = reloc_insn_imm(RELOC_OP_PREL, addr, val, 2, 26,
                                INSN_IMM_26);
         }
