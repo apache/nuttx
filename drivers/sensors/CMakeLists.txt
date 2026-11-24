@@ -143,6 +143,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS lsm303agr.c)
     endif()
 
+    if(CONFIG_SENSORS_LSM303AGR_UORB)
+      list(APPEND SRCS lsm303agr_uorb.c)
+    endif()
+
     if(CONFIG_SENSORS_LSM6DSL)
       list(APPEND SRCS lsm6dsl.c)
     endif()

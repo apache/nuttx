@@ -155,6 +155,10 @@ ifeq ($(CONFIG_SENSORS_LSM303AGR),y)
   CSRCS += lsm303agr.c
 endif
 
+ifeq ($(CONFIG_SENSORS_LSM303AGR_UORB),y)
+  CSRCS += lsm303agr_uorb.c
+endif
+
 ifeq ($(CONFIG_SENSORS_LSM6DSL),y)
   CSRCS += lsm6dsl.c
 endif
