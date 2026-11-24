@@ -1,0 +1,53 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Mon, 12 Oct 2026 21:50:49 +0800
+Subject: [PATCH] rpmsg: export rpmsg_unregister_endpoint()
+
+A device being torn down has to unregister its endpoints without
+sending NS_DESTROY, which can no longer reach the remote.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/rpmsg/rpmsg.c          |  2 +-
+ lib/rpmsg/rpmsg_internal.h | 12 ++++++++++++
+ 2 files changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/lib/rpmsg/rpmsg.c open-amp/lib/rpmsg/rpmsg.c
+index 0c82897..76521fd 100644
+--- a/lib/rpmsg/rpmsg.c
++++ open-amp/lib/rpmsg/rpmsg.c
+@@ -292,7 +292,7 @@ int rpmsg_set_priority(struct rpmsg_endpoint *ept, uint8_t priority)
+ 	return 0;
+ }
+ 
+-static void rpmsg_unregister_endpoint(struct rpmsg_endpoint *ept)
++void rpmsg_unregister_endpoint(struct rpmsg_endpoint *ept)
+ {
+ 	struct rpmsg_device *rdev = ept->rdev;
+ 
+diff --git a/lib/rpmsg/rpmsg_internal.h open-amp/lib/rpmsg/rpmsg_internal.h
+index 686ef07..854e8a3 100644
+--- a/lib/rpmsg/rpmsg_internal.h
++++ open-amp/lib/rpmsg/rpmsg_internal.h
+@@ -144,6 +144,18 @@ void rpmsg_register_endpoint(struct rpmsg_device *rdev,
+ 			     rpmsg_ept_cb cb,
+ 			     rpmsg_ns_unbind_cb ns_unbind_cb, void *priv);
+ 
++/**
++ * @internal
++ *
++ * @brief Unregister an endpoint without notifying the remote
++ *
++ * For a device that is going away, where the remote can no longer be told.
++ * Clears ept->rdev, so a later rpmsg_destroy_ept() on it is a no-op.
++ *
++ * @param ept	pointer to a registered rpmsg endpoint
++ */
++void rpmsg_unregister_endpoint(struct rpmsg_endpoint *ept);
++
+ static inline struct rpmsg_endpoint *
+ rpmsg_get_ept_from_addr(struct rpmsg_device *rdev, uint32_t addr)
+ {
+-- 
+2.34.1
+
