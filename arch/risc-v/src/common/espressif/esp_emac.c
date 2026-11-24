@@ -694,18 +694,18 @@ int esp_emac_init(void)
       return -EIO;
     }
 
-    {
-      esp_eth_config_t eth_cfg = ETH_DEFAULT_CONFIG(mac, phy);
+  {
+    esp_eth_config_t eth_cfg = ETH_DEFAULT_CONFIG(mac, phy);
 
-      err = esp_eth_driver_install(&eth_cfg, &priv->handle);
-      if (err != ESP_OK)
-        {
-          nerr("ERROR: esp_eth_driver_install failed: %d\n", (int)err);
-          phy->del(phy);
-          mac->del(mac);
-          return -EIO;
-        }
-    }
+    err = esp_eth_driver_install(&eth_cfg, &priv->handle);
+    if (err != ESP_OK)
+      {
+        nerr("ERROR: esp_eth_driver_install failed: %d\n", (int)err);
+        phy->del(phy);
+        mac->del(mac);
+        return -EIO;
+      }
+  }
 
   priv->installed = true;
 

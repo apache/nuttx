@@ -618,6 +618,7 @@ static int ameba_wlan_ioctl(struct netdev_lowerhalf_s *dev, int cmd,
       case SIOCSIWFREQ:           /* SoftAP channel hint (STA uses full scan) */
         {
           uint8_t ch = ameba_wlan_freq2channel(&iwr->u.freq);
+
           if (ch != 0)
             {
               priv->channel = ch;

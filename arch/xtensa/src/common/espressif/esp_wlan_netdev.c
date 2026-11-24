@@ -1183,7 +1183,7 @@ static int esp_wlan_initialize(uint32_t mode)
         ret = esp_wifi_sta_read_mac(mac);
 #endif
         break;
-        case IW_MODE_MASTER:
+      case IW_MODE_MASTER:
 #ifdef ESP_WLAN_HAS_SOFTAP
         wlinfo("INFO: Initialize Wi-Fi SoftAP\n");
         priv = &g_wlan_softap;
@@ -1283,6 +1283,7 @@ static int esp_wlan_initialize(uint32_t mode)
 void esp_wlan_sta_connect_success_hook(void)
 {
   struct esp_wlan_priv_s *priv = &g_wlan_sta;
+
   netdev_lower_carrier_on(&priv->dev);
 }
 #endif
@@ -1305,6 +1306,7 @@ void esp_wlan_sta_connect_success_hook(void)
 void esp_wlan_sta_disconnect_hook(void)
 {
   struct esp_wlan_priv_s *priv = &g_wlan_sta;
+
   netdev_lower_carrier_off(&priv->dev);
 }
 #endif
@@ -1327,6 +1329,7 @@ void esp_wlan_sta_disconnect_hook(void)
 void esp_wlan_softap_connect_success_hook(void)
 {
   struct esp_wlan_priv_s *priv = &g_wlan_softap;
+
   netdev_lower_carrier_on(&priv->dev);
 }
 #endif
@@ -1349,6 +1352,7 @@ void esp_wlan_softap_connect_success_hook(void)
 void esp_wlan_softap_disconnect_hook(void)
 {
   struct esp_wlan_priv_s *priv = &g_wlan_softap;
+
   netdev_lower_carrier_off(&priv->dev);
 }
 #endif
