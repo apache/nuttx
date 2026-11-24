@@ -34,6 +34,7 @@
 
 #include <net/if.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
@@ -55,8 +56,15 @@
  *
  * g_bridge_lock serializes the configuration (ioctl and the unregistering
  * of a port).  br_lock protects the filtering database and the port table,
- * and serializes the transmission to the ports.  Nothing that takes a
- * device lock is called with br_lock held.
+ * and serializes the transmission to the ports.  Nothing waits for a
+ * device lock with br_lock held: bridge_port_send() only tries the lock of
+ * the egress port, and reports the port busy when the attempt fails.
+ *
+ * The transmit operation of a port is called with br_lock held, and a port
+ * driver whose transmit completes synchronously reaches bridge_txdone()
+ * from there.  Resuming the bridge device takes its device lock, which
+ * would invert the order above, so bridge_txdone() defers the resume to
+ * the work queue whenever it finds br_lock held by the calling thread.
  */
 
 struct bridge_s;
@@ -91,6 +99,7 @@ struct bridge_s
   struct netdev_lowerhalf_s br_dev;       /* The bridge device, must be first */
   FAR struct bridge_s *br_flink;          /* Next bridge in the list */
   mutex_t br_lock;                        /* FDB, ports and TX lock */
+  struct work_s br_txdone;                /* Deferred resume, see bridge_txdone */
   struct bridge_port_s br_ports[CONFIG_NET_BRIDGE_MAX_PORTS];
   struct bridge_fdb_s br_fdb[CONFIG_NET_BRIDGE_FDB_SIZE];
 };
@@ -418,26 +427,36 @@ static FAR netpkt_t *bridge_clone(FAR struct bridge_s *br,
  * Name: bridge_port_send
  *
  * Description:
- *   Send a packet on a port, or drop it.  Takes ownership of the packet.
- *   The packet is not counted in the TX quota of the port when it comes
- *   here, as it was not allocated by the port or by its upper half, so the
- *   quota is taken like the upper half does for its own packets.
+ *   Try to send a packet on a port, bypassing the upper half of the port,
+ *   which only serves the packets of the local host.  Follows the transmit
+ *   contract of the lower half: the port owns the packet when OK is
+ *   returned, the caller still owns it on failure.
+ *
+ * Returned Value:
+ *   OK on success, -EBUSY when the port cannot take the packet now and the
+ *   same packet can be offered again later, or another negated errno value.
  *
  * Assumptions:
  *   Called with br_lock held.
  *
  ****************************************************************************/
 
-static void bridge_port_send(FAR struct bridge_port_s *port,
-                             FAR netpkt_t *pkt)
+static int bridge_port_send(FAR struct bridge_port_s *port,
+                            FAR netpkt_t *pkt)
 {
   FAR struct netdev_lowerhalf_s *dev = port->bp_dev;
   int ret;
 
-  if (!IFF_IS_UP(dev->netdev.d_flags) ||
-      netpkt_getdatalen(dev, pkt) > NETDEV_PKTSIZE(&dev->netdev))
+  if (!IFF_IS_UP(dev->netdev.d_flags))
     {
-      goto drop;
+      return -ENETDOWN;
+    }
+
+  /* The upper half of the port would do this check for its own packets */
+
+  if (netpkt_getdatalen(dev, pkt) > NETDEV_PKTSIZE(&dev->netdev))
+    {
+      return -EMSGSIZE;
     }
 
   if (atomic_read(&dev->quota_ptr[NETPKT_TX]) <= 0 &&
@@ -449,22 +468,47 @@ static void bridge_port_send(FAR struct bridge_port_s *port,
   if (atomic_sub(&dev->quota_ptr[NETPKT_TX], 1) <= 0)
     {
       atomic_add(&dev->quota_ptr[NETPKT_TX], 1);
-      goto drop;
+      return -EBUSY;
+    }
+
+  /* The transmit operation of the port is also reached under the device
+   * lock of the port, by the upper half serving the local host, and a port
+   * driver may count on that lock to serialize its transmit state.  Waiting
+   * for it here would invert the order documented above, as the RX path of
+   * a port takes its device lock before br_lock, so a port that is busy
+   * transmitting is reported full instead of waited for.
+   */
+
+  if (netdev_trylock(&dev->netdev) < 0)
+    {
+      atomic_add(&dev->quota_ptr[NETPKT_TX], 1);
+      return -EBUSY;
     }
 
   NETDEV_TXPACKETS(&dev->netdev);
-
   ret = dev->ops->transmit(dev, pkt);
+  netdev_unlock(&dev->netdev);
+
   if (ret < 0)
     {
       atomic_add(&dev->quota_ptr[NETPKT_TX], 1);
-      goto drop;
     }
 
-  return;
+  return ret;
+}
 
-drop:
-  NETDEV_TXERRORS(&dev->netdev);
+/****************************************************************************
+ * Name: bridge_port_drop
+ *
+ * Description:
+ *   Account and release a packet that a port could not take.
+ *
+ ****************************************************************************/
+
+static void bridge_port_drop(FAR struct bridge_port_s *port,
+                             FAR netpkt_t *pkt)
+{
+  NETDEV_TXERRORS(&port->bp_dev->netdev);
   iob_free_chain(pkt);
 }
 
@@ -480,6 +524,10 @@ drop:
  *   pkt     - The packet
  *   consume - True if the packet itself can be sent on the last port, in
  *             which case the packet is owned by the bridge afterwards
+ *
+ *   A port that has no room drops its copy instead of holding the packet
+ *   back: the other ports have already taken theirs, so a retry of the
+ *   whole flood would duplicate them.
  *
  * Returned Value:
  *   True if the packet was consumed.  False if the caller still owns it
@@ -519,7 +567,10 @@ static bool bridge_flood(FAR struct bridge_s *br,
           clone = bridge_clone(br, pkt);
           if (clone != NULL)
             {
-              bridge_port_send(last, clone);
+              if (bridge_port_send(last, clone) < 0)
+                {
+                  bridge_port_drop(last, clone);
+                }
             }
           else
             {
@@ -537,14 +588,21 @@ static bool bridge_flood(FAR struct bridge_s *br,
 
   if (consume)
     {
-      bridge_port_send(last, pkt);
+      if (bridge_port_send(last, pkt) < 0)
+        {
+          bridge_port_drop(last, pkt);
+        }
+
       return true;
     }
 
   pkt = bridge_clone(br, pkt);
   if (pkt != NULL)
     {
-      bridge_port_send(last, pkt);
+      if (bridge_port_send(last, pkt) < 0)
+        {
+          bridge_port_drop(last, pkt);
+        }
     }
   else
     {
@@ -580,6 +638,11 @@ static int bridge_ifdown(FAR struct netdev_lowerhalf_s *dev)
  * Description:
  *   Send a packet of the local host through the bridge.
  *
+ * Returned Value:
+ *   OK when the packet is gone, or -EBUSY to let the upper half queue it
+ *   and offer it again when bridge_txdone() reports room on the egress
+ *   port.  Only the single-port case can be retried, see bridge_flood().
+ *
  ****************************************************************************/
 
 static int bridge_transmit(FAR struct netdev_lowerhalf_s *dev,
@@ -588,6 +651,7 @@ static int bridge_transmit(FAR struct netdev_lowerhalf_s *dev,
   FAR struct bridge_s *br = (FAR struct bridge_s *)dev;
   FAR const uint8_t *dest = netpkt_getdata(dev, pkt);
   FAR struct bridge_port_s *outport = NULL;
+  int ret = OK;
 
   nxmutex_lock(&br->br_lock);
 
@@ -598,18 +662,25 @@ static int bridge_transmit(FAR struct netdev_lowerhalf_s *dev,
 
   if (outport != NULL)
     {
-      bridge_port_send(outport, pkt);
+      ret = bridge_port_send(outport, pkt);
+      if (ret < 0 && ret != -EBUSY)
+        {
+          bridge_port_drop(outport, pkt);
+          ret = OK;
+        }
     }
   else if (!bridge_flood(br, NULL, pkt, true))
     {
+      /* No port at all, nobody took the packet */
+
       iob_free_chain(pkt);
     }
 
-  /* The packet is gone, the quota of the bridge now follows the ports */
+  /* The quota of the bridge now follows the ports */
 
   bridge_update_quota(br);
   nxmutex_unlock(&br->br_lock);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -967,6 +1038,12 @@ static int bridge_delbr(FAR const char *name)
         }
     }
 
+  /* A deferred resume may still reference the bridge, and it must be gone
+   * before the unregistering frees the upper half it resumes.
+   */
+
+  work_cancel_sync(LPWORK, &br->br_txdone);
+
   netdev_lower_unregister(&br->br_dev);
 
   nxmutex_destroy(&br->br_lock);
@@ -1217,7 +1294,10 @@ void bridge_input(FAR struct bridge_port_s *port, FAR netpkt_t *pkt)
         }
       else if (outport != port)
         {
-          bridge_port_send(outport, pkt);
+          if (bridge_port_send(outport, pkt) < 0)
+            {
+              bridge_port_drop(outport, pkt);
+            }
         }
       else
         {
@@ -1240,28 +1320,62 @@ void bridge_input(FAR struct bridge_port_s *port, FAR netpkt_t *pkt)
 }
 
 /****************************************************************************
+ * Name: bridge_txdone_work
+ ****************************************************************************/
+
+static void bridge_txdone_work(FAR void *arg)
+{
+  netdev_lower_txdone(&((FAR struct bridge_s *)arg)->br_dev);
+}
+
+/****************************************************************************
  * Name: bridge_txdone
  ****************************************************************************/
 
 void bridge_txdone(FAR struct bridge_port_s *port)
 {
-  netdev_lower_txdone(&port->bp_bridge->br_dev);
+  FAR struct bridge_s *br = port->bp_bridge;
+
+  /* Resuming the bridge device takes its device lock and enters the network
+   * stack, so it cannot be done here in two cases: in an interrupt handler,
+   * which a port driver may report a completed transmission from, and with
+   * br_lock held, which must not be held when a device lock is taken.  A
+   * port whose transmit operation completes synchronously gets here from
+   * bridge_port_send(), that is from under br_lock.
+   */
+
+  if (up_interrupt_context() || nxmutex_is_hold(&br->br_lock))
+    {
+      if (work_available(&br->br_txdone))
+        {
+          work_queue(LPWORK, &br->br_txdone, bridge_txdone_work, br, 0);
+        }
+    }
+  else
+    {
+      netdev_lower_txdone(&br->br_dev);
+    }
 }
 
 /****************************************************************************
- * Name: bridge_port_detach
+ * Name: bridge_port_detach_locked
+ *
+ * Description:
+ *   Remove a device from the bridge it is a port of, if any.
+ *
+ * Assumptions:
+ *   Called with g_bridge_lock held.
+ *
  ****************************************************************************/
 
-void bridge_port_detach(FAR struct netdev_lowerhalf_s *dev)
+static void bridge_port_detach_locked(FAR struct netdev_lowerhalf_s *dev)
 {
   FAR struct bridge_s *br;
   int i;
 
   /* The port structure of the device may have moved since the caller looked
-   * at it, so find it again with g_bridge_lock held.
+   * at it, so find it again under the lock.
    */
-
-  nxmutex_lock(&g_bridge_lock);
 
   for (br = g_bridges; br != NULL; br = br->br_flink)
     {
@@ -1271,11 +1385,30 @@ void bridge_port_detach(FAR struct netdev_lowerhalf_s *dev)
           if (br->br_ports[i].bp_dev == dev)
             {
               bridge_delport(&br->br_ports[i]);
-              nxmutex_unlock(&g_bridge_lock);
               return;
             }
         }
     }
+}
 
+/****************************************************************************
+ * Name: bridge_port_detach
+ ****************************************************************************/
+
+void bridge_port_detach(FAR struct netdev_lowerhalf_s *dev)
+{
+  /* Reached from netdev_lower_unregister(), which bridge_delbr() calls with
+   * g_bridge_lock held to unregister the bridge device itself.  The ports
+   * are already gone by then, so there is nothing to look up and the lock
+   * must not be taken again.
+   */
+
+  if (nxmutex_is_hold(&g_bridge_lock))
+    {
+      return;
+    }
+
+  nxmutex_lock(&g_bridge_lock);
+  bridge_port_detach_locked(dev);
   nxmutex_unlock(&g_bridge_lock);
 }
