@@ -27,7 +27,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/addrenv.h>
 #include <nuttx/elf.h>
 #include <nuttx/lib/elf.h>
 

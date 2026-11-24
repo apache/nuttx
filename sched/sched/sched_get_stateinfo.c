@@ -31,6 +31,7 @@
 #include <semaphore.h>
 #include <nuttx/mutex.h>
 #include <nuttx/irq.h>
+#include <nuttx/addrenv.h>
 #include "nuttx/sched.h"
 
 /****************************************************************************
@@ -102,6 +103,7 @@ void nxsched_get_stateinfo(FAR struct tcb_s *tcb, FAR char *state,
       ((FAR sem_t *)(tcb->waitobj))->flags & SEM_TYPE_MUTEX)
     {
       pid_t holder = nxmutex_get_holder((FAR mutex_t *)tcb->waitobj);
+
       leave_critical_section(flags);
 
       snprintf(state, length, "Waiting,Mutex:%d", holder);

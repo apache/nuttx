@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <syslog.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/kasan.h>
 #include <nuttx/mm/mempool.h>

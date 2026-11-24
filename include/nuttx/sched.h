@@ -39,7 +39,6 @@
 #include <pthread.h>
 #include <time.h>
 
-#include <nuttx/addrenv.h>
 #include <nuttx/irq.h>
 #include <nuttx/percpu.h>
 #include <nuttx/clock.h>
@@ -251,6 +250,10 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+#ifdef CONFIG_ARCH_ADDRENV
+struct addrenv_s; /* Forward definition to avoid including addrenv.h */
+#endif
 
 /* General Task Management Types ********************************************/
 

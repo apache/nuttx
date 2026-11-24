@@ -30,6 +30,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/addrenv.h>
 #include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>

@@ -34,6 +34,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/init.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mtd/mtd.h>
@@ -352,6 +353,7 @@ void spi_flash_encrypt_ll_plaintext_save(uint32_t address,
 {
   uint32_t plaintext_offs =
       (address % SOC_FLASH_ENCRYPTED_XTS_AES_BLOCK_MAX);
+
   DEBUGASSERT(
       plaintext_offs + size <= SOC_FLASH_ENCRYPTED_XTS_AES_BLOCK_MAX);
   memcpy((void *)(AES_XTS_PLAIN_BASE + plaintext_offs), buffer, size);
@@ -655,6 +657,7 @@ int spi_flash_write_encrypted_manu(uint32_t address, const void *buffer,
     }
 
   const uint8_t *data_bytes = (const uint8_t *)buffer;
+
   esp_flash_encryption->flash_encryption_enable();
   while (length > 0)
     {
@@ -1489,6 +1492,7 @@ static int esp32s3_ioctl(struct mtd_dev_s *dev, int cmd,
                          unsigned long arg)
 {
   int ret = OK;
+
   finfo("cmd: %d\n", cmd);
 
   switch (cmd)
@@ -1497,6 +1501,7 @@ static int esp32s3_ioctl(struct mtd_dev_s *dev, int cmd,
         {
           struct esp32s3_mtd_dev_s *priv = (struct esp32s3_mtd_dev_s *)dev;
           struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
+
           if (geo)
             {
               memset(geo, 0, sizeof(*geo));
@@ -1517,6 +1522,7 @@ static int esp32s3_ioctl(struct mtd_dev_s *dev, int cmd,
         {
           struct esp32s3_mtd_dev_s *priv = (struct esp32s3_mtd_dev_s *)dev;
           struct partition_info_s *info = (struct partition_info_s *)arg;
+
           if (info != NULL)
             {
               info->numsectors  = MTD_SIZE(priv) / MTD_BLK_SIZE;
@@ -1530,6 +1536,7 @@ static int esp32s3_ioctl(struct mtd_dev_s *dev, int cmd,
       case MTDIOC_ERASESTATE:
         {
           uint8_t *result = (uint8_t *)arg;
+
           *result = MTD_ERASED_STATE;
 
           ret = OK;

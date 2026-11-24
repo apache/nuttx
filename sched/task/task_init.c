@@ -34,6 +34,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/queue.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/sched.h>
 #include <nuttx/trace.h>
 #include <nuttx/environ.h>

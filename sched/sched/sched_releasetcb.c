@@ -31,6 +31,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/sched.h>
 
 #include "task/task.h"

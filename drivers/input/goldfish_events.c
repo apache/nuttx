@@ -30,6 +30,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/queue.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/wqueue.h>
 
 #include <nuttx/input/goldfish_events.h>
 #include <nuttx/input/mouse.h>

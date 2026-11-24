@@ -37,6 +37,7 @@
 
 #include <nuttx/queue.h>
 #include <nuttx/sched.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
