@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-if(CONFIG_LIB_GDBSTUB)
+if(CONFIG_LIBC_GDBSTUB)
   target_sources(c PRIVATE lib_gdbstub.c)
 
   if(CONFIG_MM_KASAN)
