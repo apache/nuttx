@@ -40,10 +40,6 @@ if(CONFIG_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()
 
-if(CONFIG_STM32_FDCAN_CHARDRIVER)
-  list(APPEND SRCS stm32_fdcan.c)
-endif()
-
 if(CONFIG_STM32_ICACHE)
   list(APPEND SRCS stm32_icache.c)
 endif()

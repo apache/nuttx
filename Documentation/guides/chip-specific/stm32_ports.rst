@@ -280,7 +280,7 @@ Peripheral    Core version  Driver
 ============  ============  =================================================
 ADC           v1            arch/arm/src/common/stm32/stm32_adc_m0_v1.c      
 AES/CRYP      v1            not supported                                    
-CAN/FDCAN     FDCAN         arch/arm/src/common/stm32/stm32_fdcan_m0_v1.c    
+CAN/FDCAN     FDCAN         arch/arm/src/common/stm32/stm32_fdcan_mcan_v1.c  
 CRC           to be done    not supported                                    
 DAC           v1            not supported                                    
 DBGMCU        v3            not supported                                    
@@ -641,7 +641,7 @@ Peripheral    Core version  Driver
 ============  ============  ============================================
 ADC           to be done    arch/arm/src/stm32h5/stm32_adc.c       
 AES/CRYP      to be done    not supported                          
-CAN/FDCAN     FDCAN         arch/arm/src/stm32h5/stm32_fdcan.c     
+CAN/FDCAN     FDCAN         arch/arm/src/common/stm32/stm32_fdcan_mcan_v1.c
 DAC           M33 v1        arch/arm/src/common/stm32/stm32_dac_m33_v1.c
 DTS           to be done    arch/arm/src/stm32h5/stm32_dts.c       
 ETH           v2            arch/arm/src/common/stm32/stm32_eth_v2.c

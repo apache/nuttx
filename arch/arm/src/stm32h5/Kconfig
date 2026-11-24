@@ -122,6 +122,7 @@ config STM32_STM32H5XXXX
 	default n
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ICACHE
+	select STM32_HAVE_IP_FDCAN_MCAN_V1
 
 config STM32_STM32H50XXX
 	bool

@@ -27,14 +27,7 @@
  * Included Files
  ****************************************************************************/
 
-#if (defined(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_M0_V1) + \
-     defined(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_M3M4_V1)) > 1
-#  error Only one STM32 FDCAN IP version must be selected
-#endif
-
-#if defined(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_M0_V1)
-#  include "hardware/stm32_fdcan_mcan_m0.h"
-#elif defined(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_M3M4_V1)
+#if defined(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_V1)
 #  include "hardware/stm32_fdcan_mcan.h"
 #else
 #  error "Unsupported STM32 FDCAN"
