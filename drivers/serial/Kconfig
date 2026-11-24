@@ -74,7 +74,7 @@ config SERIAL_CONSOLE
 
 config SERIAL_GDBSTUB
 	bool "GDBSTUB Serial support"
-	depends on LIB_GDBSTUB
+	depends on LIBC_GDBSTUB
 	default n
 
 if SERIAL_GDBSTUB

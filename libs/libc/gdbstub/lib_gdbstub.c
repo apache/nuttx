@@ -44,7 +44,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_GDBSTUB_DEBUG
+#ifdef CONFIG_LIBC_GDBSTUB_DEBUG
 #  define GDB_DEBUG(stat, ...) \
           lib_sprintf((FAR struct lib_outstream_s *)&state->stream, \
                       ##__VA_ARGS__)
@@ -54,7 +54,7 @@
 #  define GDB_ASSERT() do {} while (0)
 #endif
 
-#define BUFSIZE CONFIG_LIB_GDBSTUB_PKTSIZE
+#define BUFSIZE CONFIG_LIBC_GDBSTUB_PKTSIZE
 
 #define REPBIAS 29
 #define REPSIZE (255 - REPBIAS)
@@ -77,7 +77,7 @@
 struct gdb_state_s
 {
   uint8_t running_regs[XCPTCONTEXT_SIZE]; /* Registers of running thread */
-#ifdef CONFIG_LIB_GDBSTUB_DEBUG
+#ifdef CONFIG_LIBC_GDBSTUB_DEBUG
   struct lib_syslograwstream_s stream;
 #endif
   gdb_send_func_t send;                   /* Send buffer to gdb */
@@ -399,7 +399,7 @@ static int gdb_send_packet(FAR struct gdb_state_s *state)
       return ret;
     }
 
-#ifdef CONFIG_LIB_GDBSTUB_DEBUG
+#ifdef CONFIG_LIBC_GDBSTUB_DEBUG
   {
     size_t p;
 
@@ -590,7 +590,7 @@ static int gdb_recv_packet(FAR struct gdb_state_s *state)
       return ret;
     }
 
-#ifdef CONFIG_LIB_GDBSTUB_DEBUG
+#ifdef CONFIG_LIBC_GDBSTUB_DEBUG
   {
     size_t p;
 
@@ -2112,7 +2112,7 @@ FAR struct gdb_state_s *gdb_state_init(gdb_send_func_t send,
   state->priv = priv;
   state->monitor = monitor;
 
-#ifdef CONFIG_LIB_GDBSTUB_DEBUG
+#ifdef CONFIG_LIBC_GDBSTUB_DEBUG
   lib_syslograwstream_open(&state->stream);
 #endif
 

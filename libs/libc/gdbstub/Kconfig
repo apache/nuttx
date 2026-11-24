@@ -24,24 +24,31 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config LIB_GDBSTUB
+config LIBC_GDBSTUB
 	tristate "GDBSTUB"
 	depends on ARCH_HAVE_TCBINFO
 	---help---
 		Enable support for gdbstub.
 
-if LIB_GDBSTUB
+if LIBC_GDBSTUB
 
-config LIB_GDBSTUB_DEBUG
+config LIBC_GDBSTUB_DEBUG
 	bool "Gdbstub Debug Info"
 	default n
 	---help---
 		Add debug info to gdbstub
 
-config LIB_GDBSTUB_PKTSIZE
+config LIBC_GDBSTUB_PKTSIZE
 	int "Gdbstub packet size"
 	default 32768
 	---help---
 		The size of the gdbstub packet buffer.
 
-endif # LIB_GDBSTUB
+endif # LIBC_GDBSTUB
+
+config LIB_GDBSTUB
+	tristate "Deprecated alias for LIBC_GDBSTUB"
+	default LIBC_GDBSTUB
+	depends on LIBC_GDBSTUB
+	---help---
+		Deprecated compatibility alias.  Use LIBC_GDBSTUB instead.

@@ -20,7 +20,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIB_GDBSTUB),y)
+ifeq ($(CONFIG_LIBC_GDBSTUB),y)
 
 # Add the internal C files to the build
 
