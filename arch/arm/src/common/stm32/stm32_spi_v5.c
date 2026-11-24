@@ -2042,6 +2042,15 @@ static int  spi_exchange_nodma(struct spi_dev_s *dev,
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
+  /* Nothing to exchange: starting and suspending a transfer without any
+   * frame never sets SUSP.
+   */
+
+  if (nwords == 0)
+    {
+      return OK;
+    }
+
   /* Disable the DMA Requests */
 
   spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, SPI_CFG1_RXDMAEN |
@@ -2223,6 +2232,11 @@ static int  spi_exchange_dma(struct spi_dev_s *dev, const void *txbuffer,
   void *orig_rxbuffer = rxbuffer;
 
   DEBUGASSERT(priv != NULL);
+
+  if (nwords == 0)
+    {
+      return OK;
+    }
 
   /* Convert the number of word to a number of bytes */
 
