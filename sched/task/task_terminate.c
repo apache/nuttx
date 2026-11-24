@@ -69,6 +69,49 @@ static int terminate_handler(FAR void *cookie)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxtask_wait_holds
+ *
+ * Description:
+ *   Wait until a task marked with TCB_FLAG_KILL_PROCESSING dropped the
+ *   references it holds on other tasks.  It drops them only when it runs,
+ *   so it is woken if stopped, and parks in nxsched_put_tcb().
+ *
+ ****************************************************************************/
+
+void nxtask_wait_holds(FAR struct tcb_s *tcb)
+{
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+  irqstate_t flags;
+#endif
+
+  SMP_MB();
+
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+  /* A stopped task never reaches nxsched_put_tcb(): wake it alone. */
+
+  flags = enter_critical_section();
+  if (atomic_read(&tcb->holds) > 0 &&
+      tcb->task_state == TSTATE_TASK_STOPPED)
+    {
+      FAR struct tcb_s *rtcb = this_task();
+
+      nxsched_remove_blocked(tcb);
+      if (nxsched_add_readytorun(tcb))
+        {
+          up_switch_context(this_task(), rtcb);
+        }
+    }
+
+  leave_critical_section(flags);
+#endif
+
+  while (atomic_read(&tcb->holds) > 0)
+    {
+      nxsem_wait(&tcb->exit_sem);
+    }
+}
+
+/****************************************************************************
  * Name: nxtask_terminate
  *
  * Description:
@@ -122,6 +165,15 @@ int nxtask_terminate(pid_t pid)
    */
 
   nxsched_put_tcb(dtcb);
+
+  /* The flag must be set before nxtask_wait_holds() reads holds: the
+   * target parks itself at its last nxsched_put_tcb() only when it sees
+   * it, and a restarted task must keep running, hence the flag only here.
+   */
+
+  atomic_or(&dtcb->shared_flags, TCB_FLAG_KILL_PROCESSING);
+
+  nxtask_wait_holds(dtcb);
 
   flags = enter_critical_section();
 

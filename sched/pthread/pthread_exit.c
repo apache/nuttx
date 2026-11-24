@@ -76,8 +76,6 @@ void nx_pthread_exit(FAR void *exit_value)
 
   DEBUGASSERT(tcb != NULL);
 
-  atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING);
-
   /* Block any signal actions that would awaken us while were
    * are performing the JOIN handshake.
    */
@@ -99,15 +97,22 @@ void nx_pthread_exit(FAR void *exit_value)
       _exit(EXIT_FAILURE);
     }
 
+  /* If the TCB is already in the exiting state, we should allow the
+   * killing task to execute normally first.  We stop the execution here.
+   * The flag is set late, after the join handshake: setting it here
+   * would refuse the signals that the join handshake still exchanges.
+   */
+
+  /* Set-and-test, like _exit(): if nxtask_terminate() won the
+   * arbitration in the same window, it tears the thread down and we
+   * park instead of racing it through the exit path.
+   */
+
   flags = enter_critical_section();
-  if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
+  if ((atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING) &
+       TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       leave_critical_section(flags);
-
-      /* If the TCB is already in the exiting state, we
-       * should allow the killing task to execute normally first.
-       * We stop the execution here.
-       */
 
       for (; ; )
         {
@@ -115,8 +120,13 @@ void nx_pthread_exit(FAR void *exit_value)
         }
     }
 
-  atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING);
   leave_critical_section(flags);
+
+  /* A thread leaving on its own must have dropped every reference it
+   * took: kernel paths finish before pthread_exit() can be called.
+   */
+
+  DEBUGASSERT(atomic_read(&tcb->holds) == 0);
 
   /* Make sure that we are in a critical section with local interrupts.
    * The IRQ state will be restored when the next task is started.

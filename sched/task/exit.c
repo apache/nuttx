@@ -88,6 +88,12 @@ void _exit(int status)
 
   atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING);
 
+  /* A task leaving on its own must have dropped every reference it
+   * took: kernel paths finish before exit() can be called.
+   */
+
+  DEBUGASSERT(atomic_read(&tcb->holds) == 0);
+
   enter_critical_section();
 
   nxtask_exithook(tcb, status);

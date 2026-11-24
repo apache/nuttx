@@ -127,7 +127,18 @@ static void report_child(FAR struct tcb_s *rtcb,
 static void child_handler(FAR struct tcb_s *tcb, FAR void *arg)
 {
   FAR struct child_search_s *search = arg;
-  FAR struct task_group_s *group = tcb->group;
+  FAR struct task_group_s *group;
+
+  /* An exiting task may already have lost its task group; the reference
+   * nxsched_foreach() holds keeps the TCB alive, not the group.
+   */
+
+  if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      return;
+    }
+
+  group = tcb->group;
 
   if (group == NULL || group == search->group ||
       group->tg_ppid != search->group->tg_pid)

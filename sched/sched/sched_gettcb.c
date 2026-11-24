@@ -27,6 +27,7 @@
 #include <sys/types.h>
 
 #include <sched.h>
+#include <stdbool.h>
 
 #include "nuttx/irq.h"
 
@@ -87,7 +88,7 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
            * number of references that this_task makes to other tasks.
            */
 
-          atomic_add(&this_task()->refs, 1);
+          atomic_add(&this_task()->holds, 1);
         }
 
       atomic_add(&ret->refs, 1);
@@ -141,26 +142,40 @@ void nxsched_put_tcb(FAR struct tcb_s *tcb)
 
   tcb = this_task();
 
-  DEBUGASSERT(atomic_read(&tcb->refs) > 0);
+  DEBUGASSERT(atomic_read(&tcb->holds) > 0);
 
-  /* this_task may be killed and in KILL_PROCESSING */
+  /* this_task may be killed and in KILL_PROCESSING: nxtask_terminate()
+   * sets the flag before it reads holds, so order our decrement before
+   * the flag read.
+   */
 
-  if (atomic_sub(&tcb->refs, 1) == 1 &&
-      (atomic_read(&tcb->shared_flags) & TCB_FLAG_KILL_PROCESSING))
+  bool last = atomic_sub(&tcb->holds, 1) == 1;
+
+  SMP_MB();
+
+  if (last &&
+      (atomic_read(&tcb->shared_flags) &
+       (TCB_FLAG_KILL_PROCESSING | TCB_FLAG_EXIT_PROCESSING)) != 0)
     {
-      nxsem_post(&tcb->exit_sem);
-
-      /* If the TCB is already in the exiting state, we
-       * should allow the exiting task to execute normally first.
-       * We stop the execution here.
-       *
-       * If it continues to run, it may happen that we obtain
-       * the TCB again and it gets killed.
+      /* Wake nxtask_terminate() or nxtask_restart() waiting for the
+       * references to be dropped.
        */
 
-      for (; ; )
+      nxsem_post(&tcb->exit_sem);
+
+      /* A killed task stops here: if it kept running it could take the
+       * TCB again and be killed again.  A restarted task must keep
+       * running until it is reset.
+       */
+
+      if ((atomic_read(&tcb->shared_flags) &
+           TCB_FLAG_KILL_PROCESSING) != 0)
         {
-          usleep(1000);
+          for (; ; )
+            {
+              usleep(1000);
+            }
         }
     }
 }
+

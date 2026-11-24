@@ -59,6 +59,7 @@ void nxtask_setup_name(FAR struct tcb_s *tcb, FAR const char *name);
 
 int  nxtask_exit(void);
 int  nxtask_terminate(pid_t pid);
+void nxtask_wait_holds(FAR struct tcb_s *tcb);
 void nxtask_exithook(FAR struct tcb_s *tcb, int status);
 void nxtask_recover(FAR struct tcb_s *tcb);
 

@@ -113,6 +113,16 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
 
   flags = enter_critical_section();
 
+  /* A task being terminated must not stop: nxtask_terminate() waits for
+   * it to drop its TCB references.
+   */
+
+  if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      leave_critical_section(flags);
+      return;
+    }
+
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* Check if received SIGCONT */
 

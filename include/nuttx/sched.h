@@ -697,6 +697,10 @@ struct tcb_s
 
   atomic_t refs;
 
+  /* The total number of references that we hold on other tasks */
+
+  atomic_t holds;
+
   /* When we exit, we need post this sem. */
 
   sem_t    exit_sem;
