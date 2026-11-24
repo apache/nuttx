@@ -30,6 +30,10 @@
 
 #include "tricore_internal.h"
 
+#ifdef CONFIG_SMP
+#  include "tricore_smp.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -41,6 +45,13 @@
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 uintptr_t up_get_intstackbase(int cpu)
 {
+#ifdef CONFIG_SMP
+  if (cpu > 0 && cpu < CONFIG_SMP_NCPUS)
+    {
+      return TRICORE_SMP_CPU_DSPR(cpu) + TRICORE_SMP_CSA_SIZE;
+    }
+#endif
+
   return (uintptr_t)g_intstackalloc;
 }
 #endif

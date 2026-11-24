@@ -75,6 +75,10 @@ if(CONFIG_ARCH_HAVE_DEBUG)
   list(APPEND SRCS tricore_hwdebug.c)
 endif()
 
+if(CONFIG_SMP)
+  list(APPEND SRCS tricore_cpustart.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
 target_sources(nuttx PRIVATE tricore_doirq.c)
 

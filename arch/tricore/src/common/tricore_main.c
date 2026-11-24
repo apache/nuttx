@@ -40,22 +40,28 @@
  * Public Data
  ****************************************************************************/
 
-/* Entries of the other cores, provided by the linker script */
+/* Entries of the other cores, provided by the linker script.  With SMP the
+ * other cores run this image instead, up_cpu_start() starts them.
+ */
 
+#ifndef CONFIG_SMP
 extern uintptr_t __start1[];
 extern uintptr_t __start2[];
 extern uintptr_t __start3[];
 extern uintptr_t __start4[];
 extern uintptr_t __start5[];
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+#ifndef CONFIG_SMP
 static uintptr_t * const g_tricore_entry[] =
 {
   __start1, __start2, __start3, __start4, __start5
 };
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -71,6 +77,7 @@ static uintptr_t * const g_tricore_entry[] =
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SMP
 static void tricore_core_sync(volatile uint32_t *sync)
 {
   uint32_t core = tricore_core_id();
@@ -99,6 +106,7 @@ static void tricore_core_sync(volatile uint32_t *sync)
 #endif
     }
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -115,7 +123,9 @@ static void tricore_core_sync(volatile uint32_t *sync)
 
 void tricore_main(void)
 {
+#ifndef CONFIG_SMP
   static volatile uint32_t g_sync_event;
+#endif
 
 #ifdef CONFIG_ARCH_HAVE_FPU
   tricore_fpuinit();
@@ -131,7 +141,9 @@ void tricore_main(void)
 
   /* Wait for CPU sync event */
 
+#ifndef CONFIG_SMP
   tricore_core_sync(&g_sync_event);
+#endif
 
   if (tricore_core_index() == 0)
     {
@@ -159,6 +171,7 @@ void tricore_main(void)
 
 void tricore_start(void)
 {
+#ifndef CONFIG_SMP
   int cpu;
 
   for (cpu = 1; cpu <= TRICORE_START_CORES; cpu++)
@@ -173,6 +186,7 @@ void tricore_start(void)
                    TRICORE_START_HALT(cpu));
         }
     }
+#endif
 
   tricore_main();
 }

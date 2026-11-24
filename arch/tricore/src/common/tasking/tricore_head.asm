@@ -34,11 +34,11 @@
 #define TRICORE_PSW_RESET  0x980   /* Supervisor, call depth counting on */
 #define TRICORE_BIV_VECTOR 0x1fe0  /* Single interrupt vector at INTTAB + 0x1fe0 */
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
-#  define TC3XX_WDTCPU0_CON0 0xf003624c  /* CPU0 watchdog CON0, 0xc apart per CPU */
+#ifdef CONFIG_ARCH_CHIP_TC3X
+#  define TC3X_WDTCPU0_CON0 0xf003624c   /* CPU0 watchdog CON0, 0xc apart per CPU */
 #endif
-#ifdef CONFIG_ARCH_CHIP_TC4XX
-#  define TC4XX_PSW_VIRT   0xb00       /* PSW for disabling the virtualization */
+#ifdef CONFIG_ARCH_CHIP_TC4X
+#  define TC4X_PSW_VIRT    0xb00       /* PSW for disabling the virtualization */
 #endif
 
 /* Make the CSA link word of the CSA address in addr: the segment in bits
@@ -70,7 +70,7 @@ tricore_csa_link .macro addr, tmp1, tmp2
 	.extern	__TRAPTAB_CPU0
 	.extern	__INTTAB_CPU0
 	.extern	__psram_ustack
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_TC4X
 	.extern	__psram_boot_csa
 	.extern	__psram_boot_csa_end
 	.extern	tricore_ram_init
@@ -116,8 +116,8 @@ tricore_head:
 	movh.a	a9, #@HIS(__a9_mem)
 	lea	a9, [a9]@LOS(__a9_mem)
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
-	jl	tc3xx_endinit_clear
+#ifdef CONFIG_ARCH_CHIP_TC3X
+	jl	tc3x_endinit_clear
 
 #endif
 	movh.a	a15, #@HIS(__TRAPTAB_CPU0)
@@ -126,7 +126,7 @@ tricore_head:
 	mtcr	#TRICORE_CPU_BTV, d15
 	isync
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_TC4X
 	movh.a	a15, #@HIS(__psram_boot_csa)
 	lea	a15, [a15]@LOS(__psram_boot_csa)
 	mov.d	d15, a15
@@ -213,8 +213,8 @@ tricore_head:
 	mtcr	#TRICORE_CPU_LCX, d15
 	isync
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
-	jl	tc3xx_endinit_set
+#ifdef CONFIG_ARCH_CHIP_TC3X
+	jl	tc3x_endinit_set
 
 #endif
 	movh.a	a10, #@HIS(__ustack)
@@ -225,7 +225,7 @@ tricore_head:
 	mtcr	#TRICORE_CPU_PSW, d0
 	isync
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_TC3X
 	call	tricore_wdt_disable
 
 #endif
@@ -266,23 +266,23 @@ tricore_head:
 	lea	a15, [a15]@LOS(tricore_start)
 	ji	a15
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
+#ifdef CONFIG_ARCH_CHIP_TC3X
 /****************************************************************************
- * Name: tc3xx_endinit_clear, tc3xx_endinit_set
+ * Name: tc3x_endinit_clear, tc3x_endinit_set
  *
  * Description:
- *   Clear (tc3xx_endinit_clear) or set (tc3xx_endinit_set) the ENDINIT
+ *   Clear (tc3x_endinit_clear) or set (tc3x_endinit_set) the ENDINIT
  *   of the watchdog of the calling CPU with the password and the lock
  *   sequence, and wait until it has changed.  Called with jl, before
  *   any CSA exists.  CPU5 has the core ID 6 on TC39x.
  *
  ****************************************************************************/
 
-tc3xx_endinit_clear:
+tc3x_endinit_clear:
 	mov	d5, #0
 	j	2n
 
-tc3xx_endinit_set:
+tc3x_endinit_set:
 	mov	d5, #1
 2:
 	mfcr	d4, #TRICORE_CPU_CORE_ID
@@ -292,8 +292,8 @@ tc3xx_endinit_set:
 3:
 	sh	d15, d4, #1
 	add	d4, d15, d4
-	movh.a	a15, #@HIS(TC3XX_WDTCPU0_CON0)
-	lea	a15, [a15]@LOS(TC3XX_WDTCPU0_CON0)
+	movh.a	a15, #@HIS(TC3X_WDTCPU0_CON0)
+	lea	a15, [a15]@LOS(TC3X_WDTCPU0_CON0)
 	addsc.a	a15, a15, d4, #2
 
 	; Password access with the inverted password bits 7:2, then the
@@ -313,7 +313,7 @@ tc3xx_endinit_set:
 	ji	a11
 #endif
 
-#ifdef CONFIG_ARCH_CHIP_TC4XX
+#ifdef CONFIG_ARCH_CHIP_TC4X
 /****************************************************************************
  * Name: tricore_virt_off
  *
@@ -326,7 +326,7 @@ tricore_virt_off:
 	mov	d0, #0
 	mtcr	#TRICORE_CPU_VCON0, d0
 	isync
-	mov	d0, #TC4XX_PSW_VIRT
+	mov	d0, #TC4X_PSW_VIRT
 	mtcr	#TRICORE_CPU_PSW, d0
 	isync
 	rfh

@@ -32,6 +32,10 @@
 
 #include "tricore_internal.h"
 
+#ifdef CONFIG_SMP
+#  include "tricore_smp.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -77,7 +81,12 @@ void up_idle(void)
   board_autoled_off(LED_CPU);
 #endif
 
+#ifdef CONFIG_SMP
+  tricore_csa_balance();
+  __asm__ __volatile__ ("enable\n\twait" : : : "memory");
+#else
   tricore_idle_loop();
+#endif
 
 #endif
 }

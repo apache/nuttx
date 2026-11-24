@@ -81,8 +81,12 @@ config ARCH_FAMILY
 	default "tc1v6"		if ARCH_TC1V6
 	default "tc1v8"		if ARCH_TC1V8
 
-config ARCH_CHIP_TC3XX
-	bool "infineon aurix tc3xx"
+choice
+	prompt "AURIX family"
+	default ARCH_CHIP_TC3X
+
+config ARCH_CHIP_TC3X
+	bool "Infineon AURIX TC3x"
 	select ARCH_TC1V6
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_MULTICPU
@@ -93,10 +97,10 @@ config ARCH_CHIP_TC3XX
 	select ONESHOT
 	select ONESHOT_COUNT
 	---help---
-		Infineon aurix tc3xx (six cores)
+		Infineon AURIX TC3x (six cores)
 
-config ARCH_CHIP_TC4XX
-	bool "infineon aurix tc4xx"
+config ARCH_CHIP_TC4X
+	bool "Infineon AURIX TC4x"
 	select ARCH_TC1V8
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_FPU if !TRICORE_CSRM
@@ -109,12 +113,14 @@ config ARCH_CHIP_TC4XX
 	select ONESHOT_COUNT
 	select HAVE_SECURITY_CORE
 	---help---
-		Infineon aurix tc4xx (six cores and one security core)
+		Infineon AURIX TC4x (six cores and one security core)
+
+endchoice # AURIX family
 
 config ARCH_CHIP
 	string
-	default "tc3xx"		if ARCH_CHIP_TC3XX
-	default "tc4xx"		if ARCH_CHIP_TC4XX
+	default "tc3x"		if ARCH_CHIP_TC3X
+	default "tc4x"		if ARCH_CHIP_TC4X
 
 config ARCH_IRQ_DISABLE_PRIORITY
 	int "IRQ disable priority threshold"
@@ -159,7 +165,7 @@ config ARCH_HAVE_PPRS
 config HAVE_SECURITY_CORE
 	bool
 	---help---
-		In addition to the 6 cores, tc4xx also has one more security core.
+		In addition to the 6 cores, tc4x also has one more security core.
 
 config CPU_COREID
 	int "TRICORE CPU CORE ID"
@@ -174,12 +180,27 @@ config TRICORE_TRAP_ALERT
 		Print the trap name and reason before the trap panics.  The
 		panic message has the trap class and TIN in any case.
 
-if ARCH_CHIP_TC3XX
-source "arch/tricore/src/tc3xx/Kconfig"
+source "arch/tricore/src/common/aurix/Kconfig"
+
+if SMP
+
+config TRICORE_SMP_CSA_COUNT
+	int "CSA frames of each secondary CPU"
+	default 512
+	---help---
+		CPU1 and up build their pool of context save areas at the start
+		of their own data scratchpad RAM, followed by their interrupt
+		stack and their idle stack.  CPU0 keeps the pool of the linker
+		script.
+
+endif # SMP
+
+if ARCH_CHIP_TC3X
+source "arch/tricore/src/tc3x/Kconfig"
 endif
 
-if ARCH_CHIP_TC4XX
-source "arch/tricore/src/tc4xx/Kconfig"
+if ARCH_CHIP_TC4X
+source "arch/tricore/src/tc4x/Kconfig"
 endif
 
 endif # ARCH_TRICORE

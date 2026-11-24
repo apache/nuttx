@@ -41,6 +41,10 @@
 
 #include "tricore_internal.h"
 
+#ifdef CONFIG_SMP
+#  include "tricore_smp.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -57,7 +61,7 @@
 void tricore_doirq(void)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
-  struct tcb_s *tcb = this_task();
+  struct tcb_s *tcb;
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
@@ -78,6 +82,8 @@ void tricore_doirq(void)
   tricore_ack_irq(irq);
 
   irq_dispatch(irq, regs);
+
+  tcb = this_task();
 
   /* Check for a context switch. */
 
@@ -109,6 +115,10 @@ void tricore_doirq(void)
        */
 
       *running_task = tcb;
+
+#ifdef CONFIG_SMP
+      tricore_csa_switch_balance();
+#endif
 
       tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
       UP_ISB();

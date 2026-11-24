@@ -138,8 +138,12 @@ void mm_unlock(FAR struct mm_heap_s *heap)
 
 irqstate_t mm_lock_irq(FAR struct mm_heap_s *heap)
 {
+#ifdef CONFIG_SMP
+  return spin_lock_irqsave(&heap->mm_delaylock);
+#else
   UNUSED(heap);
   return up_irq_save();
+#endif
 }
 
 /****************************************************************************
@@ -152,6 +156,10 @@ irqstate_t mm_lock_irq(FAR struct mm_heap_s *heap)
 
 void mm_unlock_irq(FAR struct mm_heap_s *heap, irqstate_t state)
 {
+#ifdef CONFIG_SMP
+  spin_unlock_irqrestore(&heap->mm_delaylock, state);
+#else
   UNUSED(heap);
   up_irq_restore(state);
+#endif
 }

@@ -68,8 +68,8 @@
 #define TC_TREVT_TYP_OFF              12      /* 0: watchpoint 1: breakpoint */
 #define TC_TREVT_AST_OFF              27      /* Address store trigger */
 #define TC_TREVT_ALD_OFF              28      /* Address load trigger */
-#define TC_TREVT_EVTA_MSK             0x7     /* EVTA field mask (tc3xx) */
-#define TC_TREVT_EN_MSK               0x1     /* EN bit mask (tc4xx) */
+#define TC_TREVT_EVTA_MSK             0x7     /* EVTA field mask (tc3x) */
+#define TC_TREVT_EN_MSK               0x1     /* EN bit mask (tc4x) */
 #define TC_DBGSR_EVTSRC_OFF           8
 #define TC_DBGSR_EVTSRC_MSK           0x1f
 
@@ -94,7 +94,7 @@
 #define TREVT_DEBUG_WP_ALD            (1 << TC_TREVT_ALD_OFF)
 #define TREVT_DEBUG_WP_ASTLD          (TREVT_DEBUG_WP_AST | TREVT_DEBUG_WP_ALD)
 
-/* Register TREVT[2:0] have difference between tc3xx and tc4xx */
+/* Register TREVT[2:0] have difference between tc3x and tc4x */
 
 #ifdef CONFIG_ARCH_TC1V6
   #define TREVT_CFG_REG_EN_MASK       TC_TREVT_EVTA_MSK
