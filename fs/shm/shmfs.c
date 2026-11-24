@@ -28,6 +28,7 @@
 #include <debug.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/param.h>
@@ -140,6 +141,35 @@ static void shmfs_copy(FAR struct shmfs_object_s *sho, off_t pos,
     {
       memcpy(buffer, (FAR char *)sho->paddr + pos, len);
     }
+#endif
+}
+
+/****************************************************************************
+ * Name: shmfs_copy_buffer
+ *
+ * Description:
+ *   Copy the first len bytes of the object's backing store into paddr, a
+ *   buffer returned by shmfs_alloc_buffer().
+ *
+ ****************************************************************************/
+
+static void shmfs_copy_buffer(FAR void *paddr,
+                              FAR struct shmfs_object_s *sho, size_t len)
+{
+#ifdef CONFIG_BUILD_KERNEL
+  FAR uintptr_t *dst = paddr;
+  FAR uintptr_t *src = sho->paddr;
+  size_t n;
+  size_t i;
+
+  for (i = 0; len > 0; i++, len -= n)
+    {
+      n = MIN(len, MM_PGSIZE);
+      memcpy((FAR void *)up_addrenv_page_vaddr(dst[i]),
+             (FAR const void *)up_addrenv_page_vaddr(src[i]), n);
+    }
+#else
+  memcpy(paddr, sho->paddr, len);
 #endif
 }
 
@@ -293,11 +323,17 @@ static int shmfs_close(FAR struct file *filep)
 static int shmfs_truncate(FAR struct file *filep, off_t length)
 {
   FAR struct shmfs_object_s *object;
+  FAR void *paddr = NULL;
   int ret;
 
-  if (length == 0)
+  if (length < 0)
     {
       return -EINVAL;
+    }
+
+  if ((uintmax_t)length > SIZE_MAX)
+    {
+      return -EFBIG;
     }
 
   object = filep->f_inode->i_private;
@@ -309,26 +345,48 @@ static int shmfs_truncate(FAR struct file *filep, off_t length)
       return ret;
     }
 
-  if (object->paddr == NULL)
+  if (object->paddr != NULL && object->length == length)
     {
-      object->paddr = shmfs_alloc_buffer(length);
-      if (object->paddr != NULL)
-        {
-          object->length = length;
-          filep->f_inode->i_size = length;
-        }
-      else
+      goto out;
+    }
+
+  /* A mapping points into the backing store, so it can only be replaced
+   * while the object is not mapped.
+   */
+
+  if (atomic_read(&object->nmaps) > 0)
+    {
+      ret = -EBUSY;
+      goto out;
+    }
+
+  /* Resize by moving the data to a new buffer; the new part reads back as
+   * zeros because shmfs_alloc_buffer() clears it.  Length 0 drops the
+   * backing store.
+   */
+
+  if (length > 0)
+    {
+      paddr = shmfs_alloc_buffer(length);
+      if (paddr == NULL)
         {
           ret = -ENOMEM;
+          goto out;
+        }
+
+      if (object->paddr != NULL)
+        {
+          shmfs_copy_buffer(paddr, object,
+                            MIN(object->length, (size_t)length));
         }
     }
-  else if (object->length != length)
-    {
-      /* This doesn't support resize */
 
-      ret = -EINVAL;
-    }
+  shmfs_free_buffer(object);
+  object->paddr  = paddr;
+  object->length = length;
+  filep->f_inode->i_size = length;
 
+out:
   nxmutex_unlock(&object->lock);
   return ret;
 }
