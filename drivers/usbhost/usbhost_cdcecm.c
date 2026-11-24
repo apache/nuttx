@@ -1291,8 +1291,6 @@ static inline int usbhost_devinit(FAR struct usbhost_cdcecm_s *priv)
          priv->macaddr, sizeof(priv->macaddr));
 
   dev->ops = &g_cdcecm_netdev_ops;
-  dev->quota[NETPKT_TX] = 1;
-  dev->quota[NETPKT_RX] = 1;
   dev->rxtype           = NETDEV_RX_WORK;
   dev->priority         = LPWORK;
 

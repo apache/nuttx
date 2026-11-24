@@ -82,14 +82,6 @@
 
 /* SocketCAN specific */
 
-#ifdef CONFIG_CAN_CTUCANFD_SOCKET
-#  define CTUCANFD_TX_QUOTA   CTUCANFD_TXBUF_CNT
-#  define CTUCANFD_RX_QUOTA   1
-#  if CONFIG_IOB_NBUFFERS < (CTUCANFD_RX_QUOTA + CTUCANFD_TX_QUOTA)
-#    error CONFIG_IOB_NBUFFERS must be > (CTUCANFD_RX_QUOTA + CTUCANFD_TX_QUOTA)
-#  endif
-#endif /* CONFIG_CAN_CTUCANFD_SOCKET */
-
 #ifndef CONFIG_NET_CAN_ERRORS
 #  define CTUCANFD_SOCK_RXINT (CTUCANFD_INT_RBNEI)
 #else
@@ -1923,8 +1915,6 @@ static int ctucanfd_probe(FAR struct pci_device_s *dev)
 
       /* Register the network device */
 
-      netdev->quota[NETPKT_TX] = CTUCANFD_TX_QUOTA;
-      netdev->quota[NETPKT_RX] = CTUCANFD_RX_QUOTA;
       netdev->ops = &g_ctucanfd_net_ops;
 
       /* Register the network interface. */
@@ -2065,9 +2055,7 @@ int ctucanfd_register(uintptr_t base, int irq, uint32_t id)
 #endif
 
 #ifdef CONFIG_CAN_CTUCANFD_SOCKET
-  dev->dev.quota[NETPKT_TX] = CTUCANFD_TX_QUOTA;
-  dev->dev.quota[NETPKT_RX] = CTUCANFD_RX_QUOTA;
-  dev->dev.ops              = &g_ctucanfd_net_ops;
+  dev->dev.ops = &g_ctucanfd_net_ops;
 
   snprintf(dev->dev.netdev.d_ifname, IFNAMSIZ, "can%" PRIu32, id);
 

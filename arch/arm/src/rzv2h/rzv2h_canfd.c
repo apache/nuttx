@@ -645,8 +645,7 @@ struct rzv2h_canfd_priv_s
   bool     rx_lost;                    /* A frame was dropped */
 
   /* Packet of the frame loaded into each TX message buffer, held until
-   * rzv2h_canfd_sock_reclaim() frees it, so the TX quota counts the frames
-   * still in the hardware.
+   * rzv2h_canfd_sock_reclaim() frees it.
    */
 
   netpkt_t *tx_pkt[RZV2H_CANFD_SOCK_TXMB_MAX];
@@ -863,7 +862,6 @@ static const struct netdev_ops_s g_rzv2h_canfd_sock_ops =
 #ifdef CONFIG_NETDEV_IOCTL
   .ioctl    = rzv2h_canfd_sock_ioctl,
 #endif
-  .reclaim  = rzv2h_canfd_sock_reclaim,
 };
 #else
 /* CANFD operations vtable */
@@ -4179,6 +4177,13 @@ static int rzv2h_canfd_send(struct can_dev_s *dev, struct can_msg_s *msg)
       return -EIO;
     }
 
+  /* Release the message buffers the hardware has finished with, so that a
+   * buffer freed since the last TX interrupt can be used right away
+   * instead of making the upper half wait for the next one.
+   */
+
+  rzv2h_canfd_sock_reclaim(dev);
+
   mb = rzv2h_canfd_txmb_next(priv);
   if (mb < 0)
     {
@@ -5702,8 +5707,7 @@ static void rzv2h_canfd_sock_txfree(struct rzv2h_canfd_priv_s *priv)
  * Name: rzv2h_canfd_sock_reclaim
  *
  * Description:
- *   NuttX callback, called when the TX quota is used up: free the held
- *   packets once every TX message buffer is idle, so that
+ *   Free the held packets once every TX message buffer is idle, so that
  *   rzv2h_canfd_txmb_next() starts again at TXMB0 with all txmb_num
  *   buffers free.
  *
@@ -5973,12 +5977,9 @@ static void rzv2h_canfd_sock_deadline_expiry(wdparm_t arg)
  *   rzv2h_canfd_sock_reclaim() frees it. The TX complete interrupt calls
  *   netdev_lower_txdone().
  *
- *   A packet that transmit() refuses is lost: devif_poll() releases it,
- *   and the socket has already reported the frame as sent. Holding the
- *   packets keeps the TX quota (txmb_num) at 0 from the moment the last
- *   TX message buffer is loaded until rzv2h_canfd_sock_reclaim() frees
- *   them, so transmit() is not called while rzv2h_canfd_txmb_next() has
- *   no buffer.
+ *   transmit() reports -EBUSY while rzv2h_canfd_txmb_next() has no free
+ *   buffer, so that the upper half keeps the packet and offers it again
+ *   once a transmission completes.
  *
  *   With CONFIG_NET_CAN_RAW_TX_DEADLINE, a frame whose deadline has passed
  *   is dropped, and rzv2h_canfd_sock_deadline_expiry() aborts a frame
@@ -6033,6 +6034,13 @@ static int rzv2h_canfd_sock_transmit(struct netdev_lowerhalf_s *dev,
         }
     }
 #endif
+
+  /* Release the message buffers the hardware has finished with, so that a
+   * buffer freed since the last TX interrupt can be used right away
+   * instead of making the upper half wait for the next one.
+   */
+
+  rzv2h_canfd_sock_reclaim(dev);
 
   mb = rzv2h_canfd_txmb_next(priv);
   if (mb < 0)
@@ -6570,8 +6578,6 @@ int rzv2h_canfd_sock_initialize(int channel)
 
   dev = &priv->dev;
   dev->ops = &g_rzv2h_canfd_sock_ops;
-  dev->quota[NETPKT_TX] = priv->txmb_num;
-  dev->quota[NETPKT_RX] = CONFIG_RZV2H_CANFD_SOCK_RX_DEPTH;
 
   /* Name the interface after the channel. netdev_register() uses a name
    * set here instead of the next free can<n> number.

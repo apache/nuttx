@@ -59,15 +59,6 @@
 
 /* Packet Memory ************************************************************/
 
-/* Maximum number of allocated TX and RX netpackets */
-
-#define OA_TC6_TX_QUOTA 1
-#define OA_TC6_RX_QUOTA 2
-
-#if CONFIG_IOB_NBUFFERS < (OA_TC6_TX_QUOTA + OA_TC6_RX_QUOTA)
-#  error "CONFIG_IOB_NBUFFERS must be > (OA_TC6_TX_QUOTA + OA_TC6_RX_QUOTA)"
-#endif
-
 #ifndef CONFIG_SCHED_LPWORK
 #  error "CONFIG_SCHED_LPWORK is needed by the OA-TC6 driver"
 #endif
@@ -1668,7 +1659,7 @@ static int oa_tc6_transmit(FAR struct netdev_lowerhalf_s *dev,
        */
 
       nxmutex_unlock(&priv->lock);
-      return -EAGAIN;
+      return -EBUSY;
     }
 
   priv->tx_pkt_idx = 0;
@@ -2142,8 +2133,6 @@ int oa_tc6_common_init(FAR struct oa_tc6_driver_s *priv,
   /* Fill the fields for the netdev upperhalf driver */
 
   netdev = &priv->dev;
-  netdev->quota[NETPKT_TX] = OA_TC6_TX_QUOTA;
-  netdev->quota[NETPKT_RX] = OA_TC6_RX_QUOTA;
   netdev->ops = &g_oa_tc6_ops;
 
   /* Allocate SPI buffers based on the config */

@@ -1166,8 +1166,6 @@ int morse_register(FAR struct spi_dev_s *spi,
 
   priv->dev.ops              = &g_morse_netdev_ops;
   priv->dev.iw_ops           = &g_morse_wireless_ops;
-  priv->dev.quota[NETPKT_TX] = CONFIG_IEEE80211_MORSE_TX_QUOTA;
-  priv->dev.quota[NETPKT_RX] = CONFIG_IEEE80211_MORSE_RX_QUOTA;
   priv->dev.rxtype           = NETDEV_RX_THREAD;
   priv->dev.priority         = CONFIG_IEEE80211_MORSE_TASK_PRIORITY;
 

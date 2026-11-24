@@ -180,7 +180,6 @@ static int netdriver_send(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
 
       clock_gettime(CLOCK_REALTIME, &pkt->io_time);
       iob_add_queue(pkt, &priv->tstampq);
-      atomic_add(&dev->quota_ptr[NETPKT_TX], 1);
       netdev_lower_rxready(dev);
       return OK;
     }
@@ -209,7 +208,6 @@ static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev)
       netdev_unlock(&dev->netdev);
       if (pkt != NULL)
         {
-          atomic_sub(&dev->quota_ptr[NETPKT_RX], 1);
           return pkt;
         }
     }
@@ -365,11 +363,7 @@ int sim_netdriver_init(void)
                       netdriver_txdone_interrupt,
                       netdriver_rxready_interrupt);
 
-      /* 1TX + 1RX is enough for sim. */
-
-      dev->quota[NETPKT_TX] = 1;
-      dev->quota[NETPKT_RX] = 1;
-      dev->ops              = &g_ops;
+      dev->ops = &g_ops;
 
 #if CONFIG_SIM_WIFIDEV_NUMBER != 0
       if (devidx < CONFIG_SIM_WIFIDEV_NUMBER)

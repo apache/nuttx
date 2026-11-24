@@ -119,8 +119,9 @@ static inline_function FAR void *vhost_net_map(uint64_t pa,
 
 #define VHOST_NET_F_MAC      5
 
-/* netpkt quota per direction and the longest peer descriptor chain we
- * accept on either ring (Linux commonly splits header and payload).
+/* The number of netpkts per direction and the longest peer descriptor
+ * chain we accept on either ring (Linux commonly splits header and
+ * payload).
  */
 
 #define VHOST_NET_NPKTS      8
@@ -450,8 +451,7 @@ static int vhost_net_ifdown(FAR struct netdev_lowerhalf_s *dev)
  *   Fill one peer-posted RX chain with the frame and complete it.
  *   Completion is synchronous: the netpkt is consumed and freed before
  *   returning.  Note that txdone is deliberately not signalled from here,
- *   the upper half continues its poll on a successful transmit and
- *   netpkt_free() already returns the quota.
+ *   the upper half continues its poll on a successful transmit.
  *
  ****************************************************************************/
 
@@ -592,7 +592,7 @@ static FAR netpkt_t *vhost_net_receive(FAR struct netdev_lowerhalf_s *dev)
       pkt = netpkt_alloc(dev, NETPKT_RX);
       if (pkt == NULL)
         {
-          /* Out of receive quota: drop the frame, re-arm the peer's
+          /* No netpkt available: drop the frame, re-arm the peer's
            * notifications and stop polling so the stack can release
            * buffers.
            */
@@ -678,8 +678,6 @@ static int vhost_net_probe(FAR struct vhost_device *hdev)
   virtqueue_disable_cb(priv->txq);
   virtqueue_disable_cb(priv->rxq);
 
-  priv->lower.quota[NETPKT_RX] = VHOST_NET_NPKTS;
-  priv->lower.quota[NETPKT_TX] = VHOST_NET_NPKTS;
   priv->lower.ops = &g_vhost_net_ops;
 
   /* transmit() and receive() must not run concurrently: both walk peer

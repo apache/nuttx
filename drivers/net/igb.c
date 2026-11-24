@@ -67,21 +67,7 @@
 #define IGB_TX_DESC            CONFIG_NET_IGB_TXDESC
 #define IGB_RX_DESC            CONFIG_NET_IGB_RXDESC
 
-/* After RX packet is done, we provide free netpkt to the RX descriptor ring.
- * The upper-half network logic is responsible for freeing the RX packets
- * so we need some additional spare netpkt buffers to assure that it's
- * always possible to allocate the new RX packet in the receiver logic.
- * It's hard to tell how many spare buffers is needed, for now it's set to 8.
- */
-
-#define IGB_TX_QUOTA           IGB_TX_DESC
-#define IGB_RX_QUOTA           (IGB_RX_DESC + CONFIG_NET_IGB_RXSPARE)
-
 /* NOTE: CONFIG_IOB_ALIGNMENT must match system D-CACHE line size */
-
-#if CONFIG_IOB_NBUFFERS < IGB_RX_QUOTA + IGB_TX_QUOTA
-#  error CONFIG_IOB_NBUFFERS must be > (IGB_RX_QUOTA + IGB_TX_QUOTA)
-#endif
 
 #if CONFIG_IOB_BUFSIZE < IGB_PKTBUF_SIZE
 #  error CONFIG_IOB_BUFSIZE must be > IGB_PKTBUF_SIZE
@@ -1576,8 +1562,6 @@ static int igb_probe(FAR struct pci_device_s *dev)
 
   /* Register the network device */
 
-  netdev->quota[NETPKT_TX] = IGB_TX_QUOTA;
-  netdev->quota[NETPKT_RX] = IGB_RX_QUOTA;
   netdev->ops = &g_igb_ops;
 
   return netdev_lower_register(netdev, NET_LL_ETHERNET);

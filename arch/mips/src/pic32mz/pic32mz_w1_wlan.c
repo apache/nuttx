@@ -201,9 +201,6 @@
 #define WLAN_SCAN_BUFSIZE       2048
 #define WLAN_SCAN_TIMEOUT       SEC2TICK(10)
 
-#define WLAN_RX_QUOTA           8
-#define WLAN_TX_QUOTA           16
-
 #define WLAN_CRYPTO_DEFER_MAX   8
 
 #define IW_EVENT_SIZE(field) \
@@ -957,7 +954,7 @@ static int wlan_transmit(FAR struct netdev_lowerhalf_s *dev,
 
   netpkt_copyout(dev, buf + WLAN_TX_HDROFFSET, pkt, len, 0);
 
-  /* The packet is kept (and so its TX quota) until the library frees the
+  /* The packet is kept until the library frees the
    * buffer, see DRV_PIC32MZW_MemFree().  This bounds the frames queued in
    * the library, which would otherwise be limited by the heap only.
    */
@@ -1815,8 +1812,6 @@ int pic32mz_wlan_initialize(void)
   memcpy(dev->netdev.d_mac.ether.ether_addr_octet, g_wlan.mac, 6);
   dev->ops                = &g_wlan_ops;
   dev->iw_ops             = &g_wlan_iw_ops;
-  dev->quota[NETPKT_RX]   = WLAN_RX_QUOTA;
-  dev->quota[NETPKT_TX]   = WLAN_TX_QUOTA;
   dev->rxtype             = NETDEV_RX_THREAD;
   dev->priority           = CONFIG_PIC32MZ_W1_WLAN_PRIORITY;
 

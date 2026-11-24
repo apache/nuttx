@@ -45,8 +45,8 @@
  *
  * Description:
  *   Allocate a TX packet for netpoll.
- *   When the TX quota is used up, ask the driver to reclaim finished TX
- *   packets and try again a bounded number of times.
+ *   When no packet is available, ask the driver to complete its pending
+ *   transmissions and try again a bounded number of times.
  *
  * Input Parameters:
  *   dev - The lower half device driver structure

@@ -500,8 +500,6 @@ int esp_openeth_initialize(void)
 
   dev->ops = &g_ops;
 
-  dev->quota[NETPKT_TX] = TX_BUF_COUNT;
-  dev->quota[NETPKT_RX] = RX_BUF_COUNT;
   dev->rxtype           = NETDEV_RX_THREAD;
   dev->priority         = 100;
 

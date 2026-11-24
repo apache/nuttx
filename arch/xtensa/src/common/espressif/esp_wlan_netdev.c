@@ -1211,8 +1211,6 @@ static int esp_wlan_initialize(uint32_t mode)
 
   /* Set the number of RX and TX buffers. */
 
-  priv->dev.quota[NETPKT_RX] = RX_BUF_COUNT;
-  priv->dev.quota[NETPKT_TX] = TX_BUF_COUNT;
   priv->dev.rxtype           = NETDEV_RX_THREAD;
   priv->dev.priority         = 100;
 
