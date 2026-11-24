@@ -109,7 +109,7 @@ void sched_unlock(void)
            * timer for the next time slice.
            */
 
-          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR &&
+          if (nxsched_get_policy(rtcb) == TCB_FLAG_SCHED_RR &&
               rtcb->timeslice == 0)
             {
               /* Yes.. that is the situation.  But one more thing.  The call
@@ -145,7 +145,7 @@ void sched_unlock(void)
            * for the next time slice.
            */
 
-          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC
+          if (nxsched_get_policy(rtcb) == TCB_FLAG_SCHED_SPORADIC
               && rtcb->timeslice < 0)
             {
               /* Yes.. that is the situation.  Force the low-priority state

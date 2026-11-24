@@ -92,7 +92,7 @@ void _exit(int status)
    * once, or does something very naughty.
    */
 
-  tcb->flags |= TCB_FLAG_EXIT_PROCESSING;
+  atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING);
 
   nxtask_exithook(tcb, status);
 

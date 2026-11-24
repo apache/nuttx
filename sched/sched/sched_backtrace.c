@@ -86,7 +86,7 @@ static int sched_backtrace_handler(FAR void *cookie)
   tcb = nxsched_get_tcb(arg->pid);
 
   if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
-      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+      (atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
@@ -96,7 +96,7 @@ static int sched_backtrace_handler(FAR void *cookie)
 
   if (arg->need_restore)
     {
-      tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
+      atomic_and(&tcb->shared_flags, ~TCB_FLAG_CPU_LOCKED);
     }
 
   leave_critical_section(flags);
@@ -143,7 +143,8 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
       if (tcb != NULL)
         {
           if (tcb->task_state == TSTATE_TASK_INVALID ||
-              (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+              (atomic_read(&tcb->shared_flags) &
+               TCB_FLAG_EXIT_PROCESSING) != 0)
             {
               leave_critical_section(flags);
               return 0;
@@ -159,14 +160,14 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
               FAR void *scratch[BACKTRACE_SCRATCH_DEPTH];
 #endif
 
-              if ((tcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
+              if ((atomic_or(&tcb->shared_flags, TCB_FLAG_CPU_LOCKED) &
+                   TCB_FLAG_CPU_LOCKED) != 0)
                 {
                   need_restore = false;
                 }
               else
                 {
                   need_restore = true;
-                  tcb->flags |= TCB_FLAG_CPU_LOCKED;
                 }
 
               arg.pid = tcb->pid;

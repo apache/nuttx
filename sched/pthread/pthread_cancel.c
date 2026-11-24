@@ -74,7 +74,7 @@ int pthread_cancel(pthread_t thread)
 
   /* Return ESRCH when thread was in exit processing */
 
-  if ((tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+  if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       return ESRCH;
     }

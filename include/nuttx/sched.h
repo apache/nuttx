@@ -88,33 +88,44 @@
 
 #define MAX_LOCK_COUNT             127
 
-/* Values for the struct tcb_s flags bits */
+/* Values for the struct tcb_s flags bits.  The creator of the TCB sets
+ * the thread type and TCB_FLAG_FREE_TCB before the task runs,
+ * TCB_FLAG_FREE_STACK and TCB_FLAG_EXIT_COUNTED change only while the task
+ * does not run or when it exits, and only the task itself changes the other
+ * bits.  So they need no atomic access.
+ */
 
 #define TCB_FLAG_TTYPE_SHIFT       (0)                           /* Bits 0-1: thread type */
 #define TCB_FLAG_TTYPE_MASK        (3 << TCB_FLAG_TTYPE_SHIFT)
 #  define TCB_FLAG_TTYPE_TASK      (0 << TCB_FLAG_TTYPE_SHIFT)   /*   Normal user task */
 #  define TCB_FLAG_TTYPE_PTHREAD   (1 << TCB_FLAG_TTYPE_SHIFT)   /*   User pthread */
 #  define TCB_FLAG_TTYPE_KERNEL    (2 << TCB_FLAG_TTYPE_SHIFT)   /*   Kernel thread */
-#define TCB_FLAG_POLICY_SHIFT      (3)                           /* Bit 3-4: Scheduling policy */
+#define TCB_FLAG_SIGNAL_ACTION     (1 << 2)                      /* Bit 2: In a signal handler */
+#define TCB_FLAG_SYSCALL           (1 << 3)                      /* Bit 3: In a system call */
+#define TCB_FLAG_FREE_STACK        (1 << 4)                      /* Bit 4: Free stack after exit */
+#define TCB_FLAG_FREE_TCB          (1 << 5)                      /* Bit 5: Free tcb after exit */
+#define TCB_FLAG_PREEMPT_SCHED     (1 << 6)                      /* Bit 6: tcb is PREEMPT_SCHED */
+#define TCB_FLAG_SIGMASK_SAVED     (1 << 7)                      /* Bit 7: sigsavedmask to restore */
+#define TCB_FLAG_UNINTERRUPTIBLE   (1 << 8)                      /* Bit 8: Blocking wait ignores signals */
+#define TCB_FLAG_EXIT_COUNTED      (1 << 9)                      /* Bit 9: Counted as exited in group */
+
+/* Values for the struct tcb_s shared_flags bits.  Other tasks and CPUs
+ * change them, so they are accessed with atomic operations.  They are
+ * used only with shared_flags, never with flags.
+ */
+
+#define TCB_FLAG_POLICY_SHIFT      (0)                           /* Bits 0-1: Scheduling policy */
 #define TCB_FLAG_POLICY_MASK       (3 << TCB_FLAG_POLICY_SHIFT)
 #  define TCB_FLAG_SCHED_FIFO      (0 << TCB_FLAG_POLICY_SHIFT)  /* FIFO scheding policy */
 #  define TCB_FLAG_SCHED_RR        (1 << TCB_FLAG_POLICY_SHIFT)  /* Round robin scheding policy */
 #  define TCB_FLAG_SCHED_SPORADIC  (2 << TCB_FLAG_POLICY_SHIFT)  /* Sporadic scheding policy */
 #  define TCB_FLAG_SCHED_OTHER     (3 << TCB_FLAG_POLICY_SHIFT)  /* Other scheduling policy */
-#define TCB_FLAG_CPU_LOCKED        (1 << 5)                      /* Bit 5: Locked to this CPU */
-#define TCB_FLAG_SIGNAL_ACTION     (1 << 6)                      /* Bit 6: In a signal handler */
-#define TCB_FLAG_SYSCALL           (1 << 7)                      /* Bit 7: In a system call */
-#define TCB_FLAG_EXIT_PROCESSING   (1 << 8)                      /* Bit 8: Exiting */
-#define TCB_FLAG_FREE_STACK        (1 << 9)                      /* Bit 9: Free stack after exit */
-#define TCB_FLAG_HEAP_CHECK        (1 << 10)                     /* Bit 10: Heap check */
-#define TCB_FLAG_DETACHED          (1 << 12)                     /* Bit 12: Pthread detached */
-#define TCB_FLAG_FORCED_CANCEL     (1 << 13)                     /* Bit 13: Pthread cancel is forced */
-#define TCB_FLAG_JOIN_COMPLETED    (1 << 14)                     /* Bit 14: Pthread join completed */
-#define TCB_FLAG_FREE_TCB          (1 << 15)                     /* Bit 15: Free tcb after exit */
-#define TCB_FLAG_PREEMPT_SCHED     (1 << 16)                     /* Bit 16: tcb is PREEMPT_SCHED */
-#define TCB_FLAG_SIGMASK_SAVED     (1 << 17)                     /* Bit 17: sigsavedmask to restore */
-#define TCB_FLAG_UNINTERRUPTIBLE   (1 << 18)                     /* Bit 18: Blocking wait ignores signals */
-#define TCB_FLAG_EXIT_COUNTED      (1 << 19)                     /* Bit 19: Counted as exited in group */
+#define TCB_FLAG_CPU_LOCKED        (1 << 2)                      /* Bit 2: Locked to this CPU */
+#define TCB_FLAG_EXIT_PROCESSING   (1 << 3)                      /* Bit 3: Exiting */
+#define TCB_FLAG_HEAP_CHECK        (1 << 4)                      /* Bit 4: Heap check */
+#define TCB_FLAG_DETACHED          (1 << 5)                      /* Bit 5: Pthread detached */
+#define TCB_FLAG_FORCED_CANCEL     (1 << 6)                      /* Bit 6: Pthread cancel is forced */
+#define TCB_FLAG_JOIN_COMPLETED    (1 << 7)                      /* Bit 7: Pthread join completed */
 
 /* Values for struct task_group tg_flags */
 
@@ -671,6 +682,7 @@ struct tcb_s
   pid_t    pid;                          /* This is the ID of the thread    */
   uint8_t  sched_priority;               /* Current priority of the thread  */
   uint8_t  init_priority;                /* Initial priority of the thread  */
+  uint16_t flags;                        /* Misc. general status flags      */
 
   start_t  start;                        /* Thread start function           */
   entry_t  entry;                        /* Entry Point into the thread     */
@@ -687,7 +699,7 @@ struct tcb_s
   uint8_t  cpu;                          /* CPU index if running/assigned   */
   cpu_set_t affinity;                    /* Bit set of permitted CPUs       */
 #endif
-  uint32_t flags;                        /* Misc. general status flags      */
+  atomic_t shared_flags;                 /* Flags written by other tasks    */
   int16_t  lockcount;                    /* 0=preemptible (not-locked)      */
 #ifdef CONFIG_IRQCOUNT
   int16_t  irqcount;                     /* 0=Not in critical section       */

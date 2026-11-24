@@ -109,7 +109,7 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
 
   /* Check to see if this task has the non-cancelable bit set. */
 
-  if ((tcb->flags & TCB_FLAG_FORCED_CANCEL) == 0 &&
+  if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_FORCED_CANCEL) == 0 &&
       (tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) != 0u)
     {
       /* Then we cannot cancel the thread now.  Here is how this is

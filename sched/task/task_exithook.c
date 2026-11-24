@@ -512,7 +512,8 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
    * called.  If that bit is set, then just exit doing nothing more..
    */
 
-  DEBUGASSERT((tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0);
+  DEBUGASSERT((atomic_read(&tcb->shared_flags) &
+               TCB_FLAG_EXIT_PROCESSING) != 0);
 
   nxsched_dumponexit();
 

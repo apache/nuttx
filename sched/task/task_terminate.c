@@ -122,13 +122,12 @@ int nxtask_terminate(pid_t pid)
   /* Find for the TCB associated with matching PID */
 
   dtcb = nxsched_get_tcb(pid);
-  if (!dtcb || dtcb->flags & TCB_FLAG_EXIT_PROCESSING)
+  if (!dtcb || (atomic_or(&dtcb->shared_flags, TCB_FLAG_EXIT_PROCESSING) &
+                TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       leave_critical_section(flags);
       return -ESRCH;
     }
-
-  dtcb->flags |= TCB_FLAG_EXIT_PROCESSING;
 
   /* Remove dtcb from tasklist, let remove_readtorun() do the job */
 
@@ -137,11 +136,10 @@ int nxtask_terminate(pid_t pid)
   if (task_state == TSTATE_TASK_RUNNING &&
       dtcb->cpu != this_cpu())
     {
-      uint16_t tcb_flags;
+      int32_t tcb_flags;
       int ret;
 
-      tcb_flags = dtcb->flags;
-      dtcb->flags |= TCB_FLAG_CPU_LOCKED;
+      tcb_flags = atomic_or(&dtcb->shared_flags, TCB_FLAG_CPU_LOCKED);
 
       ret = nxsched_smp_call_single(dtcb->cpu, terminat_handler,
                                     (FAR void *)(uintptr_t)pid);
@@ -154,7 +152,10 @@ int nxtask_terminate(pid_t pid)
           return ret;
         }
 
-      dtcb->flags = tcb_flags;
+      if ((tcb_flags & TCB_FLAG_CPU_LOCKED) == 0)
+        {
+          atomic_and(&dtcb->shared_flags, ~TCB_FLAG_CPU_LOCKED);
+        }
     }
   else
 #endif

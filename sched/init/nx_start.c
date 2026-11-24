@@ -339,7 +339,8 @@ static void idle_task_initialize(void)
        */
 
 #ifdef CONFIG_SMP
-      tcb->flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_LOCKED);
+      tcb->flags = TCB_FLAG_TTYPE_KERNEL;
+      atomic_set(&tcb->shared_flags, TCB_FLAG_CPU_LOCKED);
       tcb->cpu   = i;
 
       /* Set the affinity mask to allow the thread to run on all CPUs.  No,

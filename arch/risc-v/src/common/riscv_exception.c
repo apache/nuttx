@@ -122,7 +122,7 @@ static void riscv_fault_handler(uintreg_t cause, void *regs)
       sched_dumpstack(tcb->pid);
 #endif
 
-      tcb->flags |= TCB_FLAG_FORCED_CANCEL;
+      atomic_or(&tcb->shared_flags, TCB_FLAG_FORCED_CANCEL);
 
       /* Return to _exit function in privileged mode with argument SIGSEGV */
 

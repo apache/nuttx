@@ -184,7 +184,8 @@ bool nxsched_switch_running(int cpu, bool switch_equal)
        */
 
       if (CPU_ISSET(cpu, &btcb->affinity) &&
-          ((btcb->flags & TCB_FLAG_CPU_LOCKED) == 0 || btcb->cpu == cpu))
+          ((atomic_read(&btcb->shared_flags) &
+            TCB_FLAG_CPU_LOCKED) == 0 || btcb->cpu == cpu))
         {
           /* Found a task, remove it from ready-to-run list */
 
@@ -253,7 +254,8 @@ bool nxsched_switch_running(int cpu, bool switch_equal)
 bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 {
   bool doswitch = false;
-  int target_cpu = btcb->flags & TCB_FLAG_CPU_LOCKED ? btcb->cpu :
+  int target_cpu = atomic_read(&btcb->shared_flags) &
+                   TCB_FLAG_CPU_LOCKED ? btcb->cpu :
     nxsched_select_cpu(btcb->affinity);
   FAR struct tcb_s *tcb = current_task(target_cpu);
 
