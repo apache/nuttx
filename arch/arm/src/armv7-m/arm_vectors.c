@@ -48,7 +48,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IDLE_STACK      (_ebss + CONFIG_IDLETHREAD_STACKSIZE)
+/* The base of the IDLE stack.  Boards may override this to place the
+ * IDLE stack at a specific address; defaults to the end of .bss.
+ */
+
+#ifndef IDLE_STACK_BASE
+#  define IDLE_STACK_BASE _ebss
+#endif
+
+#define IDLE_STACK      (IDLE_STACK_BASE + CONFIG_IDLETHREAD_STACKSIZE)
 
 /****************************************************************************
  * Private Functions
