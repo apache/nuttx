@@ -2063,6 +2063,31 @@ void netdev_lower_bridge_set(FAR struct netdev_lowerhalf_s *dev,
   upper->bridge = port;
   netdev_unlock(&dev->netdev);
 }
+
+/****************************************************************************
+ * Name: netdev_lower_bridge_get
+ *
+ * Description:
+ *   Return the bridge port of the device, or NULL when the device is not a
+ *   port of any bridge.
+ *
+ * Input Parameters:
+ *   dev - The lower half device driver structure
+ *
+ ****************************************************************************/
+
+FAR struct bridge_port_s *
+netdev_lower_bridge_get(FAR struct netdev_lowerhalf_s *dev)
+{
+  FAR struct netdev_upperhalf_s *upper = dev->netdev.d_private;
+  FAR struct bridge_port_s *port;
+
+  netdev_lock(&dev->netdev);
+  port = upper->bridge;
+  netdev_unlock(&dev->netdev);
+
+  return port;
+}
 #endif
 
 /****************************************************************************
