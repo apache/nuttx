@@ -74,6 +74,8 @@ struct rpmsg_bind_s
   char              name[RPMSG_NAME_SIZE];
   uint32_t          dest;
   struct list_node  node;
+  size_t            extra_len;
+  uint8_t           extra[];
 };
 
 struct rpmsg_cb_s
@@ -338,40 +340,44 @@ static int rpmsg_create_wqueues(FAR struct rpmsg_wqueue_s *wqueues,
  * Name: rpmsg_bind_alloc / rpmsg_bind_free
  *
  * Description:
- *   Allocate/free a name-service bind record.  When the rpmsg pool is
- *   enabled (RPMSG_POOL_COUNT > 0) and its block size is large enough to
- *   hold a struct rpmsg_bind_s, the record is taken from the rpmsg pool to
- *   avoid heap allocation.  Otherwise it falls back to the heap.
+ *   Allocate/free a name-service bind record holding extra_len bytes of
+ *   service defined data.  When the rpmsg pool is enabled
+ *   (RPMSG_POOL_COUNT > 0) and its block size is large enough to hold the
+ *   record, it is taken from the rpmsg pool to avoid heap allocation.
+ *   Otherwise it falls back to the heap.
  *
- *   The choice is a compile-time constant, so alloc and free always use the
- *   same allocator within a build.  When RPMSG_POOL_COUNT <= 0 the rpmsg
- *   pool degenerates into alloca() and must not be used for these long-lived
- *   list nodes, so the heap is used unconditionally.
+ *   Both must be called with the same extra_len so that they agree on the
+ *   allocator: the pool does not check whether a block belongs to it, and
+ *   releasing a heap pointer into it would corrupt it.  When
+ *   RPMSG_POOL_COUNT <= 0 the rpmsg pool degenerates into alloca() and must
+ *   not be used for these long-lived list nodes, so the heap is used
+ *   unconditionally.
  *
  ****************************************************************************/
 
-static inline_function FAR void *rpmsg_bind_alloc(void)
+static inline_function FAR void *rpmsg_bind_alloc(size_t extra_len)
 {
+  size_t size = sizeof(struct rpmsg_bind_s) + extra_len;
   FAR void *bind;
 
 #if CONFIG_RPMSG_POOL_COUNT > 0
-  if (CONFIG_RPMSG_POOL_SIZE >= sizeof(struct rpmsg_bind_s))
+  if (CONFIG_RPMSG_POOL_SIZE >= size)
     {
-      bind = rpmsg_pool_alloc(sizeof(struct rpmsg_bind_s));
+      bind = rpmsg_pool_alloc(size);
     }
   else
 #endif
     {
-      bind = kmm_malloc(sizeof(struct rpmsg_bind_s));
+      bind = kmm_malloc(size);
     }
 
   return bind;
 }
 
-static inline_function void rpmsg_bind_free(FAR void *bind)
+static inline_function void rpmsg_bind_free(FAR void *bind, size_t extra_len)
 {
 #if CONFIG_RPMSG_POOL_COUNT > 0
-  if (CONFIG_RPMSG_POOL_SIZE >= sizeof(struct rpmsg_bind_s))
+  if (CONFIG_RPMSG_POOL_SIZE >= sizeof(struct rpmsg_bind_s) + extra_len)
     {
       rpmsg_pool_free(bind);
     }
@@ -445,14 +451,16 @@ static int rpmsg_register_callback_(FAR void *priv,
                       if (ns_bind_extra)
                         {
                           ns_bind_extra(rdev, priv, bind->name, bind->dest,
-                                        NULL, 0);
+                                        bind->extra_len ?
+                                        bind->extra : NULL,
+                                        bind->extra_len);
                         }
                       else
                         {
                           ns_bind(rdev, priv, bind->name, bind->dest);
                         }
 
-                      rpmsg_bind_free(bind);
+                      rpmsg_bind_free(bind, bind->extra_len);
                       again = true;
 
                       nxrmutex_lock(&rpmsg->lock);
@@ -798,11 +806,16 @@ void rpmsg_ns_bind_extra(FAR struct rpmsg_device *rdev,
 
   if (!matched)
     {
-      bind = rpmsg_bind_alloc();
+      bind = rpmsg_bind_alloc(extra_len);
       if (bind != NULL)
         {
           bind->dest = dest;
+          bind->extra_len = extra_len;
           strlcpy(bind->name, name, RPMSG_NAME_SIZE);
+          if (extra_len > 0)
+            {
+              memcpy(bind->extra, extra, extra_len);
+            }
 
           nxrmutex_lock(&rpmsg->lock);
           list_add_tail(&rpmsg->bind, &bind->node);
@@ -825,7 +838,7 @@ void rpmsg_ns_unbind(FAR struct rpmsg_device *rdev,
       if (bind->dest == dest && !strncmp(bind->name, name, RPMSG_NAME_SIZE))
         {
           list_delete(&bind->node);
-          rpmsg_bind_free(bind);
+          rpmsg_bind_free(bind, bind->extra_len);
           break;
         }
     }
@@ -897,7 +910,7 @@ void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg)
                             struct rpmsg_bind_s, node)
     {
       list_delete(&bind->node);
-      rpmsg_bind_free(bind);
+      rpmsg_bind_free(bind, bind->extra_len);
     }
 
   nxrmutex_unlock(&rpmsg->lock);
