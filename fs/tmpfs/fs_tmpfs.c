@@ -2177,6 +2177,27 @@ static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence)
   return position;
 }
 
+/****************************************************************************
+ * Name: tmpfs_release_mapping
+ *
+ * Description:
+ *   Drop one mapping and its file reference.  Called with the file locked;
+ *   the lock is released on return.
+ *
+ ****************************************************************************/
+
+static void tmpfs_release_mapping(FAR struct tmpfs_file_s *tfo)
+{
+  /* Give back memory grown for a mapping past EOF */
+
+  if (--tfo->tfo_maps == 0)
+    {
+      tmpfs_realloc_file(tfo, tfo->tfo_size);
+    }
+
+  tmpfs_release_lockedfile(tfo);
+}
+
 static int tmpfs_unmap(FAR struct task_group_s *group,
                        FAR struct mm_map_entry_s *entry,
                        FAR void *start, size_t length)
@@ -2220,8 +2241,7 @@ static int tmpfs_unmap(FAR struct task_group_s *group,
         }
 
       DEBUGASSERT(tfo->tfo_maps > 0);
-      tfo->tfo_maps--;
-      tmpfs_release_lockedfile(tfo);
+      tmpfs_release_mapping(tfo);
     }
 
   /* No.. We have been asked to "unmap' only a portion of the memory
@@ -2268,6 +2288,8 @@ static int tmpfs_msync(FAR struct mm_map_entry_s *entry, FAR void *start,
 static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 {
   FAR struct tmpfs_file_s *tfo;
+  FAR uint8_t *newdata;
+  size_t mapend;
   int ret;
 
   DEBUGASSERT(filep->f_priv != NULL);
@@ -2295,7 +2317,7 @@ static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
     }
 
   if (map->offset < 0 || map->offset >= tfo->tfo_size ||
-      map->length == 0 || map->offset + map->length > tfo->tfo_size)
+      map->length == 0 || map->length > SIZE_MAX - (size_t)map->offset)
     {
       ret = -EINVAL;
       goto errout_with_lock;
@@ -2307,6 +2329,42 @@ static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
     {
       ret = -ENOMEM;
       goto errout_with_lock;
+    }
+
+  /* A mapping may extend past the end of the file.  Back the whole range
+   * with tfo_data; the file size is unchanged.  The buffer can only grow
+   * while nothing else maps it.
+   */
+
+  mapend = map->offset + map->length;
+  if (mapend > tfo->tfo_alloc)
+    {
+      if (tfo->tfo_maps > 0)
+        {
+          ret = -ENOMEM;
+          goto errout_with_lock;
+        }
+
+      newdata = fs_heap_realloc(tfo->tfo_data, mapend);
+      if (newdata == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout_with_lock;
+        }
+
+      tfo->tfo_data  = newdata;
+      tfo->tfo_alloc = mapend;
+    }
+
+  /* Zero past EOF only for the first mapping, so a later mapping sees what
+   * an earlier one wrote there.  tmpfs_realloc_file() keeps the tail zeroed
+   * while the file stays mapped.
+   */
+
+  if (tfo->tfo_maps == 0)
+    {
+      memset(tfo->tfo_data + tfo->tfo_size, 0,
+             tfo->tfo_alloc - tfo->tfo_size);
     }
 
   map->vaddr = tfo->tfo_data + map->offset;
@@ -2325,6 +2383,12 @@ static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
        */
 
       tmpfs_update_atime((FAR struct tmpfs_object_s *)tfo);
+    }
+  else if (tfo->tfo_maps == 0)
+    {
+      /* Give back what was grown for this mapping */
+
+      tmpfs_realloc_file(tfo, tfo->tfo_size);
     }
 
 errout_with_lock:
