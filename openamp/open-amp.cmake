@@ -90,6 +90,8 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
       ${CMAKE_CURRENT_LIST_DIR}/0025-rpmsg_virtio-add-priority-in-the-rpmsg-virtio-config.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0026-rpmsg_virtio-hold-the-endpoint-across-the-ns-bound-c.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0027-rpmsg-extract-the-name-service-handling-into-a-commo.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
