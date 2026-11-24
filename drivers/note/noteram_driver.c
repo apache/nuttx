@@ -497,6 +497,7 @@ static ssize_t noteram_read(FAR struct file *filep, FAR char *buffer,
 #endif
     {
       size_t nread = 0;
+
       flags = spin_lock_irqsave_notrace(&drv->lock);
       while (nread < buflen)
         {
