@@ -578,7 +578,7 @@ static int x86_64_fault_user_isr(int irq, void *c, void *arg)
   sched_dumpstack(tcb->pid);
 #endif
 
-  tcb->flags |= TCB_FLAG_FORCED_CANCEL;
+  atomic_or(&tcb->shared_flags, TCB_FLAG_FORCED_CANCEL);
 
   /* Return to _exit(SIGSEGV) in ring 0 instead of to the instruction that
    * faulted, which would only fault again.  The frame this rewrites is the

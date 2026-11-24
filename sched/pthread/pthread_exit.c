@@ -74,7 +74,7 @@ void nx_pthread_exit(FAR void *exit_value)
 
   DEBUGASSERT(tcb != NULL);
 
-  tcb->flags |= TCB_FLAG_EXIT_PROCESSING;
+  atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING);
 
   /* Block any signal actions that would awaken us while were
    * are performing the JOIN handshake.

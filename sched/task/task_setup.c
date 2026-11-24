@@ -434,12 +434,11 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
 
       /* Set the appropriate scheduling policy in the TCB */
 
-      tcb->flags         &= ~TCB_FLAG_POLICY_MASK;
 #if CONFIG_RR_INTERVAL > 0
-      tcb->flags         |= TCB_FLAG_SCHED_RR;
+      nxsched_set_policy(tcb, TCB_FLAG_SCHED_RR);
       tcb->timeslice      = MSEC2TICK(CONFIG_RR_INTERVAL);
 #else
-      tcb->flags         |= TCB_FLAG_SCHED_FIFO;
+      nxsched_set_policy(tcb, TCB_FLAG_SCHED_FIFO);
 #endif
 
       /* Save the task ID of the parent task in the TCB and allocate

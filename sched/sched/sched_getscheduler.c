@@ -88,7 +88,7 @@ int nxsched_get_scheduler(pid_t pid)
     {
       /* Return the scheduling policy from the TCB */
 
-      ret = (tcb->flags & TCB_FLAG_POLICY_MASK) >> TCB_FLAG_POLICY_SHIFT;
+      ret = nxsched_get_policy(tcb) >> TCB_FLAG_POLICY_SHIFT;
     }
 
   return ret;

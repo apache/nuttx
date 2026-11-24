@@ -395,6 +395,20 @@ int  nxsched_waitid(idtype_t idtype, pid_t id, FAR siginfo_t *info,
                     int options);
 #endif
 
+static inline_function int32_t nxsched_get_policy(FAR struct tcb_s *tcb)
+{
+  return atomic_read(&tcb->shared_flags) & TCB_FLAG_POLICY_MASK;
+}
+
+static inline_function void nxsched_set_policy(FAR struct tcb_s *tcb,
+                                               int32_t policy)
+{
+  int32_t old = atomic_read(&tcb->shared_flags);
+
+  while (!atomic_try_cmpxchg(&tcb->shared_flags, &old,
+                             (old & ~TCB_FLAG_POLICY_MASK) | policy));
+}
+
 #if defined(up_this_task)
 #  define this_task()            up_this_task()
 #elif !defined(CONFIG_SMP)

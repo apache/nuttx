@@ -233,11 +233,11 @@ static void nxsig_abnormal_termination(int signo)
    * fatal exception: a thread can block or catch SIGTERM.
    */
 
-  rtcb->flags |= TCB_FLAG_FORCED_CANCEL;
+  atomic_or(&rtcb->shared_flags, TCB_FLAG_FORCED_CANCEL);
   group_kill_children(rtcb);
 #endif
 
-  if ((rtcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+  if ((atomic_read(&rtcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       /* If we are already in the process of terminating, then we should
        * not be here.  We should have already exited.

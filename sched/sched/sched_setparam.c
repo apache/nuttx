@@ -54,7 +54,7 @@ int set_sporadic_param(FAR const struct sched_param *param,
 
   /* Update parameters associated with SCHED_SPORADIC */
 
-  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+  if (nxsched_get_policy(tcb) == TCB_FLAG_SCHED_SPORADIC)
     {
       ret = nxsched_validate_sporadic(param, &repl_ticks, &budget_ticks);
       if (ret < 0)

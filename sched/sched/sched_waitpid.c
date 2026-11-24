@@ -177,7 +177,8 @@ pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options)
   if (ctcb != NULL)
     {
       if ((group = ctcb->group) != NULL &&
-          (ctcb->flags & TCB_FLAG_EXIT_PROCESSING) == 0)
+          (atomic_read(&ctcb->shared_flags) &
+           TCB_FLAG_EXIT_PROCESSING) == 0)
         {
           /* Lock this group so that it cannot be
            * deleted until the wait completes

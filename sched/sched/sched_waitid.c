@@ -138,7 +138,7 @@ static void child_handler(FAR struct tcb_s *tcb, FAR void *arg)
 #ifdef CONFIG_SCHED_CHILD_STATUS
   /* A child that sent SIGCHLD can still be found during its exit */
 
-  if ((tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+  if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
     {
       return;
     }
@@ -278,7 +278,8 @@ static int check_children(FAR struct tcb_s *rtcb, idtype_t idtype, pid_t id)
       ctcb = nxsched_get_tcb(id);
       if (ctcb == NULL || ctcb->group == NULL ||
           ctcb->group->tg_ppid != rtcb->group->tg_pid ||
-          (ctcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+          (atomic_read(&ctcb->shared_flags) &
+           TCB_FLAG_EXIT_PROCESSING) != 0)
         {
           return -ECHILD;
         }

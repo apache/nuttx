@@ -471,7 +471,7 @@ class Ps(gdb.Command):
 
         policy = eval2str(
             TaskSchedPolicy,
-            (tcb["flags"] & get_macro("TCB_FLAG_POLICY_MASK"))
+            (tcb["shared_flags"] & get_macro("TCB_FLAG_POLICY_MASK"))
             >> get_macro("TCB_FLAG_POLICY_SHIFT"),
         )
 
@@ -481,7 +481,11 @@ class Ps(gdb.Command):
             >> get_macro("TCB_FLAG_TTYPE_SHIFT"),
         )
 
-        npx = "P" if (tcb["flags"] & get_macro("TCB_FLAG_EXIT_PROCESSING")) else "-"
+        npx = (
+            "P"
+            if (tcb["shared_flags"] & get_macro("TCB_FLAG_EXIT_PROCESSING"))
+            else "-"
+        )
 
         waiter = (
             str(int(cast2ptr(tcb["waitobj"], "mutex_t")["holder"]))

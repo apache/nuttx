@@ -76,7 +76,7 @@ bool arm_fault_kill(uint32_t *regs)
          ptcb != NULL ? get_task_name(ptcb) : "<gone>",
          tcb->pid, get_task_name(tcb));
 
-  tcb->flags |= TCB_FLAG_FORCED_CANCEL;
+  atomic_or(&tcb->shared_flags, TCB_FLAG_FORCED_CANCEL);
 
   regs[REG_PC]   = (uint32_t)_exit;
   regs[REG_R0]   = SIGSEGV;

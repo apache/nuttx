@@ -103,7 +103,7 @@ void nxtask_recover(FAR struct tcb_s *tcb)
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
-  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+  if (nxsched_get_policy(tcb) == TCB_FLAG_SCHED_SPORADIC)
     {
       /* Stop current sporadic scheduling */
 

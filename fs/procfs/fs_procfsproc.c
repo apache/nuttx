@@ -619,7 +619,8 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
                           "%-12s%c\n", "Flags:",
-                          tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-');
+                          atomic_read(&tcb->shared_flags) &
+                          TCB_FLAG_EXIT_PROCESSING ? 'P' : '-');
 
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
@@ -657,7 +658,8 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   /* Show the scheduler policy */
 
-  policy     = g_policy[(tcb->flags & TCB_FLAG_POLICY_MASK) >>
+  policy     = g_policy[(atomic_read(&tcb->shared_flags) &
+                         TCB_FLAG_POLICY_MASK) >>
                         TCB_FLAG_POLICY_SHIFT];
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
                                "Scheduler:", policy);
@@ -1051,7 +1053,7 @@ static ssize_t proc_heapcheck(FAR struct proc_file_s *procfile,
   size_t totalsize = 0;
   size_t heapcheck = 0;
 
-  if (tcb->flags & TCB_FLAG_HEAP_CHECK)
+  if (atomic_read(&tcb->shared_flags) & TCB_FLAG_HEAP_CHECK)
     {
       heapcheck = 1;
     }
@@ -1073,10 +1075,10 @@ static ssize_t proc_heapcheck_write(FAR struct proc_file_s *procfile,
   switch (buffer[0])
     {
       case '0':
-        tcb->flags &= ~TCB_FLAG_HEAP_CHECK;
+        atomic_and(&tcb->shared_flags, ~TCB_FLAG_HEAP_CHECK);
         break;
       case '1':
-        tcb->flags |= TCB_FLAG_HEAP_CHECK;
+        atomic_or(&tcb->shared_flags, TCB_FLAG_HEAP_CHECK);
         break;
       default:
         ferr("ERROR: invalid argument\n");

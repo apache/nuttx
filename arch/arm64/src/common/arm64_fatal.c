@@ -682,7 +682,7 @@ uint64_t *arm64_fatal_handler(uint64_t *regs)
                  tcb->pid, get_task_name(tcb));
           _alert("Reason: %s - %s\n", reason, desc);
 
-          tcb->flags |= TCB_FLAG_FORCED_CANCEL;
+          atomic_or(&tcb->shared_flags, TCB_FLAG_FORCED_CANCEL);
 
           regs[REG_ELR] = (uint64_t)_exit;
           regs[REG_X0] = SIGSEGV;

@@ -109,7 +109,8 @@ bool group_in_pgrp(FAR struct tcb_s *tcb, pid_t pgid)
 
   return pgid > 0 && group != NULL && tcb->pid == group->tg_pid &&
          group->tg_pgid == pgid &&
-         (tcb->flags & TCB_FLAG_EXIT_PROCESSING) == 0 &&
+         (atomic_read(&tcb->shared_flags) &
+          TCB_FLAG_EXIT_PROCESSING) == 0 &&
          (group->tg_flags & GROUP_FLAG_EXITING) == 0;
 }
 

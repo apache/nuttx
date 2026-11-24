@@ -60,7 +60,7 @@ int process_sporadic(FAR struct tcb_s *tcb,
 
   /* Initialize or reset current sporadic scheduling */
 
-  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+  if (nxsched_get_policy(tcb) == TCB_FLAG_SCHED_SPORADIC)
     {
       ret = nxsched_reset_sporadic(tcb);
     }
@@ -73,8 +73,7 @@ int process_sporadic(FAR struct tcb_s *tcb,
 
   if (ret >= 0)
     {
-      tcb->flags            &= ~TCB_FLAG_POLICY_MASK;
-      tcb->flags            |= TCB_FLAG_SCHED_SPORADIC;
+      nxsched_set_policy(tcb, TCB_FLAG_SCHED_SPORADIC);
       tcb->timeslice         = budget_ticks;
 
       sporadic               = tcb->sporadic;
@@ -202,8 +201,7 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 #ifdef CONFIG_SCHED_SPORADIC
                 /* Cancel any on-going sporadic scheduling */
 
-                if ((tcb->flags & TCB_FLAG_POLICY_MASK) ==
-                    TCB_FLAG_SCHED_SPORADIC)
+                if (nxsched_get_policy(tcb) == TCB_FLAG_SCHED_SPORADIC)
                   {
                     DEBUGVERIFY(nxsched_stop_sporadic(tcb));
                   }
@@ -211,8 +209,7 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 
                 /* Set the new policy flag */
 
-                tcb->flags &= ~TCB_FLAG_POLICY_MASK;
-                tcb->flags |= policy << TCB_FLAG_POLICY_SHIFT;
+                nxsched_set_policy(tcb, policy << TCB_FLAG_POLICY_SHIFT);
 
                 /* Configure timeslice based on policy */
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)

@@ -960,7 +960,7 @@ int nxsched_stop_sporadic(FAR struct tcb_s *tcb)
    * context switch on thread exit would dereference it.
    */
 
-  tcb->flags &= ~TCB_FLAG_POLICY_MASK;
+  atomic_and(&tcb->shared_flags, ~TCB_FLAG_POLICY_MASK);
   return OK;
 }
 
