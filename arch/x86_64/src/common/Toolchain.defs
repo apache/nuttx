@@ -225,6 +225,10 @@ ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
   ARCHCPUFLAGS += -mavx
 endif
 
+ifeq ($(CONFIG_ARCH_X86_64_AVX2),y)
+  ARCHCPUFLAGS += -mavx2
+endif
+
 ifeq ($(CONFIG_ARCH_X86_64_AVX512),y)
   ARCHCPUFLAGS += -mavx512f
 endif

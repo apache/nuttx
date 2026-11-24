@@ -195,6 +195,10 @@ if(CONFIG_ARCH_X86_64_AVX)
   add_compile_options(-mavx)
 endif()
 
+if(CONFIG_ARCH_X86_64_AVX2)
+  add_compile_options(-mavx2)
+endif()
+
 if(CONFIG_ARCH_X86_64_AVX512)
   add_compile_options(-mavx512f)
 endif()
