@@ -952,9 +952,9 @@ void rpmsg_dump_epts(FAR struct rpmsg_device *rdev)
     {
       ept = container_of(node, struct rpmsg_endpoint, node);
       syslog(LOG_EMERG, "    ept %s %p: addr=%" PRIu32 " "
-             "dest=%" PRIu32 " refcnt=%" PRIu32 " priority=%" PRIu8
+             "dest=%" PRIu32 " refcnt=%u priority=%" PRIu8
              " priv=%p\n", ept->name, ept, ept->addr, ept->dest_addr,
-             ept->refcnt, ept->priority, ept->priv);
+             atomic_load(&ept->refcnt), ept->priority, ept->priv);
     }
 }
 
