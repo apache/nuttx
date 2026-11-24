@@ -18,7 +18,7 @@
 #
 # ##############################################################################
 
-list(APPEND SRCS arm_saveusercontext.S arm_tcbinfo.c)
+list(APPEND SRCS arm_exception.S arm_saveusercontext.S arm_tcbinfo.c)
 
 if(CONFIG_ENABLE_ALL_SIGNALS)
   list(APPEND SRCS arm_sigdeliver.c arm_schedulesigaction.c)
@@ -26,6 +26,10 @@ endif()
 
 if(CONFIG_LIB_SYSCALL)
   list(APPEND SRCS arm_dispatch_syscall.S)
+endif()
+
+if(NOT CONFIG_ARCH_HAVE_CUSTOM_VECTORS)
+  list(APPEND SRCS arm_vectors.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
