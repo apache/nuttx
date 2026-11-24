@@ -415,6 +415,15 @@ config ARCH_CHIP_MCX_NXXX
 	---help---
 		NXXx architectures (Cortex-M33)
 
+config ARCH_CHIP_PP502X
+	bool "PortalPlayer PP502x"
+	select ARCH_ARM7TDMI
+	select ARCH_HAVE_UDELAY
+	select ARCH_HAVE_DYNAMIC_UDELAY
+	---help---
+		PortalPlayer PP502x architectures (ARM7TDMI).  Only the main core
+		runs; the coprocessor stays asleep.
+
 config ARCH_CHIP_RA4
 	bool "Renesas RA4"
 	---help---
@@ -1479,6 +1488,7 @@ config ARCH_CHIP
 	default "nrf54l"	if ARCH_CHIP_NRF54L
 	default "nrf91"		if ARCH_CHIP_NRF91
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
+	default "pp502x"	if ARCH_CHIP_PP502X
 	default "ra4"			if ARCH_CHIP_RA4
 	default "ra8m1"			if ARCH_CHIP_RA8M1
 	default "rp2040"	if ARCH_CHIP_RP2040
@@ -1993,6 +2003,9 @@ source "arch/arm/src/nrf91/Kconfig"
 endif
 if ARCH_CHIP_NUC1XX
 source "arch/arm/src/nuc1xx/Kconfig"
+endif
+if ARCH_CHIP_PP502X
+source "arch/arm/src/pp502x/Kconfig"
 endif
 if ARCH_CHIP_RA4
 source "arch/arm/src/ra4/Kconfig"
