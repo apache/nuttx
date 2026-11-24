@@ -60,11 +60,15 @@
 int nxsem_destroy(FAR sem_t *sem)
 {
   int32_t old;
-  bool mutex = NXSEM_IS_MUTEX(sem);
-  FAR atomic_t *val = mutex ? NXSEM_MHOLDER(sem) : NXSEM_COUNT(sem);
-  int32_t new = mutex ? NXSEM_NO_MHOLDER : 1;
+  bool mutex;
+  FAR atomic_t *val;
+  int32_t new;
 
   DEBUGASSERT(sem != NULL);
+
+  mutex = NXSEM_IS_MUTEX(sem);
+  val = mutex ? NXSEM_MHOLDER(sem) : NXSEM_COUNT(sem);
+  new = mutex ? NXSEM_NO_MHOLDER : 1;
 
   /* There is really no particular action that we need
    * take to destroy a semaphore.  We will just reset
