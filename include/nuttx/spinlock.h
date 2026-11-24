@@ -236,6 +236,10 @@ static inline_function void spin_lock(FAR volatile spinlock_t *lock)
 
   spin_lock_notrace(lock);
 
+  /* Mark the spinlock has been locked */
+
+  spinlock_mark_locked(&lock->info);
+
   /* Get the lock, end counting busy-waiting */
 
   nxsched_critmon_busywait(false, return_address(0));
@@ -243,10 +247,6 @@ static inline_function void spin_lock(FAR volatile spinlock_t *lock)
   /* Notify that we have the spinlock */
 
   sched_note_spinlock_locked(lock);
-
-  /* Mark the spinlock has been locked */
-
-  spinlock_mark_locked(&lock->info);
 }
 #else
 #  define spin_lock(lock) ((void)(lock))
@@ -332,13 +332,13 @@ static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
   locked = spin_trylock_notrace(lock);
   if (locked)
     {
-      /* Notify that we have the spinlock */
-
-      sched_note_spinlock_locked(lock);
-
       /* Mark the spinlock has been locked */
 
       spinlock_mark_locked(&lock->info);
+
+      /* Notify that we have the spinlock */
+
+      sched_note_spinlock_locked(lock);
     }
   else
     {
@@ -515,6 +515,10 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
 
   spin_lock_notrace(lock);
 
+  /* Mark the spinlock has been locked */
+
+  spinlock_mark_locked(&lock->info);
+
   /* Get the lock, end counting busy-waiting */
 
   nxsched_critmon_busywait(false, return_address(0));
@@ -522,10 +526,6 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
   /* Notify that we have the spinlock */
 
   sched_note_spinlock_locked(lock);
-
-  /* Mark the spinlock has been locked */
-
-  spinlock_mark_locked(&lock->info);
 
   return flags;
 }
