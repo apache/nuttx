@@ -118,6 +118,10 @@ ifeq ($(CONFIG_STM32_ETHMAC)$(CONFIG_STM32_HAVE_IP_ETHMAC_M3M4_V1),yy)
 CHIP_CSRCS += stm32_eth_v1.c
 endif
 
+ifeq ($(CONFIG_SPI_SLAVE)$(CONFIG_ARCH_CHIP_STM32H7),yy)
+CHIP_CSRCS += stm32_spi_v5_slave.c
+endif
+
 ifeq ($(CONFIG_STM32_ETHMAC)$(CONFIG_STM32_HAVE_IP_ETHMAC_V2),yy)
 CHIP_CSRCS += stm32_eth_v2.c
 endif

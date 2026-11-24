@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_spi_slave.c
+ * arch/arm/src/common/stm32/stm32_spi_v5_slave.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -46,9 +46,7 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "chip.h"
-#include "stm32_rcc.h"
-#include "stm32_gpio.h"
+#include "stm32.h"
 #include "stm32_spi.h"
 #include "stm32_dma.h"
 
