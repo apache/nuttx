@@ -34,6 +34,10 @@
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/tls.h>
 
+/* Define the function, not the kernel macro of <syslog.h> */
+
+#undef syslog
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
