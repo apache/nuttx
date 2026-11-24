@@ -440,11 +440,13 @@ static int openeth_set_addr(uint8_t *addr)
       goto err;
     }
 
-  const uint8_t mac0[4] = {
+  const uint8_t mac0[4] =
+  {
     addr[5], addr[4], addr[3], addr[2]
   };
 
-  const uint8_t mac1[4] = {
+  const uint8_t mac1[4] =
+  {
     addr[1], addr[0]
   };
 
