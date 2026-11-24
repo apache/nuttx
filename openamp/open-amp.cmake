@@ -100,6 +100,8 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
       ${CMAKE_CURRENT_LIST_DIR}/0030-rpmsg-export-rpmsg_unregister_endpoint.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0031-rpmsg-let-a-service-attach-extra-data-to-its-ns-anno.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0032-rpmsg-hand-the-announced-extra-data-to-the-bound-and.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 

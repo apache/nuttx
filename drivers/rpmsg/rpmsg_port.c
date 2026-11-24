@@ -503,9 +503,11 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct rpmsg_port_s *port = priv;
   FAR struct rpmsg_device *rdev = &port->rdev;
-  struct rpmsg_ns_msg msg;
+  struct rpmsg_ns_msg_max msg;
 
-  if (len != sizeof(msg))
+  /* The announcement has to be there and to fit in the local message */
+
+  if (len < sizeof(struct rpmsg_ns_msg) || len > sizeof(msg))
     {
       return RPMSG_SUCCESS;
     }
@@ -514,10 +516,10 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
    * improve the buffer utilization.
    */
 
-  memcpy(&msg, data, sizeof(msg));
+  memcpy(&msg, data, len);
   rpmsg_port_release_rx_buffer(rdev, data);
 
-  rpmsg_ns_handle_msg(rdev, &msg);
+  rpmsg_ns_handle_msg(rdev, (FAR struct rpmsg_ns_msg *)&msg, len);
 
   return RPMSG_SUCCESS_BUFFER_RELEASED;
 }
