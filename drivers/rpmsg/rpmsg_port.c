@@ -496,7 +496,7 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
   struct rpmsg_ns_msg msg;
   FAR const char *name;
   uint32_t dest;
-  bool decref = false;
+  bool ept_to_release;
 
   if (len != sizeof(msg))
     {
@@ -516,16 +516,23 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
   metal_mutex_acquire(&rdev->lock);
   ept = rpmsg_get_endpoint(rdev, name, RPMSG_ADDR_ANY, dest);
 
+  /* If the ept release callback is not implemented, the callbacks below
+   * can free the endpoint. Test ept->release_cb before relying on the
+   * endpoint staying alive across them.
+   */
+
+  ept_to_release = ept != NULL && ept->release_cb != NULL;
+
   if (msg.flags == RPMSG_NS_DESTROY)
     {
       if (ept != NULL)
         {
           ept->dest_addr = RPMSG_ADDR_ANY;
-          if (ept->release_cb != NULL)
-            {
-              rpmsg_ept_incref(ept);
-              decref = true;
-            }
+        }
+
+      if (ept_to_release)
+        {
+          rpmsg_ept_incref(ept);
         }
 
       metal_mutex_release(&rdev->lock);
@@ -539,7 +546,7 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
           rdev->ns_unbind_cb(rdev, name, dest);
         }
 
-      if (decref)
+      if (ept_to_release)
         {
           metal_mutex_acquire(&rdev->lock);
           rpmsg_ept_decref(ept);
@@ -559,6 +566,11 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
       else if (ept->dest_addr == RPMSG_ADDR_ANY)
         {
           ept->dest_addr = dest;
+          if (ept_to_release)
+            {
+              rpmsg_ept_incref(ept);
+            }
+
           metal_mutex_release(&rdev->lock);
           if (ept->name[0] && rdev->support_ack)
             {
@@ -570,6 +582,13 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
           if (ept->ns_bound_cb != NULL)
             {
               ept->ns_bound_cb(ept);
+            }
+
+          if (ept_to_release)
+            {
+              metal_mutex_acquire(&rdev->lock);
+              rpmsg_ept_decref(ept);
+              metal_mutex_release(&rdev->lock);
             }
         }
       else
@@ -584,11 +603,23 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
       if (ept != NULL && ept->dest_addr == RPMSG_ADDR_ANY)
         {
           ept->dest_addr = dest;
+          if (ept_to_release)
+            {
+              rpmsg_ept_incref(ept);
+            }
+
           metal_mutex_release(&rdev->lock);
 
           if (ept->ns_bound_cb != NULL)
             {
               ept->ns_bound_cb(ept);
+            }
+
+          if (ept_to_release)
+            {
+              metal_mutex_acquire(&rdev->lock);
+              rpmsg_ept_decref(ept);
+              metal_mutex_release(&rdev->lock);
             }
         }
       else
