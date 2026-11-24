@@ -145,6 +145,14 @@ config ARCH_X86_64_AVX
 	depends on ARCH_HAVE_AVX
 	default n
 
+config ARCH_X86_64_AVX2
+	bool "AVX2 support"
+	depends on ARCH_X86_64_AVX
+	default n
+	---help---
+		Enable the use of AVX2 instructions.  The CPU is checked for
+		AVX2 at boot, as it is for AVX.
+
 config ARCH_X86_64_AVX512
 	bool "AVX512 support"
 	depends on ARCH_HAVE_AVX512

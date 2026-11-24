@@ -142,6 +142,12 @@ void x86_64_check_and_enable_capability(void)
 
   require = 0;
 
+  /* Check AVX2 instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_AVX2
+  require |= X86_64_CPUID_07_AVX2;
+#endif
+
   /* Check AVX512 Foundation instructions availability */
 
 #ifdef CONFIG_ARCH_X86_64_AVX512
