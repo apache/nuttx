@@ -565,6 +565,7 @@ Implemented Drivers
 - :doc:`lis2mdl`
 - lis3dsh
 - :doc:`lps22hb`
+- :doc:`lsm303agr`
 - lsm9ds1
 - ltr308
 - :doc:`mpu6050`

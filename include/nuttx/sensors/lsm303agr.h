@@ -212,4 +212,37 @@ int lsm303agr_sensor_register(FAR const char *devpath,
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_SENSORS_LSM303AGR */
+
+#ifdef CONFIG_SENSORS_LSM303AGR_UORB
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+struct i2c_master_s;
+
+/****************************************************************************
+ * Name: lsm303agr_register_uorb
+ *
+ * Description:
+ *   Register the LSM303AGR as the uORB topics sensor_accel<devno> and
+ *   sensor_mag<devno>.  Both sensors are polled.
+ *
+ * Input Parameters:
+ *   i2c   - The I2C bus the LSM303AGR is on.
+ *   devno - The device number of both topics.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int lsm303agr_register_uorb(FAR struct i2c_master_s *i2c, int devno);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* CONFIG_SENSORS_LSM303AGR_UORB */
 #endif /* __INCLUDE_NUTTX_SENSORS_LSM303AGR_H */

@@ -1073,6 +1073,31 @@ config LSM303AGR_I2C_FREQUENCY
 	range 1 400000
 	depends on SENSORS_LSM303AGR
 
+config SENSORS_LSM303AGR_UORB
+	bool "STMicro LSM303AGR uORB support"
+	default n
+	select I2C
+	---help---
+		Enable uORB driver support for the STMicro LSM303AGR accelerometer
+		and magnetometer.
+
+if SENSORS_LSM303AGR_UORB
+
+config SENSORS_LSM303AGR_UORB_I2C_FREQUENCY
+	int "LSM303AGR I2C frequency"
+	default 400000
+
+config SENSORS_LSM303AGR_UORB_THREAD_STACKSIZE
+	int "LSM303AGR polling thread stack size"
+	default 1024
+
+config SENSORS_LSM303AGR_UORB_BUFSIZE
+	int "LSM303AGR uORB buffer size"
+	default 10
+	range 0 100
+
+endif # SENSORS_LSM303AGR_UORB
+
 config SENSORS_LSM6DSL
 	bool "STMicro LSM6DSL support"
 	default n
