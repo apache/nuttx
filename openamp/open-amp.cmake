@@ -94,6 +94,8 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
       ${CMAKE_CURRENT_LIST_DIR}/0027-rpmsg-extract-the-name-service-handling-into-a-commo.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0028-rpmsg-take-the-ns-endpoint-reference-just-once.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0029-rpmsg-let-a-reference-outlive-the-endpoint-s-registr.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 

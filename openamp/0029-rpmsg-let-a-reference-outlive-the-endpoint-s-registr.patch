@@ -1,0 +1,128 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Sun, 23 Aug 2026 23:22:34 +0800
+Subject: [PATCH] rpmsg: let a reference outlive the endpoint's registration
+
+An endpoint's reference count could only be changed under the device
+lock while it was registered, and registration reset it to one. So a
+holder could not keep an endpoint alive across the device going away,
+nor take a reference before the endpoint was registered.
+
+- Change refcnt atomically, declared as atomic_uint, so no lock is
+  needed around rpmsg_ept_incref() and rpmsg_ept_decref().
+- Clear rdev in rpmsg_unregister_endpoint() instead of when the last
+  reference goes, so that it means "no longer registered" rather than
+  "no longer allocated". A second rpmsg_destroy_ept() is then a no-op
+  instead of releasing the address again.
+- Take a reference in rpmsg_register_endpoint() instead of setting the
+  count to one, so a reference taken before registration is kept. The
+  owner has to zero the endpoint before creating it.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/rpmsg.h |  3 ++-
+ lib/rpmsg/rpmsg.c           | 21 ++++++++++-----------
+ lib/rpmsg/rpmsg_internal.h  |  2 --
+ 3 files changed, 12 insertions(+), 14 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index 5737066..7fc72a2 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -12,6 +12,7 @@
+ #ifndef _RPMSG_H_
+ #define _RPMSG_H_
+ 
++#include <metal/atomic.h>
+ #include <metal/compiler.h>
+ #include <metal/mutex.h>
+ #include <metal/list.h>
+@@ -91,7 +92,7 @@ struct rpmsg_endpoint {
+ 	uint32_t dest_addr;
+ 
+ 	/** Reference count for determining whether the endpoint can be deallocated */
+-	uint32_t refcnt;
++	atomic_uint refcnt;
+ 
+ 	/** Callback to inform the user that the endpoint allocation can be safely removed */
+ 	rpmsg_ept_release_cb release_cb;
+diff --git a/lib/rpmsg/rpmsg.c open-amp/lib/rpmsg/rpmsg.c
+index feb69a4..0c82897 100644
+--- a/lib/rpmsg/rpmsg.c
++++ open-amp/lib/rpmsg/rpmsg.c
+@@ -10,6 +10,7 @@
+ #include <internal/utilities.h>
+ #include <openamp/rpmsg.h>
+ #include <metal/alloc.h>
++#include <metal/atomic.h>
+ 
+ #include "rpmsg_internal.h"
+ 
+@@ -101,20 +102,14 @@ static int rpmsg_set_address(unsigned long *bitmap, int size, int addr)
+ void rpmsg_ept_incref(struct rpmsg_endpoint *ept)
+ {
+ 	if (ept)
+-		ept->refcnt++;
++		atomic_fetch_add(&ept->refcnt, 1);
+ }
+ 
+ void rpmsg_ept_decref(struct rpmsg_endpoint *ept)
+ {
+-	if (ept) {
+-		ept->refcnt--;
+-		if (!ept->refcnt) {
+-			if (ept->release_cb)
+-				ept->release_cb(ept);
+-			else
+-				ept->rdev = NULL;
+-		}
+-	}
++	if (ept && atomic_fetch_sub(&ept->refcnt, 1) == 1 &&
++	    ept->release_cb)
++		ept->release_cb(ept);
+ }
+ 
+ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
+@@ -306,6 +301,9 @@ static void rpmsg_unregister_endpoint(struct rpmsg_endpoint *ept)
+ 		rpmsg_release_address(rdev->bitmap, RPMSG_ADDR_BMP_SIZE,
+ 				      ept->addr);
+ 	metal_list_del(&ept->node);
++
++	/* No longer registered, which is not the same as no longer allocated */
++	ept->rdev = NULL;
+ 	rpmsg_ept_decref(ept);
+ 	metal_mutex_release(&rdev->lock);
+ }
+@@ -322,7 +320,8 @@ void rpmsg_register_endpoint(struct rpmsg_device *rdev,
+ 	else
+ 		ept->name[0] = 0;
+ 
+-	ept->refcnt = 1;
++	/* A reference for the device, added to any the caller already holds */
++	atomic_fetch_add(&ept->refcnt, 1);
+ 	ept->addr = src;
+ 	ept->dest_addr = dest;
+ 	ept->cb = cb;
+diff --git a/lib/rpmsg/rpmsg_internal.h open-amp/lib/rpmsg/rpmsg_internal.h
+index 9a9d2cd..686ef07 100644
+--- a/lib/rpmsg/rpmsg_internal.h
++++ open-amp/lib/rpmsg/rpmsg_internal.h
+@@ -156,7 +156,6 @@ rpmsg_get_ept_from_addr(struct rpmsg_device *rdev, uint32_t addr)
+  * @brief Increase the endpoint reference count
+  *
+  * This function is used to avoid calling ept_cb after release lock causes race condition
+- * it should be called under lock protection.
+  *
+  * @param ept	pointer to rpmsg endpoint
+  *
+@@ -169,7 +168,6 @@ void rpmsg_ept_incref(struct rpmsg_endpoint *ept);
+  * @brief Decrease the end point reference count
+  *
+  * This function is used to avoid calling ept_cb after release lock causes race condition
+- * it should be called under lock protection.
+  *
+  * @param ept	pointer to rpmsg endpoint
+  */
+-- 
+2.34.1
+
