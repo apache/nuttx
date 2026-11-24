@@ -478,6 +478,21 @@ void netdev_lower_input(FAR struct netdev_lowerhalf_s *dev,
 struct bridge_port_s;
 void netdev_lower_bridge_set(FAR struct netdev_lowerhalf_s *dev,
                              FAR struct bridge_port_s *port);
+
+/****************************************************************************
+ * Name: netdev_lower_bridge_get
+ *
+ * Description:
+ *   Return the bridge port of the device, or NULL when the device is not a
+ *   port of any bridge.
+ *
+ * Input Parameters:
+ *   dev - The lower half device driver structure
+ *
+ ****************************************************************************/
+
+FAR struct bridge_port_s *
+netdev_lower_bridge_get(FAR struct netdev_lowerhalf_s *dev);
 #endif
 
 /****************************************************************************

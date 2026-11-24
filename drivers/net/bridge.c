@@ -1096,6 +1096,16 @@ static int bridge_addif(FAR const struct ifreq *req)
       return -EINVAL;
     }
 
+  /* A device can only be a port of one bridge.  Checked over all bridges,
+   * because attaching it here would overwrite the port it already points
+   * to, leaving the other bridge with a port it no longer receives from.
+   */
+
+  if (netdev_lower_bridge_get(dev) != NULL)
+    {
+      return -EBUSY;
+    }
+
   nxmutex_lock(&br->br_lock);
 
   for (i = 0; i < CONFIG_NET_BRIDGE_MAX_PORTS; i++)
