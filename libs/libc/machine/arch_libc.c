@@ -27,6 +27,27 @@
 #include <string.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The access checks below measure strings.  An architecture may provide
+ * some of these functions without its own strlen() or strnlen(), so fall
+ * back to the generic ones then.
+ */
+
+#ifdef CONFIG_LIBC_ARCH_STRLEN
+#  define kasan_strlen(s)       ARCH_LIBCFUN(strlen)(s)
+#else
+#  define kasan_strlen(s)       strlen(s)
+#endif
+
+#ifdef CONFIG_LIBC_ARCH_STRNLEN
+#  define kasan_strnlen(s, n)   ARCH_LIBCFUN(strnlen)(s, n)
+#else
+#  define kasan_strnlen(s, n)   strnlen(s, n)
+#endif
+
+/****************************************************************************
  * Public Functions prototypes
  ****************************************************************************/
 
@@ -185,8 +206,8 @@ int strcmp(FAR const char *s1, FAR const char *s2)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  __asan_loadN((FAR void *)s1, ARCH_LIBCFUN(strlen)(s1) + 1);
-  __asan_loadN((FAR void *)s2, ARCH_LIBCFUN(strlen)(s2) + 1);
+  __asan_loadN((FAR void *)s1, kasan_strlen(s1) + 1);
+  __asan_loadN((FAR void *)s2, kasan_strlen(s2) + 1);
 #    endif
 #  endif
   return ARCH_LIBCFUN(strcmp)(s1, s2);
@@ -200,10 +221,10 @@ FAR char *strcpy(FAR char *dest, FAR const char *src)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
 #    ifndef CONFIG_MM_KASAN_DISABLE_WRITES_CHECK
-  __asan_storeN(dest, ARCH_LIBCFUN(strlen)(src) + 1);
+  __asan_storeN(dest, kasan_strlen(src) + 1);
 #    endif
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  __asan_loadN((FAR void *)src, ARCH_LIBCFUN(strlen)(src) + 1);
+  __asan_loadN((FAR void *)src, kasan_strlen(src) + 1);
 #    endif
 #  endif
   return ARCH_LIBCFUN(strcpy)(dest, src);
@@ -249,7 +270,7 @@ FAR char *strchr(FAR const char *s, int c)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  __asan_loadN((FAR void *)s, ARCH_LIBCFUN(strlen)(s) + 1);
+  __asan_loadN((FAR void *)s, kasan_strlen(s) + 1);
 #    endif
 #  endif
 
@@ -262,7 +283,7 @@ FAR char *strchrnul(FAR const char *s, int c)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  __asan_loadN((FAR void *)s, ARCH_LIBCFUN(strlen)(s) + 1);
+  __asan_loadN((FAR void *)s, kasan_strlen(s) + 1);
 #    endif
 #  endif
   return ARCH_LIBCFUN(strchrnul)(s, c);
@@ -276,8 +297,8 @@ int strncmp(FAR const char *s1, FAR const char *s2, size_t n)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  size_t size_s1 = ARCH_LIBCFUN(strnlen)(s1, n);
-  size_t size_s2 = ARCH_LIBCFUN(strnlen)(s2, n);
+  size_t size_s1 = kasan_strnlen(s1, n);
+  size_t size_s2 = kasan_strnlen(s2, n);
   size_t size;
 
   size = size_s1 < size_s2 ? size_s1 : size_s2;
@@ -310,7 +331,7 @@ FAR char *strrchr(FAR const char *s, int c)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  __asan_loadN((FAR void *)s, ARCH_LIBCFUN(strlen)(s) + 1);
+  __asan_loadN((FAR void *)s, kasan_strlen(s) + 1);
 #    endif
 #  endif
   return ARCH_LIBCFUN(strrchr)(s, c);
