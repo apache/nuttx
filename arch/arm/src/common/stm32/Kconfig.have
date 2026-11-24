@@ -397,10 +397,7 @@ config STM32_HAVE_FDCAN2
 config STM32_HAVE_FDCAN3
 	bool
 
-config STM32_HAVE_IP_FDCAN_MCAN_M0_V1
-	bool
-
-config STM32_HAVE_IP_FDCAN_MCAN_M3M4_V1
+config STM32_HAVE_IP_FDCAN_MCAN_V1
 	bool
 
 # FLASH capabilities

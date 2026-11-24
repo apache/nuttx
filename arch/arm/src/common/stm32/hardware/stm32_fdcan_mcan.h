@@ -35,12 +35,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Only for STM32G4 */
-
-#ifndef CONFIG_STM32_STM32G4XXX
-#  error STM32 FDCAN was tested only for STM32G4
-#endif
-
 /* Register Offsets *********************************************************/
 
 #define STM32_FDCAN_CREL_OFFSET    0x0000  /* FDCAN core release register */
@@ -68,8 +62,8 @@
 #define STM32_FDCAN_RXGFC_OFFSET   0x0080  /* FDCAN global filter configuration register */
 #define STM32_FDCAN_XIDAM_OFFSET   0x0084  /* FDCAN extended ID and mask register */
 #define STM32_FDCAN_HPMS_OFFSET    0x0088  /* FDCAN high-priority message status register */
-#define STM32_FDCAN_RXFS_OFFSET(f) (0x0090 + ((f) << 3)
-#define STM32_FDCAN_RXFA_OFFSET(f) (0x0094 + ((f) << 3)
+#define STM32_FDCAN_RXFS_OFFSET(f) (0x0090 + ((f) << 3))
+#define STM32_FDCAN_RXFA_OFFSET(f) (0x0094 + ((f) << 3))
 #define STM32_FDCAN_RXF0S_OFFSET   0x0090  /* FDCAN Rx FIFO 0 status register */
 #define STM32_FDCAN_RXF0A_OFFSET   0x0094  /* CAN Rx FIFO 0 acknowledge register */
 #define STM32_FDCAN_RXF1S_OFFSET   0x0098  /* FDCAN Rx FIFO 1 status register */
@@ -96,7 +90,7 @@
 #define FDCAN_CREL_DAY_MASK        (0xff << FDCAN_CREL_DAY_SHIFT)
 #define FDCAN_CREL_MON_SHIFT       (8)                                     /* Bits 8-15: MON */
 #define FDCAN_CREL_MON_MASK        (0xff << FDCAN_CREL_MON_SHIFT)
-#define FDCAN_CREL_YEAR_SHIFT      (16)                                    /* Bits 8-15: YEAR */
+#define FDCAN_CREL_YEAR_SHIFT      (16)                                    /* Bits 16-19: YEAR */
 #define FDCAN_CREL_YEAR_MASK       (0x0f << FDCAN_CREL_YEAR_SHIFT)
 #define FDCAN_CREL_SUBSTEP_SHIFT   (20)                                    /* Bits 20-23: SUBSTEP */
 #define FDCAN_CREL_SUBSTEP_MASK    (0x0f << FDCAN_CREL_SUBSTEP_SHIFT)
@@ -219,7 +213,7 @@
 /* FDCAN error counter register */
 
 #define FDCAN_ECR_TEC_SHIFT         (0)                                    /* Bits 0-7: Transmit error counter */
-#define FDCAN_CR_TEC_MASK           (0xff << FDCAN_ECR_TEC_SHIFT)
+#define FDCAN_ECR_TEC_MASK          (0xff << FDCAN_ECR_TEC_SHIFT)
 #define FDCAN_ECR_REC_SHIFT         (8)                                    /* Bits 8-14: Receive error counter */
 #define FDCAN_ECR_REC_MASK          (0x7f << FDCAN_ECR_REC_SHIFT)
 #define FDCAN_ECR_RP                (1 << 15)                              /* Bit 15: Receive error passive */
@@ -333,7 +327,7 @@
 #  define FDCAN_RXGFC_LSS(value)      ((value) << FDCAN_RXGFC_LSS_SHIFT)
 #  define FDCAN_RXGFC_LSS_MAX         (28)
 #define FDCAN_RXGFC_LSE_SHIFT         (24)                                 /* Bits 24-27: List size ext */
-#define FDCAN_RXGFC_LSE_MASK          (0x1f << FDCAN_RXGFC_LSE_SHIFT)
+#define FDCAN_RXGFC_LSE_MASK          (0xf << FDCAN_RXGFC_LSE_SHIFT)
 #  define FDCAN_RXGFC_LSE(value)      ((value) << FDCAN_RXGFC_LSE_SHIFT)
 #  define FDCAN_RXGFC_LSE_MAX         (8)
 
@@ -384,7 +378,7 @@
 #define FDCAN_TXFQS_TFFL_MASK       (0x7 << FDCAN_TXFQS_TFFL_SHIFT)
 #define FDCAN_TXFQS_TFGI_SHIFT      (8)                                    /* Bits 8-9: FIFO get index */
 #define FDCAN_TXFQS_TFGI_MASK       (0x3 << FDCAN_TXFQS_TFGI_SHIFT)
-#define FDCAN_TXFQS_TFQPI_SHIFT     (16)                                   /* Bits 20-16: FIFO/queue put index */
+#define FDCAN_TXFQS_TFQPI_SHIFT     (16)                                   /* Bits 16-17: FIFO/queue put index */
 #define FDCAN_TXFQS_TFQPI_MASK      (0x3 << FDCAN_TXFQS_TFQPI_SHIFT)
 #define FDCAN_TXFQS_TFQF            (1 << 21)                              /* Bit 21: FIFO/queue full */
 
@@ -430,9 +424,9 @@
 
 /* FDCAN Tx event FIFO status register */
 
-#define FDCAN_TXEFS_EFFL_SHIFT       (2)                                   /* Bits 0-2: Event FIFO fill level */
-#define FDCAN_TXEFS_EFFL_MASK        (0x7 << FDCAN_TXEFC_EFFL_SHIFT)
-#  define FDCAN_TXEFC_EFFL(value)    ((value) << FDCAN_TXEFC_EFFL_SHIFT)
+#define FDCAN_TXEFS_EFFL_SHIFT       (0)                                   /* Bits 0-2: Event FIFO fill level */
+#define FDCAN_TXEFS_EFFL_MASK        (0x7 << FDCAN_TXEFS_EFFL_SHIFT)
+#  define FDCAN_TXEFS_EFFL(value)    ((value) << FDCAN_TXEFS_EFFL_SHIFT)
 #define FDCAN_TXEFS_EFGI_SHIFT       (8)                                   /* Bits 8-9: Event FIFO get index */
 #define FDCAN_TXEFS_EFGI_MASK        (0x3 << FDCAN_TXEFS_EFGI_SHIFT)
 #  define FDCAN_TXEFS_EFGI(value)    ((value) << FDCAN_TXEFS_EFGI_SHIFT)

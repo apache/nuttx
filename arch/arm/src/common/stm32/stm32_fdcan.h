@@ -41,11 +41,8 @@
 /* Port numbers for use with stm32_fdcan_initialize() */
 
 #define FDCAN1 1
-
-#if defined(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_M3M4_V1)
-#  define FDCAN2 2
-#  define FDCAN3 3
-#endif
+#define FDCAN2 2
+#define FDCAN3 3
 
 /****************************************************************************
  * Public Function Prototypes

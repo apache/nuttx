@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32_fdcan.c
+ * arch/arm/src/common/stm32/stm32_fdcan_mcan_v1.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -73,9 +73,58 @@
 
 /* FDCAN Message RAM */
 
-#  define FDCAN_MSGRAM_WORDS         (212)
-#  define STM32_CANRAM1_BASE         (STM32_FDCAN_SRAM_BASE + 0x0000)
-#  define STM32_CANRAM2_BASE         (STM32_FDCAN_SRAM_BASE + 1*(FDCAN_MSGRAM_WORDS * 4))
+/* Each instance has 212 words of message RAM, one after the other */
+
+#define FDCAN_MSGRAM_WORDS           (212)
+
+#if defined(STM32_FDCAN_SRAM_BASE)
+#  define FDCAN_SRAM_BASE            STM32_FDCAN_SRAM_BASE
+#elif defined(STM32_SRAMCAN_BASE)
+#  define FDCAN_SRAM_BASE            STM32_SRAMCAN_BASE
+#else
+#  define FDCAN_SRAM_BASE            STM32_CANRAM_BASE
+#endif
+
+#define STM32_CANRAM1_BASE           (FDCAN_SRAM_BASE + 0*(FDCAN_MSGRAM_WORDS * 4))
+#define STM32_CANRAM2_BASE           (FDCAN_SRAM_BASE + 1*(FDCAN_MSGRAM_WORDS * 4))
+#define STM32_CANRAM3_BASE           (FDCAN_SRAM_BASE + 2*(FDCAN_MSGRAM_WORDS * 4))
+
+/* Interrupt lines */
+
+#ifdef STM32_IRQ_FDCAN1_IT0
+#  define FDCAN1_IRQ0                STM32_IRQ_FDCAN1_IT0
+#  define FDCAN1_IRQ1                STM32_IRQ_FDCAN1_IT1
+#  define FDCAN2_IRQ0                STM32_IRQ_FDCAN2_IT0
+#  define FDCAN2_IRQ1                STM32_IRQ_FDCAN2_IT1
+#  define FDCAN3_IRQ0                STM32_IRQ_FDCAN3_IT0
+#  define FDCAN3_IRQ1                STM32_IRQ_FDCAN3_IT1
+#else
+#  define FDCAN1_IRQ0                STM32_IRQ_FDCAN1_0
+#  define FDCAN1_IRQ1                STM32_IRQ_FDCAN1_1
+#  define FDCAN2_IRQ0                STM32_IRQ_FDCAN2_0
+#  define FDCAN2_IRQ1                STM32_IRQ_FDCAN2_1
+#  define FDCAN3_IRQ0                STM32_IRQ_FDCAN3_0
+#  define FDCAN3_IRQ1                STM32_IRQ_FDCAN3_1
+#endif
+
+/* The G0 headers define FDCAN1 only */
+
+#if defined(CONFIG_ARCH_CHIP_STM32G0) && defined(CONFIG_STM32_FDCAN2)
+#  error "FDCAN2 is not supported on STM32G0"
+#endif
+
+/* RCC reset of all FDCAN instances */
+
+#if defined(RCC_APB1HRSTR_FDCANRST)
+#  define FDCAN_RSTR                 STM32_RCC_APB1HRSTR
+#  define FDCAN_RST                  RCC_APB1HRSTR_FDCANRST
+#elif defined(RCC_APB1RSTR1_FDCANRST)
+#  define FDCAN_RSTR                 STM32_RCC_APB1RSTR1
+#  define FDCAN_RST                  RCC_APB1RSTR1_FDCANRST
+#else
+#  define FDCAN_RSTR                 STM32_RCC_APB1RSTR
+#  define FDCAN_RST                  RCC_APB1RSTR_FDCANRST
+#endif
 
 #  ifdef CONFIG_STM32_FDCAN1
 #    define FDCAN1_STDFILTER_SIZE    (28)
@@ -106,6 +155,21 @@
 #    define FDCAN2_RXFIFO1_WORDS     (54)
 #    define FDCAN2_TXEVENTFIFO_WORDS (6)
 #    define FDCAN2_TXFIFIOQ_WORDS    (54)
+#  endif
+#  ifdef CONFIG_STM32_FDCAN3
+#    define FDCAN3_STDFILTER_SIZE    (28)
+#    define FDCAN3_EXTFILTER_SIZE    (8)
+#    define FDCAN3_RXFIFO0_SIZE      (3)
+#    define FDCAN3_RXFIFO1_SIZE      (3)
+#    define FDCAN3_TXEVENTFIFO_SIZE  (3)
+#    define FDCAN3_TXFIFIOQ_SIZE     (3)
+
+#    define FDCAN3_STDFILTER_WORDS   (28)
+#    define FDCAN3_EXTFILTER_WORDS   (16)
+#    define FDCAN3_RXFIFO0_WORDS     (54)
+#    define FDCAN3_RXFIFO1_WORDS     (54)
+#    define FDCAN3_TXEVENTFIFO_WORDS (6)
+#    define FDCAN3_TXFIFIOQ_WORDS    (54)
 #  endif
 
 /* FDCAN1 Configuration *****************************************************/
@@ -203,7 +267,7 @@
 #      error Invalid FDCAN2 NSJW
 #    endif
 #    if FDCAN2_NBRP > FDCAN_NBTP_NBRP_MAX
-#      error Invalid FDCAN1 NBRP
+#      error Invalid FDCAN2 NBRP
 #    endif
 
 #    ifdef CONFIG_STM32_FDCAN2_FD_BRS
@@ -248,6 +312,77 @@
 #  define FDCAN2_MSGRAM_WORDS      (FDCAN2_TXFIFOQ_INDEX + FDCAN2_TXFIFIOQ_WORDS)
 
 #endif /* CONFIG_STM32_FDCAN2 */
+
+/* FDCAN3 Configuration *****************************************************/
+
+#ifdef CONFIG_STM32_FDCAN3
+
+/* Bit timing */
+
+#  ifndef CONFIG_STM32_FDCAN3_AUTO_BIT_TIMING
+
+#    define FDCAN3_NTSEG1  (CONFIG_STM32_FDCAN3_NTSEG1 - 1)
+#    define FDCAN3_NTSEG2  (CONFIG_STM32_FDCAN3_NTSEG2 - 1)
+#    define FDCAN3_NBRP    (((STM32_FDCANCLK_FREQUENCY /              \
+                            ((FDCAN3_NTSEG1 + FDCAN3_NTSEG2 + 3) *  \
+                             CONFIG_STM32_FDCAN3_BITRATE)) - 1))
+#    define FDCAN3_NSJW    (CONFIG_STM32_FDCAN3_NSJW - 1)
+
+#    if FDCAN3_NTSEG1 > FDCAN_NBTP_NTSEG1_MAX
+#      error Invalid FDCAN3 NTSEG1
+#    endif
+#    if FDCAN3_NTSEG2 > FDCAN_NBTP_NTSEG2_MAX
+#      error Invalid FDCAN3 NTSEG2
+#    endif
+#    if FDCAN3_NSJW > FDCAN_NBTP_NSJW_MAX
+#      error Invalid FDCAN3 NSJW
+#    endif
+#    if FDCAN3_NBRP > FDCAN_NBTP_NBRP_MAX
+#      error Invalid FDCAN3 NBRP
+#    endif
+
+#    ifdef CONFIG_STM32_FDCAN3_FD_BRS
+#      define FDCAN3_DTSEG1 (CONFIG_STM32_FDCAN3_DTSEG1 - 1)
+#      define FDCAN3_DTSEG2 (CONFIG_STM32_FDCAN3_DTSEG2 - 1)
+#      define FDCAN3_DBRP   (((STM32_FDCANCLK_FREQUENCY /                 \
+                             ((FDCAN3_DTSEG1 + FDCAN3_DTSEG2 + 3) *     \
+                              CONFIG_STM32_FDCAN3_DBITRATE)) - 1))
+#      define FDCAN3_DSJW   (CONFIG_STM32_FDCAN3_DSJW - 1)
+#    else
+#      define FDCAN3_DTSEG1 1
+#      define FDCAN3_DTSEG2 1
+#      define FDCAN3_DBRP   1
+#      define FDCAN3_DSJW   1
+#    endif /* CONFIG_STM32_FDCAN3_FD_BRS */
+
+#    if FDCAN3_DTSEG1 > FDCAN_DBTP_DTSEG1_MAX
+#      error Invalid FDCAN3 DTSEG1
+#    endif
+#    if FDCAN3_DTSEG2 > FDCAN_DBTP_DTSEG2_MAX
+#      error Invalid FDCAN3 DTSEG2
+#    endif
+#    if FDCAN3_DBRP > FDCAN_DBTP_DBRP_MAX
+#      error Invalid FDCAN3 DBRP
+#    endif
+#    if FDCAN3_DSJW > FDCAN_DBTP_DSJW_MAX
+#      error Invalid FDCAN3 DSJW
+#    endif
+
+#  endif
+
+/* FDCAN3 Message RAM Configuration *****************************************/
+
+/* FDCAN3 Message RAM Layout */
+
+#  define FDCAN3_STDFILTER_INDEX   0
+#  define FDCAN3_EXTFILTERS_INDEX  (FDCAN3_STDFILTER_INDEX + FDCAN3_STDFILTER_WORDS)
+#  define FDCAN3_RXFIFO0_INDEX     (FDCAN3_EXTFILTERS_INDEX + FDCAN3_EXTFILTER_WORDS)
+#  define FDCAN3_RXFIFO1_INDEX     (FDCAN3_RXFIFO0_INDEX + FDCAN3_RXFIFO0_WORDS)
+#  define FDCAN3_TXEVENTFIFO_INDEX (FDCAN3_RXFIFO1_INDEX + FDCAN3_RXFIFO1_WORDS)
+#  define FDCAN3_TXFIFOQ_INDEX     (FDCAN3_TXEVENTFIFO_INDEX + FDCAN3_TXEVENTFIFO_WORDS)
+#  define FDCAN3_MSGRAM_WORDS      (FDCAN3_TXFIFOQ_INDEX + FDCAN3_TXFIFIOQ_WORDS)
+
+#endif /* CONFIG_STM32_FDCAN3 */
 
 /* Interrupts ***************************************************************/
 
@@ -318,9 +453,9 @@
 
 #define FDCAN_ANYERR_INTS (FDCAN_CMNERR_INTS | FDCAN_RXERR_INTS | FDCAN_TXERR_INTS)
 
-/* Convenience macro for clearing all interrupts */
+/* All interrupt flags of the v1 IR register (bits 0-23) */
 
-#define FDCAN_INT_ALL     0x3fcfffff
+#define FDCAN_INT_ALL     0x00ffffff
 
 /* Debug ********************************************************************/
 
@@ -332,7 +467,8 @@
 
 #undef STM32_FDCAN_LOOPBACK
 #if defined(CONFIG_STM32_FDCAN1_LOOPBACK) ||   \
-    defined(CONFIG_STM32_FDCAN2_LOOPBACK)
+    defined(CONFIG_STM32_FDCAN2_LOOPBACK) ||   \
+    defined(CONFIG_STM32_FDCAN3_LOOPBACK)
 #  define STM32_FDCAN_LOOPBACK 1
 #endif
 
@@ -390,7 +526,7 @@ struct stm32_config_s
   uint32_t data_baud;       /* Configured data baud */
   uint32_t nbtp;            /* Nominal bit timing/prescaler register setting */
   uint32_t dbtp;            /* Data bit timing/prescaler register setting */
-  uint8_t port;             /* FDCAN port number (1 or 2) */
+  uint8_t port;             /* FDCAN port number (1 to 3) */
   uint8_t irq0;             /* FDCAN peripheral IRQ number for interrupt line 0 */
   uint8_t irq1;             /* FDCAN peripheral IRQ number for interrupt line 1 */
   uint8_t mode;             /* See enum stm32_canmode_e */
@@ -456,7 +592,7 @@ struct fdcan_bitseg
   uint8_t sjw;
   uint8_t bs1;
   uint8_t bs2;
-  uint8_t prescaler;
+  uint16_t prescaler;
 };
 
 /****************************************************************************
@@ -571,8 +707,8 @@ static const struct stm32_config_s g_fdcan1const =
                       FDCAN_DBTP_DSJW(FDCAN1_DSJW),
 #endif
   .port             = 1,
-  .irq0             = STM32_IRQ_FDCAN1_IT0,
-  .irq1             = STM32_IRQ_FDCAN1_IT1,
+  .irq0             = FDCAN1_IRQ0,
+  .irq1             = FDCAN1_IRQ1,
 #if defined(CONFIG_STM32_FDCAN1_CLASSIC)
   .mode             = FDCAN_CLASSIC_MODE,
 #elif defined(CONFIG_STM32_FDCAN1_FD)
@@ -645,8 +781,8 @@ static const struct stm32_config_s g_fdcan2const =
                       FDCAN_DBTP_DSJW(FDCAN2_DSJW),
 #endif
   .port             = 2,
-  .irq0             = STM32_IRQ_FDCAN2_IT0,
-  .irq1             = STM32_IRQ_FDCAN2_IT1,
+  .irq0             = FDCAN2_IRQ0,
+  .irq1             = FDCAN2_IRQ1,
 #if defined(CONFIG_STM32_FDCAN2_CLASSIC)
   .mode             = FDCAN_CLASSIC_MODE,
 #elif defined(CONFIG_STM32_FDCAN2_FD)
@@ -693,6 +829,80 @@ static struct stm32_fdcan_s g_fdcan2priv;
 static struct can_dev_s g_fdcan2dev;
 
 #endif /* CONFIG_STM32_FDCAN2 */
+
+#ifdef CONFIG_STM32_FDCAN3
+/* FDCAN3 message RAM allocation */
+
+/* FDCAN3 constant configuration */
+
+static const struct stm32_config_s g_fdcan3const =
+{
+  .rxpinset         = GPIO_FDCAN3_RX,
+  .txpinset         = GPIO_FDCAN3_TX,
+  .base             = STM32_FDCAN3_BASE,
+  .baud             = CONFIG_STM32_FDCAN3_BITRATE,
+#if defined(CONFIG_STM32_FDCAN3_FD_BRS)
+  .data_baud        = CONFIG_STM32_FDCAN3_DBITRATE,
+#endif
+#ifndef CONFIG_STM32_FDCAN3_AUTO_BIT_TIMING
+  .nbtp             = FDCAN_NBTP_NBRP(FDCAN3_NBRP) |
+                      FDCAN_NBTP_NTSEG1(FDCAN3_NTSEG1) |
+                      FDCAN_NBTP_NTSEG2(FDCAN3_NTSEG2) |
+                      FDCAN_NBTP_NSJW(FDCAN3_NSJW),
+  .dbtp             = FDCAN_DBTP_DBRP(FDCAN3_DBRP) |
+                      FDCAN_DBTP_DTSEG1(FDCAN3_DTSEG1) |
+                      FDCAN_DBTP_DTSEG2(FDCAN3_DTSEG2) |
+                      FDCAN_DBTP_DSJW(FDCAN3_DSJW),
+#endif
+  .port             = 3,
+  .irq0             = FDCAN3_IRQ0,
+  .irq1             = FDCAN3_IRQ1,
+#if defined(CONFIG_STM32_FDCAN3_CLASSIC)
+  .mode             = FDCAN_CLASSIC_MODE,
+#elif defined(CONFIG_STM32_FDCAN3_FD)
+  .mode             = FDCAN_FD_MODE,
+#else
+  .mode             = FDCAN_FD_BRS_MODE,
+#endif
+#if defined(CONFIG_STM32_FDCAN3_NONISO_FORMAT)
+  .format           = FDCAN_NONISO_BOSCH_V1_FORMAT,
+#else
+  .format           = FDCAN_ISO11898_1_FORMAT,
+#endif
+  .nstdfilters      = FDCAN3_STDFILTER_SIZE,
+  .nextfilters      = FDCAN3_EXTFILTER_SIZE,
+  .nrxfifo0         = FDCAN3_RXFIFO0_SIZE,
+  .nrxfifo1         = FDCAN3_RXFIFO1_SIZE,
+  .ntxeventfifo     = FDCAN3_TXEVENTFIFO_SIZE,
+  .ntxfifoq         = FDCAN3_TXFIFIOQ_SIZE,
+  .rxfifo0esize     = (FDCAN3_RXFIFO0_WORDS / FDCAN3_RXFIFO0_SIZE),
+  .rxfifo1esize     = (FDCAN3_RXFIFO1_WORDS / FDCAN3_RXFIFO1_SIZE),
+  .txeventesize     = (FDCAN3_TXEVENTFIFO_WORDS / FDCAN3_TXEVENTFIFO_SIZE),
+  .txbufferesize    = (FDCAN3_TXFIFIOQ_WORDS / FDCAN3_TXFIFIOQ_SIZE),
+
+#ifdef CONFIG_STM32_FDCAN3_LOOPBACK
+  .loopback         = true,
+#endif
+
+  /* FDCAN3 Message RAM */
+
+  .msgram =
+  {
+    (uint32_t *)(STM32_CANRAM3_BASE + (FDCAN3_STDFILTER_INDEX << 2)),
+    (uint32_t *)(STM32_CANRAM3_BASE + (FDCAN3_EXTFILTERS_INDEX << 2)),
+    (uint32_t *)(STM32_CANRAM3_BASE + (FDCAN3_RXFIFO0_INDEX << 2)),
+    (uint32_t *)(STM32_CANRAM3_BASE + (FDCAN3_RXFIFO1_INDEX << 2)),
+    (uint32_t *)(STM32_CANRAM3_BASE + (FDCAN3_TXEVENTFIFO_INDEX << 2)),
+    (uint32_t *)(STM32_CANRAM3_BASE + (FDCAN3_TXFIFOQ_INDEX << 2))
+  }
+};
+
+/* FDCAN3 variable driver state */
+
+static struct stm32_fdcan_s g_fdcan3priv;
+static struct can_dev_s g_fdcan3dev;
+
+#endif /* CONFIG_STM32_FDCAN3 */
 
 /****************************************************************************
  * Private Functions
@@ -1681,12 +1891,12 @@ static void fdcan_reset(struct can_dev_s *dev)
    */
 
   flags = enter_critical_section();
-  regval  = getreg32(STM32_RCC_APB1HRSTR);
-  regval |= RCC_APB1HRSTR_FDCANRST;
-  putreg32(regval, STM32_RCC_APB1HRSTR);
+  regval  = getreg32(FDCAN_RSTR);
+  regval |= FDCAN_RST;
+  putreg32(regval, FDCAN_RSTR);
 
-  regval &= ~RCC_APB1HRSTR_FDCANRST;
-  putreg32(regval, STM32_RCC_APB1HRSTR);
+  regval &= ~FDCAN_RST;
+  putreg32(regval, FDCAN_RSTR);
   leave_critical_section(flags);
 
   priv->state = FDCAN_STATE_RESET;
@@ -3279,7 +3489,7 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
   /* Clean message RAM */
 
   msgram = config->msgram.stdfilters;
-  cntr   = (FDCAN_MSGRAM_WORDS + 1);
+  cntr   = FDCAN_MSGRAM_WORDS;
   while (cntr > 0)
     {
       *msgram++ = 0;
@@ -3546,7 +3756,8 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
  *   OK on success; >0 on failure.
  ****************************************************************************/
 
-int32_t fdcan_bittiming(struct fdcan_bitseg *timing)
+static int32_t fdcan_bittiming(struct fdcan_bitseg *timing,
+                               uint32_t maxpresc)
 {
   /* Implementation ported from PX4's uavcan_drivers/stm32[h7]
    *
@@ -3598,7 +3809,7 @@ int32_t fdcan_bittiming(struct fdcan_bitseg *timing)
 
   const uint32_t prescaler = prescaler_bs / (1 + bs1_bs2_sum);
 
-  if ((prescaler < 1U) || (prescaler > 1024U))
+  if ((prescaler < 1U) || (prescaler > maxpresc))
     {
       nerr("Target bitrate invalid - bad prescaler.");
       return 2; /* No solution */
@@ -3659,8 +3870,10 @@ int32_t fdcan_bittiming(struct fdcan_bitseg *timing)
     }
 
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
-  ninfo("[fdcan] CLK_FREQ %lu, target_bitrate %lu, prescaler %lu, bs1 %d"
-        ", bs2 %d\n", CLK_FREQ, target_bitrate, prescaler_bs, bs1 - 1,
+  ninfo("[fdcan] CLK_FREQ %" PRIu32 ", target_bitrate %" PRIu32
+        ", prescaler %" PRIu32 ", bs1 %d, bs2 %d\n",
+        (uint32_t)STM32_FDCANCLK_FREQUENCY, target_bitrate, prescaler_bs,
+        bs1 - 1,
         bs2 - 1);
 #endif
 
@@ -3684,7 +3897,7 @@ int32_t fdcan_bittiming(struct fdcan_bitseg *timing)
  *
  * Input Parameters:
  *   port - Port number (for hardware that has multiple FDCAN interfaces),
- *          1=FDCAN1, 2=FDCAN2
+ *          1=FDCAN1, 2=FDCAN2, 3=FDCAN3
  *
  * Returned Value:
  *   Valid CAN device structure reference on success; a NULL on failure
@@ -3731,6 +3944,20 @@ struct can_dev_s *stm32_fdcaninitialize(int port)
     }
   else
 #endif
+#ifdef CONFIG_STM32_FDCAN3
+  if (port == FDCAN3)
+    {
+      /* Select the FDCAN3 device structure */
+
+      dev    = &g_fdcan3dev;
+      priv   = &g_fdcan3priv;
+      config = &g_fdcan3const;
+#ifndef CONFIG_STM32_FDCAN3_AUTO_BIT_TIMING
+      auto_bit_timing = false;
+#endif
+    }
+  else
+#endif
     {
       canerr("ERROR: Unsupported port %d\n", port);
       return NULL;
@@ -3753,9 +3980,9 @@ struct can_dev_s *stm32_fdcaninitialize(int port)
   else
     {
       timing.bitrate = config->baud;
-      if (fdcan_bittiming(&timing) != OK)
+      if (fdcan_bittiming(&timing, FDCAN_NBTP_NBRP_MAX + 1) != OK)
         {
-          printf("ERROR: Invalid CAN nominal phase timings\n");
+          canerr("ERROR: Invalid CAN nominal phase timings\n");
           return NULL;
         }
 
@@ -3767,9 +3994,9 @@ struct can_dev_s *stm32_fdcaninitialize(int port)
       if (config->mode == FDCAN_FD_BRS_MODE)
         {
           timing.bitrate = config->data_baud;
-          if (fdcan_bittiming(&timing) != OK)
+          if (fdcan_bittiming(&timing, FDCAN_DBTP_DBRP_MAX + 1) != OK)
             {
-              printf("ERROR: Invalid CAN data phase timings\n");
+              canerr("ERROR: Invalid CAN data phase timings\n");
               return NULL;
             }
 

@@ -251,8 +251,8 @@ config STM32_FDCAN1_BITRATE
 
 config STM32_FDCAN1_AUTO_BIT_TIMING
 	bool "FDCAN1 automatic bit timing"
-	depends on ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32H7
-	default y
+	depends on STM32_HAVE_IP_FDCAN_MCAN_V1 || ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32H7
 	---help---
 		Automatically determine FDCAN1 bit timing (nominal and data)
 		based on bitrate.
@@ -336,8 +336,8 @@ config STM32_FDCAN2_BITRATE
 
 config STM32_FDCAN2_AUTO_BIT_TIMING
 	bool "FDCAN2 automatic bit timing"
-	depends on ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32H7
-	default y
+	depends on STM32_HAVE_IP_FDCAN_MCAN_V1 || ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32H7
 	---help---
 		Automatically determine FDCAN2 bit timing (nominal and data)
 		based on bitrate.
@@ -461,8 +461,8 @@ config STM32_FDCAN3_BITRATE
 
 config STM32_FDCAN3_AUTO_BIT_TIMING
 	bool "FDCAN3 automatic bit timing"
-	depends on ARCH_CHIP_STM32H7
-	default y
+	depends on STM32_HAVE_IP_FDCAN_MCAN_V1 || ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32H7
 	---help---
 		Automatically determine FDCAN3 bit timing (nominal and data)
 		based on bitrate.
