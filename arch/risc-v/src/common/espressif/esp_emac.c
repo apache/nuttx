@@ -637,7 +637,6 @@ int esp_emac_init(void)
   struct esp_emac_s *priv = &g_esp_emac;
   esp_eth_mac_t *mac = NULL;
   esp_eth_phy_t *phy = NULL;
-  unsigned int quota;
   uint8_t mac_addr[6];
   esp_err_t err;
   int ret;
@@ -746,18 +745,6 @@ int esp_emac_init(void)
   memcpy(priv->dev.netdev.d_mac.ether.ether_addr_octet, mac_addr, 6);
   priv->dev.ops = &g_emac_ops;
 
-  /* Keep quotas well below the global netpkt pool size so lower-half
-   * registration remains valid across different board configurations.
-   */
-
-  quota = NETPKT_BUFNUM / 4;
-  if (quota == 0)
-    {
-      quota = 1;
-    }
-
-  priv->dev.quota[NETPKT_RX] = quota;
-  priv->dev.quota[NETPKT_TX] = quota;
   priv->dev.rxtype = NETDEV_RX_WORK;
   priv->dev.priority = LPWORK;
 

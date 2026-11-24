@@ -157,14 +157,6 @@ config IEEE80211_MORSE_TX_TIMEOUT
 		Maximum time to wait for the transceiver TX queues before dropping
 		a packet.
 
-config IEEE80211_MORSE_TX_QUOTA
-	int "TX packet quota"
-	default 8
-
-config IEEE80211_MORSE_RX_QUOTA
-	int "RX packet quota"
-	default 8
-
 config IEEE80211_MORSE_SCAN_BUFSIZE
 	int "Scan result buffer size"
 	default 4096

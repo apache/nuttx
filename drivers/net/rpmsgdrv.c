@@ -469,8 +469,10 @@ static int net_rpmsg_drv_transfer_handler(FAR struct rpmsg_endpoint *ept,
   netdev_lower_rxready(dev);
   return 0;
 
+#ifndef CONFIG_NET_PRMSG_DRV_ZERO_COPY_TRANSFER
 free:
   netpkt_free(dev, pkt, NETPKT_RX);
+#endif
 
 drop:
   NETDEV_RXDROPPED(&dev->netdev);
@@ -929,9 +931,7 @@ net_rpmsg_drv_alloc(FAR const char *devname, enum net_lltype_e lltype)
     }
 
   netdev = &drv->dev;
-  netdev->quota[NETPKT_RX] = CONFIG_IOB_NBUFFERS /
-                             NET_RPMSG_DRV_MAX_NIOB / 4;
-  netdev->quota[NETPKT_TX] = 1;
+
   netdev->ops = &g_net_rpmsg_drv_ops;
 
   drv->ept.priv = drv;

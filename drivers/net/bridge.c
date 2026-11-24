@@ -351,45 +351,6 @@ static void bridge_fdb_learn(FAR struct bridge_s *br,
 }
 
 /****************************************************************************
- * Name: bridge_update_quota
- *
- * Description:
- *   The bridge device can send as many packets as the port with the least
- *   room.  Publish that number as the TX quota of the bridge device, so
- *   that the network stack stops polling the device when a port is full,
- *   and resumes when bridge_txdone() is called.
- *
- * Assumptions:
- *   Called with br_lock held.
- *
- ****************************************************************************/
-
-static void bridge_update_quota(FAR struct bridge_s *br)
-{
-  int quota = INT_MAX;
-  int i;
-
-  for (i = 0; i < CONFIG_NET_BRIDGE_MAX_PORTS; i++)
-    {
-      FAR struct netdev_lowerhalf_s *dev = br->br_ports[i].bp_dev;
-      int avail;
-
-      if (dev == NULL)
-        {
-          break;
-        }
-
-      avail = atomic_read(&dev->quota_ptr[NETPKT_TX]);
-      if (avail < quota)
-        {
-          quota = avail;
-        }
-    }
-
-  atomic_set(&br->br_dev.quota_ptr[NETPKT_TX], quota == INT_MAX ? 0 : quota);
-}
-
-/****************************************************************************
  * Name: bridge_clone
  *
  * Description:
@@ -457,17 +418,6 @@ static int bridge_port_send(FAR struct bridge_port_s *port,
       return -EMSGSIZE;
     }
 
-  /* The port reclaims its finished transmissions by itself, in its
-   * transmit operation and when it reports a completed one, so a port with
-   * no room is simply reported busy here.
-   */
-
-  if (atomic_sub(&dev->quota_ptr[NETPKT_TX], 1) <= 0)
-    {
-      atomic_add(&dev->quota_ptr[NETPKT_TX], 1);
-      return -EBUSY;
-    }
-
   /* The transmit operation of the port is also reached under the device
    * lock of the port, by the upper half serving the local host, and a port
    * driver may count on that lock to serialize its transmit state.  Waiting
@@ -478,18 +428,12 @@ static int bridge_port_send(FAR struct bridge_port_s *port,
 
   if (netdev_trylock(&dev->netdev) < 0)
     {
-      atomic_add(&dev->quota_ptr[NETPKT_TX], 1);
       return -EBUSY;
     }
 
   NETDEV_TXPACKETS(&dev->netdev);
   ret = dev->ops->transmit(dev, pkt);
   netdev_unlock(&dev->netdev);
-
-  if (ret < 0)
-    {
-      atomic_add(&dev->quota_ptr[NETPKT_TX], 1);
-    }
 
   return ret;
 }
@@ -673,9 +617,6 @@ static int bridge_transmit(FAR struct netdev_lowerhalf_s *dev,
       iob_free_chain(pkt);
     }
 
-  /* The quota of the bridge now follows the ports */
-
-  bridge_update_quota(br);
   nxmutex_unlock(&br->br_lock);
   return ret;
 }
@@ -896,7 +837,6 @@ static void bridge_delport(FAR struct bridge_port_s *port)
       last->bp_dev = NULL;
     }
 
-  bridge_update_quota(br);
   nxmutex_unlock(&br->br_lock);
 
   if (moved != NULL)
@@ -1106,7 +1046,6 @@ static int bridge_addif(FAR const struct ifreq *req)
     }
 
   port->bp_dev = dev;
-  bridge_update_quota(br);
   nxmutex_unlock(&br->br_lock);
 
   bridge_update_pktsize(br);

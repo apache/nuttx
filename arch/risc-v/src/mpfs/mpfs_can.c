@@ -2508,11 +2508,6 @@ int mpfs_can_init(int ncan, uint32_t bitrate)
   dev = &priv->dev;
   dev->ops = &g_netdev_ops;  /* Lower-half operations */
 
-  /* Set quotas for TX/RX buffers */
-
-  dev->quota[NETPKT_TX] = CAN_TX_BUFFER;
-  dev->quota[NETPKT_RX] = CAN_RX_BUFFER;
-
   ninfo("CAN driver init done for CAN controller %d\n", ncan);
 
   /* Put the interface in the down state */

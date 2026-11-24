@@ -996,8 +996,6 @@ int gdwifi_netdev_register(const uint8_t *mac)
 
   priv->dev.ops      = &g_netdev_ops;
   priv->dev.iw_ops   = &g_wireless_ops;
-  priv->dev.quota[NETPKT_RX] = 8;
-  priv->dev.quota[NETPKT_TX] = 4;
   priv->dev.rxtype   = NETDEV_RX_WORK;   /* Process RX in the work queue */
 
   /* This is NOT a task priority: netdev_lowerhalf uses it as the work

@@ -920,7 +920,7 @@ static int imxrt_netc_transmit(struct netdev_lowerhalf_s *lower,
 
   if (next == priv->txclean)
     {
-      nerr("NETC TX quota exceeded\n");
+      nerr("NETC transmit ring full\n");
       return -EBUSY;
     }
 
@@ -1209,8 +1209,6 @@ static int imxrt_netc_register(size_t index,
   priv->irq = g_msgintr_irq[config->msgintr - 1];
   priv->lower.ops = &g_netc_ops;
   priv->lower.priority = ETHWORK;
-  priv->lower.quota[NETPKT_TX] = NETC_TX_QUOTA;
-  priv->lower.quota[NETPKT_RX] = 1;
   memcpy(priv->lower.netdev.d_mac.ether.ether_addr_octet, config->mac, 6);
   priv->dma_cpu = imxrt_netc_alloc(sizeof(*priv->dma_cpu), &priv->dma_bus);
   if (priv->dma_cpu == NULL)

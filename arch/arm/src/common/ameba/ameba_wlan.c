@@ -30,8 +30,8 @@
  * This driver uses the NuttX network "lower-half" framework
  * (include/nuttx/net/netdev_lowerhalf.h + drivers/net/netdev_upperhalf.c):
  * we implement struct netdev_ops_s (ifup/ifdown/transmit/receive/ioctl) and
- * the generic upper half owns the poll loop, the RX/TX worker, the IOB
- * (netpkt) accounting and the quota-based flow control.  See the guide
+ * the generic upper half owns the poll loop, the RX/TX worker and the IOB
+ * (netpkt) accounting.  See the guide
  * in Documentation/components/net/netdriver.rst.
  *
  * The data path crosses to the SDK-header side through a thin byte-buffer
@@ -82,15 +82,6 @@
 /* Per-frame work buffer size (Ethernet MTU + headers + guard). */
 
 #define AMEBA_WLAN_BUFSIZE  (CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE)
-
-/* Quotas: the WHC send copies the frame synchronously, so a single in-flight
- * TX buffer is enough.  The RX quota bounds how many staged frames
- * (netpkts) the driver may hold before the upper half
- * drains them; keep it well under the IOB pool.
- */
-
-#define AMEBA_WLAN_TX_QUOTA 1
-#define AMEBA_WLAN_RX_QUOTA 16
 
 /****************************************************************************
  * Private Types
@@ -191,14 +182,13 @@ static unsigned char ameba_wlan_is_dhcp(const uint8_t *frame,
  *
  * Description:
  *   netdev_ops_s::transmit -- hand one packet to the NP over WHC.
- *   Non-blocking; called by the upper half under the network lock, gated by
- *   the TX quota.  The netpkt (possibly IOB-fragmented) is copied out into
- *   the flat g_txbuf because the WHC send ABI wants a contiguous buffer.
+ *   Non-blocking; called by the upper half under the network lock.  The
+ *   netpkt (possibly IOB-fragmented) is copied out into the flat g_txbuf
+ *   because the WHC send ABI wants a contiguous buffer.
  *
- *   On success we own the packet and free it (which restores TX quota).  On
- *   failure (e.g. whc_ipc_host_send returns -2 when the NP skb pool is
- *   exhausted) we return a negated errno WITHOUT freeing: the upper half
- *   recycles the packet and stops the poll, which is genuine backpressure.
+ *   On success we own the packet and free it.  When the NP skb pool is
+ *   exhausted we return -EBUSY WITHOUT freeing: the upper half keeps the
+ *   packet and offers it again, which is genuine backpressure.
  *
  ****************************************************************************/
 
@@ -211,7 +201,7 @@ static int ameba_wlan_transmit(struct netdev_lowerhalf_s *dev,
 
   if (len == 0 || len > AMEBA_WLAN_BUFSIZE)
     {
-      /* Malformed: drop it (free -> quota restored) and report consumed. */
+      /* Malformed: drop it and report consumed */
 
       netpkt_free(dev, pkt, NETPKT_TX);
       return OK;
@@ -226,16 +216,15 @@ static int ameba_wlan_transmit(struct netdev_lowerhalf_s *dev,
 
   if (ret != 0)
     {
-      /* NP host skb pool full: recycle the packet (do NOT free) and
-       * let the upper half pause the poll -- genuine backpressure.
-       * This stays off the hot path because CONFIG_NET_SEND_BUFSIZE
-       * bounds a stream's in-flight data and the NP drains at line
-       * rate, so the transient host skb backlog stays well under the
-       * pool (skb_num_ap).  A momentary full pool just pauses here and
-       * resumes on the next poll.
+      /* NP host skb pool full: keep the packet (do NOT free) and report
+       * the device busy, so that the upper half queues it and offers it
+       * again -- genuine backpressure.  This stays off the hot path
+       * because CONFIG_NET_SEND_BUFSIZE bounds a stream's in-flight data
+       * and the NP drains at line rate, so the transient host skb backlog
+       * stays well under the pool (skb_num_ap).
        */
 
-      return -EIO;
+      return -EBUSY;
     }
 
   netpkt_free(dev, pkt, NETPKT_TX);
@@ -690,8 +679,6 @@ int ameba_wlan_initialize(void)
   spin_lock_init(&priv->rx_lock);
 
   dev->ops              = &g_ameba_wlan_ops;
-  dev->quota[NETPKT_TX] = AMEBA_WLAN_TX_QUOTA;
-  dev->quota[NETPKT_RX] = AMEBA_WLAN_RX_QUOTA;
 
   /* Dedicated RX/TX thread at a moderate priority (not HPWORK/192): HPWORK
    * would preempt the prebuilt WHC IPC RX-delivery task, which then cannot

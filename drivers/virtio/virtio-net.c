@@ -562,13 +562,6 @@ static int virtio_net_send(FAR struct netdev_lowerhalf_s *dev,
 
   virtio_net_txfree(dev);
 
-  /* If we have no buffer left, enable TX done callback. */
-
-  if (netdev_lower_quota_load(dev, NETPKT_TX) <= 0)
-    {
-      virtqueue_enable_cb_lock(vq, &priv->lock[VIRTIO_NET_TX]);
-    }
-
   return OK;
 }
 
@@ -785,8 +778,6 @@ static int virtio_net_probe(FAR struct virtio_device *vdev)
   /* Initialize the netdev lower half */
 
   netdev = (FAR struct netdev_lowerhalf_s *)priv;
-  netdev->quota[NETPKT_RX] = priv->bufnum;
-  netdev->quota[NETPKT_TX] = priv->bufnum;
   netdev->ops = &g_virtio_net_ops;
 
 #ifdef CONFIG_DRIVERS_WIFI_SIM
@@ -872,8 +863,7 @@ static void virtio_net_dump(FAR struct virtio_device *vdev)
          "mac=%02x:%02x:%02x:%02x:%02x:%02x\n",
          dev->d_ifname,
          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-  syslog(LOG_EMERG, "    bufnum=%d, iob_free=%d, "
-         "quota: rx=%" PRId32 " tx=%" PRId32
+  syslog(LOG_EMERG, "    bufnum=%d, iob_free=%d"
 #ifdef CONFIG_NET_IPv4
          ", ipv4=%u.%u.%u.%u"
 #endif
@@ -881,9 +871,7 @@ static void virtio_net_dump(FAR struct virtio_device *vdev)
          ", ipv6=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x"
 #endif
          "\n",
-         priv->bufnum, iob_navail(false),
-         netdev_lower_quota_load(netdev, NETPKT_RX),
-         netdev_lower_quota_load(netdev, NETPKT_TX)
+         priv->bufnum, iob_navail(false)
 #ifdef CONFIG_NET_IPv4
          , ip4_addr1(dev->d_ipaddr), ip4_addr2(dev->d_ipaddr),
          ip4_addr3(dev->d_ipaddr), ip4_addr4(dev->d_ipaddr)

@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/mm/iob.h>
@@ -105,6 +106,15 @@ struct netdev_upperhalf_s
 
   int txing;
 
+  /* TX completion flag (0/1), raised by netdev_lower_txdone() (possibly
+   * from an ISR or another CPU) and consumed by the TX loop.  Both sides
+   * must use atomic_xchg(): read-modify-writes on one location are totally
+   * ordered, so the two sides cannot miss each other and strand a
+   * re-queued packet.
+   */
+
+  atomic_t txdone;
+
   /* Deferring process to work queue or thread */
 
   union
@@ -125,40 +135,6 @@ static int netdev_upper_txavail(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: quota_is_valid
- *
- * Description:
- *   Check if the quota of the lower half is not too big.
- *
- ****************************************************************************/
-
-static bool quota_is_valid(FAR struct netdev_lowerhalf_s *lower)
-{
-  int total = 0;
-  enum netpkt_type_e type;
-
-  for (type = NETPKT_TX; type < NETPKT_TYPENUM; type++)
-    {
-      total += netdev_lower_quota_load(lower, type);
-    }
-
-  if (total > NETPKT_BUFNUM)
-    {
-      nerr("ERROR: Too big quota when registering device: %d\n", total);
-      return false;
-    }
-
-  if (total > NETPKT_BUFNUM / 2)
-    {
-      nwarn("WARNING: The quota of the registering device may consume more "
-            "than half of the network buffers, which may hurt performance. "
-            "Please consider decreasing driver quota or increasing nIOB.\n");
-    }
-
-  return true;
-}
-
-/****************************************************************************
  * Name: netpkt_get
  *
  * Description:
@@ -172,25 +148,13 @@ static bool quota_is_valid(FAR struct netdev_lowerhalf_s *lower)
 static FAR netpkt_t *netpkt_get(FAR struct net_driver_s *dev,
                                 enum netpkt_type_e type)
 {
-  FAR struct netdev_upperhalf_s *upper;
   FAR netpkt_t *pkt;
 
   DEBUGASSERT(dev && dev->d_iob);
 
-  upper = (FAR struct netdev_upperhalf_s *)dev->d_private;
   pkt = dev->d_iob;
 
   netdev_iob_clear(dev);
-
-  /* Do not limit quota here (simply relay iob instead of dropping), most
-   * cases will be limited by netdev_upper_can_tx and seldom reaches here.
-   */
-
-  if (atomic_sub(&upper->lower->quota_ptr[type], 1) <= 0)
-    {
-      nwarn("WARNING: Allowing temporarily exceeding quota of %s.\n",
-            dev->d_ifname);
-    }
 
   return pkt;
 }
@@ -209,11 +173,7 @@ static FAR netpkt_t *netpkt_get(FAR struct net_driver_s *dev,
 static void netpkt_put(FAR struct net_driver_s *dev, FAR netpkt_t *pkt,
                        enum netpkt_type_e type)
 {
-  FAR struct netdev_upperhalf_s *upper = dev->d_private;
-
   DEBUGASSERT(dev && pkt);
-
-  atomic_add(&upper->lower->quota_ptr[type], 1);
   netdev_iob_replace_l2(dev, pkt);
 }
 
@@ -245,30 +205,6 @@ netdev_upper_alloc(FAR struct netdev_lowerhalf_s *dev, size_t extra_size)
   dev->netdev.d_private = upper;
 
   return upper;
-}
-
-/****************************************************************************
- * Name: netdev_upper_can_tx
- *
- * Description:
- *   Check if we allow tx on this device.
- *
- * Assumptions:
- *   Called with the network locked.
- *
- ****************************************************************************/
-
-static inline bool netdev_upper_can_tx(FAR struct netdev_upperhalf_s *upper)
-{
-  FAR struct netdev_lowerhalf_s *lower = upper->lower;
-
-  if (netdev_lower_quota_load(lower, NETPKT_TX) <= 0)
-    {
-      lower->txdone = true;
-      return false;
-    }
-
-  return true;
 }
 
 /****************************************************************************
@@ -333,25 +269,22 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
   if (ret == -EBUSY)
     {
       /* Transient error -- re-queue to txq head for retry.  Head-insert
-       * preserves packet ordering.  The retry will be driven by the
-       * txdone callback from the lower half driver.
+       * preserves packet ordering.  Returning the error breaks the TX
+       * loop, and netdev_lower_txdone() drives the retry.
        *
-       * Note: We manually restore quota instead of using netpkt_put()
-       * because the pkt is moved to txq, not back to dev->d_iob.
-       * After netpkt_get(), dev->d_iob is already NULL.
+       * Note: After netpkt_get(), dev->d_iob is already NULL.
        */
 
-      nwarn("WARNING: Transmit busy (%d), re-queue pkt\n", ret);
+      ninfo("Transmit busy (%d), re-queue pkt\n", ret);
       iob_add_queue_head(pkt, &upper->txq);
-      atomic_add(&upper->lower->quota_ptr[NETPKT_TX], 1);
       return ret;
     }
 
   nerr("ERROR: Transmit failed: %d, dropping pkt\n", ret);
 
   /* Permanent error -- drop the packet to avoid infinite retry.
-   * netpkt_put() restores quota and places pkt back into dev->d_iob so
-   * the caller can release it.
+   * netpkt_put() places pkt back into dev->d_iob so the caller can
+   * release it.
    */
 
 drop:
@@ -431,8 +364,19 @@ static void netdev_upper_txavail_work(FAR struct netdev_upperhalf_s *upper)
     {
       DEBUGASSERT(dev->d_buf == NULL); /* Make sure: IOB only. */
       upper->txing = true;
-      while (netdev_upper_can_tx(upper) &&
-             netdev_upper_tx(dev) == NETDEV_TX_CONTINUE);
+
+      /* Clear the flag before the attempts, then run another round for
+       * every completion that landed while we were transmitting.
+       */
+
+      atomic_xchg(&upper->txdone, 0);
+
+      do
+        {
+          while (netdev_upper_tx(dev) == NETDEV_TX_CONTINUE);
+        }
+      while (atomic_xchg(&upper->txdone, 0) != 0);
+
       upper->txing = false;
     }
 
@@ -891,7 +835,7 @@ static void netdev_upper_work(FAR void *arg)
 {
   FAR struct netdev_upperhalf_s *upper = arg;
 
-  /* RX may release quota and driver buffer, so do RX first. */
+  /* RX path may release driver-side resources, so do RX first. */
 
   netdev_upper_rxpoll_work(upper);
   netdev_upper_txavail_work(upper);
@@ -1483,6 +1427,7 @@ static int netdev_upper_ifdown(FAR struct net_driver_s *dev)
   /* Drain the TX queue before tearing down the interface. */
 
   iob_free_queue(&upper->txq);
+  atomic_set(&upper->txdone, 0);
 
   switch (upper->lower->rxtype)
     {
@@ -1624,16 +1569,6 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
       dev->ops->transmit == NULL || dev->ops->receive == NULL)
     {
       nerr("ERROR: Invalid lower half device\n");
-      return -EINVAL;
-    }
-
-  if (dev->quota_ptr == NULL)
-    {
-      dev->quota_ptr = dev->quota;
-    }
-
-  if (quota_is_valid(dev) == false)
-    {
       return -EINVAL;
     }
 
@@ -1868,19 +1803,24 @@ void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper = dev->netdev.d_private;
 
-  if (dev->txdone || !IOB_QEMPTY(&upper->txq))
-    {
-      dev->txdone = false;
-
 #ifdef CONFIG_NET_BRIDGE
-      /* The bridge device may wait for room on its ports */
+  /* The bridge device may wait for room on its ports */
 
-      if (upper->bridge != NULL)
-        {
-          bridge_txdone(upper->bridge);
-        }
+  if (upper->bridge != NULL)
+    {
+      bridge_txdone(upper->bridge);
+    }
 #endif
 
+  /* Record the completion before looking at txq: both sides do a read-modify
+   * -write on this location, and those are totally ordered, so the TX loop
+   * cannot miss a completion and strand a re-queued packet.
+   */
+
+  atomic_xchg(&upper->txdone, 1);
+
+  if (!IOB_QEMPTY(&upper->txq))
+    {
       if (dev->rxtype == NETDEV_RX_DIRECT)
         {
 #ifdef CONFIG_NET_VLAN
@@ -2104,12 +2044,6 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
 {
   FAR netpkt_t *pkt;
 
-  if (atomic_sub(&dev->quota_ptr[type], 1) <= 0)
-    {
-      atomic_add(&dev->quota_ptr[type], 1);
-      return NULL;
-    }
-
 #ifdef CONFIG_NET_CAN
   if (dev->netdev.d_lltype == NET_LL_CAN)
     {
@@ -2123,7 +2057,6 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
 
   if (pkt == NULL)
     {
-      atomic_add(&dev->quota_ptr[type], 1);
       return NULL;
     }
 
@@ -2147,7 +2080,6 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
 void netpkt_free(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
                  enum netpkt_type_e type)
 {
-  atomic_add(&dev->quota_ptr[type], 1);
   iob_free_chain(pkt);
 }
 
