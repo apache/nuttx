@@ -2231,9 +2231,7 @@ static int tmpfs_unmap(FAR struct task_group_s *group,
   else
     {
       entry->length = offset;
-      tmpfs_lock_file(tfo);
-      ret = tmpfs_realloc_file(tfo, offset);
-      tmpfs_unlock_file(tfo);
+      ret = OK;
     }
 
   return ret;
