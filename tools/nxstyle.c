@@ -943,6 +943,14 @@ static const char *g_white_files[] =
   "gd32vw55x/gdwifi/gdwifi_newlib_compat.c",
   "gd32vw55x/gdble/gd32_ble.c",
 
+  /* Skip the OpenSSL-to-Mbed-TLS compatibility wrapper: it implements the
+   * OpenSSL API, whose identifiers (X509_*, PKCS12_*, EVP_*, BIO_*, ...)
+   * are mixed case by definition.  Ref:
+   * apps/crypto/openssl_mbedtls_wrapper
+   */
+
+  "openssl_mbedtls_wrapper/",
+
   /* Skip libcxx support header (C++ file, not NuttX style) */
 
   "from_chars_support.h",
