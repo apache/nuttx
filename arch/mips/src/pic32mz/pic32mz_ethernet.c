@@ -500,7 +500,6 @@ static int pic32mz_ifup(struct netdev_lowerhalf_s *dev);
 static int pic32mz_ifdown(struct netdev_lowerhalf_s *dev);
 static int pic32mz_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt);
 static netpkt_t *pic32mz_receive(struct netdev_lowerhalf_s *dev);
-static void pic32mz_reclaim(struct netdev_lowerhalf_s *dev);
 
 #ifdef CONFIG_NET_MCASTGROUP
 static int pic32mz_addmac(struct netdev_lowerhalf_s *dev,
@@ -528,7 +527,6 @@ static const struct netdev_ops_s g_pic32mz_ops =
 #if defined(CONFIG_NETDEV_IOCTL) && defined(PIC32MZ_HAVE_PHY)
   .ioctl    = pic32mz_ioctl,
 #endif
-  .reclaim  = pic32mz_reclaim,
 };
 
 /* PHY initialization functions */
@@ -1420,6 +1418,13 @@ static int pic32mz_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
       goto errout;
     }
 
+  /* Reap the descriptors the hardware has finished with, so that a
+   * descriptor freed since the last TX-done interrupt can be used right
+   * away instead of making the upper half wait for the next one.
+   */
+
+  pic32mz_txreap(priv);
+
   /* Find the next available TX descriptor.  The TX quota is the number of
    * descriptors, so there is one unless the interface was reset.
    */
@@ -1697,29 +1702,6 @@ static netpkt_t *pic32mz_receive(struct netdev_lowerhalf_s *dev)
 
   nxmutex_unlock(&priv->pd_lock);
   return pkt;
-}
-
-/****************************************************************************
- * Function: pic32mz_reclaim
- *
- * Description:
- *   NuttX Callback: reclaim the TX descriptors that were already sent.
- *
- * Input Parameters:
- *   dev - Reference to the lower half driver state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void pic32mz_reclaim(struct netdev_lowerhalf_s *dev)
-{
-  struct pic32mz_driver_s *priv = (struct pic32mz_driver_s *)dev;
-
-  nxmutex_lock(&priv->pd_lock);
-  pic32mz_txreap(priv);
-  nxmutex_unlock(&priv->pd_lock);
 }
 
 /****************************************************************************

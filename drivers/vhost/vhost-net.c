@@ -174,9 +174,8 @@ static const struct netdev_ops_s g_vhost_net_ops =
   NULL,
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  NULL,
-#endif
   NULL
+#endif
 };
 
 static struct vhost_driver g_vhost_net_driver =

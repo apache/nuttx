@@ -191,11 +191,6 @@ struct netdev_ops_s
   CODE int (*ioctl)(FAR struct netdev_lowerhalf_s *dev, int cmd,
                     unsigned long arg);
 #endif
-
-  /* reclaim - try to reclaim packets sent by netdev. */
-
-  CODE void (*reclaim)(FAR struct netdev_lowerhalf_s *dev);
-
 #ifdef CONFIG_NET_NETPOLL
   /* txpoll - Complete pending transmissions and free the finished TX
    *          packets, so their TX quota can be reused.

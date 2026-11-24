@@ -61,7 +61,6 @@ static int esp_wlan_ifup(struct netdev_lowerhalf_s *dev);
 static int esp_wlan_ifdown(struct netdev_lowerhalf_s *dev);
 static int esp_wlan_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt);
 static netpkt_t *esp_wlan_receive(struct netdev_lowerhalf_s *dev);
-static void esp_wlan_reclaim(struct netdev_lowerhalf_s *dev);
 static int esp_wlan_ioctl(struct netdev_lowerhalf_s *dev, int cmd,
                           unsigned long arg);
 
@@ -131,7 +130,6 @@ static const struct netdev_ops_s g_netdev_ops =
     .transmit = esp_wlan_transmit,
     .receive = esp_wlan_receive,
     .ioctl = esp_wlan_ioctl,
-    .reclaim = esp_wlan_reclaim,
 };
 
 /* Wireless operations */
@@ -388,25 +386,6 @@ static int esp_wlan_ioctl(struct netdev_lowerhalf_s *dev, int cmd,
   return -ENOSYS;
 }
 #endif
-
-/****************************************************************************
- * Name: esp_wlan_reclaim
- *
- * Description:
- *   Reclaim function required by the netdev ops.
- *
- * Input Parameters:
- *   dev - The network device.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static void esp_wlan_reclaim(struct netdev_lowerhalf_s *dev)
-{
-  /* TODO: Implement reclaim logic */
-}
 
 /* Skeleton implementations for wireless_ops_s functions */
 
