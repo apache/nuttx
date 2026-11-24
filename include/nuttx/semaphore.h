@@ -50,17 +50,10 @@
 /* Initializers */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-#  if CONFIG_SEM_PREALLOCHOLDERS > 0
-/* semcount, flags, waitlist, hhead */
+/* semcount, flags, waitlist, holder */
 
-#    define NXSEM_INITIALIZER(c, f) \
-       {{(c)}, (f), SEM_WAITLIST_INITIALIZER, NULL}
-#  else
-/* semcount, flags, waitlist, holder[2] */
-
-#    define NXSEM_INITIALIZER(c, f) \
-       {{(c)}, (f), SEM_WAITLIST_INITIALIZER, SEMHOLDER_INITIALIZER}
-#  endif
+#  define NXSEM_INITIALIZER(c, f) \
+     {{(c)}, (f), SEM_WAITLIST_INITIALIZER, SEMHOLDER_INITIALIZER}
 #else /* CONFIG_PRIORITY_INHERITANCE */
 /* semcount, flags, waitlist */
 

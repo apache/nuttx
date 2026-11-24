@@ -88,6 +88,16 @@ int nxsem_set_protocol(FAR sem_t *sem, int protocol)
         return -ENOTSUP;
       case SEM_PRIO_PROTECT:
 #ifdef CONFIG_PRIORITY_PROTECT
+
+        /* Priority protection is supported only for mutexes.  A plain
+         * counting semaphore may not request it.
+         */
+
+        if ((protocol & SEM_TYPE_MUTEX) == 0)
+          {
+            return -EINVAL;
+          }
+
         break;
 #else
         /* Not yet supported */

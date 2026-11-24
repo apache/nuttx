@@ -93,7 +93,7 @@ void nxsem_recover(FAR struct tcb_s *tcb)
        * to this semaphore.
        */
 
-      nxsem_canceled(tcb, sem);
+      nxsem_canceled(sem);
 
       /* Remove the tcb from the semaphore wait list if it exists there.
        * nxtask_terminate() has already removed it, and a second dq_rem()

@@ -251,7 +251,7 @@ int nxsem_post_slow(FAR sem_t *sem)
           if (proto == SEM_PRIO_INHERIT)
             {
 #  ifdef CONFIG_PRIORITY_INHERITANCE
-              nxsem_restore_baseprio(stcb, sem);
+              nxsem_restore_baseprio(stcb);
 #  endif
             }
           else if (proto == SEM_PRIO_PROTECT)

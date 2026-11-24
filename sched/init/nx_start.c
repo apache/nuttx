@@ -503,12 +503,6 @@ void nx_start(void)
 
   /* Initialize RTOS facilities *********************************************/
 
-  /* Initialize the semaphore facility.  This has to be done very early
-   * because many subsystems depend upon fully functional semaphores.
-   */
-
-  nxsem_initialize();
-
 #if defined(MM_KERNEL_USRHEAP_INIT) || defined(CONFIG_MM_KERNEL_HEAP) || \
     defined(CONFIG_MM_PGALLOC)
   /* Initialize the memory manager */

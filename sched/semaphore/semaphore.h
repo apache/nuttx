@@ -50,12 +50,6 @@ extern "C"
 
 /* Common semaphore logic */
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-void nxsem_initialize(void);
-#else
-#  define nxsem_initialize()
-#endif
-
 /* Wake up a thread that is waiting on semaphore */
 
 void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode);
@@ -97,24 +91,20 @@ void nxsem_recover(FAR struct tcb_s *tcb);
  */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-void nxsem_initialize_holders(void);
 void nxsem_destroyholder(FAR sem_t *sem);
-void nxsem_add_holder(FAR sem_t *sem);
 void nxsem_add_holder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem);
 void nxsem_boost_priority(FAR sem_t *sem);
 void nxsem_release_holder(FAR sem_t *sem);
-void nxsem_restore_baseprio(FAR struct tcb_s *stcb, FAR sem_t *sem);
-void nxsem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem);
+void nxsem_restore_baseprio(FAR struct tcb_s *stcb);
+void nxsem_canceled(FAR sem_t *sem);
 void nxsem_release_all(FAR struct tcb_s *stcb);
 #else
-#  define nxsem_initialize_holders()
 #  define nxsem_destroyholder(sem)
-#  define nxsem_add_holder(sem)
 #  define nxsem_add_holder_tcb(htcb,sem)
 #  define nxsem_boost_priority(sem)
 #  define nxsem_release_holder(sem)
-#  define nxsem_restore_baseprio(stcb,sem)
-#  define nxsem_canceled(stcb,sem)
+#  define nxsem_restore_baseprio(stcb)
+#  define nxsem_canceled(sem)
 #  define nxsem_release_all(stcb)
 #endif
 

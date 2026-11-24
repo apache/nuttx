@@ -130,15 +130,6 @@ int nxsem_trywait(FAR sem_t *sem)
     }
 #endif
 
-  /* Disable fast path on a counting semaphore with priority inheritance */
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  if (!mutex && (sem->flags & SEM_PRIO_MASK) != SEM_PRIO_NONE)
-    {
-      fastpath = false;
-    }
-#endif
-
   while (fastpath)
     {
       FAR atomic_t *val = mutex ? NXSEM_MHOLDER(sem) : NXSEM_COUNT(sem);

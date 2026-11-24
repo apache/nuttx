@@ -1577,38 +1577,13 @@ menuconfig PRIORITY_INHERITANCE
 	bool "Enable priority inheritance"
 	default n
 	---help---
-		Set to enable support for priority inheritance on mutexes and semaphores.
-		When this option is enabled, the initial configuration of all seamphores
-		and mutexes will be with priority inheritance enabled.  That configuration
-		may not be appropriate in all cases (such as when the semaphore or mutex
-		is used for signaling).  In such cases, priority inheritance can be
-		disabled for individual semaphores by calling:
-
-			int ret = sem_setprotocol(&sem, SEM_PRIO_NONE);
-
-		From applications, the functionally equivalent OS internal interface,
-		nxsem_set_protocol(), should be used within the OS
-
-		And for individual pthread mutexes by setting the protocol attribute
-		before initializing the mutex:
+		Set to enable support for priority inheritance on mutexes.  Priority
+		inheritance is supported only for mutexes (nxmutex_t, pthread_mutex_t);
+		sem_setprotocol() rejects SEM_PRIO_INHERIT on a counting semaphore.
+		Priority inheritance can be disabled for individual pthread mutexes by
+		setting the protocol attribute before initializing the mutex:
 
 			int ret = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_NONE);
-
-if PRIORITY_INHERITANCE
-
-config SEM_PREALLOCHOLDERS
-	int "Number of pre-allocated holders"
-	default 4 if DEFAULT_SMALL
-	default 8 if !DEFAULT_SMALL
-	---help---
-		This setting is only used if priority inheritance is enabled.
-		It defines the maximum number of different threads (minus one) that
-		can take counts on a semaphore with priority inheritance support.
-		This may be set to zero if priority inheritance is disabled OR if you
-		are only using semaphores as mutexes (only one holder) OR if no more
-		than two threads participate using a counting semaphore.
-
-endif # PRIORITY_INHERITANCE
 
 config PRIORITY_PROTECT
 	bool "Enable priority protect"

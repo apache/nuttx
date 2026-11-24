@@ -51,10 +51,6 @@
 
 #define SEM_FAILED                NULL
 
-#ifndef CONFIG_SEM_PREALLOCHOLDERS
-#  define CONFIG_SEM_PREALLOCHOLDERS 0
-#endif
-
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
@@ -65,37 +61,25 @@
 struct tcb_s; /* Forward reference */
 struct sem_s;
 
+/* Priority inheritance is supported only for mutexes, which are held by
+ * exactly one thread at a time.  Therefore a single holder slot per
+ * semaphore is always sufficient.
+ */
+
 struct semholder_s
 {
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
-  FAR struct semholder_s *flink;  /* List of semaphore's holder            */
-#endif
   FAR struct semholder_s *tlink;  /* List of task held semaphores          */
   FAR struct sem_s *sem;          /* The corresponding semaphore           */
   FAR struct tcb_s *htcb;         /* The corresponding TCB                 */
-  int32_t counts;                 /* Number of counts owned by this holder */
 };
 
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
-#  define SEMHOLDER_INITIALIZER   {NULL, NULL, NULL, NULL, 0}
-#  define INITIALIZE_SEMHOLDER(h) \
-    do { \
-      (h)->flink  = NULL; \
-      (h)->tlink  = NULL; \
-      (h)->sem    = NULL; \
-      (h)->htcb   = NULL; \
-      (h)->counts = 0; \
-    } while (0)
-#else
-#  define SEMHOLDER_INITIALIZER   {NULL, NULL, NULL, 0}
+#  define SEMHOLDER_INITIALIZER   {NULL, NULL, NULL}
 #  define INITIALIZE_SEMHOLDER(h) \
     do { \
       (h)->tlink  = NULL; \
       (h)->sem    = NULL; \
       (h)->htcb   = NULL; \
-      (h)->counts = 0; \
     } while (0)
-#endif
 #endif /* CONFIG_PRIORITY_INHERITANCE */
 
 #define SEM_WAITLIST_INITIALIZER {NULL, NULL}
@@ -128,11 +112,7 @@ struct sem_s
 #endif
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-#  if CONFIG_SEM_PREALLOCHOLDERS > 0
-  FAR struct semholder_s *hhead; /* List of holders of semaphore counts */
-#  else
-  struct semholder_s holder;     /* Slot for old and new holder */
-#  endif
+  struct semholder_s holder;     /* Slot for the mutex holder */
 #endif
 #ifdef CONFIG_PRIORITY_PROTECT
   uint8_t ceiling;               /* The priority ceiling owned by mutex  */
@@ -145,17 +125,10 @@ typedef struct sem_s sem_t;
 /* Initializers */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-#  if CONFIG_SEM_PREALLOCHOLDERS > 0
-/* semcount, flags, waitlist, hhead */
+/* semcount, flags, waitlist, holder */
 
-#    define SEM_INITIALIZER(c) \
-       {{(c)}, SEM_PRIO_NONE, SEM_WAITLIST_INITIALIZER, NULL}
-#  else
-/* semcount, flags, waitlist, holder[2] */
-
-#    define SEM_INITIALIZER(c) \
-       {{(c)}, SEM_PRIO_NONE, SEM_WAITLIST_INITIALIZER, SEMHOLDER_INITIALIZER}
-#  endif
+#  define SEM_INITIALIZER(c) \
+     {{(c)}, SEM_PRIO_NONE, SEM_WAITLIST_INITIALIZER, SEMHOLDER_INITIALIZER}
 #else
 /* semcount, flags, waitlist */
 

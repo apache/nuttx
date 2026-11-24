@@ -48,8 +48,6 @@ although almost of them might be set as default.
 +-----------------+-------------------------------+------------------+
 | POSIX API       | CONFIG_PRIORITY_INHERITANCE   | `sched/Kconfig`_ |
 +                 +-------------------------------+                  +
-|                 | CONFIG_SEM_PREALLOCHOLDERS    |                  |
-+                 +-------------------------------+                  +
 |                 | CONFIG_DISABLE_MQUEUE         |                  |
 +                 +-------------------------------+                  +
 |                 | CONFIG_DISABLE_MQUEUE_SYSV    |                  |
