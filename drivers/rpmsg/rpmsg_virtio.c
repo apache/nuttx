@@ -898,7 +898,14 @@ static void rpmsg_virtio_start_worker(FAR void *arg)
   ret = rpmsg_register(name, &priv->rpmsg, &g_rpmsg_virtio_ops, nrx);
   if (ret >= 0)
     {
-      ret = rpmsg_init_vdev_with_config(&priv->rvdev, vdev, rpmsg_ns_bind,
+      /* The name service bind callback is passed as NULL here and the
+       * extra-carrying variant is installed below instead: taking the
+       * announced extra data needs a wider signature than the one
+       * rpmsg_init_vdev_with_config() accepts. Installing it afterwards is
+       * required in any case, as the init memsets the whole device.
+       */
+
+      ret = rpmsg_init_vdev_with_config(&priv->rvdev, vdev, NULL,
                                         metal_io_get_region(),
                                         priv->pool, &config);
       if (ret >= 0)
@@ -906,6 +913,7 @@ static void rpmsg_virtio_start_worker(FAR void *arg)
           priv->notifytx = priv->rvdev.svq->notify;
           priv->rvdev.svq->notify = rpmsg_virtio_tx_notify;
           priv->rvdev.notify_wait_cb = rpmsg_virtio_notify_wait;
+          priv->rvdev.rdev.ns_bind_extra_cb = rpmsg_ns_bind_extra;
           priv->rvdev.rdev.ns_unbind_cb = rpmsg_ns_unbind;
 
           /* Wake up the rx thread to process message */

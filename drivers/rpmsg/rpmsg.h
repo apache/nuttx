@@ -137,8 +137,9 @@ struct rpmsg_ops_s
 void rpmsg_modify_signals(FAR struct rpmsg_s *rpmsg,
                           int setflags, int clrflags);
 
-void rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
-                   FAR const char *name, uint32_t dest);
+void rpmsg_ns_bind_extra(FAR struct rpmsg_device *rdev,
+                         FAR const char *name, uint32_t dest,
+                         FAR const void *extra, size_t extra_len);
 void rpmsg_ns_unbind(FAR struct rpmsg_device *rdev,
                      FAR const char *name, uint32_t dest);
 

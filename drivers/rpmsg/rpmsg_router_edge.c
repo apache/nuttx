@@ -558,14 +558,18 @@ static bool rpmsg_router_edge_match(FAR struct rpmsg_device *rdev,
 
 static void rpmsg_router_edge_bind(FAR struct rpmsg_device *rdev,
                                    FAR void *priv, FAR const char *name,
-                                   uint32_t dest)
+                                   uint32_t dest, FAR const void *extra,
+                                   size_t extra_len)
 {
   FAR struct rpmsg_router_edge_s *edge = priv;
   FAR struct rpmsg_device *edgedev = &edge->rdev;
 
-  edgedev->ns_bind_cb(edgedev,
-                      name + RPMSG_ROUTER_NAME_PREFIX_LEN +
-                      strlen(edge->rpmsg.cpuname) + 1, dest);
+  /* Relay the announced extra data to the user side of the edge device */
+
+  edgedev->ns_bind_extra_cb(edgedev,
+                            name + RPMSG_ROUTER_NAME_PREFIX_LEN +
+                            strlen(edge->rpmsg.cpuname) + 1, dest,
+                            extra, extra_len);
 }
 
 /****************************************************************************
@@ -635,9 +639,9 @@ rpmsg_router_edge_destroy_epts(FAR struct rpmsg_router_edge_s *edge)
 
 static void rpmsg_router_edge_destroy(FAR struct rpmsg_router_edge_s *edge)
 {
-  rpmsg_unregister_callback(edge, NULL, NULL,
-                            rpmsg_router_edge_match,
-                            rpmsg_router_edge_bind);
+  rpmsg_unregister_callback_extra(edge, NULL, NULL,
+                                  rpmsg_router_edge_match,
+                                  rpmsg_router_edge_bind);
   rpmsg_unregister(edge->name, &edge->rpmsg);
   rpmsg_router_edge_destroy_epts(edge);
   rpmsg_device_destroy(&edge->rpmsg);
@@ -687,7 +691,7 @@ rpmsg_router_edge_create(FAR struct rpmsg_device *hubdev,
 
   rdev = &edge->rdev;
   metal_mutex_init(&rdev->lock);
-  rdev->ns_bind_cb = rpmsg_ns_bind;
+  rdev->ns_bind_extra_cb = rpmsg_ns_bind_extra;
   rdev->ns_unbind_cb = rpmsg_ns_unbind;
   rdev->ops.hold_rx_buffer = rpmsg_router_edge_hold_rx_buffer;
   rdev->ops.release_rx_buffer = rpmsg_router_edge_release_rx_buffer;
@@ -716,9 +720,9 @@ rpmsg_router_edge_create(FAR struct rpmsg_device *hubdev,
 
   /* Register callback for edge core */
 
-  ret = rpmsg_register_callback(edge, NULL, NULL,
-                                rpmsg_router_edge_match,
-                                rpmsg_router_edge_bind);
+  ret = rpmsg_register_callback_extra(edge, NULL, NULL,
+                                      rpmsg_router_edge_match,
+                                      rpmsg_router_edge_bind);
 
   if (ret < 0)
     {

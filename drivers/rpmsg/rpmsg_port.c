@@ -556,7 +556,7 @@ int rpmsg_port_initialize(FAR struct rpmsg_port_s *port,
   rdev = &port->rdev;
   memset(rdev, 0, sizeof(*rdev));
   metal_mutex_init(&rdev->lock);
-  rdev->ns_bind_cb = rpmsg_ns_bind;
+  rdev->ns_bind_extra_cb = rpmsg_ns_bind_extra;
   rdev->ns_unbind_cb = rpmsg_ns_unbind;
   rdev->ops.send_offchannel_raw = rpmsg_port_send_offchannel_raw;
   rdev->ops.hold_rx_buffer = rpmsg_port_hold_rx_buffer;
