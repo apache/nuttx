@@ -181,13 +181,13 @@ static void delay_free(struct mm_heap_s *heap, void *mem, bool delay);
  * Private Data
  ****************************************************************************/
 
-static struct mm_heap_s g_heap;
+static struct mm_heap_s g_sim_heap;
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-struct mm_heap_s *g_mmheap = &g_heap;
+struct mm_heap_s *g_mmheap = &g_sim_heap;
 
 #ifdef CONFIG_MM_RECORD_SEQNO
 unsigned long g_mm_seqno;
