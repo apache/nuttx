@@ -1101,6 +1101,96 @@ config LCD_JD9851_TE
 
 endif # LCD_JD9851
 
+config LCD_CO5300
+	bool "Chipone CO5300 QSPI AMOLED Controller"
+	default n
+	---help---
+		Driver for AMOLED panels with the Chipone CO5300 controller
+		connected through a QSPI (4-line SPI) bus.  Only RGB565 is
+		supported.  The QSPI controller must support single-line command
+		transfers and 1-1-4 memory writes (QSPIMEM_QUADDATA).
+
+if LCD_CO5300
+
+config LCD_CO5300_XRES
+	int "CO5300 X Resolution"
+	default 480
+	---help---
+		Specifies the X resolution of the panel.
+
+config LCD_CO5300_YRES
+	int "CO5300 Y Resolution"
+	default 480
+	---help---
+		Specifies the Y resolution of the panel.
+
+config LCD_CO5300_XOFFSET
+	int "CO5300 X Offset"
+	default 0
+	---help---
+		Column of the controller RAM where the panel starts.
+
+config LCD_CO5300_YOFFSET
+	int "CO5300 Y Offset"
+	default 0
+	---help---
+		Row of the controller RAM where the panel starts.
+
+config LCD_CO5300_MIRRORX
+	bool "CO5300 Mirror X"
+	default n
+	---help---
+		Mirror the display horizontally.  Enable both mirror options
+		to rotate the image by 180 degrees.  The controller cannot
+		rotate by 90 degrees.
+
+config LCD_CO5300_MIRRORY
+	bool "CO5300 Mirror Y"
+	default n
+	---help---
+		Mirror the display vertically.
+
+config LCD_CO5300_BGR
+	bool "CO5300 Use BGR Instead Of RGB"
+	default n
+
+config LCD_CO5300_FREQUENCY
+	int "CO5300 QSPI Frequency"
+	default 40000000
+	---help---
+		QSPI clock frequency in Hz.
+
+config LCD_CO5300_BRIGHTNESS
+	int "CO5300 Initial Brightness"
+	default 208
+	range 0 255
+	---help---
+		Brightness (DCS command 0x51) set at initialization.  It can be
+		changed at runtime with the LCD contrast setting.
+
+config LCD_CO5300_BUFSIZE
+	int "CO5300 Transfer Buffer Size"
+	default 2048
+	---help---
+		Size in bytes of the DMA transfer buffer.  Pixel data is sent in
+		QSPI memory transfers of at most this size, so it must not be
+		larger than the maximum transfer size of the QSPI controller
+		(e.g. ESP32S3_SPI_DMA_BUFSIZE on ESP32-S3).  Larger values
+		reduce the per-transfer overhead.  Must be even.
+
+config LCD_CO5300_SHADOWBUF
+	bool "CO5300 Shadow Buffer"
+	default n
+	---help---
+		Keep a copy of the display RAM (XRES * YRES * 2 bytes) in the
+		driver.  The panel only accepts windows with even start and
+		size, so unaligned updates are widened using pixels from this
+		copy.  It also allows reading pixels back (getrun).  Without it,
+		unaligned updates are sent unmodified and the panel may not
+		show them correctly.
+
+endif # LCD_CO5300
+
 config LCD_PCD8544
 	bool "Nokia 5110 LCD Display (Philips PCD8544)"
 	default n

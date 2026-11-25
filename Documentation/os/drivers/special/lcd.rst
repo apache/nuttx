@@ -105,6 +105,14 @@ LCDs
 OLEDs
 -----
 
+.. _co5300:
+
+- ``co5300.c``
+
+  Chipone CO5300 AMOLED controller connected through a QSPI (4-line SPI)
+  bus, e.g. on 480x480 round and square AMOLED panels.  See
+  :ref:`co5300_qspi` below.
+
 - ``p14201.c``
 
   Driver for RiT P14201 series display with SD1329 IC controller.
@@ -142,6 +150,65 @@ OLEDs
 
       boards/arm/stm32f4/stm32f4discovery
       boards/arm/sam34/sam4l-xplained
+
+.. _co5300_qspi:
+
+CO5300 QSPI AMOLED
+------------------
+
+``drivers/lcd/co5300.c`` is the first LCD driver that uses the QSPI
+interface (``struct qspi_dev_s``, ``include/nuttx/spi/qspi.h``).  It is
+enabled with ``CONFIG_LCD_CO5300`` and created with:
+
+.. code-block:: c
+
+   #include <nuttx/lcd/co5300.h>
+
+   FAR struct lcd_dev_s *co5300_lcdinitialize(FAR struct qspi_dev_s *qspi);
+
+The returned ``struct lcd_dev_s`` can be used with the LCD character driver
+(``CONFIG_LCD_DEV``, ``/dev/lcdN``) or with the framebuffer front end
+(``CONFIG_LCD_FRAMEBUFFER``, ``/dev/fbN``).
+
+Bus protocol:
+
+- Commands are sent with QSPI opcode ``0x02`` and the DCS command in bits
+  15-8 of a 24-bit address, followed by the parameters, all on one line
+  (``QSPI_COMMAND()``).
+- Pixels are sent with QSPI opcode ``0x32``, address ``0x002c00``
+  (``RAMWR``) for the first transfer of a window and ``0x003c00``
+  (``RAMWRC``) for the following ones, single-line address and quad data
+  (``QSPI_MEMORY()`` with ``QSPIMEM_QUADDATA``).  Large areas are split in
+  transfers of ``CONFIG_LCD_CO5300_BUFSIZE`` bytes.
+
+Requirements on the board and the QSPI controller:
+
+- The board resets the panel with its RESET pin before calling
+  ``co5300_lcdinitialize()``.
+- ``QSPI_COMMAND()`` transfers must use one line for address and data.  On
+  ESP32-S3 call ``esp32s3_qspibus_set_attr(qspi, 0, 1, 1)`` after
+  ``esp32s3_qspibus_initialize()``; ``CONFIG_ESP32S3_SPI_IO_QIO`` and
+  ``CONFIG_ESP32S3_SPI_DMA`` must be enabled and
+  ``CONFIG_ESP32S3_SPI_DMA_BUFSIZE`` must not be smaller than
+  ``CONFIG_LCD_CO5300_BUFSIZE``.
+- ``QSPI_ALLOC()`` must return DMA-capable memory.  Pixels are copied and
+  byte-swapped into this buffer, so the source buffer may be anywhere,
+  including PSRAM.
+
+Only RGB565 is supported.  ``setcontrast()`` sets the brightness (DCS
+``0x51``); ``setpower(0)`` turns the display off and puts the panel to
+sleep, any other value turns it on and, if ``CONFIG_LCD_MAXPOWER`` > 1,
+also scales the brightness.  The controller can mirror the image
+(``CONFIG_LCD_CO5300_MIRRORX``/``MIRRORY``) but cannot rotate it by 90
+degrees.
+
+The panel needs windows with even start and size.  The driver reports
+this through ``getareaalign()`` (``LCDDEVIO_GETAREAALIGN``).  Because the
+panel cannot be read back, unaligned areas can only be fixed by the driver
+with ``CONFIG_LCD_CO5300_SHADOWBUF``, which keeps a copy of the display RAM
+(``XRES * YRES * 2`` bytes, e.g. 450 KiB for 480x480) and widens the area
+from it.  Without it, callers should align their areas (e.g. an LVGL
+rounder callback).
 
 Segment LCDS (SLCDs)
 --------------------

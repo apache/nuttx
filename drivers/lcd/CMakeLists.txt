@@ -156,6 +156,10 @@ if(CONFIG_LCD)
   if(CONFIG_LCD_JD9851)
     list(APPEND SRCS jd9851.c)
   endif()
+
+  if(CONFIG_LCD_CO5300)
+    list(APPEND SRCS co5300.c)
+  endif()
 endif() # CONFIG_LCD
 
 if(CONFIG_SLCD)
