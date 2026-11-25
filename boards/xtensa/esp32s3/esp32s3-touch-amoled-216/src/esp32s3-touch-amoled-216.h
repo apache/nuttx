@@ -143,5 +143,20 @@ int board_i2c_init(void);
 int board_spiflash_init(void);
 #endif
 
+/****************************************************************************
+ * Name: esp32s3_qmi8658_initialize
+ *
+ * Description:
+ *   Initialize and register the QMI8658 6-axis IMU uORB driver.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_QMI8658
+int esp32s3_qmi8658_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_TOUCH_AMOLED_216_SRC_ESP32S3_TOUCH_AMOLED_216_H */

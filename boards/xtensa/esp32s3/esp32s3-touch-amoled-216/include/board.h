@@ -66,4 +66,11 @@
 #define BUTTON_IO18_BIT   (1 << BUTTON_IO18)
 #define BUTTON_PWR_BIT    (1 << BUTTON_PWR)
 
+/* QMI8658 IMU **************************************************************/
+
+/* The QMI8658 sits on the shared I2C0 bus with SA0 tied low (0x6B) */
+
+#define QMI8658_I2C_PORT  0
+#define QMI8658_I2C_ADDR  0x6b
+
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_TOUCH_AMOLED_216_INCLUDE_BOARD_H */
