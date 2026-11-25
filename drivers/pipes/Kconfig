@@ -63,7 +63,7 @@ config DEV_PIPE_VFS_PATH
 
 config DEV_PIPE_NPOLLWAITERS
 	int "number of threads for waiting POLL events"
-	default 4
+	default 2
 	---help---
 		Maximum number of threads that can be waiting for POLL events
 
