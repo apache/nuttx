@@ -259,8 +259,12 @@ static DEFINE_PER_CPU_BSS_BMP(atomic_t, g_rpmsg_id);
  * the server it found, so that close() cannot free that server meanwhile.
  */
 
-static mutex_t g_rpmsg_socket_lock = NXMUTEX_INITIALIZER;
-static dq_queue_t g_rpmsg_socket_server;
+static DEFINE_PER_CPU_BMP(mutex_t, g_rpmsg_socket_lock) =
+  NXMUTEX_INITIALIZER;
+#define g_rpmsg_socket_lock this_cpu_var_bmp(g_rpmsg_socket_lock)
+
+static DEFINE_PER_CPU_BSS_BMP(dq_queue_t, g_rpmsg_socket_server);
+#define g_rpmsg_socket_server this_cpu_var_bmp(g_rpmsg_socket_server)
 
 /****************************************************************************
  * Private Functions
