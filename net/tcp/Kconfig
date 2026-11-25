@@ -140,6 +140,19 @@ config NET_TCP_MAX_CONNS
 		This is useful in case the system is under very heavy load (or
 		under attack), ensuring that the heap will not be exhausted.
 
+config NET_TCP_SYN_RESERVE
+	int "TCP/IP connections kept from incoming SYNs"
+	default 2
+	---help---
+		A SYN to a listener is refused while this number of TCP/IP
+		connections or fewer are free.  Then SYNs from the network cannot
+		take the last connections, and socket() and connect() on this
+		device still work.  This applies only when the number of
+		connections has a limit: NET_TCP_ALLOC_CONNS is 0, or
+		NET_TCP_MAX_CONNS is set.
+
+		Set to 0 to disable.
+
 config NET_TCP_NPOLLWAITERS
 	int "Number of TCP poll waiters"
 	default 2
