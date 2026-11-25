@@ -122,7 +122,8 @@ MEMPOOL_DEFINE(g_rpmsg_pool, CONFIG_RPMSG_POOL_SIZE,
 static DEFINE_PER_CPU_BSS_BMP(struct rpmsg_wqueue_s,
                               g_rpmsg_wqueues[CONFIG_RPMSG_WQUEUE_NUMBER]);
 #define g_rpmsg_wqueues this_cpu_var_bmp(g_rpmsg_wqueues)
-static spinlock_t g_rpmsg_wqueue_lock = SP_UNLOCKED;
+static DEFINE_PER_CPU_BMP(spinlock_t, g_rpmsg_wqueue_lock) = SP_UNLOCKED;
+#define g_rpmsg_wqueue_lock this_cpu_var_bmp(g_rpmsg_wqueue_lock)
 #endif
 
 /****************************************************************************
