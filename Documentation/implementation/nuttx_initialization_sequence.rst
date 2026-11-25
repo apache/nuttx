@@ -381,7 +381,7 @@ file and in that case those operations are not performed:
       (found at ``nuttx/arch/arm/src/common/stm32/stm32_serial_m3m4_v1v2v3v4.c`` STM32 F4).
 
     * ``arm_netinitialize()`` - Initialize the network. For the STM32 F4,
-      this function is in ``nuttx/arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c``.
+      this function is in ``nuttx/arch/arm/src/common/stm32/stm32_eth_v1.c``.
 
     * ``arm_usbinitialize()`` - Initialize USB (host or device).
       For the STM32 F4, this function is in

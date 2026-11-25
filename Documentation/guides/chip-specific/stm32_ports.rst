@@ -234,7 +234,7 @@ Ethernet drivers
 ================
 
 The Ethernet MAC drivers of F1, F2, F4, F7
-(``common/stm32/stm32_eth_m3m4_v1.c``) and H5, H7, N6
+(``common/stm32/stm32_eth_v1.c``) and H5, H7, N6
 (``common/stm32/stm32_eth_v2.c``) are lower half drivers of the network upper
 half (``include/nuttx/net/netdev_lowerhalf.h``, see
 :ref:`Network Drivers <netdriver>`).  New STM32 network drivers must use this
@@ -382,7 +382,7 @@ CRC           to be done     not supported
 DAC           v1             arch/arm/src/common/stm32/stm32_dac_m3m4_v1.c          
 DBGMCU        v1             not supported                                          
 DMA           v1             arch/arm/src/common/stm32/stm32_dma_m3m4_v1_8ch.c      
-ETH           v1             arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c          
+ETH           v1             arch/arm/src/common/stm32/stm32_eth_v1.c
 EXTI          v1             arch/arm/src/common/stm32/stm32_exti_gpio_m3m4_v1v2.c  
 FLASH         F1/F3          arch/arm/src/common/stm32/stm32_flash_m3m4_f1f3.c      
 FSMC          v1             arch/arm/src/common/stm32/stm32_fsmc_m3m4_v1.c         
@@ -411,7 +411,7 @@ CAN/FDCAN     bxCAN         arch/arm/src/common/stm32/stm32_can_m3m4_v1.c
 CRYP          v1            arch/arm/src/common/stm32/stm32_aes_m3m4_v1.c          
 DAC           v1            arch/arm/src/common/stm32/stm32_dac_m3m4_v1.c          
 DMA           v2            arch/arm/src/common/stm32/stm32_dma_m3m4_v2_stream.c   
-ETH           v1            arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c          
+ETH           v1            arch/arm/src/common/stm32/stm32_eth_v1.c
 EXTI          v1            arch/arm/src/common/stm32/stm32_exti_gpio_m3m4_v1v2.c  
 FLASH         F2/F4         arch/arm/src/common/stm32/stm32_flash_m3m4_f2f4.c      
 FSMC          v1            arch/arm/src/common/stm32/stm32_fsmc_m3m4_v1.c         
@@ -472,7 +472,7 @@ CRYP          v1            arch/arm/src/common/stm32/stm32_aes_m3m4_v1.c
 DAC           v1            arch/arm/src/common/stm32/stm32_dac_m3m4_v1.c         
 DMA           v2            arch/arm/src/common/stm32/stm32_dma_m3m4_v2_stream.c  
 DMA2D         v1            arch/arm/src/common/stm32/stm32_dma2d_v1.c       
-ETH           v1            arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c         
+ETH           v1            arch/arm/src/common/stm32/stm32_eth_v1.c
 EXTI          v1            arch/arm/src/common/stm32/stm32_exti_gpio_m3m4_v1v2.c 
 FLASH         F2/F4         arch/arm/src/common/stm32/stm32_flash_m3m4_f2f4.c     
 FMC/FSMC      v1            arch/arm/src/common/stm32/stm32_fmc_m3m4_v1.c         
@@ -573,7 +573,7 @@ CAN/FDCAN     bxCAN         arch/arm/src/stm32f7/stm32_can.c
 DAC           to be done    not supported                          
 DMA           v2 style      arch/arm/src/stm32f7/stm32_dma.c       
 DMA2D         v1            arch/arm/src/common/stm32/stm32_dma2d_v1.c
-ETH           v1            arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c
+ETH           v1            arch/arm/src/common/stm32/stm32_eth_v1.c
 EXTI          to be done    arch/arm/src/stm32f7/stm32_exti_gpio.c 
 FLASH         to be done    arch/arm/src/stm32f7/stm32_flash.c     
 FMC/FSMC      to be done    arch/arm/src/stm32f7/stm32_fmc.c       
