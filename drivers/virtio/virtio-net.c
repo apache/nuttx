@@ -130,6 +130,7 @@ struct virtio_net_priv_s
 
   FAR struct virtio_device *vdev;      /* Virtio device pointer */
   int                       bufnum;    /* TX and RX Buffer number */
+  int                       rxnum;     /* RX buffers in the virtqueue */
 };
 
 /* Virtio Link Layer Header, follow shows the iob buffer layout:
@@ -307,7 +308,13 @@ static void virtio_net_rxfill(FAR struct netdev_lowerhalf_s *dev)
   FAR netpkt_t *pkt;
   int i;
 
-  for (i = 0; i < priv->bufnum; i++)
+  /* Keep at most priv->bufnum RX buffers outstanding in the virtqueue.
+   * The netpkt quota used to enforce this limit; now that it is gone from
+   * the upper half, bound the refill here so that we do not drain the
+   * shared IOB pool by filling the whole RX ring.
+   */
+
+  for (i = 0; i < priv->bufnum - priv->rxnum; i++)
     {
       /* IOB Offload, Alloc buffer from RX netpkt */
 
@@ -336,6 +343,8 @@ static void virtio_net_rxfill(FAR struct netdev_lowerhalf_s *dev)
           netpkt_free(dev, pkt, NETPKT_RX);
           break;
         }
+
+      priv->rxnum++;
     }
 
   if (i > 0)
@@ -491,7 +500,9 @@ static int virtio_net_ifdown(FAR struct netdev_lowerhalf_s *dev)
     }
 
   /* Drain RX virtqueue to free netpkt buffers that are still queued
-   * but not yet consumed.
+   * but not yet consumed.  Only the buffers the device has used come
+   * back here; the ones still in the avail ring stay queued, so the
+   * count is decremented per buffer instead of being reset.
    */
 
   while (1)
@@ -504,6 +515,7 @@ static int virtio_net_ifdown(FAR struct netdev_lowerhalf_s *dev)
         }
 
       netpkt_free(dev, hdr->pkt, NETPKT_RX);
+      priv->rxnum--;
     }
 
   /* Drain TX virtqueue as well */
@@ -549,14 +561,24 @@ static int virtio_net_send(FAR struct netdev_lowerhalf_s *dev,
     {
       /* The virtqueue has no room.  The packet was not queued, so it is
        * still owned (and will be recycled) by the upper-half.  Reclaim what
-       * the other side has finished and ask for a TX done callback to
-       * resume the transmission.
+       * the other side has finished and retry before touching the
+       * interrupt, so that a retry which succeeds does not needlessly arm
+       * the TX done callback.
        */
 
-      vrterr("net send failed: %d\n", ret);
       virtio_net_txfree(dev);
-      virtqueue_enable_cb_lock(vq, &priv->lock[VIRTIO_NET_TX]);
-      return -ENOMEM;
+      ret = virtio_net_addbuffer(dev, vq, pkt, VIRTIO_NET_TX);
+      if (ret < 0)
+        {
+          /* Still full.  Ask for a TX done callback and report a transient
+           * failure, so that the upper half queues the packet and offers
+           * it again instead of dropping it.
+           */
+
+          vrtinfo("net send busy: %d\n", ret);
+          virtqueue_enable_cb_lock(vq, &priv->lock[VIRTIO_NET_TX]);
+          return -EBUSY;
+        }
     }
 
   virtqueue_kick_lock(vq, &priv->lock[VIRTIO_NET_TX]);
@@ -608,6 +630,10 @@ static netpkt_t *virtio_net_recv(FAR struct netdev_lowerhalf_s *dev)
       vrtinfo("get NULL buffer\n");
       return NULL;
     }
+
+  /* One RX buffer left the virtqueue; allow rxfill to replenish it. */
+
+  priv->rxnum--;
 
   /* Set the received pkt length */
 
