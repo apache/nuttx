@@ -224,7 +224,7 @@ ifeq ($(CONFIG_AUDIO_CS4344),y)
   CSRCS += stm32_cs4344.c
 endif
 
-ifneq ($(CONFIG_STM32_HAVE_FDCAN_H7),y)
+ifneq ($(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_V2),y)
   ifneq ($(CONFIG_STM32_CAN_CHARDRIVER)$(CONFIG_STM32_FDCAN_CHARDRIVER),)
     CSRCS += stm32_can_setup.c
   endif

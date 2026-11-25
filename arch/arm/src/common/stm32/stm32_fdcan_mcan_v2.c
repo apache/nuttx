@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_fdcan.c
+ * arch/arm/src/common/stm32/stm32_fdcan_mcan_v2.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -41,10 +41,9 @@
 #include <nuttx/can/can.h>
 
 #include "arm_internal.h"
+#include "stm32.h"
 #include "stm32_fdcan.h"
 #include "hardware/stm32_pinmap.h"
-#include "stm32_gpio.h"
-#include "stm32_rcc.h"
 
 /****************************************************************************
  * Pre-processor Definitions

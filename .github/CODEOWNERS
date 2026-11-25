@@ -1624,6 +1624,7 @@ arch/arm/src/common/stm32/hardware/stm32_exti_v1v2.h alin.jerpelea@sony.com dani
 arch/arm/src/common/stm32/hardware/stm32_exti_v1v2_m0.h raiden00pl@gmail.com alin.jerpelea@sony.com raiden00@railab.me david_s5@usa.net bob.feretich@rafresearch.com
 arch/arm/src/common/stm32/hardware/stm32_fdcan.h masayuki.ishikawa@gmail.com ville.juven@unikie.com xiaoxiang@xiaomi.com sonic.tw.tp@gmail.com kevin.liu.mchp@gmail.com
 arch/arm/src/common/stm32/hardware/stm32_fdcan_mcan.h raiden00@railab.me alin.jerpelea@sony.com
+arch/arm/src/common/stm32/hardware/stm32_fdcan_mcan_v2.h jacob@flyvoly.com rajvinderkaur@geotab.com 101105604+simbit18@users.noreply.github.com devel@sumpfralle.de alin.jerpelea@sony.com
 arch/arm/src/common/stm32/hardware/stm32_flash.h alin.jerpelea@sony.com raiden00@railab.me
 arch/arm/src/common/stm32/hardware/stm32_flash_m0.h raiden00pl@gmail.com alin.jerpelea@sony.com raiden00@railab.me
 arch/arm/src/common/stm32/hardware/stm32_flash_v1v2.h 59230071+hartmannathan@users.noreply.github.com david_s5@nscdg.com juha.niskanen@haltian.com kwilson@2g-eng.com raiden00@railab.me
@@ -1735,6 +1736,7 @@ arch/arm/src/common/stm32/stm32_exti_wakeup_m3m4_v1.c juha.niskanen@haltian.com 
 arch/arm/src/common/stm32/stm32_fdcan.h masayuki.ishikawa@gmail.com raiden00@railab.me Masayuki.Ishikawa@jp.sony.com alin.jerpelea@sony.com
 arch/arm/src/common/stm32/stm32_fdcan_mcan_v1.c raiden00@railab.me xiaoxiang@xiaomi.com michallenc@seznam.cz devel@sumpfralle.de zhaohaiyang1@xiaomi.com
 arch/arm/src/common/stm32/stm32_fdcan_mcan_v1_sock.c raiden00@railab.me xiaoxiang@xiaomi.com jacob@flyvoly.com anchao@xiaomi.com devel@sumpfralle.de
+arch/arm/src/common/stm32/stm32_fdcan_mcan_v2_sock.c jacob@flyvoly.com rajvinderkaur@geotab.com xiaoxiang@xiaomi.com carlossanchez@geotab.com anchao@xiaomi.com
 arch/arm/src/common/stm32/stm32_flash.h 53337780+aenrbes@users.noreply.github.com masayuki.ishikawa@gmail.com raiden00@railab.me sonic.tw.tp@gmail.com tbennett@2g-eng.com
 arch/arm/src/common/stm32/stm32_flash_m0_g0c0.c tbennett@2g-eng.com raiden00@railab.me simbit18@gmail.com
 arch/arm/src/common/stm32/stm32_flash_m3m4_f1f3.c alin.jerpelea@sony.com abdelatif.guettouche@gmail.com anjiahao@xiaomi.com adwaitngodbole@gmail.com xiaoxiang@xiaomi.com
@@ -4137,7 +4139,6 @@ arch/arm/src/stm32h7/hardware/stm32_dma.h raiden00@railab.me alin.jerpelea@sony.
 arch/arm/src/stm32h7/hardware/stm32_dmamux.h raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com alexvasiljev@gmail.com
 arch/arm/src/stm32h7/hardware/stm32_ethernet.h alin.jerpelea@sony.com markus.bernet@hexagon.com raiden00@railab.me javiercasas@geotab.com
 arch/arm/src/stm32h7/hardware/stm32_exti.h po@lambdaconcept.com alin.jerpelea@sony.com raiden00@railab.me javiercasas@geotab.com
-arch/arm/src/stm32h7/hardware/stm32_fdcan.h jacob@flyvoly.com rajvinderkaur@geotab.com 101105604+simbit18@users.noreply.github.com devel@sumpfralle.de alin.jerpelea@sony.com
 arch/arm/src/stm32h7/hardware/stm32_flash.h raiden00@railab.me alin.jerpelea@sony.com javiercasas@geotab.com lwazeh@gmail.com
 arch/arm/src/stm32h7/hardware/stm32_fmc.h zapparello@ya.ru yukihiratype2@gmail.com alin.jerpelea@sony.com
 arch/arm/src/stm32h7/hardware/stm32_gpio.h alin.jerpelea@sony.com raiden00@railab.me javiercasas@geotab.com lwazeh@gmail.com
@@ -4193,7 +4194,6 @@ arch/arm/src/stm32h7/stm32_exti.h simon@leitwert.ch alin.jerpelea@sony.com
 arch/arm/src/stm32h7/stm32_exti_alarm.c david.sidrane@nscdg.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com juha.niskanen@haltian.com
 arch/arm/src/stm32h7/stm32_exti_gpio.c simon@leitwert.ch alin.jerpelea@sony.com raiden00@railab.me javiercasas@geotab.com po@lambdaconcept.com
 arch/arm/src/stm32h7/stm32_exti_wakeup.c david.sidrane@nscdg.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32h7/stm32_fdcan_sock.c jacob@flyvoly.com rajvinderkaur@geotab.com xiaoxiang@xiaomi.com carlossanchez@geotab.com anchao@xiaomi.com
 arch/arm/src/stm32h7/stm32_fdcan_sock.h jacob@flyvoly.com alin.jerpelea@sony.com
 arch/arm/src/stm32h7/stm32_flash.c javiercasas@geotab.com david.sidrane@nscdg.com jari.nippula@intel.com jlange@2g-eng.com David.Sidrane@NscDg.com
 arch/arm/src/stm32h7/stm32_flash.h jlange@2g-eng.com alin.jerpelea@sony.com anthony@vergeaero.com

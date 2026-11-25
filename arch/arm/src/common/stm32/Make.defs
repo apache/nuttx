@@ -131,6 +131,15 @@ CHIP_CSRCS += stm32_fdcan_mcan_v1_sock.c
 endif
 endif
 
+ifeq ($(CONFIG_STM32_FDCAN)$(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_V2),yy)
+ifeq ($(CONFIG_STM32_FDCAN_CHARDRIVER),y)
+CHIP_CSRCS += stm32_fdcan_mcan_v2.c
+endif
+ifeq ($(CONFIG_STM32_FDCAN_SOCKET),y)
+CHIP_CSRCS += stm32_fdcan_mcan_v2_sock.c
+endif
+endif
+
 ifeq ($(CONFIG_MDIO_BUS)$(CONFIG_STM32_HAVE_IP_ETHMAC_V2),yy)
 ifeq ($(CONFIG_STM32_ETH_MDIO_GPIO),y)
 CHIP_CSRCS += stm32_mdio_gpio.c
