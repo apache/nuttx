@@ -218,3 +218,17 @@ before the board boots::
     nsh> df -h
       Filesystem      Size      Used  Available Mounted on
       vfat           3580M     1040K      3579M /mnt
+
+wifi
+----
+
+Enables Wi-Fi support (station mode) with the ``wapi`` tool.  You can scan
+for networks and connect to an access point with::
+
+    nsh> wapi scan wlan0
+    nsh> wapi psk wlan0 mypasswd 3
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
+
+``wapi save_config wlan0`` stores the current settings on the SPI flash,
+where ``CONFIG_WIRELESS_WAPI_INITCONF`` picks them up at boot.
