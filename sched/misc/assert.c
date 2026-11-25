@@ -128,7 +128,8 @@ typedef uintptr_t last_regs_t[XCPTCONTEXT_REGS];
 static DEFINE_PER_CPU_BSS_SMP(bool, g_cpu_paused);
 #endif
 
-static spinlock_t g_assert_lock = SP_UNLOCKED;
+static DEFINE_PER_CPU_BMP(spinlock_t, g_assert_lock) = SP_UNLOCKED;
+#define g_assert_lock this_cpu_var_bmp(g_assert_lock)
 
 #ifdef CONFIG_SCHED_DUMP_TASKS
 static FAR const char * const g_policy[4] =
