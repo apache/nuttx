@@ -41,6 +41,7 @@
 #include <nuttx/mm/mempool.h>
 #include <nuttx/mutex.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/percpu.h>
 #include <nuttx/rwsem.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
@@ -102,10 +103,14 @@ static int rpmsg_dev_ioctl(FAR struct file *filep, int cmd,
  * Private Data
  ****************************************************************************/
 
-static struct list_node g_rpmsg_cb = LIST_INITIAL_VALUE(g_rpmsg_cb);
-static struct list_node g_rpmsg = LIST_INITIAL_VALUE(g_rpmsg);
+static DEFINE_PER_CPU_BSS_BMP(struct list_node, g_rpmsg_cb);
+#define g_rpmsg_cb this_cpu_var_bmp(g_rpmsg_cb)
 
-static rw_semaphore_t g_rpmsg_lock = RWSEM_INITIALIZER;
+static DEFINE_PER_CPU_BSS_BMP(struct list_node, g_rpmsg);
+#define g_rpmsg this_cpu_var_bmp(g_rpmsg)
+
+static DEFINE_PER_CPU_BMP(rw_semaphore_t, g_rpmsg_lock) = RWSEM_INITIALIZER;
+#define g_rpmsg_lock this_cpu_var_bmp(g_rpmsg_lock)
 
 #if CONFIG_RPMSG_POOL_COUNT > 0
 MEMPOOL_DEFINE(g_rpmsg_pool, CONFIG_RPMSG_POOL_SIZE,
@@ -113,7 +118,9 @@ MEMPOOL_DEFINE(g_rpmsg_pool, CONFIG_RPMSG_POOL_SIZE,
 #endif
 
 #ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
-static struct rpmsg_wqueue_s g_rpmsg_wqueues[CONFIG_RPMSG_WQUEUE_NUMBER];
+static DEFINE_PER_CPU_BSS_BMP(struct rpmsg_wqueue_s,
+                              g_rpmsg_wqueues[CONFIG_RPMSG_WQUEUE_NUMBER]);
+#define g_rpmsg_wqueues this_cpu_var_bmp(g_rpmsg_wqueues)
 static spinlock_t g_rpmsg_wqueue_lock = SP_UNLOCKED;
 #endif
 
@@ -390,6 +397,12 @@ void rpmsg_rx_worker(FAR void *arg)
   metal_mutex_release(&rdev->lock);
   DEBUGASSERT(worker != NULL);
   worker(rpmsg, arg);
+}
+
+void rpmsg_early_initialize(void)
+{
+  list_initialize(&g_rpmsg);
+  list_initialize(&g_rpmsg_cb);
 }
 
 void rpmsg_initialize(void)

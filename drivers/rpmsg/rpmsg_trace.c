@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <execinfo.h>
 
+#include <nuttx/percpu.h>
 #include <nuttx/sched_note.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/streams.h>
@@ -58,7 +59,8 @@
  * note stream when several CPUs trace at the same time.
  */
 
-static spinlock_t g_rpmsg_trace_lock = SP_UNLOCKED;
+static DEFINE_PER_CPU_BMP(spinlock_t, g_rpmsg_trace_lock) = SP_UNLOCKED;
+#define g_rpmsg_trace_lock this_cpu_var_bmp(g_rpmsg_trace_lock)
 
 /****************************************************************************
  * Public Functions
