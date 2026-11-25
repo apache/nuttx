@@ -65,6 +65,7 @@
 
 /* Enabled CAN instances */
 
+#ifdef CONFIG_NETDEV_LATEINIT
 static const uint8_t g_can_ports[] =
 {
 #if defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_FDCAN1)
@@ -77,6 +78,7 @@ static const uint8_t g_can_ports[] =
   3,
 #endif
 };
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -92,8 +94,10 @@ static const uint8_t g_can_ports[] =
 
 int stm32_cansock_setup(void)
 {
+#ifdef CONFIG_NETDEV_LATEINIT
   int ret;
   int i;
+#endif
 
 #ifdef BOARD_CAN_GPIO_STBY
   /* Enable the CAN transceiver */
@@ -101,6 +105,9 @@ int stm32_cansock_setup(void)
   stm32_configgpio(BOARD_CAN_GPIO_STBY);
   stm32_gpiowrite(BOARD_CAN_GPIO_STBY, false);
 #endif
+
+#ifdef CONFIG_NETDEV_LATEINIT
+  /* Without NETDEV_LATEINIT, arm_netinitialize() registers the ports */
 
   for (i = 0; i < sizeof(g_can_ports); i++)
     {
@@ -112,6 +119,7 @@ int stm32_cansock_setup(void)
           return ret;
         }
     }
+#endif
 
   return OK;
 }
