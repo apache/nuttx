@@ -485,6 +485,37 @@ config DS3231_I2C_FREQUENCY
 
 endif # RTC_DSXXXX
 
+config RTC_PCF85063
+	bool "PCF85063 RTC Driver"
+	default n
+	select I2C
+	select RTC_DATETIME
+	depends on RTC_EXTERNAL
+	---help---
+		Enables support for the NXP PCF85063A/PCF85063TP I2C RTC.
+
+		The chip is used in 24-hour mode.  It stores two digits of
+		year, so only dates from 2000 to 2099 are supported.  Reading
+		the time fails with -ENODATA while the oscillator stop flag is
+		set (the time was lost); setting the time clears the flag.
+
+		The alarm and timer functions of the PCF85063A are not
+		implemented.
+
+if RTC_PCF85063
+
+config PCF85063_I2C_ADDRESS
+	hex "PCF85063 I2C address"
+	default 0x51
+	range 0x08 0x77
+
+config PCF85063_I2C_FREQUENCY
+	int "PCF85063 I2C frequency"
+	default 400000
+	range 1 400000
+
+endif # RTC_PCF85063
+
 config RTC_PCF85263
 	bool "PCF85263 RTC Driver"
 	default n

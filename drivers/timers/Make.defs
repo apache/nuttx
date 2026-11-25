@@ -73,6 +73,12 @@ ifeq ($(CONFIG_RTC_DSXXXX),y)
   TMRVPATH = :timers
 endif
 
+ifeq ($(CONFIG_RTC_PCF85063),y)
+  CSRCS += pcf85063.c
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
 ifeq ($(CONFIG_RTC_PCF85263),y)
   CSRCS += pcf85263.c
   TMRDEPPATH = --dep-path timers
