@@ -101,6 +101,10 @@
 
 void drivers_early_initialize(void)
 {
+#ifdef CONFIG_RPMSG
+  rpmsg_early_initialize();
+#endif
+
 #ifdef CONFIG_DRIVERS_NOTE
   note_early_initialize();
 #endif

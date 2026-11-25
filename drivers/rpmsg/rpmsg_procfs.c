@@ -39,6 +39,7 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/percpu.h>
 #include <nuttx/rpmsg/rpmsg.h>
 
 #include "rpmsg.h"
@@ -123,7 +124,9 @@ static const struct procfs_entry_s g_rpmsg_procfs_root =
 
 /* Endpoint name pattern rpmsg_trace() records, empty to record all */
 
-static char g_rpmsg_procfs_filter[RPMSG_PROCFS_LINELEN];
+static DEFINE_PER_CPU_BSS_BMP(char,
+                              g_rpmsg_procfs_filter[RPMSG_PROCFS_LINELEN]);
+#define g_rpmsg_procfs_filter this_cpu_var_bmp(g_rpmsg_procfs_filter)
 
 /****************************************************************************
  * Private Functions

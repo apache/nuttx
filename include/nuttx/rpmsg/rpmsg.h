@@ -132,6 +132,7 @@ extern "C"
 {
 #endif
 
+void rpmsg_early_initialize(void);
 void rpmsg_initialize(void);
 
 int rpmsg_tickwait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem,
