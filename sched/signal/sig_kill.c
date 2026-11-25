@@ -170,6 +170,7 @@ int nxsig_kill(pid_t pid, int signo)
 #endif
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   siginfo_t info;
+  int ret = -EINVAL;
 #endif
 
 #ifdef CONFIG_SCHED_PROCESS_GROUPS
@@ -217,33 +218,31 @@ int nxsig_kill(pid_t pid, int signo)
 #else
   /* Make sure that the signal is valid */
 
-  if (!GOOD_SIGNO(signo))
+  if (GOOD_SIGNO(signo))
     {
-      return -EINVAL;
-    }
+      /* Zero the whole siginfo first: sigaction-queued signals carry a
+       * si_user field that only the sigaction queue path assigns, so a
+       * stack-garbage si_user here would be memcpy'd into the pending
+       * entry and handed back to a sigtimedwait() consumer.
+       */
 
-  /* Create the siginfo structure */
-
-  /* Zero the whole siginfo first: sigaction-queued signals carry a
-   * si_user field that only the sigaction queue path assigns, so a
-   * stack-garbage si_user here would be memcpy'd into the pending
-   * entry and handed back to a sigtimedwait() consumer.
-   */
-
-  memset(&info, 0, sizeof(siginfo_t));
-  info.si_signo           = signo;
-  info.si_code            = SI_USER;
-  info.si_errno           = EINTR;
-  info.si_value.sival_ptr = NULL;
+      memset(&info, 0, sizeof(siginfo_t));
+      info.si_signo           = signo;
+      info.si_code            = SI_USER;
+      info.si_errno           = EINTR;
+      info.si_value.sival_ptr = NULL;
 #ifdef CONFIG_SCHED_HAVE_PARENT
-  info.si_pid             = rtcb->pid;
-  info.si_uid             = getuid();
-  info.si_status          = OK;
+      info.si_pid             = rtcb->pid;
+      info.si_uid             = getuid();
+      info.si_status          = OK;
 #endif
 
-  /* Send the signal */
+      /* Send the signal */
 
-  return nxsig_dispatch(pid, &info, false, NULL, false);
+      ret = nxsig_dispatch(pid, &info, false, NULL, false);
+    }
+
+  return ret;
 #endif
 }
 
