@@ -121,6 +121,9 @@
 #elif defined(RCC_APB1RSTR1_FDCANRST)
 #  define FDCAN_RSTR                 STM32_RCC_APB1RSTR1
 #  define FDCAN_RST                  RCC_APB1RSTR1_FDCANRST
+#elif defined(RCC_APB1RSTR2_FDCANRST)
+#  define FDCAN_RSTR                 STM32_RCC_APB1RSTR2
+#  define FDCAN_RST                  RCC_APB1RSTR2_FDCANRST
 #else
 #  define FDCAN_RSTR                 STM32_RCC_APB1RSTR
 #  define FDCAN_RST                  RCC_APB1RSTR_FDCANRST

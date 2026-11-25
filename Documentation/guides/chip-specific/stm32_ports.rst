@@ -880,7 +880,7 @@ DAC           M33 v1        arch/arm/src/common/stm32/stm32_dac_m33_v1.c
 DBGMCU        v5            not supported
 DLYB          to be done    not supported
 EXTI          M33M55 v1     arch/arm/src/common/stm32/stm32_exti_gpio_m33m55_v1.c
-FDCAN         to be done    not supported
+FDCAN         FDCAN         arch/arm/src/common/stm32/stm32_fdcan_mcan_v1.c
 FLASH         to be done    not supported
 GPDMA         GPDMA         arch/arm/src/common/stm32/stm32_dma_gpdma.c
 GPIO          M33M55 v1     arch/arm/src/common/stm32/stm32_gpio_m33m55_v1.c
