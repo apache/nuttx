@@ -94,6 +94,10 @@ if(CONFIG_INPUT)
     list(APPEND SRCS gt9xx.c)
   endif()
 
+  if(CONFIG_INPUT_CST92XX)
+    list(APPEND SRCS cst92xx.c)
+  endif()
+
   if(CONFIG_INPUT_ST7123)
     list(APPEND SRCS st7123.c)
   endif()

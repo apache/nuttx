@@ -187,6 +187,58 @@ config UINPUT_KEYBOARD_BUFNUMBER
 
 endif
 
+config INPUT_CST92XX
+	bool "Hynitron CST92xx capacitive touch controller"
+	default n
+	select I2C
+	select INPUT_TOUCHSCREEN
+	select SCHED_HPWORK
+	---help---
+		Enable support for the Hynitron CST92xx (CST9217, CST9220) I2C
+		capacitive multi-touch controllers.
+
+if INPUT_CST92XX
+
+config INPUT_CST92XX_MAX_POINTS
+	int "Maximum number of contacts"
+	default 1
+	range 1 10
+	---help---
+		Maximum number of simultaneous contacts read from each touch
+		report.  The CST9217/CST9220 firmware commonly reports up to two.
+		Samples carry up to this many points, so readers that only read
+		a single-point struct touch_sample_s (e.g. LVGL or
+		examples/touchscreen) need this to be 1.
+
+config INPUT_CST92XX_NBUFFERS
+	int "Number of touch sample buffers"
+	default 8
+	---help---
+		Number of touch samples buffered per open file by the touchscreen
+		upper half.
+
+config INPUT_CST92XX_POLLMODE
+	bool "Polled mode"
+	default n
+	---help---
+		Read touch reports periodically while the device is open instead
+		of on the INT interrupt.  Use only if INT is not connected; it adds
+		latency and I2C traffic.
+
+if INPUT_CST92XX_POLLMODE
+
+config INPUT_CST92XX_POLL_PERIOD
+	int "Poll period (ms)"
+	default 20
+	range 1 1000
+	---help---
+		Interval between two reads of the touch report when the
+		interrupt line is not used.
+
+endif # INPUT_CST92XX_POLLMODE
+
+endif # INPUT_CST92XX
+
 config INPUT_ST7123
 	bool "ST7123 Touch Screen Controller"
 	default n
