@@ -43,7 +43,11 @@
  * in STM ticks (0: no timeout)
  */
 
-#define TRICORE_CORE_SYNC_MASK     0x5f
+#ifdef CONFIG_ARCH_CHIP_TC375
+#  define TRICORE_CORE_SYNC_MASK   0x07
+#else
+#  define TRICORE_CORE_SYNC_MASK   0x5f
+#endif
 #define TRICORE_CORE_SYNC_TIMEOUT  100000
 
 /* Other cores that tricore_start releases, CPU1 only as with the iLLD
