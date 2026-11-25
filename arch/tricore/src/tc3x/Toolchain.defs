@@ -20,6 +20,17 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_ARCH_CHIP_TC375),y)
+  ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
+    ARCHCPUFLAGS += --cpu=tc37x
+    ARCHCPUFLAGS += --default-near-size=0
+    LDFLAGS      += -Ctc37x
+    LDFLAGS      += -Wl--user-provided-initialization-code
+  else
+    ARCHCPUFLAGS += -mtc162
+  endif
+endif
+
 ifeq ($(CONFIG_ARCH_CHIP_TC397),y)
   ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
     ARCHCPUFLAGS += --cpu=tc39xb

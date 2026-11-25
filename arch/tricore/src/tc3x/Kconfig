@@ -28,6 +28,9 @@ choice
 	prompt "Infineon AURIX TC3x chip selection"
 	default ARCH_CHIP_TC397
 
+config ARCH_CHIP_TC375
+	bool "TC375 SoC"
+
 config ARCH_CHIP_TC397
 	bool "TC397 SoC"
 
