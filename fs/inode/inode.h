@@ -295,10 +295,15 @@ int fs_cwd_join(FAR const char *path, FAR char *buffer, size_t buflen);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_FS_CWD_TRACKING
 void fs_cwd_renamed(FAR const char *oldpath, FAR const char *newpath);
 void fs_cwd_removed(FAR const char *path);
 bool fs_cwd_busy(FAR const char *path);
 void fs_cwd_unmounted(FAR struct inode *mountpt, FAR const char *path);
+#else
+#  define fs_cwd_renamed(oldpath, newpath)
+#  define fs_cwd_removed(path)
+#endif
 
 /****************************************************************************
  * Name: inode_find

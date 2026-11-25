@@ -113,7 +113,6 @@ int nx_umount2(FAR const char *target, unsigned int flags)
   FAR struct inode *blkdrvr_inode = NULL;
   struct inode_search_s desc;
   FAR char *path = NULL;
-  size_t len;
   int ret;
 
   if (!nxsched_capable(PR_CAP_RAWIO))
@@ -187,6 +186,7 @@ int nx_umount2(FAR const char *target, unsigned int flags)
       goto errout_with_lock;
     }
 
+#ifdef CONFIG_FS_CWD_TRACKING
   /* A file system that holds the current directory of a task group is
    * busy, except for MNT_FORCE and MNT_DETACH (the unmount of all file
    * systems before a reboot uses MNT_FORCE).  The tree lock keeps the
@@ -203,7 +203,8 @@ int nx_umount2(FAR const char *target, unsigned int flags)
         }
       else
         {
-          len = strlen(path);
+          size_t len = strlen(path);
+
           if (len > 1 && path[len - 1] == '/')
             {
               path[len - 1] = '\0';
@@ -225,6 +226,7 @@ int nx_umount2(FAR const char *target, unsigned int flags)
           goto errout_with_path;
         }
     }
+#endif
 
   if (mountpt_inode->u.i_mops->syncfs)
     {
@@ -245,6 +247,7 @@ int nx_umount2(FAR const char *target, unsigned int flags)
       goto errout_with_path;
     }
 
+#ifdef CONFIG_FS_CWD_TRACKING
   /* The current directories in the file system are removed with it */
 
   if (path != NULL)
@@ -252,6 +255,7 @@ int nx_umount2(FAR const char *target, unsigned int flags)
       fs_cwd_unmounted(mountpt_inode, path);
       lib_put_tempbuffer(path);
     }
+#endif
 
   /* Successfully unbound.  Convert the mountpoint inode to a regular
    * pseudo-file inode.

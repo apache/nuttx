@@ -80,6 +80,12 @@ There is no list of current directories: ``rename()``, ``rmdir()`` and
 under one kernel mutex.  The walk does not allocate memory, so
 ``rename()`` gives the new name to one task group after the other.
 
+These updates need ``CONFIG_FS_CWD_TRACKING`` (default on, off with
+``CONFIG_DEFAULT_SMALL``).  Without it, the current directory keeps its
+path: after ``rename()`` a relative path uses the old name, after
+``rmdir()`` and ``mkdir()`` of the same name it uses the new directory,
+and ``umount()`` does not look at the current directories.
+
 Limits:
 
 * A change that does not go through the VFS of this system is not seen,

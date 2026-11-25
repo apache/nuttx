@@ -50,6 +50,7 @@
 
 /* A walk of the current directories of all task groups (cwd_walk()) */
 
+#ifdef CONFIG_FS_CWD_TRACKING
 struct cwd_walk_s
 {
   FAR const char          *path;    /* The directory */
@@ -59,6 +60,7 @@ struct cwd_walk_s
   bool                     remove;  /* Mark the directories removed */
   FAR struct task_group_s *group;   /* Out: a task group with one */
 };
+#endif
 
 /****************************************************************************
  * Private Data
@@ -360,6 +362,8 @@ static int cwd_get(FAR char *buf, size_t size)
   return ret;
 }
 
+#ifdef CONFIG_FS_CWD_TRACKING
+
 /****************************************************************************
  * Name: cwd_hostpath
  *
@@ -656,6 +660,8 @@ static void cwd_rename(FAR const char *oldpath, FAR const char *newpath)
   nxmutex_unlock(&g_cwd_lock);
 }
 
+#endif /* CONFIG_FS_CWD_TRACKING */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -764,6 +770,8 @@ int fs_cwd_join(FAR const char *path, FAR char *buffer, size_t buflen)
   nxmutex_unlock(&g_cwd_lock);
   return ret;
 }
+
+#ifdef CONFIG_FS_CWD_TRACKING
 
 /****************************************************************************
  * Name: fs_cwd_renamed
@@ -883,6 +891,8 @@ void fs_cwd_unmounted(FAR struct inode *mountpt, FAR const char *path)
   cwd_walk(&walk);
   nxmutex_unlock(&g_cwd_lock);
 }
+
+#endif /* CONFIG_FS_CWD_TRACKING */
 
 /****************************************************************************
  * Name: chdir
