@@ -33,6 +33,7 @@
 
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/percpu.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/vhost/vhost.h>
 #include <nuttx/virtio/virtio-gpio.h>
@@ -106,12 +107,13 @@ static void vhost_gpio_remove(FAR struct vhost_device *hdev);
  * Private Data
  ****************************************************************************/
 
-static struct vhost_driver g_vhost_gpio_driver =
+static DEFINE_PER_CPU_BMP(struct vhost_driver, g_vhost_gpio_driver) =
 {
   VIRTIO_ID_GPIO,    /* Device id */
   vhost_gpio_probe,  /* Probe */
   vhost_gpio_remove, /* Remove */
 };
+#define g_vhost_gpio_driver this_cpu_var_bmp(g_vhost_gpio_driver)
 
 /****************************************************************************
  * Private Functions

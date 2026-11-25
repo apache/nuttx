@@ -30,6 +30,7 @@
 #include <stdlib.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/percpu.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/vhost/vhost.h>
 #include <nuttx/wqueue.h>
@@ -65,12 +66,13 @@ static void vhost_rng_handler(FAR struct virtqueue *vq);
  * Private Data
  ****************************************************************************/
 
-static struct vhost_driver g_vhost_rng_driver =
+static DEFINE_PER_CPU_BMP(struct vhost_driver, g_vhost_rng_driver) =
 {
   VIRTIO_ID_ENTROPY,                           /* Device id */
   vhost_rng_probe,                             /* Probe */
   vhost_rng_remove,                            /* Remove */
 };
+#define g_vhost_rng_driver this_cpu_var_bmp(g_vhost_rng_driver)
 
 /****************************************************************************
  * Private Functions

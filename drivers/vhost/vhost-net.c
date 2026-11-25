@@ -67,6 +67,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/ethernet.h>
 #include <nuttx/net/netdev_lowerhalf.h>
+#include <nuttx/percpu.h>
 #include <nuttx/vhost/vhost.h>
 
 #include "vhost-net.h"
@@ -179,12 +180,13 @@ static const struct netdev_ops_s g_vhost_net_ops =
 #endif
 };
 
-static struct vhost_driver g_vhost_net_driver =
+static DEFINE_PER_CPU_BMP(struct vhost_driver, g_vhost_net_driver) =
 {
   VIRTIO_ID_NETWORK,                            /* device id */
   vhost_net_probe,                              /* probe */
   vhost_net_remove,                             /* remove */
 };
+#define g_vhost_net_driver this_cpu_var_bmp(g_vhost_net_driver)
 
 /****************************************************************************
  * Private Functions

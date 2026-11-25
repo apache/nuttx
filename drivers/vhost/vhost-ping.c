@@ -32,6 +32,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/percpu.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 #include <nuttx/spinlock.h>
@@ -86,13 +87,14 @@ static void vhost_ping_txdone(FAR struct virtqueue *vq);
  * Private Data
  ****************************************************************************/
 
-static struct vhost_driver g_vhost_ping_driver =
+static DEFINE_PER_CPU_BMP(struct vhost_driver, g_vhost_ping_driver) =
 {
   VIRTIO_ID_PING,    /* Device id */
   vhost_ping_probe,  /* Probe */
   vhost_ping_remove, /* Remove */
   vhost_ping_dump,   /* Dump */
 };
+#define g_vhost_ping_driver this_cpu_var_bmp(g_vhost_ping_driver)
 
 /****************************************************************************
  * Private Functions
