@@ -1053,6 +1053,16 @@ static netpkt_t *fdcan_rxframe(struct fdcan_driver_s *priv,
 
       frame->len = g_can_dlc_to_len[rf->header.dlc];
 
+      if (rf->header.brs)
+        {
+          frame->flags |= CANFD_BRS;
+        }
+
+      if (rf->header.id.esi)
+        {
+          frame->flags |= CANFD_ESI;
+        }
+
       uint32_t *frame_data_word = (uint32_t *)&frame->data[0];
 
       for (int i = 0; i < (frame->len + 4 - 1) / 4; i++)
@@ -1144,6 +1154,11 @@ static netpkt_t *fdcan_receive(struct netdev_lowerhalf_s *dev)
   if ((regval & FDCAN_RXF0S_RF0L) != 0)
     {
       NETDEV_RXERRORS(&dev->netdev);
+#ifndef CONFIG_NET_CAN_ERRORS
+      /* Without error frames nothing else clears the flag */
+
+      putreg32(FDCAN_IR_RF0L, priv->base + STM32_FDCAN_IR_OFFSET);
+#endif
     }
 
   while ((regval & FDCAN_RXF0S_F0FL) > 0)
@@ -1159,6 +1174,12 @@ static netpkt_t *fdcan_receive(struct netdev_lowerhalf_s *dev)
 
       if (pkt != NULL)
         {
+#ifdef CONFIG_NET_CAN_ERRORS
+          /* A frame was received: report protocol errors again */
+
+          modifyreg32(priv->base + STM32_FDCAN_IE_OFFSET, 0,
+                      FDCAN_IE_PEAE | FDCAN_IE_PEDE);
+#endif
           leave_critical_section(flags);
           return pkt;
         }
