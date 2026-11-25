@@ -189,10 +189,13 @@ static uint32_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 
       poll_notify(&info->fds, 1, eventset);
 
-      if (info->fds->revents != 0)
-        {
-          /* Stop further callbacks */
+      /* poll() is woken up once: stop further callbacks.  An epoll set
+       * (POLLALWAYS) keeps the poll set up across its waits (EPOLLET):
+       * it needs the next events too.
+       */
 
+      if (info->fds->revents != 0 && (info->fds->events & POLLALWAYS) == 0)
+        {
           info->cb->flags = 0;
           info->cb->priv  = NULL;
           info->cb->event = NULL;
