@@ -36,6 +36,8 @@
 #  include "stm32_dma_channel_stream.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32H7)
 #  include "stm32_dma_h7.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32F7)
+#  include "stm32_dma_f7.h"
 #else
 #  error "Unsupported STM32 DMA"
 #endif

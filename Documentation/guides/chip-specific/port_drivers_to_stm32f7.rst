@@ -162,7 +162,7 @@ driver discussed below is a good example of such a peripheral with
 built in DMA capability. Most STM32 F7 peripherals, however, have 
 no built-in DMA capability and, instead, must use a common STM32 
 F7 DMA module to perform DMA data transfers. The interfaces to that 
-common DMA module are described in ``arch/arm/src/stm32f7/stm32_dma.h``.
+common DMA module are described in ``arch/arm/src/stm32f7/stm32_dma_f7.h``.
 
 The DMA modules `does not do any cache operations`. Rather, the client 
 of the DMA module must perform the cache operations. Here are the 

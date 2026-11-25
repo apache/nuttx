@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f7/stm32_dma.h
+ * arch/arm/src/stm32f7/stm32_dma_f7.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_STM32_DMA_H
-#define __ARCH_ARM_SRC_STM32F7_STM32_DMA_H
+#ifndef __ARCH_ARM_SRC_STM32F7_STM32_DMA_F7_H
+#define __ARCH_ARM_SRC_STM32F7_STM32_DMA_F7_H
 
 /****************************************************************************
  * Included Files
@@ -284,4 +284,4 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32F7_STM32_DMA_H */
+#endif /* __ARCH_ARM_SRC_STM32F7_STM32_DMA_F7_H */
