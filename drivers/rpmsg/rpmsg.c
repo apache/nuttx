@@ -150,6 +150,7 @@ static int rpmsg_dev_ioctl_(FAR struct rpmsg_s *rpmsg, int cmd,
           }
 
         break;
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
       case RPMSGIOC_DUMP:
         if (rpmsg->ops->dump)
           {
@@ -158,6 +159,7 @@ static int rpmsg_dev_ioctl_(FAR struct rpmsg_s *rpmsg, int cmd,
           }
 
         break;
+#endif
 #ifdef CONFIG_RPMSG_PING
       case RPMSGIOC_PING:
         ret = rpmsg_ping(&rpmsg->ping, (FAR const struct rpmsg_ping_s *)arg);
@@ -202,7 +204,7 @@ static int rpmsg_dev_ioctl_(FAR struct rpmsg_s *rpmsg, int cmd,
   return ret;
 }
 
-#if CONFIG_RPMSG_PANIC_DUMP_LEVEL > RPMSG_PANIC_DUMP_DISABLE
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_MANUAL
 /****************************************************************************
  * Name: rpmsg_panic_notifier
  ****************************************************************************/
@@ -216,7 +218,7 @@ static int rpmsg_panic_notifier(FAR struct notifier_block *nb,
   if (action == PANIC_KERNEL_FINAL)
     {
       ret = rpmsg_dev_ioctl_(rpmsg, RPMSGIOC_DUMP,
-              CONFIG_RPMSG_PANIC_DUMP_LEVEL >= RPMSG_PANIC_DUMP_VERBOSE);
+              CONFIG_RPMSG_DUMP_LEVEL >= RPMSG_DUMP_PANIC_VERBOSE);
     }
 
   return ret;
@@ -914,7 +916,7 @@ int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
               list_add_tail(&g_rpmsg, &rpmsg->node);
               up_write(&g_rpmsg_lock);
 
-#if CONFIG_RPMSG_PANIC_DUMP_LEVEL > RPMSG_PANIC_DUMP_DISABLE
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_MANUAL
               rpmsg->nbpanic.notifier_call = rpmsg_panic_notifier;
               rpmsg->nbpanic.priority = INT_MIN + 2;
               panic_notifier_chain_register(&rpmsg->nbpanic);
@@ -939,7 +941,7 @@ int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
 
 void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg)
 {
-#if CONFIG_RPMSG_PANIC_DUMP_LEVEL > RPMSG_PANIC_DUMP_DISABLE
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_MANUAL
   panic_notifier_chain_unregister(&rpmsg->nbpanic);
 #endif
 
@@ -954,6 +956,7 @@ void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg)
   metal_finish();
 }
 
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
 /****************************************************************************
  * Name: rpmsg_dump_epts
  ****************************************************************************/
@@ -973,6 +976,7 @@ void rpmsg_dump_epts(FAR struct rpmsg_device *rdev)
              atomic_load(&ept->refcnt), ept->priority, ept->priv);
     }
 }
+#endif
 
 static int rpmsg_ioctl_foreach_cb(FAR struct rpmsg_s *rpmsg, FAR void *arg)
 {

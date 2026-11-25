@@ -39,9 +39,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define RPMSG_PANIC_DUMP_DISABLE 0
-#define RPMSG_PANIC_DUMP_INFO    1
-#define RPMSG_PANIC_DUMP_VERBOSE 2
+#define RPMSG_DUMP_DISABLE       0
+#define RPMSG_DUMP_MANUAL        1
+#define RPMSG_DUMP_PANIC_INFO    2
+#define RPMSG_DUMP_PANIC_VERBOSE 3
 
 /****************************************************************************
  * Public Types
@@ -102,7 +103,7 @@ struct rpmsg_s
   struct rpmsg_char_s          chr;
 #endif
   atomic_t                     signals;
-#if CONFIG_RPMSG_PANIC_DUMP_LEVEL > RPMSG_PANIC_DUMP_DISABLE
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_MANUAL
   struct notifier_block        nbpanic;
 #endif
 };
@@ -156,7 +157,9 @@ int rpmsg_queue_work(FAR struct rpmsg_s *rpmsg, int priority,
 void rpmsg_rx_worker(FAR void *arg);
 
 int rpmsg_foreach(rpmsg_foreach_t handler, FAR void *args);
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
 void rpmsg_dump_epts(FAR struct rpmsg_device *rdev);
+#endif
 
 #ifdef CONFIG_RPMSG_HEAP
 int rpmsg_heap_init(FAR struct rpmsg_device *rdev,

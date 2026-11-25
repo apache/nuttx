@@ -150,8 +150,10 @@ rpmsg_port_uart_queue_noavail(FAR struct rpmsg_port_s *port,
                               FAR struct rpmsg_port_queue_s *queue);
 static void rpmsg_port_uart_register_callback(FAR struct rpmsg_port_s *port,
                                               rpmsg_port_rx_cb_t callback);
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
 static void rpmsg_port_uart_dump(FAR struct rpmsg_port_s *port,
                                  bool verbose);
+#endif
 
 static void rpmsg_port_uart_rx_worker(FAR struct rpmsg_port_uart_s *rpuart,
                                       bool process_rx);
@@ -166,7 +168,9 @@ static const struct rpmsg_port_ops_s g_rpmsg_port_uart_ops =
   .notify_rx_free       = NULL,
   .notify_queue_noavail = rpmsg_port_uart_queue_noavail,
   .register_callback    = rpmsg_port_uart_register_callback,
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
   .dump                 = rpmsg_port_uart_dump,
+#endif
 };
 
 /****************************************************************************
@@ -502,6 +506,7 @@ static void rpmsg_port_uart_register_callback(FAR struct rpmsg_port_s *port,
   rpuart->rx_cb = callback;
 }
 
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
 /****************************************************************************
  * Name: rpmsg_port_uart_dump
  ****************************************************************************/
@@ -533,6 +538,7 @@ static void rpmsg_port_uart_dump(FAR struct rpmsg_port_s *port, bool verbose)
       rpmsgvbs("Tx thread not running\n");
     }
 }
+#endif
 
 /****************************************************************************
  * Name: rpmsg_port_uart_process_rx_conn

@@ -53,7 +53,9 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
 static void rpmsg_port_dump(FAR struct rpmsg_s *rpmsg, bool verbose);
+#endif
 static int rpmsg_port_get_timestamp(FAR struct rpmsg_s *rpmsg,
                                     FAR const void *data,
                                     FAR struct rpmsg_timestamp_s *ts);
@@ -68,7 +70,11 @@ static const struct rpmsg_ops_s g_rpmsg_port_ops =
   NULL,
   NULL,
   NULL,
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
   rpmsg_port_dump,
+#else
+  NULL,
+#endif
   rpmsg_port_get_timestamp,
 };
 
@@ -697,7 +703,9 @@ rpmsg_port_queue_get_available_buffer(FAR struct rpmsg_port_queue_s *queue,
             {
               rpmsgerr("Get buffer timeout, Dump debug information:\n");
               dump_stack();
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
               rpmsg_port_dump(&port->rpmsg, true);
+#endif
             }
         }
     }
@@ -850,6 +858,7 @@ void rpmsg_port_unregister(FAR struct rpmsg_port_s *port)
   rpmsgvbs("unregister %s success\n", port->rpmsg.cpuname);
 }
 
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
 /****************************************************************************
  * Name: rpmsg_port_dump_buffer
  ****************************************************************************/
@@ -911,3 +920,4 @@ static void rpmsg_port_dump(FAR struct rpmsg_s *rpmsg, bool verbose)
       port->ops->dump(port, verbose);
     }
 }
+#endif
