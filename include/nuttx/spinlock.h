@@ -1044,11 +1044,12 @@ void spin_unlock_irqrestore(FAR volatile spinlock_t *lock, irqstate_t flags)
 
   /* Unlock without trace note */
 
-  spin_unlock_irqrestore_notrace(lock, flags);
+  spin_unlock_notrace(lock);
 
   /* Notify that we are unlocking the spinlock */
 
   sched_note_spinlock_unlock(lock);
+  irq_restore(flags);
 }
 #else
 #  define spin_unlock_irqrestore(l, f) ((void)(l), irq_restore(f))
