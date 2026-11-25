@@ -94,9 +94,17 @@ static uint32_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
           eventset |= (POLLHUP | POLLERR);
         }
 
-      /* A poll is a sign that we are free to send data. */
+      /* A poll is a sign that we are free to send data.  Without write
+       * buffers the device polls every UDP connection when one of them
+       * sends: an epoll set (POLLALWAYS) gets POLLOUT only from its own.
+       */
 
-      else if (psock_udp_cansend(info->conn) >= 0)
+      else if (psock_udp_cansend(info->conn) >= 0
+#ifndef CONFIG_NET_UDP_WRITE_BUFFERS
+               && ((info->fds->events & POLLALWAYS) == 0 ||
+                   info->conn->sending > 0)
+#endif
+              )
         {
           eventset |= POLLOUT;
         }

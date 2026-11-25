@@ -500,8 +500,11 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       state.st_cb->priv  = (FAR void *)&state;
       state.st_cb->event = sendto_eventhandler;
 
-      /* Notify the device driver of the availability of TX data */
+      /* Notify the device driver of the availability of TX data.  The
+       * poll waiters report POLLOUT while conn->sending is not zero.
+       */
 
+      conn->sending++;
       netdev_txnotify_dev(state.st_dev, UDP_POLL);
 
       /* Wait for either the receive to complete or for an error/timeout to
@@ -512,6 +515,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       ret = conn_dev_sem_timedwait(&state.st_sem, true,
                                    _SO_TIMEOUT(conn->sconn.s_sndtimeo),
                                    &conn->sconn, state.st_dev);
+      conn->sending--;
       if (ret >= 0)
         {
           /* The result of the sendto operation is the number of bytes

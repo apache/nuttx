@@ -137,6 +137,10 @@ struct udp_conn_s
   uint8_t  crefs;         /* Reference counts on this instance */
   uint32_t listid;        /* The order of entry in the list of UDP
                            * connections (udp_alloc()) */
+#ifndef CONFIG_NET_UDP_WRITE_BUFFERS
+  uint16_t sending;       /* sendto() calls that wait for a poll of the
+                           * device */
+#endif
 
 #if CONFIG_NET_RECV_BUFSIZE > 0
   int32_t  rcvbufs;       /* Maximum amount of bytes queued in recv */
