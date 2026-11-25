@@ -314,7 +314,8 @@ The TCP timer handler in ``net/tcp/tcp_timer.c`` drives:
 * Timeout cleanup:
 
 	* ``TCP_SYN_RCVD``: if SYN-ACK retransmits exceed limit, the half-open
-		connection is closed and freed.
+		connection is closed and freed.  No RST is sent: the source address
+		of the SYN can be spoofed.
 	* ``TCP_SYN_SENT`` and established cases: if retransmits exceed limit, the
 		connection is closed, the socket is notified (``TCP_TIMEDOUT``), and a
 		RST may be sent.
