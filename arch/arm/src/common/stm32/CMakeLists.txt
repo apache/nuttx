@@ -391,7 +391,7 @@ if(CONFIG_STM32_COMMON_LEGACY)
 
   if(CONFIG_STM32_FDCAN AND CONFIG_STM32_HAVE_IP_FDCAN_MCAN_V1)
     if(CONFIG_STM32_FDCAN_SOCKET)
-      list(APPEND SRCS stm32_fdcan_m3m4_v1_sock.c)
+      list(APPEND SRCS stm32_fdcan_mcan_v1_sock.c)
     endif()
   endif()
 
