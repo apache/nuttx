@@ -28,6 +28,7 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -38,6 +39,13 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+#  include <stdio.h>
+#  include <stdlib.h>
+#  include <nuttx/kthread.h>
+#  include <nuttx/mutex.h>
+#  include <nuttx/semaphore.h>
+#endif
 #include <nuttx/spi/qspi.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/lcd/lcd.h>
@@ -49,20 +57,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_LCD_CO5300_FREQUENCY
-#  define CONFIG_LCD_CO5300_FREQUENCY 40000000
+#if (CONFIG_LCD_CO5300_BUFSIZE & 1) != 0
+#  error "CONFIG_LCD_CO5300_BUFSIZE must be even"
 #endif
 
-#ifndef CONFIG_LCD_CO5300_BUFSIZE
-#  define CONFIG_LCD_CO5300_BUFSIZE 2048
-#endif
-
-#if CONFIG_LCD_CO5300_BUFSIZE < 2 || (CONFIG_LCD_CO5300_BUFSIZE & 1) != 0
-#  error "CONFIG_LCD_CO5300_BUFSIZE must be even and non-zero"
-#endif
-
-#ifndef CONFIG_LCD_CO5300_BRIGHTNESS
-#  define CONFIG_LCD_CO5300_BRIGHTNESS 255
+#if defined(CONFIG_LCD_CO5300_TXTHREAD) && \
+    (CONFIG_LCD_CO5300_BUFSIZE & 3) != 0
+#  error "CONFIG_LCD_CO5300_BUFSIZE must be a multiple of 4 (two halves)"
 #endif
 
 #if !defined(CONFIG_LCD_MAXPOWER) || CONFIG_LCD_MAXPOWER < 1
@@ -86,9 +87,17 @@
 #define CO5300_COLORFMT      FB_FMT_RGB16_565
 #define CO5300_STRIDE        (CO5300_XRES * 2)
 
-/* Pixels per QSPI memory transfer */
+/* Pixels per QSPI memory transfer.  With the transmit thread, the
+ * transfer buffer is split in two halves that are filled and sent in turn.
+ */
 
-#define CO5300_TXPIXELS      (CONFIG_LCD_CO5300_BUFSIZE / 2)
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+#  define CO5300_NTXBUF      2
+#else
+#  define CO5300_NTXBUF      1
+#endif
+
+#define CO5300_TXPIXELS      (CONFIG_LCD_CO5300_BUFSIZE / 2 / CO5300_NTXBUF)
 
 /* Window start and size must be multiples of this */
 
@@ -126,8 +135,11 @@
 #define CO5300_SPIMODE_QSPI  0x80
 #define CO5300_CMDPAGE_USER  0x00
 
-#define CO5300_MADCTL_MX     0x02  /* Mirror X */
-#define CO5300_MADCTL_MY     0x05  /* Mirror Y */
+/* MADCTL uses the standard MIPI DCS bit layout */
+
+#define CO5300_MADCTL_MY     0x80  /* Row address order (mirror Y) */
+#define CO5300_MADCTL_MX     0x40  /* Column address order (mirror X) */
+#define CO5300_MADCTL_MV     0x20  /* Row/column exchange */
 #define CO5300_MADCTL_BGR    0x08  /* BGR color order */
 
 #ifdef CONFIG_LCD_CO5300_MIRRORX
@@ -142,6 +154,12 @@
 #  define CO5300_MADCTL_Y    0
 #endif
 
+#ifdef CONFIG_LCD_CO5300_MIRRORV
+#  define CO5300_MADCTL_V    CO5300_MADCTL_MV
+#else
+#  define CO5300_MADCTL_V    0
+#endif
+
 #ifdef CONFIG_LCD_CO5300_BGR
 #  define CO5300_MADCTL_RGB  CO5300_MADCTL_BGR
 #else
@@ -149,7 +167,7 @@
 #endif
 
 #define CO5300_MADCTL_VALUE  (CO5300_MADCTL_X | CO5300_MADCTL_Y | \
-                              CO5300_MADCTL_RGB)
+                              CO5300_MADCTL_V | CO5300_MADCTL_RGB)
 
 #define CO5300_SLEEP_DELAY   120000  /* us after SLPIN/SLPOUT */
 
@@ -161,7 +179,19 @@ struct co5300_dev_s
 {
   struct lcd_dev_s dev;           /* Publicly visible device structure */
   FAR struct qspi_dev_s *qspi;    /* QSPI bus */
-  FAR uint16_t *txbuf;            /* DMA-capable transfer buffer */
+  FAR uint16_t *txbuf;            /* DMA-capable transfer buffer(s) */
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+  mutex_t lock;                   /* Serializes the driver methods */
+  sem_t txready;                  /* Number of buffers queued to send */
+  sem_t txfree;                   /* Number of buffers free to fill */
+  size_t txlen[CO5300_NTXBUF];    /* Pixels queued in each buffer */
+  bool txfirst[CO5300_NTXBUF];    /* Buffer starts a new window */
+  uint8_t txhead;                 /* Next buffer to fill */
+  uint8_t txtail;                 /* Next buffer to send */
+  bool busheld;                   /* The QSPI bus is locked by a method */
+  bool threaded;                  /* The transmit thread is running */
+  int txerr;                      /* First error of the transmit thread */
+#endif
 #ifdef CONFIG_LCD_CO5300_SHADOWBUF
   FAR uint16_t *shadow;           /* Copy of display RAM, wire byte order */
 #endif
@@ -227,14 +257,14 @@ static const uint8_t g_co5300_initcmds[][2] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: co5300_lock
+ * Name: co5300_buslock
  *
  * Description:
  *   Lock and configure the QSPI bus.
  *
  ****************************************************************************/
 
-static void co5300_lock(FAR struct co5300_dev_s *priv)
+static void co5300_buslock(FAR struct co5300_dev_s *priv)
 {
   QSPI_LOCK(priv->qspi, true);
   QSPI_SETMODE(priv->qspi, QSPIDEV_MODE0);
@@ -243,12 +273,83 @@ static void co5300_lock(FAR struct co5300_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: co5300_drain
+ *
+ * Description:
+ *   Wait until the transmit thread has sent all queued pixels and take the
+ *   bus back, so that commands are never interleaved with pixel data.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+static void co5300_drain(FAR struct co5300_dev_s *priv)
+{
+  int i;
+
+  if (priv->busheld)
+    {
+      return;
+    }
+
+  for (i = 0; i < CO5300_NTXBUF; i++)
+    {
+      nxsem_wait_uninterruptible(&priv->txfree);
+    }
+
+  for (i = 0; i < CO5300_NTXBUF; i++)
+    {
+      nxsem_post(&priv->txfree);
+    }
+
+  co5300_buslock(priv);
+  priv->busheld = true;
+}
+#endif
+
+/****************************************************************************
+ * Name: co5300_lock
+ *
+ * Description:
+ *   Serialize the driver methods and lock the QSPI bus.
+ *
+ ****************************************************************************/
+
+static int co5300_lock(FAR struct co5300_dev_s *priv)
+{
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+  int ret;
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  co5300_drain(priv);
+#else
+  co5300_buslock(priv);
+#endif
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: co5300_unlock
  ****************************************************************************/
 
 static void co5300_unlock(FAR struct co5300_dev_s *priv)
 {
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+  if (priv->busheld)
+    {
+      QSPI_LOCK(priv->qspi, false);
+      priv->busheld = false;
+    }
+
+  nxmutex_unlock(&priv->lock);
+#else
   QSPI_LOCK(priv->qspi, false);
+#endif
 }
 
 /****************************************************************************
@@ -266,6 +367,10 @@ static int co5300_wrreg(FAR struct co5300_dev_s *priv, uint8_t cmd,
   uint8_t buf[4];
 
   DEBUGASSERT(nparam <= sizeof(buf));
+
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+  co5300_drain(priv);
+#endif
 
   /* Copy into a word-sized buffer: some controllers read whole words */
 
@@ -351,8 +456,8 @@ static int co5300_setwindow(FAR struct co5300_dev_s *priv,
  *
  ****************************************************************************/
 
-static int co5300_wrpixels(FAR struct co5300_dev_s *priv, size_t npixels,
-                           bool first)
+static int co5300_wrpixels(FAR struct co5300_dev_s *priv,
+                           FAR uint16_t *buffer, size_t npixels, bool first)
 {
   struct qspi_meminfo_s meminfo;
 
@@ -362,9 +467,170 @@ static int co5300_wrpixels(FAR struct co5300_dev_s *priv, size_t npixels,
   meminfo.cmd     = CO5300_OP_WRPIXEL;
   meminfo.addr    = (uint32_t)(first ? CO5300_RAMWR : CO5300_RAMWRC) << 8;
   meminfo.buflen  = npixels * 2;
-  meminfo.buffer  = priv->txbuf;
+  meminfo.buffer  = buffer;
 
   return QSPI_MEMORY(priv->qspi, &meminfo);
+}
+
+/****************************************************************************
+ * Name: co5300_getbuf
+ *
+ * Description:
+ *   Return a transfer buffer to fill with CO5300_TXPIXELS pixels.  With
+ *   the transmit thread, wait until one of the buffers is free and release
+ *   the bus so that the thread can send the queued ones.
+ *
+ ****************************************************************************/
+
+static FAR uint16_t *co5300_getbuf(FAR struct co5300_dev_s *priv)
+{
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+  if (!priv->threaded)
+    {
+      return priv->txbuf;
+    }
+
+  if (priv->busheld)
+    {
+      QSPI_LOCK(priv->qspi, false);
+      priv->busheld = false;
+    }
+
+  nxsem_wait_uninterruptible(&priv->txfree);
+  return priv->txbuf + priv->txhead * CO5300_TXPIXELS;
+#else
+  return priv->txbuf;
+#endif
+}
+
+/****************************************************************************
+ * Name: co5300_sendbuf
+ *
+ * Description:
+ *   Send the buffer returned by co5300_getbuf().  With the transmit thread
+ *   the buffer is only queued; an error is then reported by a later call.
+ *
+ ****************************************************************************/
+
+static int co5300_sendbuf(FAR struct co5300_dev_s *priv,
+                          FAR uint16_t *buffer, size_t npixels, bool first)
+{
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+  irqstate_t flags;
+  int ret;
+
+  if (!priv->threaded)
+    {
+      return co5300_wrpixels(priv, buffer, npixels, first);
+    }
+
+  /* Fetch and clear an error of an earlier transfer */
+
+  flags       = enter_critical_section();
+  ret         = priv->txerr;
+  priv->txerr = OK;
+  leave_critical_section(flags);
+
+  priv->txlen[priv->txhead]   = npixels;
+  priv->txfirst[priv->txhead] = first;
+  priv->txhead                = (priv->txhead + 1) % CO5300_NTXBUF;
+  nxsem_post(&priv->txready);
+  return ret;
+#else
+  return co5300_wrpixels(priv, buffer, npixels, first);
+#endif
+}
+
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+/****************************************************************************
+ * Name: co5300_txthread
+ *
+ * Description:
+ *   Send the queued transfer buffers to the panel, so that the caller can
+ *   prepare the next buffer (and LVGL render the next area) meanwhile.
+ *
+ ****************************************************************************/
+
+static int co5300_txthread(int argc, FAR char *argv[])
+{
+  FAR struct co5300_dev_s *priv =
+    (FAR struct co5300_dev_s *)((uintptr_t)strtoul(argv[1], NULL, 16));
+  int ret;
+
+  for (; ; )
+    {
+      nxsem_wait_uninterruptible(&priv->txready);
+
+      co5300_buslock(priv);
+      ret = co5300_wrpixels(priv,
+                            priv->txbuf + priv->txtail * CO5300_TXPIXELS,
+                            priv->txlen[priv->txtail],
+                            priv->txfirst[priv->txtail]);
+      QSPI_LOCK(priv->qspi, false);
+
+      if (ret < 0)
+        {
+          irqstate_t flags = enter_critical_section();
+
+          lcderr("ERROR: Pixel transfer failed: %d\n", ret);
+          if (priv->txerr == OK)
+            {
+              priv->txerr = ret;
+            }
+
+          leave_critical_section(flags);
+        }
+
+      priv->txtail = (priv->txtail + 1) % CO5300_NTXBUF;
+      nxsem_post(&priv->txfree);
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: co5300_copypixels
+ *
+ * Description:
+ *   Copy n pixels into the transfer buffer, converting them from CPU byte
+ *   order to the big-endian wire order if swap is true.  Two pixels are
+ *   converted per 32-bit word when both buffers are word aligned.
+ *
+ ****************************************************************************/
+
+static void co5300_copypixels(FAR uint16_t *dst, FAR const uint16_t *src,
+                              size_t n, bool swap)
+{
+  if (!swap)
+    {
+      memcpy(dst, src, n * sizeof(uint16_t));
+      return;
+    }
+
+  if ((((uintptr_t)dst | (uintptr_t)src) & 3) == 0)
+    {
+      FAR uint32_t *d = (FAR uint32_t *)dst;
+      FAR const uint32_t *s = (FAR const uint32_t *)src;
+      size_t words = n / 2;
+      size_t i;
+
+      for (i = 0; i < words; i++)
+        {
+          uint32_t v = s[i];
+
+          d[i] = ((v & 0x00ff00ff) << 8) | ((v >> 8) & 0x00ff00ff);
+        }
+
+      dst += words * 2;
+      src += words * 2;
+      n   -= words * 2;
+    }
+
+  while (n-- > 0)
+    {
+      *dst++ = htobe16(*src++);
+    }
 }
 
 /****************************************************************************
@@ -384,11 +650,13 @@ static int co5300_wrarea(FAR struct co5300_dev_s *priv,
                          bool swap)
 {
   FAR const uint16_t *src;
+  FAR uint16_t *txbuf = NULL;
   size_t width = col_end - col_start + 1;
+  size_t remaining;
   size_t fill = 0;
+  size_t n;
   bool first = true;
   fb_coord_t row;
-  size_t i;
   int ret;
 
   ret = co5300_setwindow(priv, row_start, row_end, col_start, col_end);
@@ -399,14 +667,30 @@ static int co5300_wrarea(FAR struct co5300_dev_s *priv,
 
   for (row = row_start; row <= row_end; row++)
     {
-      src = (FAR const uint16_t *)buffer;
+      src       = (FAR const uint16_t *)buffer;
+      remaining = width;
 
-      for (i = 0; i < width; i++)
+      while (remaining > 0)
         {
-          priv->txbuf[fill++] = swap ? htobe16(src[i]) : src[i];
+          if (fill == 0)
+            {
+              txbuf = co5300_getbuf(priv);
+            }
+
+          n = CO5300_TXPIXELS - fill;
+          if (n > remaining)
+            {
+              n = remaining;
+            }
+
+          co5300_copypixels(&txbuf[fill], src, n, swap);
+          fill      += n;
+          src       += n;
+          remaining -= n;
+
           if (fill == CO5300_TXPIXELS)
             {
-              ret = co5300_wrpixels(priv, fill, first);
+              ret = co5300_sendbuf(priv, txbuf, fill, first);
               if (ret < 0)
                 {
                   return ret;
@@ -422,7 +706,7 @@ static int co5300_wrarea(FAR struct co5300_dev_s *priv,
 
   if (fill > 0)
     {
-      ret = co5300_wrpixels(priv, fill, first);
+      ret = co5300_sendbuf(priv, txbuf, fill, first);
     }
 
   return ret;
@@ -439,8 +723,10 @@ static int co5300_wrarea(FAR struct co5300_dev_s *priv,
 static int co5300_fill(FAR struct co5300_dev_s *priv, uint16_t color)
 {
   size_t remaining = CO5300_XRES * CO5300_YRES;
+  FAR uint16_t *txbuf;
   size_t npixels;
   bool first = true;
+  int nfilled = 0;
   size_t i;
   int ret;
 
@@ -450,15 +736,23 @@ static int co5300_fill(FAR struct co5300_dev_s *priv, uint16_t color)
       return ret;
     }
 
-  for (i = 0; i < CO5300_TXPIXELS; i++)
-    {
-      priv->txbuf[i] = htobe16(color);
-    }
-
   while (remaining > 0)
     {
+      /* Each of the transfer buffers needs to be filled only once */
+
+      txbuf = co5300_getbuf(priv);
+      if (nfilled < CO5300_NTXBUF)
+        {
+          for (i = 0; i < CO5300_TXPIXELS; i++)
+            {
+              txbuf[i] = htobe16(color);
+            }
+
+          nfilled++;
+        }
+
       npixels = remaining < CO5300_TXPIXELS ? remaining : CO5300_TXPIXELS;
-      ret = co5300_wrpixels(priv, npixels, first);
+      ret = co5300_sendbuf(priv, txbuf, npixels, first);
       if (ret < 0)
         {
           return ret;
@@ -485,21 +779,12 @@ static void co5300_shadow_update(FAR struct co5300_dev_s *priv,
                                  fb_coord_t col_start, size_t width,
                                  FAR const uint8_t *buffer, size_t stride)
 {
-  FAR const uint16_t *src;
-  FAR uint16_t *dest;
   fb_coord_t row;
-  size_t i;
 
   for (row = row_start; row <= row_end; row++)
     {
-      src  = (FAR const uint16_t *)buffer;
-      dest = &priv->shadow[row * CO5300_XRES + col_start];
-
-      for (i = 0; i < width; i++)
-        {
-          dest[i] = htobe16(src[i]);
-        }
-
+      co5300_copypixels(&priv->shadow[row * CO5300_XRES + col_start],
+                        (FAR const uint16_t *)buffer, width, true);
       buffer += stride;
     }
 }
@@ -548,16 +833,22 @@ static int co5300_putarea(FAR struct lcd_dev_s *dev, fb_coord_t row_start,
             ((row_end + 1) % CO5300_ALIGN) == 0 &&
             ((col_end + 1) % CO5300_ALIGN) == 0;
 
-  co5300_lock(priv);
+  ret = co5300_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifdef CONFIG_LCD_CO5300_SHADOWBUF
+  /* Update the shadow copy and send the area from it, widened to the
+   * alignment if needed.  The shadow is in wire byte order already.
+   */
+
   co5300_shadow_update(priv, row_start, row_end, col_start, width,
                        buffer, stride);
 
   if (!aligned)
     {
-      /* Widen to the alignment and send from the shadow copy */
-
       row_start &= ~(CO5300_ALIGN - 1);
       col_start &= ~(CO5300_ALIGN - 1);
       row_end   |= CO5300_ALIGN - 1;
@@ -572,24 +863,22 @@ static int co5300_putarea(FAR struct lcd_dev_s *dev, fb_coord_t row_start,
         {
           col_end = CO5300_XRES - 1;
         }
-
-      ret = co5300_wrarea(priv, row_start, row_end, col_start, col_end,
-                          (FAR const uint8_t *)
-                          &priv->shadow[row_start * CO5300_XRES +
-                                        col_start],
-                          CO5300_STRIDE, false);
-      co5300_unlock(priv);
-      return ret;
     }
+
+  ret = co5300_wrarea(priv, row_start, row_end, col_start, col_end,
+                      (FAR const uint8_t *)
+                      &priv->shadow[row_start * CO5300_XRES + col_start],
+                      CO5300_STRIDE, false);
 #else
   if (!aligned)
     {
       lcdinfo("Unaligned area, panel may not display it correctly\n");
     }
-#endif
 
   ret = co5300_wrarea(priv, row_start, row_end, col_start, col_end,
                       buffer, stride, true);
+#endif
+
   co5300_unlock(priv);
   return ret;
 }
@@ -609,6 +898,11 @@ static int co5300_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
   if (npixels == 0)
     {
       return OK;
+    }
+
+  if (col >= CO5300_XRES || npixels > CO5300_XRES - col)
+    {
+      return -EINVAL;
     }
 
   return co5300_putarea(dev, row, row, col, col + npixels - 1, buffer,
@@ -633,20 +927,36 @@ static int co5300_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
   FAR uint16_t *dest = (FAR uint16_t *)buffer;
   FAR const uint16_t *src;
   size_t i;
+  int ret;
 
   if (row >= CO5300_YRES || col + npixels > CO5300_XRES)
     {
       return -EINVAL;
     }
 
-  co5300_lock(priv);
+  /* Only serialize with the writers, the bus is not needed */
+
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+  ret = nxmutex_lock(&priv->lock);
+#else
+  ret = QSPI_LOCK(priv->qspi, true);
+#endif
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   src = &priv->shadow[row * CO5300_XRES + col];
   for (i = 0; i < npixels; i++)
     {
       dest[i] = be16toh(src[i]);
     }
 
-  co5300_unlock(priv);
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+  nxmutex_unlock(&priv->lock);
+#else
+  QSPI_LOCK(priv->qspi, false);
+#endif
   return OK;
 #else
   return -ENOSYS;
@@ -720,7 +1030,11 @@ static int co5300_setpower(FAR struct lcd_dev_s *dev, int power)
       return -EINVAL;
     }
 
-  co5300_lock(priv);
+  ret = co5300_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   if (power == 0)
     {
@@ -798,7 +1112,12 @@ static int co5300_setcontrast(FAR struct lcd_dev_s *dev,
       return -EINVAL;
     }
 
-  co5300_lock(priv);
+  ret = co5300_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   priv->brightness = contrast * 255 / CONFIG_LCD_MAXCONTRAST;
   ret = co5300_wrreg8(priv, CO5300_WRDISBV, priv->brightness);
   co5300_unlock(priv);
@@ -898,7 +1217,7 @@ FAR struct lcd_dev_s *co5300_lcdinitialize(FAR struct qspi_dev_s *qspi)
     }
 
   priv->qspi  = qspi;
-  priv->txbuf = QSPI_ALLOC(qspi, CO5300_TXPIXELS * 2);
+  priv->txbuf = QSPI_ALLOC(qspi, CO5300_TXPIXELS * 2 * CO5300_NTXBUF);
   if (priv->txbuf == NULL)
     {
       lcderr("ERROR: Failed to allocate transfer buffer\n");
@@ -923,6 +1242,14 @@ FAR struct lcd_dev_s *co5300_lcdinitialize(FAR struct qspi_dev_s *qspi)
   priv->dev.getareaalign = co5300_getareaalign;
   priv->brightness       = CONFIG_LCD_CO5300_BRIGHTNESS;
 
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+  nxmutex_init(&priv->lock);
+  nxsem_init(&priv->txready, 0, 0);
+  nxsem_init(&priv->txfree, 0, CO5300_NTXBUF);
+#endif
+
+  /* Initialize the panel synchronously, before the transmit thread runs */
+
   co5300_lock(priv);
   ret = co5300_hwinit(priv);
   co5300_unlock(priv);
@@ -930,8 +1257,31 @@ FAR struct lcd_dev_s *co5300_lcdinitialize(FAR struct qspi_dev_s *qspi)
   if (ret < 0)
     {
       lcderr("ERROR: Panel initialization failed: %d\n", ret);
-      goto errout_with_shadow;
+      goto errout_with_sync;
     }
+
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+  {
+    FAR char *argv[2];
+    char arg1[32];
+
+    snprintf(arg1, sizeof(arg1), "%" PRIxPTR, (uintptr_t)priv);
+    argv[0] = arg1;
+    argv[1] = NULL;
+
+    priv->threaded = true;
+    ret = kthread_create("co5300", CONFIG_LCD_CO5300_TXTHREAD_PRIORITY,
+                         CONFIG_LCD_CO5300_TXTHREAD_STACKSIZE,
+                         co5300_txthread, argv);
+    if (ret < 0)
+      {
+        /* Still usable: the pixels are then sent synchronously */
+
+        lcdwarn("WARNING: No transmit thread: %d\n", ret);
+        priv->threaded = false;
+      }
+  }
+#endif
 
 #if CONFIG_LCD_MAXPOWER > 1
   priv->power = priv->brightness * CONFIG_LCD_MAXPOWER / 255;
@@ -945,7 +1295,13 @@ FAR struct lcd_dev_s *co5300_lcdinitialize(FAR struct qspi_dev_s *qspi)
 
   return &priv->dev;
 
-errout_with_shadow:
+errout_with_sync:
+#ifdef CONFIG_LCD_CO5300_TXTHREAD
+  nxsem_destroy(&priv->txfree);
+  nxsem_destroy(&priv->txready);
+  nxmutex_destroy(&priv->lock);
+#endif
+
 #ifdef CONFIG_LCD_CO5300_SHADOWBUF
   kmm_free(priv->shadow);
 errout_with_txbuf:

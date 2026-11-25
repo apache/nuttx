@@ -1140,19 +1140,32 @@ config LCD_CO5300_MIRRORX
 	bool "CO5300 Mirror X"
 	default n
 	---help---
-		Mirror the display horizontally.  Enable both mirror options
-		to rotate the image by 180 degrees.  The controller cannot
-		rotate by 90 degrees.
+		Mirror the display horizontally (reverse the column address
+		order).
 
 config LCD_CO5300_MIRRORY
 	bool "CO5300 Mirror Y"
 	default n
 	---help---
-		Mirror the display vertically.
+		Mirror the display vertically (reverse the row address order).
+
+config LCD_CO5300_MIRRORV
+	bool "CO5300 Mirror V"
+	default n
+	---help---
+		Exchange rows and columns.  The panel orientation is set in
+		hardware, at no cost: mirror X and Y together rotate the image
+		by 180 degrees; this option with mirror Y rotates it by 90
+		degrees one way, with mirror X by 90 degrees the other way.
+		On a non-square panel the resolution and offsets then refer to
+		the exchanged axes.
 
 config LCD_CO5300_BGR
 	bool "CO5300 Use BGR Instead Of RGB"
 	default n
+	---help---
+		Set the BGR bit of MADCTL, for panels whose red and blue
+		sub-pixels are swapped.
 
 config LCD_CO5300_FREQUENCY
 	int "CO5300 QSPI Frequency"
@@ -1171,12 +1184,42 @@ config LCD_CO5300_BRIGHTNESS
 config LCD_CO5300_BUFSIZE
 	int "CO5300 Transfer Buffer Size"
 	default 2048
+	range 4 65536
 	---help---
 		Size in bytes of the DMA transfer buffer.  Pixel data is sent in
 		QSPI memory transfers of at most this size, so it must not be
 		larger than the maximum transfer size of the QSPI controller
 		(e.g. ESP32S3_SPI_DMA_BUFSIZE on ESP32-S3).  Larger values
-		reduce the per-transfer overhead.  Must be even.
+		reduce the per-transfer overhead.  Must be even.  With
+		LCD_CO5300_TXTHREAD the buffer is split in two halves.
+
+config LCD_CO5300_TXTHREAD
+	bool "CO5300 Transmit Thread"
+	default n
+	---help---
+		Send the pixel data from a kernel thread, so that the next part
+		of the transfer buffer is filled (and the caller, e.g. LVGL,
+		renders the next area) while the previous part is on the bus.
+		A transfer error is then reported by the next write.
+
+if LCD_CO5300_TXTHREAD
+
+config LCD_CO5300_TXTHREAD_PRIORITY
+	int "CO5300 Transmit Thread Priority"
+	default 120
+	---help---
+		Priority of the transmit thread.  It should be higher than the
+		priority of the tasks drawing to the display, so that the next
+		buffer is sent as soon as the previous transfer completes.
+
+config LCD_CO5300_TXTHREAD_STACKSIZE
+	int "CO5300 Transmit Thread Stack Size"
+	default 1536
+	---help---
+		Stack size of the transmit thread.  It only runs the QSPI
+		transfers, so a small stack is sufficient.
+
+endif # LCD_CO5300_TXTHREAD
 
 config LCD_CO5300_SHADOWBUF
 	bool "CO5300 Shadow Buffer"

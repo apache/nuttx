@@ -180,6 +180,12 @@ Bus protocol:
   (``RAMWRC``) for the following ones, single-line address and quad data
   (``QSPI_MEMORY()`` with ``QSPIMEM_QUADDATA``).  Large areas are split in
   transfers of ``CONFIG_LCD_CO5300_BUFSIZE`` bytes.
+- With ``CONFIG_LCD_CO5300_TXTHREAD`` the transfer buffer is split in two
+  halves and a kernel thread sends one half while the caller fills the
+  other one.  ``putarea()`` then returns once the last part is queued, so
+  that e.g. LVGL renders the next area while it is sent.  Commands wait
+  until all queued pixels are sent.  A transfer error is reported by the
+  next call that writes to the panel.
 
 Requirements on the board and the QSPI controller:
 
@@ -198,9 +204,11 @@ Requirements on the board and the QSPI controller:
 Only RGB565 is supported.  ``setcontrast()`` sets the brightness (DCS
 ``0x51``); ``setpower(0)`` turns the display off and puts the panel to
 sleep, any other value turns it on and, if ``CONFIG_LCD_MAXPOWER`` > 1,
-also scales the brightness.  The controller can mirror the image
-(``CONFIG_LCD_CO5300_MIRRORX``/``MIRRORY``) but cannot rotate it by 90
-degrees.
+also scales the brightness.  The orientation is set in hardware through
+the standard MADCTL bits: ``CONFIG_LCD_CO5300_MIRRORX`` and ``MIRRORY``
+mirror the image (both together rotate it by 180 degrees), and
+``CONFIG_LCD_CO5300_MIRRORV`` exchanges rows and columns, which combined
+with one mirror option rotates it by 90 degrees.
 
 The panel needs windows with even start and size.  The driver reports
 this through ``getareaalign()`` (``LCDDEVIO_GETAREAALIGN``).  Because the
