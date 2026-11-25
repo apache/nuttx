@@ -48,6 +48,7 @@
 #include <nuttx/virtio/virtio.h>
 #include <nuttx/panic_notifier.h>
 #include <nuttx/reboot_notifier.h>
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
 #include <openamp/remoteproc_loader.h>
 #include <openamp/remoteproc_virtio.h>
@@ -1005,6 +1006,12 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
   if (RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_PANIC))
     {
       char msg[64];
+
+#ifdef CONFIG_RPTUN_REMOTE_PANIC_SILENT
+      /* Keep this passive panic out of the crashing core's log */
+
+      nx_setlogmask(LOG_NONE);
+#endif
 
       snprintf(msg, sizeof(msg), "Panic by remote core: %s",
                RPTUN_GET_CPUNAME(priv->dev));

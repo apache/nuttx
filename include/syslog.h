@@ -123,6 +123,7 @@
 #define LOG_MASK(p)   (1 << (p))
 #define LOG_UPTO(p)   ((1 << ((p)+1)) - 1)
 #define LOG_ALL       0xff
+#define LOG_NONE      0
 
 #define LOG_PRIMASK            0x07               /* mask to extract priority part (internal) */
 #define LOG_PRI(p)            ((p) & LOG_PRIMASK) /* extract priority */
