@@ -174,6 +174,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_STM32_DCMIPP) && defined(CONFIG_VIDEO_IMX335)
+  /* Register the IMX335 camera and the DCMIPP */
+
+  ret = stm32_camera_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_camera_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_VIDEO_VL53L5CX
   ret = stm32_tof_initialize();
   if (ret < 0)

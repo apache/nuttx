@@ -94,6 +94,7 @@
                         GPIO_OUTPUT_CLEAR | GPIO_PORTC | GPIO_PIN8)
 #define GPIO_CAM_EN    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
                         GPIO_OUTPUT_CLEAR | GPIO_PORTD | GPIO_PIN2)
+#define CAMERA_I2C_BUS 1
 
 /* VL53L5CX time-of-flight sensor on the camera module, I2C1 (0x29):
  * INT on PQ0 (open drain, active low, EXTI0 like the TAMP button) and LPn
@@ -189,8 +190,21 @@ void stm32_spiregister(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_VIDEO_VL53L5CX
+#if defined(CONFIG_VIDEO_VL53L5CX) || defined(CONFIG_STM32_DCMIPP)
 void stm32_camera_power(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_camera_initialize
+ *
+ * Description:
+ *   Power up the camera module and register the IMX335 sensor and the
+ *   DCMIPP capture interface.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_DCMIPP) && defined(CONFIG_VIDEO_IMX335)
+int stm32_camera_initialize(void);
 #endif
 
 /****************************************************************************
