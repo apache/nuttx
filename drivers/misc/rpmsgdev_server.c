@@ -36,6 +36,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/percpu.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/drivers/rpmsgdev.h>
 #include <nuttx/rpmsg/rpmsg.h>
@@ -158,7 +159,9 @@ static const rpmsg_ept_cb g_rpmsgdev_handler[] =
   [RPMSGDEV_POLL]          = rpmsgdev_poll_handler,
 };
 
-static FAR struct kwork_wqueue_s *g_rpmsgdev_wqueue = NULL;
+static DEFINE_PER_CPU_BSS_BMP(FAR struct kwork_wqueue_s *,
+                              g_rpmsgdev_wqueue);
+#define g_rpmsgdev_wqueue this_cpu_var_bmp(g_rpmsgdev_wqueue)
 
 /****************************************************************************
  * Private Functions
