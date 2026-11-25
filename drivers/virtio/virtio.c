@@ -35,6 +35,7 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/percpu.h>
 #include <nuttx/virtio/virtio.h>
 #include <nuttx/virtio/virtio-ping.h>
 
@@ -102,10 +103,11 @@ static const struct file_operations g_virtio_dev_ops =
   virtio_dev_ioctl,  /* ioctl */
 };
 
-static struct virtio_bus_s g_virtio_bus =
+static DEFINE_PER_CPU_BMP(struct virtio_bus_s, g_virtio_bus) =
 {
   .lock = NXMUTEX_INITIALIZER,
 };
+#define g_virtio_bus this_cpu_var_bmp(g_virtio_bus)
 
 /****************************************************************************
  * Private Functions

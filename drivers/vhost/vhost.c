@@ -34,6 +34,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/percpu.h>
 #include <nuttx/queue.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/vhost/vhost.h>
@@ -104,10 +105,11 @@ static const struct file_operations g_vhost_dev_ops =
   vhost_dev_ioctl,  /* ioctl */
 };
 
-static struct vhost_bus_s g_vhost_bus =
+static DEFINE_PER_CPU_BMP(struct vhost_bus_s, g_vhost_bus) =
 {
   .lock = NXMUTEX_INITIALIZER,
 };
+#define g_vhost_bus this_cpu_var_bmp(g_vhost_bus)
 
 /****************************************************************************
  * Private Functions
