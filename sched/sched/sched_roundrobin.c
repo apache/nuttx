@@ -46,7 +46,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-static struct smp_call_data_s g_call_data;
+static struct smp_call_data_s g_call_data[CONFIG_SMP_NCPUS];
+static volatile bool g_call_pending[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************
@@ -69,6 +70,7 @@ static int nxsched_roundrobin_handler(FAR void *cookie)
   irqstate_t flags;
 
   flags = enter_critical_section();
+  g_call_pending[this_cpu()] = false;
   tcb = nxsched_get_tcb(pid);
 
   if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
@@ -195,10 +197,15 @@ clock_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, clock_t ticks,
           DEBUGASSERT(tcb->task_state == TSTATE_TASK_RUNNING);
           if (tcb->cpu != this_cpu())
             {
-              nxsched_smp_call_init(&g_call_data,
-                                    nxsched_roundrobin_handler,
-                                    (FAR void *)(uintptr_t)tcb->pid);
-              nxsched_smp_call_single_async(tcb->cpu, &g_call_data);
+              if (!g_call_pending[tcb->cpu])
+                {
+                  g_call_pending[tcb->cpu] = true;
+                  nxsched_smp_call_init(&g_call_data[tcb->cpu],
+                                        nxsched_roundrobin_handler,
+                                        (FAR void *)(uintptr_t)tcb->pid);
+                  nxsched_smp_call_single_async(tcb->cpu,
+                                                &g_call_data[tcb->cpu]);
+                }
             }
           else if (nxsched_switch_running(tcb->cpu, true))
             {

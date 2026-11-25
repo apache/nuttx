@@ -226,6 +226,14 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
       return EINVAL;
     }
 
+#ifdef CONFIG_BMP
+  if ((attr->affinity & ~SCHED_ALL_CPUS) != 0 ||
+      (attr->affinity & (attr->affinity - 1)) != 0)
+    {
+      return EINVAL;
+    }
+#endif
+
 #ifdef CONFIG_TLS_ALIGNED
   /* The TLS alignment limits the size of the stack */
 

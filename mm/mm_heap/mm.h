@@ -31,6 +31,7 @@
 
 #include <nuttx/mutex.h>
 #include <nuttx/sched.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/lib/math32.h>
 #include <nuttx/mm/mempool.h>
@@ -269,6 +270,12 @@ struct mm_heap_s
   /* Free delay list, as sometimes we can't do free immdiately. */
 
   mm_delaylist_t delay;
+
+#ifdef CONFIG_SMP
+  /* Protects the delay lists, which any CPU may drain */
+
+  spinlock_t mm_delaylock;
+#endif
 
   /* The is a multiple mempool of the heap */
 

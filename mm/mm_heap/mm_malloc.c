@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/mm/kasan.h>
 #include <nuttx/sched.h>
@@ -108,6 +109,62 @@ static bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
 #endif
   return ret;
 }
+
+/****************************************************************************
+ * Name: free_delaylist_all
+ *
+ * Description:
+ *  Free the delay lists of all CPUs.  A CPU frees the stack of an exiting
+ *  thread while it still runs on it and holds the critical section until
+ *  it has switched away, so the lists are taken inside the critical
+ *  section.  Returns true if there is memory freed.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && (defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__))
+static bool free_delaylist_all(FAR struct mm_heap_s *heap)
+{
+  FAR struct mm_delaynode_s *list[CONFIG_SMP_NCPUS];
+  FAR struct mm_delaynode_s *tmp;
+  irqstate_t cflags;
+  irqstate_t flags;
+  bool ret = false;
+  int cpu;
+
+  if (heap == NULL || up_interrupt_context())
+    {
+      return false;
+    }
+
+  cflags = enter_critical_section();
+  flags = mm_lock_irq(heap);
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      list[cpu] = heap->mm_delaylist[cpu];
+      heap->mm_delaylist[cpu] = NULL;
+#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+      heap->mm_delaycount[cpu] = 0;
+#endif
+    }
+
+  mm_unlock_irq(heap, flags);
+  leave_critical_section(cflags);
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      while (list[cpu] != NULL)
+        {
+          tmp = list[cpu];
+          list[cpu] = tmp->flink;
+          mm_delayfree(heap, tmp, false);
+          ret = true;
+        }
+    }
+
+  return ret;
+}
+#endif
 
 #if CONFIG_MM_BACKTRACE >= 0
 void mm_dump_handler(FAR struct tcb_s *tcb, FAR void *arg)
@@ -348,6 +405,13 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   /* Try again after free delay list */
 
   else if (free_delaylist(heap, true))
+    {
+      return mm_malloc(heap, size);
+    }
+#endif
+
+#if defined(CONFIG_SMP) && (defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__))
+  else if (free_delaylist_all(heap))
     {
       return mm_malloc(heap, size);
     }
