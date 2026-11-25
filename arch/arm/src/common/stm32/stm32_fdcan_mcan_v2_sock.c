@@ -127,6 +127,23 @@
 #  define NUM_TX_FIFO       32 /* 32 elements max for TX FIFO */
 #endif
 
+/* Message RAM of one interface: 128 standard filters (1 word), 128
+ * extended filters (2 words), RX FIFO0 and the TX FIFO.
+ */
+
+#ifdef CONFIG_STM32_FDCAN3
+#  define FDCAN_NIFACES     3
+#else
+#  define FDCAN_NIFACES     2
+#endif
+
+#define FDCAN_RAM_WORDS     (CANRAM_WORDS / FDCAN_NIFACES)
+
+#if 128 + 2 * 128 + (NUM_RX_FIFO0 + NUM_TX_FIFO) * FIFO_ELEMENT_SIZE > \
+    FDCAN_RAM_WORDS
+#  error "FDCAN message RAM layout does not fit"
+#endif
+
 /* CAN Clock Configuration **************************************************/
 
 #ifndef STM32_FDCANCLK
@@ -1954,7 +1971,7 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
    * overlapping region of RAM assigned to it by properly assigning the start
    * and end addresses for all regions of RAM.
    *
-   * We will give each interface half of the available RAM.
+   * Each enabled interface index gets an equal part of the RAM.
    *
    * Rx buffers are only used in conjunction with acceptance filters; we
    * don't have any specific need for this, so we will only use Rx FIFOs.
@@ -1976,8 +1993,7 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
    * and relative address (in words) used for configuration
    */
 
-  const uint32_t iface_ram_base =
-                 (CANRAM_WORDS / 2) * priv->iface_idx;
+  const uint32_t iface_ram_base = FDCAN_RAM_WORDS * priv->iface_idx;
 
   const uint32_t gl_ram_base = STM32_CANRAM_BASE;
   uint32_t ram_offset = iface_ram_base;
@@ -2019,7 +2035,7 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
   regval = (n_extid << FDCAN_XIDFC_LSE_SHIFT) & FDCAN_XIDFC_LSE_MASK;
   regval |= ram_offset << FDCAN_XIDFC_FLESA_SHIFT;
   putreg32(regval, priv->base + STM32_FDCAN_XIDFC_OFFSET);
-  ram_offset += n_extid;
+  ram_offset += 2 * n_extid;  /* Extended filter elements are 2 words */
 
   /* Set size of each element in the Rx/Tx buffers and FIFOs */
 
