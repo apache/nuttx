@@ -317,7 +317,7 @@ CRS           to be done    not supported
 DAC           to be done    not supported
 DBGMCU        v5            not supported
 EXTI          M33M55 v1     arch/arm/src/common/stm32/stm32_exti_gpio_m33m55_v1.c
-FDCAN         FDCAN         not supported
+FDCAN         FDCAN         arch/arm/src/common/stm32/stm32_fdcan_mcan_v1.c
 FLASH         to be done    not supported
 GPIO          M33M55 v1     arch/arm/src/common/stm32/stm32_gpio_m33m55_v1.c
 HASH          to be done    not supported
