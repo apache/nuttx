@@ -33,6 +33,7 @@
 
 #include <nuttx/lib/lib.h>
 #include <nuttx/kthread.h>
+#include <nuttx/percpu.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/vhost/vhost.h>
 #include <nuttx/virtio/virtio-config.h>
@@ -65,19 +66,22 @@ static void vhost_serial_remove(FAR struct vhost_device *hdev);
  * Private Data
  ****************************************************************************/
 
-static struct vhost_driver g_vhost_serial_driver =
+static DEFINE_PER_CPU_BMP(struct vhost_driver, g_vhost_serial_driver) =
 {
   VIRTIO_ID_CONSOLE,                                   /* device id */
   vhost_serial_probe,                                  /* probe */
   vhost_serial_remove,                                 /* remove */
 };
+#define g_vhost_serial_driver this_cpu_var_bmp(g_vhost_serial_driver)
 
-static struct vhost_driver g_vhost_rprocserial_driver =
+static DEFINE_PER_CPU_BMP(struct vhost_driver, g_vhost_rprocserial_driver) =
 {
   VIRTIO_ID_RPROC_SERIAL,                              /* device id */
   vhost_serial_probe,                                  /* probe */
   vhost_serial_remove,                                 /* remove */
 };
+#define g_vhost_rprocserial_driver \
+  this_cpu_var_bmp(g_vhost_rprocserial_driver)
 
 /****************************************************************************
  * Private Functions

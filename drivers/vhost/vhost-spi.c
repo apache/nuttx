@@ -33,6 +33,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/percpu.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/spi/spi_transfer.h>
 #include <nuttx/vhost/vhost.h>
@@ -63,12 +64,13 @@ static void vhost_spi_remove(FAR struct vhost_device *hdev);
  * Private Data
  ****************************************************************************/
 
-static struct vhost_driver g_vhost_spi_driver =
+static DEFINE_PER_CPU_BMP(struct vhost_driver, g_vhost_spi_driver) =
 {
   VIRTIO_ID_SPI,    /* Device id */
   vhost_spi_probe,  /* Probe */
   vhost_spi_remove, /* Remove */
 };
+#define g_vhost_spi_driver this_cpu_var_bmp(g_vhost_spi_driver)
 
 /****************************************************************************
  * Private Functions

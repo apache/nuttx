@@ -32,6 +32,7 @@
 #include <crypto/cryptodev.h>
 #include <crypto/virtio_crypto.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/percpu.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/vhost/vhost.h>
 #include <nuttx/virtio/virtio-crypto.h>
@@ -120,12 +121,13 @@ static void vhost_crypto_remove(FAR struct vhost_device *hdev);
  * Private Data
  ****************************************************************************/
 
-static struct vhost_driver g_vhost_crypto_driver =
+static DEFINE_PER_CPU_BMP(struct vhost_driver, g_vhost_crypto_driver) =
 {
   VIRTIO_ID_CRYPTO,      /* device id */
   vhost_crypto_probe,    /* probe */
   vhost_crypto_remove,   /* remove */
 };
+#define g_vhost_crypto_driver this_cpu_var_bmp(g_vhost_crypto_driver)
 
 /****************************************************************************
  * Private Functions

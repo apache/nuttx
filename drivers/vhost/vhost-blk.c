@@ -30,6 +30,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kthread.h>
+#include <nuttx/percpu.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/vhost/vhost.h>
 #include <nuttx/virtio/virtio-blk.h>
@@ -73,12 +74,13 @@ static void vhost_blk_remove(FAR struct vhost_device *vdev);
  * Private Data
  ****************************************************************************/
 
-static struct vhost_driver g_vhost_blk_driver =
+static DEFINE_PER_CPU_BMP(struct vhost_driver, g_vhost_blk_driver) =
 {
   VIRTIO_ID_BLOCK,                              /* device id */
   vhost_blk_probe,                              /* probe */
   vhost_blk_remove,                             /* remove */
 };
+#define g_vhost_blk_driver this_cpu_var_bmp(g_vhost_blk_driver)
 
 /****************************************************************************
  * Private Functions

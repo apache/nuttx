@@ -37,6 +37,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/percpu.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/vhost/vhost.h>
 #include <nuttx/virtio/virtio-rpmb.h>
@@ -101,12 +102,13 @@ static void vhost_rpmb_remove(FAR struct vhost_device *hdev);
  * Private Data
  ****************************************************************************/
 
-static struct vhost_driver g_vhost_rpmb_driver =
+static DEFINE_PER_CPU_BMP(struct vhost_driver, g_vhost_rpmb_driver) =
 {
   VIRTIO_ID_RPMB,                               /* device id */
   vhost_rpmb_probe,                             /* probe */
   vhost_rpmb_remove,                            /* remove */
 };
+#define g_vhost_rpmb_driver this_cpu_var_bmp(g_vhost_rpmb_driver)
 
 /****************************************************************************
  * Private Functions
