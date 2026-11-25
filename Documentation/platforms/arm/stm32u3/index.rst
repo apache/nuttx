@@ -39,7 +39,7 @@ CRC         No
 CRS         No
 DBGMCU      No
 DLYB        No
-FDCAN       No
+FDCAN       Yes
 FLASH       No
 GPDMA       No
 GTZC        No
