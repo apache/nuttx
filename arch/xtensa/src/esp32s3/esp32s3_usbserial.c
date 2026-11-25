@@ -396,8 +396,28 @@ static void esp32s3_rxint(struct uart_dev_s *dev, bool enable)
 {
   if (enable)
     {
+      irqstate_t flags;
+
+      /* The packet-received interrupt only fires for new packets.  Data
+       * left in the endpoint FIFO because the receive buffer was full
+       * would otherwise only be read when the host sends more, so pick it
+       * up now that the upper half has made room.  Do it with the
+       * interrupt masked, so that the interrupt handler does not fill the
+       * receive buffer at the same time.
+       */
+
+      flags = enter_critical_section();
+      modifyreg32(USB_SERIAL_JTAG_INT_ENA_REG,
+                  USB_SERIAL_JTAG_SERIAL_OUT_RECV_PKT_INT_ENA, 0);
+
+      if (esp32s3_rxavailable(dev))
+        {
+          uart_recvchars(dev);
+        }
+
       modifyreg32(USB_SERIAL_JTAG_INT_ENA_REG, 0,
                   USB_SERIAL_JTAG_SERIAL_OUT_RECV_PKT_INT_ENA);
+      leave_critical_section(flags);
     }
   else
     {
@@ -481,7 +501,20 @@ static void esp32s3_detach(struct uart_dev_s *dev)
 
 static bool esp32s3_rxavailable(struct uart_dev_s *dev)
 {
+  struct uart_buffer_s *rxbuf = &dev->recv;
+  int nexthead;
   uint32_t regval;
+
+  /* Leave the data in the endpoint FIFO while the receive buffer is full.
+   * The USB controller then NAKs the host until there is room again, so no
+   * data is lost (the data is picked up again in esp32s3_rxint()).
+   */
+
+  nexthead = rxbuf->head + 1 < rxbuf->size ? rxbuf->head + 1 : 0;
+  if (nexthead == rxbuf->tail)
+    {
+      return false;
+    }
 
   regval = getreg32(USB_SERIAL_JTAG_EP1_CONF_REG);
 
