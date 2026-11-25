@@ -74,6 +74,8 @@ struct usr_wqueue_s
   int                     nthreads; /* Number of worker threads */
   bool                    exit;     /* Request worker thread exit */
   bool                    dynamic;  /* Dynamically allocated queue */
+  bool                    run;      /* Served by work_queue_run() */
+  sem_t                   exsem;    /* Posted when they return */
 };
 
 /****************************************************************************
