@@ -385,9 +385,6 @@ config STM32_HAVE_ETHERNET
 
 # FDCAN capabilities
 
-config STM32_HAVE_FDCAN_H7
-	bool
-
 config STM32_HAVE_FDCAN1
 	bool
 
@@ -398,6 +395,9 @@ config STM32_HAVE_FDCAN3
 	bool
 
 config STM32_HAVE_IP_FDCAN_MCAN_V1
+	bool
+
+config STM32_HAVE_IP_FDCAN_MCAN_V2
 	bool
 
 # FLASH capabilities

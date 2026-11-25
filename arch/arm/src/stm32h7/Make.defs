@@ -69,14 +69,6 @@ ifeq ($(CONFIG_STM32_DAC),y)
 CHIP_CSRCS += stm32_dac.c
 endif
 
-ifeq ($(CONFIG_STM32_FDCAN_CHARDRIVER),y)
-CHIP_CSRCS += stm32_fdcan.c
-endif
-
-ifeq ($(CONFIG_STM32_FDCAN_SOCKET),y)
-CHIP_CSRCS += stm32_fdcan_sock.c
-endif
-
 ifeq ($(CONFIG_STM32_BBSRAM),y)
 CHIP_CSRCS += stm32_bbsram.c
 endif

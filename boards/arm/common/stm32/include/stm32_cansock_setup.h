@@ -59,7 +59,7 @@ extern "C"
  ****************************************************************************/
 
 #if (defined(CONFIG_STM32_CAN_SOCKET) || defined(CONFIG_STM32_FDCAN_SOCKET)) && \
-    !defined(CONFIG_STM32_HAVE_FDCAN_H7)
+    !defined(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_V2)
 int stm32_cansock_setup(void);
 #endif
 

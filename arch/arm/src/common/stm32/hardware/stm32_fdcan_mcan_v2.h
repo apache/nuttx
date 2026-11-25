@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/hardware/stm32_fdcan.h
+ * arch/arm/src/common/stm32/hardware/stm32_fdcan_mcan_v2.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_FDCAN_H
-#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_FDCAN_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_FDCAN_MCAN_V2_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_FDCAN_MCAN_V2_H
 
 /* **************************************************************************
  * Included Files
@@ -1721,4 +1721,4 @@
 #  define EXTFILTER_F1_EFT_CLASSIC    (2 << EXTFILTER_F1_EFT_SHIFT)        /* Classic filter: SF1ID=filter SF2ID=mask */
 #  define EXTFILTER_F1_EFT_NOXIDAM    (3 << EXTFILTER_F1_EFT_SHIFT)        /* Range filter from EF1ID to EF2ID, no XIDAM */
 
-#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_FDCAN_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_FDCAN_MCAN_V2_H */

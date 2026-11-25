@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_fdcan_sock.c
+ * arch/arm/src/common/stm32/stm32_fdcan_mcan_v2_sock.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

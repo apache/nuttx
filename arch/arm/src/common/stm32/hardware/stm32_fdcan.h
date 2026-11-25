@@ -29,6 +29,8 @@
 
 #if defined(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_V1)
 #  include "hardware/stm32_fdcan_mcan.h"
+#elif defined(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_V2)
+#  include "hardware/stm32_fdcan_mcan_v2.h"
 #else
 #  error "Unsupported STM32 FDCAN"
 #endif
