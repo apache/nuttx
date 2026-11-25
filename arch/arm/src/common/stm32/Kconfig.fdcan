@@ -286,12 +286,12 @@ endif # !STM32_FDCAN1_AUTO_BIT_TIMING
 
 config STM32_FDCAN1_DBITRATE
 	int "FDCAN1 data bitrate"
-	depends on CAN_FD && STM32_FDCAN1_FD_BRS
+	depends on (CAN_FD || NET_CAN_CANFD) && STM32_FDCAN1_FD_BRS
 	default 2000000
 	---help---
 		FDCAN1 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
 
-if CAN_FD && STM32_FDCAN1_FD_BRS && !STM32_FDCAN1_AUTO_BIT_TIMING
+if (CAN_FD || NET_CAN_CANFD) && STM32_FDCAN1_FD_BRS && !STM32_FDCAN1_AUTO_BIT_TIMING
 
 comment "FDCAN1 data bit timing"
 
@@ -316,7 +316,7 @@ config STM32_FDCAN1_DSJW
 	---help---
 		The duration of a synchronization jump is Tcan_clk x DSJW.
 
-endif # CAN_FD && STM32_FDCAN1_FD_BRS && !STM32_FDCAN1_AUTO_BIT_TIMING
+endif # (CAN_FD || NET_CAN_CANFD) && STM32_FDCAN1_FD_BRS && !STM32_FDCAN1_AUTO_BIT_TIMING
 
 endif # STM32_FDCAN1
 
@@ -371,12 +371,12 @@ endif # !STM32_FDCAN2_AUTO_BIT_TIMING
 
 config STM32_FDCAN2_DBITRATE
 	int "FDCAN2 data bitrate"
-	depends on CAN_FD && STM32_FDCAN2_FD_BRS
+	depends on (CAN_FD || NET_CAN_CANFD) && STM32_FDCAN2_FD_BRS
 	default 2000000
 	---help---
 		FDCAN2 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
 
-if CAN_FD && STM32_FDCAN2_FD_BRS && !STM32_FDCAN2_AUTO_BIT_TIMING
+if (CAN_FD || NET_CAN_CANFD) && STM32_FDCAN2_FD_BRS && !STM32_FDCAN2_AUTO_BIT_TIMING
 
 comment "FDCAN2 data bit timing"
 
@@ -401,7 +401,7 @@ config STM32_FDCAN2_DSJW
 	---help---
 		The duration of a synchronization jump is Tcan_clk x DSJW.
 
-endif # CAN_FD && STM32_FDCAN2_FD_BRS && !STM32_FDCAN2_AUTO_BIT_TIMING
+endif # (CAN_FD || NET_CAN_CANFD) && STM32_FDCAN2_FD_BRS && !STM32_FDCAN2_AUTO_BIT_TIMING
 
 endif # STM32_FDCAN2
 
@@ -496,12 +496,12 @@ endif # !STM32_FDCAN3_AUTO_BIT_TIMING
 
 config STM32_FDCAN3_DBITRATE
 	int "FDCAN3 data bitrate"
-	depends on CAN_FD && STM32_FDCAN3_FD_BRS
+	depends on (CAN_FD || NET_CAN_CANFD) && STM32_FDCAN3_FD_BRS
 	default 2000000
 	---help---
 		FDCAN3 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
 
-if CAN_FD && STM32_FDCAN3_FD_BRS && !STM32_FDCAN3_AUTO_BIT_TIMING
+if (CAN_FD || NET_CAN_CANFD) && STM32_FDCAN3_FD_BRS && !STM32_FDCAN3_AUTO_BIT_TIMING
 
 comment "FDCAN3 data bit timing"
 
@@ -526,6 +526,6 @@ config STM32_FDCAN3_DSJW
 	---help---
 		The duration of a synchronization jump is Tcan_clk x DSJW.
 
-endif # CAN_FD && STM32_FDCAN3_FD_BRS && !STM32_FDCAN3_AUTO_BIT_TIMING
+endif # (CAN_FD || NET_CAN_CANFD) && STM32_FDCAN3_FD_BRS && !STM32_FDCAN3_AUTO_BIT_TIMING
 
 endif # STM32_FDCAN3

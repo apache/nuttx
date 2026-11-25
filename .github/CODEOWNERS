@@ -1733,7 +1733,6 @@ arch/arm/src/common/stm32/stm32_exti_pwr_m3m4_v1.c alin.jerpelea@sony.com raiden
 arch/arm/src/common/stm32/stm32_exti_pwr_m3m4_v1.h alin.jerpelea@sony.com raiden00@railab.me
 arch/arm/src/common/stm32/stm32_exti_wakeup_m3m4_v1.c juha.niskanen@haltian.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com mark@mjs.pw raiden00@railab.me
 arch/arm/src/common/stm32/stm32_fdcan.h masayuki.ishikawa@gmail.com raiden00@railab.me Masayuki.Ishikawa@jp.sony.com alin.jerpelea@sony.com
-arch/arm/src/common/stm32/stm32_fdcan_m0_v1_sock.c raiden00@railab.me xiaoxiang@xiaomi.com jacob@flyvoly.com anchao@xiaomi.com devel@sumpfralle.de
 arch/arm/src/common/stm32/stm32_fdcan_mcan_v1.c raiden00@railab.me xiaoxiang@xiaomi.com michallenc@seznam.cz devel@sumpfralle.de zhaohaiyang1@xiaomi.com
 arch/arm/src/common/stm32/stm32_fdcan_mcan_v1_sock.c raiden00@railab.me xiaoxiang@xiaomi.com jacob@flyvoly.com anchao@xiaomi.com devel@sumpfralle.de
 arch/arm/src/common/stm32/stm32_flash.h 53337780+aenrbes@users.noreply.github.com masayuki.ishikawa@gmail.com raiden00@railab.me sonic.tw.tp@gmail.com tbennett@2g-eng.com
