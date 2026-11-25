@@ -999,7 +999,7 @@ pci_epc_create(FAR const char *name, FAR void *priv, FAR void *dma_addr,
 
   if (dma_addr != NULL && dma_len != 0)
     {
-      epc->dmaheap = mm_initialize_pool("pci_dma", dma_addr, dma_len, NULL);
+      epc->dmaheap = mm_initialize("pci_dma", dma_addr, dma_len);
       if (epc->dmaheap == NULL)
         {
           pcierr("Create DMA heap error \n");
