@@ -200,3 +200,21 @@ used to exercise it::
     nsh> free
           total       used       free    maxused    maxfree  nused  nfree name
         8775692      23020    8752672      23400    8388592     75      4 Umem
+
+sdmmc
+-----
+
+This configuration binds the microSD card slot, on SPI3 (GPIO2 SCLK, GPIO1
+MOSI, GPIO3 MISO, GPIO41 CS), to ``/dev/mmcsd0`` and enables the FAT file
+system.  The slot has no card detect switch, so the card must be inserted
+before the board boots::
+
+    nsh> mount -t vfat /dev/mmcsd0 /mnt
+    nsh> echo hello-from-nuttx > /mnt/nxtest.txt
+    nsh> cat /mnt/nxtest.txt
+    hello-from-nuttx
+    nsh> dd if=/dev/zero of=/mnt/big.bin bs=4096 count=256
+    1048576 bytes (256 blocks) copied, 800000 usec, 1280 KB/s
+    nsh> df -h
+      Filesystem      Size      Used  Available Mounted on
+      vfat           3580M     1040K      3579M /mnt
