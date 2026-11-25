@@ -592,15 +592,66 @@ static bool tcp_is_syn_backlog(FAR struct tcp_conn_s *listener,
 }
 
 /****************************************************************************
+ * Name: tcp_syn_reserved
+ *
+ * Description:
+ *   Return true if only CONFIG_NET_TCP_SYN_RESERVE free connections or
+ *   fewer are left.  Free the connections that only wait for the end of
+ *   their close first, as tcp_alloc_conn() does when the pool is empty.
+ *
+ * Input Parameters:
+ *   dev - The device whose lock the caller holds.
+ *
+ * Returned Value:
+ *   true if the free connections are kept from incoming SYNs.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NET_TCP_SYN_RESERVE > 0 && \
+    (CONFIG_NET_TCP_ALLOC_CONNS == 0 || CONFIG_NET_TCP_MAX_CONNS > 0)
+static bool tcp_syn_reserved(FAR struct net_driver_s *dev)
+{
+  struct mempoolinfo_s info;
+  size_t navail;
+
+  for (; ; )
+    {
+      /* Not mempool_navail(): it returns SIZE_MAX for a pool without
+       * maxalloc, also for the preallocated pool that cannot grow.
+       */
+
+      mempool_info(&g_tcp_connections, &info);
+#if CONFIG_NET_TCP_ALLOC_CONNS == 0
+      navail = info.ordblks;
+#else
+      navail = info.maxalloc - info.aordblks;
+#endif
+      if (navail > CONFIG_NET_TCP_SYN_RESERVE)
+        {
+          return false;
+        }
+
+      if (!tcp_reclaim(dev))
+        {
+          return true;
+        }
+    }
+}
+#else
+#  define tcp_syn_reserved(d) (false)
+#endif
+
+/****************************************************************************
  * Name: tcp_syn_room
  *
  * Description:
  *   Return true if the listener can take one more connection in
  *   TCP_SYN_RCVD.  Its connections in TCP_SYN_RCVD and the ones that wait
- *   for accept() together take at most the backlog of listen().  If there
- *   is no room, free the oldest connection in TCP_SYN_RCVD of the listener
- *   and take its place (RFC 4987, section 3.4): one on this device first,
- *   else one on another device.
+ *   for accept() together take at most the backlog of listen().  The last
+ *   CONFIG_NET_TCP_SYN_RESERVE free connections are kept for the sockets
+ *   of this device.  If there is no room, free the oldest connection in
+ *   TCP_SYN_RCVD of the listener and take its place (RFC 4987, section
+ *   3.4): one on this device first, else one on another device.
  *
  * Input Parameters:
  *   dev      - The device whose lock the caller holds.
@@ -619,7 +670,7 @@ static bool tcp_syn_room(FAR struct net_driver_s *dev,
   FAR struct tcp_conn_s *conn;
   size_t nsynrcvd = 0;
   size_t nfree = SIZE_MAX;
-  bool room = true;
+  bool room = !tcp_syn_reserved(dev);
 
   tcp_conn_list_lock();
 #ifdef CONFIG_NET_TCPBACKLOG
