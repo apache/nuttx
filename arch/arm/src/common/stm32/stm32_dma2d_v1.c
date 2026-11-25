@@ -36,6 +36,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/cache.h>
 #include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
@@ -200,6 +201,10 @@ static uint32_t stm32_dma2d_memaddress(
 static uint32_t stm32_dma2d_lineoffset(
                                    struct stm32_dma2d_overlay_s *oinfo,
                                    const struct fb_area_s *area);
+static void stm32_dma2d_range(struct stm32_dma2d_overlay_s *oinfo,
+                              uint32_t xpos, uint32_t ypos,
+                              const struct fb_area_s *area,
+                              uintptr_t *start, uintptr_t *end);
 static void stm32_dma2d_lfifo(struct stm32_dma2d_overlay_s *oinfo,
                               int lid,
                               uint32_t xpos, uint32_t ypos,
@@ -467,7 +472,10 @@ static int stm32_dma2d_loadclut(uintptr_t pfcreg)
   int      ret;
   uint32_t regval;
 
-  /* Start clut loading */
+  /* Write back the CLUT, then start loading it */
+
+  up_clean_dcache((uintptr_t)g_dma2ddev.clut,
+                  (uintptr_t)g_dma2ddev.clut + sizeof(g_clut));
 
   regval  = getreg32(pfcreg);
   regval |= DMA2D_XGPFCCR_START;
@@ -567,6 +575,38 @@ static uint32_t stm32_dma2d_lineoffset(
 
   lcdinfo("%" PRId32 "\n", loffset);
   return loffset;
+}
+
+/****************************************************************************
+ * Name: stm32_dma2d_range
+ *
+ * Description:
+ *   Helper to calculate the memory range of a layer area for the data cache
+ *   maintenance.  The DMA2D does not snoop the CPU data cache: the source
+ *   areas are cleaned before a transfer and the output area is flushed
+ *   before and invalidated after it.  The CPU must not write the output
+ *   area while a transfer runs.
+ *
+ * Input Parameters:
+ *   oinfo - Reference to overlay information
+ *   xpos  - x-Offset
+ *   ypos  - y-Offset
+ *   area  - Reference to the area
+ *   start - Returned start address of the range
+ *   end   - Returned end address of the range
+ *
+ ****************************************************************************/
+
+static void stm32_dma2d_range(struct stm32_dma2d_overlay_s *oinfo,
+                              uint32_t xpos, uint32_t ypos,
+                              const struct fb_area_s *area,
+                              uintptr_t *start, uintptr_t *end)
+{
+  struct fb_overlayinfo_s *poverlay = oinfo->oinfo;
+
+  *start = stm32_dma2d_memaddress(oinfo, xpos, ypos);
+  *end   = *start + (area->h - 1) * poverlay->stride +
+           area->w * DMA2D_PF_BYPP(poverlay->bpp);
 }
 
 /****************************************************************************
@@ -817,7 +857,10 @@ static int stm32_dma2d_fillcolor(struct stm32_dma2d_overlay_s *oinfo,
                                  uint32_t argb)
 {
   int ret;
+  uintptr_t ostart;
+  uintptr_t oend;
   struct stm32_dma2d_s *priv = &g_dma2ddev;
+
   DEBUGASSERT(oinfo != NULL && oinfo->oinfo != NULL && area != NULL);
 
   lcdinfo("oinfo=%p, argb=%08" PRIx32 "\n", oinfo, argb);
@@ -855,9 +898,15 @@ static int stm32_dma2d_fillcolor(struct stm32_dma2d_overlay_s *oinfo,
 
   stm32_dma2d_control(STM32_DMA2D_CR_MODE_COLOR, STM32_DMA2D_CR_MODE_CLEAR);
 
+  /* Write back and drop the cached output area */
+
+  stm32_dma2d_range(oinfo, area->x, area->y, area, &ostart, &oend);
+  up_flush_dcache(ostart, oend);
+
   /* Start DMA2D and wait until completed */
 
   ret = stm32_dma2d_start();
+  up_invalidate_dcache(ostart, oend);
 
   if (ret != OK)
     {
@@ -900,6 +949,10 @@ static int stm32_dma2d_blit(struct stm32_dma2d_overlay_s *doverlay,
 {
   int      ret;
   uint32_t mode;
+  uintptr_t start;
+  uintptr_t end;
+  uintptr_t ostart;
+  uintptr_t oend;
   struct stm32_dma2d_s *priv = &g_dma2ddev;
 
   lcdinfo("doverlay=%p, destxpos=%" PRId32 ", destypos=%" PRId32
@@ -946,9 +999,17 @@ static int stm32_dma2d_blit(struct stm32_dma2d_overlay_s *doverlay,
 
   stm32_dma2d_control(mode, STM32_DMA2D_CR_MODE_CLEAR);
 
+  /* Write back the source area, write back and drop the output area */
+
+  stm32_dma2d_range(soverlay, sarea->x, sarea->y, sarea, &start, &end);
+  up_clean_dcache(start, end);
+  stm32_dma2d_range(doverlay, destxpos, destypos, sarea, &ostart, &oend);
+  up_flush_dcache(ostart, oend);
+
   /* Start DMA2D and wait until completed */
 
   ret = stm32_dma2d_start();
+  up_invalidate_dcache(ostart, oend);
 
   if (ret != OK)
     {
@@ -999,6 +1060,10 @@ static int stm32_dma2d_blend(struct stm32_dma2d_overlay_s *doverlay,
                              const struct fb_area_s *barea)
 {
   int ret;
+  uintptr_t start;
+  uintptr_t end;
+  uintptr_t ostart;
+  uintptr_t oend;
   struct stm32_dma2d_s *priv = &g_dma2ddev;
 
   lcdinfo("doverlay=%p, destxpos=%" PRId32 ", destypos=%" PRId32 ", "
@@ -1056,9 +1121,19 @@ static int stm32_dma2d_blend(struct stm32_dma2d_overlay_s *doverlay,
 
   stm32_dma2d_control(STM32_DMA2D_CR_MODE_BLEND, STM32_DMA2D_CR_MODE_CLEAR);
 
+  /* Write back the source areas, write back and drop the output area */
+
+  stm32_dma2d_range(boverlay, barea->x, barea->y, barea, &start, &end);
+  up_clean_dcache(start, end);
+  stm32_dma2d_range(foverlay, forexpos, foreypos, barea, &start, &end);
+  up_clean_dcache(start, end);
+  stm32_dma2d_range(doverlay, destxpos, destypos, barea, &ostart, &oend);
+  up_flush_dcache(ostart, oend);
+
   /* Start DMA2D and wait until completed */
 
   ret = stm32_dma2d_start();
+  up_invalidate_dcache(ostart, oend);
 
   if (ret != OK)
     {
