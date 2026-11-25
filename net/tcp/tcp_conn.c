@@ -565,6 +565,128 @@ static bool tcp_reclaimable(FAR struct tcp_conn_s *conn)
 }
 
 /****************************************************************************
+ * Name: tcp_is_syn_backlog
+ *
+ * Description:
+ *   Return true if the connection is in TCP_SYN_RCVD on the address and
+ *   port of the listener.
+ *
+ ****************************************************************************/
+
+static bool tcp_is_syn_backlog(FAR struct tcp_conn_s *listener,
+                               FAR struct tcp_conn_s *conn)
+{
+  if (conn->tcpstateflags != TCP_SYN_RCVD)
+    {
+      return false;
+    }
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  return tcp_conn_cmp(listener->domain,
+                      (FAR const union ip_addr_u *)&listener->u,
+                      listener->lport, conn);
+#else
+  return tcp_conn_cmp((FAR const union ip_addr_u *)&listener->u,
+                      listener->lport, conn);
+#endif
+}
+
+/****************************************************************************
+ * Name: tcp_syn_room
+ *
+ * Description:
+ *   Return true if the listener can take one more connection in
+ *   TCP_SYN_RCVD.  Its connections in TCP_SYN_RCVD and the ones that wait
+ *   for accept() together take at most the backlog of listen().  If there
+ *   is no room, free the oldest connection in TCP_SYN_RCVD of the listener
+ *   and take its place (RFC 4987, section 3.4): one on this device first,
+ *   else one on another device.
+ *
+ * Input Parameters:
+ *   dev      - The device whose lock the caller holds.
+ *   listener - The listening connection.
+ *
+ * Returned Value:
+ *   true if a new connection in TCP_SYN_RCVD can be made.
+ *
+ ****************************************************************************/
+
+static bool tcp_syn_room(FAR struct net_driver_s *dev,
+                         FAR struct tcp_conn_s *listener)
+{
+  FAR struct net_driver_s *other;
+  FAR struct tcp_conn_s *oldest = NULL;
+  FAR struct tcp_conn_s *conn;
+  size_t nsynrcvd = 0;
+  size_t nfree = SIZE_MAX;
+  bool room = true;
+
+  tcp_conn_list_lock();
+#ifdef CONFIG_NET_TCPBACKLOG
+  /* accept() and listen() change the backlog with the listener locked.
+   * Lock it inside the list lock, as tcp_accept_connection() does.
+   */
+
+  conn_lock(&listener->sconn);
+  nfree = 0;
+  if (listener->backlog != NULL)
+    {
+      nfree = sq_count(&listener->backlog->bl_free);
+    }
+
+  conn_unlock(&listener->sconn);
+#endif
+
+  /* The list is in the order of creation: the first match is the oldest.
+   * Take the oldest on this device if there is one.
+   */
+
+  for (conn = (FAR struct tcp_conn_s *)g_active_tcp_connections.head;
+       conn != NULL;
+       conn = (FAR struct tcp_conn_s *)conn->sconn.s_node.flink)
+    {
+      if (tcp_is_syn_backlog(listener, conn))
+        {
+          if (oldest == NULL || (oldest->dev != dev && conn->dev == dev))
+            {
+              oldest = conn;
+            }
+
+          nsynrcvd++;
+        }
+    }
+
+  if (nsynrcvd >= nfree)
+    {
+      room = false;
+    }
+
+  if (!room && oldest != NULL && nsynrcvd <= nfree)
+    {
+      /* tcp_free() takes the device lock of the connection.  The caller
+       * holds the lock of this device: only try the lock of another
+       * device, as tcp_reclaim() does, and refuse the SYN if it is busy.
+       */
+
+      other = oldest->dev != dev ? oldest->dev : NULL;
+      if (other == NULL || netdev_trylock(other) >= 0)
+        {
+          oldest->crefs = 0;
+          tcp_free(oldest);
+          room = true;
+
+          if (other != NULL)
+            {
+              netdev_unlock(other);
+            }
+        }
+    }
+
+  tcp_conn_list_unlock();
+  return room;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1211,6 +1333,15 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
   domain = PF_INET6;
 #endif
 
+  /* Each connection in TCP_SYN_RCVD takes a connection structure: limit
+   * them by the backlog, or a SYN flood takes them all.
+   */
+
+  if (!tcp_syn_room(dev, listener))
+    {
+      return NULL;
+    }
+
   /* Allocate the connection structure */
 
   conn = tcp_alloc_conn(domain, dev);
@@ -1758,17 +1889,8 @@ tcp_syn_backlog_conn(FAR struct tcp_conn_s *listener, uint32_t lastid)
        conn != NULL;
        conn = (FAR struct tcp_conn_s *)conn->sconn.s_node.flink)
     {
-      if (conn->tcpstateflags == TCP_SYN_RCVD &&
-          !TCP_LISTID_AFTER(conn->listid, lastid) &&
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-          tcp_conn_cmp(listener->domain,
-                       (FAR const union ip_addr_u *)&listener->u,
-                       listener->lport, conn)
-#else
-          tcp_conn_cmp((FAR const union ip_addr_u *)&listener->u,
-                       listener->lport, conn)
-#endif
-         )
+      if (!TCP_LISTID_AFTER(conn->listid, lastid) &&
+          tcp_is_syn_backlog(listener, conn))
         {
           return conn;
         }
