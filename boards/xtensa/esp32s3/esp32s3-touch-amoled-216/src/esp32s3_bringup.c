@@ -188,6 +188,16 @@ int esp32s3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_QMI8658
+  /* Register the QMI8658 IMU as uORB accelerometer and gyroscope */
+
+  ret = esp32s3_qmi8658_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize QMI8658: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_INPUT_BUTTONS
   /* Register the BOOT, IO18 and PWR keys as /dev/buttons */
 
