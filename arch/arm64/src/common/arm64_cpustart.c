@@ -130,6 +130,16 @@ static void arm64_smp_init_top(void)
 {
   struct tcb_s *tcb = current_task(this_cpu());
 
+#ifdef CONFIG_STACK_COLORATION
+
+  /* If stack debug is enabled, then fill the stack with a
+   * recognizable value that we can use later to test for high
+   * water marks.
+   */
+
+  arm64_stack_color(tcb->stack_base_ptr, 0);
+#endif /* CONFIG_STACK_COLORATION */
+
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts */
 
