@@ -135,6 +135,14 @@ When a SYN arrives:
 		-> TCP_ESTABLISHED         (tcp_input receives final ACK)
 		-> accept() wakes up       (tcp_accept_connection())
 
+The connections in ``TCP_SYN_RCVD`` of a listener and the connections that
+wait for ``accept()`` together take at most the backlog of ``listen()``.  A
+SYN to a listener whose backlog is full of connections in ``TCP_SYN_RCVD``
+frees the oldest of them.  The last ``CONFIG_NET_TCP_SYN_RESERVE`` free
+connections are kept for ``socket()`` and ``connect()``: then a SYN also
+frees the oldest connection in ``TCP_SYN_RCVD`` of its listener, or it is
+refused.
+
 Graceful close (active close)
 -----------------------------
 
