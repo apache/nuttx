@@ -195,6 +195,7 @@ int nxsig_clockwait(int clockid, int flags,
   irqstate_t        iflags;
   clock_t expect = 0u;
   clock_t stop   = 0u;
+  int ret = OK;
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   siginfo_t unbinfo;
   sigset_t intersection;
@@ -204,7 +205,7 @@ int nxsig_clockwait(int clockid, int flags,
 
   if (rqtp && (rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000))
     {
-      return -EINVAL;
+      ret = -EINVAL;
     }
 
   /* If rqtp is zero, yield CPU and return
@@ -219,10 +220,10 @@ int nxsig_clockwait(int clockid, int flags,
    *    openbsd-compat/bsd-misc.c#L243
    */
 
-  if (rqtp && rqtp->tv_sec == 0 && rqtp->tv_nsec == 0)
+  else if (rqtp && rqtp->tv_sec == 0 && rqtp->tv_nsec == 0)
     {
       sched_yield();
-      return -EAGAIN;
+      ret = -EAGAIN;
     }
 
 #ifdef CONFIG_CANCELLATION_POINTS
@@ -231,159 +232,167 @@ int nxsig_clockwait(int clockid, int flags,
    * must exit immediately without waiting.
    */
 
-  if (check_cancellation_point())
+  else if (check_cancellation_point())
     {
       /* If there is a pending cancellation, then do not perform
        * the wait.  Exit now with ECANCELED.
        */
 
-      return -ECANCELED;
+      ret = -ECANCELED;
     }
 #endif
 
-  iflags = enter_critical_section();
-  rtcb = this_task();
+  else
+    {
+      iflags = enter_critical_section();
+      rtcb = this_task();
 
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
-  /* If the caller did not install its own sigunbinfo (only nxsig_timedwait()
-   * does), install ours so that we can tell how we were awakened: a real
-   * signal writes its siginfo here and requires -EINTR.
-   */
-
-  if (rtcb->sigunbinfo == NULL)
-    {
-      rtcb->sigunbinfo = &unbinfo;
-      own_unbinfo = true;
-    }
-
-  /* nxsig_timedwait() publishes sigwaitmask before calling this function.
-   * A matching signal can be queued after that publication but before this
-   * task transitions to TSTATE_WAIT_SIG. Re-check the pending set here while
-   * interrupts are disabled so we do not sleep with a waited-for signal
-   * already pending.
-   */
-
-  if (!own_unbinfo)
-    {
-      /* Loop because the pending-set snapshot may be stale:
-       * nxsig_pendingset() releases tg_lock before
-       * nxsig_remove_pendingsignal() re-acquires it.  On SMP, another CPU
-       * may consume the signal in that window, causing remove() to return
-       * NULL even though the snapshot was non-empty.  Re-read and retry.
-       * Bounded because pending signals are finite.
+      /* If the caller did not install its own sigunbinfo (only
+       * nxsig_timedwait() does), install ours so that we can tell how we
+       * were awakened: a real signal writes its siginfo here and requires
+       * -EINTR.
        */
 
-      intersection = nxsig_pendingset(rtcb);
-      sigandset(&intersection, &intersection, &rtcb->sigwaitmask);
-      while (!sigisemptyset(&intersection))
+      if (rtcb->sigunbinfo == NULL)
         {
-          sigpend = nxsig_remove_pendingsignal(rtcb,
-                                               nxsig_lowest(&intersection));
-          if (sigpend == NULL)
-            {
-              /* Snapshot was stale on SMP: another CPU consumed the signal
-               * between pendingset() and remove().  Re-read and retry.
-               */
+          rtcb->sigunbinfo = &unbinfo;
+          own_unbinfo = true;
+        }
 
-              intersection = nxsig_pendingset(rtcb);
-              sigandset(&intersection, &intersection, &rtcb->sigwaitmask);
-              continue;
+      /* nxsig_timedwait() publishes sigwaitmask before calling this
+       * function.  A matching signal can be queued after that publication
+       * but before this task transitions to TSTATE_WAIT_SIG. Re-check the
+       * pending set here while interrupts are disabled so we do not sleep
+       * with a waited-for signal already pending.
+       */
+
+      if (!own_unbinfo)
+        {
+          /* Loop because the pending-set snapshot may be stale:
+           * nxsig_pendingset() releases tg_lock before
+           * nxsig_remove_pendingsignal() re-acquires it.  On SMP, another
+           * CPU may consume the signal in that window, causing remove()
+           * to return NULL even though the snapshot was non-empty.
+           * Re-read and retry.  Bounded because pending signals are
+           * finite.
+           */
+
+          intersection = nxsig_pendingset(rtcb);
+          sigandset(&intersection, &intersection, &rtcb->sigwaitmask);
+          while (!sigisemptyset(&intersection))
+            {
+              sigpend =
+                nxsig_remove_pendingsignal(rtcb,
+                                           nxsig_lowest(&intersection));
+              if (sigpend == NULL)
+                {
+                  /* Snapshot was stale on SMP: another CPU consumed the
+                   * signal between pendingset() and remove().  Re-read
+                   * and retry.
+                   */
+
+                  intersection = nxsig_pendingset(rtcb);
+                  sigandset(&intersection, &intersection,
+                            &rtcb->sigwaitmask);
+                  continue;
+                }
+
+              memcpy(rtcb->sigunbinfo, &sigpend->info, sizeof(siginfo_t));
+              sigemptyset(&rtcb->sigwaitmask);
+              nxsig_release_pendingsignal(sigpend);
+
+              leave_critical_section(iflags);
+              return 0;
+            }
+        }
+#endif
+
+      if (rqtp)
+        {
+          /* Start the watchdog timer */
+
+          if ((flags & TIMER_ABSTIME) == 0)
+            {
+              expect = clock_delay2abstick(clock_time2ticks(rqtp));
+            }
+          else if (clockid == CLOCK_REALTIME)
+            {
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+              clock_t delay;
+
+              clock_abstime2ticks(CLOCK_REALTIME, rqtp, &delay);
+              expect = clock_delay2abstick(delay);
+#else
+              clock_realtime2absticks(rqtp, &expect);
+#endif
+            }
+          else
+            {
+              expect = clock_time2ticks(rqtp);
             }
 
-          memcpy(rtcb->sigunbinfo, &sigpend->info, sizeof(siginfo_t));
-          sigemptyset(&rtcb->sigwaitmask);
-          nxsig_release_pendingsignal(sigpend);
-
-          leave_critical_section(iflags);
-          return 0;
+          wd_start_abstick(&rtcb->waitdog, expect,
+                           nxsig_timeout, (uintptr_t)rtcb);
         }
-    }
-#endif
 
-  if (rqtp)
-    {
-      /* Start the watchdog timer */
+      /* Remove the tcb task from the ready-to-run list. */
 
-      if ((flags & TIMER_ABSTIME) == 0)
+      nxsched_remove_self(rtcb);
+
+      /* Add the task to the specified blocked task list */
+
+      rtcb->task_state = TSTATE_WAIT_SIG;
+      dq_addlast((FAR dq_entry_t *)rtcb, list_waitingforsignal());
+
+      /* Now, perform the context switch if one is needed */
+
+      up_switch_context(this_task(), rtcb);
+
+      /* We no longer need the watchdog */
+
+      if (rqtp)
         {
-          expect = clock_delay2abstick(clock_time2ticks(rqtp));
-        }
-      else if (clockid == CLOCK_REALTIME)
-        {
-#ifdef CONFIG_CLOCK_TIMEKEEPING
-          clock_t delay;
-
-          clock_abstime2ticks(CLOCK_REALTIME, rqtp, &delay);
-          expect = clock_delay2abstick(delay);
-#else
-          clock_realtime2absticks(rqtp, &expect);
-#endif
-        }
-      else
-        {
-          expect = clock_time2ticks(rqtp);
+          stop = clock_systime_ticks();
         }
 
-      wd_start_abstick(&rtcb->waitdog, expect,
-                       nxsig_timeout, (uintptr_t)rtcb);
-    }
-
-  /* Remove the tcb task from the ready-to-run list. */
-
-  nxsched_remove_self(rtcb);
-
-  /* Add the task to the specified blocked task list */
-
-  rtcb->task_state = TSTATE_WAIT_SIG;
-  dq_addlast((FAR dq_entry_t *)rtcb, list_waitingforsignal());
-
-  /* Now, perform the context switch if one is needed */
-
-  up_switch_context(this_task(), rtcb);
-
-  /* We no longer need the watchdog */
-
-  if (rqtp)
-    {
-      stop = clock_systime_ticks();
-    }
-
-  /* Retrieve the wake reason before dropping the critical section */
+      /* Retrieve the wake reason before dropping the critical section */
 
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
-  if (own_unbinfo)
-    {
-      rtcb->sigunbinfo = NULL;
-    }
+      if (own_unbinfo)
+        {
+          rtcb->sigunbinfo = NULL;
+        }
 #endif
 
-  leave_critical_section(iflags);
+      leave_critical_section(iflags);
 
-  if (rqtp && rmtp && expect)
-    {
-      clock_ticks2time(rmtp,
-                       clock_compare(stop, expect) ? expect - stop : 0);
-    }
+      if (rqtp && rmtp && expect)
+        {
+          clock_ticks2time(rmtp,
+                           clock_compare(stop, expect) ? expect - stop : 0);
+        }
 
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
-  if (own_unbinfo)
-    {
-      /* Awakened by a real signal?  Then the wait must fail with EINTR
-       * (POSIX: nanosleep/clock_nanosleep).  A pending cancellation is
-       * reported through the siginfo errno instead.
-       */
-
-      if (GOOD_SIGNO(unbinfo.si_signo))
+      if (own_unbinfo)
         {
-          return -EINTR;
-        }
+          /* Awakened by a real signal?  Then the wait must fail with EINTR
+           * (POSIX: nanosleep/clock_nanosleep).  A pending cancellation is
+           * reported through the siginfo errno instead.
+           */
 
-      if (unbinfo.si_signo == SIG_CANCEL_TIMEOUT)
-        {
-          return -unbinfo.si_errno;
+          if (GOOD_SIGNO(unbinfo.si_signo))
+            {
+              ret = -EINTR;
+            }
+          else if (unbinfo.si_signo == SIG_CANCEL_TIMEOUT)
+            {
+              ret = -unbinfo.si_errno;
+            }
         }
-    }
 #endif
+    }
 
-  return 0;
+  return ret;
 }
+
