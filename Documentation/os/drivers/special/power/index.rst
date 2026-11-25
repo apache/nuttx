@@ -13,6 +13,7 @@ Power-related Drivers
   npzero.rst
   battery/ltc4013.rst
   battery/npm1100.rst
+  battery/axp2101.rst
 
 .. toctree::
    :maxdepth: 1
