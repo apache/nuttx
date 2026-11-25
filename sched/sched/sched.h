@@ -194,7 +194,7 @@ DECLARE_PER_CPU_BMP(dq_queue_t, g_readytorun);
  *    is made to run.
  */
 
-extern FAR struct tcb_s *g_assignedtasks[CONFIG_SMP_NCPUS];
+DECLARE_PER_CPU_SMP(FAR struct tcb_s *, g_assignedtasks);
 
 /* g_delivertasks is used to indicate that a task switch is scheduled for
  * another cpu to be processed.
