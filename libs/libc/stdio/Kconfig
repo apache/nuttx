@@ -75,6 +75,7 @@ config NUNGET_CHARS
 
 choice
 	prompt "printf profile"
+	default LIBC_PRINTF_MINIMAL if DEFAULT_SMALL
 	default LIBC_PRINTF_DEFAULT
 	---help---
 		A profile only sets the defaults of the printf feature options.
