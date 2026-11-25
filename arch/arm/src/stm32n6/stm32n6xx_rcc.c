@@ -527,6 +527,10 @@ static inline void rcc_enableapb5(void)
   regval |= RCC_APB5ENR_LTDCEN;
 #endif
 
+#ifdef CONFIG_STM32_DCMIPP
+  regval |= RCC_APB5ENR_DCMIPPEN | RCC_APB5ENR_CSIEN;
+#endif
+
   if (regval != 0)
     {
       putreg32(regval, STM32_RCC_APB5ENSR);

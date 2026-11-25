@@ -1154,6 +1154,15 @@ config STM32_DCMI
 		modules and CMOS sensors through an 8-bit to 14-bit parallel interface,
 		to receive video data.
 
+config STM32_DCMIPP
+	bool "DCMIPP"
+	depends on STM32_HAVE_DCMIPP && VIDEO_STREAM
+	---help---
+		Digital camera interface pixel pipeline with the MIPI CSI-2
+		host.  Captures raw Bayer frames from a CSI-2 image sensor and
+		converts them to RGB565 in the main pipe ISP for the V4L2
+		capture driver.
+
 config STM32_SYSCFG_IOCOMPENSATION
 	bool "SYSCFG I/O Compensation"
 	depends on STM32_HAVE_IOCOMPENSATION
