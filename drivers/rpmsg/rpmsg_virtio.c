@@ -101,7 +101,9 @@ struct rpmsg_virtio_priv_s
 
 static int rpmsg_virtio_wait(FAR struct rpmsg_s *rpmsg, clock_t delay);
 static int rpmsg_virtio_post(FAR struct rpmsg_s *rpmsg);
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
 static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg, bool verbose);
+#endif
 static FAR void *rpmsg_virtio_alloc_buf(FAR struct rpmsg_s *rpmsg,
                                         size_t size, size_t align);
 static void rpmsg_virtio_free_buf(FAR struct rpmsg_s *rpmsg,
@@ -119,6 +121,8 @@ static void rpmsg_virtio_tx_notify(FAR struct virtqueue *vq);
  * Private Functions
  ****************************************************************************/
 
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE || \
+    defined(CONFIG_RPMSG_VIRTIO_PM)
 /****************************************************************************
  * Name: rpmsg_virtio_buffer_nused
  ****************************************************************************/
@@ -146,6 +150,7 @@ rpmsg_virtio_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
 
   return nused;
 }
+#endif
 
 /****************************************************************************
  * Name: rpmsg_virtio_pm_callback
@@ -333,6 +338,7 @@ static int rpmsg_virtio_post(FAR struct rpmsg_s *rpmsg)
   return OK;
 }
 
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
 /****************************************************************************
  * Name: rpmsg_virtio_dump_buffer
  ****************************************************************************/
@@ -470,6 +476,7 @@ static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg, bool verbose)
       metal_mutex_release(&rdev->lock);
     }
 }
+#endif
 
 /****************************************************************************
  * Name: rpmsg_virtio_alloc_buf
@@ -802,7 +809,11 @@ static void rpmsg_virtio_start_worker(FAR void *arg)
     rpmsg_virtio_post,
     NULL,
     NULL,
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
     rpmsg_virtio_dump,
+#else
+    NULL,
+#endif
     NULL,
     rpmsg_virtio_alloc_buf,
     rpmsg_virtio_free_buf,
