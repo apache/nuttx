@@ -105,8 +105,6 @@
 
 /* Message RAM Configuration ************************************************/
 
-#define WORD_LENGTH         4U
-
 /* Define number of Rx / Tx elements in message RAM; note that elements are
  * given sizes in number of words (4-byte chunks)
  *
@@ -347,7 +345,7 @@ static const struct fdcan_config_s stm32_fdcan1_config =
   .mb_irq      =
   {
     STM32_IRQ_FDCAN2_0,
-    STM32_IRQ_FDCAN2_1 ,
+    STM32_IRQ_FDCAN2_1,
   },
 };
 #endif
@@ -360,7 +358,7 @@ static const struct fdcan_config_s stm32_fdcan2_config =
   .mb_irq      =
   {
     STM32_IRQ_FDCAN3_0,
-    STM32_IRQ_FDCAN3_1 ,
+    STM32_IRQ_FDCAN3_1,
   },
 };
 #endif
@@ -372,7 +370,7 @@ static const struct fdcan_config_s stm32_fdcan2_config =
 struct fdcan_driver_s
 {
   const struct fdcan_config_s *config;  /* Pin config */
-  uint8_t iface_idx;                    /* FDCAN interface index (0 or 1) */
+  uint8_t iface_idx;                    /* FDCAN interface index (0 to 2) */
   uint32_t base;                        /* FDCAN base address */
 
   struct fdcan_bitseg arbi_timing;      /* Timing for arbitration phase */
@@ -380,7 +378,7 @@ struct fdcan_driver_s
   struct fdcan_bitseg data_timing;      /* Timing for data phase */
 #endif
 
-  struct fdcan_message_ram message_ram; /* Start addresses for each reagion of Message RAM */
+  struct fdcan_message_ram message_ram; /* Start addresses for each region of Message RAM */
   struct rx_fifo_s *rx;                 /* Pointer to Rx FIFO0 in Message RAM */
   struct tx_fifo_s *tx;                 /* Pointer to Tx mailboxes in Message RAM */
 
