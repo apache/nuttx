@@ -529,6 +529,7 @@ qemu_epc_raise_irq(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
             uint16_t flags =
               qemu_epc_cfg_read16(qep, base + QEMU_EPC_BAR_CFG_MSI +
                                   PCI_MSI_FLAGS);
+
             if (flags & PCI_MSI_FLAGS_64BIT)
               {
                 pci_addr =
@@ -578,6 +579,7 @@ qemu_epc_raise_irq(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
         if (qep->msix_vaddr == NULL)
           {
             uint8_t bar = data & PCI_MSIX_TABLE_BIR;
+
             qep->msix_vaddr =
               qemu_epc_get_bar_addr_from_funcno(epc, funcno, bar);
             qep->msix_vob =
