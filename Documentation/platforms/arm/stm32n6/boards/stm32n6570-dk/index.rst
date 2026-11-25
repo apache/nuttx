@@ -182,6 +182,16 @@ The GT911 touch controller on I2C2 (interrupt on PQ4) is reset at bring-up
 with PQ4 held low, which selects address 0x5d, and registered as
 ``/dev/input0``; ``tc`` prints the touch coordinates.
 
+Camera module
+=============
+
+The MB1854 module (Sony IMX335) is on the CSI-2 host (two lanes) and I2C1
+(0x1a).  PD2 enables the module and PC8 releases the sensor reset.  The
+DCMIPP converts the raw frames to RGB565 and scales them, with automatic
+exposure (``CONFIG_STM32_DCMIPP_AE``) and white balance
+(``CONFIG_STM32_DCMIPP_AWB``), switched off with ``V4L2_CID_EXPOSURE_AUTO``
+and ``V4L2_CID_AUTO_WHITE_BALANCE``.
+
 Time-of-flight sensor
 =====================
 
@@ -269,6 +279,12 @@ lvgl
 ``fb`` plus the touch controller, LVGL and its widgets demo.  Start it
 with ``lvgldemo &``.  The image is close to the 511 KiB limit of the boot
 ROM, so LVGL logging and extra fonts are left out.
+
+camera
+------
+
+``fb`` plus the IMX335 camera and the ``camera`` example, see `Camera module`_.
+``camera 0`` shows a 320x240 preview on the LCD.
 
 jumbo
 -----

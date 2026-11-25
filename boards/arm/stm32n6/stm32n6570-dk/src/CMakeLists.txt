@@ -42,6 +42,8 @@ endif()
 
 if(CONFIG_VIDEO_VL53L5CX)
   list(APPEND SRCS stm32_camera.c stm32_tof.c)
+elseif(CONFIG_STM32_DCMIPP)
+  list(APPEND SRCS stm32_camera.c)
 endif()
 
 if(CONFIG_STM32_SDMMC2)

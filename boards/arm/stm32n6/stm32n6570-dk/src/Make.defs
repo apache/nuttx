@@ -45,6 +45,8 @@ endif
 
 ifeq ($(CONFIG_VIDEO_VL53L5CX),y)
 CSRCS += stm32_camera.c stm32_tof.c
+else ifeq ($(CONFIG_STM32_DCMIPP),y)
+CSRCS += stm32_camera.c
 endif
 
 ifeq ($(CONFIG_STM32_SDMMC2),y)
