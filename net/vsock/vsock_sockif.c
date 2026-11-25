@@ -36,6 +36,7 @@
 #include <nuttx/circbuf.h>
 #include <nuttx/fs/uio.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/percpu.h>
 #include <nuttx/spinlock.h>
 
 #include "socket/socket.h"
@@ -251,18 +252,27 @@ const struct sock_intf_s g_vsock_sockif =
  * Private Data
  ****************************************************************************/
 
-static atomic_t g_vsock_port = VSOCK_LAST_RESERVED_PORT;
+static DEFINE_PER_CPU_BMP(atomic_t, g_vsock_port) =
+  VSOCK_LAST_RESERVED_PORT;
+#define g_vsock_port this_cpu_var_bmp(g_vsock_port)
 
-static FAR struct kwork_wqueue_s *g_vsock_wqueue = NULL;
+static DEFINE_PER_CPU_BSS_BMP(FAR struct kwork_wqueue_s *, g_vsock_wqueue);
+#define g_vsock_wqueue this_cpu_var_bmp(g_vsock_wqueue)
 
 /* List and their locks */
 
-static struct list_node g_vsock_conn = LIST_INITIAL_VALUE(g_vsock_conn);
-static struct list_node g_vsock_transport =
-  LIST_INITIAL_VALUE(g_vsock_transport);
+static DEFINE_PER_CPU_BSS_BMP(struct list_node, g_vsock_conn);
+#define g_vsock_conn this_cpu_var_bmp(g_vsock_conn)
 
-static spinlock_t g_vsock_conn_lock = SP_UNLOCKED;
-static spinlock_t g_vsock_transport_lock = SP_UNLOCKED;
+static DEFINE_PER_CPU_BSS_BMP(struct list_node, g_vsock_transport);
+#define g_vsock_transport this_cpu_var_bmp(g_vsock_transport)
+
+static DEFINE_PER_CPU_BMP(spinlock_t, g_vsock_conn_lock) = SP_UNLOCKED;
+#define g_vsock_conn_lock this_cpu_var_bmp(g_vsock_conn_lock)
+
+static DEFINE_PER_CPU_BMP(spinlock_t, g_vsock_transport_lock) =
+  SP_UNLOCKED;
+#define g_vsock_transport_lock this_cpu_var_bmp(g_vsock_transport_lock)
 
 /****************************************************************************
  * Private Functions
@@ -2545,6 +2555,9 @@ void vsock_transport_register(FAR struct vsock_transport_s *t)
 int vsock_initialize(void)
 {
   int ret = OK;
+
+  list_initialize(&g_vsock_conn);
+  list_initialize(&g_vsock_transport);
 
   g_vsock_wqueue = work_queue_create("vsock_work",
                                      CONFIG_NET_VSOCK_WORK_PRIORITY,
