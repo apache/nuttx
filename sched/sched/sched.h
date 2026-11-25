@@ -73,7 +73,7 @@
  */
 
 #ifdef CONFIG_SMP
-#  define current_task(cpu)      (g_assignedtasks[cpu])
+#  define current_task(cpu)      (per_cpu_var_smp(g_assignedtasks, cpu))
 #else
 #  define current_task(cpu)      ((FAR struct tcb_s *)list_readytorun()->head)
 #endif
