@@ -774,6 +774,17 @@ config ASSERTIONS_FILENAME
 		function when it is enabled. This option maybe will take up a lot
 		of space from applications.
 
+config DEBUG_FUNCTIONNAME
+	bool "Prefix debug messages with the function name"
+	default !DEFAULT_SMALL
+	---help---
+		Prefix each message of the _emerg(), _alert(), _err(), _warn()
+		and _info() families with the name of the calling function.
+		Disabling it removes the name strings and the extra argument
+		from every such call.
+
+		Defaults to y unless DEFAULT_SMALL is selected.
+
 config DEBUG_ALERT
 	bool
 	default n

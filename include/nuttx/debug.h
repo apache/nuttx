@@ -85,7 +85,7 @@
  */
 
 #if !defined(EXTRA_FMT) && !defined(EXTRA_ARG) && \
-    defined(CONFIG_HAVE_FUNCTIONNAME) && !defined(CONFIG_DEFAULT_SMALL)
+    defined(CONFIG_HAVE_FUNCTIONNAME) && defined(CONFIG_DEBUG_FUNCTIONNAME)
 #  define EXTRA_FMT "%s: "
 #  define EXTRA_ARG ,__FUNCTION__
 #endif
