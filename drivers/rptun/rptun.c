@@ -230,19 +230,21 @@ static DEFINE_PER_CPU_BMP(rmutex_t, g_rptun_lock) = NXRMUTEX_INITIALIZER;
 #define g_rptun_lock this_cpu_var_bmp(g_rptun_lock)
 
 #ifdef CONFIG_RPTUN_AUTO_RESET_IN_PANIC_NOTIFIER
-static struct notifier_block g_rptun_panic_nb =
+static DEFINE_PER_CPU_BMP(struct notifier_block, g_rptun_panic_nb) =
 {
   .notifier_call = rptun_notifier,
   .priority = INT_MIN, /* Panic notifier should be called at the last */
 };
+#  define g_rptun_panic_nb this_cpu_var_bmp(g_rptun_panic_nb)
 #endif
 
 #ifndef CONFIG_RPTUN_AUTO_RESET_DISABLE
-static struct notifier_block g_rptun_reboot_nb =
+static DEFINE_PER_CPU_BMP(struct notifier_block, g_rptun_reboot_nb) =
 {
   .notifier_call = rptun_notifier,
   .priority = INT_MIN, /* Reboot notifier should be called at the last */
 };
+#  define g_rptun_reboot_nb this_cpu_var_bmp(g_rptun_reboot_nb)
 #endif
 
 /****************************************************************************
