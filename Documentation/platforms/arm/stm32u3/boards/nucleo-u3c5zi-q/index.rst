@@ -23,6 +23,18 @@ nsh
 
 Configures the NuttShell with USART1 as the serial console.
 
+can
+---
+
+FDCAN1 as a character driver (``/dev/can0``) at 250 kbit/s on the onboard
+CAN transceiver (CN18), with ``examples/can``.
+
+cansock
+-------
+
+FDCAN1 as a SocketCAN device (``can0``) at 250 kbit/s, with ``candump``
+and ``cansend``.
+
 jumbo
 -----
 
