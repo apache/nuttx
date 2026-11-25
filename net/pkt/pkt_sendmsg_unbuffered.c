@@ -249,8 +249,11 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
           state.snd_cb->priv  = (FAR void *)&state;
           state.snd_cb->event = psock_send_eventhandler;
 
-          /* Notify the device driver that new TX data is available. */
+          /* Notify the device driver that new TX data is available.  The
+           * poll waiters report POLLOUT while conn->sending is not zero.
+           */
 
+          conn->sending++;
           netdev_txnotify_dev(dev, PKT_POLL);
 
           /* Wait for the send to complete or an error to occur.
@@ -260,6 +263,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
 
           ret = conn_dev_sem_timedwait(&state.snd_sem, true, UINT_MAX,
                                        &conn->sconn, dev);
+          conn->sending--;
 
           /* Make sure that no further events are processed */
 

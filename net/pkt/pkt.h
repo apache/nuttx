@@ -62,6 +62,7 @@ struct pkt_poll_s
   FAR struct pkt_conn_s       *conn; /* Needed to handle loss of connection */
   FAR struct pollfd_s         *fds;  /* Needed to handle poll events */
   FAR struct devif_callback_s *cb;   /* Needed to teardown the poll */
+  bool                         full; /* The last check found no free IOB */
 };
 
 struct pkt_conn_s
@@ -75,6 +76,9 @@ struct pkt_conn_s
   uint8_t    ifindex;
   uint8_t    crefs;    /* Reference counts on this instance */
   uint16_t   type;     /* The Ethernet type of the packet */
+#ifndef CONFIG_NET_PKT_WRITE_BUFFERS
+  uint16_t   sending;  /* send() calls that wait for a poll of the device */
+#endif
 
 #if CONFIG_NET_RECV_BUFSIZE > 0
   int32_t    rcvbufs;  /* Maximum amount of bytes queued in recv */
