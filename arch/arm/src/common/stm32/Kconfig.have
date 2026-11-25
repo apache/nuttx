@@ -287,6 +287,9 @@ config STM32_HAVE_DCMI
 config STM32_HAVE_IP_DCMI_V1
 	bool
 
+config STM32_HAVE_DCMIPP
+	bool
+
 # DFSDM capabilities
 
 config STM32_HAVE_MDF1

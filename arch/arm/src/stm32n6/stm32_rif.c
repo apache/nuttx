@@ -107,6 +107,14 @@ void stm32_rifconfig(void)
   rif_setslave_secpriv(RIFSC_PERIPH_DMA2D);
 #endif
 
+#ifdef CONFIG_STM32_DCMIPP
+  /* The DCMIPP writes the camera frames to Secure AXISRAM */
+
+  rif_setmaster(RIFSC_MASTER_DCMIPP, RIF_MASTER_CID1_SEC_PRIV);
+  rif_setslave_secpriv(RIFSC_PERIPH_DCMIPP);
+  rif_setslave_secpriv(RIFSC_PERIPH_CSI);
+#endif
+
 #ifdef CONFIG_STM32_SDMMC1
   /* The SDMMC IDMA reads and writes buffers in Secure AXISRAM */
 

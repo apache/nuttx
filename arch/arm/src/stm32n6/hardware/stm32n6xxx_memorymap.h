@@ -125,6 +125,8 @@
 /* APB5 peripherals *********************************************************/
 
 #define STM32_LTDC_BASE       0x58001000
+#define STM32_DCMIPP_BASE     0x58002000    /* DCMIPP pixel pipelines */
+#define STM32_CSI_BASE        0x58006000    /* CSI-2 host and D-PHY */
 
 /* Debug ********************************************************************/
 
