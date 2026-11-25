@@ -41,6 +41,7 @@
 #include <nuttx/crc32.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/mutex.h>
+#include <nuttx/percpu.h>
 #include <nuttx/poll.h>
 #include <nuttx/queue.h>
 #include <nuttx/sched.h>
@@ -251,7 +252,8 @@ const struct sock_intf_s g_rpmsg_sockif =
  * Private Data
  ****************************************************************************/
 
-static atomic_t g_rpmsg_id;
+static DEFINE_PER_CPU_BSS_BMP(atomic_t, g_rpmsg_id);
+#define g_rpmsg_id this_cpu_var_bmp(g_rpmsg_id)
 
 /* Listening sockets.  rpmsg_socket_ns_bind() holds the lock while it uses
  * the server it found, so that close() cannot free that server meanwhile.
