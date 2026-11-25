@@ -53,6 +53,8 @@
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "socket/socket.h"
+#include <nuttx/mm/mempool.h>
+
 #include "utils/utils.h"
 #include "can/can.h"
 
@@ -162,10 +164,10 @@ static void isotp_tx_finish(FAR struct isotp_conn_s *isotp, int result);
  * Private Data
  ****************************************************************************/
 
-NET_BUFPOOL_DECLARE(g_isotp_conns, sizeof(struct isotp_conn_s),
-                    CONFIG_NET_CAN_ISOTP_PREALLOC_CONNS,
-                    CONFIG_NET_CAN_ISOTP_ALLOC_CONNS,
-                    CONFIG_NET_CAN_ISOTP_MAX_CONNS);
+MEMPOOL_DEFINE(g_isotp_conns, sizeof(struct isotp_conn_s),
+               CONFIG_NET_CAN_ISOTP_PREALLOC_CONNS,
+               CONFIG_NET_CAN_ISOTP_MAX_CONNS,
+               CONFIG_NET_CAN_ISOTP_ALLOC_CONNS);
 
 /****************************************************************************
  * Public Data
@@ -1144,9 +1146,7 @@ static int isotp_setup(FAR struct socket *psock)
       return -EPROTONOSUPPORT;
     }
 
-  NET_BUFPOOL_LOCK(g_isotp_conns);
-  conn = NET_BUFPOOL_TRYALLOC(g_isotp_conns);
-  NET_BUFPOOL_UNLOCK(g_isotp_conns);
+  conn = mempool_zallocate(&g_isotp_conns, 0);
   if (conn == NULL)
     {
       return -ENOMEM;
@@ -1737,9 +1737,7 @@ static int isotp_close(FAR struct socket *psock)
       nxmutex_destroy(&conn->rx_lock);
       can->crefs = 0;
       can_conn_uninit(can);
-      NET_BUFPOOL_LOCK(g_isotp_conns);
-      NET_BUFPOOL_FREE(g_isotp_conns, conn);
-      NET_BUFPOOL_UNLOCK(g_isotp_conns);
+      mempool_release(&g_isotp_conns, conn);
     }
   else
     {

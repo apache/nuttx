@@ -78,39 +78,6 @@
       (nport) = HTONS(hport); \
     } while (0)
 
-/* Network buffer pool related macros, in which:
- *   pool:     The name of the buffer pool
- *   nodesize: The size of each node in the pool
- *   prealloc: The number of pre-allocated buffers
- *   dynalloc: The number per dynamic allocations
- *   maxalloc: The number of max allocations, 0 means no limit
- */
-
-#define NET_BUFPOOL_MAX(prealloc, dynalloc, maxalloc) \
-  (dynalloc) <= 0 ? (prealloc) : ((maxalloc) > 0 ? (maxalloc) : INT16_MAX)
-
-#define NET_BUFPOOL_DECLARE(pool, nodesize, prealloc, dynalloc, maxalloc) \
-  static char pool##_buffer[prealloc][nodesize] aligned_data(sizeof(uintptr_t)); \
-  static struct net_bufpool_s pool = \
-    { \
-      pool##_buffer[0], \
-      prealloc, \
-      dynalloc, \
-      -(int)(nodesize), \
-      SEM_INITIALIZER(NET_BUFPOOL_MAX(prealloc, dynalloc, maxalloc)), \
-      NXRMUTEX_INITIALIZER, \
-      { NULL, NULL } \
-    };
-
-#define NET_BUFPOOL_TIMEDALLOC(p,t) net_bufpool_timedalloc(&p, t)
-#define NET_BUFPOOL_TRYALLOC(p)     net_bufpool_timedalloc(&p, 0)
-#define NET_BUFPOOL_ALLOC(p)        net_bufpool_timedalloc(&p, UINT_MAX)
-#define NET_BUFPOOL_FREE(p,n)       net_bufpool_free(&p, n)
-#define NET_BUFPOOL_TEST(p)         net_bufpool_test(&p)
-#define NET_BUFPOOL_NAVAIL(p)       net_bufpool_navail(&p)
-#define NET_BUFPOOL_LOCK(p)         net_bufpool_lock(&p)
-#define NET_BUFPOOL_UNLOCK(p)       net_bufpool_unlock(&p)
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -122,23 +89,6 @@ enum tv2ds_remainder_e
   TV2DS_TRUNC = 0, /* Truncate microsecond remainder */
   TV2DS_ROUND,     /* Round to the nearest full decisecond */
   TV2DS_CEIL       /* Force to next larger full decisecond */
-};
-
-/* This structure is used to manage a pool of network buffers */
-
-struct net_bufpool_s
-{
-  /* Allocation configuration */
-
-  FAR char  *pool;     /* The beginning of the pre-allocated buffer pool */
-  int        prealloc; /* The number of pre-allocated buffers */
-  int        dynalloc; /* The number per dynamic allocations */
-  int        nodesize; /* The size of each node in the pool */
-
-  sem_t      sem;      /* The semaphore for waiting for free buffers */
-
-  rmutex_t   lock;     /* The lock for the pool */
-  sq_queue_t freebuffers;
 };
 
 /****************************************************************************
@@ -483,92 +433,6 @@ FAR void *net_ipv6_payload(FAR struct ipv6_hdr_s *ipv6, FAR uint8_t *proto);
 #ifdef CONFIG_MM_IOB
 uint16_t net_iob_concat(FAR struct iob_s **iob1, FAR struct iob_s **iob2);
 #endif
-
-/****************************************************************************
- * Name: net_bufpool_timedalloc
- *
- * Description:
- *   Allocate a buffer from the pool.  If no buffer is available, then wait
- *   for the specified timeout.
- *
- * Input Parameters:
- *   pool    - The pool from which to allocate the buffer
- *   timeout - The maximum time to wait for a buffer to become available.
- *
- * Returned Value:
- *   A reference to the allocated buffer, which is guaranteed to be zeroed.
- *   NULL is returned on a timeout.
- *
- ****************************************************************************/
-
-FAR void *net_bufpool_timedalloc(FAR struct net_bufpool_s *pool,
-                                 unsigned int timeout);
-
-/****************************************************************************
- * Name: net_bufpool_free
- *
- * Description:
- *   Free a buffer from the pool.
- *
- * Input Parameters:
- *   pool - The pool from which to allocate the buffer
- *   node - The buffer to be freed
- *
- ****************************************************************************/
-
-void net_bufpool_free(FAR struct net_bufpool_s *pool, FAR void *node);
-
-/****************************************************************************
- * Name: net_bufpool_test
- *
- * Description:
- *   Check if there is room in the buffer pool.  Does not reserve any space.
- *
- * Assumptions:
- *   None.
- *
- ****************************************************************************/
-
-int net_bufpool_test(FAR struct net_bufpool_s *pool);
-
-/****************************************************************************
- * Name: net_bufpool_navail
- *
- * Description:
- *   Return the number of available buffers in the buffer pool.
- *
- * Assumptions:
- *   None.
- *
- ****************************************************************************/
-
-int net_bufpool_navail(FAR struct net_bufpool_s *pool);
-
-/****************************************************************************
- * Name: net_bufpool_lock
- *
- * Description:
- *   Use the bufpool lock to protect the node of the buffer pool.
- *
- * Input Parameters:
- *   pool - The lock of pool to be locked.
- *
- ****************************************************************************/
-
-void net_bufpool_lock(FAR struct net_bufpool_s *pool);
-
-/****************************************************************************
- * Name: net_bufpool_unlock
- *
- * Description:
- *   Finish using the bufpool lock to protect the node of the buffer pool.
- *
- * Input Parameters:
- *   pool - The lock of pool to be unlocked.
- *
- ****************************************************************************/
-
-void net_bufpool_unlock(FAR struct net_bufpool_s *pool);
 
 /****************************************************************************
  * Name: net_chksum_adjust

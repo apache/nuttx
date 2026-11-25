@@ -61,6 +61,8 @@
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "socket/socket.h"
+#include <nuttx/mm/mempool.h>
+
 #include "utils/utils.h"
 
 /****************************************************************************
@@ -154,10 +156,9 @@ static int can_raw_setsockopt(FAR struct socket *psock, int level,
 
 /* The array containing all CAN_RAW connections. */
 
-NET_BUFPOOL_DECLARE(g_can_raw_connections, sizeof(struct can_raw_conn_s),
-                    CONFIG_NET_CAN_PREALLOC_CONNS,
-                    CONFIG_NET_CAN_ALLOC_CONNS,
-                    CONFIG_NET_CAN_MAX_CONNS);
+MEMPOOL_DEFINE(g_can_raw_connections, sizeof(struct can_raw_conn_s),
+               CONFIG_NET_CAN_PREALLOC_CONNS, CONFIG_NET_CAN_MAX_CONNS,
+               CONFIG_NET_CAN_ALLOC_CONNS);
 
 /****************************************************************************
  * Public Data
@@ -325,11 +326,7 @@ static FAR struct can_conn_s *can_raw_alloc(void)
 {
   FAR struct can_raw_conn_s *raw;
 
-  /* The free list is protected by a a mutex. */
-
-  NET_BUFPOOL_LOCK(g_can_raw_connections);
-
-  raw = NET_BUFPOOL_TRYALLOC(g_can_raw_connections);
+  raw = mempool_zallocate(&g_can_raw_connections, 0);
   if (raw != NULL)
     {
       /* FIXME SocketCAN default behavior enables loopback */
@@ -359,7 +356,6 @@ static FAR struct can_conn_s *can_raw_alloc(void)
       can_conn_init(&raw->conn);
     }
 
-  NET_BUFPOOL_UNLOCK(g_can_raw_connections);
   return raw != NULL ? &raw->conn : NULL;
 }
 
@@ -374,19 +370,13 @@ static FAR struct can_conn_s *can_raw_alloc(void)
 
 static void can_raw_free(FAR struct can_conn_s *conn)
 {
-  /* The free list is protected by a mutex. */
-
   DEBUGASSERT(conn->crefs == 0);
-
-  NET_BUFPOOL_LOCK(g_can_raw_connections);
 
   can_conn_uninit(conn);
 
   /* Free the connection. */
 
-  NET_BUFPOOL_FREE(g_can_raw_connections, conn);
-
-  NET_BUFPOOL_UNLOCK(g_can_raw_connections);
+  mempool_release(&g_can_raw_connections, conn);
 }
 
 /****************************************************************************
