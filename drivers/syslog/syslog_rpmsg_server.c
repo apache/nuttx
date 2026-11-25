@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <sched.h>
 
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
@@ -291,7 +292,16 @@ int syslog_rpmsg_server_init(void)
 {
 #ifdef CONFIG_SYSLOG_RPMSG_SERVER_CHARDEV
   int ret;
+#endif
 
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER_CPUID
+  if (sched_getcpu() != CONFIG_SYSLOG_RPMSG_SERVER_CPUID)
+    {
+      return OK;
+    }
+#endif
+
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER_CHARDEV
   ret = register_driver("/dev/logrpmsg", &g_syslog_rpmsg_fops, 0600, NULL);
   if (ret < 0)
     {
