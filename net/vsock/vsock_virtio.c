@@ -33,6 +33,7 @@
 #include <nuttx/event.h>
 #include <nuttx/list.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/percpu.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio.h>
@@ -108,13 +109,14 @@ static ssize_t vsock_virtio_send_pkt(FAR struct vsock_transport_s *t,
  * Private Data
  ****************************************************************************/
 
-static struct virtio_driver g_vsock_virtio_driver =
+static DEFINE_PER_CPU_BMP(struct virtio_driver, g_vsock_virtio_driver) =
 {
   VIRTIO_ID_VSOCK,                                /* device id */
   vsock_virtio_probe,                             /* probe */
   vsock_virtio_remove,                            /* remove */
   vsock_virtio_dump,                              /* dump */
 };
+#define g_vsock_virtio_driver this_cpu_var_bmp(g_vsock_virtio_driver)
 
 static const struct vsock_transport_ops_s g_vsock_virtio_transport_ops =
 {
