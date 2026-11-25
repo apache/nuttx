@@ -107,11 +107,11 @@
 #  define STM32_DTCM_SRAM_SIZE        (64*1024)
 #  define STM32_ITCM_SRAM_SIZE        (64*1024)
 
-/* Peripherals.  STM32_NGPIO is the size of the GPIO port lookup table;
+/* Peripherals.  STM32_NPORTS is the size of the GPIO port lookup table;
  * ports I-L are not implemented, while ports M-P occupy indices 12-15.
  */
 
-#  define STM32_NGPIO                 (16) /* GPIOA-H and GPIOM-P */
+#  define STM32_NPORTS                (16) /* GPIOA-H and GPIOM-P */
 #  define STM32_NDMA                  (2)  /* GPDMA1 and HPDMA1 */
 #  define STM32_NADC                  (2)  /* ADC1-2 */
 #  define STM32_NDAC                  (0)  /* No DAC peripheral */
@@ -159,26 +159,26 @@
 
 #  if defined(CONFIG_STM32H7_IO_CONFIG_A)
 #    ifdef CONFIG_STM32_STM32H72XXX_OR_STM32H73XXX
-#      define STM32_NGPIO               (8)         /* GPIOA-GPIOH */
+#      define STM32_NPORTS              (8)         /* GPIOA-GPIOH */
 #    else
-#      define STM32_NGPIO               (10)        /* GPIOA-GPIOJ */
+#      define STM32_NPORTS              (10)        /* GPIOA-GPIOJ */
 #    endif
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_B)
-#      define STM32_NGPIO               (11)        /* GPIOA-GPIOK */
+#      define STM32_NPORTS              (11)        /* GPIOA-GPIOK */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_I)
 #    ifdef CONFIG_STM32_STM32H72XXX_OR_STM32H73XXX
-#      define STM32_NGPIO               (11)        /* GPIOA-H, GPIOJ-K */
+#      define STM32_NPORTS              (11)        /* GPIOA-H, GPIOJ-K */
 #    else
-#      define STM32_NGPIO               (9)         /* GPIOA-GPIOI */
+#      define STM32_NPORTS              (9)         /* GPIOA-GPIOI */
 #    endif
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_R)
-#      define STM32_NGPIO               (8)         /* GPIOA-D, GPIOH */
+#      define STM32_NPORTS              (8)         /* GPIOA-D, GPIOH */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_V)
-#      define STM32_NGPIO               (8)         /* GPIOA-GPIOH, missing GPIOF-GPIOG */
+#      define STM32_NPORTS              (8)         /* GPIOA-GPIOH, missing GPIOF-GPIOG */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_X)
-#      define STM32_NGPIO               (11)        /* GPIOA-GPIOK */
+#      define STM32_NPORTS              (11)        /* GPIOA-GPIOK */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_Z)
-#      define STM32_NGPIO               (8)         /* GPIOA-GPIOH */
+#      define STM32_NPORTS              (8)         /* GPIOA-GPIOH */
 #  else
 #      error CONFIG_STM32_IO_CONFIG_x Not Set
 #  endif
@@ -220,19 +220,19 @@
 /* Peripherals */
 
 #  if defined(CONFIG_STM32H7_IO_CONFIG_A)
-#      define STM32_NGPIO               (10)        /* GPIOA-GPIOJ */
+#      define STM32_NPORTS              (10)        /* GPIOA-GPIOJ */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_B)
-#      define STM32_NGPIO               (11)        /* GPIOA-GPIOK */
+#      define STM32_NPORTS              (11)        /* GPIOA-GPIOK */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_I)
-#      define STM32_NGPIO               (9)         /* GPIOA-GPIOI */
+#      define STM32_NPORTS              (9)         /* GPIOA-GPIOI */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_L)
-#      define STM32_NGPIO               (11)        /* GPIOA-GPIOK */
+#      define STM32_NPORTS              (11)        /* GPIOA-GPIOK */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_V)
-#      define STM32_NGPIO               (8)         /* GPIOA-GPIOH, missing GPIOF-GPIOG */
+#      define STM32_NPORTS              (8)         /* GPIOA-GPIOH, missing GPIOF-GPIOG */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_X)
-#      define STM32_NGPIO               (11)        /* GPIOA-GPIOK */
+#      define STM32_NPORTS              (11)        /* GPIOA-GPIOK */
 #  elif defined(CONFIG_STM32H7_IO_CONFIG_Z)
-#      define STM32_NGPIO               (8)         /* GPIOA-GPIOH */
+#      define STM32_NPORTS              (8)         /* GPIOA-GPIOH */
 #  else
 #      error CONFIG_STM32_IO_CONFIG_x Not Set
 #  endif
@@ -273,7 +273,7 @@
 
 /* Peripherals */
 
-#  define STM32_NGPIO                   (11)        /* GPIOA-GPIOK */
+#  define STM32_NPORTS                  (11)        /* GPIOA-GPIOK */
 #  define STM32_NDMA                    (4)         /* (4) DMA1, DMA2, BDMA and MDMA */
 #  define STM32_NADC                    (3)         /* (3) ADC1-3*/
 #  define STM32_NDAC                    (2)         /* (2) DAC1-2*/
@@ -307,7 +307,7 @@
 
 /* Diversification based on Family and package */
 
-#if defined(CONFIG_STM32_HAVE_ETHERNET)
+#if defined(CONFIG_STM32_HAVE_ETHMAC)
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #else
 #  define STM32_NETHERNET                0   /* No 100/100 Ethernet MAC */

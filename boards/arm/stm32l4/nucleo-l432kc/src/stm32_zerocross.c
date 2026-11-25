@@ -34,7 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sensors/zerocross.h>
 
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "nucleo-l432kc.h"
 
 #ifdef CONFIG_SENSORS_ZEROCROSS

@@ -50,42 +50,6 @@ else()
   list(APPEND PLATFORM_FLAGS -mfloat-abi=soft)
 endif()
 
-# Clang Configuration files
-
-set(ARCHFLAGS)
-
-if(CONFIG_ARCH_CORTEXM4)
-  if(CONFIG_ARCH_FPU)
-    string(APPEND ARCHFLAGS "--config armv7em_hard_fpv4_sp_d16.cfg")
-  else()
-    string(APPEND ARCHFLAGS "--config armv7em_soft_nofp.cfg")
-  endif()
-elseif(CONFIG_ARCH_CORTEXM7)
-  if(CONFIG_ARCH_FPU)
-    string(APPEND ARCHFLAGS "--config armv7em_hard_fpv5.cfg")
-  else()
-    string(APPEND ARCHFLAGS "--config armv7em_soft_nofp.cfg")
-  endif()
-else()
-  string(APPEND ARCHFLAGS "--config armv7em_soft_nofp.cfg")
-endif()
-
-if(NOT "${CMAKE_C_FLAGS}" STREQUAL "" AND NOT "${ARCHFLAGS}" STREQUAL "")
-  string(REGEX MATCH "${ARCHFLAGS}" EXISTS_FLAGS "${CMAKE_C_FLAGS}")
-endif()
-
-if(NOT EXISTS_FLAGS)
-  set(CMAKE_ASM_FLAGS
-      "${CMAKE_ASM_FLAGS} ${ARCHFLAGS}"
-      CACHE STRING "" FORCE)
-  set(CMAKE_C_FLAGS
-      "${CMAKE_C_FLAGS} ${ARCHFLAGS}"
-      CACHE STRING "" FORCE)
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} ${ARCHFLAGS}"
-      CACHE STRING "" FORCE)
-endif()
-
 if(CONFIG_ARMV7M_STACKCHECK)
   list(APPEND PLATFORM_FLAGS -finstrument-functions -ffixed-r10)
 endif()

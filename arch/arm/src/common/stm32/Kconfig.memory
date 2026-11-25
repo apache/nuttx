@@ -41,8 +41,8 @@ config STM32_DTCM_PROCFS
 
 config STM32_SRAM2_HEAP
 	bool "SRAM2 is used for heap"
-	depends on STM32_COMMON_SRAM2_OPTIONS
-	select STM32_SRAM2_INIT if !ARCH_CHIP_STM32U5 || STM32_SRAM2
+	depends on STM32_HAVE_SRAM2_HEAP
+	select STM32_SRAM2_INIT
 	---help---
 		The STM32L4 SRAM2 region has special properties (power, protection, parity)
 		which may be used by the application for special purposes.  But if these
@@ -53,7 +53,7 @@ config STM32_SRAM2_HEAP
 
 config STM32_SRAM2_INIT
 	bool "SRAM2 is initialized to zero"
-	depends on STM32_COMMON_SRAM2_OPTIONS
+	depends on STM32_HAVE_SRAM2_HEAP
 	---help---
 		The STM32L4 SRAM2 region has parity checking.  However, when the system
 		powers on, the memory is in an unknown state, and reads from uninitialized

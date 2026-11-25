@@ -55,7 +55,7 @@
  * - When the I/O is LOW, the LED is off
  */
 
-#define GPIO_LD2        (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_LD2        (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                          GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN5)
 
 /* Button definitions *******************************************************/

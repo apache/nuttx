@@ -27,7 +27,6 @@ list(
   SRCS
   stm32l4_allocateheap.c
   stm32l4_exti_gpio.c
-  stm32l4_gpio.c
   stm32l4_irq.c
   stm32l4_lowputc.c
   stm32l4_rcc.c
@@ -124,10 +123,6 @@ endif()
 
 if(CONFIG_STM32_COMP)
   list(APPEND SRCS stm32l4_comp.c stm32l4_exti_comp.c)
-endif()
-
-if(CONFIG_STM32_RNG)
-  list(APPEND SRCS stm32l4_rng.c)
 endif()
 
 if(CONFIG_STM32_SAI)

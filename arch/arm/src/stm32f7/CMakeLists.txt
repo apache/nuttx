@@ -27,7 +27,6 @@ list(
   SRCS
   stm32_allocateheap.c
   stm32_exti_gpio.c
-  stm32_gpio.c
   stm32_irq.c
   stm32_lowputc.c
   stm32_rcc.c
@@ -128,16 +127,8 @@ if(CONFIG_STM32_BBSRAM)
   list(APPEND SRCS stm32_bbsram.c)
 endif()
 
-if(CONFIG_STM32_RNG)
-  list(APPEND SRCS stm32_rng.c)
-endif()
-
 if(CONFIG_STM32_LTDC)
   list(APPEND SRCS stm32_ltdc.c)
-endif()
-
-if(CONFIG_STM32_DMA2D)
-  list(APPEND SRCS stm32_dma2d.c)
 endif()
 
 if(CONFIG_STM32_CAN_CHARDRIVER)

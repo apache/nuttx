@@ -52,7 +52,7 @@
 #  define STM32_NSPI                     2   /* SPI1 and SPI2S2 (spi2 shared with i2s) */
 #  define STM32_NI2C                     3   /* I2C1-3 */
 #  define STM32_NDMA                     2   /* Two DMA channels DMA1-2 */
-#  define STM32_NPORTS                   4   /* GPIO{A,B,C,H} */
+#  define STM32_NPORTS                   8   /* GPIO{A,B,C,H} */
 #  define STM32_NADC                     1   /* ADC1 */
 #  define STM32_NDAC                     1   /* DAC1 */
 #  define STM32_NCRC                     1   /* CRC1 */

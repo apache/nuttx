@@ -311,11 +311,11 @@
 
 #if defined(CONFIG_STM32_STM32F72XX) || defined(CONFIG_STM32_STM32F73XX)
 #      define STM32_NSPDIFRX                 0   /* Not supported */
-#      define STM32_NGPIO                    9   /* 9 GPIO ports, GPIOA-I */
+#      define STM32_NPORTS                   9   /* 9 GPIO ports, GPIOA-I */
 #      define STM32_NI2C                     3   /* I2C1-3 */
 #else
 #      define STM32_NSPDIFRX                 4   /* 4 SPDIFRX inputs */
-#      define STM32_NGPIO                   11   /* 11 GPIO ports, GPIOA-K */
+#      define STM32_NPORTS                  11   /* 11 GPIO ports, GPIOA-K */
 #      define STM32_NI2C                     4   /* I2C1-4 */
 #endif
 
@@ -355,7 +355,7 @@
 #else
 #  define STM32_NFMC                     0   /* No FMC memory controller */
 #endif
-#if defined(CONFIG_STM32_HAVE_ETHRNET)
+#if defined(CONFIG_STM32_HAVE_ETHMAC)
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #else
 #  define STM32_NETHERNET                0   /* No 100/100 Ethernet MAC */

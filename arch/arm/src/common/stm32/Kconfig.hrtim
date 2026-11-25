@@ -73,7 +73,7 @@ config STM32_HRTIM_PWM
 	---help---
 		Enable HRTIM PWM Outputs support.
 
-config STM32_HRTIM_CAP
+config STM32_HRTIM_CAPTURE
 	bool "HRTIM Capture"
 	default n
 	---help---
@@ -121,7 +121,7 @@ config STM32_HRTIM_DMABURST
 	bool "HRTIM DMA Burst"
 	default n
 
-config STM32_HRTIM_AUTODELAY
+config STM32_HRTIM_AUTODELAYED
 	bool "HRTIM Autodelay"
 	depends on STM32_HRTIM_PWM
 	default n

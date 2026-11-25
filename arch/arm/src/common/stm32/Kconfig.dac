@@ -10,7 +10,7 @@ config STM32_DAC_LL_OPS
 
 config STM32_DAC1_DMA
 	bool "DAC1 DMA"
-	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC1
+	depends on STM32_HAVE_DAC_DMA_TIMER && STM32_DAC1
 	---help---
 		If DMA is selected, then a timer and output frequency must also be
 		provided to support the DMA transfer.  The DMA transfer could be
@@ -19,24 +19,24 @@ config STM32_DAC1_DMA
 
 config STM32_DAC1_TIMER
 	int "DAC1 timer"
-	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC1_DMA
+	depends on STM32_HAVE_DAC_DMA_TIMER && STM32_DAC1_DMA
 	range 2 8
 
 config STM32_DAC1_TIMER_FREQUENCY
 	int "DAC1 timer frequency"
-	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC1_DMA
+	depends on STM32_HAVE_DAC_DMA_TIMER && STM32_DAC1_DMA
 	default 100
 	---help---
 		DAC1 output frequency.  Default:  100Hz
 
 config STM32_DAC1_DMA_BUFFER_SIZE
 	int "DAC1 DMA buffer size"
-	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC1_DMA
+	depends on STM32_HAVE_DAC_DMA_TIMER && STM32_DAC1_DMA
 	default 1
 
 config STM32_DAC2_DMA
 	bool "DAC2 DMA"
-	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC2
+	depends on STM32_HAVE_DAC_DMA_TIMER && STM32_DAC2
 	---help---
 		If DMA is selected, then a timer and output frequency must also be
 		provided to support the DMA transfer.  The DMA transfer could be
@@ -45,20 +45,20 @@ config STM32_DAC2_DMA
 
 config STM32_DAC2_TIMER
 	int "DAC2 timer"
-	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC2_DMA
+	depends on STM32_HAVE_DAC_DMA_TIMER && STM32_DAC2_DMA
 	default 0
 	range 2 8
 
 config STM32_DAC2_TIMER_FREQUENCY
 	int "DAC2 timer frequency"
-	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC2_DMA
+	depends on STM32_HAVE_DAC_DMA_TIMER && STM32_DAC2_DMA
 	default 100
 	---help---
 		DAC2 output frequency.  Default:  100Hz
 
 config STM32_DAC2_DMA_BUFFER_SIZE
 	int "DAC2 DMA buffer size"
-	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC2_DMA
+	depends on STM32_HAVE_DAC_DMA_TIMER && STM32_DAC2_DMA
 	default 1
 
 menu "DAC Configuration"

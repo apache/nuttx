@@ -37,7 +37,7 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/pcd8544.h>
 
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_spi.h"
 #include "nucleo-l476rg.h"
 

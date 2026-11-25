@@ -36,7 +36,7 @@
 #include "arm_internal.h"
 #include "nvic.h"
 #include "stm32wb_rcc.h"
-#include "stm32wb_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32wb_ipcc.h"
 #include "stm32wb_userspace.h"
 #include "stm32wb_start.h"

@@ -34,7 +34,7 @@
 #include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_spi.h"
 
 #include "b-l475e-iot01a.h"

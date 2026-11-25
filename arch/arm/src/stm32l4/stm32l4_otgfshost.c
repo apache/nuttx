@@ -5457,7 +5457,7 @@ struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
 
   /* SOF output pin configuration is configurable */
 
-#ifdef CONFIG_STM32_OTGFS_SOFOUTPUT
+#ifdef CONFIG_STM32_OTG_SOFOUTPUT
   stm32_configgpio(GPIO_OTGFS_SOF);
 #endif
 

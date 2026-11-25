@@ -30,7 +30,7 @@ include common/stm32/Make.defs
 
 # Required STM32WL5 files
 
-CHIP_CSRCS += stm32wl5_allocateheap.c stm32wl5_exti_gpio.c stm32wl5_gpio.c
+CHIP_CSRCS += stm32wl5_allocateheap.c stm32wl5_exti_gpio.c
 CHIP_CSRCS += stm32wl5_irq.c stm32wl5_lowputc.c stm32wl5_rcc.c
 CHIP_CSRCS += stm32wl5_serial.c stm32wl5_start.c
 CHIP_CSRCS += stm32wl5_lse.c stm32wl5_idle.c

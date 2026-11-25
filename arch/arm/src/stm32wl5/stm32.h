@@ -38,7 +38,7 @@
 
 #include "chip.h"
 #include "stm32wl5_flash.h"
-#include "stm32wl5_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32wl5_lowputc.h"
 #include "stm32wl5_pwr.h"
 #include "stm32wl5_rcc.h"

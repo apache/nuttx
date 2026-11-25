@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32wl5/stm32wl5_gpio.h
+ * arch/arm/src/common/stm32/stm32_gpio_v2.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32WL5_STM32WL5_GPIO_H
-#define __ARCH_ARM_SRC_STM32WL5_STM32WL5_GPIO_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_V2_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_V2_H
 
 /****************************************************************************
  * Included Files
@@ -35,15 +35,10 @@
 #endif
 
 #include <nuttx/irq.h>
-#include <arch/stm32wl5/chip.h>
+#include <arch/chip/chip.h>
 
 #include "chip.h"
-
-#if defined(CONFIG_STM32_STM32WL5XXX)
-#  include "hardware/stm32wl5_gpio.h"
-#else
-#  error "Unsupported STM32WL5 chip"
-#endif
+#include "hardware/stm32_gpio_v2.h"
 
 /****************************************************************************
  * Pre-Processor Declarations
@@ -71,6 +66,30 @@
  * Alternate Functions:   MMUU AAAA FFO. PPPP BBBB
  * Analog:                MM.. .... .... PPPP BBBB
  */
+
+/* I/O delay (STM32N6 only), above the 20-bit encoding:
+ *
+ *   Bits 20-23: Delay code, 0 for none
+ *   Bit 24:     Delay the input path instead of the output path
+ */
+
+#define GPIO_DELAY_SHIFT              (20)                       /* Bits 20-23: I/O delay */
+#define GPIO_DELAY_MASK               (15 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_NONE             (0 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_300PS            (1 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_500PS            (2 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_750PS            (3 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_1000PS           (4 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_1250PS           (5 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_1500PS           (6 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_1750PS           (7 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_2000PS           (8 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_2250PS           (9 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_2500PS           (10 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_2750PS           (11 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_3000PS           (12 << GPIO_DELAY_SHIFT)
+#  define GPIO_DELAY_3250PS           (13 << GPIO_DELAY_SHIFT)
+#define GPIO_DELAY_INPUT              (1 << 24)                  /* Bit 24: Delay the input path */
 
 /* Mode:
  *
@@ -191,7 +210,42 @@
 #  define GPIO_PORTA                  (0 << GPIO_PORT_SHIFT)     /*   GPIOA */
 #  define GPIO_PORTB                  (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
 #  define GPIO_PORTC                  (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
-#  define GPIO_PORTH                  (3 << GPIO_PORT_SHIFT)     /*   GPIOH */
+#  define GPIO_PORTD                  (3 << GPIO_PORT_SHIFT)     /*   GPIOD */
+#  define GPIO_PORTE                  (4 << GPIO_PORT_SHIFT)     /*   GPIOE */
+#  define GPIO_PORTF                  (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
+#  define GPIO_PORTG                  (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
+#  define GPIO_PORTH                  (7 << GPIO_PORT_SHIFT)     /*   GPIOH */
+
+/* STM32N6 names the ports above H as N, O, P and Q */
+
+#ifdef STM32_GPIOQ_BASE
+#  define GPIO_PORTN                  (8 << GPIO_PORT_SHIFT)     /*   GPION */
+#  define GPIO_PORTO                  (9 << GPIO_PORT_SHIFT)     /*   GPIOO */
+#  define GPIO_PORTP                  (10 << GPIO_PORT_SHIFT)    /*   GPIOP */
+#  define GPIO_PORTQ                  (11 << GPIO_PORT_SHIFT)    /*   GPIOQ */
+#else
+#  ifdef STM32_GPIOI_BASE
+#    define GPIO_PORTI                (8 << GPIO_PORT_SHIFT)     /*   GPIOI */
+#  endif
+#  ifdef STM32_GPIOJ_BASE
+#    define GPIO_PORTJ                (9 << GPIO_PORT_SHIFT)     /*   GPIOJ */
+#  endif
+#  ifdef STM32_GPIOK_BASE
+#    define GPIO_PORTK                (10 << GPIO_PORT_SHIFT)    /*   GPIOK */
+#  endif
+#  ifdef STM32_GPIOM_BASE
+#    define GPIO_PORTM                (12 << GPIO_PORT_SHIFT)    /*   GPIOM */
+#  endif
+#  ifdef STM32_GPION_BASE
+#    define GPIO_PORTN                (13 << GPIO_PORT_SHIFT)    /*   GPION */
+#  endif
+#  ifdef STM32_GPIOO_BASE
+#    define GPIO_PORTO                (14 << GPIO_PORT_SHIFT)    /*   GPIOO */
+#  endif
+#  ifdef STM32_GPIOP_BASE
+#    define GPIO_PORTP                (15 << GPIO_PORT_SHIFT)    /*   GPIOP */
+#  endif
+#endif
 
 /* This identifies the bit in the port:
  *
@@ -299,6 +353,31 @@ void stm32_gpiowrite(uint32_t pinset, bool value);
 bool stm32_gpioread(uint32_t pinset);
 
 /****************************************************************************
+ * Name: stm32_iocompensation
+ *
+ * Description:
+ *   Enable I/O compensation.
+ *
+ *   By default the I/O compensation cell is not used. However when the I/O
+ *   output buffer speed is configured in 50 MHz or 100 MHz mode, it is
+ *   recommended to use the compensation cell for slew rate control on I/O
+ *   tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power
+ *   supply.
+ *
+ *   The I/O compensation cell can be used only when the supply voltage
+ *   ranges from 2.4 to 3.6 V.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void stm32_iocompensation(void);
+
+/****************************************************************************
  * Name: stm32_gpiosetevent
  *
  * Description:
@@ -353,4 +432,4 @@ void stm32_gpioinit(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32WL5_STM32WL5_GPIO_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_V2_H */

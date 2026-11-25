@@ -30,7 +30,7 @@ include common/stm32/Make.defs
 
 # Required STM32F7 files
 
-CHIP_CSRCS += stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c
+CHIP_CSRCS += stm32_allocateheap.c stm32_exti_gpio.c
 CHIP_CSRCS += stm32_irq.c stm32_lowputc.c stm32_rcc.c stm32_serial.c
 CHIP_CSRCS += stm32_start.c stm32_capture.c
 
@@ -129,16 +129,8 @@ ifeq ($(CONFIG_STM32_BBSRAM),y)
 CHIP_CSRCS += stm32_bbsram.c
 endif
 
-ifeq ($(CONFIG_STM32_RNG),y)
-CHIP_CSRCS += stm32_rng.c
-endif
-
 ifeq ($(CONFIG_STM32_LTDC),y)
 CHIP_CSRCS += stm32_ltdc.c
-endif
-
-ifeq ($(CONFIG_STM32_DMA2D),y)
-CHIP_CSRCS += stm32_dma2d.c
 endif
 
 

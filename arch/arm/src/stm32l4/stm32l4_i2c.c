@@ -265,7 +265,7 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_rcc.h"
 #include "stm32l4_i2c.h"
 #include "stm32_waste.h"

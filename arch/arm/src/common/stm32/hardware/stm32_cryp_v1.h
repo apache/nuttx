@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/hardware/stm32h7xxxx_cryp.h
+ * arch/arm/src/common/stm32/hardware/stm32_cryp_v1.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *

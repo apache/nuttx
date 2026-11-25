@@ -40,7 +40,7 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "stm32wb_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32wb_spi.h"
 
 /****************************************************************************

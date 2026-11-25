@@ -41,7 +41,7 @@
 
 /* LD1 is connected to PA5 and is active high. */
 
-#define GPIO_LD1        (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHZ | \
+#define GPIO_LD1        (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
                          GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN5)
 
 /* B1 USER is connected to PC13 and is active high. */

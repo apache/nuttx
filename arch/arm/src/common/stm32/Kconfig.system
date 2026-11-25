@@ -4,7 +4,7 @@
 
 config STM32_DISABLE_IDLE_SLEEP_DURING_DEBUG
 	bool "Disable IDLE Sleep (WFI) in debug mode"
-	depends on STM32_COMMON_LEGACY || STM32_COMMON_L4_H5_L5_U5 || ARCH_CHIP_STM32WB
+	depends on STM32_HAVE_DISABLE_IDLE_SLEEP
 	---help---
 		In debug configuration, disables the WFI instruction in the IDLE loop
 		to prevent the JTAG from disconnecting.  With some JTAG debuggers, such
@@ -33,7 +33,7 @@ endchoice
 
 config STM32_DFU
 	bool "DFU bootloader"
-	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F0_L0_G0_C0) && !(STM32F1_VALUELINE || STM32F0_VALUELINE)
+	depends on (STM32_HAVE_IP_DFUMODE_M3M4_V1 || STM32_HAVE_IP_DFUMODE_M0_V1) && !(STM32F1_VALUELINE || STM32F0_VALUELINE)
 	---help---
 		Configure and position code for use with the STMicro DFU bootloader.  Do
 		not select this option if you will load code using JTAG/SWM.
@@ -69,7 +69,7 @@ config STM32_NOEXT_VECTORS
 
 choice
 	prompt "SysTick clock source"
-	depends on STM32_COMMON_F0_L0_G0_C0
+	depends on ARCH_CORTEXM0
 	default STM32_SYSTICK_CORECLK
 
 config STM32_SYSTICK_CORECLK

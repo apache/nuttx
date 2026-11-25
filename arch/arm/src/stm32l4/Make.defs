@@ -30,7 +30,7 @@ include common/stm32/Make.defs
 
 # Required STM32L4 files
 
-CHIP_CSRCS += stm32l4_allocateheap.c stm32l4_exti_gpio.c stm32l4_gpio.c
+CHIP_CSRCS += stm32l4_allocateheap.c stm32l4_exti_gpio.c
 CHIP_CSRCS += stm32l4_irq.c stm32l4_lowputc.c stm32l4_rcc.c
 CHIP_CSRCS += stm32l4_serial.c stm32l4_start.c
 CHIP_CSRCS += stm32l4_spi.c stm32l4_i2c.c stm32l4_lse.c
@@ -122,10 +122,6 @@ endif
 
 ifeq ($(CONFIG_STM32_COMP),y)
 CHIP_CSRCS += stm32l4_comp.c stm32l4_exti_comp.c
-endif
-
-ifeq ($(CONFIG_STM32_RNG),y)
-CHIP_CSRCS += stm32l4_rng.c
 endif
 
 ifeq ($(CONFIG_STM32_SAI),y)

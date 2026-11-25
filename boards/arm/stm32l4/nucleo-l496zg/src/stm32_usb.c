@@ -41,7 +41,7 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_otgfs.h"
 #include "nucleo-144.h"
 

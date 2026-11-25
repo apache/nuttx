@@ -32,7 +32,7 @@
 #include <nuttx/board.h>
 #include <nuttx/analog/adc.h>
 
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_dfsdm.h"
 #include "stm32l4r9ai-disco.h"
 

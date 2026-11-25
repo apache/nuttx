@@ -37,12 +37,12 @@
 
 #if (defined(CONFIG_STM32_CAN_CHARDRIVER) || \
      defined(CONFIG_STM32_FDCAN_CHARDRIVER)) && \
-    !defined(CONFIG_STM32_HAVE_FDCAN_H7)
+    !defined(CONFIG_STM32_HAVE_IP_FDCAN_M7_V1)
 #  define HAVE_CAN_SETUP
 #endif
 
 #if (defined(CONFIG_STM32_CAN_SOCKET) || defined(CONFIG_STM32_FDCAN_SOCKET)) && \
-    !defined(CONFIG_STM32_HAVE_FDCAN_H7)
+    !defined(CONFIG_STM32_HAVE_IP_FDCAN_M7_V1)
 #  define HAVE_CANSOCK_SETUP
 #endif
 

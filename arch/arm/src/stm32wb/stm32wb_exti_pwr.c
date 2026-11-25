@@ -35,7 +35,7 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32wb_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32wb_exti.h"
 
 /****************************************************************************

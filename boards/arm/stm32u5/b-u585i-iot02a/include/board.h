@@ -145,12 +145,12 @@
 
 /* SPI1: Arduino Connector CN13 */
 
-#define GPIO_SPI1_NSS   (GPIO_OUTPUT|GPIO_SPEED_2MHZ| \
+#define GPIO_SPI1_NSS   (GPIO_OUTPUT|GPIO_SPEED_2MHz| \
                          GPIO_PUSHPULL|GPIO_OUTPUT_SET| \
                          GPIO_PORTE|GPIO_PIN12)             /* PE12 */
-#define GPIO_SPI1_SCK   (GPIO_SPI1_SCK_4|GPIO_SPEED_25MHZ)  /* PE13 */
+#define GPIO_SPI1_SCK   (GPIO_SPI1_SCK_4|GPIO_SPEED_25MHz)  /* PE13 */
 #define GPIO_SPI1_MISO  (GPIO_SPI1_MISO_4)                  /* PE14 */
-#define GPIO_SPI1_MOSI  (GPIO_SPI1_MOSI_4|GPIO_SPEED_25MHZ) /* PE15 */
+#define GPIO_SPI1_MOSI  (GPIO_SPI1_MOSI_4|GPIO_SPEED_25MHz) /* PE15 */
 
 /****************************************************************************
  * Public Data

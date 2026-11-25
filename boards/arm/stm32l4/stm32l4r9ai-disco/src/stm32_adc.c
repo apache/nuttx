@@ -38,7 +38,7 @@
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_adc.h"
 #include "stm32l4r9ai-disco.h"
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/hardware/stm32_gpio_m33m55_v1.h
+ * arch/arm/src/common/stm32/hardware/stm32_gpio_v2.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_M33M55_V1_H
-#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_M33M55_V1_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_V2_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_V2_H
 
 /****************************************************************************
  * Included Files
@@ -55,6 +55,13 @@
 #define STM32_GPIO_DELAYRH_OFFSET   0x0044 /* GPIO delay register, pins 8-15 (STM32N6) */
 #define STM32_GPIO_ADVCFGRL_OFFSET  0x0048 /* GPIO advanced configuration register, pins 0-7 (STM32N6) */
 #define STM32_GPIO_ADVCFGRH_OFFSET  0x004c /* GPIO advanced configuration register, pins 8-15 (STM32N6) */
+
+#if defined(CONFIG_STM32_STM32L471XX) || \
+    defined(CONFIG_STM32_STM32L475XX) || \
+    defined(CONFIG_STM32_STM32L476XX) || \
+    defined(CONFIG_STM32_STM32L486XX)
+#  define STM32_GPIO_ASCR_OFFSET   0x002c /* GPIO analog switch control */
+#endif
 
 /* Register Addresses *******************************************************/
 
@@ -726,10 +733,10 @@
 
 /* GPIO port output speed register */
 
-#define GPIO_OSPEED_2MHZ              (0)
-#define GPIO_OSPEED_25MHZ             (1)
-#define GPIO_OSPEED_50MHZ             (2)
-#define GPIO_OSPEED_100MHZ            (3)
+#define GPIO_OSPEED_2MHz              (0)
+#define GPIO_OSPEED_25MHz             (1)
+#define GPIO_OSPEED_50MHz             (2)
+#define GPIO_OSPEED_100MHz            (3)
 #define GPIO_OSPEED_SHIFT(n)          ((n) << 1)
 #define GPIO_OSPEED_MASK(n)           (3 << GPIO_OSPEED_SHIFT(n))
 #define GPIO_OSPEED0_SHIFT             GPIO_OSPEEDR_OSPEED0_SHIFT
@@ -880,4 +887,8 @@
 #define GPIO_ADVCFGR_MASK(n)          (0xf << GPIO_ADVCFGR_SHIFT(n))
 #define GPIO_ADVCFGR_DLYPATH(n)       (1 << GPIO_ADVCFGR_SHIFT(n)) /* Delay on the input path */
 
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_M33M55_V1_H */
+/* GPIO port analog switch control register */
+
+#define GPIO_ASCR(n)                  (1 << (n))
+
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_V2_H */

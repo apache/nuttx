@@ -47,7 +47,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "stm32l4_dma.h"
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_sdmmc.h"
 
 #if defined(CONFIG_STM32_SDMMC1) || defined(CONFIG_STM32_SDMMC2)

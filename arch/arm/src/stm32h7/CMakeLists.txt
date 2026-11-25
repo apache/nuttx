@@ -27,7 +27,6 @@ list(
   SRCS
   stm32_allocateheap.c
   stm32_exti_gpio.c
-  stm32_gpio.c
   stm32_irq.c
   stm32_start.c
   stm32_rcc.c
@@ -146,11 +145,7 @@ if(CONFIG_PM)
   endif()
 endif()
 
-if(CONFIG_STM32_CRYP AND CONFIG_STM32_HAVE_IP_CRYPTO_H7)
-  list(APPEND SRCS stm32_aes.c)
-endif()
-
-if(CONFIG_CRYPTO_CRYPTODEV_HARDWARE AND CONFIG_STM32_HAVE_IP_CRYPTO_H7)
+if(CONFIG_CRYPTO_CRYPTODEV_HARDWARE AND CONFIG_STM32_HAVE_IP_CRYP_V1)
   list(APPEND SRCS stm32_crypto.c)
 endif()
 

@@ -45,7 +45,7 @@
 #include "stm32l4_dma.h"
 #include "stm32l4_exti.h"
 #include "stm32l4_flash.h"
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 #include "stm32l4_i2c.h"
 #include "stm32l4_pwr.h"
 #include "stm32l4_rcc.h"

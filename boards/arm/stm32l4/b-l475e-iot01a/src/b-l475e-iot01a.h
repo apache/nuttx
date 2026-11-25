@@ -32,7 +32,7 @@
 
 #include <arch/stm32l4/chip.h>
 
-#include "stm32l4_gpio.h"
+#include "stm32_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
