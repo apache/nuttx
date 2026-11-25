@@ -19,3 +19,11 @@
 # the License.
 #
 # ##############################################################################
+
+set(PLATFORM_FLAGS)
+
+if(CONFIG_ARCH_ARM7TDMI)
+  list(APPEND PLATFORM_FLAGS -mcpu=arm7tdmi -mfloat-abi=soft)
+endif()
+
+add_compile_options(${PLATFORM_FLAGS})
