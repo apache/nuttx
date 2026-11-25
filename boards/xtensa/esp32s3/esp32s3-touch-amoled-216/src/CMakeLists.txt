@@ -10,6 +10,10 @@ if(CONFIG_BOARDCTL_RESET)
   list(APPEND SRCS esp32s3_reset.c)
 endif()
 
+if(CONFIG_ESP32S3_SPI)
+  list(APPEND SRCS esp32s3_board_spi.c)
+endif()
+
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS esp32s3_buttons.c)
 endif()

@@ -61,6 +61,10 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_MMCSD_SPI
+#  include "esp32s3_board_sdmmc.h"
+#endif
+
 #ifdef CONFIG_ESPRESSIF_WIFI
 #  include "esp32s3_board_wlan.h"
 #endif
@@ -195,6 +199,16 @@ int esp32s3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize QMI8658: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+  /* Bind the microSD slot on SPI3 to /dev/mmcsd0 */
+
+  ret = board_sdmmc_spi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SD card: %d\n", ret);
     }
 #endif
 
