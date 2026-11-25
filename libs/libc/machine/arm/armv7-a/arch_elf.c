@@ -34,6 +34,25 @@
 #include <nuttx/elf.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* NOP instruction encodings: ARM and 32-bit Thumb (nop.w) */
+
+#define ARM_INSN_NOP            0xe320f000
+#define THUMB2_INSN_NOP_UPPER   0xf3af
+#define THUMB2_INSN_NOP_LOWER   0x8000
+
+/* A branch to an undefined weak symbol becomes a NOP, as in a static link.
+ * The symbol has the value 0, which is out of the branch range of a
+ * program at a high address.
+ */
+
+#define IS_UNDEF_WEAK(sym) \
+  ((sym)->st_shndx == SHN_UNDEF && (sym)->st_value == 0 && \
+   ELF32_ST_BIND((sym)->st_info) == STB_WEAK)
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -165,6 +184,12 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
                 ELF32_R_TYPE(rel->r_info), (long)addr,
                 (long)(*(uint32_t *)addr),
                 sym, (long)sym->st_value);
+
+          if (IS_UNDEF_WEAK(sym))
+            {
+              *(uint32_t *)addr = ARM_INSN_NOP;
+              break;
+            }
 
           offset = (*(uint32_t *)addr & 0x00ffffff) << 2;
           if (offset & 0x02000000)
@@ -383,6 +408,13 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
                 ELF32_R_TYPE(rel->r_info), (long)addr,
                 (int)upper_insn, (int)lower_insn,
                 sym, (long)sym->st_value);
+
+          if (IS_UNDEF_WEAK(sym))
+            {
+              *(uint16_t *)addr = THUMB2_INSN_NOP_UPPER;
+              *(uint16_t *)(addr + 2) = THUMB2_INSN_NOP_LOWER;
+              break;
+            }
 
           /* Extract the 25-bit offset from the 32-bit instruction:
            *
