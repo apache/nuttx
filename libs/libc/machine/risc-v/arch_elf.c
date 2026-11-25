@@ -44,6 +44,8 @@
 
 #define RVI_OPCODE_MASK 0x7F
 
+#define RVI_INSN_NOP    0x00000013  /* addi x0, x0, 0 */
+
 /* ELF32 and ELF64 definitions */
 
 #ifdef CONFIG_ARCH_64BIT
@@ -530,6 +532,19 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
                 _get_rname(relotype),
                 addr, _get_val((uint16_t *)addr),
                 sym, (uintptr_t)sym->st_value);
+
+          /* An undefined weak symbol has the value 0, which is out of the
+           * AUIPC range of a program at a high address.  The program does
+           * not call it, so make the AUIPC and JALR pair two NOPs.
+           */
+
+          if (sym->st_shndx == SHN_UNDEF && sym->st_value == 0 &&
+              ELF_ST_BIND(sym->st_info) == STB_WEAK)
+            {
+              _set_val((uint16_t *)addr, RVI_INSN_NOP);
+              _set_val((uint16_t *)(addr + 4), RVI_INSN_NOP);
+              break;
+            }
 
           offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
 
