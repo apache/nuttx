@@ -425,7 +425,7 @@ endif
 ifeq ($(CONFIG_STM32_FDCAN),y)
 ifeq ($(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_V1),y)
 ifeq ($(CONFIG_STM32_FDCAN_SOCKET),y)
-CHIP_CSRCS += stm32_fdcan_m3m4_v1_sock.c
+CHIP_CSRCS += stm32_fdcan_mcan_v1_sock.c
 endif
 endif
 endif
