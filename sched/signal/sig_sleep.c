@@ -74,25 +74,22 @@ unsigned int nxsig_sleep(unsigned int seconds)
   struct timespec rqtp;
   struct timespec rmtp;
   unsigned int remaining = 0;
-  int ret;
 
   /* Don't sleep if seconds == 0 */
 
-  if (seconds > 0)
+  if (seconds > 0u)
     {
       /* Let nxsig_nanosleep() do all of the work. */
 
-      rqtp.tv_sec  = seconds;
+      rqtp.tv_sec  = (time_t)seconds;
       rqtp.tv_nsec = 0;
 
-      ret = nxsig_nanosleep(&rqtp, &rmtp);
-
-      /* nanosleep() should only fail if it was interrupted by a signal,
-       * but we treat all errors the same,
-       */
-
-      if (ret < 0)
+      if (nxsig_nanosleep(&rqtp, &rmtp) < 0)
         {
+          /* nanosleep() should only fail if it was interrupted by a signal,
+           * but we treat all errors the same,
+           */
+
           remaining = (unsigned int)MAX(rmtp.tv_sec, 0);
           if (remaining < seconds && rmtp.tv_nsec >= 500000000)
             {
@@ -101,9 +98,7 @@ unsigned int nxsig_sleep(unsigned int seconds)
               remaining++;
             }
         }
-
-      return remaining;
     }
 
-  return 0;
+  return remaining;
 }
