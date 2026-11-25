@@ -1,0 +1,106 @@
+=============================
+X-Powers AXP2101 PMIC charger
+=============================
+
+The AXP2101 driver (``drivers/power/battery/axp2101.c``) supports the
+battery charger and the fuel gauge of the X-Powers AXP2101 PMIC, an I2C
+device at address ``0x34``. It is enabled with ``CONFIG_AXP2101``, which
+needs ``CONFIG_BATTERY_CHARGER``. The gauge part, ``CONFIG_AXP2101_GAUGE``,
+is enabled by default when ``CONFIG_BATTERY_GAUGE`` is set.
+
+The driver does not change the DCDC and LDO outputs: they keep the values
+programmed in the OTP of the chip. At initialization it checks the chip ID
+and enables the VBAT, VBUS, VSYS and die temperature ADC channels. The IRQ
+pin is not used.
+
+The power-off voltage, below which the AXP2101 turns the system off to
+protect the battery from deep discharge, is also left as programmed in the
+OTP (which may be as low as 2.6 V), unless ``CONFIG_AXP2101_VOFF_VOLTAGE``
+is set (2600 to 3300 mV in steps of 100 mV). For Li-ion and LiPo batteries
+3000 mV or more is recommended.
+
+Board interface
+===============
+
+.. code-block:: c
+
+   #include <nuttx/power/axp2101.h>
+
+   FAR struct battery_charger_dev_s *
+     axp2101_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
+                        uint32_t frequency);
+
+   FAR struct battery_gauge_dev_s *
+     axp2101_gauge_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
+                              uint32_t frequency);
+
+   int axp2101_poweroff(FAR struct battery_charger_dev_s *dev);
+
+The two lower halves are independent and are registered separately, for
+example:
+
+.. code-block:: c
+
+   charger = axp2101_initialize(i2c, AXP2101_I2C_ADDR, 400000);
+   battery_charger_register("/dev/batt0", charger);
+
+   gauge = axp2101_gauge_initialize(i2c, AXP2101_I2C_ADDR, 400000);
+   battery_gauge_register("/dev/gauge0", gauge);
+
+``axp2101_poweroff()`` turns off all the outputs. It may be called from
+``board_power_off()``. The system starts again on a power-on event, such as
+the PWRON key or the insertion of VBUS.
+
+Battery charger
+===============
+
+========================== ==================================================
+IOCTL                      Behavior
+========================== ==================================================
+``BATIOC_STATE``           ``BATTERY_CHARGING``, ``BATTERY_DISCHARGING``,
+                           ``BATTERY_FULL`` (charge done) or
+                           ``BATTERY_IDLE`` (also without battery).
+``BATIOC_HEALTH``          ``BATTERY_HEALTH_DISCONNECTED`` without battery,
+                           else ``GOOD``, ``OVERVOLTAGE``, ``OVERHEAT``,
+                           ``COLD`` or ``SAFE_TMR_EXP``.
+``BATIOC_ONLINE``          True if a good VBUS input is present.
+``BATIOC_VOLTAGE``         Charge voltage in mV: 4000, 4100, 4200, 4350 or
+                           4400.
+``BATIOC_CURRENT``         Constant charge current, 0 to 1000 mA. The value
+                           is rounded down to a step of 25 mA up to 200 mA
+                           and of 100 mA above.
+``BATIOC_INPUT_CURRENT``   VBUS input current limit, rounded down to 100,
+                           500, 900, 1000, 1500 or 2000 mA.
+``BATIOC_OPERATE``         ``BATIO_OPRTN_EN_TERM`` (``u32`` not zero enables
+                           the charge termination) and
+                           ``BATIO_OPRTN_SYSOFF`` (power off).
+``BATIOC_CHIPID``          Content of the chip ID register, ``0x4a``.
+``BATIOC_GET_VOLTAGE``     Measured battery voltage in mV.
+``BATIOC_VOLTAGE_INFO``    Measured VBUS voltage in mV.
+========================== ==================================================
+
+The health faults come from the IRQ status registers. The chip sets them
+only for the IRQs that are enabled in REG 40h to 42h, which the driver does
+not change.
+
+Battery gauge
+=============
+
+========================== ==================================================
+IOCTL                      Behavior
+========================== ==================================================
+``BATIOC_STATE``           As for the charger.
+``BATIOC_ONLINE``          True if a battery is present.
+``BATIOC_VOLTAGE``         Battery voltage in mV, 0 without battery.
+``BATIOC_CAPACITY``        State of charge from the gauge of the chip, in
+                           percent, 0 without battery.
+``BATIOC_TEMPERATURE``     Die temperature of the PMIC in 0.1 degrees
+                           Celsius. It is not the temperature of the cell.
+``BATIOC_CHIPID``          Content of the chip ID register, ``0x4a``.
+========================== ==================================================
+
+The chip does not measure the battery current, so ``BATIOC_CURRENT`` is not
+supported.
+
+The ``batterydump`` tool (``CONFIG_SYSTEM_BATTERYDUMP``) shows both devices:
+``batterydump -t 0 /dev/batt0`` and ``batterydump -t 1 /dev/gauge0``.

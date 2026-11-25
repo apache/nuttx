@@ -114,6 +114,38 @@ config AXP202_LDO4_VOLTAGE
 			1250 1300 1400 1500 1600 1700 1800 1900
 			2000 2500 2700 2800 3000 3100 3200 3300 mV.
 
+config AXP2101
+	bool "AXP2101 PMIC battery charger support"
+	default n
+	select I2C
+	depends on BATTERY_CHARGER
+	---help---
+		Battery charger driver for the X-Powers AXP2101 PMIC (I2C).
+		It reports the charge state and sets the charge voltage, the
+		charge current and the input current limit.  The power rails
+		are left as programmed by the OTP of the chip.
+
+config AXP2101_GAUGE
+	bool "AXP2101 fuel gauge support"
+	default y
+	depends on AXP2101 && BATTERY_GAUGE
+	---help---
+		Also provide a battery gauge lower half for the AXP2101: battery
+		voltage, state of charge and die temperature.
+
+config AXP2101_VOFF_VOLTAGE
+	int "AXP2101 power-off voltage (mV)"
+	default 0
+	range 0 3300
+	depends on AXP2101
+	---help---
+		The AXP2101 turns the system off when the battery voltage falls
+		below this level, which protects the battery from deep
+		discharge.  2600 to 3300 mV in steps of 100 mV.  0 keeps the
+		value programmed in the OTP of the chip, which may be as low as
+		2600 mV.  For a Li-ion or LiPo battery, 3000 mV or more is
+		recommended.
+
 config GD30BC2416
 	bool "GD30BC2416 Battery charger support"
 	default n

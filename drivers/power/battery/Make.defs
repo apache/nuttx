@@ -68,6 +68,12 @@ ifeq ($(CONFIG_I2C_AXP202),y)
 CSRCS += axp202.c
 endif
 
+# Add the AXP2101 I2C-based PMIC battery charger driver
+
+ifeq ($(CONFIG_AXP2101),y)
+CSRCS += axp2101.c
+endif
+
 endif
 
 # Add battery gauge drivers

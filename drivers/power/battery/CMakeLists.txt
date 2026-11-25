@@ -72,6 +72,12 @@ if(CONFIG_BATTERY_CHARGER)
     list(APPEND SRCS axp202.c)
   endif()
 
+  # Add the AXP2101 I2C-based PMIC battery charger driver
+
+  if(CONFIG_AXP2101)
+    list(APPEND SRCS axp2101.c)
+  endif()
+
 endif()
 
 # Add battery gauge drivers
