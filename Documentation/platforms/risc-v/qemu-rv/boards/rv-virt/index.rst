@@ -163,6 +163,53 @@ This configuration uses ``apps/examples/elf`` in order to test the ELF loader
 on 32-bit RISC-V. It boots directly into the ELF example and does not provide
 the NuttShell (NSH).
 
+gdbstub
+-------
+
+Debug configuration that runs a GDB remote stub on the console UART. The
+rv-virt machine has a single 16550 UART, so the console and the stub share
+``/dev/ttyS0``. ``CONFIG_SERIAL_GDBSTUB_WAIT_CONNECT`` makes the boot wait
+for GDB and ``CONFIG_SERIAL_GDBSTUB_AUTO_ATTACH`` lets a character received
+on the port stop the running target (Ctrl-C).
+
+The stub is registered by the serial driver and uses the ``uart_dev_s``
+operations for TX and RX (``CONFIG_SERIAL_GDBSTUB``). This is required for
+hardware breakpoints and watchpoints: their stop is reported from the
+breakpoint exception context, where the descriptor based transport of the
+``apps/system/gdbstub`` application is not usable (the descriptor is looked
+up in the interrupted task's file table, which typically fails with
+``-EBADF``).
+
+Build it with::
+
+    $ ./tools/configure.sh rv-virt:gdbstub
+    $ make -j$(nproc)
+
+Export the serial line over TCP so that GDB can speak the remote protocol
+directly::
+
+    $ qemu-system-riscv64 -M virt -bios none -kernel nuttx \
+        -display none -monitor none \
+        -serial tcp:127.0.0.1:1234,server=on,wait=off
+
+Then connect from the host::
+
+    $ gdb-multiarch nuttx
+    (gdb) target remote 127.0.0.1:1234
+    (gdb) break up_idle
+    (gdb) continue
+
+Hardware watchpoints work as well; the following stops on the next timer
+tick::
+
+    (gdb) watch g_hrtimer_last_expired
+    (gdb) continue
+
+``-bios none -kernel nuttx`` is used because this configuration runs in
+machine mode and does not need OpenSBI. A local PTY can be used instead of
+the TCP socket (``-serial pty``); GDB then connects to the printed
+``/dev/pts/N`` path.
+
 libcxx64
 --------
 
