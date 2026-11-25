@@ -556,6 +556,9 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                * the ACK is received, completing the 3-way handshake.  But if
                * the retry count elapsed, then we must assume that no ACK is
                * forthcoming and terminate the attempted connection.
+               *
+               * Send no reset: the peer never answered, and the source
+               * address of the SYN can be spoofed.
                */
 
               if (conn->tcpstateflags == TCP_SYN_RCVD &&
@@ -563,10 +566,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                 {
                   conn->tcpstateflags = TCP_CLOSED;
                   ninfo("TCP state: TCP_SYN_RCVD->TCP_CLOSED\n");
-
-                  /* We also send a reset packet to the remote host. */
-
-                  tcp_send(dev, conn, TCP_RST | TCP_ACK, hdrlen);
 
                   /* Finally, we must free this TCP connection structure */
 
