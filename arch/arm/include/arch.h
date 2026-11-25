@@ -51,6 +51,7 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
 #ifdef CONFIG_PIC
 
 /* This identifies the register that is used by the processor as the PIC base
@@ -129,6 +130,7 @@ static inline void up_fdpic_invoke(uintptr_t arg, uintptr_t entry,
 #endif /* CONFIG_FDPIC */
 
 #endif /* CONFIG_PIC */
+#endif /* __ASSEMBLY__ */
 
 #ifdef CONFIG_ARCH_ADDRENV
 #if CONFIG_MM_PGSIZE != 4096
