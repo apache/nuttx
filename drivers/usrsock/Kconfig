@@ -66,6 +66,14 @@ config NET_USRSOCK_RPMSG_SERVER
 
 if NET_USRSOCK_RPMSG_SERVER
 
+config NET_USRSOCK_RPMSG_SERVER_CPUID
+	int "The CPU the usrsock RPMSG server runs on"
+	depends on BMP
+	---help---
+		In BMP mode every CPU runs the same image, so only the CPU with
+		this ID starts the usrsock RPMSG server; the others are its
+		clients.
+
 config NET_USRSOCK_RPMSG_SERVER_NSOCKS
 	int "The maximum number of socket descriptors for usrsock monitoring"
 	default 64
