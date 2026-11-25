@@ -207,6 +207,14 @@ void stm32_rcc_enableperipherals(void)
 #endif
   modifyreg32(STM32_RCC_APB1LENR, 0, regval);
 
+#ifdef CONFIG_STM32_FDCAN
+#  ifdef STM32_RCC_CCIPR1_FDCANSEL
+  modifyreg32(STM32_RCC_CCIPR1, RCC_CCIPR1_FDCANSEL_MASK,
+              STM32_RCC_CCIPR1_FDCANSEL);
+#  endif
+  modifyreg32(STM32_RCC_APB1HENR, 0, RCC_APB1HENR_FDCANEN);
+#endif
+
 #ifdef CONFIG_STM32_LPUART1
   modifyreg32(STM32_RCC_APB3ENR, 0, RCC_APB3ENR_LPUART1EN);
 #endif

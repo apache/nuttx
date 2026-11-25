@@ -36,7 +36,7 @@ CRC         No
 CRS         No
 DAC         No
 DBG         No
-FDCAN       No
+FDCAN       Yes
 FLASH       No
 HASH        No
 I2C         No
