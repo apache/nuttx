@@ -329,6 +329,10 @@ Retransmission timer
 * An incoming ACK restarts the timer only when it acknowledges new data.  An
 	ACK that is not beyond the highest ACK so far gives no RTT sample and does
 	not reset the count of retransmissions.
+* An ACK of new data resets the count of retransmissions, also when it
+	acknowledges only a part of the data sent (RFC 1122, section 4.2.3.5).
+	The first ACK after a retransmission gives no RTT sample (Karn's
+	algorithm).
 * At each expiry the timeout doubles (RFC 6298, section 5.5): the next timeout
 	is the initial timeout (``NET_TCP_RTO``) times 2, 4, 8 and then 16.  With
 	``NET_TCP_FIXED_RTO`` it does not change.
