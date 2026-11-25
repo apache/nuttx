@@ -102,6 +102,10 @@ ifeq ($(CONFIG_STM32_LTDC)$(CONFIG_STM32_HAVE_IP_LTDC_V2),yy)
 CHIP_CSRCS += stm32_ltdc_v1v2.c
 endif
 
+ifeq ($(CONFIG_STM32_DMA2D)$(CONFIG_STM32_HAVE_IP_DMA2D_V1),yy)
+CHIP_CSRCS += stm32_dma2d_v1.c
+endif
+
 ifeq ($(CONFIG_STM32_SPI)$(CONFIG_STM32_HAVE_IP_SPI_V5),yy)
 CHIP_CSRCS += stm32_spi_v5.c
 endif
@@ -393,12 +397,6 @@ endif
 ifeq ($(CONFIG_STM32_LTDC),y)
 ifeq ($(CONFIG_STM32_HAVE_IP_LTDC_V1),y)
 CHIP_CSRCS += stm32_ltdc_v1v2.c
-endif
-endif
-
-ifeq ($(CONFIG_STM32_DMA2D),y)
-ifeq ($(CONFIG_STM32_HAVE_IP_DMA2D_M3M4_V1),y)
-CHIP_CSRCS += stm32_dma2d_m3m4_v1.c
 endif
 endif
 

@@ -122,12 +122,11 @@ config STM32_DMAMUX1
 
 config STM32_DMA2D
 	bool "DMA2D"
-	depends on STM32_HAVE_DMA2D
-	select FB if STM32_COMMON_LEGACY && STM32_STM32F429 || ARCH_CHIP_STM32F7 && STM32_HAVE_DMA2D
-	select FB_OVERLAY if STM32_COMMON_LEGACY && STM32_STM32F429 || ARCH_CHIP_STM32F7 && STM32_HAVE_DMA2D
+	depends on STM32_HAVE_IP_DMA2D_V1
+	select FB
+	select FB_OVERLAY
 	---help---
-		The STM32 DMA2D is an Chrom-Art Accelerator for image manipulation
-		available on the STM32F429 and STM32F439 devices.
+		The STM32 DMA2D Chrom-Art Accelerator as framebuffer overlays.
 
 # CLOCK peripherals
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f7/stm32_dma2d.h
+ * arch/arm/src/common/stm32/stm32_dma2d_v1.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_STM32_DMA2D_H
-#define __ARCH_ARM_SRC_STM32F7_STM32_DMA2D_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_DMA2D_V1_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_DMA2D_V1_H
 
 /****************************************************************************
  * Included Files
@@ -72,8 +72,9 @@ struct dma2d_layer_s
   /* Name: fillcolor
    *
    * Description:
-   *   Fill a specific memory region with a color. The caller must ensure
-   *   that the memory region (area) is within the entire overlay.
+   *   Fill a specific memory region with a color.
+   *   The caller must ensure that the memory region (area) is within the
+   *   entire overlay.
    *
    * Parameter:
    *   oinfo  - Reference to overlay information
@@ -188,4 +189,4 @@ int stm32_dma2dinitialize(void);
 void stm32_dma2duninitialize(void);
 
 #endif /* CONFIG_FB_OVERLAY */
-#endif /* __ARCH_ARM_SRC_STM32F7_STM32_DMA2D_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_DMA2D_V1_H */

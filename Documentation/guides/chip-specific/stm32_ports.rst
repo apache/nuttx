@@ -438,7 +438,7 @@ CAN/FDCAN     bxCAN         arch/arm/src/common/stm32/stm32_can_m3m4_v1.c
 CRYP          v1            arch/arm/src/common/stm32/stm32_aes_m3m4_v1.c         
 DAC           v1            arch/arm/src/common/stm32/stm32_dac_m3m4_v1.c         
 DMA           v2            arch/arm/src/common/stm32/stm32_dma_m3m4_v2_stream.c  
-DMA2D         v1            arch/arm/src/common/stm32/stm32_dma2d_m3m4_v1.c       
+DMA2D         v1            arch/arm/src/common/stm32/stm32_dma2d_v1.c       
 ETH           to be done    arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c         
 EXTI          v1            arch/arm/src/common/stm32/stm32_exti_gpio_m3m4_v1v2.c 
 FLASH         F2/F4         arch/arm/src/common/stm32/stm32_flash_m3m4_f2f4.c     
@@ -539,7 +539,7 @@ ADC           to be done    arch/arm/src/stm32f7/stm32_adc.c
 CAN/FDCAN     bxCAN         arch/arm/src/stm32f7/stm32_can.c       
 DAC           to be done    not supported                          
 DMA           v2 style      arch/arm/src/stm32f7/stm32_dma.c       
-DMA2D         v1            arch/arm/src/stm32f7/stm32_dma2d.c     
+DMA2D         v1            arch/arm/src/common/stm32/stm32_dma2d_v1.c
 ETH           to be done    arch/arm/src/stm32f7/stm32_ethernet.c  
 EXTI          to be done    arch/arm/src/stm32f7/stm32_exti_gpio.c 
 FLASH         to be done    arch/arm/src/stm32f7/stm32_flash.c     
