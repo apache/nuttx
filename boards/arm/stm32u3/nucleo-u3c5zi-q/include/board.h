@@ -103,10 +103,28 @@
 #define STM32_LPTIM3_CLKIN           12000000ul
 #define STM32_LPTIM4_CLKIN           12000000ul
 
+/* FDCAN kernel clock is SYSCLK (96 MHz) */
+
+#define STM32_RCC_CCIPR1_FDCANSEL    RCC_CCIPR1_FDCANSEL_SYSCLK
+#define STM32_FDCAN_FREQUENCY        STM32_SYSCLK_FREQUENCY
+
 /* USART1 is connected to the ST-LINK virtual COM port. */
 
 #define GPIO_USART1_RX               GPIO_USART1_RX_1
 #define GPIO_USART1_TX               GPIO_USART1_TX_1
+
+/* FDCAN1 is connected to the onboard CAN FD transceiver (CN18):
+ *   RX - PB8, TX - PB9
+ */
+
+#define GPIO_FDCAN1_RX               (GPIO_FDCAN1_RX_2 | GPIO_SPEED_50MHZ)
+#define GPIO_FDCAN1_TX               (GPIO_FDCAN1_TX_2 | GPIO_SPEED_50MHZ)
+
+/* CAN FD transceiver STBY - PD7 */
+
+#define BOARD_CAN_GPIO_STBY          (GPIO_OUTPUT | GPIO_PUSHPULL | \
+                                      GPIO_SPEED_25MHZ | GPIO_OUTPUT_SET | \
+                                      GPIO_PORTD | GPIO_PIN7)
 
 /* DAC1 outputs.  PA5 is also the green LED. */
 
