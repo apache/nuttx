@@ -93,6 +93,7 @@
 #define RIFSC_PERIPH_OTG1HS         (1 * 32 + 24)
 #define RIFSC_PERIPH_OTG2HS         (1 * 32 + 25)
 #define RIFSC_PERIPH_ETH1           (1 * 32 + 28)
+#define RIFSC_PERIPH_DMA2D          (3 * 32 + 5)
 #define RIFSC_PERIPH_LTDC           (3 * 32 + 6)
 #define RIFSC_PERIPH_LTDCL1         (3 * 32 + 7)
 #define RIFSC_PERIPH_LTDCL2         (3 * 32 + 8)

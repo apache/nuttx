@@ -35,6 +35,8 @@ EXTI        Yes      GPIO interrupts through the common driver.
 ETH         Yes      ETH1 through the common Ethernet v2 driver, MII, RMII
                      or RGMII up to 1000 Mbps.
 DMA         Yes      GPDMA1 and HPDMA1 through the common GPDMA driver.
+DMA2D       Yes      Common DMA2D driver as LTDC framebuffer overlays
+                     (fill, blit, blend).
 PWR         Yes      Supply configuration, VOS, I/O supply validity.
 RCC         Yes      HSI/HSE, PLL1-4, IC1-20, bus prescalers and kernel
                      clock selection from board.h.

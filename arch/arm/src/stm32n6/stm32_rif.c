@@ -100,6 +100,13 @@ void stm32_rifconfig(void)
   rif_setslave_secpriv(RIFSC_PERIPH_LTDCL2);
 #endif
 
+#ifdef CONFIG_STM32_DMA2D
+  /* The DMA2D reads and writes the overlays in Secure AXISRAM */
+
+  rif_setmaster(RIFSC_MASTER_DMA2D, RIF_MASTER_CID1_SEC_PRIV);
+  rif_setslave_secpriv(RIFSC_PERIPH_DMA2D);
+#endif
+
 #ifdef CONFIG_STM32_SDMMC1
   /* The SDMMC IDMA reads and writes buffers in Secure AXISRAM */
 
