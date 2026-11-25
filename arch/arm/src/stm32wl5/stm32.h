@@ -42,7 +42,7 @@
 #include "stm32wl5_lowputc.h"
 #include "stm32wl5_pwr.h"
 #include "stm32wl5_rcc.h"
-#include "stm32wl5_spi.h"
+#include "stm32_spi.h"
 #include "stm32wl5_uart.h"
 
 /****************************************************************************
