@@ -373,16 +373,6 @@ int wd_cancel(FAR struct wdog_s *wdog);
 
 clock_t wd_gettime(FAR struct wdog_s *wdog);
 
-/****************************************************************************
- * Name: wdlist_initialize
- *
- * Description:
- *   This function do list initialize, list should prefer runtime init.
- *
- ****************************************************************************/
-
-void wdlist_initialize(void);
-
 #ifdef __cplusplus
 }
 #endif
