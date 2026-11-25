@@ -39,6 +39,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/net/dns.h>
 #include <nuttx/net/net.h>
+#include <nuttx/percpu.h>
 #include <nuttx/poll.h>
 #include <nuttx/queue.h>
 #include <nuttx/rpmsg/rpmsg.h>
@@ -1356,6 +1357,13 @@ int usrsock_rpmsg_server_initialize(void)
   FAR struct usrsock_rpmsg_s *priv;
   int ret;
   int i;
+
+#ifdef CONFIG_NET_USRSOCK_RPMSG_SERVER_CPUID
+  if (this_cpu() != CONFIG_NET_USRSOCK_RPMSG_SERVER_CPUID)
+    {
+      return -EINVAL;
+    }
+#endif
 
   priv = kmm_calloc(1, sizeof(*priv));
   if (priv == NULL)
