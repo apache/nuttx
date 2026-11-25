@@ -778,14 +778,14 @@ out:
 void pci_epc_remove_epf(FAR struct pci_epc_ctrl_s *epc,
                         FAR struct pci_epf_device_s *epf)
 {
-  if (epc == NULL || epf == NULL)
+  if (epc == NULL || epf == NULL || epf->epc != epc)
     {
       return;
     }
 
   nxmutex_lock(&epc->lock);
   clear_bit(epf->funcno, &epc->funcno_map);
-  list_delete(&epf->node);
+  list_delete(&epf->epc_node);
   epf->epc = NULL;
   nxmutex_unlock(&epc->lock);
 }
