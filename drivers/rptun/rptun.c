@@ -41,6 +41,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/percpu.h>
 #include <nuttx/queue.h>
 #include <nuttx/rpmsg/rpmsg_virtio.h>
 #include <nuttx/rptun/rptun.h>
@@ -223,8 +224,10 @@ static const struct virtio_memory_ops g_rptun_mmops =
   .unmap        = rptun_unmap_buf,
 };
 
-static dq_queue_t g_rptun_priv;
-static rmutex_t g_rptun_lock = NXRMUTEX_INITIALIZER;
+static DEFINE_PER_CPU_BSS_BMP(dq_queue_t, g_rptun_priv);
+#define g_rptun_priv this_cpu_var_bmp(g_rptun_priv)
+static DEFINE_PER_CPU_BMP(rmutex_t, g_rptun_lock) = NXRMUTEX_INITIALIZER;
+#define g_rptun_lock this_cpu_var_bmp(g_rptun_lock)
 
 #ifdef CONFIG_RPTUN_AUTO_RESET_IN_PANIC_NOTIFIER
 static struct notifier_block g_rptun_panic_nb =
