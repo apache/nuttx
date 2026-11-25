@@ -5,6 +5,7 @@ Input Devices
 .. toctree::
   :caption: Supported Drivers
 
+  cst92xx.rst
   keypad-keyboard.rst
   keypad.rst
   mpr121.rst
