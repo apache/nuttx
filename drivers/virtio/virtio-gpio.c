@@ -33,6 +33,7 @@
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/ioexpander/gpio_virtio.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/percpu.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/wqueue.h>
@@ -145,12 +146,13 @@ static void virtio_gpio_remove(FAR struct virtio_device *vdev);
  * Private Data
  ****************************************************************************/
 
-static struct virtio_driver g_virtio_gpio_driver =
+static DEFINE_PER_CPU_BMP(struct virtio_driver, g_virtio_gpio_driver) =
 {
   VIRTIO_ID_GPIO,     /* Device id */
   virtio_gpio_probe,  /* Probe */
   virtio_gpio_remove, /* Remove */
 };
+#define g_virtio_gpio_driver this_cpu_var_bmp(g_virtio_gpio_driver)
 
 static const struct ioexpander_ops_s g_virtio_gpio_ops =
 {
@@ -172,10 +174,11 @@ static const struct ioexpander_ops_s g_virtio_gpio_ops =
 
 /* Lower-halves published to board code, indexed by probe order. */
 
-static struct virtio_gpio_bus_s g_virtio_gpio_bus =
+static DEFINE_PER_CPU_BMP(struct virtio_gpio_bus_s, g_virtio_gpio_bus) =
 {
   SP_UNLOCKED,
 };
+#define g_virtio_gpio_bus this_cpu_var_bmp(g_virtio_gpio_bus)
 
 /****************************************************************************
  * Private Functions

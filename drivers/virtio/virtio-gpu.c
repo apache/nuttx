@@ -28,6 +28,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/percpu.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/virtio/virtio.h>
@@ -150,15 +151,18 @@ static int virtio_gpu_flush_output(FAR struct fb_vtable_s *vtable,
  * Private Data
  ****************************************************************************/
 
-static struct virtio_driver g_virtio_gpu_driver =
+static DEFINE_PER_CPU_BMP(struct virtio_driver, g_virtio_gpu_driver) =
 {
   .device = VIRTIO_ID_GPU,     /* device id */
   .probe  = virtio_gpu_probe,  /* probe */
   .remove = virtio_gpu_remove, /* remove */
   .dump   = virtio_gpu_dump,   /* dump */
 };
+#define g_virtio_gpu_driver this_cpu_var_bmp(g_virtio_gpu_driver)
 
-static FAR struct virtio_gpu_priv_s *g_virtio_gpu[VIRTIO_GPU_MAX_DISP];
+static DEFINE_PER_CPU_BMP(FAR struct virtio_gpu_priv_s *,
+                          g_virtio_gpu[VIRTIO_GPU_MAX_DISP]);
+#define g_virtio_gpu this_cpu_var_bmp(g_virtio_gpu)
 
 /****************************************************************************
  * Private Functions

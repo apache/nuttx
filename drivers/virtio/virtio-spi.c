@@ -35,6 +35,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/percpu.h>
 #include <nuttx/queue.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
@@ -118,18 +119,20 @@ static void virtio_spi_dump(FAR struct virtio_device *vdev);
  * Private Data
  ****************************************************************************/
 
-static struct virtio_driver g_virtio_spi_driver =
+static DEFINE_PER_CPU_BMP(struct virtio_driver, g_virtio_spi_driver) =
 {
   VIRTIO_ID_SPI,     /* device id */
   virtio_spi_probe,  /* probe */
   virtio_spi_remove, /* remove */
   virtio_spi_dump,   /* dump */
 };
+#define g_virtio_spi_driver this_cpu_var_bmp(g_virtio_spi_driver)
 
-static struct virtio_spi_bus_s g_virtio_spi_bus =
+static DEFINE_PER_CPU_BMP(struct virtio_spi_bus_s, g_virtio_spi_bus) =
 {
   SP_UNLOCKED,
 };
+#define g_virtio_spi_bus this_cpu_var_bmp(g_virtio_spi_bus)
 
 static const struct spi_ops_s g_virtio_spi_ops =
 {

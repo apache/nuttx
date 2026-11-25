@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/percpu.h>
 #include <nuttx/rpmsg/rpmsg_virtio.h>
 #include <nuttx/virtio/virtio.h>
 
@@ -31,12 +32,13 @@
  * Private Data
  ****************************************************************************/
 
-static struct virtio_driver g_virtio_rpmsg_driver =
+static DEFINE_PER_CPU_BMP(struct virtio_driver, g_virtio_rpmsg_driver) =
 {
   VIRTIO_ID_RPMSG,                                /* Device id */
   rpmsg_virtio_probe,                             /* Probe */
   rpmsg_virtio_remove,                            /* Remove */
 };
+#define g_virtio_rpmsg_driver this_cpu_var_bmp(g_virtio_rpmsg_driver)
 
 /****************************************************************************
  * Public Functions

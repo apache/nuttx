@@ -30,6 +30,7 @@
 #include <string.h>
 #include <sys/param.h>
 
+#include <nuttx/percpu.h>
 #include <nuttx/queue.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/virtio/virtio.h>
@@ -93,17 +94,23 @@ static void virtio_input_dump(FAR struct virtio_device *vdev);
  * Private Data
  ****************************************************************************/
 
-static struct virtio_driver g_virtio_input_driver =
+static DEFINE_PER_CPU_BMP(struct virtio_driver, g_virtio_input_driver) =
 {
   .device = VIRTIO_ID_INPUT,     /* device id */
   .probe  = virtio_input_probe,  /* probe */
   .remove = virtio_input_remove, /* remove */
   .dump   = virtio_input_dump,   /* dump */
 };
+#define g_virtio_input_driver this_cpu_var_bmp(g_virtio_input_driver)
 
-static int g_virtio_mouse_idx    = 0;
-static int g_virtio_touch_idx    = 0;
-static int g_virtio_keyboard_idx = 0;
+static DEFINE_PER_CPU_BMP(int, g_virtio_mouse_idx);
+#define g_virtio_mouse_idx this_cpu_var_bmp(g_virtio_mouse_idx)
+
+static DEFINE_PER_CPU_BMP(int, g_virtio_touch_idx);
+#define g_virtio_touch_idx this_cpu_var_bmp(g_virtio_touch_idx)
+
+static DEFINE_PER_CPU_BMP(int, g_virtio_keyboard_idx);
+#define g_virtio_keyboard_idx this_cpu_var_bmp(g_virtio_keyboard_idx)
 
 /****************************************************************************
  * Private Functions

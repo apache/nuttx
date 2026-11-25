@@ -32,6 +32,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/percpu.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 #include <nuttx/spinlock.h>
@@ -92,13 +93,14 @@ static void virtio_ping_dump(FAR struct virtio_device *vdev);
  * Private Data
  ****************************************************************************/
 
-static struct virtio_driver g_virtio_ping_driver =
+static DEFINE_PER_CPU_BMP(struct virtio_driver, g_virtio_ping_driver) =
 {
   VIRTIO_ID_PING,     /* device id */
   virtio_ping_probe,  /* probe */
   virtio_ping_remove, /* remove */
   virtio_ping_dump,   /* dump */
 };
+#define g_virtio_ping_driver this_cpu_var_bmp(g_virtio_ping_driver)
 
 /****************************************************************************
  * Private Functions

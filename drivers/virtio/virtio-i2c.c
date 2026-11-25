@@ -36,6 +36,7 @@
 #include <nuttx/i2c/i2c_virtio.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/percpu.h>
 #include <nuttx/queue.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
@@ -82,22 +83,24 @@ static void virtio_i2c_dump(FAR struct virtio_device *vdev);
  * Private Data
  ****************************************************************************/
 
-static struct virtio_driver g_virtio_i2c_driver =
+static DEFINE_PER_CPU_BMP(struct virtio_driver, g_virtio_i2c_driver) =
 {
   VIRTIO_ID_I2C_ADAPTER, /* device id */
   virtio_i2c_probe,      /* probe */
   virtio_i2c_remove,     /* remove */
   virtio_i2c_dump,       /* dump */
 };
+#define g_virtio_i2c_driver this_cpu_var_bmp(g_virtio_i2c_driver)
 
 /* Registry of probed VirtIO I2C frontends, so board/in-kernel code can
  * obtain the I2C lower-half through virtio_i2c_get_master().
  */
 
-static struct virtio_i2c_bus_s g_virtio_i2c_bus =
+static DEFINE_PER_CPU_BMP(struct virtio_i2c_bus_s, g_virtio_i2c_bus) =
 {
   SP_UNLOCKED,
 };
+#define g_virtio_i2c_bus this_cpu_var_bmp(g_virtio_i2c_bus)
 
 static const struct i2c_ops_s g_virtio_i2c_ops =
 {

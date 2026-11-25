@@ -32,6 +32,7 @@
 
 #include <nuttx/audio/audio.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/percpu.h>
 #include <nuttx/virtio/virtio.h>
 #include <nuttx/semaphore.h>
 
@@ -243,12 +244,13 @@ static const struct virtio_snd_format_map_s g_format_map[] =
     }
 };
 
-static struct virtio_driver g_virtio_snd_driver =
+static DEFINE_PER_CPU_BMP(struct virtio_driver, g_virtio_snd_driver) =
 {
   VIRTIO_ID_SOUND,                              /* device id */
   virtio_snd_probe,                             /* probe */
   virtio_snd_remove,                            /* remove */
 };
+#define g_virtio_snd_driver this_cpu_var_bmp(g_virtio_snd_driver)
 
 static const struct audio_ops_s g_virtio_snd_ops =
 {
