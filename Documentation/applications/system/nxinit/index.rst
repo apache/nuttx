@@ -233,6 +233,7 @@ These are the built-in commands of NXInit:
 - Service management: ``start``/``stop`` (start/stop a service),
   ``exec_start`` (start a service and wait until it exits),
   ``class_start``/``class_stop`` (start/stop all services of a class).
+- Waiting: ``wait`` (wait for a file, see below).
 - Programs: ``exec -- <program> [<argument>]*`` (run a program and wait until
   it exits).
 - Others: ``trigger`` (trigger an event), and ``netinit``, ``boot``,
@@ -283,6 +284,25 @@ removes the request. ``<state>`` is ``normal``, ``idle``, ``standby`` or
 arguments dumps the PM statistics; NXInit does not have that form, which
 init does not need. With ``CONFIG_PM`` disabled, NXInit has no
 ``pmconfig`` command.
+
+Waiting for a File
+------------------
+
+.. code-block::
+
+    wait <path> [<timeout>]
+
+``wait`` checks for the existence of ``<path>`` with stat() every 10 ms
+and returns when the file is found. ``<timeout>`` is in seconds and may
+be fractional; it defaults to 5. When the timeout is reached, the
+command only warns and continues, so the next command still runs.
+
+.. code-block::
+
+    on boot
+        start foo_driver
+        wait /dev/xxx 2
+        start bar
 
 Compound Commands
 ------------------
