@@ -35,6 +35,7 @@ if RPTUN
 
 choice RPTUN_AUTO_RESET
 	prompt "rptun auto reset peer"
+	default RPTUN_AUTO_RESET_IN_REBOOT_NOTIFIER if BMP
 	default RPTUN_AUTO_RESET_IN_PANIC_NOTIFIER
 
 config RPTUN_AUTO_RESET_DISABLE
