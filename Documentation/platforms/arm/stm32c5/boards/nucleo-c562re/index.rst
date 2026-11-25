@@ -25,6 +25,18 @@ nsh
 Configures a small internal-flash NuttShell image with USART2 as the serial
 console and the green status LED enabled.
 
+can
+---
+
+FDCAN1 as a character driver (``/dev/can0``) at 250 kbit/s on the onboard
+MCP2562FD transceiver (CN18), with ``examples/can``.
+
+cansock
+-------
+
+FDCAN1 as a SocketCAN device (``can0``) at 250 kbit/s, with ``candump``
+and ``cansend``.
+
 jumbo
 -----
 

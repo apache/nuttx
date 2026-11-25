@@ -92,10 +92,28 @@
 
 #define STM32_LPTIM1_CLKIN           STM32_PCLK3_FREQUENCY
 
+/* FDCAN kernel clock is HSE (24 MHz) */
+
+#define STM32_RCC_CCIPR1_FDCANSEL    RCC_CCIPR1_FDCANSEL_HSE
+#define STM32_FDCAN_FREQUENCY        STM32_HSE_FREQUENCY
+
 /* USART2 is connected to the ST-LINK virtual COM port. */
 
 #define GPIO_USART2_RX               GPIO_USART2_RX_1
 #define GPIO_USART2_TX               GPIO_USART2_TX_1
+
+/* FDCAN1 is connected to the MCP2562FD transceiver (CN18):
+ *   RX - PB8, TX - PB9
+ */
+
+#define GPIO_FDCAN1_RX               (GPIO_FDCAN1_RX_3 | GPIO_SPEED_50MHZ)
+#define GPIO_FDCAN1_TX               (GPIO_FDCAN1_TX_4 | GPIO_SPEED_50MHZ)
+
+/* MCP2562FD transceiver STBY - PE2 */
+
+#define BOARD_CAN_GPIO_STBY          (GPIO_OUTPUT | GPIO_PUSHPULL | \
+                                      GPIO_SPEED_25MHZ | GPIO_OUTPUT_SET | \
+                                      GPIO_PORTE | GPIO_PIN2)
 
 /* User LEDs */
 
