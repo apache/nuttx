@@ -1074,6 +1074,8 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info,
 int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread,
                    FAR const void *source, bool limit)
 {
+  int ret = -ESRCH;
+
 #ifdef HAVE_GROUP_MEMBERS
   if (!thread)
     {
@@ -1085,7 +1087,7 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread,
 
       if (group != NULL)
         {
-          return group_signal(group, info, source, limit);
+          ret = group_signal(group, info, source, limit);
         }
     }
   else
@@ -1097,11 +1099,11 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread,
 
       if (stcb != NULL)
         {
-          return nxsig_tcbdispatch(stcb, info, false, source, limit);
+          ret = nxsig_tcbdispatch(stcb, info, false, source, limit);
         }
     }
 
-  return -ESRCH;
+  return ret;
 }
 
 /****************************************************************************
