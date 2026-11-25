@@ -57,6 +57,10 @@ if(CONFIG_RTC_DSXXXX)
   list(APPEND SRCS ds3231.c)
 endif()
 
+if(CONFIG_RTC_PCF85063)
+  list(APPEND SRCS pcf85063.c)
+endif()
+
 if(CONFIG_RTC_PCF85263)
   list(APPEND SRCS pcf85263.c)
 endif()
