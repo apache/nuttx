@@ -285,8 +285,9 @@ Options and profiles
 ====================
 
 Each feature is an option with its own prompt.  A profile only sets the default
-of each option: select one in *Library Routines*, *printf profile*.  You can add
-or remove any feature in any profile.
+of each option: select one in *Library Routines*, *printf profile*.  The profile
+defaults to Minimal when ``DEFAULT_SMALL`` is enabled, and to Default otherwise.
+You can add or remove any feature in any profile.
 
 =============================  ==========  ===========  ======
 Option                         Minimal     Default      Full
