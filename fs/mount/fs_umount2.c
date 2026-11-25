@@ -28,11 +28,13 @@
 
 #include <sys/mount.h>
 #include <stdbool.h>
+#include <string.h>
 #include <errno.h>
 #include <assert.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/sched.h>
 
 #include "inode/inode.h"
@@ -110,6 +112,8 @@ int nx_umount2(FAR const char *target, unsigned int flags)
   FAR struct inode *mountpt_inode;
   FAR struct inode *blkdrvr_inode = NULL;
   struct inode_search_s desc;
+  FAR char *path = NULL;
+  size_t len;
   int ret;
 
   if (!nxsched_capable(PR_CAP_RAWIO))
@@ -183,6 +187,45 @@ int nx_umount2(FAR const char *target, unsigned int flags)
       goto errout_with_lock;
     }
 
+  /* A file system that holds the current directory of a task group is
+   * busy, except for MNT_FORCE and MNT_DETACH (the unmount of all file
+   * systems before a reboot uses MNT_FORCE).  The tree lock keeps the
+   * mount point path as it is.
+   */
+
+  path = lib_get_tempbuffer(PATH_MAX);
+  if (path != NULL)
+    {
+      if (inode_getpath(mountpt_inode, path, PATH_MAX) < 0)
+        {
+          lib_put_tempbuffer(path);
+          path = NULL;
+        }
+      else
+        {
+          len = strlen(path);
+          if (len > 1 && path[len - 1] == '/')
+            {
+              path[len - 1] = '\0';
+            }
+        }
+    }
+
+  if ((flags & (MNT_FORCE | MNT_DETACH)) == 0)
+    {
+      if (path == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout_with_lock;
+        }
+
+      if (fs_cwd_busy(path))
+        {
+          ret = -EBUSY;
+          goto errout_with_path;
+        }
+    }
+
   if (mountpt_inode->u.i_mops->syncfs)
     {
       mountpt_inode->u.i_mops->syncfs(mountpt_inode);
@@ -194,12 +237,20 @@ int nx_umount2(FAR const char *target, unsigned int flags)
     {
       /* The inode is unhappy with the blkdrvr for some reason */
 
-      goto errout_with_lock;
+      goto errout_with_path;
     }
   else if (ret > 0)
     {
       ret = -EBUSY;
-      goto errout_with_lock;
+      goto errout_with_path;
+    }
+
+  /* The current directories in the file system are removed with it */
+
+  if (path != NULL)
+    {
+      fs_cwd_unmounted(mountpt_inode, path);
+      lib_put_tempbuffer(path);
     }
 
   /* Successfully unbound.  Convert the mountpoint inode to a regular
@@ -262,6 +313,12 @@ int nx_umount2(FAR const char *target, unsigned int flags)
   return OK;
 
   /* A lot of goto's!  But they make the error handling much simpler */
+
+errout_with_path:
+  if (path != NULL)
+    {
+      lib_put_tempbuffer(path);
+    }
 
 errout_with_lock:
   inode_unlock();

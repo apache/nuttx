@@ -45,6 +45,22 @@
 #include "fs_heap.h"
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* A walk of the current directories of all task groups (cwd_walk()) */
+
+struct cwd_walk_s
+{
+  FAR const char          *path;    /* The directory */
+  FAR struct inode        *mountpt; /* umount(): its mount point, or NULL */
+  size_t                   len;     /* umount(): the length of path */
+  bool                     below;   /* Also the directories below path */
+  bool                     remove;  /* Mark the directories removed */
+  FAR struct task_group_s *group;   /* Out: a task group with one */
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -345,6 +361,302 @@ static int cwd_get(FAR char *buf, size_t size)
 }
 
 /****************************************************************************
+ * Name: cwd_hostpath
+ *
+ * Description:
+ *   Write the canonical host path of 'path' to 'buf' (PATH_MAX bytes): the
+ *   form of the paths that chdir() keeps.  The last component is not
+ *   followed: only its directory is resolved, so this works after the
+ *   last component was removed or renamed.
+ *
+ ****************************************************************************/
+
+static int cwd_hostpath(FAR const char *path, FAR char *buf)
+{
+  FAR const char *base;
+  FAR char *dir = NULL;
+  size_t baselen = 0;
+  size_t len;
+  int ret;
+
+  len = strlen(path);
+  while (len > 1 && path[len - 1] == '/')
+    {
+      len--;
+    }
+
+  /* The last component, and its directory */
+
+  base = path + len;
+  while (base > path && *(base - 1) != '/')
+    {
+      base--;
+    }
+
+  baselen = path + len - base;
+  if (baselen == 0 || baselen > NAME_MAX ||
+      (base[0] == '.' && (baselen == 1 || (baselen == 2 && base[1] == '.'))))
+    {
+      base = NULL;     /* "/", "." or "..": resolve the whole path */
+    }
+
+  if (base != NULL)
+    {
+      if (base - path > PATH_MAX)
+        {
+          return -ENAMETOOLONG;
+        }
+
+      dir = lib_get_tempbuffer(PATH_MAX);
+      if (dir == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      if (base == path)
+        {
+          strlcpy(dir, ".", PATH_MAX);
+        }
+      else if (base == path + 1)
+        {
+          strlcpy(dir, "/", PATH_MAX);
+        }
+      else
+        {
+          strlcpy(dir, path, base - path);
+        }
+
+      path = dir;
+    }
+
+  if (lib_realpath(path, buf, false) == NULL)
+    {
+      ret = -get_errno();
+    }
+  else
+    {
+      ret = OK;
+      if (base != NULL)
+        {
+          len = strlen(buf);
+          if (len > 1)
+            {
+              buf[len++] = '/';
+            }
+
+          if (len + baselen >= PATH_MAX)
+            {
+              ret = -ENAMETOOLONG;
+            }
+          else
+            {
+              memcpy(buf + len, base, baselen);
+              buf[len + baselen] = '\0';
+            }
+        }
+
+      if (ret >= 0)
+        {
+          ret = cwd_tohost(buf);
+        }
+    }
+
+  if (dir != NULL)
+    {
+      lib_put_tempbuffer(dir);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cwd_mounted
+ *
+ * Description:
+ *   Return true if the path 'rest' below the mount point 'node' goes
+ *   through another mount point in the inode tree below it.  The caller
+ *   holds the inode tree lock.
+ *
+ ****************************************************************************/
+
+static bool cwd_mounted(FAR struct inode *node, FAR const char *rest)
+{
+  FAR struct inode *child;
+  size_t len;
+
+  while (*rest == '/')
+    {
+      rest++;
+      len = strcspn(rest, "/");
+      for (child = node->i_child; child != NULL; child = child->i_peer)
+        {
+          if (strncmp(child->i_name, rest, len) == 0 &&
+              child->i_name[len] == '\0')
+            {
+              break;
+            }
+        }
+
+      if (child == NULL)
+        {
+          return false;
+        }
+
+      if (INODE_IS_MOUNTPT(child))
+        {
+          return true;
+        }
+
+      node  = child;
+      rest += len;
+    }
+
+  return false;
+}
+
+/****************************************************************************
+ * Name: cwd_walk_one
+ *
+ * Description:
+ *   The nxsched_foreach() callback of cwd_walk(): one thread.
+ *
+ ****************************************************************************/
+
+static void cwd_walk_one(FAR struct tcb_s *tcb, FAR void *arg)
+{
+  FAR struct cwd_walk_s *walk = arg;
+  FAR struct task_group_s *group = tcb->group;
+  FAR char *cwd;
+
+  /* The group of an exiting thread can be freed now.  Another group stays:
+   * its release waits for g_cwd_lock in fs_cwd_release().
+   */
+
+  if (group == NULL ||
+      (atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      return;
+    }
+
+  cwd = group->tg_cwd;
+  if (cwd == NULL || cwd[0] == '\0' ||
+      !(walk->below ? cwd_under(cwd, walk->path) :
+                      strcmp(cwd, walk->path) == 0) ||
+      (walk->mountpt != NULL && cwd_mounted(walk->mountpt, cwd + walk->len)))
+    {
+      return;
+    }
+
+  if (walk->remove)
+    {
+      cwd[0] = '\0';
+    }
+  else
+    {
+      walk->group = group;
+    }
+}
+
+/****************************************************************************
+ * Name: cwd_walk
+ *
+ * Description:
+ *   Walk the threads of all task groups.  Mark removed each current
+ *   directory at 'path' (or below it), or return a task group with one.
+ *   The caller holds g_cwd_lock.  The walk does not allocate or block.
+ *
+ ****************************************************************************/
+
+static FAR struct task_group_s *cwd_walk(FAR struct cwd_walk_s *walk)
+{
+  walk->group = NULL;
+  nxsched_foreach(cwd_walk_one, walk);
+  return walk->group;
+}
+
+/****************************************************************************
+ * Name: cwd_find
+ *
+ * Description:
+ *   Return true if a current directory is at or below the host path 'path'.
+ *
+ ****************************************************************************/
+
+static bool cwd_find(FAR const char *path)
+{
+  struct cwd_walk_s walk;
+  FAR struct task_group_s *group;
+
+  memset(&walk, 0, sizeof(walk));
+  walk.path  = path;
+  walk.below = true;
+
+  nxmutex_lock(&g_cwd_lock);
+  group = cwd_walk(&walk);
+  nxmutex_unlock(&g_cwd_lock);
+
+  return group != NULL;
+}
+
+/****************************************************************************
+ * Name: cwd_rename
+ *
+ * Description:
+ *   Each current directory at or below the host path 'oldpath' gets the
+ *   new host path, and a current directory at 'newpath' (an empty
+ *   directory that the rename replaced) is removed.
+ *
+ ****************************************************************************/
+
+static void cwd_rename(FAR const char *oldpath, FAR const char *newpath)
+{
+  FAR struct task_group_s *group;
+  struct cwd_walk_s walk;
+  size_t oldlen = strlen(oldpath);
+  size_t newlen = strlen(newpath);
+  FAR char *path;
+  size_t len;
+
+  /* A directory does not move to itself or below itself.  So a new path
+   * is never below the old one, and the loop below ends.
+   */
+
+  if (cwd_under(newpath, oldpath))
+    {
+      return;
+    }
+
+  memset(&walk, 0, sizeof(walk));
+  walk.path   = newpath;
+  walk.remove = true;
+
+  nxmutex_lock(&g_cwd_lock);
+  cwd_walk(&walk);
+
+  /* The walk cannot allocate: give the new path to one group at a time */
+
+  walk.path   = oldpath;
+  walk.below  = true;
+  walk.remove = false;
+  while ((group = cwd_walk(&walk)) != NULL)
+    {
+      len  = strlen(group->tg_cwd + oldlen);
+      path = fs_heap_malloc(newlen + len + 1);
+      if (path == NULL)
+        {
+          break;      /* The others keep the old name */
+        }
+
+      memcpy(path, newpath, newlen);
+      memcpy(path + newlen, group->tg_cwd + oldlen, len + 1);
+      fs_heap_free(group->tg_cwd);
+      group->tg_cwd = path;
+    }
+
+  nxmutex_unlock(&g_cwd_lock);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -393,6 +705,10 @@ int fs_cwd_inherit(FAR struct task_group_s *group)
 void fs_cwd_release(FAR struct task_group_s *group)
 {
   FAR char *cwd;
+
+  /* Also with no current directory: the lock waits for a walk that can
+   * see the group (cwd_walk()).
+   */
 
   nxmutex_lock(&g_cwd_lock);
   cwd = group->tg_cwd;
@@ -447,6 +763,125 @@ int fs_cwd_join(FAR const char *path, FAR char *buffer, size_t buflen)
 
   nxmutex_unlock(&g_cwd_lock);
   return ret;
+}
+
+/****************************************************************************
+ * Name: fs_cwd_renamed
+ *
+ * Description:
+ *   See fs/inode/inode.h.
+ *
+ ****************************************************************************/
+
+void fs_cwd_renamed(FAR const char *oldpath, FAR const char *newpath)
+{
+  FAR char *oldhost;
+  FAR char *newhost;
+
+  if (!cwd_find("/"))
+    {
+      return;     /* No task group has set a current directory */
+    }
+
+  /* Without buffers (no temporary buffer free and no
+   * CONFIG_LIBC_TEMPBUFFER_MALLOC) the current directories do not change.
+   */
+
+  oldhost = lib_get_tempbuffer(PATH_MAX);
+  newhost = lib_get_tempbuffer(PATH_MAX);
+  if (oldhost != NULL && newhost != NULL &&
+      cwd_hostpath(oldpath, oldhost) >= 0 &&
+      cwd_hostpath(newpath, newhost) >= 0)
+    {
+      cwd_rename(oldhost, newhost);
+    }
+
+  if (newhost != NULL)
+    {
+      lib_put_tempbuffer(newhost);
+    }
+
+  if (oldhost != NULL)
+    {
+      lib_put_tempbuffer(oldhost);
+    }
+}
+
+/****************************************************************************
+ * Name: fs_cwd_removed
+ *
+ * Description:
+ *   See fs/inode/inode.h.
+ *
+ ****************************************************************************/
+
+void fs_cwd_removed(FAR const char *path)
+{
+  struct cwd_walk_s walk;
+  FAR char *host;
+
+  if (!cwd_find("/"))
+    {
+      return;     /* No task group has set a current directory */
+    }
+
+  host = lib_get_tempbuffer(PATH_MAX);
+  if (host != NULL)
+    {
+      if (cwd_hostpath(path, host) >= 0)
+        {
+          memset(&walk, 0, sizeof(walk));
+          walk.path   = host;
+          walk.remove = true;
+
+          nxmutex_lock(&g_cwd_lock);
+          cwd_walk(&walk);
+          nxmutex_unlock(&g_cwd_lock);
+        }
+
+      lib_put_tempbuffer(host);
+    }
+}
+
+/****************************************************************************
+ * Name: fs_cwd_busy
+ *
+ * Description:
+ *   See fs/inode/inode.h.
+ *
+ ****************************************************************************/
+
+bool fs_cwd_busy(FAR const char *path)
+{
+  return cwd_find(path);
+}
+
+/****************************************************************************
+ * Name: fs_cwd_unmounted
+ *
+ * Description:
+ *   See fs/inode/inode.h.
+ *
+ ****************************************************************************/
+
+void fs_cwd_unmounted(FAR struct inode *mountpt, FAR const char *path)
+{
+  struct cwd_walk_s walk;
+
+  walk.path    = path;
+  walk.mountpt = mountpt;
+  walk.len     = strlen(path);
+  walk.below   = true;
+  walk.remove  = true;
+
+  if (walk.len == 1)
+    {
+      walk.len = 0;   /* The root: each path is below it */
+    }
+
+  nxmutex_lock(&g_cwd_lock);
+  cwd_walk(&walk);
+  nxmutex_unlock(&g_cwd_lock);
 }
 
 /****************************************************************************

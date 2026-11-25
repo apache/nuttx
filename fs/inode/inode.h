@@ -270,6 +270,37 @@ void inode_search_release(FAR struct inode_search_s *desc);
 int fs_cwd_join(FAR const char *path, FAR char *buffer, size_t buflen);
 
 /****************************************************************************
+ * Name: fs_cwd_renamed, fs_cwd_removed, fs_cwd_busy, fs_cwd_unmounted
+ *
+ * Description:
+ *   fs_cwd_renamed(): rename() moved the directory 'oldpath' to 'newpath'
+ *   (the paths of the caller).  Each current directory at or below the
+ *   old path gets the new path, and a current directory at the new path
+ *   (an empty directory that the rename replaced) is removed.
+ *
+ *   fs_cwd_removed(): the directory 'path' (a path of the caller) was
+ *   removed.  A current directory there gives ENOENT from now on.
+ *
+ *   Call them after the operation, without a lock of the inode tree.
+ *   They resolve the directory of each path, and only when a task group
+ *   has set a current directory.
+ *
+ *   fs_cwd_busy(): return true if a current directory is at or below the
+ *   host path 'path'.
+ *
+ *   fs_cwd_unmounted(): the file system at the mount point 'mountpt' (host
+ *   path 'path') was unmounted.  A current directory at or below it is
+ *   removed, except one in another mount point below it.  The caller holds
+ *   the inode tree lock.
+ *
+ ****************************************************************************/
+
+void fs_cwd_renamed(FAR const char *oldpath, FAR const char *newpath);
+void fs_cwd_removed(FAR const char *path);
+bool fs_cwd_busy(FAR const char *path);
+void fs_cwd_unmounted(FAR struct inode *mountpt, FAR const char *path);
+
+/****************************************************************************
  * Name: inode_find
  *
  * Description:
