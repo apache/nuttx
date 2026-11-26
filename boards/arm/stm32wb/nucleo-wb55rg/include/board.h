@@ -50,8 +50,8 @@
 
 /* Values defined in arch/arm/src/stm32wb/hardware/stm32wb_dmamux.h */
 
-#define DMAMAP_SPI1_RX DMAMAP_SPI1_RX_0     /* DMA1 */
-#define DMAMAP_SPI1_TX DMAMAP_SPI1_TX_0     /* DMA1 */
+#define DMACHAN_SPI1_RX DMAMAP_SPI1_RX_0     /* DMA1 */
+#define DMACHAN_SPI1_TX DMAMAP_SPI1_TX_0     /* DMA1 */
 
 /* UART RX DMA configurations */
 

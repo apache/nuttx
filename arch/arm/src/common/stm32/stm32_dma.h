@@ -40,6 +40,8 @@
 #  include "stm32_dma_f7.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32L4)
 #  include "stm32l4_dma.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32WB)
+#  include "stm32wb_dma.h"
 #else
 #  error "Unsupported STM32 DMA"
 #endif

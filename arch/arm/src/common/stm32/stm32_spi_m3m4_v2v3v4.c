@@ -101,7 +101,8 @@
 
 #ifdef CONFIG_STM32_SPI_DMA
 
-#  if defined(CONFIG_STM32_HAVE_IP_DMA_V1) || defined(CONFIG_ARCH_CHIP_STM32L4)
+#  if defined(CONFIG_STM32_HAVE_IP_DMA_V1) || \
+      defined(CONFIG_ARCH_CHIP_STM32L4) || defined(CONFIG_ARCH_CHIP_STM32WB)
 #    define SPI_DMA_PRIO  DMA_CCR_PRIMED
 #  elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #    define SPI_DMA_PRIO  DMA_SCR_PRIMED
@@ -111,11 +112,13 @@
 #    error "Unknown STM32 DMA"
 #  endif
 
-/* DMA channel configuration.  The STM32L4 and STM32F7 have their own
- * drivers for the channel DMA of the IP v1 and the stream DMA of the IP v2.
+/* DMA channel configuration.  The STM32L4, STM32WB and STM32F7 have their
+ * own drivers for the channel DMA of the IP v1 and the stream DMA of the
+ * IP v2.
  */
 
-#if defined(CONFIG_STM32_HAVE_IP_DMA_V1) || defined(CONFIG_ARCH_CHIP_STM32L4)
+#if defined(CONFIG_STM32_HAVE_IP_DMA_V1) || \
+    defined(CONFIG_ARCH_CHIP_STM32L4) || defined(CONFIG_ARCH_CHIP_STM32WB)
 #  define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC            )
 #  define SPI_RXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC            )
 #  define SPI_RXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS                         )

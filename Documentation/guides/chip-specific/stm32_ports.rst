@@ -969,7 +969,7 @@ Radio         to be done    not supported
 RCC           to be done    arch/arm/src/stm32wb/stm32wb_rcc.c      
 RNG           to be done    not supported                           
 RTC           to be done    arch/arm/src/stm32wb/stm32wb_rtc.c      
-SPI/I2S       to be done    arch/arm/src/stm32wb/stm32wb_spi.c      
+SPI           v4            arch/arm/src/common/stm32/stm32_spi_m3m4_v2v3v4.c
 TIM           v2            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  v4            arch/arm/src/stm32wb/stm32wb_serial.c   
 USB           device        not supported                           

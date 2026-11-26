@@ -31,7 +31,7 @@ include common/stm32/Make.defs
 # Required STM32WB files
 
 CHIP_CSRCS += stm32wb_allocateheap.c stm32wb_exti_gpio.c stm32wb_gpio.c
-CHIP_CSRCS += stm32wb_irq.c stm32wb_lowputc.c stm32wb_rcc.c stm32wb_spi.c
+CHIP_CSRCS += stm32wb_irq.c stm32wb_lowputc.c stm32wb_rcc.c
 CHIP_CSRCS += stm32wb_serial.c stm32wb_i2c.c stm32wb_start.c
 CHIP_CSRCS += stm32wb_rcc_lse.c
 CHIP_CSRCS += stm32wb_pwr.c
