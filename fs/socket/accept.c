@@ -26,73 +26,29 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <fcntl.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/tls.h>
-#include <nuttx/mm/kmap.h>
 #include <arch/irq.h>
 
-#include "sched/sched.h"
 #include "fs_heap.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: map_user_mem
- *
- * Description:
- *   Map userspace memory to continuous kernel virtual memory using
- *   `kmm_map_user()`.
- *
- * Input Parameters:
- *   uaddr    The user address to map. Can be NULL, in which case NULL will
- *            be returned through `p_kaddr`.
- *   size     The size of the mem region to map
- *   p_kaddr  Pointer to the kernel address to return. Cannot be NULL.
- *
- * Returned Value:
- *  Returns 0 (OK) on success, or:
- *    -ENOMEM
- *      If there is not enough free memory to create the mapping.
- *    -EFAULT
- *      If `uaddr` points to memory not belonging to the user address space.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_MM_KMAP
-static int map_user_mem(FAR void *uaddr, size_t size, void **p_kaddr)
-{
-  *p_kaddr = uaddr;
-
-  if (uaddr)
-    {
-      *p_kaddr = kmm_map_user(this_task(), uaddr, size);
-
-      if (*p_kaddr == NULL)
-        {
-          return -ENOMEM;
-        }
-      else if (*p_kaddr == uaddr)
-        {
-          return -EFAULT;
-        }
-    }
-
-  return OK;
-}
-#endif
 
 /****************************************************************************
  * Name: accept4_cleanup
@@ -183,8 +139,9 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
   FAR struct socket *psock = NULL;
   FAR struct socket *newsock;
   FAR struct file *filep;
-  struct sockaddr *kaddr;
-  socklen_t *kaddrlen;
+  struct sockaddr_storage kaddr;
+  socklen_t kaddrlen = 0;
+  socklen_t ulen = 0;
   int oflags = O_RDWR;
   int errcode;
   int newfd;
@@ -200,32 +157,41 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
       goto errout;
     }
 
-  /* Map user addresses to kernel virtual memory and check they actually
-   * belong to the user
-   *
-   * NOTE: also check if writeable?
-   * NOTE: possible TOCTOU with contents of addrlen?
+  /* The address family gives the address of the peer into a buffer of the
+   * kernel: in a blocking accept() the network stack writes it while
+   * another address environment can be active.  It goes to the caller at
+   * the end, in its own context.  In a kernel build the caller must give
+   * user memory.
    */
 
-#ifdef CONFIG_MM_KMAP
-  ret = map_user_mem(addr, sizeof(*addr), (void **)&kaddr);
-  if (ret != OK)
+  if (addr != NULL)
     {
-      errcode = -ret;
-      goto errout;
-    }
+      if (addrlen == NULL)
+        {
+          errcode = EFAULT;
+          goto errout;
+        }
 
-  ret = map_user_mem(addrlen, sizeof(*addrlen), (void **)&kaddrlen);
-  if (ret != OK)
-    {
-      kmm_unmap(kaddr);
-      errcode = -ret;
-      goto errout;
-    }
-#else
-  kaddr = addr;
-  kaddrlen = addrlen;
+#ifdef CONFIG_BUILD_KERNEL
+      if (!uaccess_ok(addrlen, sizeof(*addrlen)))
+        {
+          errcode = EFAULT;
+          goto errout;
+        }
 #endif
+
+      ulen = *addrlen;
+#ifdef CONFIG_BUILD_KERNEL
+      if (!uaccess_ok(addr, ulen))
+        {
+          errcode = EFAULT;
+          goto errout;
+        }
+#endif
+
+      kaddrlen = sizeof(kaddr);
+      memset(&kaddr, 0, sizeof(kaddr));
+    }
 
   /* Get the underlying socket structure */
 
@@ -236,7 +202,7 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
   if (ret < 0)
     {
       errcode = -ret;
-      goto errout_with_kmap;
+      goto errout;
     }
 
   /* Drop the reference to the listening socket if canceled in accept */
@@ -250,7 +216,9 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
       goto errout_with_filep;
     }
 
-  ret = psock_accept(psock, kaddr, kaddrlen, newsock, flags);
+  ret = psock_accept(psock,
+                     addr != NULL ? (FAR struct sockaddr *)&kaddr : NULL,
+                     addr != NULL ? &kaddrlen : NULL, newsock, flags);
   if (ret < 0)
     {
       errcode = -ret;
@@ -281,10 +249,15 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
   tls_cleanup_pop(tls_get_info(), 0);
   file_put(filep);
 
-#ifdef CONFIG_MM_KMAP
-  kmm_unmap(kaddr);
-  kmm_unmap(kaddrlen);
-#endif
+  /* The address of the peer, cut to the size of the buffer of the caller
+   * (POSIX), and its whole length
+   */
+
+  if (addr != NULL)
+    {
+      memcpy(addr, &kaddr, MIN(kaddrlen, ulen));
+      *addrlen = kaddrlen;
+    }
 
   leave_cancellation_point();
   return newfd;
@@ -298,12 +271,6 @@ errout_with_alloc:
 errout_with_filep:
   tls_cleanup_pop(tls_get_info(), 0);
   file_put(filep);
-
-errout_with_kmap:
-#ifdef CONFIG_MM_KMAP
-  kmm_unmap(kaddr);
-  kmm_unmap(kaddrlen);
-#endif
 
 errout:
   leave_cancellation_point();
