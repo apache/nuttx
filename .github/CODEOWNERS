@@ -1688,8 +1688,8 @@ arch/arm/src/common/stm32/stm32_bbsram_m3m4_v1.c xiaoxiang@xiaomi.com abdelatif.
 arch/arm/src/common/stm32/stm32_bbsram_m3m4_v1.h alin.jerpelea@sony.com raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com david_s5@nscdg.com
 arch/arm/src/common/stm32/stm32_bkp.h alin.jerpelea@sony.com raiden00@railab.me
 arch/arm/src/common/stm32/stm32_can.h raiden00@railab.me alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com juha.niskanen@haltian.com xiaoxiang@xiaomi.com
-arch/arm/src/common/stm32/stm32_can_m3m4_v1.c sebastien@lorquet.fr paul-a.patience@polymtl.ca raiden00@railab.me xiaoxiang@xiaomi.com M.Lederhilger@ds-automotion.com
-arch/arm/src/common/stm32/stm32_can_m3m4_v1_sock.c raiden00@railab.me sebastien@lorquet.fr paul-a.patience@polymtl.ca xiaoxiang@xiaomi.com M.Lederhilger@ds-automotion.com
+arch/arm/src/common/stm32/stm32_can_bxcan.c sebastien@lorquet.fr paul-a.patience@polymtl.ca raiden00@railab.me xiaoxiang@xiaomi.com M.Lederhilger@ds-automotion.com
+arch/arm/src/common/stm32/stm32_can_bxcan_sock.c raiden00@railab.me sebastien@lorquet.fr paul-a.patience@polymtl.ca xiaoxiang@xiaomi.com M.Lederhilger@ds-automotion.com
 arch/arm/src/common/stm32/stm32_capture.h pn_bouteville@yahoo.fr 59230071+hartmannathan@users.noreply.github.com raiden00@railab.me fft@feedforward.com.cn alin.jerpelea@sony.com
 arch/arm/src/common/stm32/stm32_capture_m3m4_v1.c pn_bouteville@yahoo.fr fft@feedforward.com.cn juha.niskanen@haltian.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/common/stm32/stm32_capture_m3m4_v1_lowerhalf.c fft@feedforward.com.cn devel@sumpfralle.de raiden00@railab.me alin.jerpelea@sony.com
