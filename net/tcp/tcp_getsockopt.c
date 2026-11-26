@@ -216,9 +216,11 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
           {
             FAR int *nodelay   = (FAR int *)value;
 
-            /* Always true here since we do not support Nagle. */
+            /* TCP_NODELAY is always on (no Nagle algorithm).  TCP_CORK is
+             * only a hint: report what setsockopt() stored.
+             */
 
-            *nodelay           = option == TCP_NODELAY ? 1 : 0;
+            *nodelay           = option == TCP_NODELAY ? 1 : conn->cork;
             *value_len         = sizeof(int);
             ret                = OK;
           }

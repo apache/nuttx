@@ -216,22 +216,30 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
 #endif /* CONFIG_NET_TCP_KEEPALIVE */
 
       case TCP_NODELAY: /* Avoid coalescing of small segments. */
-      case TCP_CORK:    /* coalescing of small segments. */
+        if (value_len != sizeof(int))
+          {
+            ret = -EDOM;
+          }
+        else if (*(FAR int *)value == 0)
+          {
+            nerr("ERROR: TCP_NODELAY 0 not supported\n");
+            ret = -ENOSYS;
+          }
+        break;
+
+      case TCP_CORK:    /* Coalescing of small segments. */
+
+        /* A hint only: the stack has no Nagle algorithm and sends each
+         * write at once.  getsockopt() reports the value.
+         */
+
         if (value_len != sizeof(int))
           {
             ret = -EDOM;
           }
         else
           {
-            int nodelay = *(FAR int *)value;
-
-            if ((!nodelay && option == TCP_NODELAY) ||
-                (nodelay && option == TCP_CORK))
-              {
-                nerr("ERROR: %s not supported\n",
-                     option == TCP_NODELAY ? "TCP_NODELAY" : "TCP_CORK");
-                ret = -ENOSYS;
-              }
+            conn->cork = *(FAR int *)value != 0;
           }
         break;
 

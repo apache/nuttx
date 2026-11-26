@@ -272,6 +272,8 @@ struct tcp_conn_s
                            * variable */
   uint8_t  rto;           /* Retransmission time-out */
   uint8_t  tcpstateflags; /* TCP state and flags */
+  bool     cork;          /* TCP_CORK was set (a hint: segments are not
+                           * held back) */
   struct   work_s work;   /* TCP timer handle */
   bool     timeout;       /* Trigger from timer expiry */
   uint8_t  timer;         /* The retransmission timer (units: half-seconds) */
