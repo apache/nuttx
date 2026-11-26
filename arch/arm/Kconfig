@@ -160,6 +160,18 @@ config ARCH_CHIP_EFM32
 	---help---
 		Energy Micro EFM32 microcontrollers (ARM Cortex-M).
 
+config ARCH_CHIP_EFR32
+	bool "Silicon Labs EFR32 Series 2"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RESET
+	select ARM_HAVE_DSP
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV8M_HAVE_STACKCHECK
+	---help---
+		Silicon Labs EFR32 Series 2 wireless SoCs (ARM Cortex-M33).
+
 config ARCH_CHIP_EOSS3
 	bool "QuickLogic EOS S3"
 	select ARCH_CORTEXM4
@@ -1454,6 +1466,7 @@ config ARCH_CHIP
 	default "c5471"		if ARCH_CHIP_C5471
 	default "dm320"		if ARCH_CHIP_DM320
 	default "efm32"		if ARCH_CHIP_EFM32
+	default "efr32"		if ARCH_CHIP_EFR32
 	default "eoss3"		if ARCH_CHIP_EOSS3
 	default "gd32f4"	if ARCH_CHIP_GD32F4
 	default "gd32w51x"	if ARCH_CHIP_GD32W51X
@@ -1942,6 +1955,9 @@ source "arch/arm/src/dm320/Kconfig"
 endif
 if ARCH_CHIP_EFM32
 source "arch/arm/src/efm32/Kconfig"
+endif
+if ARCH_CHIP_EFR32
+source "arch/arm/src/efr32/Kconfig"
 endif
 if ARCH_CHIP_EOSS3
 source "arch/arm/src/eoss3/Kconfig"
