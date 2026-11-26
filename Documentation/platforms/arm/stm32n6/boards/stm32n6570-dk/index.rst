@@ -190,7 +190,7 @@ The MB1854 module (Sony IMX335) is on the CSI-2 host (two lanes) and I2C1
 DCMIPP converts the raw frames to RGB565 and scales them, with automatic
 exposure (``CONFIG_STM32_DCMIPP_AE``) and white balance
 (``CONFIG_STM32_DCMIPP_AWB``), switched off with ``V4L2_CID_EXPOSURE_AUTO``
-and ``V4L2_CID_AUTO_WHITE_BALANCE``.
+and ``V4L2_CID_AUTO_WHITE_BALANCE``.  The board registers ``/dev/video``.
 
 Time-of-flight sensor
 =====================

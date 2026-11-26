@@ -34,6 +34,10 @@
 #include <nuttx/video/imgsensor.h>
 #include <nuttx/video/imx335.h>
 
+#if defined(CONFIG_STM32_DCMIPP) && defined(CONFIG_VIDEO_IMX335)
+#  include <nuttx/video/v4l2_cap.h>
+#endif
+
 #include "stm32_gpio.h"
 #include "stm32_i2c.h"
 #include "stm32_dcmipp.h"
@@ -145,7 +149,7 @@ void stm32_camera_power(void)
  *
  * Description:
  *   Power the camera module, release the IMX335 reset and register the
- *   sensor and the DCMIPP.
+ *   sensor, the DCMIPP and /dev/video.
  *
  * Input Parameters:
  *   None.
@@ -159,6 +163,7 @@ int stm32_camera_initialize(void)
 {
   FAR struct i2c_master_s *i2c;
   FAR struct imgsensor_s *sensor;
+  int ret;
 
   /* Power the module, then release the sensor reset */
 
@@ -180,7 +185,13 @@ int stm32_camera_initialize(void)
 
   /* The DCMIPP registers itself in front of the raw sensor */
 
-  return stm32_dcmipp_initialize(&g_camera_config, sensor);
+  ret = stm32_dcmipp_initialize(&g_camera_config, sensor);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return capture_initialize("/dev/video");
 }
 
 #endif /* HAVE_IMX335 */
