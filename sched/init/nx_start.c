@@ -361,7 +361,7 @@ static void idle_task_initialize(void)
   FAR struct tcb_s *tcb;
   int i;
 
-  memset(g_idletcb, 0, sizeof(g_idletcb));
+  memset(&g_idletcb, 0, sizeof(g_idletcb));
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
       tcb = &per_cpu_var_smp(g_idletcb, i);

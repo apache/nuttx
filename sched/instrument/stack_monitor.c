@@ -61,7 +61,7 @@ struct instrument_s g_stack_monitor =
 static void stack_monitor_enter(FAR void *this_fn, FAR void *call_site,
                                 FAR void *arg)
 {
-  FAR struct tcb_s *tcb = g_running_tasks[this_cpu()];
+  FAR struct tcb_s *tcb = g_running_task;
   FAR void *sp = &tcb;
   size_t i;
 
@@ -101,7 +101,7 @@ static void stack_monitor_enter(FAR void *this_fn, FAR void *call_site,
 static void stack_monitor_leave(FAR void *this_fn, FAR void *call_site,
                                 FAR void *arg)
 {
-  FAR struct tcb_s *tcb = g_running_tasks[this_cpu()];
+  FAR struct tcb_s *tcb = g_running_task;
   FAR void *sp = &tcb;
 
   if (tcb == NULL || tcb->level == 0 || sp < tcb->stack_base_ptr ||
