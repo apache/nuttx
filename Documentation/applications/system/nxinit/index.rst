@@ -290,18 +290,19 @@ Waiting for a File
 
 .. code-block::
 
-    wait <path> [<timeout>]
+    wait <path> [<timeout_ms>]
 
 ``wait`` checks for the existence of ``<path>`` with stat() every 10 ms
-and returns when the file is found. ``<timeout>`` is in seconds and may
-be fractional; it defaults to 5. When the timeout is reached, the
-command only warns and continues, so the next command still runs.
+and returns when the file is found. ``<timeout_ms>`` is an integer
+number of milliseconds; it defaults to 5000. When the timeout is
+reached, the command only warns and continues, so the next command
+still runs.
 
 .. code-block::
 
     on boot
         start foo_driver
-        wait /dev/xxx 2
+        wait /dev/xxx 2000
         start bar
 
 Compound Commands
