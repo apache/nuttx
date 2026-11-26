@@ -123,12 +123,12 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   if (lipaddr == 0)
     {
-       outaddr->sin_family      = psock->s_domain;
-       outaddr->sin_addr.s_addr = 0;
-       memset(outaddr->sin_zero, 0, sizeof(outaddr->sin_zero));
-       *addrlen = sizeof(struct sockaddr_in);
+      outaddr->sin_family      = psock->s_domain;
+      outaddr->sin_addr.s_addr = 0;
+      memset(outaddr->sin_zero, 0, sizeof(outaddr->sin_zero));
+      *addrlen = sizeof(struct sockaddr_in);
 
-       return OK;
+      return OK;
     }
 
   conn_lock(psock->s_conn);
