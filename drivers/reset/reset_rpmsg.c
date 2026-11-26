@@ -197,6 +197,7 @@ static void reset_rpmsg_client_created(FAR struct rpmsg_device *rdev,
 
   if (strcmp(client->cpuname, rpmsg_get_cpuname(rdev)) == 0)
     {
+      rpmsg_set_priority(&client->ept, RPMSG_PRIO_RT);
       rpmsg_create_ept(&client->ept, rdev, RESET_RPMSG_EPT_NAME,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        reset_rpmsg_ept_cb, NULL);
