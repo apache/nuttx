@@ -609,11 +609,11 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 {
   FAR struct net_driver_s *fwddev;
   int ret;
-#ifdef CONFIG_NET_ICMPv6
+#ifdef NET_ICMPv6_HAVE_STACK
   int icmpv6_reply_type;
   int icmpv6_reply_code;
   int icmpv6_reply_data;
-#endif /* CONFIG_NET_ICMP */
+#endif /* NET_ICMPv6_HAVE_STACK */
 
   /* Check if source device supports IP forwarding capability */
 
@@ -716,7 +716,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 drop:
   ipv6_dropstats(ipv6);
 
-#ifdef CONFIG_NET_ICMPv6
+#ifdef NET_ICMPv6_HAVE_STACK
   /* Try reply ICMPv6 to the sender. */
 
   switch (ret)
@@ -753,7 +753,7 @@ drop:
   dev->d_len = 0;
   return ret;
 
-#ifdef CONFIG_NET_ICMPv6
+#ifdef NET_ICMPv6_HAVE_STACK
 reply:
 #  ifdef CONFIG_NET_NAT66
   /* Before we reply ICMPv6, call NAT outbound to try to translate
@@ -765,7 +765,7 @@ reply:
 
   icmpv6_reply(dev, icmpv6_reply_type, icmpv6_reply_code, icmpv6_reply_data);
   return OK;
-#endif /* CONFIG_NET_ICMP */
+#endif /* NET_ICMPv6_HAVE_STACK */
 }
 
 /****************************************************************************
