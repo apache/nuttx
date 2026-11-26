@@ -1642,6 +1642,7 @@ errout:
 static int stm32can_rx0interrupt(int irq, void *context, void *arg)
 {
   struct can_dev_s *dev = (struct can_dev_s *)arg;
+
   return stm32can_rxinterrupt(dev, 0);
 }
 
@@ -1663,6 +1664,7 @@ static int stm32can_rx0interrupt(int irq, void *context, void *arg)
 static int stm32can_rx1interrupt(int irq, void *context, void *arg)
 {
   struct can_dev_s *dev = (struct can_dev_s *)arg;
+
   return stm32can_rxinterrupt(dev, 1);
 }
 
