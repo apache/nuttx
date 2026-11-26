@@ -32,10 +32,15 @@
 #include <sys/types.h>
 #include <stdbool.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/clock.h>
 #include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/spinlock.h>
+
+#ifdef CONFIG_HRTIMER
+#  include <nuttx/hrtimer.h>
+#endif
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 
@@ -81,7 +86,14 @@ struct kwork_wqueue_s
   int              nthreads;  /* Number of worker threads */
   bool             exit;      /* A flag to request the thread to exit */
   bool             dynamic;   /* Dynamically allocated queue */
-  struct wdog_s    timer;     /* Timer to pending. */
+#ifdef CONFIG_SMP
+  atomic_t         nposting;  /* Wakeups posted after the unlock */
+#endif
+#ifdef CONFIG_HRTIMER
+  hrtimer_t        timer;     /* Timer of the pending queue */
+#else
+  struct wdog_s    timer;     /* Timer of the pending queue */
+#endif
 };
 
 /* This structure defines the state of one high-priority work queue.  This
@@ -277,11 +289,68 @@ bool work_remove(FAR struct kwork_wqueue_s *wqueue,
  *   The wqueue timer callback.
  *
  * Input Parameters:
- *   arg  - The work queue.
+ *   arg/timer - The timer of the work queue.
  *
  ****************************************************************************/
 
+#ifdef CONFIG_HRTIMER
+uint64_t work_timer_expired(FAR const hrtimer_t *timer, uint64_t expired);
+#else
 void work_timer_expired(wdparm_t arg);
+#endif
+
+/****************************************************************************
+ * Name: work_timer_isactive/work_timer_cancel/work_timer_cancel_sync
+ *
+ * Description:
+ *   Check whether the timer of the workqueue is pending, and cancel it.
+ *   work_timer_cancel_sync() also waits for a running timer callback.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_HRTIMER
+#  define work_timer_isactive(wqueue) ((wqueue)->timer.func != NULL)
+#  define work_timer_cancel(wqueue)   hrtimer_cancel(&(wqueue)->timer)
+#  define work_timer_cancel_sync(wqueue) \
+     hrtimer_cancel_sync(&(wqueue)->timer)
+#else
+#  define work_timer_isactive(wqueue) WDOG_ISACTIVE(&(wqueue)->timer)
+#  define work_timer_cancel(wqueue)   wd_cancel(&(wqueue)->timer)
+#  define work_timer_cancel_sync(wqueue) wd_cancel(&(wqueue)->timer)
+#endif
+
+/****************************************************************************
+ * Name: work_timer_start
+ *
+ * Description:
+ *   Internal public function to start the timer of the workqueue at the
+ *   absolute tick of the first pending work.
+ *
+ *   With CONFIG_HRTIMER the timer is an hrtimer, which has its own lock.
+ *   So the caller can hold wqueue->lock: the order is always wqueue->lock
+ *   first, the hrtimer lock second.  wd_start_abstick() enters the
+ *   critical section instead.
+ *
+ * Input Parameters:
+ *   wqueue - The work queue.
+ *   qtime  - The absolute tick of the expiration.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline_function
+void work_timer_start(FAR struct kwork_wqueue_s *wqueue, clock_t qtime)
+{
+#ifdef CONFIG_HRTIMER
+  hrtimer_start(&wqueue->timer, work_timer_expired, TICK2NSEC(qtime),
+                HRTIMER_MODE_ABS);
+#else
+  wd_start_abstick(&wqueue->timer, qtime,
+                   work_timer_expired, (wdparm_t)wqueue);
+#endif
+}
 
 /****************************************************************************
  * Name: work_timer_reset
@@ -307,12 +376,11 @@ void work_timer_reset(FAR struct kwork_wqueue_s *wqueue)
 
       work = list_first_entry(&wqueue->pending, struct work_s, node);
 
-      wd_start_abstick(&wqueue->timer, work->qtime,
-                       work_timer_expired, (wdparm_t)wqueue);
+      work_timer_start(wqueue, work->qtime);
     }
   else
     {
-      wd_cancel(&wqueue->timer);
+      work_timer_cancel(wqueue);
     }
 }
 
