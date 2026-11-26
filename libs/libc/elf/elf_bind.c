@@ -752,8 +752,7 @@ static int libelf_relocateadd(FAR struct module_s *modp,
 
       /* Calculate the relocation address. */
 
-      if (rela->r_offset < 0 ||
-          rela->r_offset > dstsec->sh_size)
+      if (rela->r_offset > dstsec->sh_size)
         {
           berr("ERROR: Section %d reloc %d: "
                "Relocation address out of range, "
