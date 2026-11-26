@@ -87,6 +87,42 @@ Configuring NuttX and compile:
    $ ./tools/configure.sh -l fvp-armv8r:nsh_smp
    $ make
 
+---
+BMP
+---
+
+The ``nsh_bmp`` configuration runs one NuttX instance on each of the four
+Cortex-R82 cores using Bound Multiprocessing (BMP).  CPU 0 owns the physical
+PL011 console and creates an RPTUN/RPMsg link to each of CPUs 1, 2, and 3.
+Software-generated interrupts (SGIs) notify the peer cores, and the RPMsg UART
+service provides a terminal for each secondary core.
+
+Configuring NuttX and compiling:
+
+.. code:: console
+
+    $ ./tools/configure.sh -l fvp-armv8r:nsh_bmp
+    $ make
+
+The configuration enables the RPMsg ping utility and creates the following
+CPU 0 devices after the links are ready:
+
+.. list-table:: BMP RPMsg devices on CPU 0
+   :header-rows: 1
+
+   * - Remote CPU
+     - RPTUN device
+     - RPMsg UART device
+   * - CPU 1
+     - ``/dev/rpmsg/core1``
+     - ``/dev/ttyCORE1``
+   * - CPU 2
+     - ``/dev/rpmsg/core2``
+     - ``/dev/ttyCORE2``
+   * - CPU 3
+     - ``/dev/rpmsg/core3``
+     - ``/dev/ttyCORE3``
+
 Running
 -------
 
@@ -223,6 +259,50 @@ Starting another terminal and enter:
      nsh: mkfatfs: command not found
      NuttShell (NSH) NuttX-12.0.0
      nsh>
+
+-----------
+Running BMP
+-----------
+
+Run the BMP image with the four-core FVP configuration:
+
+.. code:: console
+
+   $ AEMv8R_FVP/AEMv8R_base_pkg/models/Linux64_GCC-9.3/FVP_BaseR_AEMv8R \
+            -f boards/arm64/fvp-v8r/fvp-armv8r/scripts/fvp_cfg_smp.txt \
+            -a ./nuttx
+
+Connect to UART1 for the CPU 0 NSH console:
+
+.. code:: console
+
+   $ telnet localhost 5001
+
+From the CPU 0 NSH console, open the CPU 1 RPMsg UART.  The default device for
+the ``cu`` command in this configuration is ``/dev/ttyCORE1``:
+
+.. code:: console
+
+   nsh> cu
+
+Use ``~.`` at the beginning of a line to leave ``cu``.  To connect to another
+secondary CPU, specify its RPMsg UART device explicitly:
+
+.. code:: console
+
+   nsh> cu -l /dev/ttyCORE2
+   nsh> cu -l /dev/ttyCORE3
+
+The RPMsg link can also be checked from CPU 0 with the ping service.  For
+example, the following command sends 100 messages to CPU 1, waits for each
+acknowledgment, and uses a 10 ms interval:
+
+.. code:: console
+
+   nsh> rpmsg ping /dev/rpmsg/core1 100 100 1 10
+
+See :doc:`/os/drivers/special/rpmsg/rpmsg_ping` for the complete command syntax
+and :doc:`/os/drivers/special/rptun/index` for an overview of RPTUN.
 
 Status
 ======
