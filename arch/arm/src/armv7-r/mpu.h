@@ -178,6 +178,22 @@ void mpu_early_reset(void);
 #endif
 
 /****************************************************************************
+ * Name: mpu_allocregions
+ *
+ * Description:
+ *   Allocate the regions
+ *
+ * Input Parameters:
+ *   nregions - The number of regions to be allocated.
+ *
+ * Returned Value:
+ *   The index of the allocated region.
+ *
+ ****************************************************************************/
+
+unsigned int mpu_allocregions(unsigned int nregions);
+
+/****************************************************************************
  * Name: mpu_allocregion
  *
  * Description:
@@ -191,7 +207,7 @@ void mpu_early_reset(void);
  *
  ****************************************************************************/
 
-unsigned int mpu_allocregion(void);
+#define mpu_allocregion() mpu_allocregions(1)
 
 /****************************************************************************
  * Name: mpu_freeregion
@@ -306,6 +322,23 @@ uint32_t mpu_subregion(uintptr_t base, size_t size, uint8_t l2size);
 
 void mpu_modify_region(unsigned int region, uintptr_t base, size_t size,
                        uint32_t flags);
+
+/****************************************************************************
+ * Name: mpu_modify_regions
+ *
+ * Description:
+ *   Configure multi regions for privileged, strongly ordered memory
+ *
+ * Input Parameters:
+ *   region  - First region number to modify.
+ *   base    - Base address of the region.
+ *   size    - Size of the region.
+ *   flags   - Flags to configure the region.
+ *
+ ****************************************************************************/
+
+void mpu_modify_regions(unsigned int region, uintptr_t base, size_t size,
+                        uint32_t flags);
 
 /****************************************************************************
  * Name: mpu_configure_region
