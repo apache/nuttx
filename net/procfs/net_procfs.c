@@ -728,6 +728,41 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: netprocfs_read_line
+ *
+ * Description:
+ *   Transfer the rest of the line buffered in priv->line[] to the user
+ *   buffer, as much as fits.  What does not fit stays buffered for the
+ *   next read.
+ *
+ * Input Parameters:
+ *   priv   - A reference to the network procfs file structure
+ *   buffer - The user-provided buffer
+ *   buflen - The size in bytes of the user provided buffer.
+ *
+ * Returned Value:
+ *   The number of bytes transferred.
+ *
+ ****************************************************************************/
+
+size_t netprocfs_read_line(FAR struct netprocfs_file_s *priv,
+                           FAR char *buffer, size_t buflen)
+{
+  size_t xfrsize = priv->linesize;
+
+  if (xfrsize > buflen)
+    {
+      xfrsize = buflen;
+    }
+
+  memcpy(buffer, &priv->line[priv->offset], xfrsize);
+
+  priv->linesize -= xfrsize;
+  priv->offset   += xfrsize;
+  return xfrsize;
+}
+
+/****************************************************************************
  * Name: netprocfs_read_linegen
  *
  * Description:

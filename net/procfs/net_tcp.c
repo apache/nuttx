@@ -46,20 +46,15 @@
 
 #ifdef NET_TCP_HAVE_STACK
 
-#ifdef CONFIG_NET_IPv6
-#  define TCP_LINELEN 180
-#else
-#  define TCP_LINELEN 120
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int netprocfs_tcpline(FAR struct netprocfs_file_s *priv,
-                             FAR char *buffer, size_t buflen,
-                             FAR struct tcp_conn_s *conn)
+static void netprocfs_tcpline(FAR struct netprocfs_file_s *priv,
+                              FAR struct tcp_conn_s *conn)
 {
+  FAR char *buffer = priv->line;
+  size_t buflen = NET_LINELEN;
   uint8_t domain = net_ip_domain_select(conn->domain, PF_INET, PF_INET6);
   int addrlen = (domain == PF_INET) ?
                 INET_ADDRSTRLEN : INET6_ADDRSTRLEN;
@@ -67,7 +62,7 @@ static int netprocfs_tcpline(FAR struct netprocfs_file_s *priv,
   char local[INET6_ADDRSTRLEN];
   FAR void *laddr;
   FAR void *raddr;
-  int len;
+  size_t len;
 
   laddr = net_ip_binding_laddr(&conn->u, domain);
   raddr = net_ip_binding_raddr(&conn->u, domain);
@@ -95,16 +90,24 @@ static int netprocfs_tcpline(FAR struct netprocfs_file_s *priv,
 #endif
                  (conn->readahead) ? conn->readahead->io_pktlen : 0);
 
-  len += snprintf(buffer + len, buflen - len,
-                  " %*s:%-6" PRIu16 " %*s:%-6" PRIu16 "\n",
-                  (domain == PF_INET6) ? addrlen / 2 : addrlen,
-                  inet_ntop(domain, laddr, local, addrlen),
-                  ntohs(conn->lport),
-                  (domain == PF_INET6) ? addrlen / 2 : addrlen,
-                  inet_ntop(domain, raddr, remote, addrlen),
-                  ntohs(conn->rport));
+  if (len < buflen)
+    {
+      len += snprintf(buffer + len, buflen - len,
+                      " %*s:%-6" PRIu16 " %*s:%-6" PRIu16 "\n",
+                      (domain == PF_INET6) ? addrlen / 2 : addrlen,
+                      inet_ntop(domain, laddr, local, addrlen),
+                      ntohs(conn->lport),
+                      (domain == PF_INET6) ? addrlen / 2 : addrlen,
+                      inet_ntop(domain, raddr, remote, addrlen),
+                      ntohs(conn->rport));
+    }
 
-  return len;
+  /* snprintf() returns the length of the whole line, also when it does
+   * not fit.
+   */
+
+  priv->linesize = len < buflen ? len : buflen - 1;
+  priv->offset   = 0;
 }
 
 /****************************************************************************
@@ -164,10 +167,15 @@ static ssize_t netprocfs_tcpstats(FAR struct netprocfs_file_s *priv,
   FAR struct net_driver_s *held = NULL;
   FAR struct net_driver_s *dev;
   FAR struct tcp_conn_s *conn;
-  int len = 0;
+  size_t len = 0;
+
+  /* A line is written in priv->line[] and as much of it as fits is
+   * transferred.  If a part of it is left, the buffer is full: the next
+   * read takes that part first.
+   */
 
   conn = netprocfs_tcpnext(priv, NULL);
-  while (conn != NULL && buflen - len >= TCP_LINELEN)
+  while (conn != NULL && len < buflen)
     {
       /* The input path changes the read-ahead and the write queues of a
        * connection with only its device locked, and it locks the
@@ -203,7 +211,8 @@ static ssize_t netprocfs_tcpstats(FAR struct netprocfs_file_s *priv,
           held = dev;
         }
 
-      len += netprocfs_tcpline(priv, buffer + len, buflen - len, conn);
+      netprocfs_tcpline(priv, conn);
+      len += netprocfs_read_line(priv, buffer + len, buflen - len);
       priv->last = conn->listid;
       priv->lines++;
       conn = netprocfs_tcpnext(priv, conn);
@@ -243,7 +252,13 @@ ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen)
 {
   FAR struct tcp_conn_s *conn;
-  int len = 0;
+  size_t len;
+
+  /* First the rest of a line that did not fit in the buffer of the last
+   * read.
+   */
+
+  len = netprocfs_read_line(priv, buffer, buflen);
 
   tcp_conn_list_lock();
 
@@ -257,7 +272,7 @@ ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
       priv->last  = conn->listid - 1;
       priv->limit = tcp_conn_lastid();
 
-      len = snprintf(buffer, buflen, "TCP sl  "
+      len = snprintf(priv->line, NET_LINELEN, "TCP sl  "
                                      "st flg ref tmr uack nrt   "
 #if CONFIG_NET_SEND_BUFSIZE > 0 && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
                                       "txsz   "
@@ -271,10 +286,14 @@ ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
                                       INET6_ADDRSTRLEN / 2,
                                       "remote_address"
                                       );
-      priv->lines = 1;
+      priv->linesize = len < NET_LINELEN ? len : NET_LINELEN - 1;
+      priv->offset   = 0;
+      priv->lines    = 1;
+
+      len = netprocfs_read_line(priv, buffer, buflen);
     }
 
-  if (priv->lines > 0)
+  if (priv->lines > 0 && priv->linesize == 0)
     {
       len += netprocfs_tcpstats(priv, buffer + len, buflen - len);
     }
