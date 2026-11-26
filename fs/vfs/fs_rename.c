@@ -199,6 +199,7 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
   newinode->i_child   = oldinode->i_child;   /* Link to lower level inode */
   newinode->i_flags   = oldinode->i_flags;   /* Flags for inode */
   newinode->u.i_ops   = oldinode->u.i_ops;   /* Inode operations */
+  newinode->i_ino     = oldinode->i_ino;
 #ifdef CONFIG_PSEUDOFS_ATTRIBUTES
   newinode->i_mode    = oldinode->i_mode;    /* Access mode flags */
   newinode->i_owner   = oldinode->i_owner;   /* Owner */
