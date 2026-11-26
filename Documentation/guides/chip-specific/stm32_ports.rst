@@ -696,7 +696,7 @@ RCC           to be done    arch/arm/src/stm32h7/stm32_rcc.c
 RNG           v1            arch/arm/src/common/stm32/stm32_rng_v1.c
 RTC           to be done    arch/arm/src/stm32h7/stm32_rtc.c       
 SDMMC         v2            arch/arm/src/common/stm32/stm32_sdmmc_v2.c
-SPI/I2S       to be done    arch/arm/src/stm32h7/stm32_spi.c       
+SPI/I2S       v5            arch/arm/src/common/stm32/stm32_spi_v5.c
 TIM           v2, H7RS v3   arch/arm/src/common/stm32/stm32_tim.c  
 USART/LPUART  v4            arch/arm/src/stm32h7/stm32_serial.c    
 USB           OTG v2        arch/arm/src/common/stm32/stm32_otgdev_v2.c

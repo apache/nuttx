@@ -55,6 +55,14 @@
 #define ARMV7M_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
 #define ARMV7M_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
 
+/* SPI kernel clock and SPI clock limits */
+
+#define STM32_SPI_MAX_KER_CK   200000000UL
+#define STM32_SPI4_MAX_KER_CK  100000000UL
+#define STM32_SPI5_MAX_KER_CK  100000000UL
+#define STM32_SPI6_MAX_KER_CK  100000000UL
+#define STM32_SPI_CLK_MAX      150000000UL
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

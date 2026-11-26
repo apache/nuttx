@@ -883,7 +883,8 @@ config STM32_HAVE_IP_SPI_V4
 config STM32_HAVE_IP_SPI_V5
 	bool
 	---help---
-		SPI with FIFOs, TSIZE and a kernel clock (STM32H5, STM32N6).
+		SPI with FIFOs, TSIZE and a kernel clock (STM32H5, STM32H7,
+		STM32N6).
 
 config STM32_HAVE_SPI1
 	bool

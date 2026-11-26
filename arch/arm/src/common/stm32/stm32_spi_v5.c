@@ -132,6 +132,37 @@
 #    define SPI_TXDMA8_CONFIG       (GPDMA_CXTR1_DDW_LOG2_BYTE|GPDMA_CXTR1_SDW_LOG2_BYTE|GPDMA_CXTR1_SINC)
 #    define SPI_TXDMA16NULL_CONFIG  (GPDMA_CXTR1_DDW_LOG2_HW  |GPDMA_CXTR1_SDW_LOG2_BYTE                 )
 #    define SPI_TXDMA8NULL_CONFIG   (GPDMA_CXTR1_DDW_LOG2_BYTE|GPDMA_CXTR1_SDW_LOG2_BYTE                 )
+
+/* GPDMA request of bus n, direction d (RX or TX), and the argument of
+ * stm32_dmachannel()
+ */
+
+#    define SPI_DMAREQ(n, d)        GPDMA_REQ_SPI##n##_##d
+#    define SPI_DMACHAN_RX(priv)    GPDMA_TTYPE_P2M
+#    define SPI_DMACHAN_TX(priv)    GPDMA_TTYPE_M2P
+
+#  elif defined(CONFIG_ARCH_CHIP_STM32H7)
+#    define SPI_DMA_PRIO  DMA_SCR_PRILO
+
+/* DMA1/DMA2 stream configuration, BDMA (SPI6) takes the same values */
+
+#    define SPI_RXDMA16_CONFIG      (SPI_DMA_PRIO|DMA_SCR_MSIZE_16BITS|DMA_SCR_PSIZE_16BITS|DMA_SCR_MINC|DMA_SCR_DIR_P2M)
+#    define SPI_RXDMA8_CONFIG       (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS |DMA_SCR_MINC|DMA_SCR_DIR_P2M)
+#    define SPI_RXDMA16NULL_CONFIG  (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_16BITS             |DMA_SCR_DIR_P2M)
+#    define SPI_RXDMA8NULL_CONFIG   (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS              |DMA_SCR_DIR_P2M)
+#    define SPI_TXDMA16_CONFIG      (SPI_DMA_PRIO|DMA_SCR_MSIZE_16BITS|DMA_SCR_PSIZE_16BITS|DMA_SCR_MINC|DMA_SCR_DIR_M2P)
+#    define SPI_TXDMA8_CONFIG       (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS |DMA_SCR_MINC|DMA_SCR_DIR_M2P)
+#    define SPI_TXDMA16NULL_CONFIG  (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_16BITS             |DMA_SCR_DIR_M2P)
+#    define SPI_TXDMA8NULL_CONFIG   (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS              |DMA_SCR_DIR_M2P)
+
+/* DMAMUX channel of bus n, direction d (RX or TX), from board.h, and the
+ * argument of stm32_dmachannel()
+ */
+
+#    define SPI_DMAREQ(n, d)        DMAMAP_SPI##n##_##d
+#    define SPI_DMACHAN_RX(priv)    ((priv)->rxreq)
+#    define SPI_DMACHAN_TX(priv)    ((priv)->txreq)
+
 #  else
 #    error "Unknown STM32 DMA"
 #  endif
@@ -318,6 +349,8 @@
 #ifdef CONFIG_STM32_SPI_DMA
 #  if defined(CONFIG_STM32_HAVE_IP_DMA_GPDMA)
 typedef struct stm32_gpdma_cfg_s spi_dmacfg_t;
+#  elif defined(CONFIG_ARCH_CHIP_STM32H7)
+typedef stm32_dmacfg_t spi_dmacfg_t;
 #  endif
 #endif
 
@@ -517,8 +550,8 @@ static struct stm32_spidev_s g_spi1dev =
   .spiirq   = STM32_IRQ_SPI1,
 #ifdef CONFIG_STM32_SPI1_DMA
   .usedma   = true,
-  .rxreq    = GPDMA_REQ_SPI1_RX,
-  .txreq    = GPDMA_REQ_SPI1_TX,
+  .rxreq    = SPI_DMAREQ(1, RX),
+  .txreq    = SPI_DMAREQ(1, TX),
 #  if defined(SPI1_DMABUFSIZE_ADJUSTED)
   .rxbuf    = g_spi1_rxbuf,
   .txbuf    = g_spi1_txbuf,
@@ -595,8 +628,8 @@ static struct stm32_spidev_s g_spi2dev =
   .spiirq   = STM32_IRQ_SPI2,
 #ifdef CONFIG_STM32_SPI2_DMA
   .usedma   = true,
-  .rxreq    = GPDMA_REQ_SPI2_RX,
-  .txreq    = GPDMA_REQ_SPI2_TX,
+  .rxreq    = SPI_DMAREQ(2, RX),
+  .txreq    = SPI_DMAREQ(2, TX),
 #  if defined(SPI2_DMABUFSIZE_ADJUSTED)
   .rxbuf    = g_spi2_rxbuf,
   .txbuf    = g_spi2_txbuf,
@@ -673,8 +706,8 @@ static struct stm32_spidev_s g_spi3dev =
   .spiirq   = STM32_IRQ_SPI3,
 #ifdef CONFIG_STM32_SPI3_DMA
   .usedma   = true,
-  .rxreq    = GPDMA_REQ_SPI3_RX,
-  .txreq    = GPDMA_REQ_SPI3_TX,
+  .rxreq    = SPI_DMAREQ(3, RX),
+  .txreq    = SPI_DMAREQ(3, TX),
 #  if defined(SPI3_DMABUFSIZE_ADJUSTED)
   .rxbuf    = g_spi3_rxbuf,
   .txbuf    = g_spi3_txbuf,
@@ -751,8 +784,8 @@ static struct stm32_spidev_s g_spi4dev =
   .spiirq   = STM32_IRQ_SPI4,
 #ifdef CONFIG_STM32_SPI4_DMA
   .usedma   = true,
-  .rxreq    = GPDMA_REQ_SPI4_RX,
-  .txreq    = GPDMA_REQ_SPI4_TX,
+  .rxreq    = SPI_DMAREQ(4, RX),
+  .txreq    = SPI_DMAREQ(4, TX),
 #  if defined(SPI4_DMABUFSIZE_ADJUSTED)
   .rxbuf    = g_spi4_rxbuf,
   .txbuf    = g_spi4_txbuf,
@@ -829,8 +862,8 @@ static struct stm32_spidev_s g_spi5dev =
   .spiirq   = STM32_IRQ_SPI5,
 #ifdef CONFIG_STM32_SPI5_DMA
   .usedma   = true,
-  .rxreq    = GPDMA_REQ_SPI5_RX,
-  .txreq    = GPDMA_REQ_SPI5_TX,
+  .rxreq    = SPI_DMAREQ(5, RX),
+  .txreq    = SPI_DMAREQ(5, TX),
 #  if defined(SPI5_DMABUFSIZE_ADJUSTED)
   .rxbuf    = g_spi5_rxbuf,
   .txbuf    = g_spi5_txbuf,
@@ -908,8 +941,8 @@ static struct stm32_spidev_s g_spi6dev =
   .spiirq   = STM32_IRQ_SPI6,
 #ifdef CONFIG_STM32_SPI6_DMA
   .usedma   = true,
-  .rxreq    = GPDMA_REQ_SPI6_RX,
-  .txreq    = GPDMA_REQ_SPI6_TX,
+  .rxreq    = SPI_DMAREQ(6, RX),
+  .txreq    = SPI_DMAREQ(6, TX),
 #  if defined(SPI6_DMABUFSIZE_ADJUSTED)
   .rxbuf    = g_spi6_rxbuf,
   .txbuf    = g_spi6_txbuf,
@@ -1397,19 +1430,19 @@ static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_SPI_DMA) && defined(CONFIG_STM32_HAVE_IP_DMA_GPDMA)
+#ifdef CONFIG_STM32_SPI_DMA
 static void spi_dma_alloc(struct stm32_spidev_s *priv)
 {
   if (priv->config != SIMPLEX_TX)
     {
-      priv->rxdma = stm32_dmachannel(GPDMA_TTYPE_P2M);
+      priv->rxdma = stm32_dmachannel(SPI_DMACHAN_RX(priv));
       DEBUGASSERT(priv->rxdma);
       spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_RXDMAEN);
     }
 
   if (priv->config != SIMPLEX_RX)
     {
-      priv->txdma = stm32_dmachannel(GPDMA_TTYPE_M2P);
+      priv->txdma = stm32_dmachannel(SPI_DMACHAN_TX(priv));
       DEBUGASSERT(priv->txdma);
       spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_TXDMAEN);
     }
@@ -1448,6 +1481,18 @@ static void spi_dma_cfg(struct stm32_spidev_s *priv, bool rx,
   dmacfg->ntransfers = nwords;
   dmacfg->priority   = SPI_DMA_PRIO;
   dmacfg->mode       = 0;
+}
+#elif defined(CONFIG_STM32_SPI_DMA) && defined(CONFIG_ARCH_CHIP_STM32H7)
+static void spi_dma_cfg(struct stm32_spidev_s *priv, bool rx,
+                        uintptr_t maddr, size_t nwords,
+                        spi_dmacfg_t *dmacfg)
+{
+  dmacfg->paddr = priv->spibase +
+                  (rx ? STM32_SPI_RXDR_OFFSET : STM32_SPI_TXDR_OFFSET);
+  dmacfg->maddr = (uint32_t)maddr;
+  dmacfg->ndata = nwords;
+  dmacfg->cfg1  = rx ? priv->rxcfg : priv->txcfg;
+  dmacfg->cfg2  = 0;
 }
 #endif
 
