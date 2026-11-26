@@ -1236,7 +1236,13 @@ retry:
       /* Mark this entry as released */
 
       hdr.flags = (uint8_t)~MTD_ERASED_FLAGS(dev);
-      mtdconfig_writebytes(dev, offset, &hdr.flags, sizeof(hdr.flags));
+      ret = mtdconfig_writebytes(dev, offset, &hdr.flags,
+                                 sizeof(hdr.flags));
+      if (ret != sizeof(hdr.flags))
+        {
+          ret = -EIO;
+          goto errout;
+        }
     }
 
   /* Test if the new length is zero.  If it is, then we are
@@ -1494,9 +1500,16 @@ static int mtdconfig_deleteconfig(FAR struct mtdconfig_struct_s *dev,
       /* Entry found.  Mark this entry as released */
 
       hdr.flags = (uint8_t)~MTD_ERASED_FLAGS(dev);
-      mtdconfig_writebytes(dev, offset, &hdr.flags, sizeof(hdr.flags));
-
-      ret = OK;
+      ret = mtdconfig_writebytes(dev, offset, &hdr.flags,
+                                 sizeof(hdr.flags));
+      if (ret != sizeof(hdr.flags))
+        {
+          ret = -EIO;
+        }
+      else
+        {
+          ret = OK;
+        }
     }
 
   /* Free the buffer */
