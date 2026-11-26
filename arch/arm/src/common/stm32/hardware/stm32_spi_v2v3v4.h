@@ -72,12 +72,16 @@
 #  define HAVE_SPI_NSSP           /* Have NSS Pulse Management in master mode */
 #endif
 
-/* Maximum allowed speed as per specifications for all SPIs */
+/* Maximum allowed speed as per specifications for all SPIs, unless chip.h
+ * gives it
+ */
 
-#if defined(CONFIG_STM32_STM32F4XXX)
-#  define STM32_SPI_CLK_MAX     37500000UL
-#else
-#  define STM32_SPI_CLK_MAX     18000000UL
+#ifndef STM32_SPI_CLK_MAX
+#  if defined(CONFIG_STM32_STM32F4XXX)
+#    define STM32_SPI_CLK_MAX   37500000UL
+#  else
+#    define STM32_SPI_CLK_MAX   18000000UL
+#  endif
 #endif
 
 /* Register Offsets *********************************************************/

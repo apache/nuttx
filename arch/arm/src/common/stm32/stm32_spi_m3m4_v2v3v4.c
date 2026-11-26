@@ -53,6 +53,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -62,6 +63,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/power/pm.h>
 
 #include <arch/board/board.h>
 
@@ -143,9 +145,18 @@
 
 #  define STM32_SPI_DMA_MAX_XFER  65535u
 
-#  define SPIDMA_BUFFER_MASK   (4 - 1)
+/* With CONFIG_ARMV7M_DCACHE the DMA buffers must be aligned to and a
+ * multiple of the D-cache line size
+ */
+
+#  ifdef CONFIG_ARMV7M_DCACHE
+#    define SPIDMA_BUFFER_MASK   (ARMV7M_DCACHE_LINESIZE - 1)
+#    define SPIDMA_BUF_ALIGN     aligned_data(ARMV7M_DCACHE_LINESIZE)
+#  else
+#    define SPIDMA_BUFFER_MASK   (4 - 1)
+#    define SPIDMA_BUF_ALIGN     aligned_data(4)
+#  endif
 #  define SPIDMA_SIZE(b) (((b) + SPIDMA_BUFFER_MASK) & ~SPIDMA_BUFFER_MASK)
-#  define SPIDMA_BUF_ALIGN   aligned_data(4)
 
 #  if defined(CONFIG_STM32_SPI1_DMA_BUFFER) && \
             CONFIG_STM32_SPI1_DMA_BUFFER > 0
@@ -222,6 +233,9 @@ struct stm32_spidev_s
   uint32_t         actual;       /* Actual clock frequency */
   uint8_t          nbits;        /* Width of word in bits (4 through 16) */
   uint8_t          mode;         /* Mode 0,1,2,3 */
+#ifdef CONFIG_PM
+  struct pm_callback_s pm_cb;    /* PM callbacks */
+#endif
 };
 
 /****************************************************************************
@@ -303,6 +317,13 @@ static void        spi_recvblock(struct spi_dev_s *dev,
 
 static void        spi_bus_initialize(struct stm32_spidev_s *priv);
 
+/* PM interface */
+
+#ifdef CONFIG_PM
+static int         spi_pm_prepare(struct pm_callback_s *cb, int domain,
+                                  enum pm_state_e pmstate);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -372,6 +393,9 @@ static struct stm32_spidev_s g_spi1dev =
   .txsem    = SEM_INITIALIZER(0),
 #endif
   .lock     = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
 };
 #endif
 
@@ -440,6 +464,9 @@ static struct stm32_spidev_s g_spi2dev =
   .txsem    = SEM_INITIALIZER(0),
 #endif
   .lock     = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
 };
 #endif
 
@@ -508,6 +535,9 @@ static struct stm32_spidev_s g_spi3dev =
   .txsem    = SEM_INITIALIZER(0),
 #endif
   .lock     = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
 };
 #endif
 
@@ -576,6 +606,9 @@ static struct stm32_spidev_s g_spi4dev =
   .txsem    = SEM_INITIALIZER(0),
 #endif
   .lock     = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
 };
 #endif
 
@@ -644,6 +677,9 @@ static struct stm32_spidev_s g_spi5dev =
   .txsem    = SEM_INITIALIZER(0),
 #endif
   .lock     = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
 };
 #endif
 
@@ -712,6 +748,9 @@ static struct stm32_spidev_s g_spi6dev =
   .txsem    = SEM_INITIALIZER(0),
 #endif
   .lock     = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
 };
 #endif
 
@@ -1244,6 +1283,43 @@ static void spi_modifycr2(struct stm32_spidev_s *priv, uint16_t setbits,
 #endif
 
 /****************************************************************************
+ * Name: spi_enable
+ *
+ * Description:
+ *   Enable the SPI after a configuration change.  With FIFOs a mode change
+ *   can leave a spurious frame in the RX FIFO, so the RX FIFO is drained
+ *   with the DMA requests disabled.
+ *
+ ****************************************************************************/
+
+static void spi_enable(struct stm32_spidev_s *priv)
+{
+#ifdef HAVE_SPI_FIFOS
+#  ifdef CONFIG_STM32_SPI_DMA
+  uint16_t cr2 = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
+
+  spi_modifycr2(priv, 0, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
+#  endif
+
+  spi_modifycr1(priv, SPI_CR1_SPE, 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_FRLVL_MASK) != 0)
+    {
+      spi_getreg(priv, STM32_SPI_DR_OFFSET);
+    }
+
+#  ifdef CONFIG_STM32_SPI_DMA
+  /* Restore the DMA requests with the SPI disabled */
+
+  spi_modifycr1(priv, 0, SPI_CR1_SPE);
+  spi_modifycr2(priv, cr2 & (SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN), 0);
+  spi_modifycr1(priv, SPI_CR1_SPE, 0);
+#  endif
+#else
+  spi_modifycr1(priv, SPI_CR1_SPE, 0);
+#endif
+}
+
+/****************************************************************************
  * Name: spi_lock
  *
  * Description:
@@ -1302,6 +1378,13 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
   uint16_t setbits;
   uint32_t actual;
+
+  /* Limit to the maximum SPI clock of the chip */
+
+  if (frequency > STM32_SPI_CLK_MAX)
+    {
+      frequency = STM32_SPI_CLK_MAX;
+    }
 
   /* Has the frequency changed? */
 
@@ -1447,7 +1530,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       spi_modifycr1(priv, 0, SPI_CR1_SPE);
       spi_modifycr1(priv, setbits, clrbits);
-      spi_modifycr1(priv, SPI_CR1_SPE, 0);
+      spi_enable(priv);
 
 #ifdef SPI_CR2_FRF    /* If MCU supports TI Synchronous Serial Frame Format */
       switch (mode)
@@ -1471,7 +1554,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       spi_modifycr1(priv, 0, SPI_CR1_SPE);
       spi_modifycr2(priv, setbits, clrbits);
-      spi_modifycr1(priv, SPI_CR1_SPE, 0);
+      spi_enable(priv);
 #endif
 
       /* Save the mode so that subsequent re-configurations will be
@@ -1898,6 +1981,13 @@ static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           nwords = (priv->nbits > 8) ? nbytes >> 1 : nbytes;
         }
 
+      /* Flush the TX data to memory */
+
+      if (txbuffer != NULL)
+        {
+          up_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + nbytes);
+        }
+
       txp = (const uint8_t *)txbuffer;
       rxp = (uint8_t *)rxbuffer;
       ret = OK;
@@ -1974,9 +2064,17 @@ static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           nwords -= chunk;
         }
 
-      if (rxbuffer != NULL && priv->rxbuf != NULL && ret >= 0)
+      if (rxbuffer != NULL && ret >= 0)
         {
-          memcpy(xbuffer, priv->rxbuf, nbytes);
+          /* Force the RX data to be re-read from memory */
+
+          up_invalidate_dcache((uintptr_t)rxbuffer,
+                               (uintptr_t)rxbuffer + nbytes);
+
+          if (priv->rxbuf != NULL)
+            {
+              memcpy(xbuffer, priv->rxbuf, nbytes);
+            }
         }
 
 #ifdef CONFIG_SPI_TRIGGER
@@ -2087,6 +2185,78 @@ static void spi_recvblock(struct spi_dev_s *dev,
 #endif
 
 /****************************************************************************
+ * Name: spi_pm_prepare
+ *
+ * Description:
+ *   Request the driver to prepare for a new power state. This is a
+ *   warning that the system is about to enter into a new power state.  The
+ *   driver should begin whatever operations that may be required to enter
+ *   power state.  The driver may abort the state change mode by returning
+ *   a non-zero value from the callback function.
+ *
+ * Input Parameters:
+ *   cb      - Returned to the driver.  The driver version of the callback
+ *             structure may include additional, driver-specific state
+ *             data at the end of the structure.
+ *   domain  - Identifies the activity domain of the state change
+ *   pmstate - Identifies the new PM state
+ *
+ * Returned Value:
+ *   0 (OK) means the event was successfully processed and that the driver
+ *   is prepared for the PM state change.  Non-zero means that the driver
+ *   is not prepared to perform the tasks needed achieve this power setting
+ *   and will cause the state change to be aborted.  NOTE:  The prepare
+ *   method will also be recalled when reverting from lower back to higher
+ *   power consumption modes (say because another driver refused a lower
+ *   power state change).  Drivers are not permitted to return non-zero
+ *   values when reverting back to higher power consumption modes!
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static int spi_pm_prepare(struct pm_callback_s *cb, int domain,
+                          enum pm_state_e pmstate)
+{
+  struct stm32_spidev_s *priv =
+      (struct stm32_spidev_s *)((char *)cb -
+                                    offsetof(struct stm32_spidev_s, pm_cb));
+
+  /* Logic to prepare for a reduced power state goes here. */
+
+  switch (pmstate)
+    {
+      case PM_NORMAL:
+      case PM_IDLE:
+        break;
+
+      case PM_STANDBY:
+      case PM_SLEEP:
+
+        /* Check if exclusive lock for SPI bus is held. */
+
+        if (nxmutex_is_locked(&priv->lock))
+          {
+            /* Exclusive lock is held, do not allow entry to deeper
+             * PM states.
+             */
+
+            return -EBUSY;
+          }
+
+        break;
+
+      default:
+
+        /* Should not get here */
+
+        break;
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: spi_bus_initialize
  *
  * Description:
@@ -2105,6 +2275,9 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
 {
   uint16_t setbits;
   uint16_t clrbits;
+#ifdef CONFIG_PM
+  int ret;
+#endif
 
 #ifdef HAVE_SPI_ARB_DATA_SIZE
   /* Configure CR1 and CR2. Default configuration:
@@ -2186,6 +2359,14 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
   /* Enable SPI */
 
   spi_modifycr1(priv, SPI_CR1_SPE, 0);
+
+#ifdef CONFIG_PM
+  /* Register to receive power management callbacks */
+
+  ret = pm_register(&priv->pm_cb);
+  DEBUGASSERT(ret == OK);
+  UNUSED(ret);
+#endif
 }
 
 /****************************************************************************
