@@ -46,14 +46,10 @@ endif
 
 # ICMP utilities
 
-ifeq ($(CONFIG_NET_ICMP),y)
-  ifneq ($(CONFIG_NET_ICMP_NO_STACK),y)
-    NET_CSRCS += net_icmpchksum.c
-  endif
-else ifeq ($(CONFIG_NET_ICMPv6),y)
-  ifneq ($(CONFIG_NET_ICMPv6_NO_STACK),y)
-    NET_CSRCS += net_icmpchksum.c
-  endif
+ifeq ($(CONFIG_NET_ICMP)$(CONFIG_NET_ICMP_NO_STACK),y)
+NET_CSRCS += net_icmpchksum.c
+else ifeq ($(CONFIG_NET_ICMPv6)$(CONFIG_NET_ICMPv6_NO_STACK),y)
+NET_CSRCS += net_icmpchksum.c
 endif
 
 # Include utility build support
