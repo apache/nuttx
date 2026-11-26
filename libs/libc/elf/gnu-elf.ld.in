@@ -127,6 +127,20 @@ SECTIONS
       _erodata = . ;
     } PHDR_TEXT
 
+  /* ARM exception unwind tables travel with the read-only data. */
+
+  .ARM.extab :
+    {
+      *(.ARM.extab*)
+    } PHDR_TEXT
+
+  .ARM.exidx :
+    {
+      __exidx_start = ABSOLUTE(.);
+      *(.ARM.exidx*)
+      __exidx_end = ABSOLUTE(.);
+    } PHDR_TEXT
+
   .eh_frame :
     {
       KEEP (*(.eh_frame))
