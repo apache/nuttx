@@ -32,9 +32,8 @@
 #  error Only one STM32 CAN IP version must be selected
 #endif
 
-#if defined(CONFIG_STM32_HAVE_IP_CAN_BXCAN_M0_V1)
-#  include "hardware/stm32_can_bxcan_m0.h"
-#elif defined(CONFIG_STM32_HAVE_IP_CAN_BXCAN_M3M4_V1)
+#if defined(CONFIG_STM32_HAVE_IP_CAN_BXCAN_M0_V1) || \
+    defined(CONFIG_STM32_HAVE_IP_CAN_BXCAN_M3M4_V1)
 #  include "hardware/stm32_can_bxcan.h"
 #else
 #  error "Unsupported STM32 CAN"

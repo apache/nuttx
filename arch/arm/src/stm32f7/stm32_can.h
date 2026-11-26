@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "hardware/stm32_can.h"
+#include "hardware/stm32_can_bxcan.h"
 
 #include <nuttx/can/can.h>
 
