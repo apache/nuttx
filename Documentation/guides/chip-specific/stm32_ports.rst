@@ -939,7 +939,7 @@ RNG           to be done    not supported
 RTC           to be done    not supported                         
 SAES/AES      to be done    not supported                         
 SDMMC         to be done    not supported                         
-SPI/I2S       to be done    arch/arm/src/stm32u5/stm32_spi.c      
+SPI/I2S       v5            arch/arm/src/common/stm32/stm32_spi_v5.c
 TAMP          to be done    not supported                         
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c

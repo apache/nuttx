@@ -198,6 +198,22 @@
 #    endif
 #  endif
 
+#elif defined(CONFIG_ARCH_CHIP_STM32U5)
+
+/* The RCC code leaves SPInSEL at the reset value (PCLK2, PCLK1, PCLK3) */
+
+#  ifndef STM32_SPI1_FREQUENCY
+#    define STM32_SPI1_FREQUENCY  STM32_PCLK2_FREQUENCY
+#  endif
+
+#  ifndef STM32_SPI2_FREQUENCY
+#    define STM32_SPI2_FREQUENCY  STM32_PCLK1_FREQUENCY
+#  endif
+
+#  ifndef STM32_SPI3_FREQUENCY
+#    define STM32_SPI3_FREQUENCY  STM32_PCLK3_FREQUENCY
+#  endif
+
 #elif defined(CONFIG_ARCH_CHIP_STM32H7)
 
 /* Sources from STM32_RCC_D2CCIP1R_SPI123SRC, STM32_RCC_D2CCIP1R_SPI45SRC
