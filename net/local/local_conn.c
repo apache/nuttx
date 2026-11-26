@@ -119,7 +119,11 @@ local_findconn(FAR const struct local_conn_s *local_conn,
 
   while ((conn = local_nextconn(conn)) != NULL)
     {
-      if (local_conn->lc_proto == conn->lc_proto &&
+      /* The name of a socket pair is internal: a pair end is found only
+       * through its pair.
+       */
+
+      if (local_conn->lc_proto == conn->lc_proto && !conn->lc_pair &&
           strncmp(conn->lc_path, &unaddr->sun_path[index],
                   UNIX_PATH_MAX - 1) == 0)
         {
@@ -148,6 +152,7 @@ FAR struct local_conn_s *local_peerconn(FAR struct local_conn_s *conn)
   while ((peer = local_nextconn(peer)) != NULL)
     {
       if (conn->lc_proto == peer->lc_proto && conn != peer &&
+          conn->lc_pair == peer->lc_pair &&
           !strncmp(conn->lc_path, peer->lc_path, UNIX_PATH_MAX - 1))
         {
           return peer;
