@@ -26,11 +26,13 @@
 
 #include <nuttx/config.h>
 
+#include <limits.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/queue.h>
 #include <nuttx/net/net.h>
@@ -48,20 +50,37 @@
 
 static int local_waitlisten(FAR struct local_conn_s *server)
 {
+  unsigned int timeout = _SO_TIMEOUT(server->lc_conn.s_rcvtimeo);
+  clock_t start = clock_systime_ticks();
+  clock_t elapsed;
   int ret;
 
-  /* Loop until a connection is requested or we receive a signal */
+  /* Loop until a connection is requested, we receive a signal, or the
+   * receive timeout (SO_RCVTIMEO) expires: EAGAIN, as Linux.
+   */
 
   while (dq_empty(&server->u.server.lc_waiters))
     {
       /* No.. wait for a connection or a signal */
 
       local_unlock();
-      ret = nxsem_wait(&server->lc_waitsem);
+      if (timeout == UINT_MAX)
+        {
+          ret = nxsem_wait(&server->lc_waitsem);
+        }
+      else
+        {
+          elapsed = clock_systime_ticks() - start;
+          ret = elapsed < MSEC2TICK(timeout) ?
+                nxsem_tickwait(&server->lc_waitsem,
+                               MSEC2TICK(timeout) - elapsed) :
+                -ETIMEDOUT;
+        }
+
       local_lock();
       if (ret < 0)
         {
-          return ret;
+          return ret == -ETIMEDOUT ? -EAGAIN : ret;
         }
     }
 
