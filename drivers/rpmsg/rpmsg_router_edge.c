@@ -26,11 +26,13 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <nuttx/debug.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <syslog.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
@@ -87,6 +89,9 @@ static int
 rpmsg_router_edge_get_rx_buffer_size(FAR struct rpmsg_device *rdev);
 static int
 rpmsg_router_edge_get_tx_buffer_size(FAR struct rpmsg_device *rdev);
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
+static void rpmsg_router_edge_dump(FAR struct rpmsg_s *rpmsg, bool verbose);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -94,11 +99,15 @@ rpmsg_router_edge_get_tx_buffer_size(FAR struct rpmsg_device *rdev);
 
 static const struct rpmsg_ops_s g_rpmsg_router_edge_ops =
 {
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
+  NULL,                       /* wait */
+  NULL,                       /* post */
+  NULL,                       /* ioctl */
+  NULL,                       /* panic */
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
+  rpmsg_router_edge_dump,     /* dump */
+#else
+  NULL,                       /* dump */
+#endif
 };
 
 /****************************************************************************
@@ -225,6 +234,53 @@ rpmsg_router_edge_get_tx_buffer_size(FAR struct rpmsg_device *rdev)
 
   return edge->tx_len;
 }
+
+#if CONFIG_RPMSG_DUMP_LEVEL > RPMSG_DUMP_DISABLE
+/****************************************************************************
+ * Name: rpmsg_router_edge_dump
+ *
+ * Description:
+ *   Dump the router edge transport debug information. The edge is a
+ *   transparent proxy, so the dump shows its identity (local/remote cpu),
+ *   the negotiated buffer sizes, the underlying hub device it delegates
+ *   to, and the router endpoints registered on its rdev.
+ *
+ * Parameters:
+ *   rpmsg - rpmsg handler of the router edge device
+ *   verbose - whether to dump the router endpoint list
+ *
+ ****************************************************************************/
+
+static void rpmsg_router_edge_dump(FAR struct rpmsg_s *rpmsg, bool verbose)
+{
+  FAR struct rpmsg_router_edge_s *edge =
+    container_of(rpmsg, struct rpmsg_router_edge_s, rpmsg);
+  FAR struct rpmsg_device *rdev = &edge->rdev;
+  bool needunlock = false;
+
+  syslog(LOG_EMERG, "Dump rpmsg router edge:\n");
+  syslog(LOG_EMERG, "local: %s remote: %s name: %s\n",
+         edge->rpmsg.local_cpuname, edge->rpmsg.cpuname, edge->name);
+  syslog(LOG_EMERG, "tx_len: %" PRIu32 " rx_len: %" PRIu32 " hubdev: %p\n",
+         edge->tx_len, edge->rx_len, edge->hubdev);
+
+  if (verbose)
+    {
+      if (!up_interrupt_context() && !sched_idletask())
+        {
+          metal_mutex_acquire(&rdev->lock);
+          needunlock = true;
+        }
+
+      rpmsg_dump_epts(rdev);
+
+      if (needunlock)
+        {
+          metal_mutex_release(&rdev->lock);
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: rpmsg_router_edge_cb
