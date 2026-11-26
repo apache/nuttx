@@ -581,7 +581,7 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
     {
       /* Unable to allocate buffer, can't consolidate! */
 
-      return 0;
+      return -ENOMEM;
     }
 
   /* Loop for all blocks and consolidate them */
@@ -730,7 +730,7 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 errout:
   kmm_free(pbuf);
   ferr("ERROR: fail ram consolidate: %d\n", ret);
-  return 0;
+  return (off_t)ret;
 }
 
 /****************************************************************************
@@ -779,7 +779,7 @@ static off_t  mtdconfig_consolidate(FAR struct mtdconfig_struct_s *dev)
   pbuf = kmm_malloc(dev->blocksize);
   if (pbuf == NULL)
     {
-      return 0;
+      return -ENOMEM;
     }
 
   /* Now copy block zero to last block */
@@ -1000,7 +1000,7 @@ retry_relocate:
 errout:
   kmm_free(pbuf);
   ferr("ERROR: fail consolidate: %d\n", ret);
-  return 0;
+  return (off_t)ret;
 }
 
 #endif /* CONFIG_MTD_CONFIG_RAM_CONSOLIDATE */
@@ -1316,7 +1316,13 @@ retry_find:
                   goto errout;
                 }
 
-              mtdconfig_ramconsolidate(dev);
+              offset = mtdconfig_ramconsolidate(dev);
+              if (offset < 0)
+                {
+                  ret = (int)offset;
+                  goto errout;
+                }
+
               retrycount++;
               goto retry_find;
             }
@@ -1331,7 +1337,13 @@ retry_find:
                   goto errout;
                 }
 
-              mtdconfig_consolidate(dev);
+              offset = mtdconfig_consolidate(dev);
+              if (offset < 0)
+                {
+                  ret = (int)offset;
+                  goto errout;
+                }
+
               retrycount++;
               goto retry_find;
             }
