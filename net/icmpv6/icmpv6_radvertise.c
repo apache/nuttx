@@ -221,7 +221,9 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
                       sizeof(struct icmpv6_router_advertise_s));
   srcaddr->opttype  = ICMPv6_OPT_SRCLLADDR;
   srcaddr->optlen   = ICMPv6_OPT_OCTECTS(lladdrsize);
+#ifdef NETDEV_HAVE_LLADDR
   memcpy(srcaddr->srclladdr, &dev->d_mac, lladdrsize);
+#endif
 
   /* Set up the MTU option */
 

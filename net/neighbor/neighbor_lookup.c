@@ -82,9 +82,7 @@ static int neighbor_match(FAR struct net_driver_s *dev, FAR void *arg)
       info->ni_laddr->na_lltype = dev->d_lltype;
       info->ni_laddr->na_llsize = netdev_lladdrsize(dev);
 
-#if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_6LOWPAN) || \
-    defined(CONFIG_NET_BLUETOOTH) || defined(CONFIG_NET_IEEE802154) || \
-    defined(CONFIG_NET_TUN)
+#ifdef NETDEV_HAVE_LLADDR
       memcpy(&info->ni_laddr->u, &dev->d_mac, info->ni_laddr->na_llsize);
 #endif
     }
