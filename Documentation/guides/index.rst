@@ -116,4 +116,9 @@ Guides
 .. toctree::
    :maxdepth: 1
 
+   gdbserver.rst
+
+.. toctree::
+   :maxdepth: 1
+
    /debugging/index.rst
