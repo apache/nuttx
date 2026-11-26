@@ -1673,7 +1673,8 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 static int spi_hwfeatures(struct spi_dev_s *dev,
                           spi_hwfeatures_t features)
 {
-#if defined(CONFIG_SPI_BITORDER) || defined(CONFIG_SPI_TRIGGER)
+#if defined(CONFIG_SPI_BITORDER) || \
+    (defined(CONFIG_SPI_TRIGGER) && defined(CONFIG_STM32_SPI_DMA))
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
 #endif
 
@@ -1703,7 +1704,7 @@ static int spi_hwfeatures(struct spi_dev_s *dev,
   features &= ~HWFEAT_LSBFIRST;
 #endif
 
-#ifdef CONFIG_SPI_TRIGGER
+#if defined(CONFIG_SPI_TRIGGER) && defined(CONFIG_STM32_SPI_DMA)
 /* Turn deferred trigger mode on or off.  Only applicable for DMA mode. If a
  * transfer is deferred then the DMA will not actually be triggered until a
  * subsequent call to SPI_TRIGGER to set it off. The thread will be waiting
@@ -1965,16 +1966,20 @@ static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
        * bytes, which is about the break even point for the DMA IO overhead.
        */
 
-      if (txbuffer && priv->txbuf)
+      if (priv->txbuf != NULL && (txbuffer != NULL || rxbuffer != NULL))
         {
           if (nbytes > priv->buflen)
             {
               nbytes = priv->buflen;
             }
 
-          memcpy(priv->txbuf, txbuffer, nbytes);
-          txbuffer  = priv->txbuf;
-          rxbuffer  = rxbuffer ? priv->rxbuf : rxbuffer;
+          if (txbuffer != NULL)
+            {
+              memcpy(priv->txbuf, txbuffer, nbytes);
+              txbuffer = priv->txbuf;
+            }
+
+          rxbuffer = rxbuffer ? priv->rxbuf : rxbuffer;
 
           /* Rescale nwords to match the (possibly clamped) nbytes. */
 
@@ -2041,7 +2046,7 @@ static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           /* Then wait for each to complete */
 
           ret = spi_dmarxwait(priv);
-          if (ret < 0)
+          if (ret >= 0)
             {
               ret = spi_dmatxwait(priv);
             }
@@ -2071,7 +2076,7 @@ static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           up_invalidate_dcache((uintptr_t)rxbuffer,
                                (uintptr_t)rxbuffer + nbytes);
 
-          if (priv->rxbuf != NULL)
+          if (rxbuffer != xbuffer)
             {
               memcpy(xbuffer, priv->rxbuf, nbytes);
             }
