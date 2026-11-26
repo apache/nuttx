@@ -34,7 +34,7 @@ config FS_MQUEUE_VFS_PATH
 
 config FS_MQUEUE_NPOLLWAITERS
 	int "Maximum number of poll waiters"
-	default 4
+	default 2
 	---help---
 		The maximum number of waiters for the poll operation.
 
