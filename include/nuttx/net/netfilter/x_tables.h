@@ -55,6 +55,10 @@
 #define XT_UDP_INV_DSTPT        0x02 /* Invert the sense of dest ports. */
 #define XT_UDP_INV_MASK         0x03 /* All possible flags. */
 
+/* Scale of the "avg" field in struct xt_rateinfo. */
+
+#define XT_LIMIT_SCALE          10000
+
 /* Target names */
 
 #define XT_STANDARD_TARGET      ""   /* Standard return verdict, or do jump. */
@@ -68,6 +72,7 @@
 #define XT_MATCH_NAME_UDP       "udp"
 #define XT_MATCH_NAME_ICMP      "icmp"
 #define XT_MATCH_NAME_ICMP6     "icmp6"
+#define XT_MATCH_NAME_LIMIT     "limit"
 
 /* Table name to simplify our code */
 
@@ -196,6 +201,25 @@ struct xt_tcp
   uint8_t flg_mask; /* TCP flags mask byte */
   uint8_t flg_cmp;  /* TCP flags compare byte */
   uint8_t invflags; /* Inverse flags */
+};
+
+/* Rate limit match (-m limit), with the layout of Linux.  avg is the time
+ * between two packets in seconds * XT_LIMIT_SCALE.  burst is the number of
+ * packets that can come at once.
+ */
+
+struct xt_rateinfo
+{
+  uint32_t avg;         /* Average seconds between packets * scale */
+  uint32_t burst;       /* Period multiplier for upper limit */
+
+  /* The kernel does not use these fields. */
+
+  unsigned long prev;
+  uint32_t credit;
+  uint32_t credit_cap;
+  uint32_t cost;
+  FAR struct xt_rateinfo *master;
 };
 
 /* UDP matching stuff */

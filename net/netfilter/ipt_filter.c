@@ -27,10 +27,13 @@
 #include <nuttx/config.h>
 
 #include <nuttx/debug.h>
+#include <assert.h>
 #include <errno.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/param.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/netfilter/ip_tables.h>
 #include <nuttx/net/netfilter/x_tables.h>
@@ -46,6 +49,52 @@
 #define FILTER_VALID_HOOKS ((1 << NF_INET_LOCAL_IN) | \
                             (1 << NF_INET_FORWARD)  | \
                             (1 << NF_INET_LOCAL_OUT))
+
+/* convert_limit() uses the avg of struct xt_rateinfo as the cost in
+ * 1 / IPFILTER_LIMIT_SCALE clock tick per 1 / TICK_PER_SEC second.
+ */
+
+static_assert(IPFILTER_LIMIT_SCALE == XT_LIMIT_SCALE,
+              "convert_limit() needs the same scale as XT_LIMIT_SCALE");
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* A match that the filter knows: its name, the size of its data, and the
+ * protocol that it needs (0 = any protocol).
+ */
+
+struct filter_match_s
+{
+  FAR const char *name;
+  size_t          size;
+  uint8_t         proto;
+};
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+static const struct filter_match_s g_ipv4_matches[] =
+{
+  {XT_MATCH_NAME_TCP,   sizeof(struct xt_tcp),      IPPROTO_TCP},
+  {XT_MATCH_NAME_UDP,   sizeof(struct xt_udp),      IPPROTO_UDP},
+  {XT_MATCH_NAME_ICMP,  sizeof(struct ipt_icmp),    IPPROTO_ICMP},
+  {XT_MATCH_NAME_LIMIT, sizeof(struct xt_rateinfo), 0}
+};
+#endif
+
+#ifdef CONFIG_NET_IPv6
+static const struct filter_match_s g_ipv6_matches[] =
+{
+  {XT_MATCH_NAME_TCP,   sizeof(struct xt_tcp),      IPPROTO_TCP},
+  {XT_MATCH_NAME_UDP,   sizeof(struct xt_udp),      IPPROTO_UDP},
+  {XT_MATCH_NAME_ICMP6, sizeof(struct ip6t_icmp),   IPPROTO_ICMP6},
+  {XT_MATCH_NAME_LIMIT, sizeof(struct xt_rateinfo), 0}
+};
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -98,6 +147,73 @@ static void convert_invflags(FAR struct ipfilter_entry_s *entry,
 }
 
 /****************************************************************************
+ * Name: convert_tcpflags
+ *
+ * Description:
+ *   Convert iptables tcp flags match (--tcp-flags, --syn) to ipfilter entry.
+ *
+ * Input Parameters:
+ *   entry    - The ipfilter entry to be filled.
+ *   tcp      - The iptables tcp match to be converted.
+ *
+ ****************************************************************************/
+
+static void convert_tcpflags(FAR struct ipfilter_entry_s *entry,
+                             FAR const struct xt_tcp *tcp)
+{
+  /* Without flags to examine, the flags match all packets, or no packet
+   * when it is inverted ("! --tcp-flags NONE NONE").
+   */
+
+  if (tcp->flg_mask == 0 && tcp->flg_cmp == 0 &&
+      (tcp->invflags & XT_TCP_INV_FLAGS) == 0)
+    {
+      return;
+    }
+
+  entry->flg_mask    = tcp->flg_mask;
+  entry->flg_cmp     = tcp->flg_cmp;
+  entry->inv_flags   = !!(tcp->invflags & XT_TCP_INV_FLAGS);
+  entry->match_flags = 1;
+}
+
+/****************************************************************************
+ * Name: convert_limit
+ *
+ * Description:
+ *   Convert iptables limit match to the token bucket of ipfilter entry.
+ *   One packet costs the time between two packets, in units of
+ *   1 / IPFILTER_LIMIT_SCALE clock tick.  avg is in units of
+ *   1 / XT_LIMIT_SCALE second, and the two scales are the same, so the
+ *   cost is avg * TICK_PER_SEC.  The product fits in 64 bits.
+ *
+ * Input Parameters:
+ *   entry    - The ipfilter entry to be filled.
+ *   rate     - The iptables limit match to be converted.
+ *
+ ****************************************************************************/
+
+static void convert_limit(FAR struct ipfilter_entry_s *entry,
+                          FAR const struct xt_rateinfo *rate)
+{
+  uint64_t cost;
+
+  if (rate->avg == 0 || rate->burst == 0)
+    {
+      return;
+    }
+
+  cost = (uint64_t)rate->avg * TICK_PER_SEC;
+
+  entry->cost        = cost;
+  entry->credit_cap  = rate->burst > UINT64_MAX / cost ?
+                       UINT64_MAX : cost * rate->burst;
+  entry->credit      = entry->credit_cap;
+  entry->prev        = clock_systime_ticks();
+  entry->match_limit = 1;
+}
+
+/****************************************************************************
  * Name: convert_tcpudp
  *
  * Description:
@@ -112,8 +228,8 @@ static void convert_invflags(FAR struct ipfilter_entry_s *entry,
  ****************************************************************************/
 
 static void convert_tcpudp(FAR struct ipfilter_entry_s *entry,
-                           uint16_t spts[2], uint16_t dpts[2],
-                           uint8_t invflags)
+                           FAR const uint16_t *spts,
+                           FAR const uint16_t *dpts, uint8_t invflags)
 {
   entry->match.tcpudp.sports[0] = spts[0];
   entry->match.tcpudp.sports[1] = spts[1];
@@ -145,6 +261,110 @@ static void convert_icmp(FAR struct ipfilter_entry_s *entry, uint8_t type,
   entry->match.icmp.type = type;
   entry->inv_icmp = !!(invflags & IPT_ICMP_INV);
   entry->match_icmp = 1;
+}
+
+/****************************************************************************
+ * Name: convert_match
+ *
+ * Description:
+ *   Convert one iptables match to ipfilter entry.
+ *
+ * Input Parameters:
+ *   entry    - The ipfilter entry to be filled.
+ *   match    - The iptables match to be converted.
+ *   proto    - The protocol of the iptables entry.
+ *
+ ****************************************************************************/
+
+static void convert_match(FAR struct ipfilter_entry_s *entry,
+                          FAR const struct xt_entry_match *match,
+                          uint8_t proto)
+{
+  FAR const void *data = match + 1;
+
+  if (proto == IPPROTO_TCP &&
+      strcmp(match->u.user.name, XT_MATCH_NAME_TCP) == 0)
+    {
+      FAR const struct xt_tcp *tcp = data;
+
+      convert_tcpudp(entry, tcp->spts, tcp->dpts, tcp->invflags);
+      convert_tcpflags(entry, tcp);
+    }
+  else if (proto == IPPROTO_UDP &&
+           strcmp(match->u.user.name, XT_MATCH_NAME_UDP) == 0)
+    {
+      FAR const struct xt_udp *udp = data;
+
+      convert_tcpudp(entry, udp->spts, udp->dpts, udp->invflags);
+    }
+  else if (proto == IPPROTO_ICMP &&
+           strcmp(match->u.user.name, XT_MATCH_NAME_ICMP) == 0)
+    {
+      FAR const struct ipt_icmp *icmp = data;
+
+      convert_icmp(entry, icmp->type, icmp->invflags);
+    }
+  else if (proto == IPPROTO_ICMP6 &&
+           strcmp(match->u.user.name, XT_MATCH_NAME_ICMP6) == 0)
+    {
+      FAR const struct ip6t_icmp *icmp6 = data;
+
+      convert_icmp(entry, icmp6->type, icmp6->invflags);
+    }
+  else if (strcmp(match->u.user.name, XT_MATCH_NAME_LIMIT) == 0)
+    {
+      convert_limit(entry, data);
+    }
+}
+
+/****************************************************************************
+ * Name: convert_matches
+ *
+ * Description:
+ *   Convert all iptables matches of an entry to ipfilter entry.  The
+ *   matches are between the entry header and the target, and each match
+ *   has its own size.  "-p tcp --syn -m limit", for example, has two.
+ *
+ * Input Parameters:
+ *   entry         - The ipfilter entry to be filled.
+ *   first         - The first iptables match of the entry.
+ *   target_offset - The offset of the target in the iptables entry.
+ *   entry_size    - The size of the iptables entry header.
+ *   proto         - The protocol of the iptables entry.
+ *
+ ****************************************************************************/
+
+static void convert_matches(FAR struct ipfilter_entry_s *entry,
+                            FAR const struct xt_entry_match *first,
+                            size_t target_offset, size_t entry_size,
+                            uint8_t proto)
+{
+  FAR const uint8_t *base = (FAR const uint8_t *)first;
+  FAR const struct xt_entry_match *match;
+  size_t off = 0;
+  size_t len;
+
+  if (target_offset < entry_size + sizeof(struct xt_entry_match))
+    {
+      ninfo("No match inside entry, skip match conversion.\n");
+      return;
+    }
+
+  len = target_offset - entry_size;
+
+  while (off + sizeof(struct xt_entry_match) <= len)
+    {
+      match = (FAR const struct xt_entry_match *)(base + off);
+      if (match->u.match_size < sizeof(struct xt_entry_match) ||
+          off + match->u.match_size > len)
+        {
+          nwarn("WARNING: Bad match size %u\n", match->u.match_size);
+          return;
+        }
+
+      convert_match(entry, match, proto);
+      off += match->u.match_size;
+    }
 }
 
 /****************************************************************************
@@ -186,6 +406,101 @@ static uint8_t convert_target(FAR const struct xt_entry_target *target)
 
   nwarn("WARNING: Unsupported target %s\n", target->u.user.name);
   return IPFILTER_TARGET_DROP;
+}
+
+/****************************************************************************
+ * Name: check_matches
+ *
+ * Description:
+ *   Check all iptables matches of an entry, as Linux xt_check_match() does.
+ *   Each match must be inside the entry, be large enough for its data,
+ *   have a size that is a multiple of XT_ALIGN() (so the next match is
+ *   aligned), have a name that the filter knows, and fit the protocol of
+ *   the entry.  The conversion skips a match that it
+ *   does not know, so an unknown match would make a broader rule.
+ *
+ * Input Parameters:
+ *   head          - The iptables entry.
+ *   entry_size    - The size of the iptables entry header.
+ *   target_offset - The offset of the target in the iptables entry.
+ *   next_offset   - The size of the iptables entry with all its parts.
+ *   proto         - The protocol of the iptables entry.
+ *   matches       - The matches that the filter knows for the family.
+ *   nmatches      - The number of known matches.
+ *
+ * Returned Value:
+ *   OK if all matches are valid, otherwise -EINVAL.
+ *
+ ****************************************************************************/
+
+static int check_matches(FAR const void *head, size_t entry_size,
+                         size_t target_offset, size_t next_offset,
+                         uint8_t proto,
+                         FAR const struct filter_match_s *matches,
+                         size_t nmatches)
+{
+  FAR const uint8_t *base = (FAR const uint8_t *)head + entry_size;
+  FAR const struct xt_entry_match *match;
+  size_t off = 0;
+  size_t len;
+  size_t i;
+
+  if (target_offset < entry_size || target_offset > next_offset)
+    {
+      nwarn("WARNING: Bad target offset %zu\n", target_offset);
+      return -EINVAL;
+    }
+
+  len = target_offset - entry_size;
+
+  while (off < len)
+    {
+      match = (FAR const struct xt_entry_match *)(base + off);
+      if (len - off < sizeof(struct xt_entry_match) ||
+          match->u.match_size < sizeof(struct xt_entry_match) ||
+          match->u.match_size > len - off ||
+          XT_ALIGN(match->u.match_size) != match->u.match_size)
+        {
+          nwarn("WARNING: Bad match size %zu\n",
+                len - off < sizeof(struct xt_entry_match) ?
+                len - off : (size_t)match->u.match_size);
+          return -EINVAL;
+        }
+
+      for (i = 0; i < nmatches; i++)
+        {
+          if (strcmp(match->u.user.name, matches[i].name) == 0)
+            {
+              break;
+            }
+        }
+
+      if (i == nmatches)
+        {
+          nwarn("WARNING: Unsupported match %.*s\n",
+                (int)sizeof(match->u.user.name), match->u.user.name);
+          return -EINVAL;
+        }
+
+      if (match->u.match_size < sizeof(struct xt_entry_match) +
+                                matches[i].size)
+        {
+          nwarn("WARNING: Short %s match %u\n", matches[i].name,
+                match->u.match_size);
+          return -EINVAL;
+        }
+
+      if (matches[i].proto != 0 && matches[i].proto != proto)
+        {
+          nwarn("WARNING: %s match for protocol %u\n", matches[i].name,
+                proto);
+          return -EINVAL;
+        }
+
+      off += match->u.match_size;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -235,45 +550,9 @@ convert_ipv4entry(FAR const struct ipt_entry *entry)
 
   /* Convert match fields */
 
-  if (entry->target_offset < sizeof(struct xt_entry_match))
-    {
-      ninfo("No match inside entry, skip match conversion.\n");
-      goto skip_match;
-    }
+  convert_matches(&filter->common, match, entry->target_offset,
+                  sizeof(struct ipt_entry), entry->ip.proto);
 
-  switch (entry->ip.proto)
-    {
-      case IPPROTO_TCP:
-        if (strcmp(match->u.user.name, XT_MATCH_NAME_TCP) == 0)
-          {
-            FAR struct xt_tcp *tcp = (FAR struct xt_tcp *)(match + 1);
-            convert_tcpudp(&filter->common, tcp->spts, tcp->dpts,
-                           tcp->invflags);
-          }
-        break;
-
-      case IPPROTO_UDP:
-        if (strcmp(match->u.user.name, XT_MATCH_NAME_UDP) == 0)
-          {
-            FAR struct xt_udp *udp = (FAR struct xt_udp *)(match + 1);
-            convert_tcpudp(&filter->common, udp->spts, udp->dpts,
-                           udp->invflags);
-          }
-        break;
-
-      case IPPROTO_ICMP:
-        if (strcmp(match->u.user.name, XT_MATCH_NAME_ICMP) == 0)
-          {
-            FAR struct ipt_icmp *icmp = (FAR struct ipt_icmp *)(match + 1);
-            convert_icmp(&filter->common, icmp->type, icmp->invflags);
-          }
-        break;
-
-      default:
-        break;
-    }
-
-skip_match:
   return filter;
 }
 #endif
@@ -311,46 +590,9 @@ convert_ipv6entry(FAR const struct ip6t_entry *entry)
 
   /* Convert match fields */
 
-  if (entry->target_offset < sizeof(struct xt_entry_match))
-    {
-      ninfo("No match inside entry, skip match conversion.\n");
-      goto skip_match;
-    }
+  convert_matches(&filter->common, match, entry->target_offset,
+                  sizeof(struct ip6t_entry), entry->ipv6.proto);
 
-  switch (entry->ipv6.proto)
-    {
-      case IPPROTO_TCP:
-        if (strcmp(match->u.user.name, XT_MATCH_NAME_TCP) == 0)
-          {
-            FAR struct xt_tcp *tcp = (FAR struct xt_tcp *)(match + 1);
-            convert_tcpudp(&filter->common, tcp->spts, tcp->dpts,
-                           tcp->invflags);
-          }
-        break;
-
-      case IPPROTO_UDP:
-        if (strcmp(match->u.user.name, XT_MATCH_NAME_UDP) == 0)
-          {
-            FAR struct xt_udp *udp = (FAR struct xt_udp *)(match + 1);
-            convert_tcpudp(&filter->common, udp->spts, udp->dpts,
-                           udp->invflags);
-          }
-        break;
-
-      case IPPROTO_ICMP6:
-        if (strcmp(match->u.user.name, XT_MATCH_NAME_ICMP6) == 0)
-          {
-            FAR struct ip6t_icmp *icmp6 =
-                                        (FAR struct ip6t_icmp *)(match + 1);
-            convert_icmp(&filter->common, icmp6->type, icmp6->invflags);
-          }
-        break;
-
-      default:
-        break;
-    }
-
-skip_match:
   return filter;
 }
 #endif
@@ -491,40 +733,24 @@ FAR struct ip6t_replace *ip6t_filter_init(void)
 int ipt_filter_apply(FAR const struct ipt_replace *repl)
 {
   FAR const struct ipt_entry *entry;
-  FAR const struct xt_entry_match *match;
   FAR const struct xt_entry_target *target;
+  int ret;
 
   /* Check config first. */
 
   ipt_entry_for_every(entry, repl->entries, repl->size)
     {
-      match  = IPT_MATCH(entry);
       target = IPT_TARGET(entry);
 
-      /* Check match type matches the protocol */
+      /* Check all matches and their protocol */
 
-      if (entry->target_offset >= sizeof(struct xt_entry_match))
+      ret = check_matches(entry, sizeof(struct ipt_entry),
+                          entry->target_offset, entry->next_offset,
+                          entry->ip.proto, g_ipv4_matches,
+                          nitems(g_ipv4_matches));
+      if (ret < 0)
         {
-          if (strcmp(match->u.user.name, XT_MATCH_NAME_TCP) == 0 &&
-              entry->ip.proto != IPPROTO_TCP)
-            {
-              nwarn("WARNING: TCP match for non-TCP protocol\n");
-              return -EINVAL;
-            }
-
-          if (strcmp(match->u.user.name, XT_MATCH_NAME_UDP) == 0 &&
-              entry->ip.proto != IPPROTO_UDP)
-            {
-              nwarn("WARNING: UDP match for non-UDP protocol\n");
-              return -EINVAL;
-            }
-
-          if (strcmp(match->u.user.name, XT_MATCH_NAME_ICMP) == 0 &&
-              entry->ip.proto != IPPROTO_ICMP)
-            {
-              nwarn("WARNING: ICMP match for non-ICMP protocol\n");
-              return -EINVAL;
-            }
+          return ret;
         }
 
       /* Check target type */
@@ -550,40 +776,24 @@ int ipt_filter_apply(FAR const struct ipt_replace *repl)
 int ip6t_filter_apply(FAR const struct ip6t_replace *repl)
 {
   FAR const struct ip6t_entry *entry;
-  FAR const struct xt_entry_match *match;
   FAR const struct xt_entry_target *target;
+  int ret;
 
   /* Check config first. */
 
   ip6t_entry_for_every(entry, repl->entries, repl->size)
     {
-      match  = IP6T_MATCH(entry);
       target = IP6T_TARGET(entry);
 
-      /* Check match type matches the protocol */
+      /* Check all matches and their protocol */
 
-      if (entry->target_offset >= sizeof(struct xt_entry_match))
+      ret = check_matches(entry, sizeof(struct ip6t_entry),
+                          entry->target_offset, entry->next_offset,
+                          entry->ipv6.proto, g_ipv6_matches,
+                          nitems(g_ipv6_matches));
+      if (ret < 0)
         {
-          if (strcmp(match->u.user.name, XT_MATCH_NAME_TCP) == 0 &&
-              entry->ipv6.proto != IPPROTO_TCP)
-            {
-              nwarn("WARNING: TCP match for non-TCP protocol\n");
-              return -EINVAL;
-            }
-
-          if (strcmp(match->u.user.name, XT_MATCH_NAME_UDP) == 0 &&
-              entry->ipv6.proto != IPPROTO_UDP)
-            {
-              nwarn("WARNING: UDP match for non-UDP protocol\n");
-              return -EINVAL;
-            }
-
-          if (strcmp(match->u.user.name, XT_MATCH_NAME_ICMP6) == 0 &&
-              entry->ipv6.proto != IPPROTO_ICMP6)
-            {
-              nwarn("WARNING: ICMP6 match for non-ICMP6 protocol\n");
-              return -EINVAL;
-            }
+          return ret;
         }
 
       /* Check target type */

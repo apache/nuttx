@@ -28,9 +28,11 @@
 
 #include <nuttx/debug.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/icmpv6.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
 #include <nuttx/queue.h>
 
@@ -125,6 +127,57 @@ static bool ipfilter_match_device(FAR const struct ipfilter_entry_s *entry,
 }
 
 /****************************************************************************
+ * Name: ipfilter_match_limit
+ *
+ * Description:
+ *   Match the rate limit of the filter entry (iptables -m limit), with a
+ *   token bucket.  The credit grows with time up to the burst, and each
+ *   matched packet spends the cost of one packet.  Without enough credit
+ *   the entry does not match, and the next entry of the chain applies.
+ *
+ * Input Parameters:
+ *   entry - The filter entry to match
+ *
+ * Returned Value:
+ *   true  - The packet is in the rate, or the entry has no rate limit
+ *   false - The packet is over the rate
+ *
+ ****************************************************************************/
+
+static bool ipfilter_match_limit(FAR struct ipfilter_entry_s *entry)
+{
+  uint64_t add;
+  clock_t now;
+
+  if (!entry->match_limit)
+    {
+      return true;
+    }
+
+  now = clock_systime_ticks();
+  add = now - entry->prev;
+  add *= IPFILTER_LIMIT_SCALE;
+  entry->prev = now;
+
+  if (add >= entry->credit_cap - entry->credit)
+    {
+      entry->credit = entry->credit_cap;
+    }
+  else
+    {
+      entry->credit += add;
+    }
+
+  if (entry->credit < entry->cost)
+    {
+      return false;
+    }
+
+  entry->credit -= entry->cost;
+  return true;
+}
+
+/****************************************************************************
  * Name: ipfilter_match_proto
  *
  * Description:
@@ -159,6 +212,19 @@ static bool ipfilter_match_proto(FAR const struct ipfilter_entry_s *entry,
   switch (proto)
     {
       case IP_PROTO_TCP:
+        if (entry->match_flags)
+          {
+            FAR const struct tcp_hdr_s *tcp = l4hdr;
+
+            if (!(((tcp->flags & entry->flg_mask) == entry->flg_cmp) ^
+                  entry->inv_flags))
+              {
+                return false;
+              }
+          }
+
+        /* Fall through to the port match. */
+
       case IP_PROTO_UDP:
         if (entry->match_tcpudp)
           {
@@ -216,7 +282,7 @@ static int ipv4_filter_match(FAR const struct net_driver_s *indev,
                              FAR const struct ipv4_hdr_s *ipv4,
                              enum ipfilter_chain_e chain)
 {
-  FAR const struct ipv4_filter_entry_s *filter;
+  FAR struct ipv4_filter_entry_s *filter;
   FAR const sq_queue_t *queue = &g_ipv4_filters[chain];
   FAR const sq_entry_t *entry;
   FAR const void *l4hdr;
@@ -269,6 +335,13 @@ static int ipv4_filter_match(FAR const struct net_driver_s *indev,
           continue;
         }
 
+      /* Match rate limit last: only a matched packet spends credit. */
+
+      if (!ipfilter_match_limit(&filter->common))
+        {
+          continue;
+        }
+
       /* Return the target action if matched. */
 
       return filter->common.target;
@@ -287,7 +360,7 @@ static int ipv6_filter_match(FAR const struct net_driver_s *indev,
                              FAR const struct ipv6_hdr_s *ipv6,
                              enum ipfilter_chain_e chain)
 {
-  FAR const struct ipv6_filter_entry_s *filter;
+  FAR struct ipv6_filter_entry_s *filter;
   FAR const sq_queue_t *queue = &g_ipv6_filters[chain];
   FAR const sq_entry_t *entry;
   FAR const void *l4hdr;
@@ -335,6 +408,13 @@ static int ipv6_filter_match(FAR const struct net_driver_s *indev,
       /* Match protocol */
 
       if (!ipfilter_match_proto(&filter->common, l4hdr, proto))
+        {
+          continue;
+        }
+
+      /* Match rate limit last: only a matched packet spends credit. */
+
+      if (!ipfilter_match_limit(&filter->common))
         {
           continue;
         }
