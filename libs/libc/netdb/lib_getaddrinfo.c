@@ -87,10 +87,12 @@ struct transport_s
  *
  ****************************************************************************/
 
+#if defined(CONFIG_CANCELLATION_POINTS) && CONFIG_TLS_NCLEANUP > 0
 static void getaddrinfo_free(FAR void *arg)
 {
   lib_free(arg);
 }
+#endif
 
 /****************************************************************************
  * Name: add_transports
@@ -493,14 +495,19 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
     }
 
   /* The DNS lookup is a cancellation point: free the buffer if the
-   * thread is cancelled there.
+   * thread is cancelled there.  Without cancellation points the cancel
+   * is asynchronous, and the kernel needs the cleanup entries.
    */
 
+#if defined(CONFIG_CANCELLATION_POINTS) && CONFIG_TLS_NCLEANUP > 0
   tls_cleanup_push(tls_get_info(), getaddrinfo_free, hostbuffer);
+#endif
   ret = gethostentbyname_r(hostname, &host,
                            hostbuffer, CONFIG_NETDB_BUFSIZE,
                            &herrno, flags);
+#if defined(CONFIG_CANCELLATION_POINTS) && CONFIG_TLS_NCLEANUP > 0
   tls_cleanup_pop(tls_get_info(), 0);
+#endif
   if (ret != OK)
     {
       lib_free(hostbuffer);

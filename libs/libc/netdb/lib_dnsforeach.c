@@ -72,7 +72,7 @@ struct dns_foreach_resolvconf_s
  *
  ****************************************************************************/
 
-#if CONFIG_TLS_NCLEANUP > 0
+#if defined(CONFIG_CANCELLATION_POINTS) && CONFIG_TLS_NCLEANUP > 0
 static void dns_foreach_cleanup(FAR void *arg)
 {
   FAR struct dns_foreach_resolvconf_s *state = arg;
@@ -151,7 +151,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
     }
 
   state.locked = false;
-#if CONFIG_TLS_NCLEANUP > 0
+#if defined(CONFIG_CANCELLATION_POINTS) && CONFIG_TLS_NCLEANUP > 0
   tls_cleanup_push(tls_get_info(), dns_foreach_cleanup, &state);
 #endif
 
@@ -296,7 +296,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
   state.locked = false;
   dns_unlock();
-#if CONFIG_TLS_NCLEANUP > 0
+#if defined(CONFIG_CANCELLATION_POINTS) && CONFIG_TLS_NCLEANUP > 0
   tls_cleanup_pop(tls_get_info(), 0);
 #endif
   fclose(state.stream);

@@ -849,7 +849,7 @@ static void dns_query_error(FAR const char *prompt, int ret,
  *
  ****************************************************************************/
 
-#if CONFIG_TLS_NCLEANUP > 0
+#if defined(CONFIG_CANCELLATION_POINTS) && CONFIG_TLS_NCLEANUP > 0
 static void dns_query_cleanup(FAR void *arg)
 {
   FAR struct dns_query_data_s *qdata = arg;
@@ -1087,7 +1087,7 @@ int dns_query(FAR const char *hostname, FAR union dns_addr_u *addr,
     }
 
   qdata->sd = -1;
-#if CONFIG_TLS_NCLEANUP > 0
+#if defined(CONFIG_CANCELLATION_POINTS) && CONFIG_TLS_NCLEANUP > 0
   tls_cleanup_push(tls_get_info(), dns_query_cleanup, qdata);
 #endif
 
@@ -1119,7 +1119,7 @@ int dns_query(FAR const char *hostname, FAR union dns_addr_u *addr,
 
   /* Free the query data */
 
-#if CONFIG_TLS_NCLEANUP > 0
+#if defined(CONFIG_CANCELLATION_POINTS) && CONFIG_TLS_NCLEANUP > 0
   tls_cleanup_pop(tls_get_info(), 0);
 #endif
   lib_free(qdata);
