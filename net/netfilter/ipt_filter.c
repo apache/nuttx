@@ -171,6 +171,7 @@ static uint8_t convert_target(FAR const struct xt_entry_target *target)
   if (strcmp(target->u.user.name, XT_STANDARD_TARGET) == 0)
     {
       int verdict = ((FAR const struct xt_standard_target *)target)->verdict;
+
       verdict = -verdict - 1;
 
       if (verdict == NF_ACCEPT)
@@ -209,6 +210,7 @@ convert_ipv4entry(FAR const struct ipt_entry *entry)
   FAR const struct xt_entry_target *target;
   FAR struct ipv4_filter_entry_s *filter =
               (FAR struct ipv4_filter_entry_s *)ipfilter_cfg_alloc(PF_INET);
+
   if (filter == NULL)
     {
       return NULL;
@@ -284,6 +286,7 @@ convert_ipv6entry(FAR const struct ip6t_entry *entry)
   FAR const struct xt_entry_target *target;
   FAR struct ipv6_filter_entry_s *filter =
               (FAR struct ipv6_filter_entry_s *)ipfilter_cfg_alloc(PF_INET6);
+
   if (filter == NULL)
     {
       return NULL;
@@ -391,6 +394,7 @@ static void adjust_ipv4filter(FAR const struct ipt_replace *repl)
       ipt_entry_for_every(entry, head, size)
         {
           FAR struct ipv4_filter_entry_s *filter = convert_ipv4entry(entry);
+
           if (filter != NULL)
             {
               ipfilter_cfg_add(&filter->common, PF_INET, chain);
@@ -432,6 +436,7 @@ static void adjust_ipv6filter(FAR const struct ip6t_replace *repl)
       ip6t_entry_for_every(entry, head, size)
         {
           FAR struct ipv6_filter_entry_s *filter = convert_ipv6entry(entry);
+
           if (filter != NULL)
             {
               ipfilter_cfg_add(&filter->common, PF_INET6, chain);
