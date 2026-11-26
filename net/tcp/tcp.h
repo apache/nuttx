@@ -1004,6 +1004,25 @@ ssize_t tcp_reset_report(FAR struct tcp_conn_s *conn, ssize_t ret);
 int tcp_close(FAR struct socket *psock);
 
 /****************************************************************************
+ * Name: tcp_close_abort
+ *
+ * Description:
+ *   End a connection that no socket refers to (a pending connection of a
+ *   backlog) with a RST to the peer, then free it.  The RST goes out at the
+ *   next poll of the device.  A connection in another state than
+ *   ESTABLISHED or CLOSE_WAIT, or without a device, is freed at once.
+ *
+ * Input Parameters:
+ *   conn - The TCP connection
+ *
+ * Assumptions:
+ *   Called from normal task logic without a lock of the network held.
+ *
+ ****************************************************************************/
+
+void tcp_close_abort(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
  * Name: tcp_shutdown
  *
  * Description:
