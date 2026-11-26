@@ -1073,6 +1073,7 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
       case CANIOC_SET_NART:
         {
           uint32_t regval;
+
           ret = stm32l4can_enterinitmode(priv);
           if (ret != 0)
             {
@@ -1097,6 +1098,7 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
       case CANIOC_SET_ABOM:
         {
           uint32_t regval;
+
           ret = stm32l4can_enterinitmode(priv);
           if (ret != 0)
             {

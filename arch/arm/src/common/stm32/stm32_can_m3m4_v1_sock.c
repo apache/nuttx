@@ -379,7 +379,7 @@ static void stm32can_vputreg(uint32_t addr, uint32_t value)
 {
   /* Show the register value being written */
 
-  ninfo("%08" PRIx32 "->%08" PRIx32 "\n", addr, val);
+  ninfo("%08" PRIx32 "->%08" PRIx32 "\n", addr, value);
 
   /* Write the value */
 
@@ -1307,6 +1307,7 @@ errout:
 static void stm32can_rx0interrupt_work(void *arg)
 {
   struct stm32_can_s *priv = (struct stm32_can_s *)arg;
+
   stm32can_rxinterrupt_work(priv, 0);
 }
 
@@ -1317,6 +1318,7 @@ static void stm32can_rx0interrupt_work(void *arg)
 static void stm32can_rx1interrupt_work(void *arg)
 {
   struct stm32_can_s *priv = (struct stm32_can_s *)arg;
+
   stm32can_rxinterrupt_work(priv, 1);
 }
 
@@ -1385,6 +1387,7 @@ static int stm32can_rxinterrupt(struct stm32_can_s *priv, int rxmb)
 static int stm32can_rx0interrupt(int irq, void *context, void *arg)
 {
   struct stm32_can_s *priv = (struct stm32_can_s *)arg;
+
   return stm32can_rxinterrupt(priv, 0);
 }
 
@@ -1406,6 +1409,7 @@ static int stm32can_rx0interrupt(int irq, void *context, void *arg)
 static int stm32can_rx1interrupt(int irq, void *context, void *arg)
 {
   struct stm32_can_s *priv = (struct stm32_can_s *)arg;
+
   return stm32can_rxinterrupt(priv, 1);
 }
 

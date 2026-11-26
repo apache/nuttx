@@ -1135,6 +1135,7 @@ static int stm32can_ioctl(struct can_dev_s *dev, int cmd,
       case CANIOC_SET_NART:
         {
           uint32_t regval;
+
           ret = stm32can_enterinitmode(priv);
           if (ret != 0)
             {
@@ -1159,6 +1160,7 @@ static int stm32can_ioctl(struct can_dev_s *dev, int cmd,
       case CANIOC_SET_ABOM:
         {
           uint32_t regval;
+
           ret = stm32can_enterinitmode(priv);
           if (ret != 0)
             {
@@ -1579,6 +1581,7 @@ errout:
 static int stm32can_rx0interrupt(int irq, void *context, void *arg)
 {
   struct can_dev_s *dev = (struct can_dev_s *)arg;
+
   return stm32can_rxinterrupt(dev, 0);
 }
 
@@ -1600,6 +1603,7 @@ static int stm32can_rx0interrupt(int irq, void *context, void *arg)
 static int stm32can_rx1interrupt(int irq, void *context, void *arg)
 {
   struct can_dev_s *dev = (struct can_dev_s *)arg;
+
   return stm32can_rxinterrupt(dev, 1);
 }
 
