@@ -247,11 +247,14 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 
   conn_dev_lock(&conn->sconn, conn->dev);
 
-  /* Non-blocking connection ? */
+  /* Non-blocking connection, or a blocking connect() that a signal
+   * ended while the handshake goes on?
+   */
 
   nonblock_conn = ((conn->tcpstateflags == TCP_ALLOCATED ||
                     conn->tcpstateflags == TCP_SYN_SENT) &&
-                   _SS_ISNONBLOCK(conn->sconn.s_flags));
+                   (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
+                    _SS_ISCONNECTING(conn->sconn.s_flags)));
 
   /* Find a container to hold the poll information */
 

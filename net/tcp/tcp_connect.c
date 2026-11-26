@@ -405,7 +405,8 @@ int psock_tcp_connect(FAR struct socket *psock,
 
               /* The event handler may have set the result before the wait
                * ended.  SO_SNDTIMEO ends the wait, not the connection: the
-               * connection goes on as for a non-blocking socket.
+               * connection goes on as for a non-blocking socket.  A signal
+               * also ends only the wait (POSIX): connect() gives EINTR.
                */
 
               if (ret >= 0 || state.tc_result != -EAGAIN)
@@ -418,17 +419,18 @@ int psock_tcp_connect(FAR struct socket *psock,
                 }
 
               /* Make sure that no further events are processed.  With
-               * EINPROGRESS the connection goes on, as after a success.
+               * EINPROGRESS or EINTR the connection goes on, as after a
+               * success.
                */
 
-              psock_teardown_callbacks(&state,
-                                       ret != -EINPROGRESS ? ret : OK);
+              psock_teardown_callbacks(&state, ret != -EINPROGRESS &&
+                                               ret != -EINTR ? ret : OK);
             }
         }
 
       /* Check if the socket was successfully connected. */
 
-      if (ret >= 0 || ret == -EINPROGRESS)
+      if (ret >= 0 || ret == -EINPROGRESS || ret == -EINTR)
         {
           int ret2;
 
