@@ -904,7 +904,7 @@ RTC           to be done    not supported
 SAES          to be done    not supported
 SAI           to be done    not supported
 SDMMC         to be done    not supported
-SPI/I2S       to be done    not supported
+SPI           v5            arch/arm/src/common/stm32/stm32_spi_v5.c
 SYSCFG        to be done    not supported
 TAMP          to be done    not supported
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
