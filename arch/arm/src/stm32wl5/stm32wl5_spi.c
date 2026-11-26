@@ -74,7 +74,7 @@
 #endif
 #include "stm32wl5_spi.h"
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2S2)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -133,10 +133,10 @@
 #    define SPI1_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
 #  endif
 
-#  if defined(CONFIG_STM32_SPI2S2_DMA_BUFFER) && \
-            CONFIG_STM32_SPI2S2_DMA_BUFFER > 0
-#    define SPI2S2_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI2S2_DMA_BUFFER)
-#    define SPI2S2_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  if defined(CONFIG_STM32_SPI2_DMA_BUFFER) && \
+            CONFIG_STM32_SPI2_DMA_BUFFER > 0
+#    define SPI2_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI2_DMA_BUFFER)
+#    define SPI2_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
 #  endif
 
 #endif
@@ -331,20 +331,20 @@ static struct stm32_spidev_s g_spi1dev =
 };
 #endif
 
-#ifdef CONFIG_STM32_SPI2S2
+#ifdef CONFIG_STM32_SPI2
 static const struct spi_ops_s g_sp2iops =
 {
   .lock              = spi_lock,
-  .select            = stm32_spi2s2select,
+  .select            = stm32_spi2select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
   .hwfeatures        = spi_hwfeatures,
 #endif
-  .status            = stm32_spi2s2status,
+  .status            = stm32_spi2status,
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = stm32_spi2s2cmddata,
+  .cmddata           = stm32_spi2cmddata,
 #endif
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
@@ -357,38 +357,38 @@ static const struct spi_ops_s g_sp2iops =
   .trigger           = spi_trigger,
 #endif
 #ifdef CONFIG_SPI_CALLBACK
-  .registercallback  = stm32_s2register,  /* provided externally */
+  .registercallback  = stm32_spi2register, /* Provided externally */
 #else
   .registercallback  = 0,                   /* not implemented */
 #endif
 };
 
-#if defined(SPI2S2_DMABUFSIZE_ADJUSTED)
-static uint8_t g_spi2s2_txbuf[SPI2S2_DMABUFSIZE_ADJUSTED]
-  SPI2S2_DMABUFSIZE_ALGN;
-static uint8_t g_spi2s2_rxbuf[SPI2S2_DMABUFSIZE_ADJUSTED]
-  SPI2S2_DMABUFSIZE_ALGN;
+#if defined(SPI2_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi2_txbuf[SPI2_DMABUFSIZE_ADJUSTED]
+  SPI2_DMABUFSIZE_ALGN;
+static uint8_t g_spi2_rxbuf[SPI2_DMABUFSIZE_ADJUSTED]
+  SPI2_DMABUFSIZE_ALGN;
 #endif
 
-static struct stm32_spidev_s g_spi2s2dev =
+static struct stm32_spidev_s g_spi2dev =
 {
   .spidev   =
     {
       &g_sp2iops
     },
-  .spibase  = STM32_SPI2S2_BASE,
+  .spibase  = STM32_SPI2_BASE,
   .spiclock = STM32_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
-  .spiirq   = STM32_IRQ_SPI2S2,
+  .spiirq   = STM32_IRQ_SPI2,
 #endif
 #ifdef CONFIG_STM32_SPI_DMA
-#  ifdef CONFIG_STM32_SPI2S2_DMA
-  .rxch     = DMACHAN_SPI2S2_RX,
-  .txch     = DMACHAN_SPI2S2_TX,
-#if defined(SPI2S2_DMABUFSIZE_ADJUSTED)
-  .rxbuf    = g_spi2s2_rxbuf,
-  .txbuf    = g_spi2s2_txbuf,
-  .buflen   = SPI2S2_DMABUFSIZE_ADJUSTED,
+#  ifdef CONFIG_STM32_SPI2_DMA
+  .rxch     = DMACHAN_SPI2_RX,
+  .txch     = DMACHAN_SPI2_TX,
+#if defined(SPI2_DMABUFSIZE_ADJUSTED)
+  .rxbuf    = g_spi2_rxbuf,
+  .txbuf    = g_spi2_txbuf,
+  .buflen   = SPI2_DMABUFSIZE_ADJUSTED,
 #    endif
 #  else
   .rxch     = 0,
@@ -1808,22 +1808,22 @@ struct spi_dev_s *stm32_spibus_initialize(int bus)
     }
   else
 #endif
-#ifdef CONFIG_STM32_SPI2S2
+#ifdef CONFIG_STM32_SPI2
   if (bus == 2)
     {
-      /* Select SPI2S2 */
+      /* Select SPI2 */
 
-      priv = &g_spi2s2dev;
+      priv = &g_spi2dev;
 
       /* Only configure if the bus is not already configured */
 
       if (!priv->initialized)
         {
-          /* Configure SPI2S2 pins: SCK, MISO, and MOSI */
+          /* Configure SPI2 pins: SCK, MISO, and MOSI */
 
-          stm32_configgpio(GPIO_SPI2S2_SCK);
-          stm32_configgpio(GPIO_SPI2S2_MISO);
-          stm32_configgpio(GPIO_SPI2S2_MOSI);
+          stm32_configgpio(GPIO_SPI2_SCK);
+          stm32_configgpio(GPIO_SPI2_MISO);
+          stm32_configgpio(GPIO_SPI2_MOSI);
 
           /* Set up default configuration: Master, 8-bit, etc. */
 
@@ -1841,4 +1841,4 @@ struct spi_dev_s *stm32_spibus_initialize(int bus)
   return (struct spi_dev_s *)priv;
 }
 
-#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2S2 */
+#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 */

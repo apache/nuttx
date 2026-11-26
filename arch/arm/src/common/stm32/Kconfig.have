@@ -776,9 +776,6 @@ config STM32_HAVE_I2S3
 config STM32_HAVE_I2S2
 	bool
 
-config STM32_HAVE_SPI2S2
-	bool
-
 config STM32_HAVE_I2SPLL
 	bool
 

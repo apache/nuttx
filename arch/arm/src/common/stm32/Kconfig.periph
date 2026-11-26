@@ -1085,11 +1085,6 @@ config STM32_I2S3
 	select I2S if STM32_COMMON_LEGACY
 	select STM32_I2S
 
-config STM32_SPI2S2
-	bool "SPI2S2"
-	depends on STM32_HAVE_SPI2S2
-	select STM32_SPI
-
 config STM32_SAI1
 	bool "SAI1"
 	depends on STM32_HAVE_SAI1

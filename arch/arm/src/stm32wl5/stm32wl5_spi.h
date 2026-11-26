@@ -110,11 +110,11 @@ uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid);
 int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
-#ifdef CONFIG_STM32_SPI2S2
-void stm32_spi2s2select(struct spi_dev_s *dev, uint32_t devid,
-                           bool selected);
-uint8_t stm32_spi2s2status(struct spi_dev_s *dev, uint32_t devid);
-int stm32_spi2s2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
+#ifdef CONFIG_STM32_SPI2
+void stm32_spi2select(struct spi_dev_s *dev, uint32_t devid,
+                      bool selected);
+uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 /****************************************************************************
@@ -143,10 +143,10 @@ int stm32_spi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
                           void *arg);
 #endif
 
-#ifdef CONFIG_STM32_SPI2S2
-int stm32_spi2s2register(struct spi_dev_s *dev,
-                            spi_mediachange_t callback,
-                            void *arg);
+#ifdef CONFIG_STM32_SPI2
+int stm32_spi2register(struct spi_dev_s *dev,
+                       spi_mediachange_t callback,
+                       void *arg);
 #endif
 #endif
 
