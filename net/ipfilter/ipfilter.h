@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <sys/types.h>
 
 #include <nuttx/compiler.h>
 #include <nuttx/net/ip.h>
@@ -43,6 +44,10 @@
 #define IPFILTER_TARGET_ACCEPT (0)
 #define IPFILTER_TARGET_DROP   (-1)
 #define IPFILTER_TARGET_REJECT (-2)
+
+/* Units of rate limit credit in one clock tick */
+
+#define IPFILTER_LIMIT_SCALE   10000
 
 /****************************************************************************
  * Public Types
@@ -79,13 +84,27 @@ struct ipfilter_entry_s
     } icmp;
   } match;
 
+  /* Token bucket of a rate limit (iptables -m limit).  The unit is
+   * 1 / IPFILTER_LIMIT_SCALE clock tick.  Each rule has its own bucket.
+   */
+
+  uint64_t cost;          /* Credit that one packet spends */
+  uint64_t credit;        /* Credit left */
+  uint64_t credit_cap;    /* Largest credit, for the burst */
+  clock_t  prev;          /* Time of the last credit update */
+
   uint8_t proto;          /* Protocol to match, 0 = ALL (Same as Linux) */
   int8_t  target;
+
+  uint8_t flg_mask;       /* TCP flags to examine (--tcp-flags, --syn) */
+  uint8_t flg_cmp;        /* Value that the examined TCP flags must have */
 
   /* Match flags, whether we need to match protocol in detail */
 
   uint8_t match_tcpudp : 1; /* Match TCP/UDP */
   uint8_t match_icmp   : 1; /* Match ICMP */
+  uint8_t match_flags  : 1; /* Match TCP flags */
+  uint8_t match_limit  : 1; /* Match a packet rate */
 
   /* Inverse flags */
 
@@ -97,6 +116,7 @@ struct ipfilter_entry_s
   uint8_t inv_sport  : 1; /* Inverse source port */
   uint8_t inv_dport  : 1; /* Inverse destination port */
   uint8_t inv_icmp   : 1; /* Inverse ICMP type */
+  uint8_t inv_flags  : 1; /* Inverse TCP flags */
 };
 
 struct ipv4_filter_entry_s
