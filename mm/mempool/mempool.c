@@ -128,6 +128,7 @@ static inline void mempool_add_backtrace(FAR struct mempool_s *pool,
   buf->pid = _SCHED_GETTID();
   MM_INCSEQNO(buf);
 #  if CONFIG_MM_BACKTRACE > 0
+#    if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
   if (pool->procfs.backtrace)
     {
       int result = sched_backtrace(buf->pid, buf->backtrace,
@@ -140,6 +141,7 @@ static inline void mempool_add_backtrace(FAR struct mempool_s *pool,
         }
     }
   else
+#    endif
     {
       buf->backtrace[0] = NULL;
     }
