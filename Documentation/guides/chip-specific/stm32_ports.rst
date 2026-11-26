@@ -334,7 +334,7 @@ RCC           C5            arch/arm/src/stm32c5/stm32c5xx_rcc.c
 RNG           to be done    not supported
 RTC           to be done    not supported
 SBS           to be done    not supported
-SPI/I2S       to be done    not supported
+SPI           v5            arch/arm/src/common/stm32/stm32_spi_v5.c
 TAMP          to be done    not supported
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 USART/UART    M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c

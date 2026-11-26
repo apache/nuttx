@@ -133,11 +133,11 @@
 #    define SPI_TXDMA16NULL_CONFIG  (GPDMA_CXTR1_DDW_LOG2_HW  |GPDMA_CXTR1_SDW_LOG2_BYTE                 )
 #    define SPI_TXDMA8NULL_CONFIG   (GPDMA_CXTR1_DDW_LOG2_BYTE|GPDMA_CXTR1_SDW_LOG2_BYTE                 )
 
-/* GPDMA request of bus n, direction d (RX or TX), and the argument of
- * stm32_dmachannel()
+/* DMA request of bus n, direction d (RX or TX), from the family
+ * dmasigmap.h, and the argument of stm32_dmachannel()
  */
 
-#    define SPI_DMAREQ(n, d)        GPDMA_REQ_SPI##n##_##d
+#    define SPI_DMAREQ(n, d)        STM32_SPI##n##_##d##DMA_REQ
 #    define SPI_DMACHAN_RX(priv)    GPDMA_TTYPE_P2M
 #    define SPI_DMACHAN_TX(priv)    GPDMA_TTYPE_M2P
 
