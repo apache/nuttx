@@ -48,6 +48,7 @@
 #include "arm_internal.h"
 #include "stm32.h"
 #include "stm32_spi.h"
+#include "stm32_spi_clk.h"
 #include "stm32_dma.h"
 
 #if defined(CONFIG_STM32_SPI1_SLAVE) ||                               \
@@ -100,44 +101,81 @@
                                      DMA_SCR_PSIZE_8BITS | DMA_SCR_MINC|DMA_SCR_DIR_M2P)
 #endif
 
-/* Kernel clock configuration
- * TODO:
- *  - support for all kernel clock configuration
+/* Kernel clock configuration.  The kernel clock limit of an instance is
+ * STM32_SPIn_MAX_KER_CK from chip.h, else STM32_SPI_MAX_KER_CK.
  */
 
-#if defined(CONFIG_STM32_SPI1_SLAVE) || defined(CONFIG_STM32_SPI2_SLAVE) || \
-  defined(CONFIG_STM32_SPI3_SLAVE)
-#  if STM32_RCC_D2CCIP1R_SPI123SRC == RCC_D2CCIP1R_SPI123SEL_PLL1
-#    define SPI123_KERNEL_CLOCK_FREQ STM32_PLL1Q_FREQUENCY
-#  else
-#    error Not supported yet
+#ifdef CONFIG_STM32_SPI1_SLAVE
+#  ifndef STM32_SPI1_FREQUENCY
+#    error Must define STM32_SPI1_FREQUENCY in board.h
 #  endif
-#  if SPI123_KERNEL_CLOCK_FREQ > 200000000
-#    error Not supported SPI123 frequency
+#  ifndef STM32_SPI1_MAX_KER_CK
+#    define STM32_SPI1_MAX_KER_CK STM32_SPI_MAX_KER_CK
 #  endif
-#endif /* SPI123 */
+#  if STM32_SPI1_FREQUENCY > STM32_SPI1_MAX_KER_CK
+#    error Not supported SPI1 frequency
+#  endif
+#endif
 
-#if defined(CONFIG_STM32_SPI4_SLAVE) || defined(CONFIG_STM32_SPI5_SLAVE)
-#  if STM32_RCC_D2CCIP1R_SPI45SRC == RCC_D2CCIP1R_SPI45SEL_APB
-#    define SPI45_KERNEL_CLOCK_FREQ STM32_PCLK2_FREQUENCY
-#  else
-#    error Not supported yet
+#ifdef CONFIG_STM32_SPI2_SLAVE
+#  ifndef STM32_SPI2_FREQUENCY
+#    error Must define STM32_SPI2_FREQUENCY in board.h
 #  endif
-#  if SPI45_KERNEL_CLOCK_FREQ > 100000000
-#    error Not supported SPI45 frequency
+#  ifndef STM32_SPI2_MAX_KER_CK
+#    define STM32_SPI2_MAX_KER_CK STM32_SPI_MAX_KER_CK
 #  endif
-#endif /* SPI45 */
+#  if STM32_SPI2_FREQUENCY > STM32_SPI2_MAX_KER_CK
+#    error Not supported SPI2 frequency
+#  endif
+#endif
 
-#if defined(CONFIG_STM32_SPI6_SLAVE)
-#  if STM32_RCC_D3CCIPR_SPI6SRC == RCC_D3CCIPR_SPI6SEL_PCLK4
-#    define SPI6_KERNEL_CLOCK_FREQ STM32_PCLK4_FREQUENCY
-#  else
-#    error Not supported yet
+#ifdef CONFIG_STM32_SPI3_SLAVE
+#  ifndef STM32_SPI3_FREQUENCY
+#    error Must define STM32_SPI3_FREQUENCY in board.h
 #  endif
-#  if SPI6_KERNEL_CLOCK_FREQ > 100000000
+#  ifndef STM32_SPI3_MAX_KER_CK
+#    define STM32_SPI3_MAX_KER_CK STM32_SPI_MAX_KER_CK
+#  endif
+#  if STM32_SPI3_FREQUENCY > STM32_SPI3_MAX_KER_CK
+#    error Not supported SPI3 frequency
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_SPI4_SLAVE
+#  ifndef STM32_SPI4_FREQUENCY
+#    error Must define STM32_SPI4_FREQUENCY in board.h
+#  endif
+#  ifndef STM32_SPI4_MAX_KER_CK
+#    define STM32_SPI4_MAX_KER_CK STM32_SPI_MAX_KER_CK
+#  endif
+#  if STM32_SPI4_FREQUENCY > STM32_SPI4_MAX_KER_CK
+#    error Not supported SPI4 frequency
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_SPI5_SLAVE
+#  ifndef STM32_SPI5_FREQUENCY
+#    error Must define STM32_SPI5_FREQUENCY in board.h
+#  endif
+#  ifndef STM32_SPI5_MAX_KER_CK
+#    define STM32_SPI5_MAX_KER_CK STM32_SPI_MAX_KER_CK
+#  endif
+#  if STM32_SPI5_FREQUENCY > STM32_SPI5_MAX_KER_CK
+#    error Not supported SPI5 frequency
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_SPI6_SLAVE
+#  ifndef STM32_SPI6_FREQUENCY
+#    error Must define STM32_SPI6_FREQUENCY in board.h
+#  endif
+#  ifndef STM32_SPI6_MAX_KER_CK
+#    define STM32_SPI6_MAX_KER_CK STM32_SPI_MAX_KER_CK
+#  endif
+#  if STM32_SPI6_FREQUENCY > STM32_SPI6_MAX_KER_CK
 #    error Not supported SPI6 frequency
 #  endif
-#endif /* SPI6 */
+#endif
 
 /* SPI6 is in D3 domain and is not yet supported. Remove this when the proper
  * support is in place
@@ -320,7 +358,7 @@ static const struct spi_slave_ctrlrops_s g_ctrlr_ops =
   .ctrlr.ops     = &g_ctrlr_ops,                        \
   .dev           = NULL,                                \
   .spibase       = STM32_SPI##x##_BASE,                 \
-  .spiclock      = SPI45_KERNEL_CLOCK_FREQ,             \
+  .spiclock      = STM32_SPI##x##_FREQUENCY,            \
   .irq           = STM32_IRQ_SPI##x,                    \
   SPI_SLAVE_INIT_DMA(x)                                 \
   .initialized   = false,                               \

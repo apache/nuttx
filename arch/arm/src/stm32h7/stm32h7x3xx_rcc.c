@@ -494,13 +494,13 @@ static inline void rcc_enableapb1(void)
 
   regval = getreg32(STM32_RCC_APB1LENR);
 
-#ifdef CONFIG_STM32_SPI2
+#if defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI2_SLAVE)
   /* SPI2 clock enable */
 
   regval |= RCC_APB1LENR_SPI2EN;
 #endif
 
-#ifdef CONFIG_STM32_SPI3
+#if defined(CONFIG_STM32_SPI3) || defined(CONFIG_STM32_SPI3_SLAVE)
   /* SPI3 clock enable */
 
   regval |= RCC_APB1LENR_SPI3EN;
@@ -555,19 +555,19 @@ static inline void rcc_enableapb2(void)
 
   regval = getreg32(STM32_RCC_APB2ENR);
 
-#ifdef CONFIG_STM32_SPI1
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI1_SLAVE)
   /* SPI1 clock enable */
 
   regval |= RCC_APB2ENR_SPI1EN;
 #endif
 
-#ifdef CONFIG_STM32_SPI4
+#if defined(CONFIG_STM32_SPI4) || defined(CONFIG_STM32_SPI4_SLAVE)
   /* SPI4 clock enable */
 
   regval |= RCC_APB2ENR_SPI4EN;
 #endif
 
-#ifdef CONFIG_STM32_SPI5
+#if defined(CONFIG_STM32_SPI5) || defined(CONFIG_STM32_SPI5_SLAVE)
   /* SPI5 clock enable */
 
   regval |= RCC_APB2ENR_SPI5EN;
@@ -670,7 +670,7 @@ static inline void rcc_enableapb4(void)
   regval |= RCC_APB4ENR_I2C4EN;
 #endif
 
-#ifdef CONFIG_STM32_SPI6
+#if defined(CONFIG_STM32_SPI6) || defined(CONFIG_STM32_SPI6_SLAVE)
   /* SPI6 clock enable */
 
   regval |= RCC_APB4ENR_SPI6EN;
