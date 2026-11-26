@@ -650,6 +650,12 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
                * fits in the current destination block.
                */
 
+              if (src_offset + sizeof(hdr) + phdr->len > dev->erasesize)
+                {
+                  ret = -EIO;
+                  goto errout;
+                }
+
               bytes_left_in_block = (dst_block + 1) * dev->erasesize -
                 dst_offset;
               if (bytes_left_in_block < sizeof(*phdr) + phdr->len)
