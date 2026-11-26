@@ -1057,7 +1057,14 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
 
       priv->write_wait = true;
       nxmutex_unlock(&priv->lock);
-      nxsem_wait(&priv->write_wait_sem);
+
+      /* A signal or a cancellation ends the wait: nothing written yet */
+
+      ret = nxsem_wait(&priv->write_wait_sem);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   nxmutex_unlock(&priv->lock);
@@ -1157,7 +1164,14 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
 
       priv->read_wait = true;
       nxmutex_unlock(&priv->lock);
-      nxsem_wait(&priv->read_wait_sem);
+
+      /* A signal or a cancellation ends the wait: nothing read yet */
+
+      ret = nxsem_wait(&priv->read_wait_sem);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   nxmutex_unlock(&priv->lock);
