@@ -1603,7 +1603,8 @@ config FDCLONE_STDIO
 
 config NFILE_DESCRIPTORS_PER_BLOCK
 	int "The number of file descriptors per block"
-	default 8
+	default 4 if DEFAULT_SMALL
+	default 8 if !DEFAULT_SMALL
 	range 3 99999
 	---help---
 		The number of file descriptors per block(one for each open)
