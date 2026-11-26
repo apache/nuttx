@@ -1428,13 +1428,18 @@ static void kvaser_sock_interrupt(FAR struct kvaser_driver_s *priv)
 
   for (passes = 0; passes < CONFIG_CAN_KVASER_IRQ_PASSES; passes++)
     {
+      bool pending = false;
+
       for (i = 0; i < priv->count; i++)
         {
           st = kvaser_getreg_sja(&priv->sja[i], SJA1000_INT_RAW_REG);
+          st &= kvaser_getreg_sja(&priv->sja[i], SJA1000_INT_ENA_REG);
           if (st == 0)
             {
               continue;
             }
+
+          pending = true;
 
           /* RX ready. The SJA1000 RX interrupt is level triggered (it stays
            * asserted while the RX FIFO is non-empty), and we process RX in a
@@ -1455,6 +1460,11 @@ static void kvaser_sock_interrupt(FAR struct kvaser_driver_s *priv)
             {
               netdev_lower_txdone(&priv->sja[i].dev);
             }
+        }
+
+      if (!pending)
+        {
+          break;
         }
     }
 }
