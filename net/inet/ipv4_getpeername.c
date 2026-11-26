@@ -28,6 +28,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/param.h>
 
 #include <string.h>
 #include <errno.h>
@@ -72,21 +73,11 @@ int ipv4_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
                      FAR socklen_t *addrlen)
 {
 #if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
-  FAR struct sockaddr_in *outaddr = (FAR struct sockaddr_in *)addr;
+  struct sockaddr_in outaddr;
   FAR struct socket_conn_s *conn = psock->s_conn;
   in_addr_t ripaddr;
 
-  /* Check if enough space has been provided for the full address */
-
-  if (*addrlen < sizeof(struct sockaddr_in))
-    {
-      /* This function is supposed to return the partial address if
-       * a smaller buffer has been provided.  This support has not
-       * been implemented.
-       */
-
-      return -ENOSYS;
-    }
+  memset(&outaddr, 0, sizeof(outaddr));
 
   /* Verify that the socket has been connected */
 
@@ -104,8 +95,8 @@ int ipv4_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
         {
           FAR struct tcp_conn_s *tcp_conn = psock->s_conn;
 
-          outaddr->sin_port = tcp_conn->rport; /* Already in network byte order */
-          ripaddr           = tcp_conn->u.ipv4.raddr;
+          outaddr.sin_port = tcp_conn->rport; /* Already in network byte order */
+          ripaddr          = tcp_conn->u.ipv4.raddr;
         }
         break;
 #endif
@@ -115,8 +106,8 @@ int ipv4_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
         {
           FAR struct udp_conn_s *udp_conn = psock->s_conn;
 
-          outaddr->sin_port = udp_conn->rport; /* Already in network byte order */
-          ripaddr           = udp_conn->u.ipv4.raddr;
+          outaddr.sin_port = udp_conn->rport; /* Already in network byte order */
+          ripaddr          = udp_conn->u.ipv4.raddr;
         }
         break;
 #endif
@@ -127,10 +118,15 @@ int ipv4_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Set the address family and the IP address */
 
-  outaddr->sin_family      = psock->s_domain;
-  outaddr->sin_addr.s_addr = ripaddr;
-  memset(outaddr->sin_zero, 0, sizeof(outaddr->sin_zero));
-  *addrlen = sizeof(struct sockaddr_in);
+  outaddr.sin_family      = psock->s_domain;
+  outaddr.sin_addr.s_addr = ripaddr;
+
+  /* Copy as much of the address as the buffer holds.  *addrlen gives the
+   * length of the whole address, so the caller sees a truncation.
+   */
+
+  memcpy(addr, &outaddr, MIN(*addrlen, sizeof(outaddr)));
+  *addrlen = sizeof(outaddr);
 
   /* Return success */
 
