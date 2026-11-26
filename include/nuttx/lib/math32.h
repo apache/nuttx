@@ -441,7 +441,7 @@ static inline_function uint64_t up_umulh64(uint64_t a, uint64_t b)
 {
   /* Compiles to a single UMULH instruction on x86_64 and AArch64. */
 
-  _uint128_t a128 = a;
+  _uint128_t a128   = a;
   _uint128_t res128 = a128 * b;
   return res128 >> 64;
 }
