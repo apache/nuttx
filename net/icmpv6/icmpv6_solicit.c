@@ -120,7 +120,9 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
 
   /* Copy our link layer address into the message */
 
+#ifdef NETDEV_HAVE_LLADDR
   memcpy(sol->srclladdr, &dev->d_mac, lladdrsize);
+#endif
 
   /* Update device buffer length */
 

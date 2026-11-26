@@ -88,6 +88,14 @@
 #define NETDEV_RX_STAMP (1 << 3) /* Netdev support hardware timestamp */
 #define NETDEV_TX_STAMP (1 << 4) /* Netdev provides hardware TX timestamps */
 
+/* The link layers with an address: struct net_driver_s has d_mac */
+
+#if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_6LOWPAN) || \
+    defined(CONFIG_NET_BLUETOOTH) || defined(CONFIG_NET_IEEE802154) || \
+    defined(CONFIG_NET_TUN)
+#  define NETDEV_HAVE_LLADDR
+#endif
+
 /* Determine the largest possible address */
 
 #if defined(CONFIG_WIRELESS_IEEE802154) && defined(CONFIG_WIRELESS_PKTRADIO)
@@ -367,9 +375,7 @@ struct net_driver_s
 
   /* Link layer address */
 
-#if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_6LOWPAN) || \
-    defined(CONFIG_NET_BLUETOOTH) || defined(CONFIG_NET_IEEE802154) || \
-    defined(CONFIG_NET_TUN)
+#ifdef NETDEV_HAVE_LLADDR
   union
   {
 #  if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_NET_TUN)

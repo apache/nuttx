@@ -103,7 +103,9 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
 
   /* Copy our link layer address into the message */
 
+#ifdef NETDEV_HAVE_LLADDR
   memcpy(adv->tgtlladdr, &dev->d_mac, lladdrsize);
+#endif
 
   /* Update device buffer length */
 
