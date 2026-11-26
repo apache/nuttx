@@ -363,7 +363,9 @@ gives end-of-file and a send gives ``EPIPE`` (and ``SIGPIPE`` without
 ``MSG_NOSIGNAL``).  ``poll()`` gives ``POLLHUP`` and ``POLLIN``, and
 ``POLLERR`` while the ``ECONNRESET`` is not yet reported.  After the FIN of
 the peer the application already read the end of the stream: a RST does not
-change what a receive (end-of-file) or a send (``EPIPE``) gives.
+change what a receive (end-of-file) or a send (``EPIPE``) gives, and
+``getsockopt(SO_ERROR)`` gives ``EPIPE`` (in ``TCP_CLOSE_WAIT``) or
+``ECONNRESET`` (in ``TCP_LAST_ACK``) once, as Linux.
 
 Close or reset before accept() or connect() returns
 ---------------------------------------------------
