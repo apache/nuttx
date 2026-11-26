@@ -2314,7 +2314,7 @@ static int stm32can_filterinit(struct stm32_can_s *priv)
     defined(CONFIG_STM32_STM32F20XX) || \
     defined(CONFIG_STM32_STM32F4XXX)
   regval  = stm32can_getfreg(priv, STM32_CAN_FMR_OFFSET);
-  regval &= CAN_FMR_CAN2SB_MASK;
+  regval &= ~CAN_FMR_CAN2SB_MASK;
   regval |= (CAN_NFILTERS / 2) << CAN_FMR_CAN2SB_SHIFT;
   stm32can_putfreg(priv, STM32_CAN_FMR_OFFSET, regval);
 #endif
