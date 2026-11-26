@@ -105,6 +105,7 @@ struct stm32_can_s
   uint32_t base;     /* Base address of the CAN control registers */
   uint32_t fbase;    /* Base address of the CAN filter registers */
   uint32_t baud;     /* Configured baud */
+  bool     active;   /* Between setup and shutdown */
 };
 
 /****************************************************************************
@@ -624,6 +625,19 @@ static void stm32can_reset(struct can_dev_s *dev)
 #ifdef CONFIG_STM32_CAN1
   if (priv->port == 1)
     {
+#ifdef CONFIG_STM32_CAN2
+      /* The CAN2 filter banks are in CAN1: only stop CAN1 */
+
+      if (g_can2priv.active)
+        {
+          stm32can_putreg(priv, STM32_CAN_IER_OFFSET, 0);
+          regval  = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+          regval |= CAN_MCR_INRQ;
+          stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+          return;
+        }
+#endif
+
       regbit = CAN_RCC_CAN1RST;
     }
   else
@@ -775,6 +789,7 @@ static int stm32can_setup(struct can_dev_s *dev)
 #ifdef CONFIG_CAN_ERRORS
   up_enable_irq(priv->cansce);
 #endif
+  priv->active = true;
   return OK;
 }
 
@@ -798,6 +813,8 @@ static void stm32can_shutdown(struct can_dev_s *dev)
   struct stm32_can_s *priv = dev->cd_priv;
 
   caninfo("CAN%" PRIu8 "\n", priv->port);
+
+  priv->active = false;
 
   /* Disable the RX FIFO 0/1, TX and SCE interrupts */
 
@@ -2319,7 +2336,7 @@ static int stm32can_filterinit(struct stm32_can_s *priv)
     defined(CONFIG_STM32_STM32F20XX) || \
     defined(CONFIG_STM32_STM32F4XXX)
   regval  = stm32can_getfreg(priv, STM32_CAN_FMR_OFFSET);
-  regval &= CAN_FMR_CAN2SB_MASK;
+  regval &= ~CAN_FMR_CAN2SB_MASK;
   regval |= (CAN_NFILTERS / 2) << CAN_FMR_CAN2SB_SHIFT;
   stm32can_putfreg(priv, STM32_CAN_FMR_OFFSET, regval);
 #endif
