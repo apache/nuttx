@@ -1881,7 +1881,8 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 static int spi_hwfeatures(struct spi_dev_s *dev,
                           spi_hwfeatures_t features)
 {
-#if defined(CONFIG_SPI_BITORDER) || defined(CONFIG_SPI_TRIGGER)
+#if defined(CONFIG_SPI_BITORDER) || \
+    (defined(CONFIG_SPI_TRIGGER) && defined(CONFIG_STM32_SPI_DMA))
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
 #endif
 
@@ -2508,12 +2509,12 @@ static void spi_sndblock(struct spi_dev_s *dev,
 #ifdef CONFIG_STM32_SPI_DMA
   if (priv->usedma)
     {
-      return spi_exchange_dma(dev, txbuffer, NULL, nwords);
+      spi_exchange_dma(dev, txbuffer, NULL, nwords);
     }
   else
 #endif
     {
-      return spi_exchange_nodma(dev, txbuffer, NULL, nwords);
+      spi_exchange_nodma(dev, txbuffer, NULL, nwords);
     }
 }
 #endif
@@ -2551,12 +2552,12 @@ static void spi_recvblock(struct spi_dev_s *dev,
 #ifdef CONFIG_STM32_SPI_DMA
   if (priv->usedma)
     {
-      return spi_exchange_dma(dev, NULL, rxbuffer, nwords);
+      spi_exchange_dma(dev, NULL, rxbuffer, nwords);
     }
   else
 #endif
     {
-      return spi_exchange_nodma(dev, NULL, rxbuffer, nwords);
+      spi_exchange_nodma(dev, NULL, rxbuffer, nwords);
     }
 }
 #endif
