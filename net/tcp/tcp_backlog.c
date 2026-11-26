@@ -206,11 +206,12 @@ FAR struct tcp_backlog_s *tcp_backlogdetach(FAR struct tcp_conn_s *conn)
  *   Free a backlog that tcp_backlogdetach() returned, and the pending
  *   connections in it.
  *
- *   NOTE: This function re-enters tcp_free() for each pending connection.
+ *   NOTE: Each pending connection is ended with tcp_close_abort(), which
+ *   frees it (tcp_free()) at once or after its RST.
  *
  * Assumptions:
- *   The caller holds no lock of the network: tcp_free() takes the device
- *   lock of each pending connection, and the input path takes the TCP
+ *   The caller holds no lock of the network: tcp_close_abort() takes the
+ *   device lock of each pending connection, and the input path takes the TCP
  *   connection list lock under a device lock.
  *
  ****************************************************************************/
@@ -233,13 +234,13 @@ void tcp_backlogfree(FAR struct tcp_backlog_s *blg)
       blconn = blc->bc_conn;
       if (blconn)
         {
-          /* REVISIT
-           * -- such connections really need to be gracefully closed
+          /* No socket will accept this connection: end it with a RST to
+           * the peer (as Linux at the close of a listener), so that the
+           * peer does not wait for it for ever.
            */
 
           blconn->backlog = NULL;
-          blconn->crefs   = 0;
-          tcp_free(blconn);
+          tcp_close_abort(blconn);
         }
     }
 

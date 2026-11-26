@@ -286,6 +286,47 @@ static bool tcp_close_waits(FAR struct tcp_conn_s *conn)
 }
 
 /****************************************************************************
+ * Name: tcp_close_abort_eventhandler
+ ****************************************************************************/
+
+static uint32_t tcp_close_abort_eventhandler(FAR struct net_driver_s *dev,
+                                             FAR void *pvpriv,
+                                             uint32_t flags)
+{
+  FAR struct tcp_conn_s *conn = pvpriv;
+
+  ninfo("flags: %" PRIx32 "\n", flags);
+
+  /* Drop received data.  Unless the peer reset the connection, it timed
+   * out or the device went down, send the RST now (tcp_appsend() sets
+   * TCP_CLOSED).
+   */
+
+  dev->d_len = 0;
+  flags &= ~TCP_NEWDATA;
+  if ((flags & TCP_DISCONN_EVENTS) == 0)
+    {
+      flags |= TCP_ABORT;
+    }
+  else
+    {
+      conn->tcpstateflags = TCP_CLOSED;
+    }
+
+  if (conn->clscb != NULL)
+    {
+      tcp_callback_free(conn, conn->clscb);
+      conn->clscb = NULL;
+    }
+
+  /* Free the connection after this event */
+
+  conn->flags |= TCP_CLOSE_ARRANGED;
+  work_queue(LPWORK, &conn->clswork, tcp_close_work, conn, 0);
+  return flags;
+}
+
+/****************************************************************************
  * Name: tcp_close_disconnect
  *
  * Description:
@@ -460,6 +501,53 @@ int tcp_close(FAR struct socket *psock)
   /* Break any current connections and close the socket */
 
   return tcp_close_disconnect(psock);
+}
+
+/****************************************************************************
+ * Name: tcp_close_abort
+ *
+ * Description:
+ *   End a connection that no socket refers to (a pending connection of a
+ *   backlog) with a RST to the peer, then free it.  The RST goes out at the
+ *   next poll of the device.  A connection in another state than
+ *   ESTABLISHED or CLOSE_WAIT, or without a device, is freed at once.
+ *
+ * Input Parameters:
+ *   conn - The TCP connection
+ *
+ * Assumptions:
+ *   Called from normal task logic without a lock of the network held.
+ *
+ ****************************************************************************/
+
+void tcp_close_abort(FAR struct tcp_conn_s *conn)
+{
+  FAR struct net_driver_s *dev = conn->dev;
+  uint8_t state;
+
+  conn_dev_lock(&conn->sconn, dev);
+  conn->crefs = 0;
+
+  /* tcp_poll() gives TCP_POLL only in these states to a connection that
+   * did not send a FIN.
+   */
+
+  state = conn->tcpstateflags & TCP_STATE_MASK;
+  if (dev != NULL &&
+      (state == TCP_ESTABLISHED || state == TCP_CLOSE_WAIT) &&
+      (conn->clscb = tcp_callback_alloc(conn)) != NULL)
+    {
+      conn->clscb->flags = TCP_NEWDATA | TCP_ACKDATA | TCP_POLL |
+                           TCP_DISCONN_EVENTS;
+      conn->clscb->event = tcp_close_abort_eventhandler;
+      conn->clscb->priv  = conn;
+      netdev_txnotify_dev(dev, TCP_POLL);
+      conn_dev_unlock(&conn->sconn, dev);
+      return;
+    }
+
+  conn_dev_unlock(&conn->sconn, dev);
+  tcp_free(conn);
 }
 
 #endif /* CONFIG_NET_TCP */
