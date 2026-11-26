@@ -35,6 +35,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/param.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -2231,32 +2232,23 @@ static int can_raw_getsockname(FAR struct socket *psock,
                                FAR struct sockaddr *addr,
                                FAR socklen_t *addrlen)
 {
-  FAR struct sockaddr_can *canaddr;
   FAR struct can_conn_s *conn;
-
-  /* Check if enough space has been provided for the full address */
-
-  if (*addrlen < sizeof(struct sockaddr_can))
-    {
-      /* This function is supposed to return the partial address if
-       * a smaller buffer has been provided.  This support has not
-       * been implemented.
-       */
-
-      return -EINVAL;
-    }
+  struct sockaddr_can canaddr;
 
   conn = psock->s_conn;
 
   /* Return the address information in the address structure */
 
-  canaddr = (FAR struct sockaddr_can *)addr;
-  memset(canaddr, 0, sizeof(struct sockaddr_can));
+  memset(&canaddr, 0, sizeof(canaddr));
+  canaddr.can_family = AF_CAN;
+  canaddr.can_ifindex = can_get_ifindex(conn);
 
-  canaddr->can_family = AF_CAN;
-  canaddr->can_ifindex = can_get_ifindex(conn);
+  /* Copy as much of the address as the buffer holds.  *addrlen gives the
+   * length of the whole address, so the caller sees a truncation.
+   */
 
-  *addrlen = sizeof(struct sockaddr_can);
+  memcpy(addr, &canaddr, MIN(*addrlen, sizeof(canaddr)));
+  *addrlen = sizeof(canaddr);
   return OK;
 }
 
