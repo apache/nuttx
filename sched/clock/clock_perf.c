@@ -47,7 +47,7 @@
 #  define USE_UP_PERF
 #endif
 
-#ifndef CONFIG_ARCH_PERF_EVENTS_USER_ACCESS
+#ifndef CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS
 #  if defined(USE_UP_PERF) && defined(CONFIG_PERF_OVERFLOW_CORRECTION) && \
       ULONG_MAX != UINT64_MAX
 
@@ -172,7 +172,7 @@ clock_t perf_gettime(void)
 }
 
 #  endif
-#endif /* !CONFIG_ARCH_PERF_EVENTS_USER_ACCESS */
+#endif /* !CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS */
 
 #ifdef USE_UP_PERF
 
