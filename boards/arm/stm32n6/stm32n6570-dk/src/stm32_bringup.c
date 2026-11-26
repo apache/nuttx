@@ -184,6 +184,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_LSM6DS3TRC
+  /* Register the camera module IMU */
+
+  ret = stm32_imu_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_imu_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_VIDEO_VL53L5CX
   ret = stm32_tof_initialize();
   if (ret < 0)

@@ -38,6 +38,10 @@
 #  include <nuttx/video/v4l2_cap.h>
 #endif
 
+#ifdef CONFIG_SENSORS_LSM6DS3TRC
+#  include <nuttx/sensors/lsm6ds3trc.h>
+#endif
+
 #include "stm32_gpio.h"
 #include "stm32_i2c.h"
 #include "stm32_dcmipp.h"
@@ -195,3 +199,37 @@ int stm32_camera_initialize(void)
 }
 
 #endif /* HAVE_IMX335 */
+
+#ifdef CONFIG_SENSORS_LSM6DS3TRC
+
+/****************************************************************************
+ * Name: stm32_imu_initialize
+ *
+ * Description:
+ *   Power the camera module and register its IMU, polled.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int stm32_imu_initialize(void)
+{
+  static struct lsm6ds3trc_config_s config;
+  FAR struct i2c_master_s *i2c;
+
+  stm32_camera_power();
+
+  i2c = stm32_i2cbus_initialize(CAMERA_I2C_BUS);
+  if (i2c == NULL)
+    {
+      return -ENODEV;
+    }
+
+  return lsm6ds3trc_register(i2c, IMU_I2C_ADDR, 0, &config);
+}
+
+#endif /* CONFIG_SENSORS_LSM6DS3TRC */

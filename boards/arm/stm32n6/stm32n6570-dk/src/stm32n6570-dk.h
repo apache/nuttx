@@ -96,6 +96,12 @@
                         GPIO_OUTPUT_CLEAR | GPIO_PORTD | GPIO_PIN2)
 #define CAMERA_I2C_BUS 1
 
+/* ISM330DLC IMU on the camera module, I2C1 (0x6a), polled.  It is register
+ * compatible with the LSM6DS3TR-C and uses that driver.
+ */
+
+#define IMU_I2C_ADDR   0x6a
+
 /* VL53L5CX time-of-flight sensor on the camera module, I2C1 (0x29):
  * INT on PQ0 (open drain, active low, EXTI0 like the TAMP button) and LPn
  * on PQ5 (low disables the I2C interface).
@@ -190,8 +196,22 @@ void stm32_spiregister(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_VIDEO_VL53L5CX) || defined(CONFIG_STM32_DCMIPP)
+#if defined(CONFIG_VIDEO_VL53L5CX) || defined(CONFIG_STM32_DCMIPP) || \
+    defined(CONFIG_SENSORS_LSM6DS3TRC)
 void stm32_camera_power(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_imu_initialize
+ *
+ * Description:
+ *   Power the camera module and register its IMU as
+ *   /dev/uorb/sensor_accel0 and /dev/uorb/sensor_gyro0.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_LSM6DS3TRC
+int stm32_imu_initialize(void);
 #endif
 
 /****************************************************************************
