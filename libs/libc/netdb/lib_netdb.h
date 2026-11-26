@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <netdb.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -80,6 +81,20 @@
 #else
 #  define NETDB_HOSTBYNAME_FAMILY AF_UNSPEC
 #endif
+
+/* getaddrinfo(), gethostbyname() and gethostbyaddr() use a buffer of
+ * CONFIG_NETDB_BUFSIZE bytes.  A look-up puts its struct hostent_info_s at
+ * the start of this buffer and the host data after it.  If the buffer
+ * cannot hold the struct and the host data, each look-up fails with ERANGE
+ * at run time.  This macro fails the build instead: the buffer must hold
+ * the struct "type" plus "extra" bytes.
+ */
+
+#define NETDB_CHECK_BUFSIZE(type, extra) \
+  static_assert(sizeof(type) + (extra) <= CONFIG_NETDB_BUFSIZE, \
+                "CONFIG_NETDB_BUFSIZE is too small for " \
+                "CONFIG_NETDB_MAX_IPv4ADDR, CONFIG_NETDB_MAX_IPv6ADDR " \
+                "and CONFIG_NETDB_MAX_ALTNAMES")
 
 /****************************************************************************
  * Public Types

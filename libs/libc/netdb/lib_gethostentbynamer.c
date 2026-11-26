@@ -58,6 +58,11 @@ struct hostent_info_s
   char      hi_data[1];
 };
 
+/* The buffer must hold struct hostent_info_s, one address and its text */
+
+NETDB_CHECK_BUFSIZE(struct hostent_info_s,
+                    sizeof(struct in6_addr) + INET6_ADDRSTRLEN);
+
 /****************************************************************************
  * Private functions
  ****************************************************************************/

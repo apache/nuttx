@@ -71,6 +71,11 @@ config NETDB_BUFSIZE
 	int "gethostbyname/gethostbyaddr buffer size"
 	depends on LIBC_NETDB
 	default 256
+	---help---
+		The size of the buffer of getaddrinfo(), gethostbyname() and
+		gethostbyaddr().  It holds the address list of one host, so it
+		must grow with NETDB_MAX_IPv4ADDR, NETDB_MAX_IPv6ADDR and
+		NETDB_MAX_ALTNAMES.  The build fails if it is too small.
 
 if NET_IPv4
 
