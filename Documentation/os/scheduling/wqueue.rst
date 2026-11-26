@@ -176,6 +176,22 @@ all build modes.
 -  ``CONFIG_LIBC_USRWORKSTACKSIZE``. The stack size allocated for
    the lower priority worker thread. Default: 2048.
 
+Kernel Work Queue Timer
+-----------------------
+
+A kernel work queue starts a timer for its first delayed work item. With
+``CONFIG_HRTIMER``, the timer is a high-resolution timer. Without it, the
+timer is a watchdog timer.
+
+The work queue holds its spinlock while it starts or cancels the timer.
+A watchdog timer enters the critical section, and code in the critical
+section can call ``work_queue()`` or ``work_cancel()``. On SMP, two CPUs
+can then wait for each other. A high-resolution timer has its own lock,
+so this cannot occur. Enable ``CONFIG_HRTIMER`` on an SMP system that
+queues or cancels work in the critical section.
+
+The work queue wakes its worker threads after it releases its spinlock.
+
 Common Work Queue Interfaces
 ============================
 
