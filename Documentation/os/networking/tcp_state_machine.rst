@@ -366,6 +366,10 @@ that came before the RST, then ``ECONNRESET`` once, then end-of-file).
 connection that the peer resets while it waits in the backlog of the
 listener is freed: ``accept()`` waits for the next connection.
 
+When the listener is closed, each connection that waits in its backlog gets
+a RST and is freed, as on Linux.  ``listen()`` again with a smaller backlog
+does the same to the connections that the new backlog cannot hold.
+
 ``tcp_start_monitor()`` sets the connection state of the socket
 (``_SF_CONNECTED``, ``_SF_CLOSED``) with the device locked, where the monitor
 changes it for an event of the peer.  ``accept()`` and ``connect()`` do not
