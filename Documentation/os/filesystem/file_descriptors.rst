@@ -29,6 +29,28 @@ their own allocation policies. Caller-owned objects passed to
 ``file_open()`` are also outside this pool. Enabling this pool alone does
 not make ``open()`` free of heap allocations.
 
+Socket Object Allocation
+========================
+
+``CONFIG_FS_PREALLOC_SOCKETS`` reserves static ``struct socket`` objects.
+``CONFIG_FS_ALLOC_SOCKETS`` sets the number added from ``fs_heap`` when the
+pool is empty. Both default to zero, preserving direct heap allocation.
+A positive reserve with zero growth creates a fixed pool: allocation fails
+immediately when all objects are in use. Positive growth allows expansion
+with or without a static reserve. Expanded storage remains allocated for
+reuse, so memory use follows peak demand. Dynamic chunks use the independent
+FS heap when ``CONFIG_FS_HEAPSIZE`` is enabled, and the kernel heap otherwise.
+
+The pool serves objects created by ``socket()``, ``accept()`` and
+``socketpair()``, including copies made by file duplication. Objects return
+to the pool on close or failure rollback. ``dup()`` shares an open file
+object and does not require a separate socket object. Caller-owned sockets
+passed to the ``psock_*`` interfaces are outside this pool. Network connection
+structures, file objects and descriptor tables have separate allocation
+policies; enabling this pool alone does not eliminate heap allocations from
+socket operations. Include sockets opened during system startup when sizing
+a fixed pool.
+
 Drivers within Drivers
 ======================
 

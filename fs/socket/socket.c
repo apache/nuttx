@@ -31,6 +31,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/uio.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/mempool.h>
 #include <nuttx/mm/map.h>
 
 #include <sys/socket.h>
@@ -42,6 +43,11 @@
 
 #include "inode/inode.h"
 #include "fs_heap.h"
+#include "socket.h"
+
+#if CONFIG_FS_PREALLOC_SOCKETS > 0 || CONFIG_FS_ALLOC_SOCKETS > 0
+#  define SOCKET_POOL_BLOCKSIZE ALIGN_UP(sizeof(struct socket), MM_ALIGN)
+#endif
 
 /****************************************************************************
  * Private Functions Prototypes
@@ -65,9 +71,35 @@ static ssize_t sock_file_readv(FAR struct file *filep,
 static ssize_t sock_file_writev(FAR struct file *filep,
                                 FAR struct uio *uio);
 
+#if CONFIG_FS_PREALLOC_SOCKETS > 0 || CONFIG_FS_ALLOC_SOCKETS > 0
+static FAR void *socket_pool_alloc(FAR struct mempool_s *pool, size_t size);
+static void socket_pool_free(FAR struct mempool_s *pool, FAR void *addr);
+static void socket_pool_check(FAR struct mempool_s *pool, FAR void *addr);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#if CONFIG_FS_PREALLOC_SOCKETS > 0 || CONFIG_FS_ALLOC_SOCKETS > 0
+static char g_socket_pool_buffer[CONFIG_FS_PREALLOC_SOCKETS *
+  MEMPOOL_REALBLOCKSIZE(SOCKET_POOL_BLOCKSIZE) + MEMPOOL_HEADER_SIZE]
+  aligned_data(MM_ALIGN);
+
+static struct mempool_s g_socket_mempool =
+{
+  .initialbase = g_socket_pool_buffer,
+  .initialsize = sizeof(g_socket_pool_buffer),
+  .blocksize   = SOCKET_POOL_BLOCKSIZE,
+  .expandsize  = CONFIG_FS_ALLOC_SOCKETS *
+                 MEMPOOL_REALBLOCKSIZE(SOCKET_POOL_BLOCKSIZE) +
+                 MEMPOOL_HEADER_SIZE,
+  .name        = "socket",
+  .alloc       = socket_pool_alloc,
+  .free        = socket_pool_free,
+  .check       = socket_pool_check,
+};
+#endif
 
 static const struct file_operations g_sock_fileops =
 {
@@ -100,12 +132,41 @@ static struct inode g_sock_inode =
  * Private Functions
  ****************************************************************************/
 
+#if CONFIG_FS_PREALLOC_SOCKETS > 0 || CONFIG_FS_ALLOC_SOCKETS > 0
+/****************************************************************************
+ * Name: socket_pool_alloc
+ ****************************************************************************/
+
+static FAR void *socket_pool_alloc(FAR struct mempool_s *pool, size_t size)
+{
+  return fs_heap_malloc(size);
+}
+
+/****************************************************************************
+ * Name: socket_pool_free
+ ****************************************************************************/
+
+static void socket_pool_free(FAR struct mempool_s *pool, FAR void *addr)
+{
+  fs_heap_free(addr);
+}
+
+/****************************************************************************
+ * Name: socket_pool_check
+ ****************************************************************************/
+
+static void socket_pool_check(FAR struct mempool_s *pool, FAR void *addr)
+{
+  DEBUGASSERT(fs_heap_member(addr));
+}
+#endif
+
 static int sock_file_open(FAR struct file *filep)
 {
   FAR struct socket *psock;
   int ret;
 
-  psock = fs_heap_zalloc(sizeof(*psock));
+  psock = sock_alloc();
   if (psock == NULL)
     {
       return -ENOMEM;
@@ -118,7 +179,7 @@ static int sock_file_open(FAR struct file *filep)
     }
   else
     {
-      fs_heap_free(psock);
+      sock_free(psock);
     }
 
   return ret;
@@ -127,7 +188,7 @@ static int sock_file_open(FAR struct file *filep)
 static int sock_file_close(FAR struct file *filep)
 {
   psock_close(filep->f_priv);
-  fs_heap_free(filep->f_priv);
+  sock_free(filep->f_priv);
   return 0;
 }
 
@@ -200,6 +261,26 @@ static ssize_t sock_file_writev(FAR struct file *filep,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#if CONFIG_FS_PREALLOC_SOCKETS > 0 || CONFIG_FS_ALLOC_SOCKETS > 0
+/****************************************************************************
+ * Name: sock_alloc
+ ****************************************************************************/
+
+FAR struct socket *sock_alloc(void)
+{
+  return mempool_zallocate(&g_socket_mempool, 0);
+}
+
+/****************************************************************************
+ * Name: sock_free
+ ****************************************************************************/
+
+void sock_free(FAR struct socket *psock)
+{
+  mempool_release(&g_socket_mempool, psock);
+}
+#endif
 
 /****************************************************************************
  * Name: sockfd_allocate
@@ -323,7 +404,7 @@ int socket(int domain, int type, int protocol)
       oflags |= O_NONBLOCK;
     }
 
-  psock = fs_heap_zalloc(sizeof(*psock));
+  psock = sock_alloc();
   if (psock == NULL)
     {
       ret = -ENOMEM;
@@ -355,7 +436,7 @@ errout_with_psock:
   psock_close(psock);
 
 errout_with_alloc:
-  fs_heap_free(psock);
+  sock_free(psock);
 
 errout:
   set_errno(-ret);

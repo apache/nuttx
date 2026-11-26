@@ -44,7 +44,7 @@
 #include <nuttx/tls.h>
 #include <arch/irq.h>
 
-#include "fs_heap.h"
+#include "socket.h"
 
 /****************************************************************************
  * Private Functions
@@ -209,7 +209,7 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
 
   tls_cleanup_push(tls_get_info(), accept4_cleanup, filep);
 
-  newsock = fs_heap_zalloc(sizeof(*newsock));
+  newsock = sock_alloc();
   if (newsock == NULL)
     {
       errcode = ENOMEM;
@@ -266,7 +266,7 @@ errout_with_psock:
   psock_close(newsock);
 
 errout_with_alloc:
-  fs_heap_free(newsock);
+  sock_free(newsock);
 
 errout_with_filep:
   tls_cleanup_pop(tls_get_info(), 0);
