@@ -90,11 +90,19 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
       /* Handle MLD-related socket options */
 
       case IPV6_JOIN_GROUP:       /* Join a multicast group */
-        ret = mld_joingroup(value);
-        break;
-
       case IPV6_LEAVE_GROUP:      /* Quit a multicast group */
-        ret = mld_leavegroup(value);
+        if (value_len < sizeof(struct ipv6_mreq))
+          {
+            ret = -EINVAL;
+          }
+        else if (option == IPV6_JOIN_GROUP)
+          {
+            ret = mld_joingroup(value);
+          }
+        else
+          {
+            ret = mld_leavegroup(value);
+          }
         break;
 
       case MCAST_JOIN_GROUP:      /* Join a multicast group (RFC 3678) */
@@ -147,8 +155,15 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         {
           FAR struct net_driver_s *dev;
           FAR struct udp_conn_s *conn = psock->s_conn;
-          int ifindex = *(FAR int *)value;
+          int ifindex;
 
+          if (value_len < sizeof(int))
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          ifindex = *(FAR int *)value;
           if (ifindex > 0)
             {
               dev = netdev_findbyindex(ifindex);
