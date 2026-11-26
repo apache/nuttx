@@ -1220,11 +1220,12 @@ static int netlink_ipv6_addr_callback(FAR struct net_driver_s *dev,
 static int netlink_addr_callback(FAR struct net_driver_s *dev, FAR void *arg)
 {
   FAR struct nlroute_info_s *info = arg;
-  FAR struct netlink_response_s *resp;
 
 #ifdef CONFIG_NET_IPv4
   if (info->req->gen.rtgen_family == AF_INET)
     {
+      FAR struct netlink_response_s *resp;
+
       resp = netlink_get_ifaddr(dev, AF_INET, RTM_NEWADDR, &dev->d_ipaddr,
                                 net_ipv4_mask2pref(dev->d_netmask),
                                 info->req);
