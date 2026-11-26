@@ -48,11 +48,10 @@
 
 /* Number of filters depends on silicon */
 
-#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F20XX) || \
-    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F4XXX)
-#  define CAN_NFILTERS 28
-#else
+#if defined(CONFIG_STM32_STM32F10XX) && !defined(CONFIG_STM32_CONNECTIVITYLINE)
 #  define CAN_NFILTERS 14
+#else
+#  define CAN_NFILTERS 28
 #endif
 
 /* Register Offsets *********************************************************/
@@ -238,6 +237,60 @@
 #  define STM32_CAN2_FIR(b,i)     (STM32_CAN2_BASE+STM32_CAN_FIR_OFFSET(b,i))
 #endif
 
+#if STM32_NCAN > 2
+#  define STM32_CAN3_MCR          (STM32_CAN3_BASE+STM32_CAN_MCR_OFFSET)
+#  define STM32_CAN3_MSR          (STM32_CAN3_BASE+STM32_CAN_MSR_OFFSET)
+#  define STM32_CAN3_TSR          (STM32_CAN3_BASE+STM32_CAN_TSR_OFFSET)
+#  define STM32_CAN3_RF0R         (STM32_CAN3_BASE+STM32_CAN_RF0R_OFFSET)
+#  define STM32_CAN3_RF1R         (STM32_CAN3_BASE+STM32_CAN_RF1R_OFFSET)
+#  define STM32_CAN3_IER          (STM32_CAN3_BASE+STM32_CAN_IER_OFFSET)
+#  define STM32_CAN3_ESR          (STM32_CAN3_BASE+STM32_CAN_ESR_OFFSET)
+#  define STM32_CAN3_BTR          (STM32_CAN3_BASE+STM32_CAN_BTR_OFFSET)
+
+#  define STM32_CAN3_TIR(m)       (STM32_CAN3_BASE+STM32_CAN_TIR_OFFSET(m))
+#  define STM32_CAN3_TI0R         (STM32_CAN3_BASE+STM32_CAN_TI0R_OFFSET)
+#  define STM32_CAN3_TI1R         (STM32_CAN3_BASE+STM32_CAN_TI1R_OFFSET)
+#  define STM32_CAN3_TI2R         (STM32_CAN3_BASE+STM32_CAN_TI2R_OFFSET)
+
+#  define STM32_CAN3_TDTR(m)      (STM32_CAN3_BASE+STM32_CAN_TDTR_OFFSET(m))
+#  define STM32_CAN3_TDT0R        (STM32_CAN3_BASE+STM32_CAN_TDT0R_OFFSET)
+#  define STM32_CAN3_TDT1R        (STM32_CAN3_BASE+STM32_CAN_TDT1R_OFFSET)
+#  define STM32_CAN3_TDT2R        (STM32_CAN3_BASE+STM32_CAN_TDT2R_OFFSET)
+
+#  define STM32_CAN3_TDLR(m)      (STM32_CAN3_BASE+STM32_CAN_TDLR_OFFSET(m))
+#  define STM32_CAN3_TDL0R        (STM32_CAN3_BASE+STM32_CAN_TDL0R_OFFSET)
+#  define STM32_CAN3_TDL1R        (STM32_CAN3_BASE+STM32_CAN_TDL1R_OFFSET)
+#  define STM32_CAN3_TDL2R        (STM32_CAN3_BASE+STM32_CAN_TDL2R_OFFSET)
+
+#  define STM32_CAN3_TDHR(m)      (STM32_CAN3_BASE+STM32_CAN_TDHR_OFFSET(m))
+#  define STM32_CAN3_TDH0R        (STM32_CAN3_BASE+STM32_CAN_TDH0R_OFFSET)
+#  define STM32_CAN3_TDH1R        (STM32_CAN3_BASE+STM32_CAN_TDH1R_OFFSET)
+#  define STM32_CAN3_TDH2R        (STM32_CAN3_BASE+STM32_CAN_TDH2R_OFFSET)
+
+#  define STM32_CAN3_RIR(m)       (STM32_CAN3_BASE+STM32_CAN_RIR_OFFSET(m))
+#  define STM32_CAN3_RI0R         (STM32_CAN3_BASE+STM32_CAN_RI0R_OFFSET)
+#  define STM32_CAN3_RI1R         (STM32_CAN3_BASE+STM32_CAN_RI1R_OFFSET)
+
+#  define STM32_CAN3_RDTR(m)      (STM32_CAN3_BASE+STM32_CAN_RDTR_OFFSET(m))
+#  define STM32_CAN3_RDT0R        (STM32_CAN3_BASE+STM32_CAN_RDT0R_OFFSET)
+#  define STM32_CAN3_RDT1R        (STM32_CAN3_BASE+STM32_CAN_RDT1R_OFFSET)
+
+#  define STM32_CAN3_RDLR(m)      (STM32_CAN3_BASE+STM32_CAN_RDLR_OFFSET(m))
+#  define STM32_CAN3_RDL0R        (STM32_CAN3_BASE+STM32_CAN_RDL0R_OFFSET)
+#  define STM32_CAN3_RDL1R        (STM32_CAN3_BASE+STM32_CAN_RDL1R_OFFSET)
+
+#  define STM32_CAN3_RDHR(m)      (STM32_CAN3_BASE+STM32_CAN_RDHR_OFFSET(m))
+#  define STM32_CAN3_RDH0R        (STM32_CAN3_BASE+STM32_CAN_RDH0R_OFFSET)
+#  define STM32_CAN3_RDH1R        (STM32_CAN3_BASE+STM32_CAN_RDH1R_OFFSET)
+
+#  define STM32_CAN3_FMR          (STM32_CAN3_BASE+STM32_CAN_FMR_OFFSET)
+#  define STM32_CAN3_FM1R         (STM32_CAN3_BASE+STM32_CAN_FM1R_OFFSET)
+#  define STM32_CAN3_FS1R         (STM32_CAN3_BASE+STM32_CAN_FS1R_OFFSET)
+#  define STM32_CAN3_FFA1R        (STM32_CAN3_BASE+STM32_CAN_FFA1R_OFFSET)
+#  define STM32_CAN3_FA1R         (STM32_CAN3_BASE+STM32_CAN_FA1R_OFFSET)
+#  define STM32_CAN3_FIR(b,i)     (STM32_CAN3_BASE+STM32_CAN_FIR_OFFSET(b,i))
+#endif
+
 /* Register Bitfield Definitions ********************************************/
 
 /* CAN master control register */
@@ -333,7 +386,7 @@
 #  define CAN_ESR_SWERROR         (7 << CAN_ESR_LEC_SHIFT) /* 111: Set by software */
 
 #define CAN_ESR_TEC_SHIFT         (16)      /* Bits 23-16: LS byte of the 9-bit Transmit Error Counter */
-#define CAN_ESR_TEC_MASK          (0xff << CAN_ESR_TEC_SHIF)
+#define CAN_ESR_TEC_MASK          (0xff << CAN_ESR_TEC_SHIFT)
 #define CAN_ESR_REC_SHIFT         (24)      /* Bits 31-24: Receive Error Counter */
 #define CAN_ESR_REC_MASK          (0xff << CAN_ESR_REC_SHIFT)
 
@@ -437,10 +490,8 @@
 /* CAN filter master register */
 
 #define CAN_FMR_FINIT             (1 << 0)  /* Bit 0: Filter Init Mode */
-#if defined(CONFIG_STM32_HAVE_IP_CAN_BXCAN_M3M4_V1)
-#  define CAN_FMR_CAN2SB_SHIFT    (8)       /* Bits 13-8: CAN2 start bank */
-#  define CAN_FMR_CAN2SB_MASK     (0x3f << CAN_FMR_CAN2SB_SHIFT)
-#endif
+#define CAN_FMR_CAN2SB_SHIFT      (8)       /* Bits 13-8: CAN2 start bank */
+#define CAN_FMR_CAN2SB_MASK       (0x3f << CAN_FMR_CAN2SB_SHIFT)
 
 /* CAN filter mode register */
 
