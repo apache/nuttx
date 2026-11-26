@@ -414,6 +414,27 @@ int netlink_add_terminator(NETLINK_HANDLE handle,
                            FAR const struct nlmsghdr *req, int group);
 
 /****************************************************************************
+ * Name: netlink_add_ack
+ *
+ * Description:
+ *   Add one NLMSG_ERROR response with error 0 (an ACK) for a request.
+ *
+ * Input Parameters:
+ *   handle - The handle previously provided to the sendto() implementation
+ *            for the protocol.  This is an opaque reference to the Netlink
+ *            socket state structure.
+ *   req    - The request message header.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned if the ACK was successfully added to the
+ *   response list.
+ *   A negated error value is returned if an unexpected error occurred.
+ *
+ ****************************************************************************/
+
+int netlink_add_ack(NETLINK_HANDLE handle, FAR const struct nlmsghdr *req);
+
+/****************************************************************************
  * Name: netlink_tryget_response
  *
  * Description:

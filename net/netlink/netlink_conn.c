@@ -283,6 +283,53 @@ void netlink_add_response(NETLINK_HANDLE handle,
 }
 
 /****************************************************************************
+ * Name: netlink_add_ack
+ *
+ * Description:
+ *   Add one NLMSG_ERROR response with error 0 (an ACK) for a request.
+ *
+ * Input Parameters:
+ *   handle - The handle previously provided to the sendto() implementation
+ *            for the protocol.  This is an opaque reference to the Netlink
+ *            socket state structure.
+ *   req    - The request message header.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned if the ACK was successfully added to the
+ *   response list.
+ *   A negated error value is returned if an unexpected error occurred.
+ *
+ ****************************************************************************/
+
+int netlink_add_ack(NETLINK_HANDLE handle, FAR const struct nlmsghdr *req)
+{
+  FAR struct netlink_conn_s *conn = handle;
+  FAR struct netlink_response_s *resp;
+  FAR struct nlmsgerr *err;
+
+  resp = kmm_zalloc(SIZEOF_NETLINK_RESPONSE_S(sizeof(struct nlmsgerr)));
+  if (resp == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  /* As Linux, the ACK holds only the header of the request */
+
+  resp->msg.nlmsg_len   = NLMSG_LENGTH(sizeof(struct nlmsgerr));
+  resp->msg.nlmsg_type  = NLMSG_ERROR;
+  resp->msg.nlmsg_flags = NLM_F_CAPPED;
+  resp->msg.nlmsg_seq   = req->nlmsg_seq;
+  resp->msg.nlmsg_pid   = conn->pid;
+
+  err        = NLMSG_DATA(&resp->msg);
+  err->error = 0;
+  memcpy(&err->msg, req, sizeof(struct nlmsghdr));
+
+  netlink_add_response(handle, resp);
+  return OK;
+}
+
+/****************************************************************************
  * Name: netlink_add_terminator
  *
  * Description:

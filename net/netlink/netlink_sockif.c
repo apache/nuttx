@@ -679,6 +679,23 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
         break;
     }
 
+  /* As Linux, answer a request with NLM_F_ACK with an ACK.  A dump ends
+   * with NLMSG_DONE instead.  A request that fails still returns its error
+   * from sendto() and gets no ACK.
+   */
+
+  if (ret >= 0 && (nlmsg->nlmsg_flags & NLM_F_ACK) != 0 &&
+      (nlmsg->nlmsg_flags & NLM_F_DUMP) == 0)
+    {
+      int err;
+
+      err = netlink_add_ack(conn, nlmsg);
+      if (err < 0)
+        {
+          ret = err;
+        }
+    }
+
   return ret;
 }
 
