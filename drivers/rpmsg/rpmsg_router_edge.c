@@ -513,6 +513,60 @@ static void rpmsg_router_edge_bind(FAR struct rpmsg_device *rdev,
 }
 
 /****************************************************************************
+ * Name: rpmsg_router_edge_destroy_epts
+ *
+ * Description:
+ *   Destroy all router epts on hubdev that belong to this edge.
+ *   When the edge is destroyed, some user services (e.g. rpmsg_socket)
+ *   only mark the connection as unbound in their ns_unbind_cb without
+ *   destroying the usr_ept. This leaves the corresponding router ept
+ *   orphaned on hubdev. After kmm_free(edge), usr_ept->rdev becomes a
+ *   dangling pointer, and the router ept's priv still references the
+ *   usr_ept. If the remote edge reconnects, a stale router ept may be
+ *   matched by NS_CREATE_ACK, causing a use-after-free crash.
+ *
+ * Parameters:
+ *   edge - rpmsg router edge device being destroyed
+ *
+ ****************************************************************************/
+
+static void
+rpmsg_router_edge_destroy_epts(FAR struct rpmsg_router_edge_s *edge)
+{
+  FAR struct rpmsg_device *hubdev = edge->hubdev;
+  FAR struct rpmsg_endpoint *ept;
+  FAR struct metal_list *node;
+  FAR struct metal_list *tmp;
+  struct metal_list list = METAL_INIT_LIST(list);
+  char prefix[RPMSG_NAME_SIZE];
+  int len;
+
+  len = snprintf(prefix, sizeof(prefix), RPMSG_ROUTER_NAME_PREFIX"%s:",
+                 edge->rpmsg.cpuname);
+
+  metal_mutex_acquire(&hubdev->lock);
+  metal_list_for_each_safe(&hubdev->endpoints, tmp, node)
+    {
+      ept = metal_container_of(node, struct rpmsg_endpoint, node);
+      if (ept->release_cb == rpmsg_router_edge_release &&
+          !strncmp(ept->name, prefix, len))
+        {
+          ept->priv = NULL;
+          metal_list_del(node);
+          metal_list_add_tail(&list, node);
+        }
+    }
+
+  metal_mutex_release(&hubdev->lock);
+
+  metal_list_for_each_safe(&list, tmp, node)
+    {
+      ept = metal_container_of(node, struct rpmsg_endpoint, node);
+      rpmsg_destroy_ept(ept);
+    }
+}
+
+/****************************************************************************
  * Name: rpmsg_router_edge_destroy
  *
  * Description:
@@ -529,6 +583,7 @@ static void rpmsg_router_edge_destroy(FAR struct rpmsg_router_edge_s *edge)
                             rpmsg_router_edge_match,
                             rpmsg_router_edge_bind);
   rpmsg_unregister(edge->name, &edge->rpmsg);
+  rpmsg_router_edge_destroy_epts(edge);
   rpmsg_device_destroy(&edge->rpmsg);
   kmm_free(edge);
 }
