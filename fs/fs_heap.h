@@ -32,6 +32,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -47,6 +48,7 @@ size_t    fs_heap_malloc_size(FAR void *mem);
 FAR void *fs_heap_realloc(FAR void *oldmem, size_t size) realloc_like(2);
 FAR void *fs_heap_memalign(size_t alignment, size_t size) malloc_like1(2);
 void      fs_heap_free(FAR void *mem);
+bool      fs_heap_member(FAR void *mem);
 FAR char *fs_heap_strdup(FAR const char *s) malloc_like;
 FAR char *fs_heap_strndup(FAR const char *s, size_t size) malloc_like;
 int       fs_heap_asprintf(FAR char **strp, FAR const char *fmt, ...)
@@ -60,6 +62,7 @@ struct mallinfo_task fs_heap_mallinfo_task(FAR const struct malltask *task);
 #  define fs_heap_realloc       kmm_realloc
 #  define fs_heap_memalign      kmm_memalign
 #  define fs_heap_free          kmm_free
+#  define fs_heap_member        kmm_heapmember
 #  define fs_heap_mallinfo_task kmm_mallinfo_task
 #  define fs_heap_strdup        strdup
 #  define fs_heap_strndup       strndup

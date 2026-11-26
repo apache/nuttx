@@ -39,6 +39,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mm/mempool.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mutex.h>
@@ -56,9 +57,76 @@
 #include "inode/inode.h"
 #include "fs_heap.h"
 
+#if CONFIG_FS_PREALLOC_FILES > 0 || CONFIG_FS_ALLOC_FILES > 0
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define FILE_POOL_BLOCKSIZE ALIGN_UP(sizeof(struct file), MM_ALIGN)
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static FAR void *file_pool_alloc(FAR struct mempool_s *pool, size_t size);
+static void file_pool_free(FAR struct mempool_s *pool, FAR void *addr);
+static void file_pool_check(FAR struct mempool_s *pool, FAR void *addr);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static char g_file_pool_buffer[CONFIG_FS_PREALLOC_FILES *
+  MEMPOOL_REALBLOCKSIZE(FILE_POOL_BLOCKSIZE) + MEMPOOL_HEADER_SIZE]
+  aligned_data(MM_ALIGN);
+
+static struct mempool_s g_file_mempool =
+{
+  .initialbase = g_file_pool_buffer,
+  .initialsize = sizeof(g_file_pool_buffer),
+  .blocksize   = FILE_POOL_BLOCKSIZE,
+  .expandsize  = CONFIG_FS_ALLOC_FILES *
+                 MEMPOOL_REALBLOCKSIZE(FILE_POOL_BLOCKSIZE) +
+                 MEMPOOL_HEADER_SIZE,
+  .name        = "file",
+  .alloc       = file_pool_alloc,
+  .free        = file_pool_free,
+  .check       = file_pool_check,
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#if CONFIG_FS_PREALLOC_FILES > 0 || CONFIG_FS_ALLOC_FILES > 0
+/****************************************************************************
+ * Name: file_pool_alloc
+ ****************************************************************************/
+
+static FAR void *file_pool_alloc(FAR struct mempool_s *pool, size_t size)
+{
+  return fs_heap_malloc(size);
+}
+
+/****************************************************************************
+ * Name: file_pool_free
+ ****************************************************************************/
+
+static void file_pool_free(FAR struct mempool_s *pool, FAR void *addr)
+{
+  fs_heap_free(addr);
+}
+
+/****************************************************************************
+ * Name: file_pool_check
+ ****************************************************************************/
+
+static void file_pool_check(FAR struct mempool_s *pool, FAR void *addr)
+{
+  DEBUGASSERT(fs_heap_member(addr));
+}
+#endif
 
 /****************************************************************************
  * Name: fdlist_limit
@@ -835,7 +903,11 @@ int fdlist_copy(FAR struct fdlist *plist, FAR struct fdlist *clist,
 
 FAR struct file *file_allocate(void)
 {
+#if CONFIG_FS_PREALLOC_FILES > 0 || CONFIG_FS_ALLOC_FILES > 0
+  return mempool_zallocate(&g_file_mempool, 0);
+#else
   return fs_heap_zalloc(sizeof(struct file));
+#endif
 }
 
 /****************************************************************************
@@ -848,7 +920,11 @@ FAR struct file *file_allocate(void)
 
 void file_deallocate(FAR struct file *filep)
 {
+#if CONFIG_FS_PREALLOC_FILES > 0 || CONFIG_FS_ALLOC_FILES > 0
+  mempool_release(&g_file_mempool, filep);
+#else
   fs_heap_free(filep);
+#endif
 }
 
 /****************************************************************************
@@ -927,7 +1003,7 @@ int file_put(FAR struct file *filep)
           ferr("ERROR: fs putfilep file_close() failed: %d\n", ret);
         }
 
-      fs_heap_free(filep);
+      file_deallocate(filep);
     }
 
   return ret;
