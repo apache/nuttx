@@ -791,7 +791,7 @@ RCC           to be done    arch/arm/src/stm32l5/stm32l5_rcc.c
 RNG           to be done    not supported                           
 RTC           to be done    not supported                           
 SDMMC         to be done    not supported                           
-SPI/I2S       to be done    arch/arm/src/stm32l5/stm32l5_spi.c      
+SPI           v4            arch/arm/src/common/stm32/stm32_spi_m3m4_v2v3v4.c      
 TIM           v2            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 USB           device        not supported                           

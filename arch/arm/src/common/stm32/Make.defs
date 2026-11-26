@@ -119,7 +119,8 @@ CHIP_CSRCS += stm32_eth_v1.c
 endif
 
 ifeq ($(CONFIG_STM32_SPI),y)
-ifneq ($(filter y,$(CONFIG_ARCH_CHIP_STM32F7) $(CONFIG_ARCH_CHIP_STM32L4)),)
+ifneq ($(filter y,$(CONFIG_ARCH_CHIP_STM32F7) $(CONFIG_ARCH_CHIP_STM32L4) \
+                 $(CONFIG_ARCH_CHIP_STM32L5)),)
 CHIP_CSRCS += stm32_spi_m3m4_v2v3v4.c
 endif
 endif

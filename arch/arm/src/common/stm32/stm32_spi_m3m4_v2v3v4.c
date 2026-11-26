@@ -70,7 +70,9 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "stm32.h"
-#include "stm32_dma.h"
+#ifdef CONFIG_STM32_SPI_DMA
+#  include "stm32_dma.h"
+#endif
 #include "stm32_spi.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
