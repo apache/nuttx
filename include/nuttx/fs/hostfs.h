@@ -98,10 +98,11 @@
 #define NUTTX___O_SYNC          (1 << 20)      /* Synchronize file (data+metadata) */
 #define NUTTX_O_PATH            (1 << 21)      /* Obtain a path-only fd (no I/O) */
 #define NUTTX___O_TMPFILE       (1 << 22)      /* Create an unnamed temporary file */
+#define NUTTX___O_RSYNC         (1 << 23)      /* Synchronize input on read */
 
 #define NUTTX_O_NDELAY          NUTTX_O_NONBLOCK                        /* Synonym for O_NONBLOCK */
 #define NUTTX_O_SYNC            (NUTTX___O_SYNC | NUTTX_O_DSYNC)        /* Synchronize output on write */
-#define NUTTX_O_RSYNC           NUTTX_O_SYNC                            /* Synchronize input on read */
+#define NUTTX_O_RSYNC           NUTTX___O_RSYNC                         /* Synchronize input on read */
 #define NUTTX_O_TMPFILE         (NUTTX___O_TMPFILE | NUTTX_O_DIRECTORY) /* Create a temporary file */
 #define NUTTX_O_BINARY          0                                       /* Open the file in binary mode */
 
