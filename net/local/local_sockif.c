@@ -34,6 +34,8 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <inttypes.h>
+#include <nuttx/atomic.h>
 #include <nuttx/debug.h>
 #include <nuttx/poll.h>
 
@@ -1183,16 +1185,24 @@ static int local_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 
 static int local_socketpair(FAR struct socket *psocks[2])
 {
+  static atomic_t g_next_pair_id;
   FAR struct local_conn_s *conns[2];
+  uint32_t id;
   bool nonblock;
   int ret;
   int i;
+
+  /* The name only names the FIFOs of the pair.  A number from a counter
+   * keeps it unique.
+   */
+
+  id = atomic_add(&g_next_pair_id, 1);
 
   for (i = 0; i < 2; i++)
     {
       conns[i] = psocks[i]->s_conn;
       snprintf(conns[i]->lc_path,
-               sizeof(conns[i]->lc_path), "socketpair%p", psocks[0]);
+               sizeof(conns[i]->lc_path), "socketpair%" PRIu32, id);
 
       conns[i]->lc_proto = psocks[i]->s_type;
       conns[i]->lc_type  = LOCAL_TYPE_PATHNAME;
