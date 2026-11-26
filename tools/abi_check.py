@@ -223,7 +223,7 @@ def resolve_referenced_die(dwarfinfo, die):
         type_offset = die.attributes["DW_AT_specification"].value
         cu_offset = die.cu.cu_offset
         absolute_offset = type_offset + cu_offset
-        return dwarfinfo.get_DIE_from_refaddr(absolute_offset())
+        return dwarfinfo.get_DIE_from_refaddr(absolute_offset)
 
     return None
 
@@ -274,9 +274,113 @@ def resolve_combination_type(dwarfinfo, die):
 
 
 def get_die_file_path(die, dwarfinfo):
-    cu = die.cu
-    name = cu.get_top_DIE().attributes.get("DW_AT_name")
-    return name.value.decode("utf-8") if name else "unknown file"
+    """Best-effort source file path for a DIE.
+
+    Prefer DW_AT_decl_file (mapped through the CU's line program) which points
+    to the declaration/definition location, and fall back to the CU's DW_AT_name.
+    """
+
+    def _decode_attr_value(attr):
+        if not attr:
+            return None
+        v = attr.value
+        return v.decode("utf-8") if isinstance(v, (bytes, bytearray)) else str(v)
+
+    def _ref_die_from_attr(cur_die, attr_name):
+        attr = cur_die.attributes.get(attr_name)
+        if not attr:
+            return None
+
+        ref = attr.value
+        # CU-relative ref forms need CU base added; ref_addr is already absolute.
+        if attr.form in {
+            "DW_FORM_ref1",
+            "DW_FORM_ref2",
+            "DW_FORM_ref4",
+            "DW_FORM_ref8",
+            "DW_FORM_ref_udata",
+        }:
+            ref = ref + cur_die.cu.cu_offset
+
+        try:
+            return dwarfinfo.get_DIE_from_refaddr(ref)
+        except Exception:
+            return None
+
+    def _find_decl_file_owner(start_die, max_depth=8):
+        cur = start_die
+        for _ in range(max_depth):
+            if not cur:
+                return None
+            if "DW_AT_decl_file" in cur.attributes:
+                return cur
+
+            # Follow common indirections for inlined / split decl/def cases.
+            nxt = _ref_die_from_attr(cur, "DW_AT_abstract_origin")
+            if nxt is None:
+                nxt = _ref_die_from_attr(cur, "DW_AT_specification")
+            if nxt is None:
+                return None
+            cur = nxt
+
+        return None
+
+    def _lineprog_file_index_to_path(cu, file_index):
+        try:
+            lp = dwarfinfo.line_program_for_CU(cu)
+        except Exception:
+            lp = None
+
+        if not lp or not getattr(lp, "header", None):
+            return None
+
+        # DWARF line program file indices are 1-based.
+        if not file_index or file_index <= 0:
+            return None
+
+        files = getattr(lp.header, "file_entry", None) or []
+        if file_index > len(files):
+            return None
+
+        fe = files[file_index - 1]
+        name = (
+            fe.name.decode("utf-8")
+            if isinstance(fe.name, (bytes, bytearray))
+            else str(fe.name)
+        )
+
+        # Directory index may differ by DWARF version / pyelftools representation.
+        dir_index = getattr(fe, "dir_index", None)
+        if dir_index is None:
+            dir_index = getattr(fe, "directory_index", 0)
+        dir_index = int(dir_index or 0)
+
+        path = name
+        if not os.path.isabs(path) and dir_index > 0:
+            dirs = getattr(lp.header, "include_directory", None) or []
+            if dir_index <= len(dirs):
+                d = dirs[dir_index - 1]
+                d = d.decode("utf-8") if isinstance(d, (bytes, bytearray)) else str(d)
+                path = os.path.join(d, name)
+
+        # Prefer comp_dir to make a stable, absolute-ish path when possible.
+        comp_dir = _decode_attr_value(cu.get_top_DIE().attributes.get("DW_AT_comp_dir"))
+        if comp_dir and not os.path.isabs(path):
+            path = os.path.normpath(os.path.join(comp_dir, path))
+
+        return path
+
+    # 1) Prefer the DIE's own decl_file.
+    decl_owner = _find_decl_file_owner(die)
+    if decl_owner and "DW_AT_decl_file" in decl_owner.attributes:
+        file_index = decl_owner.attributes["DW_AT_decl_file"].value
+        path = _lineprog_file_index_to_path(die.cu, int(file_index))
+        if path:
+            return path
+
+    # 2) Fallback: CU name.
+    cu_name = _decode_attr_value(die.cu.get_top_DIE().attributes.get("DW_AT_name"))
+    return cu_name if cu_name else "unknown file"
 
 
 def die_is_prototyped(die):
@@ -291,6 +395,7 @@ def die_is_prototyped(die):
 def die_is_real_function(die):
     return (
         die.tag == "DW_TAG_subprogram"
+        and die.get_parent().tag != "DW_TAG_namespace"
         and "DW_AT_external" in die.attributes
         and "DW_AT_name" in die.attributes
         and ("DW_AT_low_pc" in die.attributes or "DW_AT_inline" in die.attributes)
@@ -311,12 +416,10 @@ def find_function_signature(elf_path, function_list, die_check):
 
         for CU in dwarf_info.iter_CUs():
             for die in (die for die in CU.iter_DIEs() if die_check(die)):
-                name = die.attributes["DW_AT_name"].value.decode("utf-8")
                 if "DW_AT_linkage_name" in die.attributes:
-                    if name not in function_list:
-                        name = die.attributes["DW_AT_linkage_name"].value.decode(
-                            "utf-8"
-                        )
+                    name = die.attributes["DW_AT_linkage_name"].value.decode("utf-8")
+                else:
+                    name = die.attributes["DW_AT_name"].value.decode("utf-8")
 
                 if name not in function_list:
                     continue
