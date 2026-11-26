@@ -100,8 +100,8 @@ The memory cost of a task is higher because it includes most of the costs
 of a pthread plus the cost of the task group structure.
 The cost of the task group structure varies with such things as:
 
-* The number of file descriptors you have configured (controlled by
-  ``CONFIG_NFILE_DESCRIPTORS``),
+* The number of pre-allocated file descriptors per block (controlled by
+  ``CONFIG_NFILE_DESCRIPTORS_PER_BLOCK``),
 * The number of streams that you have configured for C buffered I/O
   (controlled by ``CONFIG_NFILE_STREAMS``),
 * The size of the I/O buffer configured for for each stream
