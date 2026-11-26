@@ -1239,7 +1239,7 @@ void rspin_restorelock(FAR rspinlock_t *lock, uint16_t count)
 }
 #else
 #  define rspin_breaklock(lock) (0)
-#  define rspin_restorelock(lock, count)
+#  define rspin_restorelock(lock, count) ((void)(count))
 #endif
 
 #ifdef CONFIG_RW_SPINLOCK
