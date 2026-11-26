@@ -708,13 +708,14 @@ static int rpmsgblk_default_ioctl(FAR struct inode *inode, int cmd,
   msg->arg     = arg;
   msg->arglen  = arglen;
 
-  if (arglen > 0)
+  if (arg != 0 && arglen > 0)
     {
       memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
     }
 
   return rpmsgblk_send_recv(priv, RPMSGBLK_IOCTL, false, &msg->header,
-                            msglen, arglen > 0 ? (FAR void *)arg : NULL);
+                            msglen, arglen > 0 && arg != 0 ?
+                            (FAR void *)arg : NULL);
 }
 
 /****************************************************************************
