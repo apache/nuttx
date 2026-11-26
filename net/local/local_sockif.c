@@ -382,9 +382,11 @@ static int local_getsockname(FAR struct socket *psock,
     {
       /* Now copy the address description.  */
 
-      if (conn->lc_type == LOCAL_TYPE_UNNAMED)
+      if (conn->lc_type == LOCAL_TYPE_UNNAMED || conn->lc_pair)
         {
-          /* Zero-length sun_path... */
+          /* Zero-length sun_path.  The name of a socket pair is internal:
+           * it only names the FIFOs of the pair.
+           */
 
           *addrlen = sizeof(sa_family_t);
         }
@@ -512,9 +514,11 @@ static int local_getpeername(FAR struct socket *psock,
     {
       /* Now copy the address description.  */
 
-      if (peer->lc_type == LOCAL_TYPE_UNNAMED)
+      if (peer->lc_type == LOCAL_TYPE_UNNAMED || peer->lc_pair)
         {
-          /* Zero-length sun_path...  */
+          /* Zero-length sun_path.  The name of a socket pair is internal:
+           * it only names the FIFOs of the pair.
+           */
 
           *addrlen = sizeof(sa_family_t);
         }

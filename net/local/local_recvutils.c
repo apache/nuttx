@@ -153,6 +153,23 @@ int local_getaddr(FAR struct local_conn_s *conn, FAR struct sockaddr *addr,
 
   DEBUGASSERT(conn && addr && addrlen);
 
+  /* A socket pair has no name, as an unbound socket.  Its internal name
+   * only names the FIFOs of the pair.
+   */
+
+  if (conn->lc_pair)
+    {
+      if (*addrlen < sizeof(sa_family_t))
+        {
+          *addrlen = 0;
+          return OK;
+        }
+
+      addr->sa_family = AF_LOCAL;
+      *addrlen = sizeof(sa_family_t);
+      return OK;
+    }
+
   /* Get the length of the path (minus the NUL terminator) and the length
    * of the whole Unix domain address.
    */
