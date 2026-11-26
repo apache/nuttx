@@ -211,11 +211,13 @@ the following paragraphs.
   On return, the ``addr`` structure is filled in with the address of the
   connecting entity. The ``addrlen`` argument initially contains the size
   of the structure pointed to by ``addr``; on return it will contain the
-  actual length of the address returned.
+  actual length of the address.  If the address is longer than the
+  buffer, it is truncated to the size of the buffer.
 
   If no pending connections are present on the queue, and the socket is
   not marked as non-blocking, accept blocks the caller until a connection
-  is present. If the socket is marked non-blocking and no pending
+  is present, or until the receive timeout of the socket (``SO_RCVTIMEO``)
+  expires. If the socket is marked non-blocking and no pending
   connections are present on the queue, accept returns ``EAGAIN``.
 
   **Input Parameters:**
@@ -229,7 +231,8 @@ the following paragraphs.
   non-negative integer that is a descriptor for the accepted socket.
 
   -  ``EAGAIN`` or ``EWOULDBLOCK``: The socket is marked non-blocking and
-     no connections are present to be accepted.
+     no connections are present to be accepted, or the receive timeout
+     (``SO_RCVTIMEO``) expired.
   -  ``EBADF``: The descriptor is invalid.
   -  ``ENOTSOCK``: The descriptor references a file, not a socket.
   -  ``EOPNOTSUPP``: The referenced socket is not of type ``SOCK_STREAM``.
@@ -241,7 +244,7 @@ the following paragraphs.
      reached.
   -  ``ENFILE``: The system maximum for file descriptors has been reached.
   -  ``EFAULT``: The addr parameter is not in a writable part of the user
-     address space.
+     address space, or ``addr`` is given without ``addrlen``.
   -  ``ENOBUFS`` or ``ENOMEM``: Not enough free memory.
   -  ``EPROTO``: Protocol error.
   -  ``EPERM``: Firewall rules forbid connection.
