@@ -1632,41 +1632,41 @@ static void stm32can_sceinterrupt_work(void *arg)
 
       if (regval & CAN_ESR_LEC_MASK)
         {
-          if (regval & CAN_ESR_STUFFERROR)
+          if ((regval & CAN_ESR_LEC_MASK) == CAN_ESR_STUFFERROR)
             {
               /* Stuff Error */
 
               errbits |= CAN_ERR_PROT;
               data[2] |= CAN_ERR_PROT_STUFF;
             }
-          else if (regval & CAN_ESR_FORMERROR)
+          else if ((regval & CAN_ESR_LEC_MASK) == CAN_ESR_FORMERROR)
             {
               /* Format Error */
 
               errbits |= CAN_ERR_PROT;
               data[2] |= CAN_ERR_PROT_FORM;
             }
-          else if (regval & CAN_ESR_ACKERROR)
+          else if ((regval & CAN_ESR_LEC_MASK) == CAN_ESR_ACKERROR)
             {
               /* Acknowledge Error */
 
               errbits |= CAN_ERR_ACK;
             }
-          else if (regval & CAN_ESR_BRECERROR)
+          else if ((regval & CAN_ESR_LEC_MASK) == CAN_ESR_BRECERROR)
             {
               /* Bit recessive Error */
 
               errbits |= CAN_ERR_PROT;
               data[2] |= CAN_ERR_PROT_BIT1;
             }
-          else if (regval & CAN_ESR_BDOMERROR)
+          else if ((regval & CAN_ESR_LEC_MASK) == CAN_ESR_BDOMERROR)
             {
               /* Bit dominant Error */
 
               errbits |= CAN_ERR_PROT;
               data[2] |= CAN_ERR_PROT_BIT0;
             }
-          else if (regval & CAN_ESR_CRCERRPR)
+          else if ((regval & CAN_ESR_LEC_MASK) == CAN_ESR_CRCERRPR)
             {
               /* Receive CRC Error */
 
@@ -1687,10 +1687,6 @@ static void stm32can_sceinterrupt_work(void *arg)
           errbits |= CAN_ERR_LOSTARB;
         }
 
-      /* Clear TSR register */
-
-      stm32can_putreg(priv, STM32_CAN_TSR_OFFSET, regval);
-
       /* Clear ERRI flag */
 
       stm32can_putreg(priv, STM32_CAN_MSR_OFFSET, CAN_MSR_ERRI);
@@ -1704,7 +1700,7 @@ static void stm32can_sceinterrupt_work(void *arg)
 
       /* Copy frame */
 
-      frame->can_id  = errbits;
+      frame->can_id  = CAN_ERR_FLAG | errbits;
       frame->can_dlc = CAN_ERR_DLC;
 
       memcpy(frame->data, data, CAN_ERR_DLC);

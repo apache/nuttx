@@ -1861,41 +1861,41 @@ static int stm32can_sceinterrupt(int irq, void *context, void *arg)
 
       if (regval & CAN_ESR_LEC_MASK)
         {
-          if (regval & CAN_ESR_STUFFERROR)
+          if ((regval & CAN_ESR_LEC_MASK) == CAN_ESR_STUFFERROR)
             {
               /* Stuff Error */
 
               errbits |= CAN_ERROR_PROTOCOL;
               data[2] |= CAN_ERROR2_STUFF;
             }
-          else if (regval & CAN_ESR_FORMERROR)
+          else if ((regval & CAN_ESR_LEC_MASK) == CAN_ESR_FORMERROR)
             {
               /* Format Error */
 
               errbits |= CAN_ERROR_PROTOCOL;
               data[2] |= CAN_ERROR2_FORM;
             }
-          else if (regval & CAN_ESR_ACKERROR)
+          else if ((regval & CAN_ESR_LEC_MASK) == CAN_ESR_ACKERROR)
             {
               /* Acknowledge Error */
 
               errbits |= CAN_ERROR_NOACK;
             }
-          else if (regval & CAN_ESR_BRECERROR)
+          else if ((regval & CAN_ESR_LEC_MASK) == CAN_ESR_BRECERROR)
             {
               /* Bit recessive Error */
 
               errbits |= CAN_ERROR_PROTOCOL;
               data[2] |= CAN_ERROR2_BIT1;
             }
-          else if (regval & CAN_ESR_BDOMERROR)
+          else if ((regval & CAN_ESR_LEC_MASK) == CAN_ESR_BDOMERROR)
             {
               /* Bit dominant Error */
 
               errbits |= CAN_ERROR_PROTOCOL;
               data[2] |= CAN_ERROR2_BIT0;
             }
-          else if (regval & CAN_ESR_CRCERRPR)
+          else if ((regval & CAN_ESR_LEC_MASK) == CAN_ESR_CRCERRPR)
             {
               /* Receive CRC Error */
 
@@ -1915,10 +1915,6 @@ static int stm32can_sceinterrupt(int irq, void *context, void *arg)
 
           errbits |= CAN_ERROR_LOSTARB;
         }
-
-      /* Clear TSR register */
-
-      stm32can_putreg(priv, STM32_CAN_TSR_OFFSET, regval);
 
       /* Clear ERRI flag */
 
