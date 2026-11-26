@@ -412,7 +412,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
            * unless destination address was broadcast/multicast.
            */
 
-#if !defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMPv6)
+#if !defined(NET_ICMP_HAVE_STACK) && !defined(NET_ICMPv6_HAVE_STACK)
           dev->d_len = 0;
 #else
 #  ifdef CONFIG_NET_IPv4
@@ -420,11 +420,11 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
           if (IFF_IS_IPv4(dev->d_flags))
 #    endif
             {
-#    ifdef CONFIG_NET_ICMP
+#    ifdef NET_ICMP_HAVE_STACK
               icmp_reply(dev, ICMP_DEST_UNREACHABLE, ICMP_PORT_UNREACH);
 #    else
               dev->d_len = 0;
-#    endif /* CONFIG_NET_ICMP */
+#    endif /* NET_ICMP_HAVE_STACK */
             }
 #  endif /* CONFIG_NET_IPv4 */
 #  ifdef CONFIG_NET_IPv6
@@ -432,12 +432,12 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
           else
 #    endif
             {
-#    ifdef CONFIG_NET_ICMPv6
+#    ifdef NET_ICMPv6_HAVE_STACK
               icmpv6_reply(dev, ICMPv6_DEST_UNREACHABLE,
                            ICMPv6_PORT_UNREACH, 0);
 #    else
               dev->d_len = 0;
-#    endif /* CONFIG_NET_ICMPv6 */
+#    endif /* NET_ICMPv6_HAVE_STACK */
             }
 #  endif /* CONFIG_NET_IPv6*/
 #endif

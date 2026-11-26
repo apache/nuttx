@@ -100,6 +100,18 @@ do  \
 
 #define LOOPBACK_IPFRAME_NOFRAGMENT    0
 
+/* A reassembly timeout sends ICMP Time Exceeded only if the ICMP stack of
+ * the family of the packet is there.
+ */
+
+#if defined(NET_ICMP_HAVE_STACK) && defined(NET_ICMPv6_HAVE_STACK)
+#  define IPFRAG_CAN_REPLY(isipv4)     true
+#elif defined(NET_ICMP_HAVE_STACK)
+#  define IPFRAG_CAN_REPLY(isipv4)     (isipv4)
+#elif defined(NET_ICMPv6_HAVE_STACK)
+#  define IPFRAG_CAN_REPLY(isipv4)     (!(isipv4))
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -227,8 +239,9 @@ static void ip_fragin_timerwork(FAR void *arg)
            */
 
           ninfo("Reassembly timeout occurs!");
-#if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
-          if ((node->verifyflag & IP_FRAGVERIFY_RECVDZEROFRAG) != 0)
+#ifdef IPFRAG_CAN_REPLY
+          if ((node->verifyflag & IP_FRAGVERIFY_RECVDZEROFRAG) != 0 &&
+              IPFRAG_CAN_REPLY(node->frags->isipv4))
             {
               FAR struct net_driver_s *dev = node->dev;
 
@@ -237,7 +250,7 @@ static void ip_fragin_timerwork(FAR void *arg)
               netdev_iob_replace(dev, node->frags->frag);
               node->frags->frag = NULL;
 
-#ifdef CONFIG_NET_IPv4
+#if defined(CONFIG_NET_IPv4) && defined(NET_ICMP_HAVE_STACK)
               if (node->frags->isipv4)
                 {
                   icmp_reply(dev, ICMP_TIME_EXCEEDED,
@@ -245,7 +258,7 @@ static void ip_fragin_timerwork(FAR void *arg)
                 }
 #endif
 
-#ifdef CONFIG_NET_IPv6
+#if defined(CONFIG_NET_IPv6) && defined(NET_ICMPv6_HAVE_STACK)
               if (!node->frags->isipv4)
                 {
                   icmpv6_reply(dev, ICMPv6_PACKET_TIME_EXCEEDED,
