@@ -42,7 +42,11 @@
 
 /* Configuration ************************************************************/
 
-/* Up to 2 CAN interfaces are supported */
+/* Up to 3 CAN interfaces are supported */
+
+#  if STM32_NCAN < 3
+#    undef CONFIG_STM32_CAN3
+#  endif
 
 #  if STM32_NCAN < 2
 #    undef CONFIG_STM32_CAN2
@@ -60,6 +64,10 @@
 
 #  if defined(CONFIG_STM32_CAN2) && !defined(CONFIG_STM32_CAN2_BAUD)
 #    error "CONFIG_STM32_CAN2_BAUD is not defined"
+#  endif
+
+#  if defined(CONFIG_STM32_CAN3) && !defined(CONFIG_STM32_CAN3_BAUD)
+#    error "CONFIG_STM32_CAN3_BAUD is not defined"
 #  endif
 
 /* User-defined TSEG1 and TSEG2 settings may be used.

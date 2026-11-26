@@ -134,14 +134,6 @@ CHIP_CSRCS += stm32_ltdc.c
 endif
 
 
-ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
-CHIP_CSRCS += stm32_can.c
-endif
-
-ifeq ($(CONFIG_STM32_CAN_SOCKET),y)
-CHIP_CSRCS += stm32_can_sock.c
-endif
-
 ifeq ($(CONFIG_STM32_SAI),y)
 CHIP_CSRCS += stm32_sai.c
 endif

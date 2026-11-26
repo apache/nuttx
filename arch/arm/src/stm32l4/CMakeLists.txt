@@ -142,10 +142,6 @@ if(CONFIG_STM32_QSPI)
   list(APPEND SRCS stm32l4_qspi.c)
 endif()
 
-if(CONFIG_STM32_CAN)
-  list(APPEND SRCS stm32l4_can.c)
-endif()
-
 if(CONFIG_STM32_FIREWALL)
   list(APPEND SRCS stm32l4_firewall.c)
 endif()

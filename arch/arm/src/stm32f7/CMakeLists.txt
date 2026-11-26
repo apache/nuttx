@@ -132,14 +132,6 @@ if(CONFIG_STM32_LTDC)
   list(APPEND SRCS stm32_ltdc.c)
 endif()
 
-if(CONFIG_STM32_CAN_CHARDRIVER)
-  list(APPEND SRCS stm32_can.c)
-endif()
-
-if(CONFIG_STM32_CAN_SOCKET)
-  list(APPEND SRCS stm32_can_sock.c)
-endif()
-
 if(CONFIG_STM32_SAI)
   list(APPEND SRCS stm32_sai.c)
 endif()
