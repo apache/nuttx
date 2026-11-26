@@ -102,6 +102,13 @@ static int host_oflags_convert(int flags)
       mapflags |= O_SYNC;
     }
 
+#ifdef O_RSYNC
+  if (flags & NUTTX_O_RSYNC)
+    {
+      mapflags |= O_RSYNC;
+    }
+#endif
+
 #ifdef O_DIRECT
   if (flags & NUTTX_O_DIRECT)
     {

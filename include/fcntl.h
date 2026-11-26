@@ -88,7 +88,11 @@
 
 #define O_NDELAY     O_NONBLOCK                  /* Synonym for O_NONBLOCK */
 #define O_SYNC       (__O_SYNC | O_DSYNC)        /* Synchronize output on write */
-#define O_RSYNC      O_SYNC                      /* Synchronize input on read */
+#if UINT_MAX > 0xffff
+#define O_RSYNC      (1U << 23)                  /* Synchronize input on read */
+#else
+#define O_RSYNC      O_SYNC                      /* Not supported: no spare bit */
+#endif
 #ifndef NUTTX_NO_EXTENSIONS                      /* See nuttx/compiler.h */
 #define O_BINARY     0                           /* Open the file in binary mode */
 #endif
@@ -98,7 +102,7 @@
  */
 
 #if UINT_MAX > 0xffff
-#  define _O_MAXBIT   22
+#  define _O_MAXBIT   23
 #else
 #  define _O_MAXBIT   15
 #endif
@@ -109,11 +113,12 @@
 #define FNONBLOCK   O_NONBLOCK       /* Don't wait for data */
 #define FAPPEND     O_APPEND         /* Keep contents, append to end */
 #define FSYNC       O_SYNC           /* Synchronize output on write */
+#define FRSYNC      O_RSYNC          /* Synchronize input on read */
 #define FASYNC      O_ASYNC          /* No counterpart in NuttX */
 
 /* FFCNTL is all the bits that may be set via fcntl. */
 
-#define FFCNTL      (FNONBLOCK | FNDELAY | FAPPEND | FSYNC | FASYNC)
+#define FFCNTL      (FNONBLOCK | FNDELAY | FAPPEND | FSYNC | FASYNC | FRSYNC)
 
 /* fcntl() commands */
 
