@@ -154,6 +154,10 @@ void tricore_irq_sched(void)
       tcb = this_task();
 #endif
 
+      /* Update the TLS pointer */
+
+      tricore_set_tls_info(tcb->stack_alloc_ptr);
+
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.

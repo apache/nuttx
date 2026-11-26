@@ -117,6 +117,18 @@
 
 #define tricore_fullcontextrestore() sys_call0(SYS_restore_context)
 
+/* Update tls_info when task switches */
+
+#define tricore_set_tls_info(val)                                      \
+  do                                                                   \
+    {                                                                  \
+      tricore_mtcr(TRICORE_CPU_PSW,                                    \
+                   tricore_mfcr(TRICORE_CPU_PSW) | PSW_GW);            \
+      write_sysreg(val, a8);                                           \
+      tricore_mtcr(TRICORE_CPU_PSW,                                    \
+                   tricore_mfcr(TRICORE_CPU_PSW) & (~PSW_GW));         \
+    } while (0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
