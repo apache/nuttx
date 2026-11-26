@@ -27,7 +27,7 @@
 menu "ICMPv6 Networking Support"
 
 config NET_ICMPv6
-	bool "Enable ICMPv6 networking"
+	bool "Enable ICMPv6 networking" if NET_IPv6
 	default n
 	select NET_MCASTGROUP
 	depends on NET
