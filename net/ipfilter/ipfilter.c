@@ -504,8 +504,11 @@ int ipv4_filter_in(FAR struct net_driver_s *dev)
   if (ret == IPFILTER_TARGET_REJECT)
     {
       /* TODO: Support more --reject-with types later. */
-#if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
+
+#ifdef NET_ICMP_HAVE_STACK
       icmp_reply(dev, ICMP_DEST_UNREACHABLE, ICMP_NET_UNREACH);
+#else
+      dev->d_len = 0;
 #endif
     }
 
@@ -528,7 +531,11 @@ int ipv6_filter_in(FAR struct net_driver_s *dev)
     {
       /* TODO: Support more --reject-with types later. */
 
+#ifdef NET_ICMPv6_HAVE_STACK
       icmpv6_reply(dev, ICMPv6_DEST_UNREACHABLE, ICMPv6_ADDR_UNREACH, 0);
+#else
+      dev->d_len = 0;
+#endif
     }
 
   return ret;
@@ -574,8 +581,10 @@ void ipfilter_out(FAR struct net_driver_s *dev)
 
       if (ret == IPFILTER_TARGET_REJECT)
         {
-#if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
+#ifdef NET_ICMP_HAVE_STACK
           icmp_reply(dev, ICMP_DEST_UNREACHABLE, ICMP_NET_UNREACH);
+#else
+          dev->d_len = 0;
 #endif
         }
     }
@@ -594,7 +603,11 @@ void ipfilter_out(FAR struct net_driver_s *dev)
 
       if (ret == IPFILTER_TARGET_REJECT)
         {
+#ifdef NET_ICMPv6_HAVE_STACK
           icmpv6_reply(dev, ICMPv6_DEST_UNREACHABLE, ICMPv6_ADDR_UNREACH, 0);
+#else
+          dev->d_len = 0;
+#endif
         }
     }
 #endif
