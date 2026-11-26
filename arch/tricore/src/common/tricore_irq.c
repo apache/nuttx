@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <nuttx/debug.h>
+#include <sched.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -78,62 +79,16 @@ static spinlock_t g_irqlock = SP_UNLOCKED;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tricore_src_init
- *
- * Description:
- *   Route a service request to a service provider (TOS), a core or for
- *   example the DMA, with a priority and clear a pending request.  The
- *   enable bit is left as it is.
- *
+ * Name: tricore_src_enable
  ****************************************************************************/
 
-static void tricore_src_init(volatile uint32_t *src, int tos, int srpn)
+inline_function
+static void tricore_src_enable(int irq)
 {
-  uint32_t regval = *src;
+  uintptr_t src = TRICORE_IRQ2SRC(irq);
 
-  regval &= ~(TRICORE_SRC_SRPN_MASK | TRICORE_SRC_TOS_MASK);
-#ifdef TRICORE_SRC_VM_MASK
-  regval &= ~TRICORE_SRC_VM_MASK;
-#endif
-
-  regval |= (srpn & TRICORE_SRC_SRPN_MASK) |
-            ((tos << TRICORE_SRC_TOS_SHIFT) & TRICORE_SRC_TOS_MASK);
-  *src = regval | TRICORE_SRC_CLRR;
+  putreg32(getreg32(src) | TRICORE_SRC_SRE, src);
 }
-
-#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
-/****************************************************************************
- * Name: tricore_gpsrinitialize
- *
- * Description:
- *   Perform gpsr initialization for the CPU
- *
- ****************************************************************************/
-
-static void tricore_gpsrinitialize(void)
-{
-  int cpu = up_cpu_index();
-  int tos = TRICORE_SRC_TOS_CPU(cpu);
-  int i;
-
-  /* Cpux gpsr init */
-
-  for (i = 0; i < CONFIG_NCPUS; i++)
-    {
-      int irq = TRICORE_GPSR_IRQNUM(i, cpu);
-
-      tricore_src_init(TRICORE_IRQ2SRC(irq), tos,
-                       tricore_irq_to_srpn(irq));
-    }
-
-  /* Cpucs gpsr init */
-
-#ifndef CONFIG_ARCH_CHIP_TC3X
-  tricore_src_init(TRICORE_IRQ2SRC(TRICORE_GPSR_IRQNUM(6, cpu)), tos,
-                   tricore_irq_to_srpn(TRICORE_GPSR_IRQNUM(6, cpu)));
-#endif
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -227,6 +182,45 @@ int tricore_srpn_to_irq(int srpn)
   return g_srpn_to_irq[srpn];
 }
 
+#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
+/****************************************************************************
+ * Name: tricore_gpsrinitialize
+ *
+ * Description:
+ *   Perform gpsr initialization for the CPU
+ *
+ ****************************************************************************/
+
+static inline_function void tricore_gpsrinitialize(void)
+{
+  int cpu = up_cpu_index();
+  int irq;
+  int i;
+
+  /* Cpux gpsr init */
+
+  for (i = 0; i < CONFIG_NCPUS; i++)
+    {
+      irq = TRICORE_GPSR2IRQ(i, cpu);
+
+      tricore_src_init(irq, TRICORE_SRC_TOS_CPU(cpu),
+                       tricore_irq_to_srpn(irq));
+    }
+
+  /* Cpucs gpsr init */
+
+#ifdef CONFIG_HAVE_SECURITY_CORE
+  irq = TRICORE_GPSR2IRQ(6, cpu);
+  tricore_src_init(irq, TRICORE_SRC_TOS_CPU(cpu), tricore_irq_to_srpn(irq));
+#endif
+}
+
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 /****************************************************************************
  * Name: up_irq_enable
  *
@@ -275,9 +269,7 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-  volatile uint32_t *src = TRICORE_IRQ2SRC(irq);
-
-  *src = TRICORE_SRC_TOS_MASK;
+  putreg32(TRICORE_SRC_TOS_MASK, TRICORE_IRQ2SRC(irq));
 }
 
 /****************************************************************************
@@ -290,35 +282,9 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-  volatile uint32_t *src = TRICORE_IRQ2SRC(irq);
-
-  tricore_src_init(src, TRICORE_SRC_TOS_CPU(up_cpu_index()),
+  tricore_src_init(irq, TRICORE_SRC_TOS_CPU(up_cpu_index()),
                    tricore_irq_to_srpn(irq));
-  *src |= TRICORE_SRC_SRE;
-}
-
-/****************************************************************************
- * Name: up_affinity_irq
- *
- * Description:
- *   Set an IRQ affinity by software.
- *
- ****************************************************************************/
-
-void up_affinity_irq(int irq, cpu_set_t cpuset)
-{
-  volatile uint32_t *src = TRICORE_IRQ2SRC(irq);
-  int irq_prio = tricore_irq_to_srpn(irq);
-
-  *src &= ~TRICORE_SRC_SRE;
-
-  /* Only support interrupt routing mode 0,
-   * so routing to the first cpu in cpuset.
-   */
-
-  tricore_src_init(src, TRICORE_SRC_TOS_CPU(ffs(cpuset) - 1),
-                   irq_prio);
-  *src |= TRICORE_SRC_SRE;
+  tricore_src_enable(irq);
 }
 
 /****************************************************************************
@@ -331,7 +297,9 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
 
 void tricore_ack_irq(int irq)
 {
-  *TRICORE_IRQ2SRC(irq) |= TRICORE_SRC_CLRR;
+  uintptr_t src = TRICORE_IRQ2SRC(irq);
+
+  putreg32(getreg32(src) | TRICORE_SRC_CLRR, src);
 }
 
 #ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
@@ -345,8 +313,10 @@ void tricore_ack_irq(int irq)
 
 void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
-  *(volatile uint32_t *)(TRICORE_INT_SRB_BASE + up_cpu_index() * 4) =
-    cpuset;
+  uintptr_t srb = TRICORE_INT_SRB_BASE +
+                  up_cpu_index() * TRICORE_INT_SRB_SPACING;
+
+  putreg32(cpuset, srb);
 }
 #endif
 
@@ -354,9 +324,9 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
  * Name: up_prioritize_irq
  *
  * Description:
- *   Set the priority (SRPN) of an IRQ. This is the only way to assign an
- *   SRPN above TRICORE_IRQ_DISABLE_PRIORITY when
- *   CONFIG_ARCH_HIPRI_INTERRUPT is enabled.
+ *   Set the priority (SRPN) of an IRQ.This is the only way to assign an SRPN
+ *   above TRICORE_IRQ_DISABLE_PRIORITY When CONFIG_ARCH_HIPRI_INTERRUPT is
+ *   enabled.
  *
  ****************************************************************************/
 
@@ -401,3 +371,69 @@ int up_prioritize_irq(int irq, int priority)
   return OK;
 }
 #endif
+
+/****************************************************************************
+ * Name: up_affinity_irq
+ *
+ * Description:
+ *   Set an IRQ affinity by software.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+void up_affinity_irq(int irq, cpu_set_t cpuset)
+{
+  bool enabled = (getreg32(TRICORE_IRQ2SRC(irq)) & TRICORE_SRC_SRE) != 0;
+  int cpu;
+
+  for (cpu = 0; cpu < CONFIG_NCPUS; cpu++)
+    {
+      if (CPU_ISSET(cpu, &cpuset))
+        {
+          tricore_src_init(irq, TRICORE_SRC_TOS_CPU(cpu),
+                           tricore_irq_to_srpn(irq));
+
+          if (enabled)
+            {
+              tricore_src_enable(irq);
+            }
+
+          return;
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: tricore_src_init
+ ****************************************************************************/
+
+void tricore_src_init(int irq, uint8_t tos, uint8_t srpn)
+{
+  uintptr_t src = TRICORE_IRQ2SRC(irq);
+  uint32_t regval = getreg32(src);
+
+  /* Clear VM (virtual machine) and SRE (service request enable). */
+
+  regval &= ~TRICORE_SRC_SRE;
+#ifdef TRICORE_SRC_VM_MASK
+  regval &= ~TRICORE_SRC_VM_MASK;
+#endif
+
+  /* Update tos (target cpu) and srpn (priority) fields. */
+
+  regval &= ~(TRICORE_SRC_TOS_MASK | TRICORE_SRC_SRPN_MASK);
+  regval |= srpn | (tos << TRICORE_SRC_TOS_SHIFT);
+
+  /* Cyber security */
+
+#ifdef CONFIG_TRICORE_CSRM
+  regval |= TRICORE_SRC_CS;
+#endif
+
+  /* Clear pending request */
+
+  regval |= TRICORE_SRC_CLRR;
+
+  putreg32(regval, src);
+}

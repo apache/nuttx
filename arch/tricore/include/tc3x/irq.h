@@ -31,21 +31,44 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /****************************************************************************
- * Pre-processor Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#define NR_IRQS 2048
 
 #define TRICORE_UART_RX_IRQ      21
 
-/* Interrupt router: the IRQ number is the index of the service request
- * control (SRC) register from TRICORE_SRC_BASE.
+/* Interrupt router: the irq number is the index of service request
+ * control (SRC).
  */
 
 #define TRICORE_SRC_BASE         0xf0038000  /* SRC_CPU0SB, IRQ 0 */
 #define TRICORE_SRC_GPSR_BASE    0xf0038990  /* SRC_GPSR0SR0 */
 #define TRICORE_INT_SRB_BASE     0xf0037010  /* INT_SRB0 */
+#define TRICORE_INT_SRB_SPACING  0x4         /* INT_SRB1 - INT_SRB0 */
 #define TRICORE_INT_LASR_BASE    0xf0037204  /* INT_LASR0 */
-#define TRICORE_INT_LASR_SPACING 0x10        /* INT_LASRn spacing */
+#define TRICORE_INT_LASR_SPACING 0x10        /* INT_LASR1 - INT_LASR0 */
+
+/* SRC register layout (TC3xx):
+ *   [7:0]   SRPN   - Service request priority number
+ *   [9:8]   Reserved
+ *   [10]    SRE    - Service request enable
+ *   [13:11] TOS    - Type of service (3-bit, CPU0-5/DMA)
+ *   [15:14] Reserved
+ *   [20:16] ECC    - Error correction code
+ *   [23:21] Reserved
+ *   [24]    SRR    - Service request flag
+ *   [25]    CLRR   - Request clear
+ *   [26]    SETR   - Request set
+ *   [27]    IOV    - Interrupt trigger overflow
+ *   [28]    IOVCLR - Interrupt trigger overflow clear
+ *   [29]    SWS    - Software sticky
+ *   [30]    SWSCLR - Software sticky clear
+ *   [31]    Reserved
+ */
 
 #define TRICORE_SRC_SRPN_MASK    0xff        /* Service request priority */
 #define TRICORE_SRC_SRE          (1 << 10)   /* Service request enable */
