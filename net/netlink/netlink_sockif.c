@@ -259,7 +259,10 @@ static int netlink_bind(FAR struct socket *psock,
   FAR struct sockaddr_nl *nladdr;
   FAR struct netlink_conn_s *conn;
 
-  DEBUGASSERT(addrlen >= sizeof(struct sockaddr_nl));
+  if (addrlen < sizeof(struct sockaddr_nl))
+    {
+      return -EINVAL;
+    }
 
   /* Save the address information in the connection structure */
 
@@ -397,7 +400,10 @@ static int netlink_connect(FAR struct socket *psock,
   FAR struct sockaddr_nl *nladdr;
   FAR struct netlink_conn_s *conn;
 
-  DEBUGASSERT(addrlen >= sizeof(struct sockaddr_nl));
+  if (addrlen < sizeof(struct sockaddr_nl))
+    {
+      return -EINVAL;
+    }
 
   /* Save the address information in the connection structure */
 
