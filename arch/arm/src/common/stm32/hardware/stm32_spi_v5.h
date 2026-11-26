@@ -33,6 +33,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* SPI version **************************************************************/
+
+/* The STM32H7 SPI cannot bypass the baud rate prescaler (no CFG1.BPASS) */
+
+#ifndef CONFIG_ARCH_CHIP_STM32H7
+#  define HAVE_SPI_BPASS
+#endif
+
 /* Register Offsets *********************************************************/
 
 #define STM32_SPI_CR1_OFFSET      0x0000  /* SPI/I2S Control Register 1 */

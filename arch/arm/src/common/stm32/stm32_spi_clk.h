@@ -1,0 +1,203 @@
+/****************************************************************************
+ * arch/arm/src/common/stm32/stm32_spi_clk.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_SPI_CLK_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_SPI_CLK_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include "stm32.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Default SPI kernel clock, STM32_SPIn_FREQUENCY, from the source that the
+ * board selects for the family RCC code.  Other clock sources need
+ * STM32_SPIn_FREQUENCY in board.h.
+ */
+
+#if defined(CONFIG_ARCH_CHIP_STM32H5)
+
+/* Source from STM32_RCC_CCIPR3_SPInSEL in board.h */
+
+#  if !defined(STM32_SPI1_FREQUENCY) && defined(STM32_RCC_CCIPR3_SPI1SEL)
+#    if STM32_RCC_CCIPR3_SPI1SEL == RCC_CCIPR3_SPI1SEL_PLL1QCK
+#      define STM32_SPI1_FREQUENCY  STM32_PLL1Q_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI1SEL == RCC_CCIPR3_SPI1SEL_PLL2PCK
+#      define STM32_SPI1_FREQUENCY  STM32_PLL2P_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI1SEL == RCC_CCIPR3_SPI1SEL_PLL3PCK
+#      define STM32_SPI1_FREQUENCY  STM32_PLL3P_FREQUENCY
+#    endif
+#  endif
+
+#  if !defined(STM32_SPI2_FREQUENCY) && defined(STM32_RCC_CCIPR3_SPI2SEL)
+#    if STM32_RCC_CCIPR3_SPI2SEL == RCC_CCIPR3_SPI2SEL_PLL1QCK
+#      define STM32_SPI2_FREQUENCY  STM32_PLL1Q_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI2SEL == RCC_CCIPR3_SPI2SEL_PLL2PCK
+#      define STM32_SPI2_FREQUENCY  STM32_PLL2P_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI2SEL == RCC_CCIPR3_SPI2SEL_PLL3PCK
+#      define STM32_SPI2_FREQUENCY  STM32_PLL3P_FREQUENCY
+#    endif
+#  endif
+
+#  if !defined(STM32_SPI3_FREQUENCY) && defined(STM32_RCC_CCIPR3_SPI3SEL)
+#    if STM32_RCC_CCIPR3_SPI3SEL == RCC_CCIPR3_SPI3SEL_PLL1QCK
+#      define STM32_SPI3_FREQUENCY  STM32_PLL1Q_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI3SEL == RCC_CCIPR3_SPI3SEL_PLL2PCK
+#      define STM32_SPI3_FREQUENCY  STM32_PLL2P_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI3SEL == RCC_CCIPR3_SPI3SEL_PLL3PCK
+#      define STM32_SPI3_FREQUENCY  STM32_PLL3P_FREQUENCY
+#    endif
+#  endif
+
+#  if !defined(STM32_SPI4_FREQUENCY) && defined(STM32_RCC_CCIPR3_SPI4SEL)
+#    if STM32_RCC_CCIPR3_SPI4SEL == RCC_CCIPR3_SPI4SEL_RCCPCLK2
+#      define STM32_SPI4_FREQUENCY  STM32_PCLK2_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI4SEL == RCC_CCIPR3_SPI4SEL_PLL2QCK
+#      define STM32_SPI4_FREQUENCY  STM32_PLL2Q_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI4SEL == RCC_CCIPR3_SPI4SEL_PLL3QCK
+#      define STM32_SPI4_FREQUENCY  STM32_PLL3Q_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI4SEL == RCC_CCIPR3_SPI4SEL_HSIKERCK
+#      define STM32_SPI4_FREQUENCY  STM32_HSI_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI4SEL == RCC_CCIPR3_SPI4SEL_CSIKERCK
+#      define STM32_SPI4_FREQUENCY  STM32_CSI_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI4SEL == RCC_CCIPR3_SPI4SEL_HSECK
+#      define STM32_SPI4_FREQUENCY  STM32_HSE_FREQUENCY
+#    endif
+#  endif
+
+#  if !defined(STM32_SPI5_FREQUENCY) && defined(STM32_RCC_CCIPR3_SPI5SEL)
+#    if STM32_RCC_CCIPR3_SPI5SEL == RCC_CCIPR3_SPI5SEL_RCCPCLK3
+#      define STM32_SPI5_FREQUENCY  STM32_PCLK3_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI5SEL == RCC_CCIPR3_SPI5SEL_PLL2QCK
+#      define STM32_SPI5_FREQUENCY  STM32_PLL2Q_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI5SEL == RCC_CCIPR3_SPI5SEL_PLL3QCK
+#      define STM32_SPI5_FREQUENCY  STM32_PLL3Q_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI5SEL == RCC_CCIPR3_SPI5SEL_HSIKERCK
+#      define STM32_SPI5_FREQUENCY  STM32_HSI_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI5SEL == RCC_CCIPR3_SPI5SEL_CSIKERCK
+#      define STM32_SPI5_FREQUENCY  STM32_CSI_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI5SEL == RCC_CCIPR3_SPI5SEL_HSECK
+#      define STM32_SPI5_FREQUENCY  STM32_HSE_FREQUENCY
+#    endif
+#  endif
+
+#  if !defined(STM32_SPI6_FREQUENCY) && defined(STM32_RCC_CCIPR3_SPI6SEL)
+#    if STM32_RCC_CCIPR3_SPI6SEL == RCC_CCIPR3_SPI6SEL_RCCPCLK2
+#      define STM32_SPI6_FREQUENCY  STM32_PCLK2_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI6SEL == RCC_CCIPR3_SPI6SEL_PLL2QCK
+#      define STM32_SPI6_FREQUENCY  STM32_PLL2Q_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI6SEL == RCC_CCIPR3_SPI6SEL_PLL3QCK
+#      define STM32_SPI6_FREQUENCY  STM32_PLL3Q_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI6SEL == RCC_CCIPR3_SPI6SEL_HSIKERCK
+#      define STM32_SPI6_FREQUENCY  STM32_HSI_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI6SEL == RCC_CCIPR3_SPI6SEL_CSIKERCK
+#      define STM32_SPI6_FREQUENCY  STM32_CSI_FREQUENCY
+#    elif STM32_RCC_CCIPR3_SPI6SEL == RCC_CCIPR3_SPI6SEL_HSECK
+#      define STM32_SPI6_FREQUENCY  STM32_HSE_FREQUENCY
+#    endif
+#  endif
+
+#elif defined(CONFIG_ARCH_CHIP_STM32N6)
+
+/* Source from STM32_RCC_CCIPR9_SPInSEL in board.h, else the reset value
+ * (PCLK)
+ */
+
+#  ifndef STM32_SPI1_FREQUENCY
+#    if !defined(STM32_RCC_CCIPR9_SPI1SEL) || \
+        STM32_RCC_CCIPR9_SPI1SEL == RCC_CCIPR9_SPI1SEL_PCLK2
+#      define STM32_SPI1_FREQUENCY  STM32_PCLK2_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI1SEL == RCC_CCIPR9_SPI1SEL_MSI
+#      define STM32_SPI1_FREQUENCY  STM32_MSI_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI1SEL == RCC_CCIPR9_SPI1SEL_HSI
+#      define STM32_SPI1_FREQUENCY  STM32_HSI_FREQUENCY
+#    endif
+#  endif
+
+#  ifndef STM32_SPI2_FREQUENCY
+#    if !defined(STM32_RCC_CCIPR9_SPI2SEL) || \
+        STM32_RCC_CCIPR9_SPI2SEL == RCC_CCIPR9_SPI2SEL_PCLK1
+#      define STM32_SPI2_FREQUENCY  STM32_PCLK1_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI2SEL == RCC_CCIPR9_SPI2SEL_MSI
+#      define STM32_SPI2_FREQUENCY  STM32_MSI_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI2SEL == RCC_CCIPR9_SPI2SEL_HSI
+#      define STM32_SPI2_FREQUENCY  STM32_HSI_FREQUENCY
+#    endif
+#  endif
+
+#  ifndef STM32_SPI3_FREQUENCY
+#    if !defined(STM32_RCC_CCIPR9_SPI3SEL) || \
+        STM32_RCC_CCIPR9_SPI3SEL == RCC_CCIPR9_SPI3SEL_PCLK1
+#      define STM32_SPI3_FREQUENCY  STM32_PCLK1_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI3SEL == RCC_CCIPR9_SPI3SEL_MSI
+#      define STM32_SPI3_FREQUENCY  STM32_MSI_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI3SEL == RCC_CCIPR9_SPI3SEL_HSI
+#      define STM32_SPI3_FREQUENCY  STM32_HSI_FREQUENCY
+#    endif
+#  endif
+
+#  ifndef STM32_SPI4_FREQUENCY
+#    if !defined(STM32_RCC_CCIPR9_SPI4SEL) || \
+        STM32_RCC_CCIPR9_SPI4SEL == RCC_CCIPR9_SPI4SEL_PCLK2
+#      define STM32_SPI4_FREQUENCY  STM32_PCLK2_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI4SEL == RCC_CCIPR9_SPI4SEL_MSI
+#      define STM32_SPI4_FREQUENCY  STM32_MSI_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI4SEL == RCC_CCIPR9_SPI4SEL_HSI
+#      define STM32_SPI4_FREQUENCY  STM32_HSI_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI4SEL == RCC_CCIPR9_SPI4SEL_HSE
+#      define STM32_SPI4_FREQUENCY  STM32_HSE_FREQUENCY
+#    endif
+#  endif
+
+#  ifndef STM32_SPI5_FREQUENCY
+#    if !defined(STM32_RCC_CCIPR9_SPI5SEL) || \
+        STM32_RCC_CCIPR9_SPI5SEL == RCC_CCIPR9_SPI5SEL_PCLK2
+#      define STM32_SPI5_FREQUENCY  STM32_PCLK2_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI5SEL == RCC_CCIPR9_SPI5SEL_MSI
+#      define STM32_SPI5_FREQUENCY  STM32_MSI_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI5SEL == RCC_CCIPR9_SPI5SEL_HSI
+#      define STM32_SPI5_FREQUENCY  STM32_HSI_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI5SEL == RCC_CCIPR9_SPI5SEL_HSE
+#      define STM32_SPI5_FREQUENCY  STM32_HSE_FREQUENCY
+#    endif
+#  endif
+
+#  ifndef STM32_SPI6_FREQUENCY
+#    if !defined(STM32_RCC_CCIPR9_SPI6SEL) || \
+        STM32_RCC_CCIPR9_SPI6SEL == RCC_CCIPR9_SPI6SEL_PCLK4
+#      define STM32_SPI6_FREQUENCY  STM32_PCLK4_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI6SEL == RCC_CCIPR9_SPI6SEL_MSI
+#      define STM32_SPI6_FREQUENCY  STM32_MSI_FREQUENCY
+#    elif STM32_RCC_CCIPR9_SPI6SEL == RCC_CCIPR9_SPI6SEL_HSI
+#      define STM32_SPI6_FREQUENCY  STM32_HSI_FREQUENCY
+#    endif
+#  endif
+
+#endif
+
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_SPI_CLK_H */
