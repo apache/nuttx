@@ -271,12 +271,17 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       conn->accept_private  = (FAR void *)&state;
       conn->accept          = accept_eventhandler;
 
-      /* Wait for the send to complete or an error to occur:  NOTES:
-       * conn_dev_sem_timedwait will also terminate if a signal is received.
+      /* Wait for a connection, a signal or the receive timeout
+       * (SO_RCVTIMEO).  A timeout gives EAGAIN, as Linux.
        */
 
-      ret = conn_dev_sem_timedwait(&state.acpt_sem, true, UINT_MAX,
+      ret = conn_dev_sem_timedwait(&state.acpt_sem, true,
+                                   _SO_TIMEOUT(conn->sconn.s_rcvtimeo),
                                    &conn->sconn, NULL);
+      if (ret == -ETIMEDOUT)
+        {
+          ret = -EAGAIN;
+        }
 
       /* Make sure that no further events are processed */
 
@@ -285,11 +290,20 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
       nxsem_destroy(&state.acpt_sem);
 
+      /* A connection can come after the end of the wait, before the lock
+       * is taken again: accept it, or nothing would ever free it.
+       */
+
+      if (state.acpt_newconn != NULL)
+        {
+          ret = OK;
+        }
+
       /* Check for a errors.  Errors are signalled by negative errno values
        * for the send length.
        */
 
-      if (state.acpt_result != 0)
+      else if (state.acpt_result != 0)
         {
           DEBUGASSERT(state.acpt_result > 0);
           ret = -state.acpt_result;
