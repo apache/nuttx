@@ -125,6 +125,7 @@ void tricore_svcall(volatile void *trap)
         nxsched_switch_context(*running_task, tcb);
 
       case SYS_restore_context:
+        tricore_set_tls_info(tcb->stack_alloc_ptr);
         *running_task = tcb;
         tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
         UP_ISB();

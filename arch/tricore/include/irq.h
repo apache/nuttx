@@ -103,6 +103,7 @@
 /* PSW: Program Status Word Register */
 
 #define PSW_CDE         (1 << 7) /* Bits 7: Call Depth Count Enable */
+#define PSW_GW          (1 << 8) /* Global address register write permission */
 #define PSW_IS          (1 << 9) /* Bits 9: Interrupt Stack Control */
 #define PSW_IO          (10)     /* Bits 10-11: Access Privilege Level Control (I/O Privilege) */
 #  define PSW_MODE_MASK     (3 << PSW_IO)
@@ -193,6 +194,8 @@
 #endif
 #define FPU_TRAP_FZE_SHIFT    20
 #define FPU_TRAP_TCL_SHIFT    1
+
+#define up_tls_info() ((struct tls_info_s *)read_sysreg(a8))
 
 #ifndef __ASSEMBLY__
 
