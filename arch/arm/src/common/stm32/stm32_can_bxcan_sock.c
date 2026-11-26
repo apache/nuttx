@@ -1881,7 +1881,13 @@ static int stm32can_bittiming(struct stm32_can_s *priv)
       ts1 = CONFIG_STM32_CAN_TSEG1;
       ts2 = CONFIG_STM32_CAN_TSEG2;
       brp = (tmp + (CAN_BIT_QUANTA / 2)) / CAN_BIT_QUANTA;
-      DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
+    }
+
+  if (brp > CAN_BTR_BRP_MAX || ts1 < 1 || ts1 > CAN_BTR_TSEG1_MAX ||
+      ts2 < 1 || ts2 > CAN_BTR_TSEG2_MAX)
+    {
+      canerr("ERROR: Bit rate %" PRIu32 " not supported\n", priv->baud);
+      return -EINVAL;
     }
 
   ninfo("TS1: %" PRIu32 " TS2: %" PRIu32 " BRP: %" PRIu32 "\n",
