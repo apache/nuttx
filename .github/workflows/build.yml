@@ -413,7 +413,7 @@ jobs:
               if python -m pip install \
                 --default-timeout=100 \
                 --retries 10 \
-                ntfc==0.0.3; then
+                ntfc==0.0.4; then
                 break
               fi
 
