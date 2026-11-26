@@ -23,5 +23,9 @@
 if(CONFIG_RESET)
   set(SRCS core.c)
 
+  if(CONFIG_RESET_RPMSG)
+    list(APPEND SRCS reset_rpmsg.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
