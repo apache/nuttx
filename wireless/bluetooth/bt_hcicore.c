@@ -1603,13 +1603,26 @@ static int hci_initialize(void)
                                   g_btdev.btdev->head_reserve);
       hbs->acl_pkts = BT_HOST2LE16(CONFIG_BLUETOOTH_BUFFER_PREALLOC);
 
+      /* A controller may reject the buffer size of the host, e.g. one that
+       * needs ACL packets of the maximum LE length (251 bytes).  Flow
+       * control is optional, so continue without it if the controller
+       * rejects either command (-EIO); other errors are fatal.
+       */
+
       ret = bt_hci_cmd_send_sync(BT_HCI_OP_HOST_BUFFER_SIZE, buf, NULL);
-      if (ret < 0)
+      if (ret == -EIO)
+        {
+          flow_control = false;
+        }
+      else if (ret < 0)
         {
           wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
           return ret;
         }
+    }
 
+  if (flow_control)
+    {
       buf = bt_hci_cmd_create(BT_HCI_OP_SET_CTL_TO_HOST_FLOW, 1);
       if (buf == NULL)
         {
@@ -1621,19 +1634,26 @@ static int hci_initialize(void)
       *enable = 1;
 
       ret = bt_hci_cmd_send_sync(BT_HCI_OP_SET_CTL_TO_HOST_FLOW, buf, NULL);
-      if (ret < 0)
+      if (ret == -EIO)
+        {
+          flow_control = false;
+        }
+      else if (ret < 0)
         {
           wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
           return ret;
         }
+    }
 
+  if (flow_control)
+    {
       /* Report completed packets only after flow control is enabled. */
 
       g_btdev.flow_control_enable = true;
     }
   else
     {
-      wlwarn("WARNING: Controller to Host flow control is not supported\n");
+      wlwarn("WARNING: Controller to Host flow control is not available\n");
     }
 #endif
 
