@@ -589,25 +589,6 @@ void fdlist_free(FAR struct fdlist *list)
 }
 
 /****************************************************************************
- * Name: fdlist_count
- *
- * Description:
- *   Get file descriptor count from file list.
- *
- * Input Parameters:
- *   list - Pointer to the file descriptor list structure.
- *
- * Returned Value:
- *   file count of file list.
- *
- ****************************************************************************/
-
-int fdlist_count(FAR struct fdlist *list)
-{
-  return list->fl_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
-}
-
-/****************************************************************************
  * Name: fdlist_get2
  *
  * Description:

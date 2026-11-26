@@ -1047,7 +1047,10 @@ void fdlist_free(FAR struct fdlist *list);
  *
  ****************************************************************************/
 
-int fdlist_count(FAR struct fdlist *list);
+static inline int fdlist_count(FAR struct fdlist *list)
+{
+  return list->fl_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
+}
 
 /****************************************************************************
  * Name: fdlist_copy
