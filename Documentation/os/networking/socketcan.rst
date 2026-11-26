@@ -158,9 +158,10 @@ Socket Address
 
 ``getsockname()`` returns a ``struct sockaddr_can`` with ``can_family`` set
 to ``AF_CAN`` and ``can_ifindex`` set to the index of the interface the
-socket is bound to, or 0 if the socket is not bound to an interface.  The
-address buffer must be at least ``sizeof(struct sockaddr_can)`` bytes,
-otherwise ``EINVAL`` is returned.
+socket is bound to, or 0 if the socket is not bound to an interface.  A
+buffer shorter than ``sizeof(struct sockaddr_can)`` gets the first bytes of
+the address, and the length is set to ``sizeof(struct sockaddr_can)``, as on
+Linux.
 
 Features
 --------
