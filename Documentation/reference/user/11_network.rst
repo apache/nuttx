@@ -135,8 +135,9 @@ the following paragraphs.
   ``EAGAIN`` No more free local ports or insufficient entries in the
   routing cache. For PF_INET.
 
-  ``EALREADY`` The socket is non-blocking and a previous connection
-  attempt has not yet been completed.
+  ``EALREADY`` A previous connection attempt has not yet been completed:
+  the socket is non-blocking, or a signal or the send timeout ended the
+  wait of the earlier ``connect()``.
 
   ``EBADF`` The file descriptor is not a valid index in the descriptor
   table.
@@ -155,8 +156,9 @@ the following paragraphs.
   reports ``POLLOUT`` when it completes.
 
   ``EINTR`` The system call was interrupted by a signal that was caught.
+  The connection goes on: ``poll()`` reports ``POLLOUT`` when it completes.
 
-  ``EISCONN`` The socket is already connected.
+  ``EISCONN`` The socket is already connected, or it listens.
 
   ``ENETUNREACH`` Network is unreachable.
 
