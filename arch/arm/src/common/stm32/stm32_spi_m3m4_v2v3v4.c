@@ -70,7 +70,6 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "stm32.h"
-#include "stm32_gpio.h"
 #include "stm32_dma.h"
 #include "stm32_spi.h"
 
@@ -104,11 +103,15 @@
 #    define SPI_DMA_PRIO  DMA_CCR_PRIMED
 #  elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #    define SPI_DMA_PRIO  DMA_SCR_PRIMED
+#  elif defined(CONFIG_ARCH_CHIP_STM32F7)
+#    define SPI_DMA_PRIO  DMA_SCR_PRILO
 #  else
 #    error "Unknown STM32 DMA"
 #  endif
 
-/* DMA channel configuration */
+/* DMA channel configuration.  The STM32F7 has its own driver for the
+ * stream DMA of the IP v2.
+ */
 
 #if defined(CONFIG_STM32_HAVE_IP_DMA_V1)
 #  define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC            )
@@ -119,7 +122,7 @@
 #  define SPI_TXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC|DMA_CCR_DIR)
 #  define SPI_TXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS             |DMA_CCR_DIR)
 #  define SPI_TXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS              |DMA_CCR_DIR)
-#elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
+#elif defined(CONFIG_STM32_HAVE_IP_DMA_V2) || defined(CONFIG_ARCH_CHIP_STM32F7)
 #  define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_SCR_MSIZE_16BITS|DMA_SCR_PSIZE_16BITS|DMA_SCR_MINC|DMA_SCR_DIR_P2M)
 #  define SPI_RXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS |DMA_SCR_MINC|DMA_SCR_DIR_P2M)
 #  define SPI_RXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_16BITS             |DMA_SCR_DIR_P2M)

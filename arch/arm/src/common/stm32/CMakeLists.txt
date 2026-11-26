@@ -107,6 +107,10 @@ if(CONFIG_STM32_ETHMAC AND CONFIG_STM32_HAVE_IP_ETHMAC_M3M4_V1)
   list(APPEND SRCS stm32_eth_v1.c)
 endif()
 
+if(CONFIG_ARCH_CHIP_STM32F7 AND CONFIG_STM32_SPI)
+  list(APPEND SRCS stm32_spi_m3m4_v2v3v4.c)
+endif()
+
 if(CONFIG_STM32_SPI_SLAVE)
   list(APPEND SRCS stm32_spi_v5_slave.c)
 endif()

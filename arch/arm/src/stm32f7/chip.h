@@ -51,6 +51,14 @@
 #define ARMV7M_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
 #define ARMV7M_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
 
+/* Maximum SPI clock as per data sheet for all SPIs */
+
+#if defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
+#  define STM32_SPI_CLK_MAX      54000000UL
+#else
+#  define STM32_SPI_CLK_MAX      50000000UL
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

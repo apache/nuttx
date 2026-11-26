@@ -588,6 +588,7 @@ RCC           to be done    arch/arm/src/stm32f7/stm32_rcc.c
 RNG           to be done    arch/arm/src/stm32f7/stm32_rng.c       
 RTC           to be done    arch/arm/src/stm32f7/stm32_rtc.c       
 SDMMC         to be done    arch/arm/src/stm32f7/stm32_sdmmc.c     
+SPI           v4            arch/arm/src/common/stm32/stm32_spi_m3m4_v2v3v4.c
 SPI/I2S       to be done    arch/arm/src/stm32f7/stm32_i2s.c       
 TIM           v2            arch/arm/src/common/stm32/stm32_tim.c  
 USART/LPUART  v3            arch/arm/src/stm32f7/stm32_serial.c    

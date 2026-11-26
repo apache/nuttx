@@ -87,10 +87,6 @@ if(CONFIG_STM32_I2S)
   list(APPEND SRCS stm32_i2s.c)
 endif()
 
-if(CONFIG_STM32_SPI)
-  list(APPEND SRCS stm32_spi.c)
-endif()
-
 if(CONFIG_STM32_SDMMC)
   list(APPEND SRCS stm32_sdmmc.c)
 endif()
