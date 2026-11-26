@@ -192,6 +192,10 @@ exposure (``CONFIG_STM32_DCMIPP_AE``) and white balance
 (``CONFIG_STM32_DCMIPP_AWB``), switched off with ``V4L2_CID_EXPOSURE_AUTO``
 and ``V4L2_CID_AUTO_WHITE_BALANCE``.  The board registers ``/dev/video``.
 
+The module's ISM330DLC IMU (I2C1, 0x6a) uses the LSM6DS3TR-C driver
+(``CONFIG_SENSORS_LSM6DS3TRC``), polled, as ``/dev/uorb/sensor_accel0`` and
+``/dev/uorb/sensor_gyro0``.
+
 Time-of-flight sensor
 =====================
 
