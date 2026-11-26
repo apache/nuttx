@@ -31,21 +31,45 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /****************************************************************************
- * Pre-processor Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#define NR_IRQS 2048
 
 #define TRICORE_UART_RX_IRQ      173
 
-/* Interrupt router: the IRQ number is the index of the service request
- * control (SRC) register from TRICORE_SRC_BASE.
+/* Interrupt router: the irq number is the index of service request
+ * control (SRC).
  */
 
 #define TRICORE_SRC_BASE         0xf4432000  /* SRC_CPU0SB, IRQ 0 */
-#define TRICORE_SRC_GPSR_BASE    0xf4433460  /* SRC_GPSR0SR0 */
+#ifdef CONFIG_ARCH_CHIP_TC4DX
+#  define TRICORE_SRC_GPSR_BASE  0xf4433460  /* SRC_GPSR0SR0, TC4DX */
+#else
+#  define TRICORE_SRC_GPSR_BASE  0xf4433420  /* SRC_GPSR0SR0, TC48X/TC4ZX */
+#endif
 #define TRICORE_INT_SRB_BASE     0xf4430b00  /* INT_SRB0 */
-#define TRICORE_INT_LASR_BASE    0xf4430c20  /* INT_LASR0 */
-#define TRICORE_INT_LASR_SPACING 0x34        /* INT_LASRn spacing */
+#define TRICORE_INT_SRB_SPACING  0x4         /* INT_SRB1 - INT_SRB0 */
+#define TRICORE_INT_LASR_BASE    0xf4430c20  /* INT_ICU0_LASR */
+#define TRICORE_INT_LASR_SPACING 0x34
+
+/* SRC register layout (TC4xx):
+ *   [7:0]   SRPN   - Service request priority number
+ *   [10:8]  VM     - Virtual machine
+ *   [11]    CS     - Cyber security, set by the CSRM core
+ *   [15:12] TOS    - Type of service (4-bit)
+ *   [22:16] Reserved
+ *   [23]    SRE    - Service request enable
+ *   [24]    SRR    - Service request status
+ *   [25]    CLRR   - Service request clear
+ *   [26]    SETR   - Service request set
+ *   [27]    IOV    - Interrupt overflow status
+ *   [28]    IOVCLR - Interrupt overflow clear
+ *   [31:29] Reserved
+ */
 
 #define TRICORE_SRC_SRPN_MASK    0xff        /* Service request priority */
 #define TRICORE_SRC_VM_MASK      (0x7 << 8)  /* Virtual machine */
