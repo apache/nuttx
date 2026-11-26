@@ -21,7 +21,8 @@
 # ##############################################################################
 
 # The start-up file has the vector table (its reset slot must be a relative
-# branch), so it replaces the common head and vector table.
+# branch), so it replaces the common head and vector table, and ends in the
+# common entry point without MMU.
 
 get_target_property(NUTTX_SRCS nuttx SOURCES)
 list(FILTER NUTTX_SRCS EXCLUDE REGEX "arm_head\\.S$")
@@ -44,4 +45,4 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS pp502x_idle.c)
 endif()
 
-target_sources(arch PRIVATE ${SRCS})
+target_sources(arch PRIVATE ${SRCS} ../arm/arm_nommuhead.S)

@@ -23,11 +23,13 @@
 include arm/Make.defs
 
 # The vector table lives in the start-up file (its reset slot must be a
-# relative branch) and the idle loop sleeps the core.
+# relative branch), which ends in the common entry point, and the idle loop
+# sleeps the core.
 
 HEAD_ASRC  = pp502x_head.S
 
 CMN_ASRCS := $(filter-out arm_vectortab.S,$(CMN_ASRCS))
+CMN_ASRCS += arm_nommuhead.S
 CMN_CSRCS := $(filter-out arm_idle.c,$(CMN_CSRCS))
 
 CHIP_CSRCS  = pp502x_allocateheap.c pp502x_cache.c pp502x_decodeirq.c pp502x_irq.c
