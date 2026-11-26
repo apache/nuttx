@@ -28,6 +28,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/param.h>
 #include <stdbool.h>
 #include <string.h>
 #include <poll.h>
@@ -297,23 +298,24 @@ static int netlink_getsockname(FAR struct socket *psock,
                                FAR struct sockaddr *addr,
                                FAR socklen_t *addrlen)
 {
-  FAR struct sockaddr_nl *nladdr;
   FAR struct netlink_conn_s *conn;
-
-  DEBUGASSERT(*addrlen >= sizeof(struct sockaddr_nl));
+  struct sockaddr_nl nladdr;
 
   conn = psock->s_conn;
 
   /* Return the address information in the address structure */
 
-  nladdr = (FAR struct sockaddr_nl *)addr;
-  memset(nladdr, 0, sizeof(struct sockaddr_nl));
+  memset(&nladdr, 0, sizeof(nladdr));
+  nladdr.nl_family = AF_NETLINK;
+  nladdr.nl_pid    = conn->pid;
+  nladdr.nl_groups = conn->groups;
 
-  nladdr->nl_family = AF_NETLINK;
-  nladdr->nl_pid    = conn->pid;
-  nladdr->nl_groups = conn->groups;
+  /* Copy as much of the address as the buffer holds.  *addrlen gives the
+   * length of the whole address, so the caller sees a truncation.
+   */
 
-  *addrlen = sizeof(struct sockaddr_nl);
+  memcpy(addr, &nladdr, MIN(*addrlen, sizeof(nladdr)));
+  *addrlen = sizeof(nladdr);
   return OK;
 }
 
@@ -349,23 +351,24 @@ static int netlink_getpeername(FAR struct socket *psock,
                                FAR struct sockaddr *addr,
                                FAR socklen_t *addrlen)
 {
-  FAR struct sockaddr_nl *nladdr;
   FAR struct netlink_conn_s *conn;
-
-  DEBUGASSERT(*addrlen >= sizeof(struct sockaddr_nl));
+  struct sockaddr_nl nladdr;
 
   conn = psock->s_conn;
 
   /* Return the address information in the address structure */
 
-  nladdr = (FAR struct sockaddr_nl *)addr;
-  memset(nladdr, 0, sizeof(struct sockaddr_nl));
+  memset(&nladdr, 0, sizeof(nladdr));
+  nladdr.nl_family = AF_NETLINK;
+  nladdr.nl_pid    = conn->dst_pid;
+  nladdr.nl_groups = conn->dst_groups;
 
-  nladdr->nl_family = AF_NETLINK;
-  nladdr->nl_pid    = conn->dst_pid;
-  nladdr->nl_groups = conn->dst_groups;
+  /* Copy as much of the address as the buffer holds.  *addrlen gives the
+   * length of the whole address, so the caller sees a truncation.
+   */
 
-  *addrlen = sizeof(struct sockaddr_nl);
+  memcpy(addr, &nladdr, MIN(*addrlen, sizeof(nladdr)));
+  *addrlen = sizeof(nladdr);
   return OK;
 }
 
