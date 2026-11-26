@@ -113,10 +113,10 @@ endif()
 
 if(CONFIG_STM32_CAN AND CONFIG_STM32_HAVE_IP_CAN_BXCAN_M3M4_V1)
   if(CONFIG_STM32_CAN_CHARDRIVER)
-    list(APPEND SRCS stm32_can_m3m4_v1.c)
+    list(APPEND SRCS stm32_can_bxcan.c)
   endif()
   if(CONFIG_STM32_CAN_SOCKET)
-    list(APPEND SRCS stm32_can_m3m4_v1_sock.c)
+    list(APPEND SRCS stm32_can_bxcan_sock.c)
   endif()
 endif()
 
