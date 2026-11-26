@@ -284,11 +284,13 @@ lvgl
 with ``lvgldemo &``.  The image is close to the 511 KiB limit of the boot
 ROM, so LVGL logging and extra fonts are left out.
 
-camera
-------
+lvglcam
+-------
 
-``fb`` plus the IMX335 camera and the ``camera`` example, see `Camera module`_.
-``camera 0`` shows a 320x240 preview on the LCD.
+The :doc:`lvglcam </applications/examples/lvglcam/index>` dashboard with
+the camera view, the IMU, the time-of-flight sensor, the network state and
+snapshots to the microSD card, see `Camera module`_.  Mount the card and
+start it with ``mount -t vfat /dev/mmcsd0 /mnt`` and ``lvglcam &``.
 
 jumbo
 -----
