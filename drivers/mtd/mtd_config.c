@@ -1362,9 +1362,12 @@ retry_find:
                                    pdata->configdata, pdata->len);
       if (bytes != pdata->len)
         {
-          /* Error writing data! */
+          /* Error writing data!  Mark the entry as released (the same
+           * marker used by delete/overwrite) so that the partially written
+           * payload cannot be read back later.
+           */
 
-          hdr.flags = MTD_ERASED_FLAGS(dev);
+          hdr.flags = (uint8_t)~MTD_ERASED_FLAGS(dev);
           mtdconfig_writebytes(dev, offset, (FAR uint8_t *)&hdr,
                                sizeof(hdr.flags));
           ret = -EIO;
