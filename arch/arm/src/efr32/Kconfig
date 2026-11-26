@@ -1,0 +1,82 @@
+############################################################################
+# arch/arm/src/efr32/Kconfig
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+comment "EFR32 Configuration Options"
+
+choice
+	prompt "EFR32 Chip Selection"
+	default ARCH_CHIP_EFR32MG24B210F1536IM48
+	depends on ARCH_CHIP_EFR32
+
+config ARCH_CHIP_EFR32MG24B210F1536IM48
+	bool "EFR32MG24B210F1536IM48"
+	select EFR32_EFR32MG24
+	---help---
+		EFR32MG24 Cortex-M33 at up to 78 MHz, QFN48 package,
+		1536 KB flash, 256 KB RAM, +10 dBm 2.4 GHz radio.
+		Chip used on the xG24-EK2703A Explorer Kit.
+
+endchoice # EFR32 Chip Selection
+
+config EFR32_EFR32MG24
+	bool
+	default n
+	select EFR32_HAVE_USART0
+
+config EFR32_HAVE_USART0
+	bool
+	default n
+
+menu "EFR32 Peripheral Support"
+
+config EFR32_USART0
+	bool "USART0"
+	default n
+	depends on EFR32_HAVE_USART0
+	select USART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		USART0 in asynchronous (UART) mode, clocked from PCLK.  The
+		TX and RX pins are chosen by the board (board.h) and routed
+		through the GPIO block.
+
+config EFR32_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	default n
+	---help---
+		Interrupts on pins 0-11 of any port, one port per pin number,
+		through the GPIO EXTI lines.
+
+endmenu # EFR32 Peripheral Support
+
+menu "EFR32 Clock Options"
+
+config EFR32_HFXO_CTUNE
+	int "HFXO tuning capacitance (CTUNE)"
+	default 140
+	range 0 255
+	---help---
+		Tuning capacitance of the HFXO crystal, used when the user data
+		page holds no factory-programmed value.  The default is the
+		Silicon Labs default for the EFR32xG24.
+
+endmenu # EFR32 Clock Options
