@@ -106,6 +106,36 @@ Options
    valid with ``-p icmp6`` (or ``-p icmpv6``, ``-p ipv6-icmp``). The
    ``!`` argument inverts the match.
 
+``[!] --tcp-flags mask comp``
+   TCP flags specification. ``mask`` is a comma separated list of the
+   flags to examine. ``comp`` is the list of the flags of ``mask`` that
+   must be set; the other flags of ``mask`` must be clear. The flags
+   are ``SYN``, ``ACK``, ``FIN``, ``RST``, ``URG`` and ``PSH``, in upper
+   or lower case; ``ALL`` and ``NONE`` are also accepted. Only valid
+   with ``-p tcp``. The ``!`` argument inverts the match.
+
+``[!] --syn``
+   Match only TCP packets with SYN set and ACK, RST and FIN clear (the
+   first packet of a connection). The same as
+   ``--tcp-flags SYN,RST,ACK,FIN SYN``.
+
+``-m, --match limit``
+   Add a rate limit to the rule: the rule matches at most ``--limit``
+   packets on average, with bursts of up to ``--limit-burst`` packets.
+   Over the rate, the rule does not match and the next rule applies.
+   The limit can be used alone or with a TCP, UDP or ICMP match. Each
+   rule has its own count, which starts again when the table changes.
+   The ``!`` argument is not accepted before ``-m``, ``--limit`` and
+   ``--limit-burst``.
+
+``--limit rate[/second|/minute|/hour|/day]``
+   Average rate of the limit match (default: ``3/hour``). The unit can
+   be abbreviated (``5/s``); without a unit, the rate is per second.
+
+``--limit-burst number``
+   Number of packets that can match at once, from 1 to 10000 (default:
+   ``5``).
+
 ``!``
    Inverts the following match criterion.
 
@@ -153,6 +183,17 @@ Use negation to match all protocols except TCP:
 .. code-block:: text
 
    nsh> ip6tables -A INPUT ! -p tcp -j ACCEPT
+
+Accept at most 5 new TCP connections per second (bursts of 10), and drop
+the other SYN packets:
+
+.. code-block:: text
+
+   nsh> ip6tables -A INPUT -p tcp --syn -m limit --limit 5/s --limit-burst 10 -j ACCEPT
+   nsh> ip6tables -A INPUT -p tcp --syn -j DROP
+
+A rule with a limit is long: set ``CONFIG_NSH_LINELEN`` and
+``CONFIG_NSH_MAXARGUMENTS`` large enough for it.
 
 See Also
 ========

@@ -5,7 +5,7 @@ IP Packet Filter
 NuttX supports IP packet filter (firewall) compatible with Linux's iptables and
 netfilter. It is a stateless packet filter that can be used to filter packets
 based on source and destination IP addresses, source and destination ports,
-protocol, and interface.
+protocol, TCP flags, and interface. A rule can also have a rate limit.
 
 Workflow
 ========
@@ -79,6 +79,11 @@ The following examples show the commands we support:
                          port[:port]      Destination port
   [!] --icmp-type        type             ICMP type
   [!] --icmpv6-type      type             ICMPv6 type
+  [!] --tcp-flags        mask comp        TCP flags (SYN,ACK,FIN,RST,URG,PSH,ALL,NONE)
+  [!] --syn                               TCP SYN (--tcp-flags SYN,RST,ACK,FIN SYN)
+      --match         -m limit            Match a packet rate
+      --limit            rate[/unit]      Packets per s, m, h or d (default: 3/hour)
+      --limit-burst      number           Packets that can come at once (default: 5)
 
 ..  code-block:: shell
 
@@ -123,3 +128,20 @@ The following examples show the commands we support:
 
   Chain OUTPUT (policy ACCEPT)
   target        prot  idev  odev  source              destination
+
+A rule can match TCP flags (``--tcp-flags``, ``--syn``) and can have a rate
+limit (``-m limit``). The filter keeps one token bucket per rule: the rule
+matches at most ``--limit`` packets on average, and up to ``--limit-burst``
+packets at once. A packet over the rate does not match the rule, and the next
+rule of the chain applies. The bucket is full again after each change of the
+table. The limit works alone or after a TCP, UDP or ICMP match.
+
+..  code-block:: shell
+
+  > iptables -A INPUT -p tcp --syn -m limit --limit 5/s --limit-burst 10 -j ACCEPT
+  > iptables -A INPUT -p tcp --syn -j DROP
+  > iptables -L INPUT
+  Chain INPUT (policy ACCEPT)
+  target        prot  idev  odev  source              destination
+  ACCEPT        tcp   any   any   anywhere            anywhere           tcp spts:0:65535 dpts:0:65535 flags:0x17/0x02 limit: avg 5/second burst 10
+  DROP          tcp   any   any   anywhere            anywhere           tcp spts:0:65535 dpts:0:65535 flags:0x17/0x02
