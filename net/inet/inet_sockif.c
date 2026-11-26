@@ -1302,11 +1302,19 @@ static int inet_connect(FAR struct socket *psock,
         {
           FAR struct tcp_conn_s *conn = psock->s_conn;
 
-          /* Verify that the socket is not already connected */
+          /* Verify that the socket is not already connected and does not
+           * listen.  A handshake that is still in progress gives EALREADY.
+           */
 
-          if (_SS_ISCONNECTED(conn->sconn.s_flags))
+          if (_SS_ISCONNECTED(conn->sconn.s_flags) ||
+              _SS_ISLISTENING(conn->sconn.s_flags))
             {
               return -EISCONN;
+            }
+
+          if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT)
+            {
+              return -EALREADY;
             }
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
