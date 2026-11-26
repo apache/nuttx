@@ -1161,13 +1161,24 @@ found:
           /* A RST before the FIN of the peer: the next receive or send
            * gives ECONNRESET.  In TCP_SYN_SENT the RST refuses the
            * connection (ECONNREFUSED).  After the FIN of the peer a
-           * receive gives end-of-file and a send EPIPE.
+           * receive gives end-of-file and a send EPIPE.  SO_ERROR gives
+           * EPIPE in TCP_CLOSE_WAIT and ECONNRESET in TCP_LAST_ACK, as
+           * Linux (tcp_reset()).
            */
 
           if ((conn->tcpstateflags & TCP_STATE_MASK) >= TCP_ESTABLISHED &&
               (conn->tcpstateflags & TCP_STATE_MASK) <= TCP_FIN_WAIT_2)
             {
               conn->flags |= TCP_RESET | TCP_RESETERR;
+              _SO_CONN_SETERRNO(conn, ECONNRESET);
+            }
+          else if ((conn->tcpstateflags & TCP_STATE_MASK) ==
+                   TCP_CLOSE_WAIT)
+            {
+              _SO_CONN_SETERRNO(conn, EPIPE);
+            }
+          else if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_LAST_ACK)
+            {
               _SO_CONN_SETERRNO(conn, ECONNRESET);
             }
 
