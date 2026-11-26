@@ -1035,11 +1035,14 @@ static int stm32can_ioctl(struct can_dev_s *dev, int cmd,
           uint32_t regval;
 
           DEBUGASSERT(bt != NULL);
-          DEBUGASSERT(bt->bt_baud > 0 &&
-            bt->bt_baud < STM32_PCLK1_FREQUENCY);
-          DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 4);
-          DEBUGASSERT(bt->bt_tseg1 > 0 && bt->bt_tseg1 <= 16);
-          DEBUGASSERT(bt->bt_tseg2 > 0 && bt->bt_tseg2 <=  8);
+          if (bt->bt_baud == 0 || bt->bt_baud >= STM32_PCLK1_FREQUENCY ||
+              bt->bt_sjw == 0 || bt->bt_sjw > 4 ||
+              bt->bt_tseg1 == 0 || bt->bt_tseg1 > CAN_BTR_TSEG1_MAX ||
+              bt->bt_tseg2 == 0 || bt->bt_tseg2 > CAN_BTR_TSEG2_MAX)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
           regval = stm32can_getreg(priv, STM32_CAN_BTR_OFFSET);
 
@@ -1069,7 +1072,11 @@ static int stm32can_ioctl(struct can_dev_s *dev, int cmd,
           else
             {
               brp = (tmp + (can_bit_quanta / 2)) / can_bit_quanta;
-              DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
+              if (brp > CAN_BTR_BRP_MAX)
+                {
+                  ret = -EINVAL;
+                  break;
+                }
             }
 
           caninfo("TS1: %"PRIu8 " TS2: %" PRIu8 " BRP: %" PRIu32 "\n",
@@ -2084,7 +2091,13 @@ static int stm32can_bittiming(struct stm32_can_s *priv)
       ts1 = CONFIG_STM32_CAN_TSEG1;
       ts2 = CONFIG_STM32_CAN_TSEG2;
       brp = (tmp + (CAN_BIT_QUANTA / 2)) / CAN_BIT_QUANTA;
-      DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
+    }
+
+  if (brp > CAN_BTR_BRP_MAX || ts1 < 1 || ts1 > CAN_BTR_TSEG1_MAX ||
+      ts2 < 1 || ts2 > CAN_BTR_TSEG2_MAX)
+    {
+      canerr("ERROR: Bit rate %" PRIu32 " not supported\n", priv->baud);
+      return -EINVAL;
     }
 
   caninfo("TS1: %" PRIu32 " TS2: %" PRIu32 " BRP: %" PRIu32 "\n",
