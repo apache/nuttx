@@ -56,7 +56,7 @@
 
 	.globl	_vector_start
 	.globl	_vector_end
-	.globl	__start
+	.globl	pp502x_start
 
 /****************************************************************************
  * Name: _vector_start
@@ -69,7 +69,7 @@
  ****************************************************************************/
 
 _vector_start:
-	b	__start				/* 0x00: Reset */
+	b	pp502x_start			/* 0x00: Reset */
 	b	arm_vectorundefinsn		/* 0x04: Undefined instruction */
 	b	arm_vectorsvc			/* 0x08: Software interrupt */
 	b	arm_vectorprefetch		/* 0x0c: Prefetch abort */
@@ -81,7 +81,7 @@ _vector_start:
 _vector_end:
 
 /****************************************************************************
- * Name: __start
+ * Name: pp502x_start
  *
  * Description:
  *   Entry point for both cores.  The COP masks its interrupts and sleeps
@@ -93,9 +93,9 @@ _vector_end:
  *
  ****************************************************************************/
 
-	.type	__start, %function
+	.type	pp502x_start, %function
 
-__start:
+pp502x_start:
 	mov	r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
 	msr	cpsr_c, r0
 
@@ -200,67 +200,31 @@ __start:
 	ldr	pc, =.Lremapped
 
 	.ltorg
-	.size	__start, . - __start
+	.size	pp502x_start, . - pp502x_start
 
 /****************************************************************************
  * Name: .Lremapped
  *
  * Description:
- *   Runs at the link address: set up the idle stack in SYS mode, turn the
- *   cache on (it uses no static data), clear BSS and start the OS.
+ *   Runs at the link address: store the SDRAM size, turn the cache on and
+ *   set up the clocks and the console UART on a temporary stack (neither
+ *   call uses static data), then continue in the common entry point, which
+ *   sets the idle stack, clears BSS and starts the OS.
  *
  ****************************************************************************/
 
 	.text
 
 .Lremapped:
-	mov	r0, #(PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT)
-	msr	cpsr_c, r0
-
-	adr	r0, .Linitparms
-	ldmia	r0, {r4, r5, sp}
-
 	ldr	r0, =g_pp502x_ramsize
 	str	fp, [r0]
 
+	ldr	sp, =(_ebss + CONFIG_IDLETHREAD_STACKSIZE)
+
 	bl	pp502x_cache_init
-
-	mov	fp, #0
-1:	cmp	r4, r5
-	strcc	fp, [r4], #4
-	bcc	1b
-
 	bl	pp502x_lowsetup
 
-#ifdef USE_EARLYSERIALINIT
-	bl	arm_earlyserialinit
-#endif
-
-	mov	lr, #0
-	b	nx_start
-
-.Linitparms:
-	.long	_sbss
-	.long	_ebss
-	.long	_ebss + CONFIG_IDLETHREAD_STACKSIZE
+	b	__start
 
 	.ltorg
-
-/****************************************************************************
- * Name: g_idle_topstack
- *
- * Description:
- *   The idle task stack starts at the end of BSS.  The heap continues from
- *   there until the end of RAM.
- *
- ****************************************************************************/
-
-	.data
-	.align	4
-	.globl	g_idle_topstack
-	.type	g_idle_topstack, object
-
-g_idle_topstack:
-	.long	_ebss + CONFIG_IDLETHREAD_STACKSIZE
-	.size	g_idle_topstack, . - g_idle_topstack
 	.end
