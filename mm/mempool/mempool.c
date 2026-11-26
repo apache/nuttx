@@ -30,6 +30,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <syslog.h>
+#include <sys/param.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/kasan.h>
@@ -659,27 +660,44 @@ void mempool_release(FAR struct mempool_s *pool, FAR void *blk)
  *
  * Returned Value:
  *   Return the number of available buffers in the mempool, 0 means no room.
+ *   SIZE_MAX means no limit: the pool expands on demand and has no
+ *   maxalloc.
  *
  ****************************************************************************/
 
 size_t mempool_navail(FAR struct mempool_s *pool)
 {
+  size_t blocksize;
   irqstate_t flags;
-  size_t ret;
+  size_t ret = SIZE_MAX;
 
   DEBUGASSERT(pool != NULL);
   mempool_init(pool);
 
+  blocksize = MEMPOOL_REALBLOCKSIZE(pool->blocksize);
   flags = spin_lock_irqsave(&pool->lock);
-  if (pool->maxalloc == 0)
+
+  /* A pool that cannot expand has only the free blocks of its queues, as
+   * mempool_allocate() takes them: the interrupt queue only in an
+   * interrupt.
+   */
+
+  if (pool->expandsize < blocksize + MEMPOOL_HEADER_SIZE)
     {
-      spin_unlock_irqrestore(&pool->lock, flags);
-      return SIZE_MAX;
+      ret = sq_count(&pool->queue);
+      if (up_interrupt_context())
+        {
+          ret += sq_count(&pool->iqueue);
+        }
     }
 
-  ret = pool->maxalloc > pool->nalloc ? pool->maxalloc - pool->nalloc : 0;
-  spin_unlock_irqrestore(&pool->lock, flags);
+  if (pool->maxalloc > 0)
+    {
+      ret = MIN(ret, pool->maxalloc > pool->nalloc ?
+                     pool->maxalloc - pool->nalloc : 0);
+    }
 
+  spin_unlock_irqrestore(&pool->lock, flags);
   return ret;
 }
 
