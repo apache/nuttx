@@ -141,7 +141,7 @@
 #    define SPI_DMACHAN_RX(priv)    GPDMA_TTYPE_P2M
 #    define SPI_DMACHAN_TX(priv)    GPDMA_TTYPE_M2P
 
-#  elif defined(CONFIG_ARCH_CHIP_STM32H7)
+#  elif defined(CONFIG_STM32_H7_LEGACY)
 #    define SPI_DMA_PRIO  DMA_SCR_PRILO
 
 /* DMA1/DMA2 stream configuration, BDMA (SPI6) takes the same values */
@@ -349,7 +349,7 @@
 #ifdef CONFIG_STM32_SPI_DMA
 #  if defined(CONFIG_STM32_HAVE_IP_DMA_GPDMA)
 typedef struct stm32_gpdma_cfg_s spi_dmacfg_t;
-#  elif defined(CONFIG_ARCH_CHIP_STM32H7)
+#  elif defined(CONFIG_STM32_H7_LEGACY)
 typedef stm32_dmacfg_t spi_dmacfg_t;
 #  endif
 #endif
@@ -1482,7 +1482,7 @@ static void spi_dma_cfg(struct stm32_spidev_s *priv, bool rx,
   dmacfg->priority   = SPI_DMA_PRIO;
   dmacfg->mode       = 0;
 }
-#elif defined(CONFIG_STM32_SPI_DMA) && defined(CONFIG_ARCH_CHIP_STM32H7)
+#elif defined(CONFIG_STM32_SPI_DMA) && defined(CONFIG_STM32_H7_LEGACY)
 static void spi_dma_cfg(struct stm32_spidev_s *priv, bool rx,
                         uintptr_t maddr, size_t nwords,
                         spi_dmacfg_t *dmacfg)

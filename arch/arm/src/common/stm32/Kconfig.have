@@ -888,9 +888,9 @@ config STM32_HAVE_IP_SPI_V5
 
 config STM32_HAVE_SPI_SLAVE
 	bool
-	default y if ARCH_CHIP_STM32H7 && STM32_HAVE_IP_SPI_V5
+	default y if STM32_H7_LEGACY && STM32_HAVE_IP_SPI_V5
 	---help---
-		The SPI slave driver supports this chip (STM32H7).
+		The SPI slave driver supports this chip (STM32H7, not H7R/S).
 
 config STM32_HAVE_SPI1
 	bool

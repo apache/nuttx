@@ -35,9 +35,11 @@
 
 /* SPI version **************************************************************/
 
-/* The STM32H7 SPI cannot bypass the baud rate prescaler (no CFG1.BPASS) */
+/* The STM32H7 SPI cannot bypass the baud rate prescaler (no CFG1.BPASS),
+ * the STM32H7R/S SPI can.
+ */
 
-#ifndef CONFIG_ARCH_CHIP_STM32H7
+#if !defined(CONFIG_ARCH_CHIP_STM32H7) || defined(CONFIG_STM32_STM32H7RSXX)
 #  define HAVE_SPI_BPASS
 #endif
 

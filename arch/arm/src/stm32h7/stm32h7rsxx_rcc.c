@@ -410,6 +410,38 @@ static inline void rcc_enableapb5(void)
 }
 
 /****************************************************************************
+ * Name: rcc_enableccip
+ *
+ * Description:
+ *   Set the SPI kernel clock sources that board.h selects.  The others
+ *   keep their reset value.
+ *
+ ****************************************************************************/
+
+static inline void rcc_enableccip(void)
+{
+#ifdef STM32_RCC_CCIPR2_SPI23SEL
+  modifyreg32(STM32_RCC_CCIPR2, RCC_CCIPR2_SPI23SEL_MASK,
+              STM32_RCC_CCIPR2_SPI23SEL);
+#endif
+
+#ifdef STM32_RCC_CCIPR3_SPI1SEL
+  modifyreg32(STM32_RCC_CCIPR3, RCC_CCIPR3_SPI1SEL_MASK,
+              STM32_RCC_CCIPR3_SPI1SEL);
+#endif
+
+#ifdef STM32_RCC_CCIPR3_SPI45SEL
+  modifyreg32(STM32_RCC_CCIPR3, RCC_CCIPR3_SPI45SEL_MASK,
+              STM32_RCC_CCIPR3_SPI45SEL);
+#endif
+
+#ifdef STM32_RCC_CCIPR4_SPI6SEL
+  modifyreg32(STM32_RCC_CCIPR4, RCC_CCIPR4_SPI6SEL_MASK,
+              STM32_RCC_CCIPR4_SPI6SEL);
+#endif
+}
+
+/****************************************************************************
  * Name: rcc_enableperipherals
  *
  * Description:
@@ -419,6 +451,7 @@ static inline void rcc_enableapb5(void)
 
 static inline void rcc_enableperipherals(void)
 {
+  rcc_enableccip();
   rcc_enableahb5();
   rcc_enableahb1();
   rcc_enableahb2();
