@@ -273,6 +273,8 @@ void mempool_release(FAR struct mempool_s *pool, FAR void *blk);
  *
  * Returned Value:
  *   Return the number of available buffers in the mempool, 0 means no room.
+ *   SIZE_MAX means no limit: the pool expands on demand and has no
+ *   maxalloc.
  *
  ****************************************************************************/
 
