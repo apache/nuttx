@@ -79,6 +79,8 @@ void up_initial_state(struct tcb_s *tcb)
                                       CONFIG_IDLETHREAD_STACKSIZE);
       tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+      tricore_set_tls_info((uintptr_t)tcb->stack_alloc_ptr +
+                           sizeof(struct tls_info_s));
 
 #ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a

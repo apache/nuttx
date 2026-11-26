@@ -31,6 +31,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <nuttx/userspace.h>
+#include <nuttx/tls.h>
 #include <syscall.h>
 
 #include <arch/barriers.h>
@@ -125,7 +126,8 @@ void tricore_svcall(volatile void *trap)
         nxsched_switch_context(*running_task, tcb);
 
       case SYS_restore_context:
-        tricore_set_tls_info(tcb->stack_alloc_ptr);
+        tricore_set_tls_info((uintptr_t)tcb->stack_alloc_ptr +
+                             sizeof(struct tls_info_s));
         *running_task = tcb;
         tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
         UP_ISB();

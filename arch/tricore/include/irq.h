@@ -195,7 +195,7 @@
 #define FPU_TRAP_FZE_SHIFT    20
 #define FPU_TRAP_TCL_SHIFT    1
 
-#define up_tls_info() ((struct tls_info_s *)read_sysreg(a8))
+#define up_tls_info() ((struct tls_info_s *)read_sysreg(a8) - 1)
 
 #ifndef __ASSEMBLY__
 
