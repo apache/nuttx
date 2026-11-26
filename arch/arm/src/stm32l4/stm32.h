@@ -38,7 +38,7 @@
 
 #include "chip.h"
 #include "stm32l4_adc.h"
-#include "stm32l4_can.h"
+#include "stm32_can.h"
 #include "stm32l4_comp.h"
 #include "stm32l4_dac.h"
 #include "stm32_dbgmcu.h"

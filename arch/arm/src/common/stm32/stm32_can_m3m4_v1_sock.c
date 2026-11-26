@@ -96,6 +96,19 @@
                             CAN_IER_EWGIE)
 #endif
 
+/* RCC reset of the CAN instances */
+
+#ifdef STM32_RCC_APB1RSTR1
+#  define CAN_RCC_RSTR              STM32_RCC_APB1RSTR1
+#  define CAN_RCC_CAN1RST           RCC_APB1RSTR1_CAN1RST
+#  define CAN_RCC_CAN2RST           RCC_APB1RSTR1_CAN2RST
+#else
+#  define CAN_RCC_RSTR              STM32_RCC_APB1RSTR
+#  define CAN_RCC_CAN1RST           RCC_APB1RSTR_CAN1RST
+#  define CAN_RCC_CAN2RST           RCC_APB1RSTR_CAN2RST
+#  define CAN_RCC_CAN3RST           RCC_APB1RSTR_CAN3RST
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -271,6 +284,28 @@ static struct stm32_can_s g_can2priv =
   .base             = STM32_CAN2_BASE,
   .fbase            = STM32_CAN1_BASE,
   .baud             = CONFIG_STM32_CAN2_BAUD,
+};
+
+#endif
+
+#ifdef CONFIG_STM32_CAN3
+
+static struct stm32_can_s g_can3priv =
+{
+  .port             = 3,
+  .canrx            =
+  {
+    STM32_IRQ_CAN3RX0,
+    STM32_IRQ_CAN3RX1,
+  },
+  .cantx            = STM32_IRQ_CAN3TX,
+#ifdef CONFIG_NET_CAN_ERRORS
+  .cansce           = STM32_IRQ_CAN3SCE,
+#endif
+  .filter           = 0,
+  .base             = STM32_CAN3_BASE,
+  .fbase            = STM32_CAN3_BASE,
+  .baud             = CONFIG_STM32_CAN3_BAUD,
 };
 
 #endif
@@ -2019,14 +2054,21 @@ static void stm32can_reset(struct stm32_can_s *priv)
 #ifdef CONFIG_STM32_CAN1
   if (priv->port == 1)
     {
-      regbit = RCC_APB1RSTR_CAN1RST;
+      regbit = CAN_RCC_CAN1RST;
     }
   else
 #endif
 #ifdef CONFIG_STM32_CAN2
   if (priv->port == 2)
     {
-      regbit = RCC_APB1RSTR_CAN2RST;
+      regbit = CAN_RCC_CAN2RST;
+    }
+  else
+#endif
+#ifdef CONFIG_STM32_CAN3
+  if (priv->port == 3)
+    {
+      regbit = CAN_RCC_CAN3RST;
     }
   else
 #endif
@@ -2043,12 +2085,12 @@ static void stm32can_reset(struct stm32_can_s *priv)
 
   /* Reset the CAN */
 
-  regval  = getreg32(STM32_RCC_APB1RSTR);
+  regval  = getreg32(CAN_RCC_RSTR);
   regval |= regbit;
-  putreg32(regval, STM32_RCC_APB1RSTR);
+  putreg32(regval, CAN_RCC_RSTR);
 
   regval &= ~regbit;
-  putreg32(regval, STM32_RCC_APB1RSTR);
+  putreg32(regval, CAN_RCC_RSTR);
   leave_critical_section(flags);
 }
 
@@ -2238,7 +2280,8 @@ static int stm32can_cellinit(struct stm32_can_s *priv)
  *   One filter is set up for each CAN.  The filter resources are shared
  *   between the two CAN modules:  CAN1 uses only filter 0 (but reserves
  *   0 through CAN_NFILTERS/2-1); CAN2 uses only filter CAN_NFILTERS/2
- *   (but reserves CAN_NFILTERS/2 through CAN_NFILTERS-1).
+ *   (but reserves CAN_NFILTERS/2 through CAN_NFILTERS-1).  CAN3 has its
+ *   own filter banks and uses only filter 0.
  *
  *   32-bit IdMask mode is configured.  However, both the ID and the MASK
  *   are set to zero thus suppressing all filtering because anything masked
@@ -2437,6 +2480,22 @@ int stm32_cansockinitialize(int port)
     }
   else
 #endif
+#ifdef CONFIG_STM32_CAN3
+  if (port == 3)
+    {
+      /* Select the CAN3 device structure */
+
+      priv = &g_can3priv;
+
+      /* Configure CAN3 pins.  The ambiguous settings in the stm32*_pinmap.h
+       * file must have been disambiguated in the board.h file.
+       */
+
+      stm32_configgpio(GPIO_CAN3_RX);
+      stm32_configgpio(GPIO_CAN3_TX);
+    }
+  else
+#endif
     {
       nerr("ERROR: Unsupported port %d\n", port);
       ret = -EINVAL;
@@ -2489,6 +2548,10 @@ void arm_netinitialize(void)
 
 #ifdef CONFIG_STM32_CAN2
   stm32_cansockinitialize(2);
+#endif
+
+#ifdef CONFIG_STM32_CAN3
+  stm32_cansockinitialize(3);
 #endif
 }
 #endif

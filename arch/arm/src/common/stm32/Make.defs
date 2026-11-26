@@ -122,6 +122,15 @@ ifeq ($(CONFIG_STM32_ETHMAC)$(CONFIG_STM32_HAVE_IP_ETHMAC_V2),yy)
 CHIP_CSRCS += stm32_eth_v2.c
 endif
 
+ifeq ($(CONFIG_STM32_CAN)$(CONFIG_STM32_HAVE_IP_CAN_BXCAN_M3M4_V1),yy)
+ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
+CHIP_CSRCS += stm32_can_m3m4_v1.c
+endif
+ifeq ($(CONFIG_STM32_CAN_SOCKET),y)
+CHIP_CSRCS += stm32_can_m3m4_v1_sock.c
+endif
+endif
+
 ifeq ($(CONFIG_STM32_FDCAN)$(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_V1),yy)
 ifeq ($(CONFIG_STM32_FDCAN_CHARDRIVER),y)
 CHIP_CSRCS += stm32_fdcan_mcan_v1.c
@@ -424,15 +433,6 @@ ifeq ($(CONFIG_STM32_CAP),y)
 CHIP_CSRCS += stm32_capture_m3m4_v1_lowerhalf.c
 endif
 
-
-ifeq ($(CONFIG_STM32_CAN)$(CONFIG_STM32_HAVE_IP_CAN_BXCAN_M3M4_V1),yy)
-ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
-CHIP_CSRCS += stm32_can_m3m4_v1.c
-endif
-ifeq ($(CONFIG_STM32_CAN_SOCKET),y)
-CHIP_CSRCS += stm32_can_m3m4_v1_sock.c
-endif
-endif
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
 ifeq ($(CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1),y)
