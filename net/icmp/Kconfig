@@ -27,7 +27,7 @@
 menu "ICMP Networking Support"
 
 config NET_ICMP
-	bool "Enable ICMP networking"
+	bool "Enable ICMP networking" if NET_IPv4
 	default NET_IPv4
 	---help---
 		Enable minimal ICMP support. Includes built-in support
