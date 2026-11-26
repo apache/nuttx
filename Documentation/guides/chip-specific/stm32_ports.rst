@@ -551,7 +551,7 @@ RNG           to be done    arch/arm/src/stm32l4/stm32l4_rng.c
 RTC           to be done    arch/arm/src/stm32l4/stm32l4_rtc.c       
 SAI           to be done    arch/arm/src/stm32l4/stm32l4_sai.c       
 SDMMC         to be done    arch/arm/src/stm32l4/stm32l4_sdmmc.c     
-SPI/I2S       to be done    arch/arm/src/stm32l4/stm32l4_spi.c       
+SPI           v4            arch/arm/src/common/stm32/stm32_spi_m3m4_v2v3v4.c
 TIM           v2            arch/arm/src/common/stm32/stm32_tim.c    
 USART/LPUART  v3            arch/arm/src/stm32l4/stm32l4_serial.c    
 USB           OTG FS        arch/arm/src/stm32l4/stm32l4_otgfsdev.c  

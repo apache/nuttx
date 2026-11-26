@@ -99,7 +99,7 @@
 
 #ifdef CONFIG_STM32_SPI_DMA
 
-#  if defined(CONFIG_STM32_HAVE_IP_DMA_V1)
+#  if defined(CONFIG_STM32_HAVE_IP_DMA_V1) || defined(CONFIG_ARCH_CHIP_STM32L4)
 #    define SPI_DMA_PRIO  DMA_CCR_PRIMED
 #  elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #    define SPI_DMA_PRIO  DMA_SCR_PRIMED
@@ -109,11 +109,11 @@
 #    error "Unknown STM32 DMA"
 #  endif
 
-/* DMA channel configuration.  The STM32F7 has its own driver for the
- * stream DMA of the IP v2.
+/* DMA channel configuration.  The STM32L4 and STM32F7 have their own
+ * drivers for the channel DMA of the IP v1 and the stream DMA of the IP v2.
  */
 
-#if defined(CONFIG_STM32_HAVE_IP_DMA_V1)
+#if defined(CONFIG_STM32_HAVE_IP_DMA_V1) || defined(CONFIG_ARCH_CHIP_STM32L4)
 #  define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC            )
 #  define SPI_RXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC            )
 #  define SPI_RXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS                         )
@@ -218,8 +218,8 @@ struct stm32_spidev_s
   bool             defertrig;    /* Flag indicating that trigger should be deferred */
   bool             trigarmed;    /* Flag indicating that the trigger is armed */
 #endif
-  uint8_t          rxch;         /* The RX DMA channel number */
-  uint8_t          txch;         /* The TX DMA channel number */
+  uint16_t         rxch;         /* The RX DMA channel number */
+  uint16_t         txch;         /* The TX DMA channel number */
   uint8_t          *rxbuf;       /* The RX DMA buffer */
   uint8_t          *txbuf;       /* The TX DMA buffer */
   size_t           buflen;       /* The DMA buffer length */

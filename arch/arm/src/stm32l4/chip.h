@@ -56,4 +56,8 @@
 #define ARMV7M_DCACHE_LINESIZE 0  /* no cache */
 #define ARMV7M_ICACHE_LINESIZE 0  /* no cache */
 
+/* Maximum SPI clock as per specifications for all SPIs */
+
+#define STM32_SPI_CLK_MAX      40000000UL
+
 #endif /* __ARCH_ARM_SRC_STM32L4_CHIP_H */
