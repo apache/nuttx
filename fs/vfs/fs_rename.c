@@ -112,18 +112,34 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
   ret = inode_search(&newdesc, &newinode);
   if (ret >= 0)
     {
+      FAR struct inode *oldtarget = oldinode;
+      FAR struct inode *newtarget = newinode;
+
       /* We found it.  Get the search results */
 
       DEBUGASSERT(newinode != NULL);
 
-      /* If the old and new inodes are the same, then this is an attempt to
-       * move the directory entry onto itself.  Let's not but say we did.
+#ifdef CONFIG_FS_LINKS
+      if (INODE_IS_HARDLINK(oldtarget))
+        {
+          oldtarget = oldtarget->i_private;
+        }
+
+      if (INODE_IS_HARDLINK(newtarget))
+        {
+          newtarget = newtarget->i_private;
+        }
+#endif
+
+      /* POSIX requires both names to remain when they refer to the same
+       * file.  No entry moves, so no rename notification should be sent.
        */
 
-      if (oldinode == newinode)
+      if (oldtarget == newtarget)
         {
-          ret = OK;
-          goto errout_with_newsearch;
+          inode_search_release(&newdesc);
+          inode_unlock();
+          return OK;
         }
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
