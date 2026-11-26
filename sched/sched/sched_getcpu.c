@@ -31,6 +31,8 @@
 
 #include "sched/sched.h"
 
+#ifndef CONFIG_ARCH_SCHED_GETCPU_USER_ACCESS
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -65,3 +67,5 @@ int sched_getcpu(void)
 {
   return up_cpu_index();  /* Does not fail */
 }
+
+#endif /* CONFIG_ARCH_SCHED_GETCPU_USER_ACCESS */
