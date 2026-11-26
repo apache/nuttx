@@ -1290,7 +1290,6 @@ static int inet_connect(FAR struct socket *psock,
         break;
 
       default:
-        DEBUGPANIC();
         return -EAFNOSUPPORT;
     }
 
