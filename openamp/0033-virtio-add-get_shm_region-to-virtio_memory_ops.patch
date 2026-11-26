@@ -1,0 +1,112 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Thu, 22 Oct 2026 13:18:23 +0800
+Subject: [PATCH] virtio: add get_shm_region to virtio_memory_ops
+
+Virtio 1.1 defines shared memory regions, device specific memory
+windows identified by an id, but there is no way for a driver to
+query them.
+
+Add struct virtio_shm_region, a get_shm_region op in
+virtio_memory_ops and the virtio_get_shm_region() wrapper, which
+returns -ENXIO when the transport does not implement it and -ENOENT
+when the device has no such region. Only the transport knows how to
+make the region accessible, so it returns the mapped va along with
+the physical address.
+
+Record the resource table vdev index in struct remoteproc_virtio, so
+a remoteproc transport can find the region resources of a vdev.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+diff --git a/lib/include/openamp/remoteproc_virtio.h open-amp/lib/include/openamp/remoteproc_virtio.h
+--- a/lib/include/openamp/remoteproc_virtio.h
++++ open-amp/lib/include/openamp/remoteproc_virtio.h
+@@ -53,6 +53,9 @@
+ 	/** Notification function */
+ 	rpvdev_notify_func notify;
+ 
++	/** Index of the vdev resource in the resource table */
++	unsigned int index;
++
+ 	/** Virtio device */
+ 	struct virtio_device vdev;
+ 
+diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
+--- a/lib/include/openamp/virtio.h
++++ open-amp/lib/include/openamp/virtio.h
+@@ -306,6 +306,18 @@
+ 	VIRTIO_DMA_BIDIRECTIONAL,	/**< Data transferred both ways. */
+ };
+ 
++/** @brief Virtio shared memory region, see virtio spec "Shared Memory Regions". */
++struct virtio_shm_region {
++	/** Physical address of va, as metal_io_virt_to_phys() returns it */
++	metal_phys_addr_t addr;
++
++	/** Address mapped by the transport, accessible by this CPU */
++	void *va;
++
++	/** Length of the region in bytes */
++	size_t len;
++};
++
+ struct virtio_memory_ops {
+ 	/** Allocate memory from the virtio device. */
+ 	void *(*alloc)(struct virtio_device *dev, size_t size, size_t align);
+@@ -328,6 +340,10 @@
+ 		     enum virtio_dma_map dir);
+ 	void (*unmap)(struct virtio_device *dev, void *buf, size_t len,
+ 		      enum virtio_dma_map dir, void *mapped);
++
++	/* Look up shared memory region id, -ENOENT if the device has none. */
++	int (*get_shm_region)(struct virtio_device *dev, uint8_t id,
++			      struct virtio_shm_region *region);
+ };
+ 
+ /**
+@@ -617,6 +633,30 @@
+ }
+ 
+ /**
++ * @brief Get a shared memory region of the virtio device.
++ *
++ * @param vdev		Pointer to virtio device structure.
++ * @param id		Shared memory region id, defined per device type.
++ * @param region	Filled with the region address, mapping and length.
++ *
++ * @return 0 on success, -ENOENT if the device has no such region,
++ * -ENXIO if the transport does not support shared memory regions,
++ * otherwise error code.
++ */
++static inline int virtio_get_shm_region(struct virtio_device *vdev,
++					uint8_t id,
++					struct virtio_shm_region *region)
++{
++	if (!vdev || !region)
++		return -EINVAL;
++
++	if (!vdev->mmops || !vdev->mmops->get_shm_region)
++		return -ENXIO;
++
++	return vdev->mmops->get_shm_region(vdev, id, region);
++}
++
++/**
+  * @brief Map a buffer so the device side can access it.
+  *
+  * If the transport does not need to bounce buffers (the peer can access
+diff --git a/lib/remoteproc/remoteproc.c open-amp/lib/remoteproc/remoteproc.c
+--- a/lib/remoteproc/remoteproc.c
++++ open-amp/lib/remoteproc/remoteproc.c
+@@ -994,6 +994,7 @@
+ 	rproc_virtio_wait_remote_ready(vdev);
+ 
+ 	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
++	rpvdev->index = vdev_id;
+ 	metal_list_add_tail(&rproc->vdevs, &rpvdev->node);
+ 	num_vrings = vdev_rsc->num_of_vrings;
+ 
+-- 
+2.34.1
+

@@ -99,6 +99,7 @@ open-amp.zip:
 	$(Q) patch -p0 < 0030-rpmsg-export-rpmsg_unregister_endpoint.patch
 	$(Q) patch -p0 < 0031-rpmsg-let-a-service-attach-extra-data-to-its-ns-anno.patch
 	$(Q) patch -p0 < 0032-rpmsg-hand-the-announced-extra-data-to-the-bound-and.patch
+	$(Q) patch -p0 < 0033-virtio-add-get_shm_region-to-virtio_memory_ops.patch
 
 .openamp_headers: open-amp.zip
 else
