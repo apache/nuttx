@@ -888,7 +888,10 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
               }
           }
 
-        break;
+        /* The file descriptor is not in the set */
+
+        ret = -ENOENT;
+        goto err;
 
       case EPOLL_CTL_MOD:
         finfo("%p CTL MOD: fd=%d ev=%08" PRIx32 "\n", eph, fd, ev->events);
@@ -964,11 +967,14 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
 
                 list_delete(&epn->node);
                 list_add_tail(&eph->setup, &epn->node);
-                break;
+                goto out;
               }
           }
 
-        break;
+        /* The file descriptor is not in the set */
+
+        ret = -ENOENT;
+        goto err;
 
       default:
         ret = -EINVAL;
