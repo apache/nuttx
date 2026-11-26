@@ -288,6 +288,18 @@ config ARCH_BOARD_EFM32GG_STK3700
 	---help---
 		This option selects the EFM32 Giant Gecko Starter Kit (EFM32GG-STK3700).
 
+config ARCH_BOARD_XG24_EK2703A
+	bool "Silicon Labs EFR32xG24 Explorer Kit (xG24-EK2703A)"
+	depends on ARCH_CHIP_EFR32MG24B210F1536IM48
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if EFR32_GPIO_IRQ
+	---help---
+		This option selects the Silicon Labs EFR32xG24 Explorer Kit
+		(xG24-EK2703A, board BRD2703A) with an EFR32MG24B210F1536IM48
+		(Cortex-M33, 1536 KB flash, 256 KB RAM), an on-board J-Link
+		debugger with a virtual COM port, two LEDs and two buttons.
+
 config ARCH_BOARD_EKKLM3S9B96
 	bool "TI/Stellaris EKK-LM3S9B96"
 	depends on ARCH_CHIP_LM3S9B96
@@ -4264,6 +4276,7 @@ config ARCH_BOARD
 	default "eagle100"                     if ARCH_BOARD_EAGLE100
 	default "efm32-g8xx-stk"               if ARCH_BOARD_EFM32G8XXSTK
 	default "efm32gg-stk3700"              if ARCH_BOARD_EFM32GG_STK3700
+	default "xg24-ek2703a"                 if ARCH_BOARD_XG24_EK2703A
 	default "ekk-lm3s9b96"                 if ARCH_BOARD_EKKLM3S9B96
 	default "elegoo-mega2560r3"            if ARCH_BOARD_ELEGOO_MEGA2560R3
 	default "emw3162"                      if ARCH_BOARD_EMW3162
@@ -4747,6 +4760,9 @@ source "boards/arm/efm32/efm32-g8xx-stk/Kconfig"
 endif
 if ARCH_BOARD_EFM32GG_STK3700
 source "boards/arm/efm32/efm32gg-stk3700/Kconfig"
+endif
+if ARCH_BOARD_XG24_EK2703A
+source "boards/arm/efr32/xg24-ek2703a/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
 source "boards/arm/efm32/olimex-efm32g880f128-stk/Kconfig"
