@@ -729,18 +729,56 @@ netlink_get_neighbor(FAR const void *neigh, int domain, int type,
   return (FAR struct netlink_response_s *)alloc;
 }
 
-static int netlink_get_neighborlist(NETLINK_HANDLE handle, int domain,
-                              FAR const struct nlroute_sendto_request_s *req)
+static int netlink_get_neighborlist(NETLINK_HANDLE handle,
+                                    FAR const struct nlroute_sendto_request_s
+                                    *req)
 {
   FAR struct netlink_response_s *resp;
+  int family = req->gen.rtgen_family;
+  bool match = false;
+  bool found = false;
 
-  resp = netlink_get_neighbor(NULL, domain, RTM_GETNEIGH, req);
-  if (resp == NULL)
+  /* As in Linux, AF_UNSPEC dumps the tables of all families */
+
+#ifdef CONFIG_NET_ARP
+  if (family == AF_INET || family == AF_UNSPEC)
+    {
+      match = true;
+      resp  = netlink_get_neighbor(NULL, AF_INET, RTM_GETNEIGH, req);
+      if (resp != NULL)
+        {
+          netlink_add_response(handle, resp);
+          found = true;
+        }
+    }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+  if (family == AF_INET6 || family == AF_UNSPEC)
+    {
+      match = true;
+      resp  = netlink_get_neighbor(NULL, AF_INET6, RTM_GETNEIGH, req);
+      if (resp != NULL)
+        {
+          netlink_add_response(handle, resp);
+          found = true;
+        }
+    }
+#endif
+
+  if (!match)
+    {
+      return -EAFNOSUPPORT;
+    }
+
+  /* The empty table of one family is an error.  The dump of all families
+   * ends with NLMSG_DONE also when all tables are empty, as in Linux.
+   */
+
+  if (!found && family != AF_UNSPEC)
     {
       return -ENOENT;
     }
-
-  netlink_add_response(handle, resp);
 
   return netlink_add_terminator(handle, &req->hdr, 0);
 }
@@ -843,22 +881,13 @@ static int netlink_list_ipv4_route(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   struct nlroute_info_s info;
-  int ret;
 
   /* Visit each routing table entry */
 
   info.handle = handle;
   info.req    = req;
 
-  ret = net_foreachroute_ipv4(netlink_ipv4route_callback, &info);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Terminate the routing table */
-
-  return netlink_add_terminator(handle, &req->hdr, 0);
+  return net_foreachroute_ipv4(netlink_ipv4route_callback, &info);
 }
 #endif
 
@@ -963,14 +992,54 @@ static int netlink_list_ipv6_route(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   struct nlroute_info_s info;
-  int ret;
 
   /* Visit each routing table entry */
 
   info.handle = handle;
   info.req    = req;
 
-  ret = net_foreachroute_ipv6(netlink_ipv6route_callback, &info);
+  return net_foreachroute_ipv6(netlink_ipv6route_callback, &info);
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_list_route
+ *
+ * Description:
+ *   Dump the routing table of the family of the request.  As in Linux,
+ *   AF_UNSPEC dumps the tables of all families.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NETLINK_DISABLE_GETROUTE
+static int netlink_list_route(NETLINK_HANDLE handle,
+                              FAR const struct nlroute_sendto_request_s *req)
+{
+  int family = req->gen.rtgen_family;
+  int ret = -EAFNOSUPPORT;
+
+#ifdef CONFIG_NET_IPv4
+  if (family == AF_INET || family == AF_UNSPEC)
+    {
+      ret = netlink_list_ipv4_route(handle, req);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+  if (family == AF_INET6 || family == AF_UNSPEC)
+    {
+      ret = netlink_list_ipv6_route(handle, req);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+#endif
+
   if (ret < 0)
     {
       return ret;
@@ -1222,7 +1291,8 @@ static int netlink_addr_callback(FAR struct net_driver_s *dev, FAR void *arg)
   FAR struct nlroute_info_s *info = arg;
 
 #ifdef CONFIG_NET_IPv4
-  if (info->req->gen.rtgen_family == AF_INET)
+  if (info->req->gen.rtgen_family == AF_INET ||
+      info->req->gen.rtgen_family == AF_UNSPEC)
     {
       FAR struct netlink_response_s *resp;
 
@@ -1239,7 +1309,8 @@ static int netlink_addr_callback(FAR struct net_driver_s *dev, FAR void *arg)
 #endif
 
 #ifdef CONFIG_NET_IPv6
-  if (info->req->gen.rtgen_family == AF_INET6)
+  if (info->req->gen.rtgen_family == AF_INET6 ||
+      info->req->gen.rtgen_family == AF_UNSPEC)
     {
       return netdev_ipv6_foreach(dev, netlink_ipv6_addr_callback, arg);
     }
@@ -1253,6 +1324,23 @@ static int netlink_get_addr(NETLINK_HANDLE handle,
 {
   struct nlroute_info_s info;
   int ret;
+
+  /* As in Linux, AF_UNSPEC dumps the addresses of all families */
+
+  switch (req->gen.rtgen_family)
+    {
+      case AF_UNSPEC:
+#ifdef CONFIG_NET_IPv4
+      case AF_INET:
+#endif
+#ifdef CONFIG_NET_IPv6
+      case AF_INET6:
+#endif
+        break;
+
+      default:
+        return -EAFNOSUPPORT;
+    }
 
   /* Visit each device */
 
@@ -1368,28 +1456,7 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
       /* Retrieve ARP/Neighbor Tables */
 
       case RTM_GETNEIGH:
-#ifdef CONFIG_NET_ARP
-        /* Retrieve the ARP table in its entirety. */
-
-        if (req->gen.rtgen_family == AF_INET)
-          {
-            ret = netlink_get_neighborlist(handle, AF_INET, req);
-          }
-        else
-#endif
-
-#ifdef CONFIG_NET_IPv6
-        /* Retrieve the IPv6 neighbor table in its entirety. */
-
-        if (req->gen.rtgen_family == AF_INET6)
-          {
-            ret = netlink_get_neighborlist(handle, AF_INET6, req);
-          }
-        else
-#endif
-          {
-            ret = -EAFNOSUPPORT;
-          }
+        ret = netlink_get_neighborlist(handle, req);
         break;
 #endif /* !CONFIG_NETLINK_DISABLE_GETNEIGH */
 
@@ -1397,23 +1464,7 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
       /* Retrieve the IPv4 or IPv6 routing table */
 
       case RTM_GETROUTE:
-#ifdef CONFIG_NET_IPv4
-        if (req->gen.rtgen_family == AF_INET)
-          {
-            ret = netlink_list_ipv4_route(handle, req);
-          }
-        else
-#endif
-#ifdef CONFIG_NET_IPv6
-        if (req->gen.rtgen_family == AF_INET6)
-          {
-            ret = netlink_list_ipv6_route(handle, req);
-          }
-        else
-#endif
-          {
-            ret = -EAFNOSUPPORT;
-          }
+        ret = netlink_list_route(handle, req);
         break;
 #endif
 
@@ -1469,23 +1520,7 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
       /* Get the IPv4 or IPv6 address */
 
       case RTM_GETADDR:
-#ifdef CONFIG_NET_IPv4
-        if (req->gen.rtgen_family == AF_INET)
-          {
-            ret = netlink_get_addr(handle, req);
-          }
-        else
-#endif
-#ifdef CONFIG_NET_IPv6
-        if (req->gen.rtgen_family == AF_INET6)
-          {
-            ret = netlink_get_addr(handle, req);
-          }
-        else
-#endif
-          {
-            ret = -EAFNOSUPPORT;
-          }
+        ret = netlink_get_addr(handle, req);
         break;
 #endif
 
