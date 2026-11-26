@@ -175,7 +175,7 @@ int stm32_bringup(void)
 #endif
 
 #if defined(CONFIG_STM32_DCMIPP) && defined(CONFIG_VIDEO_IMX335)
-  /* Register the IMX335 camera and the DCMIPP */
+  /* Register the IMX335 camera, the DCMIPP and /dev/video */
 
   ret = stm32_camera_initialize();
   if (ret < 0)

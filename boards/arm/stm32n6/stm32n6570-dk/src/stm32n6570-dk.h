@@ -198,8 +198,8 @@ void stm32_camera_power(void);
  * Name: stm32_camera_initialize
  *
  * Description:
- *   Power up the camera module and register the IMX335 sensor and the
- *   DCMIPP capture interface.
+ *   Power up the camera module and register the IMX335 sensor, the
+ *   DCMIPP capture interface and /dev/video.
  *
  ****************************************************************************/
 
