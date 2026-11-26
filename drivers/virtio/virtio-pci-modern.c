@@ -469,6 +469,7 @@ static void virtio_pci_modern_write_config(FAR struct virtio_device *vdev,
         {
           FAR char *s = src;
           int i;
+
           for (i = 0; i < length; i++)
             {
               pci_write_io_byte(vpdev->dev,
@@ -525,6 +526,7 @@ static void virtio_pci_modern_read_config(FAR struct virtio_device *vdev,
         {
           FAR char *d = dst;
           int i;
+
           for (i = 0; i < length; i++)
             {
               pci_read_io_byte(vpdev->dev,
