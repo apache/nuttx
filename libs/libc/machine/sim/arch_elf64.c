@@ -33,6 +33,7 @@
 #include <nuttx/config.h>
 
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <nuttx/debug.h>
 #include <assert.h>
@@ -171,7 +172,8 @@ int up_relocateadd(const Elf64_Rela *rel, const Elf64_Sym *sym,
   switch (relotype)
     {
       case R_X86_64_64: /* S + A */
-        *(uint64_t *)addr = sym->st_value + rel->r_addend;
+        value = sym->st_value + rel->r_addend;
+        memcpy((void *)addr, &value, sizeof(value));
         break;
       case R_X86_64_PC32:  /* S + A - P */
       case R_X86_64_PLT32: /* L + A - P */
@@ -186,7 +188,7 @@ int up_relocateadd(const Elf64_Rela *rel, const Elf64_Sym *sym,
         break;
       case R_X86_64_PC64:  /* S + A - P */
         value = sym->st_value + rel->r_addend - addr;
-        *(uint64_t *)addr = value;
+        memcpy((void *)addr, &value, sizeof(value));
         break;
       case R_X86_64_32:  /* S + A */
       case R_X86_64_32S: /* S + A */
