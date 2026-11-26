@@ -29,7 +29,8 @@ set(SRCS
     task_setcanceltype.c
     task_testcancel.c
     task_gettid.c
-    task_getpid.c)
+    task_getpid.c
+    sched_getcpu.c)
 
 if(CONFIG_SMP)
   list(APPEND SRCS sched_cpucount.c)

@@ -717,6 +717,14 @@ config ARCH_HAVE_PERF_EVENTS_USER_ACCESS
 	---help---
 		Select if hardware allows userspace perf counter access.
 
+config ARCH_SCHED_GETCPU_USER_ACCESS
+	bool "Enable userspace sched_getcpu access"
+	default n
+	depends on ARCH_HAVE_MULTICPU
+	depends on BUILD_FLAT
+	---help---
+		Enable userspace sched_getcpu access.
+
 config ARCH_PERF_EVENTS
 	bool "Configure hardware performance counting"
 	default y if SCHED_CRITMONITOR || SCHED_IRQMONITOR || RPMSG_PING || SEGGER_SYSVIEW
