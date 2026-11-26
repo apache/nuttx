@@ -88,6 +88,11 @@ void fs_heap_free(FAR void *mem)
   mm_free(g_fs_heap, mem);
 }
 
+bool fs_heap_member(FAR void *mem)
+{
+  return mm_heapmember(g_fs_heap, mem);
+}
+
 FAR char *fs_heap_strdup(FAR const char *s)
 {
   size_t len = strlen(s) + 1;

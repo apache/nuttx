@@ -4,6 +4,31 @@
 File Descriptors
 ================
 
+File Object Allocation
+======================
+
+``CONFIG_FS_PREALLOC_FILES`` reserves a static pool of ``struct file``
+objects. ``CONFIG_FS_ALLOC_FILES`` sets the number of objects added to the
+pool from ``fs_heap`` when the pool is empty. Both settings default to zero,
+which preserves direct allocation from ``fs_heap``.
+
+Set ``CONFIG_FS_PREALLOC_FILES`` to a positive value and leave
+``CONFIG_FS_ALLOC_FILES`` at zero for a fixed pool. Allocation fails
+immediately when all objects are in use. Include files opened during system
+startup when choosing its capacity. Set ``CONFIG_FS_ALLOC_FILES`` to a
+positive value to allow growth, with or without statically reserved objects.
+Expanded storage remains allocated for reuse, so memory use follows the
+peak number of file objects. Dynamic chunks use the independent FS heap
+when ``CONFIG_FS_HEAPSIZE`` is enabled, and the kernel heap otherwise.
+
+The pool serves dynamically allocated open file objects across all tasks.
+``dup()`` and inherited descriptors share references to an open file object;
+the object returns to the pool when its last reference is released. File
+descriptor tables, socket private data and filesystem private data have
+their own allocation policies. Caller-owned objects passed to
+``file_open()`` are also outside this pool. Enabling this pool alone does
+not make ``open()`` free of heap allocations.
+
 Drivers within Drivers
 ======================
 
