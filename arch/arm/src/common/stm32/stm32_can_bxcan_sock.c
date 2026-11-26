@@ -39,9 +39,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include <nuttx/wqueue.h>
-#include <nuttx/net/netdev.h>
+#include <nuttx/can.h>
 #include <nuttx/net/can.h>
+#include <nuttx/net/netdev_lowerhalf.h>
 
 #include "arm_internal.h"
 #include "chip.h"
@@ -67,26 +67,9 @@
 #  undef CONFIG_STM32_CAN_REGDEBUG
 #endif
 
-/* Pool configuration *******************************************************/
+/* Number of TX mailboxes */
 
-#define POOL_SIZE  (1)
-
-/* Work queue support is required. */
-
-#if !defined(CONFIG_SCHED_WORKQUEUE)
-#  error Work queue support is required
-#endif
-
-/* The low priority work queue is preferred.  If it is not enabled, LPWORK
- * will be the same as HPWORK.
- *
- * NOTE:  However, the network should NEVER run on the high priority work
- * queue!  That queue is intended only to service short back end interrupt
- * processing that never suspends.  Suspending the high priority work queue
- * may bring the system to its knees!
- */
-
-#define CANWORK LPWORK
+#define CAN_NTXMB 3
 
 /* CAN error interrupts */
 
@@ -115,7 +98,9 @@
 
 struct stm32_can_s
 {
-  uint8_t  port;     /* CAN port number (1 or 2) */
+  struct netdev_lowerhalf_s dev; /* Lower half network device, first */
+
+  uint8_t  port;     /* CAN port number (1 to 3) */
   uint8_t  canrx[2]; /* CAN RX FIFO 0/1 IRQ number */
   uint8_t  cantx;    /* CAN TX IRQ number */
 #ifdef CONFIG_NET_CAN_ERRORS
@@ -125,22 +110,11 @@ struct stm32_can_s
   uint32_t base;     /* Base address of the CAN control registers */
   uint32_t fbase;    /* Base address of the CAN filter registers */
   uint32_t baud;     /* Configured baud */
-
-  bool                bifup;  /* true:ifup false:ifdown */
-  struct net_driver_s dev;    /* Interface understood by the network */
-
-  struct work_s irqwork;  /* For deferring interrupt work to the wq */
-  struct work_s pollwork; /* For deferring poll work to the work wq */
-
-  /* A pointers to the list of TX/RX descriptors */
-
-  struct can_frame *txdesc;
-  struct can_frame *rxdesc;
-
-  /* TX/RX pool */
-
-  uint8_t tx_pool[sizeof(struct can_frame)*POOL_SIZE];
-  uint8_t rx_pool[sizeof(struct can_frame)*POOL_SIZE];
+  bool     active;   /* Between ifup and ifdown */
+#ifdef CONFIG_NET_CAN_ERRORS
+  bool     errpending; /* Error interrupt waits for receive() */
+#endif
+  netpkt_t *txpkt[CAN_NTXMB]; /* Packets held by the TX mailboxes */
 };
 
 /****************************************************************************
@@ -179,34 +153,21 @@ static void stm32can_txint(struct stm32_can_s *priv, bool enable);
 static void stm32can_errint(struct stm32_can_s *priv, bool enable);
 #endif
 
-/* Common TX logic */
+/* TX and RX */
 
-static int stm32can_transmit(struct stm32_can_s *priv);
-static bool stm32can_txready(struct stm32_can_s *priv);
-static int  stm32can_txpoll(struct net_driver_s *dev);
+static int  stm32can_reclaim(struct stm32_can_s *priv);
+static netpkt_t *stm32can_rxframe(struct stm32_can_s *priv, int rxmb);
+#ifdef CONFIG_NET_CAN_ERRORS
+static netpkt_t *stm32can_errframe(struct stm32_can_s *priv);
+#endif
 
-/* CAN RX interrupt handling */
+/* Interrupt handling */
 
-static int  stm32can_rxinterrupt_work(struct stm32_can_s *priv,
-                                      int rxmb);
-
-static void stm32can_rx0interrupt_work(void *arg);
-static void stm32can_rx1interrupt_work(void *arg);
-static int stm32can_rxinterrupt(struct stm32_can_s *priv, int rxmb);
-
+static int  stm32can_rxinterrupt(struct stm32_can_s *priv, int rxmb);
 static int  stm32can_rx0interrupt(int irq, void *context, void *arg);
 static int  stm32can_rx1interrupt(int irq, void *context, void *arg);
-
-/* CAN TX interrupt handling */
-
 static int  stm32can_txinterrupt(int irq, void *context, void *arg);
-static void stm32can_txdone_work(void *arg);
-static void stm32can_txdone(struct stm32_can_s *priv);
-
 #ifdef CONFIG_NET_CAN_ERRORS
-/* CAN errors interrupt handling */
-
-static void stm32can_sceinterrupt_work(void *arg);
 static int  stm32can_sceinterrupt(int irq, void *context, void *arg);
 #endif
 
@@ -229,20 +190,36 @@ static bool stm32can_txmb2empty(uint32_t tsr_regval);
 
 /* NuttX callback functions */
 
-static int  stm32can_ifup(struct net_driver_s *dev);
-static int  stm32can_ifdown(struct net_driver_s *dev);
-
-static void stm32can_txavail_work(void *arg);
-static int  stm32can_txavail(struct net_driver_s *dev);
-
+static int  stm32can_ifup(struct netdev_lowerhalf_s *dev);
+static int  stm32can_ifdown(struct netdev_lowerhalf_s *dev);
+static int  stm32can_transmit(struct netdev_lowerhalf_s *dev,
+                              netpkt_t *pkt);
+static netpkt_t *stm32can_receive(struct netdev_lowerhalf_s *dev);
+#ifdef CONFIG_NET_NETPOLL
+static void stm32can_txpoll(struct netdev_lowerhalf_s *dev);
+#endif
 #ifdef CONFIG_NETDEV_IOCTL
-static int  stm32can_netdev_ioctl(struct net_driver_s *dev, int cmd,
+static int  stm32can_netdev_ioctl(struct netdev_lowerhalf_s *dev, int cmd,
                                   unsigned long arg);
 #endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static const struct netdev_ops_s g_can_ops =
+{
+  .ifup     = stm32can_ifup,
+  .ifdown   = stm32can_ifdown,
+  .transmit = stm32can_transmit,
+  .receive  = stm32can_receive,
+#ifdef CONFIG_NET_NETPOLL
+  .txpoll   = stm32can_txpoll,
+#endif
+#ifdef CONFIG_NETDEV_IOCTL
+  .ioctl    = stm32can_netdev_ioctl,
+#endif
+};
 
 #ifdef CONFIG_STM32_CAN1
 
@@ -751,26 +728,31 @@ static void stm32can_errint(struct stm32_can_s *priv, bool enable)
  * Function: stm32can_ifup
  *
  * Description:
- *   NuttX Callback: Bring up the Ethernet interface when an IP address is
- *   provided
+ *   NuttX Callback: Bring up the CAN interface.
  *
  * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   dev  - Reference to the lower half driver state structure
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static int stm32can_ifup(struct net_driver_s *dev)
+static int stm32can_ifup(struct netdev_lowerhalf_s *dev)
 {
-  struct stm32_can_s *priv = (struct stm32_can_s *)dev->d_private;
+  struct stm32_can_s *priv = (struct stm32_can_s *)dev;
+  int ret;
 
   /* Setup CAN */
 
-  stm32can_setup(priv);
+  ret = stm32can_setup(priv);
+  if (ret < 0)
+    {
+      stm32can_shutdown(priv);
+      return ret;
+    }
+
+  priv->active = true;
 
   /* Enable interrupts */
 
@@ -790,15 +772,7 @@ static int stm32can_ifup(struct net_driver_s *dev)
   up_enable_irq(priv->cansce);
 #endif
 
-  priv->bifup = true;
-
-  priv->txdesc = (struct can_frame *)priv->tx_pool;
-  priv->rxdesc = (struct can_frame *)priv->rx_pool;
-
-  priv->dev.d_buf = (uint8_t *)priv->txdesc;
-
-  netdev_carrier_on(dev);
-
+  netdev_lower_carrier_on(dev);
   return OK;
 }
 
@@ -809,87 +783,83 @@ static int stm32can_ifup(struct net_driver_s *dev)
  *   NuttX Callback: Stop the interface.
  *
  * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   dev  - Reference to the lower half driver state structure
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
+ *   Zero (OK)
  *
  ****************************************************************************/
 
-static int stm32can_ifdown(struct net_driver_s *dev)
+static int stm32can_ifdown(struct netdev_lowerhalf_s *dev)
 {
-  struct stm32_can_s *priv = (struct stm32_can_s *)dev->d_private;
+  struct stm32_can_s *priv = (struct stm32_can_s *)dev;
+  int i;
 
-  /* Disable CAN interrupts */
+  netdev_lower_carrier_off(dev);
+
+  /* Disable CAN interrupts and reset CAN */
 
   stm32can_shutdown(priv);
-
-  /* Reset CAN */
-
+  priv->active = false;
   stm32can_reset(priv);
 
-  netdev_carrier_off(dev);
+  /* Free the packets of the TX mailboxes */
+
+  for (i = 0; i < CAN_NTXMB; i++)
+    {
+      if (priv->txpkt[i] != NULL)
+        {
+          netpkt_free(dev, priv->txpkt[i], NETPKT_TX);
+          priv->txpkt[i] = NULL;
+        }
+    }
+
+#ifdef CONFIG_NET_CAN_ERRORS
+  priv->errpending = false;
+#endif
 
   return OK;
-}
-
-/****************************************************************************
- * Name: stm32can_txready
- *
- * Description:
- *   Return true if the CAN hardware can accept another TX message.
- *
- ****************************************************************************/
-
-static bool stm32can_txready(struct stm32_can_s *priv)
-{
-  uint32_t regval;
-
-  /* Return true if any mailbox is available */
-
-  regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
-  ninfo("CAN%" PRIu8 " TSR: %08" PRIx32 "\n", priv->port, regval);
-
-  return (stm32can_txmb0empty(regval) || stm32can_txmb1empty(regval) ||
-          stm32can_txmb2empty(regval));
 }
 
 /****************************************************************************
  * Name: stm32can_transmit
  *
  * Description:
- *   Start hardware transmission.  Called either from the txdone interrupt
- *   handling or from watchdog based polling.
+ *   NuttX callback: put one frame into a free TX mailbox.
  *
  * Input Parameters:
- *   priv - reference to the private CAN driver state structure
+ *   dev - Reference to the lower half driver state structure
+ *   pkt - The packet with the CAN frame
  *
  * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
+ *   OK on success, -EBUSY if no mailbox is free, -EINVAL for a bad frame.
  *
  ****************************************************************************/
 
-static int stm32can_transmit(struct stm32_can_s *priv)
+static int stm32can_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
 {
-  struct can_frame *frame = (struct can_frame *)priv->dev.d_buf;
-  uint8_t          *ptr;
-  uint32_t          regval;
-  uint32_t          tmp;
-  int               dlc;
-  int               txmb;
+  struct stm32_can_s *priv  = (struct stm32_can_s *)dev;
+  struct can_frame   *frame = (struct can_frame *)netpkt_getdata(dev, pkt);
+  uint8_t            *ptr;
+  uint32_t            regval;
+  uint32_t            tmp;
+  irqstate_t          flags;
+  int                 dlc;
+  int                 txmb;
+
+  /* The socket checks the frame size only, check the data length */
+
+  if (frame->can_dlc > CAN_MAX_DLEN)
+    {
+      return -EINVAL;
+    }
 
   ninfo("CAN%" PRIu8 " ID: %" PRIu32 " DLC: %" PRIu8 "\n",
         priv->port, (uint32_t)frame->can_id, frame->can_dlc);
 
   /* Select one empty transmit mailbox */
 
+  flags  = enter_critical_section();
   regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
   if (stm32can_txmb0empty(regval))
     {
@@ -905,7 +875,7 @@ static int stm32can_transmit(struct stm32_can_s *priv)
     }
   else
     {
-      canerr("ERROR: No available mailbox\n");
+      leave_critical_section(flags);
       return -EBUSY;
     }
 
@@ -1009,6 +979,8 @@ static int stm32can_transmit(struct stm32_can_s *priv)
 
   stm32can_putreg(priv, STM32_CAN_TDHR_OFFSET(txmb), regval);
 
+  priv->txpkt[txmb] = pkt;
+
   /* Enable the transmit mailbox empty interrupt (may already be enabled) */
 
   regval  = stm32can_getreg(priv, STM32_CAN_IER_OFFSET);
@@ -1021,173 +993,107 @@ static int stm32can_transmit(struct stm32_can_s *priv)
   regval |= CAN_TIR_TXRQ;  /* Transmit Mailbox Request */
   stm32can_putreg(priv, STM32_CAN_TIR_OFFSET(txmb), regval);
 
+  leave_critical_section(flags);
+
   stm32can_dumpmbregs(priv, "After send");
   return OK;
 }
 
 /****************************************************************************
- * Function: stm32can_txpoll
+ * Name: stm32can_reclaim
  *
  * Description:
- *   The transmitter is available, check if the network has any outgoing
- *   packets ready to send.  This is a callback from devif_poll().
- *   devif_poll() may be called:
- *
- *   1. When the preceding TX packet send is complete,
- *   2. When the preceding TX packet send timesout and the interface is reset
- *   3. During normal TX polling
+ *   Free the packets of the finished TX mailboxes.  Called with interrupts
+ *   disabled: from the TX interrupt and stm32can_txpoll().
  *
  * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   priv - reference to the private CAN driver state structure
  *
  * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
+ *   The number of finished mailboxes.
  *
  ****************************************************************************/
 
-static int stm32can_txpoll(struct net_driver_s *dev)
+static int stm32can_reclaim(struct stm32_can_s *priv)
 {
-  struct stm32_can_s *priv = (struct stm32_can_s *)dev->d_private;
+  uint32_t regval;
+  uint32_t rqcp;
+  int      ndone = 0;
+  int      i;
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
-   */
+  regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
 
-  if (priv->dev.d_len > 0)
+  for (i = 0; i < CAN_NTXMB; i++)
     {
-      stm32can_txdone(priv);
+      rqcp = CAN_TSR_RQCP0 << (8 * i);
+      if ((regval & rqcp) == 0)
+        {
+          continue;
+        }
 
-      /* Send the packet */
-
-      stm32can_transmit(priv);
-
-      /* Check if there is room in the device to hold another packet. If
-       * not, return a non-zero value to terminate the poll.
+      /* Writing '1' to RQCPx clears RQCPx and all the status bits (TXOKx,
+       * ALSTx and TERRx) for mailbox x.
        */
 
-      if (stm32can_txready(priv) == false)
+      stm32can_putreg(priv, STM32_CAN_TSR_OFFSET, rqcp);
+
+      if (priv->txpkt[i] != NULL)
         {
-          return -EBUSY;
+          if ((regval & (CAN_TSR_TXOK0 << (8 * i))) == 0)
+            {
+              NETDEV_TXERRORS(&priv->dev.netdev);
+            }
+
+          netpkt_free(&priv->dev, priv->txpkt[i], NETPKT_TX);
+          priv->txpkt[i] = NULL;
         }
+
+      ndone++;
     }
 
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return 0;
+  return ndone;
 }
 
 /****************************************************************************
- * Function: stm32can_txavail_work
+ * Name: stm32can_txpoll
  *
  * Description:
- *   Perform an out-of-cycle poll on the worker thread.
- *
- * Input Parameters:
- *   arg - Reference to the NuttX driver state structure (cast to void*)
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called on the higher priority worker thread.
+ *   NuttX callback: free the packets of the finished TX mailboxes for
+ *   netpoll, which may run with or without interrupts disabled.
  *
  ****************************************************************************/
 
-static void stm32can_txavail_work(void *arg)
+#ifdef CONFIG_NET_NETPOLL
+static void stm32can_txpoll(struct netdev_lowerhalf_s *dev)
 {
-  struct stm32_can_s *priv = (struct stm32_can_s *)arg;
+  irqstate_t flags = enter_critical_section();
 
-  /* Ignore the notification if the interface is not yet up */
-
-  net_lock();
-  if (priv->bifup)
-    {
-      /* Check if there is room in the hardware to hold another outgoing
-       * packet.
-       */
-
-      if (stm32can_txready(priv))
-        {
-          /* No, there is space for another transfer.  Poll the network for
-           * new XMIT data.
-           */
-
-          devif_poll(&priv->dev, stm32can_txpoll);
-        }
-    }
-
-  net_unlock();
+  stm32can_reclaim((struct stm32_can_s *)dev);
+  leave_critical_section(flags);
 }
+#endif
 
 /****************************************************************************
- * Function: stm32can_txavail
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static int stm32can_txavail(struct net_driver_s *dev)
-{
-  struct stm32_can_s *priv = (struct stm32_can_s *)dev->d_private;
-
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions and we will have to ignore the Tx
-   * availability action.
-   */
-
-  if (work_available(&priv->pollwork))
-    {
-      /* Schedule to serialize the poll on the worker thread. */
-
-      stm32can_txavail_work(priv);
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Function: stm32can_ioctl
+ * Function: stm32can_netdev_ioctl
  *
  * Description:
  *   PHY ioctl command handler
  *
  * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
+ *   dev  - Reference to the lower half driver state structure
  *   cmd  - ioctl command
  *   arg  - Argument accompanying the command
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int stm32can_netdev_ioctl(struct net_driver_s *dev, int cmd,
+static int stm32can_netdev_ioctl(struct netdev_lowerhalf_s *dev, int cmd,
                                  unsigned long arg)
 {
-  struct stm32_can_s *priv = (struct stm32_can_s *)dev->d_private;
-  int                 ret  = OK;
+  int ret = OK;
 
   switch (cmd)
     {
@@ -1203,28 +1109,26 @@ static int stm32can_netdev_ioctl(struct net_driver_s *dev, int cmd,
 #endif /* CONFIG_NETDEV_IOCTL */
 
 /****************************************************************************
- * Name: stm32can_rxinterrupt_work
+ * Name: stm32can_rxframe
  *
  * Description:
- *   CAN RX FIFO 0/1 interrupt handler
+ *   Read the next message of an RX FIFO into a packet and release the FIFO
+ *   element.  The message is dropped if no packet is free.
  *
  * Input Parameters:
- *   irq - The IRQ number of the interrupt.
- *   context - The register state save array at the time of the interrupt.
- *   rxmb - The RX mailbox number.
+ *   priv - reference to the private CAN driver state structure
+ *   rxmb - The RX FIFO number
  *
  * Returned Value:
- *   Zero on success; a negated errno on failure
+ *   The received packet, or NULL if the message was dropped.
  *
  ****************************************************************************/
 
-static int stm32can_rxinterrupt_work(struct stm32_can_s *priv, int rxmb)
+static netpkt_t *stm32can_rxframe(struct stm32_can_s *priv, int rxmb)
 {
-  struct can_frame *frame = (struct can_frame *)priv->rxdesc;
+  struct can_frame *frame;
+  netpkt_t         *pkt;
   uint32_t          regval;
-  int               ret   = OK;
-
-  DEBUGASSERT(priv != NULL);
 
   if (rxmb == 0)
     {
@@ -1234,6 +1138,17 @@ static int stm32can_rxinterrupt_work(struct stm32_can_s *priv, int rxmb)
     {
       stm32can_dumpmbregs(priv, "RX1 interrupt");
     }
+
+  pkt = netpkt_alloc(&priv->dev, NETPKT_RX);
+  if (pkt == NULL)
+    {
+      NETDEV_RXDROPPED(&priv->dev.netdev);
+      goto release;
+    }
+
+  netpkt_setdatalen(&priv->dev, pkt, sizeof(struct can_frame));
+  frame = (struct can_frame *)netpkt_getdata(&priv->dev, pkt);
+  memset(frame, 0, sizeof(*frame));
 
   /* Get the CAN identifier. */
 
@@ -1253,8 +1168,9 @@ static int stm32can_rxinterrupt_work(struct stm32_can_s *priv, int rxmb)
   if ((regval & CAN_RIR_IDE) != 0)
     {
       nerr("ERROR: Received message with extended identifier.  Dropped\n");
-      ret = -ENOSYS;
-      goto errout;
+      netpkt_free(&priv->dev, pkt, NETPKT_RX);
+      pkt = NULL;
+      goto release;
     }
 
   frame->can_id = (regval & CAN_RIR_STID_MASK) >> CAN_RIR_STID_SHIFT;
@@ -1286,75 +1202,74 @@ static int stm32can_rxinterrupt_work(struct stm32_can_s *priv, int rxmb)
   frame->data[6] = (regval & CAN_RDHR_DATA6_MASK) >> CAN_RDHR_DATA6_SHIFT;
   frame->data[7] = (regval & CAN_RDHR_DATA7_MASK) >> CAN_RDHR_DATA7_SHIFT;
 
-  /* Copy the buffer pointer to priv->dev..  Set amount of data
-   * in priv->dev.d_len
-   */
-
-  priv->dev.d_len = sizeof(struct can_frame);
-  priv->dev.d_buf = (uint8_t *)frame;
-
-  /* Send to socket interface */
-
-  NETDEV_RXPACKETS(&priv->dev);
-
-  can_input(&priv->dev);
-
-  /* Point the packet buffer back to the next Tx buffer that will be
-   * used during the next write.  If the write queue is full, then
-   * this will point at an active buffer, which must not be written
-   * to.  This is OK because devif_poll won't be called unless the
-   * queue is not full.
-   */
-
-  priv->dev.d_buf = (uint8_t *)priv->txdesc;
-
   /* Release the FIFO */
 
-#ifndef CONFIG_NET_CAN_EXTID
-errout:
-#endif
+release:
   regval  = stm32can_getreg(priv, STM32_CAN_RFR_OFFSET(rxmb));
   regval |= CAN_RFR_RFOM;
   stm32can_putreg(priv, STM32_CAN_RFR_OFFSET(rxmb), regval);
 
-  /* Re-enable CAN RX interrupts */
-
-  if (rxmb == 0)
-    {
-      stm32can_rx0int(priv, true);
-    }
-  else if (rxmb == 1)
-    {
-      stm32can_rx1int(priv, true);
-    }
-  else
-    {
-      DEBUGPANIC();
-    }
-
-  return ret;
+  return pkt;
 }
 
 /****************************************************************************
- * Name: stm32can_rx0interrupt_work
+ * Name: stm32can_receive
+ *
+ * Description:
+ *   NuttX callback: return one received frame or error frame.  When both
+ *   RX FIFOs are empty, enable the RX interrupts again and return NULL.
+ *
+ * Input Parameters:
+ *   dev - Reference to the lower half driver state structure
+ *
+ * Returned Value:
+ *   The received packet, or NULL if there is none.
+ *
  ****************************************************************************/
 
-static void stm32can_rx0interrupt_work(void *arg)
+static netpkt_t *stm32can_receive(struct netdev_lowerhalf_s *dev)
 {
-  struct stm32_can_s *priv = (struct stm32_can_s *)arg;
+  struct stm32_can_s *priv = (struct stm32_can_s *)dev;
+  netpkt_t           *pkt;
+  irqstate_t          flags;
+  int                 rxmb;
 
-  stm32can_rxinterrupt_work(priv, 0);
-}
+  flags = enter_critical_section();
 
-/****************************************************************************
- * Name: stm32can_rx1interrupt_work
- ****************************************************************************/
+#ifdef CONFIG_NET_CAN_ERRORS
+  if (priv->errpending)
+    {
+      priv->errpending = false;
+      pkt = stm32can_errframe(priv);
+      stm32can_errint(priv, true);
+      if (pkt != NULL)
+        {
+          leave_critical_section(flags);
+          return pkt;
+        }
+    }
+#endif
 
-static void stm32can_rx1interrupt_work(void *arg)
-{
-  struct stm32_can_s *priv = (struct stm32_can_s *)arg;
+  for (rxmb = 0; rxmb < 2; rxmb++)
+    {
+      while ((stm32can_getreg(priv, STM32_CAN_RFR_OFFSET(rxmb)) &
+              CAN_RFR_FMP_MASK) != 0)
+        {
+          pkt = stm32can_rxframe(priv, rxmb);
+          if (pkt != NULL)
+            {
+              leave_critical_section(flags);
+              return pkt;
+            }
+        }
+    }
 
-  stm32can_rxinterrupt_work(priv, 1);
+  /* Both FIFOs are empty */
+
+  stm32can_rx0int(priv, true);
+  stm32can_rx1int(priv, true);
+  leave_critical_section(flags);
+  return NULL;
 }
 
 /****************************************************************************
@@ -1367,40 +1282,18 @@ static void stm32can_rx1interrupt_work(void *arg)
 
 static int stm32can_rxinterrupt(struct stm32_can_s *priv, int rxmb)
 {
-  uint32_t regval   = 0;
-  int      npending = 0;
-
-  /* Verify that a message is pending in the FIFO */
-
-  regval   = stm32can_getreg(priv, STM32_CAN_RFR_OFFSET(rxmb));
-  npending = (regval & CAN_RFR_FMP_MASK) >> CAN_RFR_FMP_SHIFT;
-  if (npending < 1)
-    {
-      nwarn("WARNING: No messages pending\n");
-      return OK;
-    }
-
-  /* Disable further CAN RX interrupts and schedule to perform the
-   * interrupt processing on the worker thread
-   */
+  /* receive() enables the interrupt again when the FIFOs are empty */
 
   if (rxmb == 0)
     {
       stm32can_rx0int(priv, false);
-      work_queue(CANWORK, &priv->irqwork,
-                 stm32can_rx0interrupt_work, priv, 0);
-    }
-  else if (rxmb == 1)
-    {
-      stm32can_rx1int(priv, false);
-      work_queue(CANWORK, &priv->irqwork,
-                 stm32can_rx1interrupt_work, priv, 0);
     }
   else
     {
-      DEBUGPANIC();
+      stm32can_rx1int(priv, false);
     }
 
+  netdev_lower_rxready(&priv->dev);
   return OK;
 }
 
@@ -1466,130 +1359,38 @@ static int stm32can_rx1interrupt(int irq, void *context, void *arg)
 static int stm32can_txinterrupt(int irq, void *context, void *arg)
 {
   struct stm32_can_s *priv = (struct stm32_can_s *)arg;
-  uint32_t regval;
 
-  DEBUGASSERT(priv != NULL);
-
-  /* Get the transmit status */
-
-  regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
-
-  /* Check for RQCP0: Request completed mailbox 0 */
-
-  if ((regval & CAN_TSR_RQCP0) != 0)
+  if (stm32can_reclaim(priv) > 0)
     {
-      /* Writing '1' to RCP0 clears RCP0 and all the status bits (TXOK0,
-       * ALST0 and TERR0) for Mailbox 0.
-       */
-
-      stm32can_putreg(priv, STM32_CAN_TSR_OFFSET, CAN_TSR_RQCP0);
-
-      /* Tell the upper half that the transfer is finished. */
-
-      /* Disable further TX CAN interrupts. here can be no race
-       * condition here.
-       */
-
-      stm32can_txint(priv, false);
-      work_queue(CANWORK, &priv->irqwork, stm32can_txdone_work, priv, 0);
-    }
-
-  /* Check for RQCP1: Request completed mailbox 1 */
-
-  if ((regval & CAN_TSR_RQCP1) != 0)
-    {
-      /* Writing '1' to RCP1 clears RCP1 and all the status bits (TXOK1,
-       * ALST1 and TERR1) for Mailbox 1.
-       */
-
-      stm32can_putreg(priv, STM32_CAN_TSR_OFFSET, CAN_TSR_RQCP1);
-
-      /* Tell the upper half that the transfer is finished. */
-
-      /* Disable further TX CAN interrupts. here can be no race
-       * condition here.
-       */
-
-      stm32can_txint(priv, false);
-      work_queue(CANWORK, &priv->irqwork, stm32can_txdone_work, priv, 0);
-    }
-
-  /* Check for RQCP2: Request completed mailbox 2 */
-
-  if ((regval & CAN_TSR_RQCP2) != 0)
-    {
-      /* Writing '1' to RCP2 clears RCP2 and all the status bits (TXOK2,
-       * ALST2 and TERR2) for Mailbox 2.
-       */
-
-      stm32can_putreg(priv, STM32_CAN_TSR_OFFSET, CAN_TSR_RQCP2);
-
-      /* Disable further TX CAN interrupts. here can be no race
-       * condition here.
-       */
-
-      stm32can_txint(priv, false);
-      work_queue(CANWORK, &priv->irqwork, stm32can_txdone_work, priv, 0);
+      netdev_lower_txdone(&priv->dev);
     }
 
   return OK;
 }
 
-/****************************************************************************
- * Name: stm32can_txdone_work
- ****************************************************************************/
-
-static void stm32can_txdone_work(void *arg)
-{
-  struct stm32_can_s *priv = (struct stm32_can_s *)arg;
-
-  stm32can_txdone(priv);
-
-  /* There should be space for a new TX in any event.  Poll the network for
-   * new XMIT data
-   */
-
-  net_lock();
-  devif_poll(&priv->dev, stm32can_txpoll);
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: stm32can_txdone
- ****************************************************************************/
-
-static void stm32can_txdone(struct stm32_can_s *priv)
-{
-  stm32can_txint(priv, true);
-
-  NETDEV_TXDONE(&priv->dev);
-}
-
 #ifdef CONFIG_NET_CAN_ERRORS
 
 /****************************************************************************
- * Name: stm32can_sceinterrupt_work
+ * Name: stm32can_errframe
  *
  * Description:
- *   CAN status change interrupt work
+ *   Build an error frame from the CAN error status.  Called from receive().
  *
  * Input Parameters:
- *   arg  - reference to the driver state structure
+ *   priv - reference to the driver state structure
  *
  * Returned Value:
- *   None
+ *   The error frame packet, or NULL if there is no error or no free packet.
  *
  ****************************************************************************/
 
-static void stm32can_sceinterrupt_work(void *arg)
+static netpkt_t *stm32can_errframe(struct stm32_can_s *priv)
 {
-  struct stm32_can_s *priv    = (struct stm32_can_s *)arg;
-  struct can_frame   *frame   = (struct can_frame *)priv->rxdesc;
-  uint32_t            regval  = 0;
-  uint16_t            errbits = 0;
-  uint8_t             data[CAN_ERR_DLC];
-
-  DEBUGASSERT(priv != NULL);
+  struct can_frame *frame;
+  netpkt_t         *pkt;
+  uint32_t          regval  = 0;
+  uint16_t          errbits = 0;
+  uint8_t           data[CAN_ERR_DLC];
 
   /* Check Error Interrupt flag */
 
@@ -1692,48 +1493,29 @@ static void stm32can_sceinterrupt_work(void *arg)
       stm32can_putreg(priv, STM32_CAN_MSR_OFFSET, CAN_MSR_ERRI);
     }
 
-  /* Report a CAN error */
-
-  if (errbits != 0)
+  if (errbits == 0)
     {
-      canerr("ERROR: errbits = %08" PRIx16 "\n", errbits);
-
-      /* Copy frame */
-
-      frame->can_id  = CAN_ERR_FLAG | errbits;
-      frame->can_dlc = CAN_ERR_DLC;
-
-      memcpy(frame->data, data, CAN_ERR_DLC);
-
-      net_lock();
-
-      /* Copy the buffer pointer to priv->dev..  Set amount of data
-       * in priv->dev.d_len
-       */
-
-      priv->dev.d_len = sizeof(struct can_frame);
-      priv->dev.d_buf = (uint8_t *)frame;
-
-      /* Send to socket interface */
-
-      NETDEV_ERRORS(&priv->dev);
-
-      can_input(&priv->dev);
-
-      /* Point the packet buffer back to the next Tx buffer that will be
-       * used during the next write.  If the write queue is full, then
-       * this will point at an active buffer, which must not be written
-       * to.  This is OK because devif_poll won't be called unless the
-       * queue is not full.
-       */
-
-      priv->dev.d_buf = (uint8_t *)priv->txdesc;
-      net_unlock();
+      return NULL;
     }
 
-  /* Re-enable CAN SCE interrupts */
+  ninfo("errbits = %08" PRIx16 "\n", errbits);
 
-  stm32can_errint(priv, true);
+  pkt = netpkt_alloc(&priv->dev, NETPKT_RX);
+  if (pkt == NULL)
+    {
+      return NULL;
+    }
+
+  netpkt_setdatalen(&priv->dev, pkt, sizeof(struct can_frame));
+  frame = (struct can_frame *)netpkt_getdata(&priv->dev, pkt);
+  memset(frame, 0, sizeof(*frame));
+
+  frame->can_id  = CAN_ERR_FLAG | errbits;
+  frame->can_dlc = CAN_ERR_DLC;
+  memcpy(frame->data, data, CAN_ERR_DLC);
+
+  NETDEV_ERRORS(&priv->dev.netdev);
+  return pkt;
 }
 
 /****************************************************************************
@@ -1755,13 +1537,11 @@ static int stm32can_sceinterrupt(int irq, void *context, void *arg)
 {
   struct stm32_can_s *priv = (struct stm32_can_s *)arg;
 
-  /* Disable further CAN SCE interrupts and schedule to perform the
-   * interrupt processing on the worker thread
-   */
+  /* receive() reports the error and enables the interrupts again */
 
   stm32can_errint(priv, false);
-  work_queue(CANWORK, &priv->irqwork,
-             stm32can_sceinterrupt_work, priv, 0);
+  priv->errpending = true;
+  netdev_lower_rxready(&priv->dev);
 
   return OK;
 }
@@ -2056,6 +1836,19 @@ static void stm32can_reset(struct stm32_can_s *priv)
 #ifdef CONFIG_STM32_CAN1
   if (priv->port == 1)
     {
+#ifdef CONFIG_STM32_CAN2
+      /* The CAN2 filter banks are in CAN1: only stop CAN1 */
+
+      if (g_can2priv.active)
+        {
+          stm32can_putreg(priv, STM32_CAN_IER_OFFSET, 0);
+          regval  = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+          regval |= CAN_MCR_INRQ;
+          stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+          return;
+        }
+#endif
+
       regbit = CAN_RCC_CAN1RST;
     }
   else
@@ -2506,25 +2299,15 @@ int stm32_cansockinitialize(int port)
 
   /* Initialize the driver structure */
 
-  priv->dev.d_ifup    = stm32can_ifup;
-  priv->dev.d_ifdown  = stm32can_ifdown;
-  priv->dev.d_txavail = stm32can_txavail;
-#ifdef CONFIG_NETDEV_IOCTL
-  priv->dev.d_ioctl   = stm32can_netdev_ioctl;
-#endif
-  priv->dev.d_private = priv;
+  priv->dev.ops = &g_can_ops;
 
-  /* Put the interface in the down state.  This usually amounts to resetting
-   * the device and/or calling stm32can_ifdown().
-   */
+  /* Put the controller in the reset state */
 
-  ninfo("callbacks done\n");
-
-  stm32can_ifdown(&priv->dev);
+  stm32can_reset(priv);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  ret = netdev_register(&priv->dev, NET_LL_CAN);
+  ret = netdev_lower_register(&priv->dev, NET_LL_CAN);
 
 errout:
   return ret;
