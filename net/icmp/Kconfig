@@ -29,6 +29,7 @@ menu "ICMP Networking Support"
 config NET_ICMP
 	bool "Enable ICMP networking" if NET_IPv4
 	default NET_IPv4
+	select MM_IOB if !NET_ICMP_NO_STACK
 	---help---
 		Enable minimal ICMP support. Includes built-in support
 		for sending replies to received ECHO (ping) requests.
