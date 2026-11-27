@@ -283,6 +283,7 @@ void esp32s3_lowputc_set_iflow(const struct esp32s3_uart_s *priv,
                                uint8_t threshold, bool enable)
 {
   uint32_t mask;
+
   if (enable)
     {
       /* Enable RX flow control */
@@ -345,6 +346,7 @@ void esp32s3_lowputc_set_oflow(const struct esp32s3_uart_s *priv,
 void esp32s3_lowputc_reset_cores(const struct esp32s3_uart_s *priv)
 {
   uint32_t set_bit = 1 << UART_RST_CORE_S;
+
   modifyreg32(UART_CLK_CONF_REG(priv->id), UART_RST_CORE_M, set_bit);
   modifyreg32(UART_CLK_CONF_REG(priv->id), UART_RST_CORE_M, 0);
 }
@@ -444,6 +446,7 @@ void esp32s3_lowputc_set_sclk(const struct esp32s3_uart_s *priv,
                               enum uart_sclk source)
 {
   uint32_t clk = (uint32_t)source << UART_SCLK_SEL_S;
+
   modifyreg32(UART_CLK_CONF_REG(priv->id), UART_SCLK_SEL_M, clk);
 }
 
@@ -729,6 +732,7 @@ void esp32s3_lowputc_enable_sysclk(const struct esp32s3_uart_s *priv)
 bool esp32s3_lowputc_is_tx_fifo_full(const struct esp32s3_uart_s *priv)
 {
   uint32_t val;
+
   val = REG_MASK(getreg32(UART_STATUS_REG(priv->id)), UART_TXFIFO_CNT);
   return val >= (UART_TX_FIFO_SIZE - 1);
 }
