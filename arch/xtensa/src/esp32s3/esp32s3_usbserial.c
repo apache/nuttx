@@ -37,6 +37,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/clock.h>
+#include <nuttx/wdog.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/serial/tioctl.h>
 #include <arch/irq.h>
@@ -67,6 +69,10 @@ struct esp32s3_priv_s
   const uint8_t  irq;           /* IRQ number assigned to the peripheral */
   int            cpu;           /* CPU id */
   int            cpuint;        /* CPU interrupt assigned */
+#if CONFIG_ESP32S3_USBSERIAL_TXTIMEOUT > 0
+  struct wdog_s  txwdog;        /* Runs while data waits for the host */
+  bool           txstalled;     /* The host does not read the port */
+#endif
 };
 
 /****************************************************************************
@@ -83,6 +89,10 @@ static int  esp32s3_attach(struct uart_dev_s *dev);
 static void esp32s3_detach(struct uart_dev_s *dev);
 static void esp32s3_txint(struct uart_dev_s *dev, bool enable);
 static void esp32s3_txkick(struct uart_dev_s *dev);
+#if CONFIG_ESP32S3_USBSERIAL_TXTIMEOUT > 0
+static void esp32s3_txdiscard(struct uart_dev_s *dev);
+static void esp32s3_txtimeout(wdparm_t arg);
+#endif
 static void esp32s3_rxint(struct uart_dev_s *dev, bool enable);
 static bool esp32s3_rxavailable(struct uart_dev_s *dev);
 static bool esp32s3_txready(struct uart_dev_s *dev);
@@ -172,7 +182,32 @@ static int esp32s3_interrupt(int irq, void *context, void *arg)
     {
       putreg32(USB_SERIAL_JTAG_SERIAL_IN_EMPTY_INT_CLR,
                USB_SERIAL_JTAG_INT_CLR_REG);
+
+#if CONFIG_ESP32S3_USBSERIAL_TXTIMEOUT > 0
+      /* The host took the data: give it the whole time again for what
+       * remains.
+       */
+
+      {
+        struct esp32s3_priv_s *priv = dev->priv;
+
+        priv->txstalled = false;
+        wd_cancel(&priv->txwdog);
+      }
+#endif
+
       uart_xmitchars(dev);
+
+#if CONFIG_ESP32S3_USBSERIAL_TXTIMEOUT > 0
+      if (dev->xmit.head != dev->xmit.tail)
+        {
+          struct esp32s3_priv_s *priv = dev->priv;
+
+          wd_start(&priv->txwdog,
+                   MSEC2TICK(CONFIG_ESP32S3_USBSERIAL_TXTIMEOUT),
+                   esp32s3_txtimeout, (wdparm_t)dev);
+        }
+#endif
     }
 
   /* Data from the host are available to read. */
@@ -242,6 +277,42 @@ static void esp32s3_txkick(struct uart_dev_s *dev)
 
 static void esp32s3_txint(struct uart_dev_s *dev, bool enable)
 {
+#if CONFIG_ESP32S3_USBSERIAL_TXTIMEOUT > 0
+  struct esp32s3_priv_s *priv = dev->priv;
+  irqstate_t flags = enter_critical_section();
+
+  if (enable)
+    {
+      if (priv->txstalled && !esp32s3_txready(dev))
+        {
+          /* The host still does not read the port: do not wait again */
+
+          esp32s3_txdiscard(dev);
+        }
+      else
+        {
+          priv->txstalled = false;
+          if (!WDOG_ISACTIVE(&priv->txwdog))
+            {
+              wd_start(&priv->txwdog,
+                       MSEC2TICK(CONFIG_ESP32S3_USBSERIAL_TXTIMEOUT),
+                       esp32s3_txtimeout, (wdparm_t)dev);
+            }
+
+          modifyreg32(USB_SERIAL_JTAG_INT_ENA_REG, 0,
+                      USB_SERIAL_JTAG_SERIAL_IN_EMPTY_INT_ENA);
+          esp32s3_txkick(dev);
+        }
+    }
+  else
+    {
+      wd_cancel(&priv->txwdog);
+      modifyreg32(USB_SERIAL_JTAG_INT_ENA_REG,
+                  USB_SERIAL_JTAG_SERIAL_IN_EMPTY_INT_ENA, 0);
+    }
+
+  leave_critical_section(flags);
+#else
   if (enable)
     {
       irqstate_t flags = enter_critical_section();
@@ -256,7 +327,62 @@ static void esp32s3_txint(struct uart_dev_s *dev, bool enable)
       modifyreg32(USB_SERIAL_JTAG_INT_ENA_REG,
                   USB_SERIAL_JTAG_SERIAL_IN_EMPTY_INT_ENA, 0);
     }
+#endif
 }
+
+#if CONFIG_ESP32S3_USBSERIAL_TXTIMEOUT > 0
+
+/****************************************************************************
+ * Name: esp32s3_txdiscard
+ *
+ * Description:
+ *   Throw away the data that waits in the transmit buffer and wake up the
+ *   writers.  Called with the interrupts disabled.
+ *
+ ****************************************************************************/
+
+static void esp32s3_txdiscard(struct uart_dev_s *dev)
+{
+  modifyreg32(USB_SERIAL_JTAG_INT_ENA_REG,
+              USB_SERIAL_JTAG_SERIAL_IN_EMPTY_INT_ENA, 0);
+
+  dev->xmit.tail = dev->xmit.head;
+  uart_datasent(dev);
+}
+
+/****************************************************************************
+ * Name: esp32s3_txtimeout
+ *
+ * Description:
+ *   The host did not take any data for
+ *   CONFIG_ESP32S3_USBSERIAL_TXTIMEOUT milliseconds: nothing reads the
+ *   port.  Discard the output from now on, until the host reads again, so
+ *   that the writers do not block for ever.
+ *
+ ****************************************************************************/
+
+static void esp32s3_txtimeout(wdparm_t arg)
+{
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct esp32s3_priv_s *priv = dev->priv;
+  irqstate_t flags = enter_critical_section();
+
+  if (dev->xmit.head != dev->xmit.tail)
+    {
+      if (esp32s3_txready(dev))
+        {
+          esp32s3_txkick(dev);
+        }
+      else
+        {
+          priv->txstalled = true;
+          esp32s3_txdiscard(dev);
+        }
+    }
+
+  leave_critical_section(flags);
+}
+#endif
 
 /****************************************************************************
  * Name: esp32s3_rxint
