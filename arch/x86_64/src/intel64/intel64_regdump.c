@@ -77,33 +77,6 @@ void print_mem(void *sp, size_t size)
     }
 }
 
-void backtrace(uint64_t rbp)
-{
-  int i;
-
-  _alert("Frame Dump (64 bytes):\n");
-
-  for (i = 0; i < 16; i++)
-    {
-      if ((rbp < 0x200000) || (rbp > 0xfffffffff))
-        {
-          break;
-        }
-
-      _alert("  %016" PRIx64 "\t%016" PRIx64 "\n",
-             *((uint64_t *)(rbp)), *((uint64_t *)(rbp + 1 * 8)));
-
-      if ((rbp) && *((uint64_t *)(rbp + 1 * 8)))
-        {
-          rbp = *(uint64_t *)rbp;
-        }
-      else
-        {
-          break;
-        }
-    }
-}
-
 void up_dump_register(void *dumpregs)
 {
   volatile uint64_t *regs = dumpregs ? dumpregs : running_regs();
