@@ -61,18 +61,19 @@ void print_mem(void *sp, size_t size)
             }
         }
 
-    buf[8] = '\0';
-    _alert(" %016" PRIxPTR "\t%02x %02x %02x %02x %02x %02x %02x %02x\t%s\n",
-            (uintptr_t)(sp + i * 8),
-            *((uint8_t *)(sp + i * 8 + 0)),
-            *((uint8_t *)(sp + i * 8 + 1)),
-            *((uint8_t *)(sp + i * 8 + 2)),
-            *((uint8_t *)(sp + i * 8 + 3)),
-            *((uint8_t *)(sp + i * 8 + 4)),
-            *((uint8_t *)(sp + i * 8 + 5)),
-            *((uint8_t *)(sp + i * 8 + 6)),
-            *((uint8_t *)(sp + i * 8 + 7)),
-            buf);
+      buf[8] = '\0';
+      _alert(" %016" PRIxPTR
+             "\t%02x %02x %02x %02x %02x %02x %02x %02x\t%s\n",
+             (uintptr_t)(sp + i * 8),
+             *((uint8_t *)(sp + i * 8 + 0)),
+             *((uint8_t *)(sp + i * 8 + 1)),
+             *((uint8_t *)(sp + i * 8 + 2)),
+             *((uint8_t *)(sp + i * 8 + 3)),
+             *((uint8_t *)(sp + i * 8 + 4)),
+             *((uint8_t *)(sp + i * 8 + 5)),
+             *((uint8_t *)(sp + i * 8 + 6)),
+             *((uint8_t *)(sp + i * 8 + 7)),
+             buf);
     }
 }
 
