@@ -141,7 +141,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   tcb = this_task();
 
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
-  if (tcb->sigdeliver)
+  if (tcb->sigdeliver && !tcb->xcp.saved_regs)
     {
       up_schedule_sigaction(tcb);
     }
