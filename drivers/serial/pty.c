@@ -129,6 +129,7 @@ struct pty_devpair_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static void    pty_closepipes(FAR struct pty_devpair_s *devpair);
 static void    pty_destroy(FAR struct pty_devpair_s *devpair);
 static int     pty_pipe(FAR struct pty_devpair_s *devpair);
 static int     pty_open(FAR struct file *filep);
@@ -171,6 +172,26 @@ static const struct file_operations g_pty_fops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: pty_closepipes
+ *
+ * Description:
+ *   Close the pipe ends of both sides.  The first open of a pair makes both
+ *   pipes, with the ends of both sides.  The last close of a side closes
+ *   only its own ends, so a side that was not opened (a master closed
+ *   before an open of its slave) still holds its ends.  file_close() does
+ *   nothing for an end that is already closed.
+ *
+ ****************************************************************************/
+
+static void pty_closepipes(FAR struct pty_devpair_s *devpair)
+{
+  file_close(&devpair->pp_master.pd_src);
+  file_close(&devpair->pp_master.pd_sink);
+  file_close(&devpair->pp_slave.pd_src);
+  file_close(&devpair->pp_slave.pd_sink);
+}
+
+/****************************************************************************
  * Name: pty_destroy
  ****************************************************************************/
 
@@ -203,6 +224,10 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
       snprintf(devname, sizeof(devname), "/dev/ttyp%u", devpair->pp_minor);
       unregister_driver(devname);
     }
+
+  /* Close the pipe ends that are still open */
+
+  pty_closepipes(devpair);
 
   /* And free the device structure */
 
@@ -401,9 +426,16 @@ static int pty_close(FAR struct file *filep)
     }
   else
     {
-      /* Otherwise just decrement the open count */
+      /* Otherwise just decrement the open count.  A pair that stays after
+       * its last close (BSD) makes new pipes at its next open: close the
+       * ends that a side that was not opened still holds.
+       */
 
       devpair->pp_nopen--;
+      if (devpair->pp_nopen == 0)
+        {
+          pty_closepipes(devpair);
+        }
     }
 
   nxmutex_unlock(&devpair->pp_lock);
