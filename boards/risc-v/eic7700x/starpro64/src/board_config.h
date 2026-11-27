@@ -44,4 +44,8 @@
 
 int eic7700x_bringup(void);
 
+#ifdef CONFIG_EIC7700X_WDT
+int eic7700x_board_wdt_initialize(void);
+#endif
+
 #endif /* __BOARDS_RISCV_EIC7700X_STARPRO64_SRC_BOARD_CONFIG_H */
