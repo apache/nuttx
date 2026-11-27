@@ -259,7 +259,8 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
   size_t length = entry->length;
 
   ret = file_ioctl(filep, BIOC_XIPBASE, (unsigned long)&entry->vaddr);
-  if (ret == OK)
+  if (ret == OK &&
+      ((entry->flags & MAP_PRIVATE) == 0 || (entry->prot & PROT_WRITE) == 0))
     {
       if (entry->offset < 0)
         {
