@@ -353,7 +353,12 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
   /* Zero any memory beyond the amount read from the file */
 
   memset(rdbuffer, 0, length);
-  file_seek(filep, opos, SEEK_SET);
+  fpos = file_seek(filep, opos, SEEK_SET);
+  if (fpos < 0)
+    {
+      ret = fpos;
+      goto errout_with_region;
+    }
 
   /* Add the buffer to the list of regions */
 
