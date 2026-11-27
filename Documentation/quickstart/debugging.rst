@@ -66,13 +66,13 @@ This will start a ``gdb`` server. Then, start ``gdb`` with:
 .. code-block:: console
 
   $ cd nuttx/
-  $ gdb-multiarch nuttx/nuttx
+  $ gdb-multiarch ./nuttx
 
 Inside ``gdb`` console, connect to the ``gdb`` server with:
 
 .. code-block::
 
-  (gdb) target extended-remote :3333
+  (gdb) tar remote :3333
 
 You can now use standard ``gdb`` commands. For example, to
 reset the board:
