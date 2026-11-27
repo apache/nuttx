@@ -66,9 +66,10 @@ static void nxclock_set_realtime(FAR const struct timespec *tp)
   struct timespec bias;
   irqstate_t flags;
 #  ifdef CONFIG_CLOCK_ADJTIME
-  const struct timeval zerodelta = {
-    0, 0
-  };
+  const struct timeval zerodelta =
+    {
+      0, 0
+    };
 #  endif
 
   /* Interrupts are disabled here so that the in-memory time
