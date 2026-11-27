@@ -130,7 +130,8 @@ struct pty_devpair_s
  ****************************************************************************/
 
 static void    pty_closepipes(FAR struct pty_devpair_s *devpair);
-static void    pty_destroy(FAR struct pty_devpair_s *devpair);
+static void    pty_destroy(FAR struct pty_devpair_s *devpair,
+                           FAR struct pty_dev_s *unlinked);
 static int     pty_pipe(FAR struct pty_devpair_s *devpair);
 static int     pty_open(FAR struct file *filep);
 static int     pty_close(FAR struct file *filep);
@@ -193,18 +194,36 @@ static void pty_closepipes(FAR struct pty_devpair_s *devpair)
 
 /****************************************************************************
  * Name: pty_destroy
+ *
+ * Description:
+ *   Remove the devices of the pair and free it.  'unlinked' is the device
+ *   that pty_unlink() is called for (NULL if none): nx_unlink() removes
+ *   its node after pty_unlink() returns.
+ *
  ****************************************************************************/
 
-static void pty_destroy(FAR struct pty_devpair_s *devpair)
+static void pty_destroy(FAR struct pty_devpair_s *devpair,
+                        FAR struct pty_dev_s *unlinked)
 {
   char devname[16];
+
+  /* The removal of each device below calls pty_unlink().  For a pair that
+   * no file has open, pty_unlink() would then free it again.  Count an
+   * open, so that pty_unlink() only marks the pair.
+   */
+
+  devpair->pp_nopen++;
 
   if (devpair->pp_susv1)
     {
       /* Un-register the slave device */
 
-      snprintf(devname, sizeof(devname), "/dev/pts/%u", devpair->pp_minor);
-      unregister_driver(devname);
+      if (unlinked != &devpair->pp_slave)
+        {
+          snprintf(devname, sizeof(devname), "/dev/pts/%u",
+                   devpair->pp_minor);
+          unregister_driver(devname);
+        }
 
       /* Free this minor number so that it can be reused */
 
@@ -216,13 +235,21 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
        * unlinked).
        */
 
-      snprintf(devname, sizeof(devname), "/dev/pty%u", devpair->pp_minor);
-      unregister_driver(devname);
+      if (unlinked != &devpair->pp_master)
+        {
+          snprintf(devname, sizeof(devname), "/dev/pty%u",
+                   devpair->pp_minor);
+          unregister_driver(devname);
+        }
 
       /* Un-register the slave device */
 
-      snprintf(devname, sizeof(devname), "/dev/ttyp%u", devpair->pp_minor);
-      unregister_driver(devname);
+      if (unlinked != &devpair->pp_slave)
+        {
+          snprintf(devname, sizeof(devname), "/dev/ttyp%u",
+                   devpair->pp_minor);
+          unregister_driver(devname);
+        }
     }
 
   /* Close the pipe ends that are still open */
@@ -421,7 +448,7 @@ static int pty_close(FAR struct file *filep)
       /* Yes.. Free the device pair now (without freeing the semaphore) */
 
       nxmutex_unlock(&devpair->pp_lock);
-      pty_destroy(devpair);
+      pty_destroy(devpair, NULL);
       return OK;
     }
   else
@@ -1249,7 +1276,7 @@ static int pty_unlink(FAR struct inode *inode)
   if (devpair->pp_nopen == 0)
     {
       nxmutex_unlock(&devpair->pp_lock);
-      pty_destroy(devpair);
+      pty_destroy(devpair, dev);
       return OK;
     }
 
