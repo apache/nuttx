@@ -1994,19 +1994,20 @@ static ssize_t tmpfs_readv(FAR struct file *filep, FAR struct uio *uio)
 
   tfo = filep->f_priv;
 
-  /* Directly return when the f_pos bigger then tfo_size */
-
-  if (filep->f_pos > tfo->tfo_size)
-    {
-      return 0;
-    }
-
   /* Get exclusive access to the file */
 
   ret = tmpfs_lock_file(tfo);
   if (ret < 0)
     {
       return ret;
+    }
+
+  /* The file size can change while waiting for its lock. */
+
+  if (filep->f_pos > tfo->tfo_size)
+    {
+      nread = 0;
+      goto out;
     }
 
   /* Handle attempts to read beyond the end of the file. */
@@ -2040,6 +2041,7 @@ static ssize_t tmpfs_readv(FAR struct file *filep, FAR struct uio *uio)
 
   /* Release the lock on the file */
 
+out:
   tmpfs_unlock_file(tfo);
   return nread;
 }
