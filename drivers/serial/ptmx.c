@@ -207,11 +207,17 @@ static int ptmx_open(FAR struct file *filep)
 
   snprintf(devname, sizeof(devname), "/dev/pty%d", minor);
   ret = file_open(&temp, devname, O_RDWR | O_CLOEXEC);
-  DEBUGASSERT(ret >= 0);  /* file_open() should never fail */
+  if (ret < 0)
+    {
+      goto errout_with_pair;
+    }
+
   ret = file_dup2(&temp, filep);
-  DEBUGASSERT(ret >= 0);  /* file_dup2() should never fail) */
-  ret = file_close(&temp);
-  DEBUGASSERT(ret >= 0);  /* file_close() should never fail */
+  file_close(&temp);
+  if (ret < 0)
+    {
+      goto errout_with_pair;
+    }
 
   /* Now unlink the master.  This will remove it from the VFS namespace,
    * the driver will still persist because of the open count on the
@@ -222,6 +228,15 @@ static int ptmx_open(FAR struct file *filep)
   DEBUGASSERT(ret >= 0 || ret == -EBUSY);  /* unregister_driver() should never fail */
 
   return OK;
+
+errout_with_pair:
+
+  /* Remove the pair: the unlink of the master, which is not open, frees
+   * it, its slave and the minor (pty_destroy()).
+   */
+
+  unregister_driver(devname);
+  return ret;
 }
 
 /****************************************************************************
