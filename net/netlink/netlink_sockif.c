@@ -73,6 +73,11 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
 static ssize_t netlink_recvmsg(FAR struct socket *psock,
                                FAR struct msghdr *msg, int flags);
 static int netlink_close(FAR struct socket *psock);
+#ifdef CONFIG_NET_SOCKOPTS
+static int netlink_setsockopt(FAR struct socket *psock, int level,
+                              int option, FAR const void *value,
+                              socklen_t value_len);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -92,7 +97,14 @@ const struct sock_intf_s g_netlink_sockif =
   netlink_poll,         /* si_poll */
   netlink_sendmsg,      /* si_sendmsg */
   netlink_recvmsg,      /* si_recvmsg */
-  netlink_close         /* si_close */
+  netlink_close,        /* si_close */
+  NULL,                 /* si_ioctl */
+  NULL,                 /* si_socketpair */
+  NULL,                 /* si_shutdown */
+#ifdef CONFIG_NET_SOCKOPTS
+  NULL,                 /* si_getsockopt */
+  netlink_setsockopt    /* si_setsockopt */
+#endif
 };
 
 /****************************************************************************
@@ -134,6 +146,11 @@ static int netlink_setup(FAR struct socket *psock)
         break;
 #endif
 
+#ifdef CONFIG_NETLINK_GENERIC
+      case NETLINK_GENERIC:
+        break;
+#endif
+
 #ifdef CONFIG_NETLINK_NETFILTER
       case NETLINK_NETFILTER:
         break;
@@ -166,6 +183,7 @@ static int netlink_setup(FAR struct socket *psock)
        */
 
       conn->crefs = 1;
+      conn->protocol = proto;
 
       /* Attach the connection instance to the socket */
 
@@ -636,7 +654,10 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
       tolen = sizeof(struct sockaddr_nl);
     }
 
-  DEBUGASSERT(tolen >= sizeof(struct sockaddr_nl));
+  if (tolen < sizeof(struct sockaddr_nl))
+    {
+      return -EINVAL;
+    }
 
   /* Netlink message must contain at least a complete nlmsghdr */
 
@@ -662,6 +683,15 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
                                    msg->msg_iov[0].iov_len, flags,
                                    (FAR const struct sockaddr_nl *)to,
                                    tolen);
+        break;
+#endif
+
+#ifdef CONFIG_NETLINK_GENERIC
+      case NETLINK_GENERIC:
+        ret = netlink_generic_sendto(conn, nlmsg,
+                                     msg->msg_iov->iov_len, flags,
+                                     (FAR const struct sockaddr_nl *)to,
+                                     tolen);
         break;
 #endif
 
@@ -841,5 +871,86 @@ static int netlink_close(FAR struct socket *psock)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: netlink_setsockopt
+ *
+ * Description:
+ *   netlink_setsockopt() sets the NetLink-specific option specified by the
+ *   'option' argument to the value pointed to by the 'value' argument for
+ *   the socket specified by the 'psock' argument.
+ *
+ *   See <sys/socket.h> a complete list of values for the 'option' argument.
+ *
+ * Input Parameters:
+ *   psock     Socket structure of socket to operate on
+ *   level     Protocol level to set the option
+ *   option    identifies the option to set
+ *   value     Points to the argument value
+ *   value_len The length of the argument value
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success.  On failure, it returns a negated errno
+ *   value to indicate the nature of the error.  See psock_setsockopt() for
+ *   the list of possible error values.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_SOCKOPTS
+static int netlink_setsockopt(FAR struct socket *psock, int level,
+                              int option, FAR const void *value,
+                              socklen_t value_len)
+{
+  FAR struct netlink_conn_s *conn;
+  int ret = OK;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && value != NULL);
+  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+
+  if (level == SOL_NETLINK)
+    {
+      switch (option)
+        {
+          case NETLINK_ADD_MEMBERSHIP:
+          case NETLINK_DROP_MEMBERSHIP:
+            {
+              int group;
+
+              if (value_len < sizeof(int))
+                {
+                  return -EINVAL;
+                }
+
+              group = *(FAR const int *)value;
+
+              if (group < 1 || group > 32)
+                {
+                  return -EINVAL;
+                }
+
+              if (option == NETLINK_ADD_MEMBERSHIP)
+                {
+                  conn->groups |= (1u << (group - 1));
+                }
+              else
+                {
+                  conn->groups &= ~(1u << (group - 1));
+                }
+            }
+            break;
+
+          default:
+            ret = -ENOPROTOOPT;
+            break;
+        }
+    }
+  else
+    {
+      ret = -ENOPROTOOPT;
+    }
+
+  return ret;
+}
+#endif
 
 #endif /* CONFIG_NET_NETLINK */

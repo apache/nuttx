@@ -86,6 +86,12 @@ config NETLINK_MAX_CONNS
 
 menu "Netlink Protocols"
 
+config NETLINK_GENERIC
+	bool "Netlink Generic protocol"
+	default n
+	---help---
+		Support the NETLINK_GENERIC protocol option.
+
 config NETLINK_ROUTE
 	bool "Netlink Route protocol"
 	default n

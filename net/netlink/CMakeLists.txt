@@ -23,10 +23,14 @@
 # Logic specific to NETLINK
 
 if(CONFIG_NET_NETLINK)
-  set(SRCS netlink_sockif.c netlink_conn.c netlink_notifier.c)
+  set(SRCS netlink_sockif.c netlink_conn.c netlink_notifier.c netlink_attr.c)
 
   if(CONFIG_NETLINK_ROUTE)
-    list(APPEND SRCS netlink_route.c netlink_attr.c)
+    list(APPEND SRCS netlink_route.c)
+  endif()
+
+  if(CONFIG_NETLINK_GENERIC)
+    list(APPEND SRCS netlink_generic.c)
   endif()
 
   if(CONFIG_NETLINK_NETFILTER)

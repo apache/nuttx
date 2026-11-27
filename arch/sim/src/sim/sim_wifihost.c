@@ -1073,7 +1073,7 @@ static int wifi_send_event(struct net_driver_s *dev, unsigned int cmd,
   memset(&wev->event.u, 0, sizeof(union iwreq_data));
   memcpy(&wev->event.u, ((char *)wrqu), sizeof(union iwreq_data));
 
-  netlink_add_broadcast(RTNLGRP_LINK,
+  netlink_add_broadcast(NETLINK_ROUTE, RTNLGRP_LINK,
                         (struct netlink_response_s *)alloc);
   return OK;
 }
