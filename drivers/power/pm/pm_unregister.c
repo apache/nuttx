@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <errno.h>
 
 #include <nuttx/queue.h>
 #include <nuttx/power/pm.h>
@@ -67,6 +68,12 @@ int pm_domain_unregister(int domain, FAR struct pm_callback_s *cb)
   flags = spin_lock_irqsave(&pdom->lock);
 
   /* Remove entry from the list of registered callbacks. */
+
+  if (!dq_inqueue(&cb->entry, &pdom->registry))
+    {
+      spin_unlock_irqrestore(&pdom->lock, flags);
+      return -ENOENT;
+    }
 
   dq_rem(&cb->entry, &pdom->registry);
   spin_unlock_irqrestore(&pdom->lock, flags);
