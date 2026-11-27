@@ -2777,6 +2777,7 @@ static int i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels)
 {
   struct esp_i2s_s *priv = (struct esp_i2s_s *)dev;
   bool is_mono = true;
+  bool was_started;
 
   if (priv->config->rx_en)
     {
@@ -2798,7 +2799,11 @@ static int i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels)
         }
 #endif
 
-      i2s_rx_channel_stop(priv);
+      was_started = priv->rx_started;
+      if (was_started)
+        {
+          i2s_rx_channel_stop(priv);
+        }
 
       priv->channels = channels;
 
@@ -2810,7 +2815,10 @@ static int i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels)
       i2s_ll_rx_enable_mono_mode(priv->config->ctx->dev,
                                  is_mono);
 
-      i2s_rx_channel_start(priv);
+      if (was_started)
+        {
+          i2s_rx_channel_start(priv);
+        }
 
       return OK;
     }
@@ -2883,10 +2891,15 @@ static int32_t i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 static int32_t i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
   struct esp_i2s_s *priv = (struct esp_i2s_s *)dev;
+  bool was_started;
 
   if (priv->config->rx_en)
     {
-      i2s_rx_channel_stop(priv);
+      was_started = priv->rx_started;
+      if (was_started)
+        {
+          i2s_rx_channel_stop(priv);
+        }
 
       priv->rate = rate;
 
@@ -2897,7 +2910,10 @@ static int32_t i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 
       i2s_set_clock(priv);
 
-      i2s_rx_channel_start(priv);
+      if (was_started)
+        {
+          i2s_rx_channel_start(priv);
+        }
 
       return OK;
     }
@@ -2964,16 +2980,24 @@ static int32_t i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
 static int32_t i2s_rxdatawidth(struct i2s_dev_s *dev, int bits)
 {
   struct esp_i2s_s *priv = (struct esp_i2s_s *)dev;
+  bool was_started;
 
   if (priv->config->rx_en)
     {
-      i2s_rx_channel_stop(priv);
+      was_started = priv->rx_started;
+      if (was_started)
+        {
+          i2s_rx_channel_stop(priv);
+        }
 
       priv->data_width = bits;
 
       i2s_set_datawidth(priv);
 
-      i2s_rx_channel_start(priv);
+      if (was_started)
+        {
+          i2s_rx_channel_start(priv);
+        }
 
       return bits;
     }
@@ -3015,6 +3039,7 @@ static int i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     {
       struct esp_buffer_s *bfcontainer;
       int ret = OK;
+      uint32_t dma_nbytes;
       uint32_t nbytes;
       uint32_t nsamp;
 
@@ -3026,13 +3051,24 @@ static int i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       nbytes = (apb->nbytes - apb->curbyte) + priv->tx.carry.bytes;
 
       nbytes -= (nbytes % (priv->data_width / 8));
+      dma_nbytes = nbytes;
 
-      if (nbytes > (ESPRESSIF_DMA_BUFLEN_MAX * I2S_DMADESC_NUM))
+      if (priv->channels == 1 && dma_nbytes > 0)
+        {
+          if (dma_nbytes > UINT32_MAX / 2)
+            {
+              return -EFBIG;
+            }
+
+          dma_nbytes *= 2;
+        }
+
+      if (dma_nbytes > (ESPRESSIF_DMA_BUFLEN_MAX * I2S_DMADESC_NUM))
         {
           i2serr("Required buffer size can't fit into DMA outlink "
                  "(exceeds in %" PRIu32 " bytes). Try to increase the "
                  "number of the DMA descriptors (CONFIG_I2S_DMADESC_NUM).",
-                 nbytes - (ESPRESSIF_DMA_BUFLEN_MAX * I2S_DMADESC_NUM));
+                 dma_nbytes - (ESPRESSIF_DMA_BUFLEN_MAX * I2S_DMADESC_NUM));
           return -EFBIG;
         }
 
@@ -3050,7 +3086,7 @@ static int i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       ret = nxmutex_lock(&priv->lock);
       if (ret < 0)
         {
-          goto errout_with_buf;
+          goto errout_with_unlocked_buf;
         }
 
       /* Add a reference to the audio buffer */
@@ -3063,7 +3099,7 @@ static int i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       bfcontainer->timeout  = timeout;
       bfcontainer->arg      = arg;
       bfcontainer->apb      = apb;
-      bfcontainer->nbytes   = nbytes;
+      bfcontainer->nbytes   = dma_nbytes;
       bfcontainer->result   = -EBUSY;
 
       ret = i2s_txdma_setup(priv, bfcontainer);
@@ -3083,6 +3119,7 @@ static int i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
 errout_with_buf:
       nxmutex_unlock(&priv->lock);
+errout_with_unlocked_buf:
       i2s_buf_free(priv, bfcontainer);
       return ret;
     }
@@ -3126,7 +3163,6 @@ static int i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       int ret = OK;
       uint32_t nbytes;
       uint32_t frame_size;
-      uint32_t nsamp;
 
       /* Check max audio buffer data size from the upper half and align the
        * receiving buffer according to the data width.
@@ -3170,7 +3206,7 @@ static int i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       ret = nxmutex_lock(&priv->lock);
       if (ret < 0)
         {
-          goto errout_with_buf;
+          goto errout_with_unlocked_buf;
         }
 
       /* Add a reference to the audio buffer */
@@ -3190,6 +3226,7 @@ static int i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
       if (ret != OK)
         {
+          apb_free(bfcontainer->apb);
           goto errout_with_buf;
         }
 
@@ -3199,6 +3236,7 @@ static int i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
 errout_with_buf:
       nxmutex_unlock(&priv->lock);
+errout_with_unlocked_buf:
       i2s_buf_free(priv, bfcontainer);
       return ret;
     }
