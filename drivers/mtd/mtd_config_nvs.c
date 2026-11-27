@@ -1340,12 +1340,37 @@ static int nvs_startup(FAR struct nvs_fs *fs)
 
   size_t ate_size = nvs_ate_size(fs);
 
-  NVS_ATE(second_ate, ate_size);
-  NVS_ATE(last_ate, ate_size);
+  /* Check the number of blocks, it should be at least 2. */
+
+  if (fs->nblocks < 2)
+    {
+      ferr("Configuration error - block count\n");
+      return -EINVAL;
+    }
+
+  /* Check block size: it must be large enough to hold the closing ATE,
+   * GC marker ATE, at least one entry ATE, and must not exceed the
+   * maximum addressable 16-bit offset.
+   */
+
+  if (fs->blocksize <= 3 * ate_size ||
+      fs->blocksize > (NVS_ADDR_OFFS_MASK + 1))
+    {
+      ferr("Configuration error - block size: %" PRIu32 "\n",
+           fs->blocksize);
+      return -EINVAL;
+    }
 
 #if CONFIG_MTD_CONFIG_BUFFER_SIZE > 0
-  DEBUGASSERT(ate_size <= CONFIG_MTD_CONFIG_BUFFER_SIZE);
+  if (ate_size > CONFIG_MTD_CONFIG_BUFFER_SIZE)
+    {
+      ferr("Configuration error - ATE size too large\n");
+      return -EINVAL;
+    }
 #endif
+
+  NVS_ATE(second_ate, ate_size);
+  NVS_ATE(last_ate, ate_size);
 
   rc = MTD_IOCTL(fs->mtd, MTDIOC_ERASESTATE,
                  (unsigned long)((uintptr_t)&fs->erasestate));
@@ -1353,14 +1378,6 @@ static int nvs_startup(FAR struct nvs_fs *fs)
     {
       ferr("ERROR: MTD ioctl(MTDIOC_ERASESTATE) failed: %d\n", rc);
       return rc;
-    }
-
-  /* Check the number of blocks, it should be at least 2. */
-
-  if (fs->nblocks < 2)
-    {
-      ferr("Configuration error - block count\n");
-      return -EINVAL;
     }
 
   /* Step through the blocks to find a open block following
