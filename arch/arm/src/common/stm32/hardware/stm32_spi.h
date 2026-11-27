@@ -27,32 +27,26 @@
  * Included Files
  ****************************************************************************/
 
-/* The SPI IP version (V1..V4) is independent of the CPU core.  The register
- * layout is the same, but the M0 and M3/M4 ports currently keep separate
- * register headers, so the file is chosen by the standard NuttX core symbol
- * (CONFIG_ARCH_CORTEXM0) while the version is core-agnostic.
+/* The SPI IP version is independent of the CPU core.  The M0 port keeps
+ * its own register header for V1 and V2, chosen by CONFIG_ARCH_CORTEXM0.
  */
 
 #if (defined(CONFIG_STM32_HAVE_IP_SPI_V1) + \
      defined(CONFIG_STM32_HAVE_IP_SPI_V2) + \
-     defined(CONFIG_STM32_HAVE_IP_SPI_V3) + \
-     defined(CONFIG_STM32_HAVE_IP_SPI_V4) + \
-     defined(CONFIG_STM32_HAVE_IP_SPI_V5)) > 1
+     defined(CONFIG_STM32_HAVE_IP_SPI_V3)) > 1
 #  error Only one STM32 SPI IP version must be selected
 #endif
 
 #if !(defined(CONFIG_STM32_HAVE_IP_SPI_V1) || \
       defined(CONFIG_STM32_HAVE_IP_SPI_V2) || \
-      defined(CONFIG_STM32_HAVE_IP_SPI_V3) || \
-      defined(CONFIG_STM32_HAVE_IP_SPI_V4) || \
-      defined(CONFIG_STM32_HAVE_IP_SPI_V5))
+      defined(CONFIG_STM32_HAVE_IP_SPI_V3))
 #  error "Unsupported STM32 SPI"
-#elif defined(CONFIG_STM32_HAVE_IP_SPI_V5)
-#  include "hardware/stm32_spi_v5.h"
+#elif defined(CONFIG_STM32_HAVE_IP_SPI_V3)
+#  include "hardware/stm32_spi_v3.h"
 #elif defined(CONFIG_ARCH_CORTEXM0)
 #  include "hardware/stm32_spi_v1v2_m0.h"
 #else
-#  include "hardware/stm32_spi_v2v3v4.h"
+#  include "hardware/stm32_spi_v1v2.h"
 #endif
 
 #endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_H */

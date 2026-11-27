@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/hardware/stm32_spi_v5.h
+ * arch/arm/src/common/stm32/hardware/stm32_spi_v3.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V5_H
-#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V5_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V3_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V3_H
 
 /****************************************************************************
  * Included Files
@@ -491,4 +491,4 @@
 #define SPI_I2SCFGR_ODD            (1 << 24) /* Bit 24: Odd Factor for the Prescaler */
 #define SPI_I2SCFGR_MCKOE          (1 << 25) /* Bit 24: Master Clock Output Enable */
 
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V5_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V3_H */

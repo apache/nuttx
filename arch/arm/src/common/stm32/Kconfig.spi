@@ -116,7 +116,7 @@ config STM32_SPI6_DMA
 
 config STM32_SPI1_COMMTYPE
 	int "SPI1 Operation mode"
-	depends on ARCH_CORTEXM0 || STM32_HAVE_IP_SPI_V5
+	depends on ARCH_CORTEXM0 || STM32_HAVE_IP_SPI_V3
 	depends on STM32_SPI && STM32_SPI1 || STM32_SPI1_SLAVE
 	default 0
 	range 0 3
@@ -125,7 +125,7 @@ config STM32_SPI1_COMMTYPE
 
 config STM32_SPI2_COMMTYPE
 	int "SPI2 Operation mode"
-	depends on ARCH_CORTEXM0 || STM32_HAVE_IP_SPI_V5
+	depends on ARCH_CORTEXM0 || STM32_HAVE_IP_SPI_V3
 	depends on STM32_SPI && STM32_SPI2 || STM32_SPI2_SLAVE
 	default 0
 	range 0 3
@@ -134,7 +134,7 @@ config STM32_SPI2_COMMTYPE
 
 config STM32_SPI3_COMMTYPE
 	int "SPI3 Operation mode"
-	depends on ARCH_CORTEXM0 || STM32_HAVE_IP_SPI_V5
+	depends on ARCH_CORTEXM0 || STM32_HAVE_IP_SPI_V3
 	depends on STM32_SPI && STM32_SPI3 || STM32_SPI3_SLAVE
 	default 0
 	range 0 3
@@ -144,14 +144,14 @@ config STM32_SPI3_COMMTYPE
 config STM32_SPI6_DMA_BUFFER
 	int "SPI6 DMA buffer size"
 	depends on STM32_SPI6_DMA
-	depends on ARCH_CHIP_STM32F7 || STM32_HAVE_IP_SPI_V5
+	depends on ARCH_CHIP_STM32F7 || STM32_HAVE_IP_SPI_V3
 	default 0
 	---help---
 		Add a properly aligned DMA buffer for RX and TX DMA for SPI6.
 
 config STM32_SPI4_COMMTYPE
 	int "SPI4 Operation mode"
-	depends on STM32_HAVE_IP_SPI_V5
+	depends on STM32_HAVE_IP_SPI_V3
 	depends on STM32_SPI && STM32_SPI4 || STM32_SPI4_SLAVE
 	default 0
 	range 0 3
@@ -160,7 +160,7 @@ config STM32_SPI4_COMMTYPE
 
 config STM32_SPI5_COMMTYPE
 	int "SPI5 Operation mode"
-	depends on STM32_HAVE_IP_SPI_V5
+	depends on STM32_HAVE_IP_SPI_V3
 	depends on STM32_SPI && STM32_SPI5 || STM32_SPI5_SLAVE
 	default 0
 	range 0 3
@@ -169,7 +169,7 @@ config STM32_SPI5_COMMTYPE
 
 config STM32_SPI6_COMMTYPE
 	int "SPI6 Operation mode"
-	depends on STM32_HAVE_IP_SPI_V5
+	depends on STM32_HAVE_IP_SPI_V3
 	depends on STM32_SPI && STM32_SPI6 || STM32_SPI6_SLAVE
 	default 0
 	range 0 3

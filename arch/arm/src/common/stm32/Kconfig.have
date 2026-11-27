@@ -849,17 +849,17 @@ config STM32_HAVE_HASH
 
 config STM32_HAVE_IP_SPI_V1
 	bool
+	---help---
+		SPI without FIFOs (STM32F1, STM32F2, STM32F4, STM32L0, STM32L1).
 
 config STM32_HAVE_IP_SPI_V2
 	bool
+	---help---
+		SPI with FIFOs and a 4-16 bit data size (STM32C0, STM32F0,
+		STM32F3, STM32F7, STM32G0, STM32G4, STM32L4, STM32L5, STM32U0,
+		STM32WB, STM32WL5).
 
 config STM32_HAVE_IP_SPI_V3
-	bool
-
-config STM32_HAVE_IP_SPI_V4
-	bool
-
-config STM32_HAVE_IP_SPI_V5
 	bool
 	---help---
 		SPI with FIFOs, TSIZE and a kernel clock (STM32C5, STM32H5,
@@ -867,7 +867,7 @@ config STM32_HAVE_IP_SPI_V5
 
 config STM32_HAVE_SPI_SLAVE
 	bool
-	default y if STM32_H7_LEGACY && STM32_HAVE_IP_SPI_V5
+	default y if STM32_H7_LEGACY && STM32_HAVE_IP_SPI_V3
 	---help---
 		The SPI slave driver supports this chip (STM32H7, not H7R/S).
 

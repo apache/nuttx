@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_spi_m0_v1.c
+ * arch/arm/src/common/stm32/stm32_spi_m0_v1v2.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

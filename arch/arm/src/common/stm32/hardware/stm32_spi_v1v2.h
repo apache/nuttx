@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/hardware/stm32_spi_v2v3v4.h
+ * arch/arm/src/common/stm32/hardware/stm32_spi_v1v2.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V2V3V4_H
-#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V2V3V4_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V1V2_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V1V2_H
 
 /****************************************************************************
  * Included Files
@@ -36,7 +36,7 @@
 
 /* SPI version **************************************************************/
 
-/* SPI IP v1 is default unless v2 or greater is specified for this chip */
+/* V1: no FIFOs, 8 or 16 bit data.  V2: FIFOs and a 4-16 bit data size. */
 
 #undef HAVE_SPI_I2S               /* No I2S mode in the SPI peripheral */
 #undef HAVE_SPI_I2S_ASTRT         /* No I2S asynchronous start capability */
@@ -45,31 +45,20 @@
 #undef HAVE_SPI_FIFOS             /* No Tx/Rx FIFOs */
 #undef HAVE_SPI_NSSP              /* No NSS Pulse Management in master mode */
 
-#if defined(CONFIG_STM32_HAVE_IP_SPI_V2)
+#if defined(CONFIG_STM32_HAVE_IP_SPI_V1)
+#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#    define HAVE_SPI_I2S          /* Some SPI peripherals have I2S mode */
+#    define HAVE_SPI_TI_MODE      /* Have Motorola and TI frame modes */
+#  endif
+#elif defined(CONFIG_STM32_HAVE_IP_SPI_V2)
 #  define HAVE_SPI_I2S            /* Some SPI peripherals have I2S mode */
-#  undef HAVE_SPI_I2S_ASTRT       /* No I2S asynchronous start capability */
-#  define HAVE_SPI_TI_MODE        /* Have Motorola and TI frame modes */
-#  undef HAVE_SPI_ARB_DATA_SIZE   /* Data size 8 or 16 bit; not arbitrary 4-16 bit */
-#  undef HAVE_SPI_FIFOS           /* No Tx/Rx FIFOs */
-#  undef HAVE_SPI_NSSP            /* No NSS Pulse Management in master mode */
-#endif
-
-#if defined(CONFIG_STM32_HAVE_IP_SPI_V3)
-#  define HAVE_SPI_I2S            /* Some SPI peripherals have I2S mode */
-#  undef HAVE_SPI_I2S_ASTRT       /* No I2S asynchronous start capability */
-#  define HAVE_SPI_TI_MODE        /* Have Motorola and TI frame modes */
-#  define HAVE_SPI_ARB_DATA_SIZE  /* Supports arbitrary data size from 4-16 bits */
-#  define HAVE_SPI_FIFOS          /* Have Tx/Rx FIFOs */
-#  undef HAVE_SPI_NSSP            /* No NSS Pulse Management in master mode */
-#endif
-
-#if defined(CONFIG_STM32_HAVE_IP_SPI_V4)
-#  define HAVE_SPI_I2S            /* Some SPI peripherals have I2S mode */
-#  define HAVE_SPI_I2S_ASTRT      /* Supports I2S asynchronous start capability */
 #  define HAVE_SPI_TI_MODE        /* Have Motorola and TI frame modes */
 #  define HAVE_SPI_ARB_DATA_SIZE  /* Supports arbitrary data size from 4-16 bits */
 #  define HAVE_SPI_FIFOS          /* Have Tx/Rx FIFOs */
 #  define HAVE_SPI_NSSP           /* Have NSS Pulse Management in master mode */
+#  if defined(CONFIG_ARCH_CHIP_STM32F7)
+#    define HAVE_SPI_I2S_ASTRT    /* Supports I2S asynchronous start capability */
+#  endif
 #endif
 
 /* Maximum allowed speed as per specifications for all SPIs, unless chip.h
@@ -284,4 +273,4 @@
 #  define SPI_I2SPR_MCKOE            (1 << 9)  /* Bit 9: Master clock output enable */
 #endif
 
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V2V3V4_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V1V2_H */
