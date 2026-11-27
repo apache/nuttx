@@ -107,6 +107,13 @@ static int msync_rammap(FAR struct mm_map_entry_s *entry, FAR void *start,
           continue;
         }
 
+      if (nwrite == 0)
+        {
+          ferr("ERROR: Write made no progress\n");
+          nwrite = -EIO;
+          break;
+        }
+
       /* Increment number of bytes written */
 
       wrbuffer += nwrite;
