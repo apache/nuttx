@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <sched.h>
+#include <string.h>
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>
 #include <nuttx/power/pm_runtime.h>
@@ -132,9 +133,9 @@ static int rpm_changestate(FAR struct pm_runtime_s *rpm, rpm_state_e state)
       }
     else if (state == RPM_SUSPENDING)
       {
-         ret = work_queue(HPWORK, &rpm->suspend_work,
-                          rpm_autosuspend_cb, rpm,
-                          MSEC2TICK(rpm->suspend_delay));
+        ret = work_queue(HPWORK, &rpm->suspend_work,
+                         rpm_autosuspend_cb, rpm,
+                         MSEC2TICK(rpm->suspend_delay));
       }
     break;
 
@@ -188,6 +189,7 @@ void pm_runtime_init(FAR struct pm_runtime_s *rpm, rpm_state_e state,
   DEBUGASSERT(rpm != NULL && ops != NULL);
   DEBUGASSERT(state == RPM_ACTIVE || state == RPM_SUSPENDED);
   nxrmutex_init(&rpm->lock);
+  memset(&rpm->suspend_work, 0, sizeof(rpm->suspend_work));
   rpm->use_count = 0;
   rpm->suspend_delay = 0;
   rpm->state = state;
