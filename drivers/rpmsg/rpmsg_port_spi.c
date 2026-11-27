@@ -44,13 +44,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_RPMSG_PORT_SPI_CRC
-#  define rpmsg_port_spi_crc16(hdr)     xorsum16(&(hdr)->cmd, \
-                                                 (hdr)->len - sizeof((hdr)->crc))
-#else
-#  define rpmsg_port_spi_crc16(hdr)     0
-#endif
-
 #define RPMSG_PORT_SPI_CMD_TIMEOUT      1000
 #define RPMSG_PORT_SPI_BYTES2WORDS(s,b) ((b) / ((s)->nbits >> 3))
 
@@ -147,6 +140,23 @@ static const struct rpmsg_port_ops_s g_rpmsg_port_spi_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: rpmsg_port_spi_crc16
+ ****************************************************************************/
+
+static uint16_t rpmsg_port_spi_crc16(FAR struct rpmsg_port_header_s *hdr)
+{
+#ifdef CONFIG_RPMSG_PORT_SPI_CRC
+  uint16_t crc = xorsum16(&hdr->cmd, hdr->len - sizeof(hdr->crc));
+
+  /* The receiver skips the check of a zero crc, so never send one */
+
+  return crc != 0 ? crc : 1;
+#else
+  return 0;
+#endif
+}
 
 #ifdef CONFIG_PM
 
