@@ -838,9 +838,11 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
 
   if (isconsole)
     {
-      priv->termios.iflag = ICRNL;
-      priv->termios.oflag = OPOST | ONLCR;
-      priv->termios.lflag = ECHO | ISIG;
+      uart_termios_init(&priv->termios, ICRNL, OPOST | ONLCR, ECHO | ISIG);
+    }
+  else
+    {
+      uart_termios_init(&priv->termios, 0, 0, 0);
     }
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
