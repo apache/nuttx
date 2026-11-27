@@ -66,6 +66,11 @@ static int msync_rammap(FAR struct mm_map_entry_s *entry, FAR void *start,
   off_t fpos;
   off_t opos;
 
+  if ((entry->prot & PROT_WRITE) == 0)
+    {
+      return OK;
+    }
+
   offset = (uintptr_t)start - (uintptr_t)entry->vaddr;
   if (length > entry->length - offset)
     {
