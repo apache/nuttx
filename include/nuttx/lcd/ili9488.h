@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/nuttx/lcd/ili9488.h
  *
- *   Copyright (c) 2011, Atmel Corporation
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-FileCopyrightText: 2011, Atmel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
