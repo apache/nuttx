@@ -60,6 +60,12 @@
 #  warning CONFIG_FS_TMPFS_FILE_FREEGUARD needs to be > ALLOCGUARD
 #endif
 
+#ifdef CONFIG_FS_LARGEFILE
+#  define TMPFS_OFF_MAX INT64_MAX
+#else
+#  define TMPFS_OFF_MAX INT32_MAX
+#endif
+
 #define tmpfs_lock(fs) \
            nxrmutex_lock(&fs->tfs_lock)
 #define tmpfs_lock_object(to) \
@@ -2141,6 +2147,7 @@ static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct tmpfs_file_s *tfo;
   off_t position;
+  int ret;
 
   finfo("filep: %p\n", filep);
   DEBUGASSERT(filep->f_priv != NULL);
@@ -2149,31 +2156,60 @@ static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   tfo = filep->f_priv;
 
+  ret = tmpfs_lock_file(tfo);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Map the offset according to the whence option */
 
   switch (whence)
     {
-      case SEEK_SET: /* The offset is set to offset bytes. */
-        position = offset;
+      case SEEK_SET:
+        position = 0;
         break;
 
-      case SEEK_CUR: /* The offset is set to its current location plus
-                      * offset bytes. */
-        position = offset + filep->f_pos;
+      case SEEK_CUR:
+        position = filep->f_pos;
         break;
 
-      case SEEK_END: /* The offset is set to the size of the file plus
-                      * offset bytes. */
-        position = offset + tfo->tfo_size;
+      case SEEK_END:
+        if (tfo->tfo_size > TMPFS_OFF_MAX)
+          {
+            position = -EOVERFLOW;
+            goto out;
+          }
+
+        position = tfo->tfo_size;
         break;
 
       default:
-        return -EINVAL;
+        position = -EINVAL;
+        goto out;
     }
 
-  /* Save the new file position */
+  /* Check before adding so failure preserves the file position and the
+   * addition cannot overflow off_t.
+   */
 
+  if (offset < -position)
+    {
+      position = -EINVAL;
+      goto out;
+    }
+
+  if (offset > TMPFS_OFF_MAX - position)
+    {
+      position = -EOVERFLOW;
+      goto out;
+    }
+
+  position += offset;
   filep->f_pos = position;
+
+out:
+  tmpfs_unlock_file(tfo);
   return position;
 }
 
