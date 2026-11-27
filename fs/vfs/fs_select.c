@@ -59,20 +59,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: select
+ * Name: nx_select
  *
  * Description:
- *   select() allows a program to monitor multiple file descriptors, waiting
- *   until one or more of the file descriptors become "ready" for some class
- *   of I/O operation (e.g., input possible).  A file descriptor is
- *   considered  ready if it is possible to perform the corresponding I/O
- *   operation (e.g., read(2)) without blocking.
- *
- *   NOTE: poll() is the fundamental API for performing such monitoring
- *   operation under NuttX.  select() is provided for compatibility and
- *   is simply a layer of added logic on top of poll().  As such, select()
- *   is more wasteful of resources and poll() is the recommended API to be
- *   used.
+ *   nx_select() is the internal form of select() and pselect().  It
+ *   returns a negated errno value on failure and does not set errno.
  *
  * Input Parameters:
  *   nfds - the maximum fd number (+1) of any descriptor in any of the
@@ -82,16 +73,18 @@
  *   exceptfds - the set of descriptions to monitor for error events
  *   timeout - Return at this time if none of these events of interest
  *     occur.
+ *   sigmask - Optional temporary signal mask, given to nx_poll().
  *
  *  Returned Value:
  *   0: Timer expired
  *  >0: The number of bits set in the three sets of descriptors
- *  -1: An error occurred (errno will be set appropriately)
+ *  <0: A negated errno value
  *
  ****************************************************************************/
 
-int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
-           FAR fd_set *exceptfds, FAR struct timeval *timeout)
+int nx_select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
+              FAR fd_set *exceptfds, FAR struct timeval *timeout,
+              FAR const sigset_t *sigmask)
 {
   struct pollfd *pollset = NULL;
   int fd;
@@ -102,8 +95,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
   if (nfds < 0)
     {
-      set_errno(EINVAL);
-      return ERROR;
+      return -EINVAL;
     }
 
   /* Convert the timeout to milliseconds */
@@ -113,8 +105,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
       if (timeout->tv_sec < 0 || timeout->tv_usec < 0 ||
           timeout->tv_usec >= USEC_PER_SEC)
         {
-          set_errno(EINVAL);
-          return ERROR;
+          return -EINVAL;
         }
 
       /* Calculate the timeout in milliseconds, clamping to INT_MAX
@@ -143,8 +134,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
   if (nfds < 0 || nfds > FD_SETSIZE)
     {
-      set_errno(EINVAL);
-      return ERROR;
+      return -EINVAL;
     }
 
   /* How many pollfd structures do we need to allocate? */
@@ -174,8 +164,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
       if (pollset == NULL)
         {
-          set_errno(ENOMEM);
-          return ERROR;
+          return -ENOMEM;
         }
 
       memset(pollset, 0, npfds * sizeof(struct pollfd));
@@ -239,9 +228,11 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
   DEBUGASSERT(ndx == npfds);
 
-  /* Then let poll do all of the real work. */
+  /* Then let poll do all of the real work.  nx_poll() sets the mask only
+   * after the poll setup, outside of the critical section.
+   */
 
-  ret = poll(pollset, npfds, msec);
+  ret = nx_poll(pollset, npfds, msec, sigmask);
 
   /* Now set up the return values */
 
@@ -314,6 +305,52 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
   if (pollset != NULL)
     {
       lib_put_tempbuffer(pollset);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: select
+ *
+ * Description:
+ *   select() allows a program to monitor multiple file descriptors, waiting
+ *   until one or more of the file descriptors become "ready" for some class
+ *   of I/O operation (e.g., input possible).  A file descriptor is
+ *   considered  ready if it is possible to perform the corresponding I/O
+ *   operation (e.g., read(2)) without blocking.
+ *
+ *   NOTE: poll() is the fundamental API for performing such monitoring
+ *   operation under NuttX.  select() is provided for compatibility and
+ *   is simply a layer of added logic on top of poll().  As such, select()
+ *   is more wasteful of resources and poll() is the recommended API to be
+ *   used.
+ *
+ * Input Parameters:
+ *   nfds - the maximum fd number (+1) of any descriptor in any of the
+ *     three sets.
+ *   readfds - the set of descriptions to monitor for read-ready events
+ *   writefds - the set of descriptions to monitor for write-ready events
+ *   exceptfds - the set of descriptions to monitor for error events
+ *   timeout - Return at this time if none of these events of interest
+ *     occur.
+ *
+ *  Returned Value:
+ *   0: Timer expired
+ *  >0: The number of bits set in the three sets of descriptors
+ *  -1: An error occurred (errno will be set appropriately)
+ *
+ ****************************************************************************/
+
+int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
+           FAR fd_set *exceptfds, FAR struct timeval *timeout)
+{
+  int ret = nx_select(nfds, readfds, writefds, exceptfds, timeout, NULL);
+
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
     }
 
   return ret;

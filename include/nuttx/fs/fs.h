@@ -224,6 +224,8 @@
 struct file;
 struct inode;
 struct stat;
+struct timeval;
+struct fd_set_s;
 struct statfs;
 struct pollfd_s;
 struct mtd_dev_s;
@@ -1893,6 +1895,20 @@ int file_poll(FAR struct file *filep, FAR struct pollfd_s *fds, bool setup);
 
 int nx_poll(FAR struct pollfd *fds, nfds_t nfds, int timeout,
             FAR const sigset_t *sigmask);
+
+/****************************************************************************
+ * Name: nx_select
+ *
+ * Description:
+ *   Internal select implementation for select() and pselect().  Returns the
+ *   number of bits set in the three sets or a negated errno value.  The
+ *   sigmask is given to nx_poll(); NULL leaves the signal mask unchanged.
+ *
+ ****************************************************************************/
+
+int nx_select(int nfds, FAR struct fd_set_s *readfds,
+              FAR struct fd_set_s *writefds, FAR struct fd_set_s *exceptfds,
+              FAR struct timeval *timeout, FAR const sigset_t *sigmask);
 
 /****************************************************************************
  * Name: file_fstat
