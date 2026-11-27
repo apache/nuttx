@@ -29,6 +29,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/net/icmpv6.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
@@ -75,6 +76,12 @@ static sq_queue_t g_ipv4_filters[IPFILTER_CHAIN_MAX];
 #ifdef CONFIG_NET_IPv6
 static sq_queue_t g_ipv6_filters[IPFILTER_CHAIN_MAX];
 #endif
+
+/* The packet path walks the filter lists under the lock of its own device
+ * only, so the lists need their own lock against ipfilter_cfg_replace().
+ */
+
+static mutex_t g_ipfilter_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -223,6 +230,7 @@ static int ipv4_filter_match(FAR const struct net_driver_s *indev,
   in_addr_t srcip;
   in_addr_t dstip;
   bool matched;
+  int ret = IPFILTER_TARGET_ACCEPT;
 
   /* Handle unexpected status, return ACCEPT to indicate doing nothing. */
 
@@ -235,6 +243,7 @@ static int ipv4_filter_match(FAR const struct net_driver_s *indev,
   srcip = net_ip4addr_conv32(ipv4->srcipaddr);
   dstip = net_ip4addr_conv32(ipv4->destipaddr);
 
+  nxmutex_lock(&g_ipfilter_lock);
   sq_for_every(queue, entry)
     {
       filter = (FAR struct ipv4_filter_entry_s *)entry;
@@ -271,13 +280,20 @@ static int ipv4_filter_match(FAR const struct net_driver_s *indev,
 
       /* Return the target action if matched. */
 
-      return filter->common.target;
+      ret = filter->common.target;
+      break;
     }
+
+  nxmutex_unlock(&g_ipfilter_lock);
 
   /* Normally there should be a default rule in chain, won't reach here. */
 
-  ninfo("No filter matched, maybe uninitialized.\n");
-  return IPFILTER_TARGET_ACCEPT;
+  if (entry == NULL)
+    {
+      ninfo("No filter matched, maybe uninitialized.\n");
+    }
+
+  return ret;
 }
 #endif
 
@@ -293,6 +309,7 @@ static int ipv6_filter_match(FAR const struct net_driver_s *indev,
   FAR const void *l4hdr;
   uint8_t proto;
   bool matched;
+  int ret = IPFILTER_TARGET_ACCEPT;
 
   /* Handle unexpected status, return ACCEPT to indicate doing nothing. */
 
@@ -303,6 +320,7 @@ static int ipv6_filter_match(FAR const struct net_driver_s *indev,
 
   l4hdr = IPv6_L4HDR(ipv6, proto);
 
+  nxmutex_lock(&g_ipfilter_lock);
   sq_for_every(queue, entry)
     {
       filter = (FAR struct ipv6_filter_entry_s *)entry;
@@ -341,13 +359,20 @@ static int ipv6_filter_match(FAR const struct net_driver_s *indev,
 
       /* Return the target action if matched. */
 
-      return filter->common.target;
+      ret = filter->common.target;
+      break;
     }
+
+  nxmutex_unlock(&g_ipfilter_lock);
 
   /* Normally there should be a default rule in chain, won't reach here. */
 
-  ninfo("No filter matched, maybe uninitialized.\n");
-  return IPFILTER_TARGET_ACCEPT;
+  if (entry == NULL)
+    {
+      ninfo("No filter matched, maybe uninitialized.\n");
+    }
+
+  return ret;
 }
 #endif
 
@@ -395,13 +420,12 @@ FAR struct ipfilter_entry_s *ipfilter_cfg_alloc(sa_family_t family)
  * Name: ipfilter_cfg_add
  *
  * Description:
- *   Add a new filter configuration entry for the given address family to the
- *   end of specified chain.
+ *   Add a new filter configuration entry to the end of a chain that the
+ *   caller builds.  The chain becomes active with ipfilter_cfg_replace().
  *
  * Input Parameters:
- *   entry  - The filter entry to add
- *   family - The address family of the filter entry
- *   chain  - The chain to add the filter entry to
+ *   entry - The filter entry to add
+ *   queue - The chain to add the filter entry to
  *
  * Returned Value:
  *   None
@@ -409,64 +433,71 @@ FAR struct ipfilter_entry_s *ipfilter_cfg_alloc(sa_family_t family)
  ****************************************************************************/
 
 void ipfilter_cfg_add(FAR struct ipfilter_entry_s *entry,
-                      sa_family_t family, enum ipfilter_chain_e chain)
+                      FAR sq_queue_t *queue)
 {
-#ifdef CONFIG_NET_IPv4
-  if (family == PF_INET)
-    {
-      sq_addlast((FAR sq_entry_t *)entry, &g_ipv4_filters[chain]);
-    }
-#endif
-
-#ifdef CONFIG_NET_IPv6
-  if (family == PF_INET6)
-    {
-      sq_addlast((FAR sq_entry_t *)entry, &g_ipv6_filters[chain]);
-    }
-#endif
+  sq_addlast((FAR sq_entry_t *)entry, queue);
 }
 
 /****************************************************************************
- * Name: ipfilter_cfg_clear
+ * Name: ipfilter_cfg_replace
  *
  * Description:
- *   Clear all filter configuration entries for the given address family from
- *   the specified chain.
+ *   Replace all chains of the given address family with the chains that
+ *   the caller built with ipfilter_cfg_add(), and free the old entries.
+ *   The packet path walks the chains under g_ipfilter_lock, so it sees
+ *   either all the old chains or all the new chains.  The old entries are
+ *   freed after the lock is released.
  *
  * Input Parameters:
- *   family - The address family of the filter entry to clear
- *   chain  - The chain to clear the filter entries from
+ *   family - The address family of the filter entries
+ *   queues - The new chains, one for each ipfilter_chain_e.  They are
+ *            empty on return.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void ipfilter_cfg_clear(sa_family_t family, enum ipfilter_chain_e chain)
+void ipfilter_cfg_replace(sa_family_t family,
+                          FAR sq_queue_t queues[IPFILTER_CHAIN_MAX])
 {
+  FAR sq_queue_t *filters = NULL;
+  sq_queue_t old[IPFILTER_CHAIN_MAX];
+  int chain;
+
 #ifdef CONFIG_NET_IPv4
   if (family == PF_INET)
     {
-      FAR sq_queue_t *queue = &g_ipv4_filters[chain];
-
-      while (!sq_empty(queue))
-        {
-          kmm_free(sq_remfirst(queue));
-        }
+      filters = g_ipv4_filters;
     }
 #endif
 
 #ifdef CONFIG_NET_IPv6
   if (family == PF_INET6)
     {
-      FAR sq_queue_t *queue = &g_ipv6_filters[chain];
-
-      while (!sq_empty(queue))
-        {
-          kmm_free(sq_remfirst(queue));
-        }
+      filters = g_ipv6_filters;
     }
 #endif
+
+  DEBUGASSERT(filters != NULL);
+
+  nxmutex_lock(&g_ipfilter_lock);
+
+  for (chain = 0; chain < IPFILTER_CHAIN_MAX; chain++)
+    {
+      sq_move(&filters[chain], &old[chain]);
+      sq_move(&queues[chain], &filters[chain]);
+    }
+
+  nxmutex_unlock(&g_ipfilter_lock);
+
+  for (chain = 0; chain < IPFILTER_CHAIN_MAX; chain++)
+    {
+      while (!sq_empty(&old[chain]))
+        {
+          kmm_free(sq_remfirst(&old[chain]));
+        }
+    }
 }
 
 /****************************************************************************

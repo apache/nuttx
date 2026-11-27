@@ -377,16 +377,17 @@ static void adjust_ipv4filter(FAR const struct ipt_replace *repl)
 {
   FAR const struct ipt_entry *entry;
   FAR const uint8_t *head;
+  sq_queue_t queues[IPFILTER_CHAIN_MAX];
   enum ipfilter_chain_e chain;
   enum nf_inet_hooks hook;
   size_t size;
 
   for (hook = NF_INET_LOCAL_IN; hook <= NF_INET_LOCAL_OUT; hook++)
     {
-      /* Clear all filter config first. */
+      /* Build the new chains aside, the old chains stay in use. */
 
       chain = convert_chain(hook);
-      ipfilter_cfg_clear(PF_INET, chain);
+      sq_init(&queues[chain]);
 
       /* Set filter config according to iptables config. */
 
@@ -403,7 +404,7 @@ static void adjust_ipv4filter(FAR const struct ipt_replace *repl)
 
           if (filter != NULL)
             {
-              ipfilter_cfg_add(&filter->common, PF_INET, chain);
+              ipfilter_cfg_add(&filter->common, &queues[chain]);
             }
           else
             {
@@ -411,6 +412,10 @@ static void adjust_ipv4filter(FAR const struct ipt_replace *repl)
             }
         }
     }
+
+  /* Replace all chains at once and free the old entries. */
+
+  ipfilter_cfg_replace(PF_INET, queues);
 }
 #endif
 
@@ -419,16 +424,17 @@ static void adjust_ipv6filter(FAR const struct ip6t_replace *repl)
 {
   FAR const struct ip6t_entry *entry;
   FAR const uint8_t *head;
+  sq_queue_t queues[IPFILTER_CHAIN_MAX];
   enum ipfilter_chain_e chain;
   enum nf_inet_hooks hook;
   size_t size;
 
   for (hook = NF_INET_LOCAL_IN; hook <= NF_INET_LOCAL_OUT; hook++)
     {
-      /* Clear all filter config first. */
+      /* Build the new chains aside, the old chains stay in use. */
 
       chain = convert_chain(hook);
-      ipfilter_cfg_clear(PF_INET6, chain);
+      sq_init(&queues[chain]);
 
       /* Set filter config according to iptables config. */
 
@@ -445,7 +451,7 @@ static void adjust_ipv6filter(FAR const struct ip6t_replace *repl)
 
           if (filter != NULL)
             {
-              ipfilter_cfg_add(&filter->common, PF_INET6, chain);
+              ipfilter_cfg_add(&filter->common, &queues[chain]);
             }
           else
             {
@@ -453,6 +459,10 @@ static void adjust_ipv6filter(FAR const struct ip6t_replace *repl)
             }
         }
     }
+
+  /* Replace all chains at once and free the old entries. */
+
+  ipfilter_cfg_replace(PF_INET6, queues);
 }
 #endif
 
