@@ -744,6 +744,11 @@ This configuration is the same as the ``nsh`` configuration, but it generates th
 image in a format that can be used by MCUboot. It also makes the ``make bootloader`` command to
 build the MCUboot bootloader image using the Espressif HAL.
 
+The board can chain-boot an MCUboot-format image with
+``boardctl(BOARDIOC_BOOT_IMAGE)``. The request supplies the partition path
+and image header size to ``board_boot_image()``. See
+:doc:`/applications/boot/mcuboot/index` for the general MCUboot flow.
+
 mcuboot_update_agent
 --------------------
 
