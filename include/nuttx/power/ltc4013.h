@@ -1,5 +1,6 @@
 /****************************************************************************
  * include/nuttx/power/ltc4013.h
+ *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

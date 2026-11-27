@@ -5,8 +5,6 @@
  * SPDX-FileCopyrightText: 2015 Intuitive Aerial AB. All rights reserved.
  * SPDX-FileContributor: Marten Svanfeldt <marten@intuitiveaerial.com>
  *
- * References: RA8875, Rev 1.6, Apr 2013, RAiO Technologies Inc
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -35,6 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+ * References: RA8875, Rev 1.6, Apr 2013, RAiO Technologies Inc
 
 #ifndef __INCLUDE_NUTTX_LCD_RA8875_H
 #define __INCLUDE_NUTTX_LCD_RA8875_H

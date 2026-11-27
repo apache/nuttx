@@ -18,11 +18,12 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- * The definitions and prototypes in this file are created with reference to
+ ****************************************************************************/
+
+/* The definitions and prototypes in this file are created with reference to
  * the FreeBSD V4L2 driver header at: https://github.com/freebsd/freebsd-src
  * /sys/contrib/v4l/videodev2.h
- *
- ****************************************************************************/
+ */
 
 #ifndef __INCLUDE_NUTTX_VIDEO_VIDEO_H
 #define __INCLUDE_NUTTX_VIDEO_VIDEO_H

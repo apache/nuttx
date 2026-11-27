@@ -1,8 +1,6 @@
 /****************************************************************************
  * include/nuttx/sensors/l86xxx.h
  *
- * NOTE: EXPERIMENTAL DRIVER
- *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

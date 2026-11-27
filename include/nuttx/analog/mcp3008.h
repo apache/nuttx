@@ -1,8 +1,6 @@
 /****************************************************************************
  * include/nuttx/analog/mcp3008.h
  *
- * Contributed by Matteo Golin
- *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
