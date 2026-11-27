@@ -599,12 +599,13 @@ are two conditions where ``mmap()`` can be supported:
 
   :param flags: See the ``MAP_*`` definitions in ``sys/mman.h``.
 
-     -  ``MAP_SHARED`` - Required
-     -  ``MAP_PRIVATE`` - Will cause an error
+     -  ``MAP_SHARED`` - Either this or ``MAP_PRIVATE`` is required
+     -  ``MAP_PRIVATE`` - Either this or ``MAP_SHARED`` is required
      -  ``MAP_FIXED`` - Will cause an error
      -  ``MAP_FILE`` - Ignored
-     -  ``MAP_ANONYMOUS`` - Will cause an error
-     -  ``MAP_ANON`` - Will cause an error
+     -  ``MAP_ANONYMOUS`` - Allocate memory without a backing file;
+        requires ``CONFIG_FS_ANONMAP``
+     -  ``MAP_ANON`` - Alias for ``MAP_ANONYMOUS``
      -  ``MAP_GROWSDOWN`` - Ignored
      -  ``MAP_DENYWRITE`` - Will cause an error
      -  ``MAP_EXECUTABLE`` - Ignored
@@ -613,7 +614,8 @@ are two conditions where ``mmap()`` can be supported:
      -  ``MAP_POPULATE`` - Ignored
      -  ``AP_NONBLOCK`` - Ignored
 
-  :param fd: file descriptor of the backing file -- required.
+  :param fd: File descriptor of the backing file. Ignored when
+    ``MAP_ANONYMOUS`` is set; use -1 for portability.
   :param offset: The offset into the file to map.
 
   :return:
@@ -624,7 +626,8 @@ are two conditions where ``mmap()`` can be supported:
 
     -  ``ENOSYS`` - Returned if any of the unsupported ``mmap()`` features
        are attempted.
-    -  ``EBADF`` - ``fd`` is not a valid file descriptor.
+    -  ``EBADF`` - ``fd`` is not a valid file descriptor and
+       ``MAP_ANONYMOUS`` is not set.
     -  ``EINVAL`` - Length is 0. flags contained neither ``MAP_PRIVATE`` or
        ``MAP_SHARED``, or contained both of these values.
     -  ``ENODEV`` - The underlying file-system of the specified file does
