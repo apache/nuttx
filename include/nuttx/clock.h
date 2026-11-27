@@ -34,6 +34,8 @@
 #include <stdint.h>
 #include <time.h>
 
+#include <stdbool.h>
+
 #include <nuttx/compiler.h>
 #include <nuttx/lib/math32.h>
 
@@ -454,6 +456,28 @@ extern "C"
   (((ts1)->tv_sec < (ts2)->tv_sec) ? -1 : \
    ((ts1)->tv_sec > (ts2)->tv_sec) ? 1 : \
    (ts1)->tv_nsec - (ts2)->tv_nsec)
+
+/****************************************************************************
+ * Name: clock_timespec_validate
+ *
+ * Description:
+ *   Validate that a timespec has legal values.
+ *
+ * Input Parameters:
+ *   ts - Pointer to the timespec to validate.
+ *
+ * Returned Value:
+ *   true if the timespec is valid, false otherwise.
+ *
+ ****************************************************************************/
+
+static inline_function
+bool clock_timespec_validate(FAR const struct timespec *ts)
+{
+  DEBUGASSERT(ts);
+  return ts->tv_sec >= 0 && ts->tv_nsec >= 0 &&
+         ts->tv_nsec < NSEC_PER_SEC;
+}
 
 /****************************************************************************
  * Name: clock_abstime2ticks

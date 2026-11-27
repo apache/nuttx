@@ -160,7 +160,7 @@ ssize_t file_mq_timedreceive_internal(FAR struct file *mq, FAR char *msg,
 
   /* Verify the input parameters */
 
-  if (abstime && (abstime->tv_nsec < 0 || abstime->tv_nsec >= 1000000000))
+  if (abstime && !clock_timespec_validate(abstime))
     {
       return -EINVAL;
     }

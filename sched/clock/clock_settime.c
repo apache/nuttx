@@ -145,7 +145,7 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 {
   int ret = -EINVAL;
 
-  if (tp != NULL && tp->tv_nsec >= 0 && tp->tv_nsec < 1000000000)
+  if (tp != NULL && clock_timespec_validate(tp))
     {
       if (clock_id == CLOCK_REALTIME)
         {

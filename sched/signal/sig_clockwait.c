@@ -203,7 +203,7 @@ int nxsig_clockwait(int clockid, int flags,
   bool own_unbinfo = false;
 #endif
 
-  if (rqtp && (rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000))
+  if (rqtp && !clock_timespec_validate(rqtp))
     {
       ret = -EINVAL;
     }
