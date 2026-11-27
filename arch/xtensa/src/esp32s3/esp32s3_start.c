@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/init.h>
 #include <nuttx/irq.h>
 
@@ -365,6 +366,10 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
   /* Initialize RTC controller and set CPU frequency */
 
   esp_clk_init();
+
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  up_perf_init((void *)(uintptr_t)esp_clk_cpu_freq());
+#endif
 
   /* Initialize peripherals parameters */
 
