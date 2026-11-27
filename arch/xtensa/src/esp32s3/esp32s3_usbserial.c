@@ -423,34 +423,34 @@ static int esp32s3_ioctl(struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
 #ifdef CONFIG_SERIAL_TERMIOS
-    case TCGETS:
-      {
-        struct termios *termiosp = (struct termios *)arg;
+      case TCGETS:
+        {
+          struct termios *termiosp = (struct termios *)arg;
 
-        if (!termiosp)
-          {
-            ret = -EINVAL;
-          }
-        else
-          {
-            /* The USB Serial Console has fixed configuration of:
-             *    9600 baudrate, no parity, 8 bits, 1 stopbit.
-             */
+          if (!termiosp)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              /* The USB Serial Console has fixed configuration of:
+               *    9600 baudrate, no parity, 8 bits, 1 stopbit.
+               */
 
-            termiosp->c_cflag = CS8;
-            cfsetispeed(termiosp, 9600);
-          }
-      }
-      break;
+              termiosp->c_cflag = CS8;
+              cfsetispeed(termiosp, 9600);
+            }
+        }
+        break;
 
-    case TCSETS:
-      ret = -ENOTTY;
-      break;
+      case TCSETS:
+        ret = -ENOTTY;
+        break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
-    default:
-      ret = -ENOTTY;
-      break;
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
   return ret;
