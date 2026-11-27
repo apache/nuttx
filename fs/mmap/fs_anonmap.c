@@ -105,16 +105,16 @@ static int unmap_anonymous(FAR struct task_group_s *group,
     {
       if (kernel)
         {
-          newaddr = fs_heap_realloc(entry->vaddr, length);
+          newaddr = fs_heap_realloc(entry->vaddr, offset);
         }
       else
         {
-          newaddr = kumm_realloc(entry->vaddr, length);
+          newaddr = kumm_realloc(entry->vaddr, offset);
         }
 
       DEBUGASSERT(newaddr == entry->vaddr);
       entry->vaddr = newaddr;
-      entry->length = length;
+      entry->length = offset;
     }
 
   return ret;
