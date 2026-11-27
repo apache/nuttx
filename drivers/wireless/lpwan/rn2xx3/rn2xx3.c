@@ -1,8 +1,6 @@
 /****************************************************************************
  * drivers/wireless/lpwan/rn2xx3/rn2xx3.c
  *
- * NOTE: EXPERIMENTAL DRIVER
- *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

@@ -1,8 +1,6 @@
 /****************************************************************************
  * drivers/sensors/mcp9600_uorb.c
  *
- * Contributed by Matteo Golin
- *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

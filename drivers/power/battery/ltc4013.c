@@ -1,5 +1,6 @@
 /****************************************************************************
  * drivers/power/battery/ltc4013.c
+ *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
