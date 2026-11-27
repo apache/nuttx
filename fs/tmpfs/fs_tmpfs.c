@@ -104,6 +104,7 @@ static int  tmpfs_realloc_directory(FAR struct tmpfs_directory_s *tdo,
               unsigned int nentries);
 static int  tmpfs_realloc_file(FAR struct tmpfs_file_s *tfo,
               size_t newsize);
+static void tmpfs_orphan_file(FAR struct tmpfs_file_s *tfo);
 static void tmpfs_release_lockedobject(FAR struct tmpfs_object_s *to);
 static void tmpfs_release_lockedfile(FAR struct tmpfs_file_s *tfo);
 static int  tmpfs_release_file(FAR struct tmpfs_file_s *tfo);
@@ -450,6 +451,23 @@ static int tmpfs_realloc_file(FAR struct tmpfs_file_s *tfo,
 }
 
 /****************************************************************************
+ * Name: tmpfs_orphan_file
+ *
+ * Description:
+ *   The name of an open file goes: the file stays until its last close,
+ *   but it is in no directory.  Its directory can go before it, so the file
+ *   must not keep a pointer to that directory.  The caller holds the lock
+ *   of the file system.
+ *
+ ****************************************************************************/
+
+static void tmpfs_orphan_file(FAR struct tmpfs_file_s *tfo)
+{
+  tfo->tfo_flags  |= TFO_FLAG_UNLINKED;
+  tfo->tfo_parent  = NULL;
+}
+
+/****************************************************************************
  * Name: tmpfs_release_lockedobject
  ****************************************************************************/
 
@@ -733,7 +751,7 @@ static int tmpfs_replace_dirent(FAR struct tmpfs_directory_s *tdo,
 
       if (oldfile->tfo_refs > 0)
         {
-          oldfile->tfo_flags |= TFO_FLAG_UNLINKED;
+          tmpfs_orphan_file(oldfile);
           tmpfs_unlock_file(oldfile);
         }
       else
@@ -1667,7 +1685,7 @@ static int tmpfs_free_callout(FAR struct tmpfs_directory_s *tdo,
         {
           /* Yes.. We cannot delete the file now. Just mark it as unlinked. */
 
-          tfo->tfo_flags |= TFO_FLAG_UNLINKED;
+          tmpfs_orphan_file(tfo);
           return TMPFS_UNLINKED;
         }
 
@@ -2464,6 +2482,13 @@ static int tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           return ret;
         }
 
+      /* An unlinked file has no path */
+
+      if ((tfo->tfo_flags & TFO_FLAG_UNLINKED) != 0)
+        {
+          return -ENOENT;
+        }
+
       ret = tmpfs_getpath((FAR struct tmpfs_object_s *)tfo, ptr, PATH_MAX);
       if (ret < 0)
         {
@@ -3098,7 +3123,7 @@ static int tmpfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
     {
       /* Make the file object as unlinked */
 
-      tfo->tfo_flags |= TFO_FLAG_UNLINKED;
+      tmpfs_orphan_file(tfo);
 
       /* Release the reference count on the file object */
 
