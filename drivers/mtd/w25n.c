@@ -1,21 +1,6 @@
 /****************************************************************************
  * drivers/mtd/w25n.c
  *
- * Driver for Winbond W25N SPI NAND flash.
- * Currently only W25N01GV (1Gbit/128MB) is supported and tested.
- *
- * Bad block management uses the chip's built-in 20-entry hardware Bad
- * Block Management Look-Up Table (datasheet section 8.2.7). Factory bad
- * blocks are scanned at init by reading the OOB marker (byte 0 of the
- * spare area of page 0) and remapped to spares from a reserved pool at
- * the top of the array. Runtime erase/program failures (E-FAIL/P-FAIL)
- * trigger the same remap path and retry the operation once. The chip
- * routes accesses to remapped LBAs to the spare PBA transparently.
- *
- * Limitations:
- *   - No Quad SPI support (standard SPI only).
- *   - No access to OTP region.
- *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -34,6 +19,22 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* Driver for Winbond W25N SPI NAND flash.
+ * Currently only W25N01GV (1Gbit/128MB) is supported and tested.
+ *
+ * Bad block management uses the chip's built-in 20-entry hardware Bad
+ * Block Management Look-Up Table (datasheet section 8.2.7). Factory bad
+ * blocks are scanned at init by reading the OOB marker (byte 0 of the
+ * spare area of page 0) and remapped to spares from a reserved pool at
+ * the top of the array. Runtime erase/program failures (E-FAIL/P-FAIL)
+ * trigger the same remap path and retry the operation once. The chip
+ * routes accesses to remapped LBAs to the spare PBA transparently.
+ *
+ * Limitations:
+ *   - No Quad SPI support (standard SPI only).
+ *   - No access to OTP region.
+ */
 
 /****************************************************************************
  * Included Files
