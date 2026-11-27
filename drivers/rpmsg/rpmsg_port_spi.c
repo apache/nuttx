@@ -791,7 +791,7 @@ rpmsg_port_spi_init_gpio(FAR struct ioexpander_dev_s *ioe,
   int ret;
 
   ret = IOEXP_SETOPTION(ioe, pin, IOEXPANDER_OPTION_INVERT,
-                        (FAR void *)invert);
+                        (FAR void *)(intptr_t)invert);
   if (ret < 0)
     {
       rpmsgerr("gpio set invert option error: %d\n", ret);
@@ -812,7 +812,7 @@ rpmsg_port_spi_init_gpio(FAR struct ioexpander_dev_s *ioe,
       FAR void *ptr;
 
       ret = IOEXP_SETOPTION(ioe, pin, IOEXPANDER_OPTION_INTCFG,
-                            (FAR void *)intcfg);
+                            (FAR void *)(intptr_t)intcfg);
       if (ret < 0)
         {
           rpmsgerr("gpio set int option %d error: %d\n", intcfg, ret);
