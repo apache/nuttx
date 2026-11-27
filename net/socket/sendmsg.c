@@ -26,14 +26,18 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/socket.h>
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
 #include <signal.h>
+#include <string.h>
 
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/uio.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
@@ -41,6 +45,58 @@
 #include "socket/socket.h"
 
 #ifdef CONFIG_NET
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: psock_sendmsg_check
+ *
+ * Description:
+ *   Check the socket and the message of a send.
+ *
+ * Input Parameters:
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   msg      Message to send
+ *
+ * Returned Value:
+ *   Zero (OK) when the send can start, or a negated errno value.
+ *
+ ****************************************************************************/
+
+static int psock_sendmsg_check(FAR struct socket *psock,
+                               FAR const struct msghdr *msg)
+{
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (psock == NULL || psock->s_conn == NULL)
+    {
+      return -EBADF;
+    }
+
+  /* Verify that non-NULL pointers were passed */
+
+  if (msg == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* POSIX: fail with EMSGSIZE if msg_iovlen <= 0 or > IOV_MAX */
+
+  if (msg->msg_iovlen == 0 || msg->msg_iovlen > IOV_MAX)
+    {
+      return -EMSGSIZE;
+    }
+
+  if (msg->msg_iov == NULL ||
+      (psock->s_type != SOCK_DGRAM && msg->msg_iov->iov_base == NULL))
+    {
+      return -EINVAL;
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Public Functions
@@ -77,31 +133,12 @@
 ssize_t psock_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                        int flags)
 {
-  /* Verify that the sockfd corresponds to valid, allocated socket */
+  int ret;
 
-  if (psock == NULL || psock->s_conn == NULL)
+  ret = psock_sendmsg_check(psock, msg);
+  if (ret < 0)
     {
-      return -EBADF;
-    }
-
-  /* Verify that non-NULL pointers were passed */
-
-  if (msg == NULL)
-    {
-      return -EINVAL;
-    }
-
-  /* POSIX: fail with EMSGSIZE if msg_iovlen <= 0 or > IOV_MAX */
-
-  if (msg->msg_iovlen == 0 || msg->msg_iovlen > IOV_MAX)
-    {
-      return -EMSGSIZE;
-    }
-
-  if (msg->msg_iov == NULL ||
-      (psock->s_type != SOCK_DGRAM && msg->msg_iov->iov_base == NULL))
-    {
-      return -EINVAL;
+      return ret;
     }
 
   /* Let logic specific to this address family handle the sendmsg()
@@ -113,6 +150,144 @@ ssize_t psock_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
 
   return psock->s_sockif->si_sendmsg(psock, msg, flags);
 }
+
+#ifdef CONFIG_BUILD_KERNEL
+/****************************************************************************
+ * Name: psock_sendmsg_user
+ *
+ * Description:
+ *   psock_sendmsg() for a message in user memory.  The network can send
+ *   the data from another task, where the memory of the caller is not
+ *   mapped.  So copy the data, the address and the control data to kernel
+ *   memory before the send.  A stream sends up to SOCKET_COPY_SIZE bytes
+ *   per part, while each part goes out whole; a datagram is sent whole.
+ *
+ * Input Parameters:
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   msg      Message to send, in user memory
+ *   flags    Send flags
+ *
+ * Returned Value:
+ *   The number of bytes sent, or a negated errno value when no byte was
+ *   sent.
+ *
+ ****************************************************************************/
+
+ssize_t psock_sendmsg_user(FAR struct socket *psock,
+                           FAR const struct msghdr *msg, int flags)
+{
+  struct sockaddr_storage kname;
+  struct msghdr kmsg;
+  struct iovec kiov;
+  struct uio uio;
+  FAR uint8_t *kbuf;
+  FAR void *kctrl = NULL;
+  size_t bufsize;
+  size_t total = 0;
+  size_t len;
+  ssize_t ret;
+
+  ret = psock_sendmsg_check(psock, msg);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = uio_init(&uio, msg->msg_iov, msg->msg_iovlen);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (msg->msg_name != NULL && msg->msg_namelen > sizeof(kname))
+    {
+      return -EINVAL;
+    }
+
+  if (msg->msg_control != NULL && msg->msg_controllen > SOCKET_COPY_SIZE)
+    {
+      return -ENOBUFS;
+    }
+
+  if (psock->s_type == SOCK_STREAM)
+    {
+      bufsize = MIN(uio.uio_resid, SOCKET_COPY_SIZE);
+    }
+  else if (uio.uio_resid > SOCKET_DGRAM_MAX)
+    {
+      return -EMSGSIZE;
+    }
+  else
+    {
+      bufsize = uio.uio_resid;
+    }
+
+  kbuf = kmm_malloc(bufsize);
+  if (kbuf == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  if (msg->msg_control != NULL && msg->msg_controllen > 0)
+    {
+      kctrl = kmm_malloc(msg->msg_controllen);
+      if (kctrl == NULL)
+        {
+          ret = -ENOMEM;
+          goto out;
+        }
+
+      memcpy(kctrl, msg->msg_control, msg->msg_controllen);
+    }
+
+  if (msg->msg_name != NULL)
+    {
+      memcpy(&kname, msg->msg_name, msg->msg_namelen);
+    }
+
+  kiov.iov_base       = kbuf;
+  kmsg.msg_name       = msg->msg_name != NULL ? &kname : NULL;
+  kmsg.msg_namelen    = msg->msg_namelen;
+  kmsg.msg_iov        = &kiov;
+  kmsg.msg_iovlen     = 1;
+  kmsg.msg_control    = kctrl;
+  kmsg.msg_controllen = kctrl != NULL ? msg->msg_controllen : 0;
+  kmsg.msg_flags      = msg->msg_flags;
+
+  do
+    {
+      kiov.iov_len = MIN(uio.uio_resid - total, bufsize);
+      uio_copyto(&uio, total, kbuf, kiov.iov_len);
+
+      ret = psock_sendmsg(psock, &kmsg, flags);
+      if (ret <= 0)
+        {
+          break;
+        }
+
+      len    = ret;
+      total += len;
+
+      /* The control data goes with the first part only */
+
+      kmsg.msg_control    = NULL;
+      kmsg.msg_controllen = 0;
+    }
+  while (len == kiov.iov_len && total < uio.uio_resid);
+
+  /* Return the error only when no byte went out, as a send does */
+
+  if (total > 0)
+    {
+      ret = total;
+    }
+
+out:
+  kmm_free(kctrl);
+  kmm_free(kbuf);
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: psock_sigpipe
@@ -199,11 +374,11 @@ ssize_t sendmsg(int sockfd, FAR const struct msghdr *msg, int flags)
 
   ret = sockfd_socket(sockfd, &filep, &psock);
 
-  /* Let psock_sendmsg() do all of the work */
+  /* Let psock_sendmsg_user() do all of the work */
 
   if (ret == OK)
     {
-      ret = psock_sendmsg(psock, msg, flags);
+      ret = psock_sendmsg_user(psock, msg, flags);
       psock_sigpipe(psock, ret, flags);
       file_put(filep);
     }

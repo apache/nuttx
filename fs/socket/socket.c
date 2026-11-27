@@ -131,15 +131,34 @@ static int sock_file_close(FAR struct file *filep)
 static ssize_t sock_file_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen)
 {
-  return psock_recv(filep->f_priv, buffer, buflen, 0);
+  struct msghdr msg;
+  struct iovec iov;
+
+  iov.iov_base = buffer;
+  iov.iov_len = buflen;
+
+  memset(&msg, 0, sizeof(struct msghdr));
+  msg.msg_iov = &iov;
+  msg.msg_iovlen = 1;
+
+  return psock_recvmsg_user(filep->f_priv, &msg, 0);
 }
 
 static ssize_t sock_file_write(FAR struct file *filep,
                                FAR const char *buffer, size_t buflen)
 {
+  struct msghdr msg;
+  struct iovec iov;
   ssize_t ret;
 
-  ret = psock_send(filep->f_priv, buffer, buflen, 0);
+  iov.iov_base = (FAR char *)buffer;
+  iov.iov_len = buflen;
+
+  memset(&msg, 0, sizeof(struct msghdr));
+  msg.msg_iov = &iov;
+  msg.msg_iovlen = 1;
+
+  ret = psock_sendmsg_user(filep->f_priv, &msg, 0);
   psock_sigpipe(filep->f_priv, ret, 0);
   return ret;
 }
@@ -170,7 +189,7 @@ static ssize_t sock_file_readv(FAR struct file *filep,
   msg.msg_iov = (FAR struct iovec *)uio->uio_iov;
   msg.msg_iovlen = uio->uio_iovcnt;
 
-  return psock_recvmsg(filep->f_priv, &msg, 0);
+  return psock_recvmsg_user(filep->f_priv, &msg, 0);
 }
 
 static ssize_t sock_file_writev(FAR struct file *filep,
@@ -183,7 +202,7 @@ static ssize_t sock_file_writev(FAR struct file *filep,
   msg.msg_iov = (FAR struct iovec *)uio->uio_iov;
   msg.msg_iovlen = uio->uio_iovcnt;
 
-  ret = psock_sendmsg(filep->f_priv, &msg, 0);
+  ret = psock_sendmsg_user(filep->f_priv, &msg, 0);
   psock_sigpipe(filep->f_priv, ret, 0);
   return ret;
 }
