@@ -1305,7 +1305,18 @@ static int i2s_rxdma_setup(struct esp_i2s_s *priv,
 
   sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.pend);
 
-  /* Trigger DMA transfer if the RX channel is already running. */
+  /* Start the RX channel when the first buffer is queued and I2S is not
+   * paused. Codecs such as ES8311/ES8388 and i2schar call I2S_RECEIVE()
+   * but never send AUDIOIOC_START, so without this the buffer would stay
+   * in the pending queue and the receive would never complete.
+   */
+
+  if (!priv->rx_started && !priv->paused)
+    {
+      i2s_rx_channel_start(priv);
+    }
+
+  /* Trigger DMA transfer if the RX channel is running. */
 
   if (priv->rx_started)
     {
@@ -3587,6 +3598,7 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
   int ret;
   struct esp_i2s_s *priv = NULL;
   irqstate_t flags;
+  bool locked = false;
 
   i2sinfo("port: %d\n", port);
 
@@ -3617,6 +3629,7 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
     }
 
   flags = spin_lock_irqsave(&priv->slock);
+  locked = true;
 
   i2s_configure(priv);
 
@@ -3637,16 +3650,21 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
 #endif /* I2S_HAVE_TX */
 
 #ifdef I2S_HAVE_RX
-  /* Start RX channel */
+  /* RX must not be started until buffers are queued and AUDIOIOC_START is
+   * issued. Starting it during bus initialization may raise RX DMA events
+   * before the audio upper half is ready.
+   */
 
   if (priv->config->rx_en)
     {
       priv->rx_started = false;
-      i2s_rx_channel_start(priv);
     }
 #endif /* I2S_HAVE_RX */
 
+  priv->paused = false;
+
   spin_unlock_irqrestore(&priv->slock, flags);
+  locked = false;
 
   /* Enable the I2S DMA interrupts.  up_enable_irq writes the cpuint
    * back into the interrupt matrix register, which must happen after
@@ -3680,6 +3698,10 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
   /* Failure exit */
 
 err:
-  spin_unlock_irqrestore(&priv->slock, flags);
+  if (locked)
+    {
+      spin_unlock_irqrestore(&priv->slock, flags);
+    }
+
   return NULL;
 }
