@@ -410,6 +410,10 @@ static ssize_t cdcuart_sendbuf(FAR struct uart_dev_s *dev,
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SUBMITFAIL),
                (uint16_t)-ret);
+      flags = spin_lock_irqsave(&priv->lock);
+      sq_addlast((FAR sq_entry_t *)wrcontainer, &priv->txfree);
+      priv->nwrq++;
+      spin_unlock_irqrestore(&priv->lock, flags);
       return ret;
     }
 
@@ -854,6 +858,10 @@ static int cdcacm_serialstate(FAR struct cdcacm_dev_s *priv)
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SUBMITFAIL), (uint16_t)-ret);
+      flags = spin_lock_irqsave(&priv->lock);
+      sq_addlast((FAR sq_entry_t *)wrcontainer, &priv->txfree);
+      priv->nwrq++;
+      spin_unlock_irqrestore(&priv->lock, flags);
     }
 
 errout_with_flags:
@@ -3123,6 +3131,8 @@ static void cdcuart_dmasend(FAR struct uart_dev_s *dev)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SUBMITFAIL),
                (uint16_t)-ret);
+      sq_addlast((FAR sq_entry_t *)wrcontainer, &priv->txfree);
+      priv->nwrq++;
     }
 }
 #endif
