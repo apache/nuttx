@@ -650,12 +650,12 @@ static void esp32s3_qspi_setmode(struct qspi_dev_s *dev,
         }
 
       regval  = getreg32(SPI_MISC_REG(id));
-      regval &= SPI_CK_IDLE_EDGE_M;
+      regval &= ~SPI_CK_IDLE_EDGE_M;
       regval |= ck_idle_edge << SPI_CK_IDLE_EDGE_S;
       putreg32(regval, SPI_MISC_REG(id));
 
       regval  = getreg32(SPI_USER_REG(id));
-      regval &= SPI_CK_OUT_EDGE_M;
+      regval &= ~SPI_CK_OUT_EDGE_M;
       regval |= ck_out_edge << SPI_CK_OUT_EDGE_S;
       putreg32(regval, SPI_USER_REG(id));
 
