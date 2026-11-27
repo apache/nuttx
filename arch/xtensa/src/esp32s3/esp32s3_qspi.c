@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
