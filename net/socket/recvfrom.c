@@ -26,13 +26,10 @@
 
 #include <nuttx/config.h>
 
-#include <sys/param.h>
 #include <assert.h>
 #include <errno.h>
-#include <string.h>
 
 #include <nuttx/cancelpt.h>
-#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
@@ -159,93 +156,40 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 {
   FAR struct socket *psock;
   FAR struct file *filep;
+  struct msghdr msg;
+  struct iovec iov;
   ssize_t ret;
-#ifdef CONFIG_BUILD_KERNEL
-  struct sockaddr_storage kaddr;
-  FAR struct sockaddr *ufrom;
-  FAR socklen_t *ufromlen;
-  socklen_t kfromlen = 0;
-  socklen_t kfromsize = 0;
-  FAR void *kbuf;
-  FAR void *ubuf;
-#endif
 
   /* recvfrom() is a cancellation point */
 
   enter_cancellation_point();
 
-#ifdef CONFIG_BUILD_KERNEL
-  /* Allocate memory and copy user buffer to kernel */
-
-  kbuf = kmm_malloc(len);
-  if (!kbuf)
-    {
-      /* Out of memory */
-
-      ret = -ENOMEM;
-      goto errout_with_cancelpt;
-    }
-
-  ubuf = buf;
-  buf = kbuf;
-
-  /* Copy the address data to kernel, store the original user pointer */
-
-  ufromlen = fromlen;
-  if ((ufrom = from) != NULL)
-    {
-      /* A socket type can return no address, and the kernel copy of the
-       * address has a fixed size.  The program can also change its length
-       * while this call waits.
-       */
-
-      memset(&kaddr, 0, sizeof(kaddr));
-      if (fromlen != NULL)
-        {
-          kfromlen = MIN(*fromlen, sizeof(kaddr));
-          kfromsize = kfromlen;
-        }
-
-      from = (FAR struct sockaddr *)&kaddr;
-      fromlen = &kfromlen;
-    }
-#endif
+  iov.iov_base = buf;
+  iov.iov_len = len;
+  msg.msg_name = from;
+  msg.msg_namelen = fromlen != NULL ? *fromlen : 0;
+  msg.msg_iov = &iov;
+  msg.msg_iovlen = 1;
+  msg.msg_control = NULL;
+  msg.msg_controllen = 0;
+  msg.msg_flags = 0;
 
   /* Get the underlying socket structure */
 
   ret = sockfd_socket(sockfd, &filep, &psock);
 
-  /* Then let psock_recvfrom() do all of the work */
+  /* Then let psock_recvmsg_user() do all of the work */
 
   if (ret == OK)
     {
-      ret = psock_recvfrom(psock, buf, len, flags, from, fromlen);
+      ret = psock_recvmsg_user(psock, &msg, flags);
       file_put(filep);
     }
 
-#ifdef CONFIG_BUILD_KERNEL
-  if (ret > 0)
+  if (ret >= 0 && fromlen != NULL)
     {
-      memcpy(ubuf, buf, ret);
+      *fromlen = msg.msg_namelen;
     }
-
-  kmm_free(kbuf);
-
-  /* Copy the address back to user.  The length that the socket gives can
-   * be larger than the buffer: then the address is cut, as in a flat build.
-   */
-
-  if (ret >= 0 && ufrom)
-    {
-      memcpy(ufrom, &kaddr, MIN(kfromlen, kfromsize));
-      if (ufromlen != NULL)
-        {
-          *ufromlen = kfromlen;
-        }
-    }
-
-errout_with_cancelpt:
-#endif
 
   leave_cancellation_point();
 
