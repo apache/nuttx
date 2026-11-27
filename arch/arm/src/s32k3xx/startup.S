@@ -22,6 +22,8 @@
 
 /* Copyright 2022 NXP */
 
+#include <nuttx/config.h>
+
     .syntax unified
     .arch armv7-m
 	.text
@@ -38,7 +40,10 @@ __start:
     mov   r6, #0
     mov   r7, #0
 
-    /* Initialize SRAM ECC */
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+    /* Initialize SRAM ECC - skip when running from SRAM since the loader
+     * already wrote ECC-correct data and zeroing would destroy live code.
+     */
     ldr r1, =SRAM_BASE_ADDR
     ldr r2, =SRAM_INIT_END_ADDR
 
@@ -53,6 +58,7 @@ SRAM_LOOP:
     subs r2, 8
     bge SRAM_LOOP
 SRAM_LOOP_END:
+#endif
     b s32k3xx_start
 
 .align 4
