@@ -139,7 +139,7 @@ static int unmap_rammap(FAR struct task_group_s *group,
   FAR struct file *filep = (FAR void *)((uintptr_t)entry->priv.p & ~3);
   enum mm_map_type_e type =
                     (enum mm_map_type_e)((uintptr_t)entry->priv.p & 3);
-  FAR void *newaddr = NULL;
+  FAR void *newaddr = entry->vaddr;
   off_t offset;
   int ret = OK;
 
@@ -261,6 +261,19 @@ int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
   ret = file_ioctl(filep, BIOC_XIPBASE, (unsigned long)&entry->vaddr);
   if (ret == OK)
     {
+      if (entry->offset < 0)
+        {
+          return -EINVAL;
+        }
+
+      if ((uintmax_t)entry->offset >
+          UINTPTR_MAX - (uintptr_t)entry->vaddr)
+        {
+          return -EOVERFLOW;
+        }
+
+      entry->vaddr = (FAR void *)((uintptr_t)entry->vaddr +
+                                  (uintptr_t)entry->offset);
       type = MAP_XIP;
       goto out;
     }
