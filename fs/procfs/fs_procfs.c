@@ -45,6 +45,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/signal.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
@@ -934,11 +935,14 @@ static int procfs_readdir(FAR struct inode *mountpt,
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
       /* Skip the tasks of the snapshot of opendir() that have ended since:
-       * the walk goes on with the next one, as on Linux.
+       * the walk goes on with the next one, as on Linux.  A task has ended
+       * when kill() does not find it (nxsig_kill_target()): its TCB can
+       * stay in the table after its parent has waited for it.
        */
 
       while (priv->index < priv->nentries &&
-             nxsched_get_tcb(level0->pid[priv->index]) == NULL)
+             (nxsched_get_tcb(level0->pid[priv->index]) == NULL ||
+              nxsig_kill_target(level0->pid[priv->index]) < 0))
         {
           priv->index++;
         }
