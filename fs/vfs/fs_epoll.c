@@ -66,6 +66,7 @@ struct epoll_node_s
   struct list_node         node;
   epoll_data_t             data;
   bool                     notified;
+  bool                     armed;    /* The poll of the file is set up */
   struct pollfd_s          pfd;
   FAR struct file         *filep;
   FAR struct epoll_head_s *eph;
@@ -82,10 +83,13 @@ struct epoll_head_s
   struct list_node      setup;    /* The setup list, store all the setuped
                                    * epoll node.
                                    */
-  struct list_node      teardown; /* The teardown list, store all the epoll
-                                   * node notified after epoll_wait finish,
-                                   * these epoll node should be setup again
-                                   * to check the pending poll notification.
+  struct list_node      teardown; /* The teardown list: the level-triggered
+                                   * nodes that the last epoll_wait() saw
+                                   * notified.  Their poll stays set up, so
+                                   * a new event still wakes the set and
+                                   * the pollers of the set.  The next
+                                   * epoll_wait() sets them up again to
+                                   * check what is still pending.
                                    */
   struct list_node      oneshot;  /* The oneshot list, store all the epoll
                                    * node notified after epoll_wait and with
@@ -101,6 +105,9 @@ struct epoll_head_s
                                    * memory in epoll_do_close().
                                    */
   spinlock_t            poll_lock;
+  bool                  insetup;  /* epoll_setup() runs: a set that holds
+                                   * itself through other sets ends there.
+                                   */
   FAR struct pollfd_s  *fds[CONFIG_EPOLL_NPOLLWAITERS];
 };
 
@@ -151,6 +158,32 @@ static struct inode g_epoll_inode =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: epoll_arm, epoll_disarm
+ *
+ * Description:
+ *   Set up and take down the poll of the file of a node.  A node knows if
+ *   its poll is set up, so each list can hold nodes in either state.
+ *
+ ****************************************************************************/
+
+static int epoll_arm(FAR epoll_node_t *epn)
+{
+  int ret = file_poll(epn->filep, &epn->pfd, true);
+
+  epn->armed = ret >= 0;
+  return ret;
+}
+
+static void epoll_disarm(FAR epoll_node_t *epn)
+{
+  if (epn->armed)
+    {
+      file_poll(epn->filep, &epn->pfd, false);
+      epn->armed = false;
+    }
+}
 
 static FAR epoll_head_t *epoll_head_from_fd(int fd, FAR struct file **filep)
 {
@@ -225,17 +258,19 @@ static int epoll_do_close(FAR struct file *filep)
     {
       list_for_every_entry(&eph->setup, epn, epoll_node_t, node)
         {
-          file_poll(epn->filep, &epn->pfd, false);
+          epoll_disarm(epn);
           file_put(epn->filep);
         }
 
       list_for_every_entry(&eph->teardown, epn, epoll_node_t, node)
         {
+          epoll_disarm(epn);
           file_put(epn->filep);
         }
 
       list_for_every_entry(&eph->oneshot, epn, epoll_node_t, node)
         {
+          epoll_disarm(epn);
           file_put(epn->filep);
         }
 
@@ -324,18 +359,30 @@ static int epoll_do_poll(FAR struct file *filep,
 
       spin_unlock_irqrestore(&eph->poll_lock, flags);
 
+      /* The set is ready while a member is ready, as for epoll_wait().  So
+       * check again the members that the last epoll_wait() reported: a
+       * member with data left notifies at once.
+       */
+
+      epoll_setup(eph);
+
       nxrmutex_lock(&eph->lock);
+
+      /* A node of the teardown list still has its poll set up: an event
+       * that came after the last epoll_wait() notified it.
+       */
 
       list_for_every_entry(&eph->setup, epn, epoll_node_t, node)
         {
-          /* Only check the notified fd */
-
-          if (!epn->notified)
+          if (epn->notified && epn->pfd.revents != 0)
             {
-              continue;
+              eventset |= POLLIN;
             }
+        }
 
-          if (epn->pfd.revents != 0)
+      list_for_every_entry(&eph->teardown, epn, epoll_node_t, node)
+        {
+          if (epn->notified && epn->pfd.revents != 0)
             {
               eventset |= POLLIN;
             }
@@ -459,15 +506,28 @@ static int epoll_setup(FAR epoll_head_t *eph)
       return ret;
     }
 
+  /* A poll of a member that is an epoll set sets that set up too.  Sets
+   * that hold each other come back here, with the lock of this set.
+   */
+
+  if (eph->insetup)
+    {
+      nxrmutex_unlock(&eph->lock);
+      return OK;
+    }
+
+  eph->insetup = true;
+
   list_for_every_entry_safe(&eph->teardown, epn, tepn, epoll_node_t, node)
     {
       /* Setup again to check the notified pollfd last epoll_wait() to
        * cover the situation several poll event pending on one fd.
        */
 
+      epoll_disarm(epn);
       epn->notified    = false;
       epn->pfd.revents = 0;
-      ret = file_poll(epn->filep, &epn->pfd, true);
+      ret = epoll_arm(epn);
       if (ret < 0)
         {
           ferr("epoll setup failed, filep=%p, events=%08" PRIx32 ", "
@@ -479,6 +539,7 @@ static int epoll_setup(FAR epoll_head_t *eph)
       list_add_tail(&eph->setup, &epn->node);
     }
 
+  eph->insetup = false;
   nxrmutex_unlock(&eph->lock);
   return ret;
 }
@@ -550,7 +611,7 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
               epn->pfd.revents = 0;
               if ((epn->pfd.events & EPOLLONESHOT) != 0)
                 {
-                  file_poll(epn->filep, &epn->pfd, false);
+                  epoll_disarm(epn);
                   list_delete(&epn->node);
                   list_add_tail(&eph->oneshot, &epn->node);
                 }
@@ -567,19 +628,25 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
         }
       else
         {
-          /* Level-triggered mode: teardown the poll and move to
-           * teardown list. epoll_setup will re-register and re-check.
+          /* Level-triggered mode: move the node to the teardown list.
+           * epoll_setup() sets it up again and checks it at the next
+           * epoll_wait().  Its poll stays set up until then: an event that
+           * comes before that wait must still wake the set, a poll() of
+           * the set and an epoll set that holds this set.  A reported
+           * event is consumed, so the node waits for a new one.
            */
 
-          file_poll(epn->filep, &epn->pfd, false);
           list_delete(&epn->node);
 
           if (epn->pfd.revents != 0 && i < maxevents)
             {
-              evs[i].data     = epn->data;
-              evs[i++].events = epn->pfd.revents;
+              evs[i].data      = epn->data;
+              evs[i++].events  = epn->pfd.revents;
+              epn->notified    = false;
+              epn->pfd.revents = 0;
               if ((epn->pfd.events & EPOLLONESHOT) != 0)
                 {
+                  epoll_disarm(epn);
                   list_add_tail(&eph->oneshot, &epn->node);
                 }
               else
@@ -589,6 +656,16 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
             }
           else
             {
+              /* A notification with nothing to report: the node waits for
+               * a new one.  A node with no room in the array keeps its
+               * event for the next epoll_wait().
+               */
+
+              if (epn->pfd.revents == 0)
+                {
+                  epn->notified = false;
+                }
+
               list_add_tail(&eph->teardown, &epn->node);
             }
         }
@@ -828,6 +905,7 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
         epn->eph         = eph;
         epn->data        = ev->data;
         epn->notified    = false;
+        epn->armed       = false;
         epn->pfd.events  = ev->events | POLLALWAYS;
         epn->pfd.fd      = fd;
         epn->pfd.arg     = epn;
@@ -841,7 +919,7 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
             goto err;
           }
 
-        ret = file_poll(epn->filep, &epn->pfd, true);
+        ret = epoll_arm(epn);
         if (ret < 0)
           {
             file_put(epn->filep);
@@ -858,7 +936,7 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
           {
             if (epn->pfd.fd == fd)
               {
-                file_poll(epn->filep, &epn->pfd, false);
+                epoll_disarm(epn);
                 file_put(epn->filep);
                 list_delete(&epn->node);
                 list_add_tail(&eph->free, &epn->node);
@@ -870,6 +948,7 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
           {
             if (epn->pfd.fd == fd)
               {
+                epoll_disarm(epn);
                 file_put(epn->filep);
                 list_delete(&epn->node);
                 list_add_tail(&eph->free, &epn->node);
@@ -881,6 +960,7 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
           {
             if (epn->pfd.fd == fd)
               {
+                epoll_disarm(epn);
                 file_put(epn->filep);
                 list_delete(&epn->node);
                 list_add_tail(&eph->free, &epn->node);
@@ -901,18 +981,18 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
               {
                 if (epn->pfd.events != (ev->events | POLLALWAYS))
                   {
-                    file_poll(epn->filep, &epn->pfd, false);
+                    epoll_disarm(epn);
 
                     epn->notified    = false;
                     epn->data        = ev->data;
                     epn->pfd.events  = ev->events | POLLALWAYS;
                     epn->pfd.revents = 0;
 
-                    ret = file_poll(epn->filep, &epn->pfd, true);
+                    ret = epoll_arm(epn);
                     if (ret < 0)
                       {
                         /* Only registered nodes may stay in the setup list:
-                         * close and teardown tear down whatever is there.
+                         * the next epoll_wait() tries this one again.
                          */
 
                         list_delete(&epn->node);
@@ -931,12 +1011,14 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
               {
                 if (epn->pfd.events != (ev->events | POLLALWAYS))
                   {
+                    epoll_disarm(epn);
+
                     epn->notified    = false;
                     epn->data        = ev->data;
                     epn->pfd.events  = ev->events | POLLALWAYS;
                     epn->pfd.revents = 0;
 
-                    ret = file_poll(epn->filep, &epn->pfd, true);
+                    ret = epoll_arm(epn);
                     if (ret < 0)
                       {
                         goto err;
@@ -959,7 +1041,7 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
                 epn->pfd.events  = ev->events | POLLALWAYS;
                 epn->pfd.revents = 0;
 
-                ret = file_poll(epn->filep, &epn->pfd, true);
+                ret = epoll_arm(epn);
                 if (ret < 0)
                   {
                     goto err;
