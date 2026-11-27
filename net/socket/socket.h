@@ -44,7 +44,7 @@
 
 /* This macro converts a socket option value into a bit setting */
 
-#define _SO_BIT(o)       (1 << (o))
+#define _SO_BIT(o)       (1ULL << (o))
 
 /* These define bit positions for each socket option (see sys/socket.h) */
 
@@ -65,12 +65,13 @@
 #define _SO_SNDTIMEO     _SO_BIT(SO_SNDTIMEO)
 #define _SO_TYPE         _SO_BIT(SO_TYPE)
 #define _SO_TIMESTAMP    _SO_BIT(SO_TIMESTAMP)
-#define _SO_TIMESTAMPNS  _SO_BIT(SO_TIMESTAMPNS)
 #define _SO_BINDTODEVICE _SO_BIT(SO_BINDTODEVICE)
+#define _SO_TIMESTAMPNS  _SO_BIT(SO_TIMESTAMPNS)
+#define _SO_TIMESTAMPING _SO_BIT(SO_TIMESTAMPING)
 
 /* This is the largest option value.  REVISIT: belongs in sys/socket.h */
 
-#define _SO_MAXOPT       (18)
+#define _SO_MAXOPT       (21)
 
 /* Macros to set, test, clear options */
 

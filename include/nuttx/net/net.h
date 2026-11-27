@@ -136,7 +136,7 @@ enum net_lltype_e
 
 /* This defines a bitmap big enough for one bit for each socket option */
 
-typedef uint32_t sockopt_t;
+typedef uint64_t sockopt_t;
 
 /* This defines the storage size of a timeout value.  This effects only
  * range of supported timeout values.  With an LSB in seciseconds, the

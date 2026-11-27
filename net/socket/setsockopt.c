@@ -116,17 +116,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
               conn->s_sndtimeo = timeo;
             }
 
-          /* Set/clear the corresponding enable/disable bit */
-
-          if (timeo)
-            {
-              _SO_CLROPT(conn->s_options, option);
-            }
-          else
-            {
-              _SO_SETOPT(conn->s_options, option);
-            }
-
           return OK;
         }
 
