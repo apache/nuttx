@@ -2341,9 +2341,9 @@ static int tmpfs_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
       goto errout_with_lock;
     }
 
-  /* Each mapping also holds a reference, so tfo_maps <= tfo_refs */
+  /* Keep the 8-bit tfo_maps in range */
 
-  if (tfo->tfo_refs == UINT8_MAX)
+  if (tfo->tfo_maps == UINT8_MAX)
     {
       ret = -ENOMEM;
       goto errout_with_lock;
