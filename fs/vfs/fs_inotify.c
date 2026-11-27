@@ -1713,7 +1713,9 @@ void notify_initialize(void)
  * Name: notify_open
  *
  * Description:
- *   The hook is called when the file is opened.
+ *   The hook is called when the file is opened.  O_CREAT in oflags means
+ *   that the open made the file: the caller clears it for a file that was
+ *   there.
  *
  ****************************************************************************/
 

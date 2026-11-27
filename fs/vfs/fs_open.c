@@ -120,6 +120,9 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) || defined(CONFIG_PSEUDOFS_FILE)
   mode_t mode = 0666;
 #endif
+#ifdef CONFIG_FS_NOTIFY
+  bool created = false;
+#endif
   int ret;
 
   if (path == NULL)
@@ -154,6 +157,9 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
       if ((oflags & O_CREAT) != 0)
         {
           ret = pseudofile_create(&inode, path, mode);
+#ifdef CONFIG_FS_NOTIFY
+          created = ret >= 0;
+#endif
         }
 #endif
 
@@ -225,7 +231,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 #ifdef CONFIG_FS_NOTIFY
       if (ret >= 0)
         {
-          notify_open(path, filep->f_oflags);
+          notify_open(path, filep->f_oflags & ~O_CREAT);
         }
 #endif
 
@@ -310,6 +316,21 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   else if (INODE_IS_MOUNTPT(inode))
     {
+#ifdef CONFIG_FS_NOTIFY
+      /* The file system makes the file.  O_CREAT does not tell if the file
+       * is new: ask the stat method before the open.
+       */
+
+      if ((oflags & O_CREAT) != 0)
+        {
+          struct stat buf;
+
+          created = (oflags & O_EXCL) != 0 ||
+                    inode->u.i_mops->stat == NULL ||
+                    inode->u.i_mops->stat(inode, desc.relpath, &buf) < 0;
+        }
+#endif
+
       if (inode->u.i_mops->open != NULL)
         {
           ret = inode->u.i_mops->open(filep, desc.relpath, oflags, mode);
@@ -349,7 +370,10 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
   inode_search_release(&desc);
 #ifdef CONFIG_FS_NOTIFY
-  notify_open(path, filep->f_oflags);
+  /* IN_CREATE only for a file that this open made */
+
+  notify_open(path, created ? filep->f_oflags :
+                              filep->f_oflags & ~O_CREAT);
 #endif
 
   filep->f_oflags &= ~(O_CREAT | O_EXCL | O_NOCTTY | O_TRUNC);
