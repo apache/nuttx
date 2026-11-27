@@ -60,6 +60,12 @@
 #  warning CONFIG_FS_TMPFS_FILE_FREEGUARD needs to be > ALLOCGUARD
 #endif
 
+#ifdef CONFIG_FS_LARGEFILE
+#  define TMPFS_OFF_MAX INT64_MAX
+#else
+#  define TMPFS_OFF_MAX INT32_MAX
+#endif
+
 #define tmpfs_lock(fs) \
            nxrmutex_lock(&fs->tfs_lock)
 #define tmpfs_lock_object(to) \
@@ -2075,11 +2081,34 @@ static ssize_t tmpfs_writev(FAR struct file *filep, FAR struct uio *uio)
 
   if ((filep->f_oflags & O_APPEND) != 0)
     {
+      if (tfo->tfo_size > TMPFS_OFF_MAX)
+        {
+          ret = -EFBIG;
+          goto errout_with_lock;
+        }
+
       startpos = tfo->tfo_size;
     }
   else
     {
       startpos = filep->f_pos;
+    }
+
+  if (startpos < 0)
+    {
+      ret = -EINVAL;
+      goto errout_with_lock;
+    }
+
+  /* Both the file offset and the backing allocation must represent the end.
+   */
+
+  if ((uintmax_t)startpos > SIZE_MAX ||
+      uio->uio_resid > SIZE_MAX - (size_t)startpos ||
+      uio->uio_resid > TMPFS_OFF_MAX - startpos)
+    {
+      ret = -EFBIG;
+      goto errout_with_lock;
     }
 
   nwritten = uio->uio_resid;
