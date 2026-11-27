@@ -34,6 +34,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <math.h>
 
 #include <nuttx/irq.h>
@@ -447,6 +448,7 @@ struct esp_i2s_s
 #endif /* I2S_HAVE_RX */
 
   bool streaming;                 /* Is I2S peripheral active? */
+  bool paused;                    /* Is I2S peripheral paused? */
 
   /* Pre-allocated pool of buffer containers */
 
@@ -915,6 +917,11 @@ static int i2s_rxdma_start(struct esp_i2s_s *priv)
   int upd_timeout;
 #endif
 
+  if (!priv->rx_started || priv->paused)
+    {
+      return OK;
+    }
+
   /* If there is already an active transmission in progress, then bail
    * returning success.
    */
@@ -1056,9 +1063,9 @@ static IRAM_ATTR int i2s_txdma_setup(struct esp_i2s_s *priv,
   struct ap_buffer_s *apb;
   struct esp_dmadesc_s *outlink;
   apb_samp_t samp_size;
+  apb_samp_t valid_size;
   irqstate_t flags;
   uint8_t *buf;
-  uint8_t padding;
   uint8_t *samp;
 
   DEBUGASSERT(bfcontainer && bfcontainer->apb);
@@ -1069,9 +1076,22 @@ static IRAM_ATTR int i2s_txdma_setup(struct esp_i2s_s *priv,
   /* Get the transfer information, accounting for any data offset */
 
   const apb_samp_t bytes_per_sample = priv->data_width / 8;
+
   samp = &apb->samp[apb->curbyte];
   samp_size = (apb->nbytes - apb->curbyte) + priv->tx.carry.bytes;
   carry_size = samp_size % bytes_per_sample;
+  valid_size = samp_size - carry_size;
+
+  if (priv->channels == 1 && valid_size > 0)
+    {
+      if (valid_size > UINT32_MAX / 2)
+        {
+          apb_free(bfcontainer->apb);
+          return -EFBIG;
+        }
+
+      bfcontainer->nbytes = valid_size * 2;
+    }
 
   /* Allocate the current audio buffer considering the remaining bytes
    * carried from the last upper half audio buffer.
@@ -1082,6 +1102,7 @@ static IRAM_ATTR int i2s_txdma_setup(struct esp_i2s_s *priv,
     {
       i2serr("Failed to allocate the DMA internal buffer "
              "[%" PRIu32 " bytes]", bfcontainer->nbytes);
+      apb_free(bfcontainer->apb);
       return -ENOMEM;
     }
 
@@ -1095,27 +1116,58 @@ static IRAM_ATTR int i2s_txdma_setup(struct esp_i2s_s *priv,
    * buffer.
    */
 
-  if (priv->tx.carry.bytes)
+  if (priv->channels == 1 && valid_size > 0)
     {
-      memcpy(buf, &priv->tx.carry.value, priv->tx.carry.bytes);
-      buf += priv->tx.carry.bytes;
-      data_copied += priv->tx.carry.bytes;
-      memcpy(buf, samp, (bytes_per_sample - priv->tx.carry.bytes));
-      buf += (bytes_per_sample - priv->tx.carry.bytes);
-      samp += (bytes_per_sample - priv->tx.carry.bytes);
-      data_copied += (bytes_per_sample - priv->tx.carry.bytes);
+      uint8_t sample[sizeof(uint32_t)];
+
+      if (priv->tx.carry.bytes)
+        {
+          memcpy(sample, &priv->tx.carry.value, priv->tx.carry.bytes);
+          memcpy(sample + priv->tx.carry.bytes, samp,
+                 bytes_per_sample - priv->tx.carry.bytes);
+          samp += bytes_per_sample - priv->tx.carry.bytes;
+
+          memcpy(buf, sample, bytes_per_sample);
+          buf += bytes_per_sample;
+          memcpy(buf, sample, bytes_per_sample);
+          buf += bytes_per_sample;
+          data_copied += bytes_per_sample;
+        }
+
+      while (data_copied < valid_size)
+        {
+          memcpy(buf, samp, bytes_per_sample);
+          buf += bytes_per_sample;
+          memcpy(buf, samp, bytes_per_sample);
+          buf += bytes_per_sample;
+          samp += bytes_per_sample;
+          data_copied += bytes_per_sample;
+        }
     }
+  else
+    {
+      if (priv->tx.carry.bytes)
+        {
+          memcpy(buf, &priv->tx.carry.value, priv->tx.carry.bytes);
+          buf += priv->tx.carry.bytes;
+          data_copied += priv->tx.carry.bytes;
+          memcpy(buf, samp, (bytes_per_sample - priv->tx.carry.bytes));
+          buf += (bytes_per_sample - priv->tx.carry.bytes);
+          samp += (bytes_per_sample - priv->tx.carry.bytes);
+          data_copied += (bytes_per_sample - priv->tx.carry.bytes);
+        }
 
-  /* Copy the upper half buffer to the internal buffer considering that
-   * the current upper half buffer may not contain a complete sample at
-   * the end of the buffer (and those bytes needs to be carried to the
-   * next audio buffer).
-   */
+      /* Copy the upper half buffer to the internal buffer considering that
+       * the current upper half buffer may not contain a complete sample at
+       * the end of the buffer (and those bytes needs to be carried to the
+       * next audio buffer).
+       */
 
-  memcpy(buf, samp, samp_size - (data_copied + carry_size));
-  buf += samp_size - (data_copied + carry_size);
-  samp += samp_size - (data_copied + carry_size);
-  data_copied += samp_size - (data_copied + carry_size);
+      memcpy(buf, samp, samp_size - (data_copied + carry_size));
+      buf += samp_size - (data_copied + carry_size);
+      samp += samp_size - (data_copied + carry_size);
+      data_copied += samp_size - (data_copied + carry_size);
+    }
 
   /* If the audio buffer's size is not a multiple of the sample size,
    * it's necessary to carry the remaining bytes that are part of what
@@ -1157,7 +1209,9 @@ static IRAM_ATTR int i2s_txdma_setup(struct esp_i2s_s *priv,
       i2serr("Failed to enqueue I2S buffer "
              "(%" PRIu32 " bytes of %" PRIu32 ")\n",
              bytes_queued, bfcontainer->nbytes);
-      return -bytes_queued;
+      free(bfcontainer->buf);
+      bfcontainer->buf = NULL;
+      return -EIO;
     }
 
   flags = spin_lock_irqsave(&priv->slock);
@@ -1228,7 +1282,9 @@ static int i2s_rxdma_setup(struct esp_i2s_s *priv,
       i2serr("Failed to enqueue I2S buffer "
              "(%" PRIu32 " bytes of %" PRIu32 ")\n",
              bytes_queued, bfcontainer->nbytes);
-      return -bytes_queued;
+      free(bfcontainer->buf);
+      bfcontainer->buf = NULL;
+      return -EIO;
     }
 
   /* Writeback DMA descriptors from data cache to physical memory.
@@ -1249,9 +1305,12 @@ static int i2s_rxdma_setup(struct esp_i2s_s *priv,
 
   sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.pend);
 
-  /* Trigger DMA transfer if no transmission is in progress */
+  /* Trigger DMA transfer if the RX channel is already running. */
 
-  ret = i2s_rxdma_start(priv);
+  if (priv->rx_started)
+    {
+      ret = i2s_rxdma_start(priv);
+    }
 
   spin_unlock_irqrestore(&priv->slock, flags);
 
@@ -2277,6 +2336,7 @@ static void i2s_tx_channel_start(struct esp_i2s_s *priv)
 static void i2s_rx_channel_start(struct esp_i2s_s *priv)
 {
   int upd_timeout;
+
   if (priv->config->rx_en)
     {
       if (priv->rx_started)
@@ -3167,11 +3227,29 @@ static int i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
 
       case AUDIOIOC_START:
         {
+          bool playback = (bool)arg;
+
           i2sinfo("AUDIOIOC_START\n");
 
           priv->streaming = true;
-
+          priv->paused = false;
           ret = OK;
+
+#ifdef I2S_HAVE_RX
+          if (!playback && priv->config->rx_en && !priv->rx_started)
+            {
+              i2s_rx_channel_start(priv);
+            }
+
+          if (!playback && priv->config->rx_en)
+            {
+              irqstate_t flags;
+
+              flags = spin_lock_irqsave(&priv->slock);
+              ret = i2s_rxdma_start(priv);
+              spin_unlock_irqrestore(&priv->slock, flags);
+            }
+#endif
         }
         break;
 
@@ -3186,6 +3264,7 @@ static int i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
           i2sinfo("AUDIOIOC_STOP\n");
 
           priv->streaming = false;
+          priv->paused = false;
 
 #ifdef I2S_HAVE_RX
           /* Stop the I2S RX channel and DMA to abort any in-progress
@@ -3246,6 +3325,94 @@ static int i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 #endif /* CONFIG_AUDIO_EXCLUDE_STOP */
+
+#ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
+      case AUDIOIOC_PAUSE:
+        {
+          bool playback = (bool)arg;
+
+          if (playback || !priv->streaming)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+#ifdef I2S_HAVE_RX
+          if (!priv->paused)
+            {
+              struct esp_buffer_s *bfcontainer;
+              irqstate_t flags;
+
+              flags = spin_lock_irqsave(&priv->slock);
+              priv->paused = true;
+              spin_unlock_irqrestore(&priv->slock, flags);
+
+              if (priv->rx_started)
+                {
+                  i2s_rx_channel_stop(priv);
+                }
+
+              flags = spin_lock_irqsave(&priv->slock);
+              bfcontainer =
+                (struct esp_buffer_s *)sq_remfirst(&priv->rx.act);
+              if (bfcontainer != NULL)
+                {
+                  sq_addfirst((sq_entry_t *)bfcontainer, &priv->rx.pend);
+                }
+
+              spin_unlock_irqrestore(&priv->slock, flags);
+              i2sinfo("AUDIOIOC_PAUSE capture\n");
+            }
+
+          ret = OK;
+#else
+          ret = -ENOTSUP;
+#endif
+        }
+        break;
+
+      case AUDIOIOC_RESUME:
+        {
+          bool playback = (bool)arg;
+
+          if (playback || !priv->streaming)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+#ifdef I2S_HAVE_RX
+          if (priv->paused)
+            {
+              irqstate_t flags;
+
+              flags = spin_lock_irqsave(&priv->slock);
+              priv->paused = false;
+              spin_unlock_irqrestore(&priv->slock, flags);
+
+              i2s_rx_channel_start(priv);
+
+              flags = spin_lock_irqsave(&priv->slock);
+              ret = i2s_rxdma_start(priv);
+              spin_unlock_irqrestore(&priv->slock, flags);
+
+              if (ret < 0)
+                {
+                  i2s_rx_channel_stop(priv);
+                  priv->paused = true;
+                  break;
+                }
+
+              i2sinfo("AUDIOIOC_RESUME capture\n");
+            }
+
+          ret = OK;
+#else
+          ret = -ENOTSUP;
+#endif
+        }
+        break;
+#endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
 
       /* AUDIOIOC_ALLOCBUFFER - Allocate an audio buffer
        *
@@ -3344,6 +3511,7 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
       int cpuint = esp_setup_irq(periph, 1,
                                  ESP_IRQ_TRIGGER_LEVEL,
                                  i2s_interrupt, priv);
+
       if (cpuint < 0)
         {
           i2serr("Failed to allocate a CPU interrupt.\n");
@@ -3364,6 +3532,7 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
       int cpuint = esp_setup_irq(periph, 1,
                                  ESP_IRQ_TRIGGER_LEVEL,
                                  i2s_interrupt, priv);
+
       if (cpuint < 0)
         {
           i2serr("Failed to allocate a CPU interrupt.\n");
@@ -3388,6 +3557,7 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
                              ESP_IRQ_PRIORITY_DEFAULT,
                              ESP_IRQ_TRIGGER_LEVEL,
                              i2s_interrupt, priv);
+
   if (cpuint < 0)
     {
       i2serr("Failed to allocate a CPU interrupt.\n");
