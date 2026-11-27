@@ -872,6 +872,21 @@ config ESP32S3_USBSERIAL
 	select OTHER_UART_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config ESP32S3_USBSERIAL_TXTIMEOUT
+	int "USB-Serial transmit timeout (ms)"
+	default 100
+	depends on ESP32S3_USBSERIAL
+	---help---
+		The data written to the USB-Serial/JTAG port leave the chip only
+		when the host reads the port.  With no program that has the port
+		open on the host, a write would block for ever, and with the
+		console on this port the whole system stops at the first messages.
+
+		When the host takes no data for this time, the driver discards
+		the data that wait and all the data written after that, until
+		the host reads again.  0 disables the timeout: a write waits for
+		the host for ever.
+
 config ESP32S3_OTG
 	bool "USB OTG"
 	default n
