@@ -113,8 +113,7 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
    * specified by cond or the mutex specified by mutex.
    */
 
-  else if (abstime && (abstime->tv_nsec < 0 ||
-           abstime->tv_nsec >= NSEC_PER_SEC))
+  else if (abstime && !clock_timespec_validate(abstime))
     {
       ret = EINVAL;
     }
