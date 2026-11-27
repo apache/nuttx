@@ -82,6 +82,7 @@ static void esp32s3_shutdown(struct uart_dev_s *dev);
 static int  esp32s3_attach(struct uart_dev_s *dev);
 static void esp32s3_detach(struct uart_dev_s *dev);
 static void esp32s3_txint(struct uart_dev_s *dev, bool enable);
+static void esp32s3_txkick(struct uart_dev_s *dev);
 static void esp32s3_rxint(struct uart_dev_s *dev, bool enable);
 static bool esp32s3_rxavailable(struct uart_dev_s *dev);
 static bool esp32s3_txready(struct uart_dev_s *dev);
@@ -212,6 +213,26 @@ static void esp32s3_shutdown(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: esp32s3_txkick
+ *
+ * Description:
+ *   Start the transmission when the hardware buffer can take data.  The
+ *   "IN empty" interrupt is raised when the host takes a packet; when the
+ *   flag of an earlier packet was already cleared and nothing is on its way
+ *   to the host, no interrupt would come to send the first byte.  Called
+ *   with the interrupts disabled.
+ *
+ ****************************************************************************/
+
+static void esp32s3_txkick(struct uart_dev_s *dev)
+{
+  if (dev->xmit.head != dev->xmit.tail && esp32s3_txready(dev))
+    {
+      uart_xmitchars(dev);
+    }
+}
+
+/****************************************************************************
  * Name: esp32s3_txint
  *
  * Description:
@@ -223,8 +244,12 @@ static void esp32s3_txint(struct uart_dev_s *dev, bool enable)
 {
   if (enable)
     {
+      irqstate_t flags = enter_critical_section();
+
       modifyreg32(USB_SERIAL_JTAG_INT_ENA_REG, 0,
                   USB_SERIAL_JTAG_SERIAL_IN_EMPTY_INT_ENA);
+      esp32s3_txkick(dev);
+      leave_critical_section(flags);
     }
   else
     {
