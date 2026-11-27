@@ -6,7 +6,7 @@ This supports the POSIX shm_open() APIs for shared memory among unrelated
 apps.
 
 It can be enabled with ``CONFIG_FS_SHMFS=y``. To check how it works, please
-also enable the example app via ``CONFIG_EXMAPLE_SHM=y`` and run ``shm_test``
+also enable the example app via ``CONFIG_EXAMPLE_SHM=y`` and run ``shm_test``
 from NSH command line.
 
 This file system doesn't support mount operations though.
