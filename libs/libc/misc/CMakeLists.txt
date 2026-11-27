@@ -106,6 +106,7 @@ list(
   lib_crc8table.c
   lib_glob.c
   lib_backtrace.c
+  lib_execinfo.c
   lib_ftok.c
   lib_err.c
   lib_instrument.c)

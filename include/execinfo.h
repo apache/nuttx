@@ -27,11 +27,23 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/sched.h>
+#include <nuttx/config.h>
 
 #include <assert.h>
+#include <errno.h>
+#include <sched.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <sys/types.h>
+
+/* The OS calls the backtrace functions of the scheduler for its own thread
+ * directly.  A program gets backtrace() and dump_stack() as functions of
+ * the C library, and no kernel header.
+ */
+
+#ifdef __KERNEL__
+#  include <nuttx/sched.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -45,8 +57,10 @@
 
 #define BACKTRACE_BUFFER_SIZE(d) (BACKTRACE_PTR_FMT_WIDTH * (d) + 1)
 
-#define backtrace(b, s) sched_backtrace(_SCHED_GETTID(), b, s, 0)
-#define dump_stack()    sched_dumpstack(_SCHED_GETTID())
+#ifdef __KERNEL__
+#  define backtrace(b, s) sched_backtrace(_SCHED_GETTID(), b, s, 0)
+#  define dump_stack()    sched_dumpstack(_SCHED_GETTID())
+#endif
 
 #ifndef CONFIG_LIBC_BACKTRACE_DEPTH
 #  define CONFIG_LIBC_BACKTRACE_DEPTH 0
@@ -59,6 +73,11 @@
 #if defined(__cplusplus)
 extern "C"
 {
+#endif
+
+#ifndef __KERNEL__
+int backtrace(FAR void **buffer, int size);
+void dump_stack(void);
 #endif
 
 FAR char **backtrace_symbols(FAR void *const *buffer, int size);
