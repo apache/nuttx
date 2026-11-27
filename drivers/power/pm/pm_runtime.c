@@ -124,41 +124,41 @@ static int rpm_changestate(FAR struct pm_runtime_s *rpm, rpm_state_e state)
   int ret = 0;
 
   switch (rpm->state)
-  {
-  case RPM_ACTIVE:
-    if (state == RPM_SUSPENDED)
-      {
-        ret = rpm_suspend(rpm);
-      }
-    else if (state == RPM_SUSPENDING)
-      {
-         ret = work_queue(HPWORK, &rpm->suspend_work,
-                          rpm_autosuspend_cb, rpm,
-                          MSEC2TICK(rpm->suspend_delay));
-      }
-    break;
+    {
+      case RPM_ACTIVE:
+        if (state == RPM_SUSPENDED)
+          {
+            ret = rpm_suspend(rpm);
+          }
+        else if (state == RPM_SUSPENDING)
+          {
+            ret = work_queue(HPWORK, &rpm->suspend_work,
+                             rpm_autosuspend_cb, rpm,
+                             MSEC2TICK(rpm->suspend_delay));
+          }
+        break;
 
-  case RPM_SUSPENDED:
-    if (state == RPM_ACTIVE)
-      {
-        ret = rpm_resume(rpm);
-      }
-    break;
+      case RPM_SUSPENDED:
+        if (state == RPM_ACTIVE)
+          {
+            ret = rpm_resume(rpm);
+          }
+        break;
 
-  case RPM_SUSPENDING:
-    if (state == RPM_ACTIVE)
-      {
-        work_cancel(HPWORK, &rpm->suspend_work);
-      }
-    else if (state == RPM_SUSPENDED)
-      {
-        ret = rpm_suspend(rpm);
-      }
-    break;
+      case RPM_SUSPENDING:
+        if (state == RPM_ACTIVE)
+          {
+            work_cancel(HPWORK, &rpm->suspend_work);
+          }
+        else if (state == RPM_SUSPENDED)
+          {
+            ret = rpm_suspend(rpm);
+          }
+        break;
 
-  default:
-    break;
-  }
+      default:
+        break;
+    }
 
   return ret;
 }
@@ -188,10 +188,10 @@ void pm_runtime_init(FAR struct pm_runtime_s *rpm, rpm_state_e state,
   DEBUGASSERT(rpm != NULL && ops != NULL);
   DEBUGASSERT(state == RPM_ACTIVE || state == RPM_SUSPENDED);
   nxrmutex_init(&rpm->lock);
-  rpm->use_count = 0;
+  rpm->use_count     = 0;
   rpm->suspend_delay = 0;
-  rpm->state = state;
-  rpm->ops = ops;
+  rpm->state         = state;
+  rpm->ops           = ops;
 }
 
 /****************************************************************************
