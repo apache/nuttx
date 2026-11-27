@@ -713,6 +713,17 @@ void esp32s3_lowputc_enable_sysclk(const struct esp32s3_uart_s *priv)
     {
       periph_module_enable(PERIPH_UART1_MODULE + (priv->id - 1));
     }
+  else
+    {
+      /* UART0 has no entry in periph_module_t: it is normally the console
+       * and always clocked.  With no serial console, however,
+       * esp_perip_clk_init() of the HAL gates its clock and holds it in
+       * reset as an unused peripheral, so enable it here.
+       */
+
+      modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_UART_CLK_EN_M);
+      modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_UART_RST_M, 0);
+    }
 }
 
 /****************************************************************************
@@ -898,6 +909,13 @@ void esp32s3_lowputc_config_pins(const struct esp32s3_uart_s *priv)
       esp_configgpio(priv->rxpin, priv->id == 1 ? INPUT_FUNCTION_3 :
                                                       INPUT_FUNCTION_1);
       esp_gpio_matrix_out(priv->rxpin, SIG_GPIO_OUT_IDX, 0, 0);
+
+      /* Take the RX signal from the pin.  It is not always there: with no
+       * serial console bootloader_console_init() of the HAL connects the
+       * RX signal of UART0 to a constant level in the GPIO matrix.
+       */
+
+      esp_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
       if (priv->iflow)
