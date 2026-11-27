@@ -1,5 +1,4 @@
 /****************************************************************************
-
  * boards/arm/rzv2h/rzv2h-evk/src/rzv2h_bringup.c
  *
  * SPDX-License-Identifier: Apache-2.0

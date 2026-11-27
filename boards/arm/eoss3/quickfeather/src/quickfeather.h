@@ -17,6 +17,7 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
  * License for the specific language governing permissions and limitations
  * under the License.
+ *
  ****************************************************************************/
 
 #ifndef __BOARDS_ARM_EOSS3_QUICKFEATHER_SRC_QUICKFEATHER_H
