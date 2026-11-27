@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -223,6 +224,7 @@ struct stm32_spidev_s
   uint32_t         txccr;        /* DMA control register for TX transfers */
   uint32_t         rxccr;        /* DMA control register for RX transfers */
   bool             dmarunning;   /* DMA is started */
+  volatile bool    txbusy;       /* TX DMA is in progress */
 #endif
   bool             initialized;  /* Has SPI interface been initialized */
   mutex_t          lock;         /* Held while chip is selected for mutual
@@ -287,7 +289,7 @@ static inline void spi_dmarxstart(struct stm32_spidev_s *priv);
 static inline void spi_dmatxstart(struct stm32_spidev_s *priv);
 #endif
 
-/* Interrupt handler detecting nss status changes */
+/* NSS rising edge: end of a transfer */
 
 static int  spi_nssinterrupt(int irq, void *context, void *arg);
 
@@ -758,6 +760,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
   /* Wake-up the SPI driver */
 
   priv->txresult = isr | 0x080;  /* OR'ed with 0x80 to assure non-zero */
+  priv->txbusy   = false;
   SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_TX_COMPLETE);
 }
 #endif
@@ -822,47 +825,26 @@ static void spi_dmarxsetup(struct stm32_spidev_s *priv, size_t nwords)
 #ifdef CONFIG_STM32_SPI_DMA
 static void spi_dmatxsetup(struct stm32_spidev_s *priv, size_t nwords)
 {
-  /* TODO: set up dma to transfer out the new data from priv->outq,
-   * which is set up in spi_enqueue
-   * When the transfer is complete, update outq indexies accordingly
-   */
-
-#if 0
   stm32_dmacfg_t dmacfg;
-
-  /* Can't transmit in rx only mode */
-
-  if (priv->config == SIMPLEX_RX)
-    {
-      return;
-    }
 
   /* 8- or 16-bit mode? */
 
   if (spi_9to16bitmode(priv))
     {
-      /* 16-bit mode */
-
       priv->txccr = SPI_TXDMA16_CONFIG;
     }
   else
     {
-      /* 8-bit mode */
-
       priv->txccr = SPI_TXDMA8_CONFIG;
     }
 
   dmacfg.paddr = priv->spibase + STM32_SPI_TXDR_OFFSET;
-  dmacfg.maddr = (uint32_t)priv->outq[0];
+  dmacfg.maddr = (uint32_t)priv->outq;
   dmacfg.ndata = nwords;
   dmacfg.cfg1  = priv->txccr;
   dmacfg.cfg2  = 0;
 
-  /* Setup the TX DMA */
-
   stm32_dmasetup(priv->txdma, &dmacfg);
-
-#endif // 0
 }
 #endif
 
@@ -902,14 +884,8 @@ static void spi_dmarxstart(struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32_SPI_DMA
 static void spi_dmatxstart(struct stm32_spidev_s *priv)
 {
-  /* Can't transmit in rx only mode */
-
-  if (priv->config == SIMPLEX_RX)
-    {
-      return;
-    }
-
   priv->txresult = 0;
+  priv->txbusy   = true;
   stm32_dmastart(priv->txdma, spi_dmatxcallback, priv, false);
   spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_TXDMAEN);
 }
@@ -1131,7 +1107,6 @@ static void spi_bind(struct spi_slave_ctrlr_s *ctrlr,
                      int nbits)
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)ctrlr;
-  uint32_t nss_gpio;
 
   spiinfo("dev=%p mode=%d nbits=%d\n", dev, mode, nbits);
 
@@ -1170,16 +1145,24 @@ static void spi_bind(struct spi_slave_ctrlr_s *ctrlr,
   spi_setmode(ctrlr, mode);
   spi_setbits(ctrlr, nbits);
 
-  /* First, configure NSS as GPIO EXTI input */
+  /* The hardware NSS input frames each transfer, its rising edge reports
+   * the end of a transfer.
+   */
 
-  nss_gpio = priv->nss_pin & (GPIO_PORT_MASK | GPIO_PIN_MASK);
-  nss_gpio |= (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI);
-  stm32_configgpio(nss_gpio);
-
-  /* Bind to NSS interrupt */
-
-  stm32_gpiosetevent(priv->nss_pin, false, true, false,
+  stm32_configgpio(priv->nss_pin);
+  stm32_gpiosetevent(priv->nss_pin, true, false, false,
                      spi_nssinterrupt, priv);
+
+#ifdef CONFIG_STM32_SPI_DMA
+  /* Start the circular RX DMA */
+
+  spi_dmarxsetup(priv, 0);
+  spi_dmarxstart(priv);
+  priv->txbusy     = false;
+  priv->dmarunning = true;
+#endif
+
+  spi_enable(priv, true);
 
 #ifdef CONFIG_PM
   /* Register to receive power management callbacks */
@@ -1196,15 +1179,7 @@ static void spi_bind(struct spi_slave_ctrlr_s *ctrlr,
  * Name: spi_nssinterrupt
  *
  * Description:
- *   SPI slave NSS interrupt handler
- *
- * Input Parameters:
- *   irq     - not used
- *   context - not used
- *   arg     - pointer to controller
- *
- * Returned Value:
- *   OK
+ *   NSS rising edge: the master ended a transfer, report the received data.
  *
  ****************************************************************************/
 
@@ -1212,59 +1187,10 @@ static int spi_nssinterrupt(int irq, void *context, void *arg)
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)arg;
 
-  /* If the pin is low, just enable rising edge interrupt */
-
-  if (!stm32_gpioread(priv->nss_pin))
+  if (priv->dev != NULL)
     {
-      /* Bind to NSS rising edge interrupt */
-
-      stm32_gpiosetevent(priv->nss_pin, true, false, false,
-                         spi_nssinterrupt, priv);
-      return OK;
+      SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_RX_COMPLETE);
     }
-
-  /* Disable NSS interrupt */
-
-  stm32_gpiosetevent(priv->nss_pin, false, false, false,
-                     NULL, priv);
-
-  /* Re-configure nss pin */
-
-  stm32_configgpio(priv->nss_pin);
-
-  /* Enable spi peripheral */
-
-  spi_enable(priv, true);
-
-  /* Flush SPI read FIFO */
-
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXPLVL_MASK) != 0)
-    {
-      spi_getreg(priv, STM32_SPI_RXDR_OFFSET);
-    }
-
-  /* Disable spi before dma setup */
-
-  spi_enable(priv, false);
-
-#ifdef CONFIG_STM32_SPI_DMA
-
-  /* Setup DMAs */
-
-  spi_dmarxsetup(priv, 0);
-  spi_dmatxsetup(priv, 0);
-
-  /* Start the DMAs */
-
-  spi_dmarxstart(priv);
-  spi_dmatxstart(priv);
-
-  priv->dmarunning = true;
-#endif
-
-  /* Enable spi peripheral */
-
-  spi_enable(priv, true);
 
   return OK;
 }
@@ -1300,16 +1226,32 @@ static void spi_unbind(struct spi_slave_ctrlr_s *ctrlr)
 
   /* Unbind the SPI slave interface */
 
+  stm32_gpiosetevent(priv->nss_pin, false, false, false, NULL, NULL);
   priv->dev = NULL;
 
-  /* Disable DMA */
+  /* Disable the SPI peripheral and DMA */
 
+  spi_enable(priv, false);
   spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET,
                 SPI_CFG1_RXDMAEN | SPI_CFG1_TXDMAEN, 0);
 
-  /* Disable the SPI peripheral */
+#ifdef CONFIG_STM32_SPI_DMA
+  if (priv->dmarunning)
+    {
+      if (priv->config != SIMPLEX_TX)
+        {
+          stm32_dmastop(priv->rxdma);
+        }
 
-  spi_enable(priv, false);
+      if (priv->config != SIMPLEX_RX)
+        {
+          stm32_dmastop(priv->txdma);
+        }
+
+      priv->txbusy     = false;
+      priv->dmarunning = false;
+    }
+#endif
 
   spi_lock(ctrlr, false);
 }
@@ -1341,7 +1283,50 @@ static void spi_unbind(struct spi_slave_ctrlr_s *ctrlr)
 static int spi_enqueue(struct spi_slave_ctrlr_s *ctrlr,
                        const void *data, size_t len)
 {
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)ctrlr;
+  size_t wordsize = spi_9to16bitmode(priv) ? 2 : 1;
+  irqstate_t flags;
+
+  DEBUGASSERT(priv != NULL && priv->dev != NULL);
+
+#ifdef CONFIG_STM32_SPI_DMA
+  if (priv->config == SIMPLEX_RX || !priv->dmarunning || priv->txbusy)
+    {
+      return 0;
+    }
+
+  len = MIN(len, CONFIG_STM32_SPI_SLAVE_QSIZE / wordsize);
+  if (len == 0)
+    {
+      return 0;
+    }
+
+  spi_lock(ctrlr, true);
+
+  memcpy(priv->outq, data, len * wordsize);
+  up_clean_dcache((uintptr_t)priv->outq,
+                  (uintptr_t)priv->outq + DMA_ALIGN_UP(len * wordsize));
+
+  /* CFG1 is writable only with SPE=0.  Disabling SPI also drops the old
+   * TX FIFO content, the circular RX DMA keeps running.
+   */
+
+  flags = enter_critical_section();
+  spi_enable(priv, false);
+  spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, SPI_CFG1_TXDMAEN, 0);
+  spi_putreg(priv, STM32_SPI_IFCR_OFFSET, SPI_IFCR_UDRC);
+
+  spi_dmatxsetup(priv, len);
+  spi_dmatxstart(priv);
+
+  spi_enable(priv, true);
+  leave_critical_section(flags);
+
+  spi_lock(ctrlr, false);
+  return len;
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
@@ -1361,7 +1346,13 @@ static int spi_enqueue(struct spi_slave_ctrlr_s *ctrlr,
 
 static bool spi_qfull(struct spi_slave_ctrlr_s *ctrlr)
 {
+#ifdef CONFIG_STM32_SPI_DMA
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)ctrlr;
+
+  return priv->txbusy;
+#else
   return false;
+#endif
 }
 
 /****************************************************************************
@@ -1410,6 +1401,17 @@ static void spi_qflush(struct spi_slave_ctrlr_s *ctrlr)
 #endif
 
   /* Flush the output buffers */
+
+#ifdef CONFIG_STM32_SPI_DMA
+  if (priv->txbusy)
+    {
+      spi_enable(priv, false);
+      spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, SPI_CFG1_TXDMAEN, 0);
+      stm32_dmastop(priv->txdma);
+      priv->txbusy = false;
+      spi_enable(priv, true);
+    }
+#endif
 
   priv->ohead = 0;
   priv->otail = 0;
@@ -1633,10 +1635,10 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
 
   /* Configure CR1, CFG1 and CFG2. Default configuration:
    *   Mode 0:                        CFG2.CPHA=0 and CFG2.CPOL=0
-   *   Master:                        CFG2.MSTR=1
+   *   Slave:                         CFG2.MASTER=0
    *   8-bit:                         CFG1.DSIZE=7
    *   MSB transmitted first:         CFG2.LSBFRST=0
-   *   Replace NSS with SSI & SSI=1:  CR1.SSI=1 CFG2.SSM=1 (prevent MODF err)
+   *   Hardware NSS input:            CFG2.SSM=0
    *   Two lines full duplex:         CFG2.COMM=0
    */
 
@@ -1654,8 +1656,8 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
   /* CFG2 */
 
   clrbits = SPI_CFG2_CPHA | SPI_CFG2_CPOL | SPI_CFG2_LSBFRST |
-    SPI_CFG2_COMM_MASK;
-  setbits = SPI_CFG2_SSM;
+    SPI_CFG2_COMM_MASK | SPI_CFG2_SSM;
+  setbits = 0;
 
   switch (priv->config)
     {
@@ -1687,9 +1689,7 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
   spi_putreg(priv, STM32_SPI_CRCPOLY_OFFSET, 7);
 
 #ifdef CONFIG_STM32_SPI_DMA
-  /* DMA will be started in the interrupt handler, synchronized to the master
-   * nss
-   */
+  /* DMA is started in bind */
 
   priv->dmarunning = false;
 
