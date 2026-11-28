@@ -270,6 +270,26 @@ config FS_ALLOC_FILES
 		empty. Set to zero to disable expansion. Expanded blocks are retained
 		for reuse, so heap use follows the peak number of open file objects.
 
+config FS_PREALLOC_SOCKETS
+	int "Preallocated socket objects"
+	default 0
+	range 0 65535
+	depends on NET
+	---help---
+		Number of socket objects reserved in a static pool.  If this or
+		FS_ALLOC_SOCKETS is positive, socket objects use a dedicated pool.
+		When both are zero, objects are allocated directly from fs_heap.
+
+config FS_ALLOC_SOCKETS
+	int "Dynamic socket objects allocation"
+	default 0
+	range 0 65535
+	depends on NET
+	---help---
+		Number of socket objects added to the pool from fs_heap when it is
+		empty.  Zero disables growth; a fixed pool fails immediately when
+		empty.  Expanded storage remains allocated for reuse.
+
 config FS_HEAPSIZE
 	int "Independent heap bytes"
 	default 0

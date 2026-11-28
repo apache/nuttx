@@ -38,7 +38,7 @@
 #include <nuttx/debug.h>
 
 #include "inode/inode.h"
-#include "fs_heap.h"
+#include "socket.h"
 
 /****************************************************************************
  * Public Functions
@@ -80,7 +80,7 @@ int socketpair(int domain, int type, int protocol, int sv[2])
 
   for (k = 0; k < 2; k++)
     {
-      psocks[k] = fs_heap_zalloc(sizeof(*psocks[k]));
+      psocks[k] = sock_alloc();
       if (psocks[k] == NULL)
         {
           ret = -ENOMEM;
@@ -132,7 +132,7 @@ errout_with_psock:
 errout_with_alloc:
   for (i = j; i < k; i++)
     {
-      fs_heap_free(psocks[i]);
+      sock_free(psocks[i]);
     }
 
 errout:
