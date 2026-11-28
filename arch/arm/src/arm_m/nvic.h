@@ -305,9 +305,13 @@
 #define NVIC_CID2_OFFSET                0x0ff8 /* Component identification register bits 23:16 (CID0) */
 #define NVIC_CID3_OFFSET                0x0ffc /* Component identification register bits 23:16 (CID0) */
 
-/* Cortex-M55 and Cortex-M85 implementation defined registers */
+/* Cache Control Register address differs between Cortex-M architectures */
 
-#define NVIC_CACR_OFFSET                0x10008 /* L1 Cache Control Register */
+#ifdef CONFIG_ARCH_ARMV8M
+#  define NVIC_CACR_OFFSET              0x10008 /* Cortex-M55/M85 L1 CACR */
+#else
+#  define NVIC_CACR_OFFSET              0x0f9c  /* Cortex-M7 CACR */
+#endif
 
 /* NVIC register addresses **************************************************/
 
