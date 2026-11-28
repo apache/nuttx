@@ -2,20 +2,18 @@
  * net/sixlowpan/sixlowpan_input.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2017, Gregory Nutt
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt
+ * SPDX-FileCopyrightText: 2008 Swedish Institute of Computer Science.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Adam Dunkels <adam@sics.se>
+ * SPDX-FileContributor: Nicolas Tsiftes <nvt@sics.se>
+ * SPDX-FileContributor: Niclas Finne <nfi@sics.se>
+ * SPDX-FileContributor: Mathilde Durvy <mdurvy@cisco.com>
+ * SPDX-FileContributor: Julien Abeille <jabeille@cisco.com>
+ * SPDX-FileContributor: Joakim Eriksson <joakime@sics.se>
+ * SPDX-FileContributor: Joel Hoglund <joel@sics.se>
  *
  * Derives in large part from Contiki:
- *
- *   Copyright (c) 2008, Swedish Institute of Computer Science.
- *   All rights reserved.
- *   Authors: Adam Dunkels <adam@sics.se>
- *            Nicolas Tsiftes <nvt@sics.se>
- *            Niclas Finne <nfi@sics.se>
- *            Mathilde Durvy <mdurvy@cisco.com>
- *            Julien Abeille <jabeille@cisco.com>
- *            Joakim Eriksson <joakime@sics.se>
- *            Joel Hoglund <joel@sics.se>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

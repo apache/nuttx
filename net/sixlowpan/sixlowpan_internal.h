@@ -2,29 +2,20 @@
  * net/sixlowpan/sixlowpan_internal.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2008 Swedish Institute of Computer Science
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Colin O'Flynn coflynn@newae.com
+ * SPDX-FileContributor: Eric Gnoske egnoske@gmail.com
+ * SPDX-FileContributor: Blake Leverett bleverett@gmail.com
+ * SPDX-FileContributor: Mike Vidales mavida404@gmail.com
+ * SPDX-FileContributor: Kevin Brown kbrown3@uccs.edu
+ * SPDX-FileContributor: Nate Bohlmann nate@elfwerks.com
+ * SPDX-FileContributor: Joakim Eriksson
+ * SPDX-FileContributor: Niclas Finne
+ * SPDX-FileContributor: Nicolas Tsiftes
  *
  * Parts of this file derive from Contiki:
- *
- *   Copyright (c) 2008, Swedish Institute of Computer Science
- *   All rights reserved.
- *
- *   Additional fixes for AVR contributed by:
- *         Colin O'Flynn coflynn@newae.com
- *         Eric Gnoske egnoske@gmail.com
- *         Blake Leverett bleverett@gmail.com
- *         Mike Vidales mavida404@gmail.com
- *         Kevin Brown kbrown3@uccs.edu
- *         Nate Bohlmann nate@elfwerks.com
- *
- *   Additional fixes for MSP430 contributed by:
- *         Joakim Eriksson
- *         Niclas Finne
- *         Nicolas Tsiftes
- *
- *    All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
