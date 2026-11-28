@@ -416,6 +416,240 @@ static int vsprintf_putnum(FAR struct lib_outstream_s *stream,
   return len;
 }
 
+static int vsprintf_scan_literal(FAR struct lib_outstream_s *stream,
+                                 FAR const IPTR char **fmtp,
+                                 FAR unsigned char *conv)
+{
+  FAR const IPTR char *fmt = *fmtp;
+  unsigned char c;
+  int total_len = 0;
+
+#ifndef CONFIG_ARCH_ROMGETC
+  FAR const char *start = fmt;
+
+  for (; ; )
+    {
+      c = fmt_char(fmt);
+      if (c == '\0')
+        {
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+          if (stream != NULL)
+#  endif
+            {
+              size_t litlen = (fmt - start) - 1;
+
+              if (litlen > 0)
+                {
+                  total_len += litlen;
+                  lib_stream_puts(stream, start, litlen);
+                }
+            }
+
+          break;
+        }
+
+      if (c == '%')
+        {
+          size_t litlen = (fmt - start) - 1;
+
+          c = fmt_char(fmt);
+          if (c != '%')
+            {
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+              if (stream != NULL)
+#  endif
+                {
+                  if (litlen > 0)
+                    {
+                      total_len += litlen;
+                      lib_stream_puts(stream, start, litlen);
+                    }
+
+                  if (c == '\0')
+                    {
+                      total_len++;
+                      lib_stream_putc(stream, '%');
+                    }
+                }
+
+              break;
+            }
+
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+          if (stream != NULL)
+#  endif
+            {
+              total_len += litlen + 1;
+              lib_stream_puts(stream, start, litlen + 1);
+            }
+
+          start = fmt;
+        }
+    }
+#else
+  for (; ; )
+    {
+      c = fmt_char(fmt);
+      if (c == '\0')
+        {
+          break;
+        }
+
+      if (c == '%')
+        {
+          c = fmt_char(fmt);
+          if (c != '%')
+            {
+              if (c == '\0')
+                {
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+                  if (stream != NULL)
+#  endif
+                    {
+                      total_len++;
+                      lib_stream_putc(stream, '%');
+                    }
+                }
+
+              break;
+            }
+        }
+
+#  ifdef CONFIG_LIBC_NUMBERED_ARGS
+      if (stream != NULL)
+#  endif
+        {
+          total_len++;
+          lib_stream_putc(stream, c);
+        }
+    }
+#endif
+
+  *fmtp = fmt;
+  *conv = c;
+
+  return total_len;
+}
+
+static int vsprintf_put_field(FAR struct lib_outstream_s *stream,
+                              FAR const char *pnt, size_t size,
+                              int width, uint16_t flags)
+{
+  int total_len = 0;
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      if (width > 0 && size < (size_t)width)
+        {
+          int pad = width - size;
+
+          total_len += vsprintf_repeat(stream, ' ', pad);
+        }
+    }
+
+  total_len += size;
+  lib_stream_puts(stream, pnt, size);
+
+  return total_len;
+}
+
+static int vsprintf_put_char(FAR struct lib_outstream_s *stream,
+                             uint16_t flags, int ch, FAR int *width,
+                             FAR char *buf)
+{
+  FAR const char *pnt;
+  size_t size;
+
+#ifdef CONFIG_LIBC_LOCALE
+  if ((flags & FL_LONG) != 0)
+    {
+      mbstate_t ps;
+
+      /* %lc: a wide character, written as its multibyte sequence. */
+
+      memset(&ps, 0, sizeof(ps));
+      size = wcrtomb(buf, (wchar_t)ch, &ps);
+      if (size == (size_t)-1)
+        {
+          return -1;
+        }
+    }
+  else
+#endif
+    {
+      buf[0] = ch;
+      size = 1;
+    }
+
+  pnt = buf;
+  ch = vsprintf_put_field(stream, pnt, size, *width, flags);
+  *width = FL_LPAD != 0 && *width > 0 && size < (size_t)*width ?
+           *width - size : 0;
+
+  return ch;
+}
+
+#ifdef CONFIG_LIBC_LOCALE
+static int vsprintf_put_wstring(FAR struct lib_outstream_s *stream,
+                                FAR const wchar_t *ws, uint16_t flags,
+                                FAR int *width, int prec)
+{
+  char mb[MB_LEN_MAX];
+  mbstate_t ps;
+  size_t size;
+  size_t n;
+  int total_len = 0;
+  int i;
+
+  /* %ls: a wide string, written as multibyte characters.  The precision
+   * limits the bytes, and a character that does not fit is not written in
+   * part.  First count the bytes.
+   */
+
+  memset(&ps, 0, sizeof(ps));
+  for (size = 0, i = 0; ws[i] != L'\0'; i++)
+    {
+      n = wcrtomb(mb, ws[i], &ps);
+      if (n == (size_t)-1)
+        {
+          return -1;
+        }
+
+      if ((flags & FL_PREC) != 0 && size + n > (size_t)prec)
+        {
+          break;
+        }
+
+      size += n;
+    }
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      if (*width > 0 && size < *width)
+        {
+          int pad = *width - size;
+
+          total_len += vsprintf_repeat(stream, ' ', pad);
+          *width -= pad;
+        }
+    }
+
+  memset(&ps, 0, sizeof(ps));
+  for (n = 0, i = 0; n < size; i++)
+    {
+      size_t m = wcrtomb(mb, ws[i], &ps);
+
+      total_len += m;
+      lib_stream_puts(stream, mb, m);
+      n += m;
+    }
+
+  *width = *width >= size ? *width - size : 0;
+
+  return total_len;
+}
+#endif
+
 #ifdef CONFIG_LIBC_PRINTF_PERCENT_N
 /* Store the count of %n at the size of its length modifier */
 
@@ -1091,6 +1325,196 @@ static size_t vsprintf_puthex(FAR struct lib_outstream_s *stream,
 }
 #endif
 
+#ifdef CONFIG_LIBC_PRINT_EXTENSION
+static int vsprintf_pointer_extension(FAR struct lib_outstream_s *stream,
+                                      FAR const IPTR char **fmt,
+                                      unsigned long long x,
+                                      FAR size_t *total_len)
+{
+  unsigned char c = fmt_char(*fmt);
+
+  switch (c)
+    {
+      case 'B':
+        {
+          FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
+
+          *total_len += lib_bsprintf(stream, vaf->fmt, vaf->va);
+          return 1;
+        }
+
+      case 'V':
+        {
+          FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
+#  ifdef va_copy
+          va_list copy;
+
+          va_copy(copy, *vaf->va);
+          *total_len += lib_vsprintf(stream, vaf->fmt, copy);
+          va_end(copy);
+#  else
+          *total_len += lib_vsprintf(stream, vaf->fmt, *vaf->va);
+#  endif
+          return 1;
+        }
+
+      case 'S':
+      case 's':
+        {
+#  ifdef CONFIG_ALLSYMS
+          FAR const struct symtab_s *symbol;
+          FAR void *addr = (FAR void *)(uintptr_t)x;
+          size_t symbolsize;
+          FAR const char *name;
+          size_t namelen;
+
+          symbol = allsyms_findbyvalue(addr, &symbolsize);
+          if (symbol != NULL)
+            {
+              name = symbol->sym_name;
+              namelen = strlen(name);
+
+              *total_len += namelen;
+              lib_stream_puts(stream, name, namelen);
+
+              if (c == 'S')
+                {
+                  *total_len +=
+                    lib_sprintf_internal(stream, "+%#tx/%#zx",
+                                         addr - symbol->sym_value,
+                                         symbolsize);
+                }
+
+              return 1;
+            }
+#  endif
+          break;
+        }
+
+      default:
+        fmt_ungetc(*fmt);
+        break;
+    }
+
+  return 0;
+}
+#endif
+
+static size_t vsprintf_put_integer(FAR struct lib_outstream_s *stream,
+                                   uint16_t flags, FAR char *buf,
+                                   int digits, FAR int *width, int prec)
+{
+  unsigned int len = digits;
+  size_t total_len = 0;
+  int w = *width;
+
+  if ((flags & FL_INT_PREC) != 0)
+    {
+      flags &= ~FL_ZFILL;
+      if (len < prec)
+        {
+          len = prec;
+          if ((flags & FL_ALT_FORM) != 0 && !FL_ALT_IS_HEX(flags))
+            {
+              flags &= ~FL_ALT;
+            }
+        }
+    }
+
+  if ((flags & FL_ALT) != 0)
+    {
+      /* digits is 0 for a value of 0 with a precision of 0: then %#o has
+       * a "0" from the flag, and a hexadecimal value has no prefix.
+       */
+
+      if (digits == 0 ? FL_ALT_IS_HEX(flags) : buf[digits - 1] == '0')
+        {
+          flags &= ~(FL_ALT | FL_ALTHEX | FL_ALTUPP);
+        }
+      else
+        {
+          len += 1;
+          if (FL_ALT_IS_HEX(flags))
+            {
+              len += 1;
+            }
+        }
+    }
+  else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
+    {
+      len += 1;
+    }
+
+  if (len > INT_MAX)
+    {
+      *width = 0;
+      return INT_MAX + 1u;
+    }
+
+  if ((flags & FL_LPAD) == 0)
+    {
+      if ((flags & FL_ZFILL) != 0)
+        {
+          prec = digits;
+          if (len < w)
+            {
+              prec += w - len;
+              len = w;
+            }
+        }
+
+      if (len < w)
+        {
+          total_len += vsprintf_repeat(stream, ' ', w - len);
+          len = w;
+        }
+    }
+
+  *width = len < w ? w - len : 0;
+
+  if ((flags & FL_ALT) != 0)
+    {
+      total_len++;
+      lib_stream_putc(stream, '0');
+      if (FL_ALT_IS_HEX(flags))
+        {
+          int ch = (flags & FL_ALTBIN) != 0 ? 'b' : 'x';
+
+          total_len++;
+          lib_stream_putc(stream,
+                          FL_ALT_FORM != 0 && (flags & FL_ALTUPP) != 0 ?
+                          ch - 0x20 : ch);
+        }
+    }
+  else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
+    {
+      unsigned char z = ' ';
+
+      if ((flags & FL_PLUS) != 0)
+        {
+          z = '+';
+        }
+
+      if ((flags & FL_NEGATIVE) != 0)
+        {
+          z = '-';
+        }
+
+      total_len++;
+      lib_stream_putc(stream, z);
+    }
+
+  if (prec > digits)
+    {
+      total_len += vsprintf_repeat(stream, '0', prec - digits);
+      prec = digits;
+    }
+
+  total_len += vsprintf_putnum(stream, buf, digits);
+
+  return total_len;
+}
+
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                              FAR struct arg_s *arglist, int numargs,
                              FAR const IPTR char *fmt, va_list ap)
@@ -1116,9 +1540,8 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
   FAR const char *pnt;
   size_t size;
-  int ch;
   int star;
-  unsigned int len;
+  int result;
   size_t total_len = 0;
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
@@ -1130,87 +1553,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
   while (total_len <= INT_MAX)
     {
-#ifndef CONFIG_ARCH_ROMGETC
-      FAR const char *start = fmt;
-
-      for (; ; )
+      total_len += vsprintf_scan_literal(stream, &fmt, &c);
+      if (c == '\0')
         {
-          c = fmt_char(fmt);
-          if (c == '\0')
-            {
-#ifdef CONFIG_LIBC_NUMBERED_ARGS
-              if (stream != NULL)
-#endif
-                {
-                  size_t litlen = (fmt - start) - 1;
-
-                  if (litlen > 0)
-                    {
-                      stream_puts(start, litlen, stream);
-                    }
-                }
-
-              goto ret;
-            }
-
-          if (c == '%')
-            {
-              size_t litlen = (fmt - start) - 1;
-
-              c = fmt_char(fmt);
-              if (c != '%')
-                {
-#ifdef CONFIG_LIBC_NUMBERED_ARGS
-                  if (stream != NULL)
-#endif
-                    {
-                      if (litlen > 0)
-                        {
-                          stream_puts(start, litlen, stream);
-                        }
-                    }
-
-                  break;
-                }
-
-#ifdef CONFIG_LIBC_NUMBERED_ARGS
-              if (stream != NULL)
-#endif
-                {
-                  stream_puts(start, litlen + 1, stream);
-                }
-
-              start = fmt;
-            }
+          goto ret;
         }
-#else
-      for (; ; )
-        {
-          c = fmt_char(fmt);
-          if (c == '\0')
-            {
-              goto ret;
-            }
-
-          if (c == '%')
-            {
-              c = fmt_char(fmt);
-              if (c != '%')
-                {
-                  break;
-                }
-            }
-
-#ifdef CONFIG_LIBC_NUMBERED_ARGS
-          if (stream != NULL)
-            {
-              stream_putc(c, stream);
-            }
-#else
-          stream_putc(c, stream);
-#endif
-        }
-#endif
 
       flags = 0;
       width = 0;
@@ -1733,39 +2080,24 @@ put_unavailable:
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
             if ((flags & FL_ARGNUMBER) != 0)
               {
-                ch = (int)arglist->value[argnumber - 1].u;
+                result = vsprintf_put_char(stream, flags,
+                                           arglist->value[argnumber - 1].u,
+                                           &width, buf);
               }
             else
 #endif
               {
-                ch = va_arg(ap, int);
+                result = vsprintf_put_char(stream, flags, va_arg(ap, int),
+                                           &width, buf);
               }
 
-#ifdef CONFIG_LIBC_LOCALE
-            if ((flags & FL_LONG) != 0)
+            if (result < 0)
               {
-                mbstate_t ps;
-
-                /* %lc: a wide character, written as its multibyte
-                 * sequence.
-                 */
-
-                memset(&ps, 0, sizeof(ps));
-                size = wcrtomb(buf, (wchar_t)ch, &ps);
-                if (size == (size_t)-1)
-                  {
-                    return -1;
-                  }
-              }
-            else
-#endif
-              {
-                buf[0] = ch;
-                size = 1;
+                return -1;
               }
 
-            pnt = buf;
-            goto str_lpad;
+            total_len += result;
+            goto tail;
 
           case 'n':
           case 's':
@@ -1800,56 +2132,15 @@ put_unavailable:
 #ifdef CONFIG_LIBC_LOCALE
             else if (c == 's' && (flags & FL_LONG) != 0)
               {
-                FAR const wchar_t *ws = (FAR const wchar_t *)pnt;
-                char mb[MB_LEN_MAX];
-                mbstate_t ps;
-                size_t n;
-                int i;
-
-                /* %ls: a wide string, written as multibyte characters.  The
-                 * precision limits the bytes, and a character that does not
-                 * fit is not written in part.  First count the bytes.
-                 */
-
-                memset(&ps, 0, sizeof(ps));
-                for (size = 0, i = 0; ws[i] != L'\0'; i++)
+                result = vsprintf_put_wstring(stream,
+                                              (FAR const wchar_t *)pnt,
+                                              flags, &width, prec);
+                if (result < 0)
                   {
-                    n = wcrtomb(mb, ws[i], &ps);
-                    if (n == (size_t)-1)
-                      {
-                        return -1;
-                      }
-
-                    if ((flags & FL_PREC) != 0 && size + n > (size_t)prec)
-                      {
-                        break;
-                      }
-
-                    size += n;
+                    return -1;
                   }
 
-                if ((flags & FL_LPAD) == 0)
-                  {
-                    if (width > 0 && size < width)
-                      {
-                        int pad = width - size;
-
-                        stream_repeat(' ', pad, stream);
-                        width -= pad;
-                      }
-                  }
-
-                memset(&ps, 0, sizeof(ps));
-                for (n = 0, i = 0; n < size; i++)
-                  {
-                    size_t m = wcrtomb(mb, ws[i], &ps);
-
-                    stream_puts(mb, m, stream);
-                    n += m;
-                  }
-
-                width = width >= size ? width - size : 0;
-                size = 0;
+                total_len += result;
                 goto tail;
               }
 #endif
@@ -1864,19 +2155,10 @@ put_unavailable:
               }
 
 str_lpad:
-            if ((flags & FL_LPAD) == 0)
-              {
-                if (width > 0 && size < width)
-                  {
-                    int pad = width - size;
-
-                    stream_repeat(' ', pad, stream);
-                    width -= pad;
-                  }
-              }
-
-            stream_puts(pnt, size, stream);
-            width = width >= size ? width - size : 0;
+            total_len += vsprintf_put_field(stream, pnt, size, width,
+                                            flags);
+            width = FL_LPAD != 0 && width > 0 && size < (size_t)width ?
+                    width - size : 0;
             size = 0;
 
             goto tail;
@@ -2060,66 +2342,11 @@ str_lpad:
 
               case 'p':
 #ifdef CONFIG_LIBC_PRINT_EXTENSION
-                c = fmt_char(fmt);
-                switch (c)
+                result = vsprintf_pointer_extension(stream, &fmt, x,
+                                                     &total_len);
+                if (result > 0)
                   {
-                    case 'B':
-                      {
-                        FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
-
-                        total_len += lib_bsprintf(stream, vaf->fmt,
-                                                  vaf->va);
-                        continue;
-                      }
-
-                    case 'V':
-                      {
-                        FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
-#  ifdef va_copy
-                        va_list copy;
-
-                        va_copy(copy, *vaf->va);
-                        total_len += lib_vsprintf(stream, vaf->fmt, copy);
-                        va_end(copy);
-#  else
-                        total_len += lib_vsprintf(stream, vaf->fmt,
-                                                  *vaf->va);
-#  endif
-                        continue;
-                      }
-
-                    case 'S':
-                    case 's':
-                      {
-#  ifdef CONFIG_ALLSYMS
-                        FAR const struct symtab_s *symbol;
-                        FAR void *addr = (FAR void *)(uintptr_t)x;
-                        size_t symbolsize;
-
-                        symbol = allsyms_findbyvalue(addr, &symbolsize);
-                        if (symbol != NULL)
-                          {
-                            pnt = symbol->sym_name;
-                            stream_puts(pnt, strlen(pnt), stream);
-
-                            if (c == 'S')
-                              {
-                                total_len +=
-                                lib_sprintf_internal(stream,
-                                      "+%#tx/%#zx",
-                                      addr - symbol->sym_value,
-                                      symbolsize);
-                              }
-
-                            continue;
-                          }
-#  endif
-                        break;
-                      }
-
-                    default:
-                      fmt_ungetc(fmt);
-                      break;
+                    continue;
                   }
 #endif
 
@@ -2182,106 +2409,8 @@ str_lpad:
           goto put_unavailable;
         }
 
-      len = c;
-
-      if ((flags & FL_INT_PREC) != 0)
-        {
-          flags &= ~FL_ZFILL;
-          if (len < prec)
-            {
-              len = prec;
-              if ((flags & FL_ALT_FORM) != 0 && !FL_ALT_IS_HEX(flags))
-                {
-                  flags &= ~FL_ALT;
-                }
-            }
-        }
-
-      if ((flags & FL_ALT) != 0)
-        {
-          /* c is 0 for a value of 0 with a precision of 0: then %#o has a
-           * "0" from the flag, and a hexadecimal value has no prefix.
-           */
-
-          if (c == 0 ? FL_ALT_IS_HEX(flags) : buf[c - 1] == '0')
-            {
-              flags &= ~(FL_ALT | FL_ALTHEX | FL_ALTUPP);
-            }
-          else
-            {
-              len += 1;
-              if (FL_ALT_IS_HEX(flags))
-                {
-                  len += 1;
-                }
-            }
-        }
-      else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
-        {
-          len += 1;
-        }
-
-      if (len > INT_MAX)
-        {
-          total_len = INT_MAX + 1u;
-          goto ret;
-        }
-
-      if ((flags & FL_LPAD) == 0)
-        {
-          if ((flags & FL_ZFILL) != 0)
-            {
-              prec = c;
-              if (len < width)
-                {
-                  prec += width - len;
-                  len = width;
-                }
-            }
-
-          if (len < width)
-            {
-              stream_repeat(' ', width - len, stream);
-              len = width;
-            }
-        }
-
-      width = (len < width) ? width - len : 0;
-
-      if ((flags & FL_ALT) != 0)
-        {
-          stream_putc('0', stream);
-          if (FL_ALT_IS_HEX(flags))
-            {
-              ch = (flags & FL_ALTBIN) != 0 ? 'b' : 'x';
-              stream_putc(FL_ALT_FORM != 0 && (flags & FL_ALTUPP) != 0 ?
-                          ch - 0x20 : ch, stream);
-            }
-        }
-      else if ((flags & (FL_NEGATIVE | FL_PLUS | FL_SPACE)) != 0)
-        {
-          unsigned char z = ' ';
-
-          if ((flags & FL_PLUS) != 0)
-            {
-              z = '+';
-            }
-
-          if ((flags & FL_NEGATIVE) != 0)
-            {
-              z = '-';
-            }
-
-          stream_putc(z, stream);
-        }
-
-      if (prec > c)
-        {
-          stream_repeat('0', prec - c, stream);
-          prec = c;
-        }
-
-      total_len += vsprintf_putnum(stream, buf, c);
+      total_len += vsprintf_put_integer(stream, flags, buf, c, &width,
+                                        prec);
 
 tail:
 
