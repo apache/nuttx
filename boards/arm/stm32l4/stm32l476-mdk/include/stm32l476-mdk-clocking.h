@@ -2,8 +2,8 @@
  * boards/arm/stm32l4/stm32l476-mdk/include/stm32l476-mdk-clocking.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2016 Motorola Mobility, LLC. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2016 Motorola Mobility, LLC.
  * SPDX-FileContributor: Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without

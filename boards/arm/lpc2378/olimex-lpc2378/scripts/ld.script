@@ -2,8 +2,8 @@
  * boards/arm/lpc2378/olimex-lpc2378/scripts/ld.script
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2010 Rommel Marcelo. All rights reserved.
- * SPDX-FileCopyrightText: 2010, 2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2010 Rommel Marcelo.
+ * SPDX-FileCopyrightText: 2010, 2014 Gregory Nutt.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Rommel Marcelo
  *
