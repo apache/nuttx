@@ -390,6 +390,10 @@ void nxsched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 void nxsched_suspend(FAR struct tcb_s *tcb);
 #endif
 
+#ifdef CONFIG_SCHED_WAITPID
+void nxsched_reaped(pid_t pid);
+#endif
+
 #if defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_SCHED_HAVE_PARENT)
 int  nxsched_waitid(idtype_t idtype, pid_t id, FAR siginfo_t *info,
                     int options);

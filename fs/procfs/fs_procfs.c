@@ -45,6 +45,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/signal.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
@@ -932,6 +933,21 @@ static int procfs_readdir(FAR struct inode *mountpt,
     {
       level0 = (FAR struct procfs_level0_s *)priv;
 
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
+      /* Skip the tasks of the snapshot of opendir() that have ended since:
+       * the walk goes on with the next one, as on Linux.  A task has ended
+       * when kill() does not find it (nxsig_kill_target()): its TCB can
+       * stay in the table after its parent has waited for it.
+       */
+
+      while (priv->index < priv->nentries &&
+             (nxsched_get_tcb(level0->pid[priv->index]) == NULL ||
+              nxsig_kill_target(level0->pid[priv->index]) < 0))
+        {
+          priv->index++;
+        }
+#endif
+
       /* Have we reached the end of the PID information */
 
       index = priv->index;
@@ -1030,16 +1046,9 @@ static int procfs_readdir(FAR struct inode *mountpt,
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
       else
         {
-          /* Verify that the pid still refers to an active task/thread */
+          /* The pid referred to an active task/thread above */
 
           pid_t pid = level0->pid[index];
-          FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
-
-          if (!tcb)
-            {
-              ferr("ERROR: PID %d is no longer valid\n", pid);
-              return -ENOENT;
-            }
 
           /* Save the filename=pid and file type=directory */
 

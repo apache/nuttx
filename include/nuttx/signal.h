@@ -496,6 +496,27 @@ int nxsig_queue(int pid, int signo, const union sigval value);
 int nxsig_kill(pid_t pid, int signo);
 
 /****************************************************************************
+ * Name: nxsig_kill_target
+ *
+ * Description:
+ *   Tell if the process (or thread) pid exists, as kill() sees it.  A
+ *   thread in its exit exists until it leaves its group.  A process that
+ *   its parent has waited for does not exist, also when its TCB is still
+ *   in the table.  A process that has ended and that its parent has not
+ *   waited for yet (a zombie) exists, also when its TCB is gone.
+ *
+ * Input Parameters:
+ *   pid - The process or thread ID
+ *
+ * Returned Value:
+ *   1 if the thread pid runs, 0 if pid exists but ends (a zombie, or a
+ *   thread in its exit), -ESRCH if it does not exist.
+ *
+ ****************************************************************************/
+
+int nxsig_kill_target(pid_t pid);
+
+/****************************************************************************
  * Name: nxsig_kill_foreground
  *
  * Description:

@@ -1676,7 +1676,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
   pid = (pid_t)tmp;
 
   tcb = nxsched_get_tcb(pid);
-  if (tcb == NULL)
+  if (tcb == NULL || nxsig_kill_target(pid) < 0)
     {
       ferr("ERROR: PID %d is no longer valid\n", pid);
       return -ENOENT;
@@ -1987,7 +1987,7 @@ static int proc_opendir(FAR const char *relpath,
   pid = (pid_t)tmp;
 
   tcb = nxsched_get_tcb(pid);
-  if (tcb == NULL)
+  if (tcb == NULL || nxsig_kill_target(pid) < 0)
     {
       ferr("ERROR: PID %d is not valid\n", pid);
       return -ENOENT;
@@ -2225,7 +2225,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
   pid = (pid_t)tmp;
 
   tcb = nxsched_get_tcb(pid);
-  if (tcb == NULL)
+  if (tcb == NULL || nxsig_kill_target(pid) < 0)
     {
       ferr("ERROR: PID %d is no longer valid\n", pid);
       return -ENOENT;

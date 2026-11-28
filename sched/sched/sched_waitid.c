@@ -105,6 +105,7 @@ static void report_child(FAR struct tcb_s *rtcb,
     {
       if (event == CHILD_FLAG_EXITED)
         {
+          nxsched_reaped(child->ch_pid);
           group_remove_child(rtcb->group, child->ch_pid);
           group_free_child(child);
         }
@@ -376,6 +377,11 @@ static int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, pid_t id,
 
       if (!retains && child_selected(info, idtype, id, options))
         {
+          if (info->si_code == CLD_EXITED && (options & WNOWAIT) == 0)
+            {
+              nxsched_reaped(info->si_pid);
+            }
+
           return OK;
         }
     }

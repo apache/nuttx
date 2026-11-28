@@ -46,6 +46,33 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsched_reaped
+ *
+ * Description:
+ *   A wait has reported the exit of the process pid.  If its TCB is still
+ *   in the table (in its exit), mark it: kill() does not find it any more.
+ *   The caller is in a critical section.
+ *
+ * Input Parameters:
+ *   pid - The process ID that the wait reported
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsched_reaped(pid_t pid)
+{
+  FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
+
+  if (tcb != NULL && (atomic_read(&tcb->shared_flags) &
+                      TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      atomic_or(&tcb->shared_flags, TCB_FLAG_REAPED);
+    }
+}
+
+/****************************************************************************
  * Name: nxsched_waitpid
  *
  * Description:
@@ -227,6 +254,11 @@ pid_t nxsched_waitpid(pid_t pid, FAR int *stat_loc, int options)
             }
 
           group_del_waiter(group);
+
+          if (ret >= 0)
+            {
+              nxsched_reaped(pid);
+            }
 
           if (ret < 0)
             {

@@ -127,6 +127,7 @@
 #define TCB_FLAG_DETACHED          (1 << 5)                      /* Bit 5: Pthread detached */
 #define TCB_FLAG_FORCED_CANCEL     (1 << 6)                      /* Bit 6: Pthread cancel is forced */
 #define TCB_FLAG_JOIN_COMPLETED    (1 << 7)                      /* Bit 7: Pthread join completed */
+#define TCB_FLAG_REAPED            (1 << 8)                      /* Bit 8: Exit waited for by parent */
 
 /* Values for struct task_group tg_flags */
 
