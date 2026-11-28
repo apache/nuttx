@@ -3,12 +3,12 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2018 Gregory Nutt
+ * SPDX-FileCopyrightText: 2013-2017 Peter Andersson
+ * (pelleplutt1976@gmail.com)
  *
  * This is a port of version 0.3.7 of SPIFFS by Peter Andersion.  That
  * version was originally released under the MIT license but is here re-
  * released under the NuttX BSD license.
- *
- *   Copyright (c) 2013-2017 Peter Andersson (pelleplutt1976@gmail.com)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
