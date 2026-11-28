@@ -31,6 +31,20 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <assert.h>
+#include <limits.h>
+#include <net/if.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+#include <termios.h>
+
+#include <nuttx/audio/audio.h>
+#include <nuttx/drivers/rpmsgdev.h>
+#include <nuttx/input/mouse.h>
+#include <nuttx/mtd/mtd.h>
+#include <nuttx/net/ioctl.h>
+#include <nuttx/power/battery_ioctl.h>
+#include <nuttx/video/fb.h>
 
 #include "inode/inode.h"
 #include "vfs.h"
@@ -38,6 +52,20 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ioctl_arglen_add
+ ****************************************************************************/
+
+static ssize_t ioctl_arglen_add(size_t header, size_t data)
+{
+  if (data > SSIZE_MAX - header)
+    {
+      return -EOVERFLOW;
+    }
+
+  return header + data;
+}
 
 /****************************************************************************
  * Name: file_vioctl
@@ -256,6 +284,150 @@ static int nx_vioctl(int fd, int req, va_list ap)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ioctl_arglen
+ *
+ * Description:
+ *   Calculate the size of a contiguous device ioctl argument buffer.
+ *
+ * Input Parameters:
+ *   cmd - The ioctl command
+ *   arg - The argument at the device ioctl entry point
+ *
+ * Returned Value:
+ *   Positive buffer size, zero for a value argument, or a negated errno.
+ *
+ ****************************************************************************/
+
+ssize_t ioctl_arglen(int cmd, unsigned long arg)
+{
+  switch (cmd)
+    {
+      case FIONBIO:
+      case FIONWRITE:
+      case FIONREAD:
+      case FIONSPACE:
+      case FBIOGET_POWER:
+      case BATIOC_CURRENT:
+      case BATIOC_VOLTAGE:
+      case BATIOC_TEMPERATURE:
+      case BATIOC_INPUT_CURRENT:
+      case BATIOC_STATE:
+      case BATIOC_CAPACITY:
+      case BATIOC_CHIPID:
+      case BATIOC_GET_PROTOCOL:
+        return sizeof(int);
+
+      case BATIOC_ONLINE:
+        return sizeof(bool);
+
+      case FIOC_FILEPATH:
+        return PATH_MAX;
+
+      case TUNSETIFF:
+      case TUNGETIFF:
+        return sizeof(struct ifreq);
+
+      case FBIOSET_POWER:
+      case TCDRN:
+      case TCFLSH:
+      case MSIOC_GRAB:
+      case BIOC_PROBE:
+      case BIOC_EJECT:
+      case BIOC_LLFORMAT:
+      case BIOC_ALLOCSECT:
+      case BIOC_FREESECT:
+      case BIOC_FLUSH:
+      case MTDIOC_BULKERASE:
+        return 0;
+
+      case TCGETS:
+      case TCSETS:
+        return sizeof(struct termios);
+
+      case FIOC_SETLK:
+      case FIOC_GETLK:
+      case FIOC_SETLKW:
+        return sizeof(struct flock);
+
+      case BIOC_XIPBASE:
+        return sizeof(uintptr_t);
+
+      case BIOC_PARTINFO:
+        return sizeof(struct partition_info_s);
+
+      case BIOC_BLKSSZGET:
+        return sizeof(blksize_t);
+
+      case MTDIOC_ERASESTATE:
+        return sizeof(uint8_t);
+
+      case MTDIOC_PROTECT:
+      case MTDIOC_UNPROTECT:
+        return sizeof(struct mtd_protect_s);
+
+      case BATIOC_OPERATE:
+        return sizeof(struct batio_operate_msg_s);
+
+      case MSIOC_VENDOR:
+        {
+          FAR const struct mouse_vendor_cmd_s *req =
+            (FAR const struct mouse_vendor_cmd_s *)(uintptr_t)arg;
+
+          if (req == NULL)
+            {
+              return -EINVAL;
+            }
+
+          return ioctl_arglen_add(sizeof(*req), req->len);
+        }
+
+#ifdef CONFIG_DEV_RPMSG
+      case RPMSGDEV_PRIVATE_IOCTL:
+        {
+          FAR const struct rpmsgdev_private_ioctl *req =
+            (FAR const struct rpmsgdev_private_ioctl *)(uintptr_t)arg;
+
+          if (req == NULL)
+            {
+              return -EINVAL;
+            }
+
+          return ioctl_arglen_add(sizeof(*req), req->len);
+        }
+#endif
+
+#ifdef CONFIG_AUDIO
+      case AUDIOIOC_HWRESET:
+        return 0;
+
+      case AUDIOIOC_GETBUFFERINFO:
+      case AUDIOIOC_SETBUFFERINFO:
+        return sizeof(struct ap_buffer_info_s);
+
+      case AUDIOIOC_GETAUDIOINFO:
+        return sizeof(struct audio_info_s);
+
+      case AUDIOIOC_SETPARAMTER:
+        {
+          size_t len;
+
+          if (arg == 0)
+            {
+              return -EINVAL;
+            }
+
+          len = strnlen((FAR const char *)(uintptr_t)arg, SSIZE_MAX);
+          return ioctl_arglen_add(1, len);
+        }
+
+#endif
+
+      default:
+        return -ENOTTY;
+    }
+}
 
 /****************************************************************************
  * Name: file_ioctl

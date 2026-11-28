@@ -52,6 +52,37 @@ needs to implement. This also allows the file system to be free from worry
 about the device driver implementations for storage devices, as they also
 expose a unified way of accessing the underlying devices.
 
+Ioctl Argument Sizes
+--------------------
+
+``ssize_t ioctl_arglen(int cmd, unsigned long arg)`` is declared in
+``<nuttx/fs/ioctl.h>`` and implemented in ``fs/vfs/fs_ioctl.c``.  It describes
+the argument received at a device ioctl entry point, excluding any transport
+header:
+
+* A positive result is the number of bytes in the contiguous buffer pointed
+  to by ``arg``.
+* Zero means the argument is an immediate value or is unused.  No argument
+  buffer should be copied.
+* A negative result is a negated errno: ``-ENOTTY`` for an unsupported
+  command, ``-EINVAL`` for a missing variable-size header or string, or
+  ``-EOVERFLOW`` when the size cannot be represented by ``ssize_t``.
+
+Variable-size commands require an accessible input header containing the
+length, or a NUL-terminated string.  The helper checks size arithmetic; it
+does not validate pointer accessibility, buffer capacity, or the availability
+of an ioctl on a particular device.  The caller must provide the complete
+input and output buffer described by the command.
+
+Requests needing nested-pointer marshalling, such as configdata, SMART
+sector I/O and MMC commands, remain transport-specific.  Unknown
+driver-private commands are not inferred from their command number.
+
+RPMSG clients call ``ioctl_arglen()`` directly for flat
+arguments, while retaining local operations and specialized handling for
+non-flat requests.  The remote device remains responsible for accepting
+or rejecting the command.
+
 How VFS works
 -------------
 

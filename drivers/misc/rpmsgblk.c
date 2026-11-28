@@ -95,7 +95,7 @@ static ssize_t rpmsgblk_write(FAR struct inode *inode,
                               blkcnt_t start_sector, unsigned int nsectors);
 static int     rpmsgblk_geometry(FAR struct inode *inode,
                                  FAR struct geometry *geometry);
-static ssize_t rpmsgblk_ioctl_arglen(int cmd);
+static ssize_t rpmsgblk_ioctl_arglen(int cmd, unsigned long arg);
 static int     rpmsgblk_ioctl(FAR struct inode *inode, int cmd,
                               unsigned long arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -500,19 +500,11 @@ out:
  *
  ****************************************************************************/
 
-static ssize_t rpmsgblk_ioctl_arglen(int cmd)
+static ssize_t rpmsgblk_ioctl_arglen(int cmd, unsigned long arg)
 {
   switch (cmd)
     {
-      case BIOC_XIPBASE:
-        return sizeof(uintptr_t);
-      case BIOC_PROBE:
-      case BIOC_EJECT:
-      case BIOC_LLFORMAT:
       case BIOC_GETFORMAT:
-      case BIOC_ALLOCSECT:
-      case BIOC_FREESECT:
-      case BIOC_FLUSH:
         return 0;
       case BIOC_READSECT:
       case BIOC_WRITESECT:
@@ -521,12 +513,8 @@ static ssize_t rpmsgblk_ioctl_arglen(int cmd)
         return sizeof(struct mtd_smart_procfs_data_s);
       case BIOC_DEBUGCMD:
         return sizeof(struct mtd_smart_debug_data_s);
-      case BIOC_PARTINFO:
-        return sizeof(struct partition_info_s);
-      case BIOC_BLKSSZGET:
-        return sizeof(blksize_t);
       default:
-        return -ENOTTY;
+        return ioctl_arglen(cmd, arg);
     }
 }
 
@@ -688,13 +676,11 @@ static int rpmsgblk_default_ioctl(FAR struct inode *inode, int cmd,
 
   /* Call our internal routine to perform the ioctl */
 
-  arglen = rpmsgblk_ioctl_arglen(cmd);
+  arglen = rpmsgblk_ioctl_arglen(cmd, arg);
   if (arglen < 0)
     {
       return arglen;
     }
-
-  msglen = sizeof(*msg) + arglen - 1;
 
   msg = rpmsgblk_get_tx_payload_buffer(priv, &space);
   if (msg == NULL)
@@ -702,7 +688,14 @@ static int rpmsgblk_default_ioctl(FAR struct inode *inode, int cmd,
       return -ENOMEM;
     }
 
-  DEBUGASSERT(space >= msglen);
+  if (space < sizeof(*msg) - 1 ||
+      arglen > space - (sizeof(*msg) - 1))
+    {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
+      return -EMSGSIZE;
+    }
+
+  msglen = sizeof(*msg) - 1 + arglen;
 
   msg->request = cmd;
   msg->arg     = arg;

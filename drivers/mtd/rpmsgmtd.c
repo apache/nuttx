@@ -93,7 +93,6 @@ static ssize_t rpmsgmtd_read(FAR struct mtd_dev_s *dev, off_t offset,
 static ssize_t rpmsgmtd_write(FAR struct mtd_dev_s *dev, off_t offset,
                               size_t nbytes, FAR const uint8_t *buffer);
 #endif
-static ssize_t rpmsgmtd_ioctl_arglen(int cmd);
 static int     rpmsgmtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
                               unsigned long arg);
 
@@ -574,33 +573,6 @@ out:
 #endif
 
 /****************************************************************************
- * Name: rpmsgmtd_ioctl_arglen
- *
- * Description:
- *   Get rpmsg mtd ioctl argument length according to the command
- *
- * Parameters:
- *   cmd - the ioctl command
- *
- * Returned Values:
- *   0        - ioctl command not support
- *   positive - the argument length
- *
- ****************************************************************************/
-
-static ssize_t rpmsgmtd_ioctl_arglen(int cmd)
-{
-  switch (cmd)
-    {
-      case MTDIOC_PROTECT:
-      case MTDIOC_UNPROTECT:
-        return sizeof(struct mtd_protect_s);
-      default:
-        return -ENOTTY;
-    }
-}
-
-/****************************************************************************
  * Name: rpmsgmtd_ioctl
  *
  * Description:
@@ -636,19 +608,26 @@ static int rpmsgmtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 
   /* Call our internal routine to perform the ioctl */
 
-  arglen = rpmsgmtd_ioctl_arglen(cmd);
+  arglen = ioctl_arglen(cmd, arg);
   if (arglen < 0)
     {
       return arglen;
     }
-
-  msglen = sizeof(*msg) + arglen - 1;
 
   msg = rpmsgmtd_get_tx_payload_buffer(priv, &space);
   if (msg == NULL)
     {
       return -ENOMEM;
     }
+
+  if (space < sizeof(*msg) - 1 ||
+      arglen > space - (sizeof(*msg) - 1))
+    {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
+      return -EMSGSIZE;
+    }
+
+  msglen = sizeof(*msg) - 1 + arglen;
 
   msg->request = cmd;
   msg->arg     = arg;
