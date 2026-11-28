@@ -28,6 +28,7 @@
 
 #include <nuttx/debug.h>
 #include <nuttx/irq.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/pgalloc.h>
 
 #include "x86_64_internal.h"

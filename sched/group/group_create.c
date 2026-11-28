@@ -31,6 +31,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>

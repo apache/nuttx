@@ -28,6 +28,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/kmalloc.h>
 
 #include <sys/mman.h>

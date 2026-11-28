@@ -38,6 +38,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/timers/ptp_clock.h>
+#include <nuttx/wqueue.h>
 
 #include "clock/clock.h"
 #ifdef CONFIG_CLOCK_TIMEKEEPING
@@ -66,7 +67,8 @@ static void nxclock_set_realtime(FAR const struct timespec *tp)
   struct timespec bias;
   irqstate_t flags;
 #  ifdef CONFIG_CLOCK_ADJTIME
-  const struct timeval zerodelta = {
+  const struct timeval zerodelta =
+  {
     0, 0
   };
 #  endif

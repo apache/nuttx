@@ -38,6 +38,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/wqueue.h>
 
 #include "riscv_internal.h"
 

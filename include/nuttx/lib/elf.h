@@ -33,7 +33,6 @@
 #include <stdbool.h>
 #include <elf.h>
 
-#include <nuttx/addrenv.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/list.h>
 
@@ -108,6 +107,10 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+struct addrenv_s; /* Forward definition to avoid including addrenv.h */
+#endif
 
 /* This is the type of the function that is called to uninitialize the
  * the loaded module.  This may mean, for example, un-registering a device
@@ -333,8 +336,8 @@ struct mod_loadinfo_s
    */
 
 #ifdef CONFIG_ARCH_ADDRENV
-  FAR addrenv_t     *addrenv;    /* Address environment */
-  FAR addrenv_t     *oldenv;     /* Saved address environment */
+  FAR struct addrenv_s *addrenv; /* Address environment */
+  FAR struct addrenv_s *oldenv;  /* Saved address environment */
 #endif
 };
 

@@ -34,6 +34,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/addrenv.h>
 
 #include "sched/sched.h"
 #include "arm64_internal.h"
@@ -126,6 +127,7 @@ size_t arm64_stack_check(void *stackbase, size_t nbytes)
           for (j = 0; j < 64; j++)
             {
               int ch;
+
               if (*ptr++ == STACK_COLOR)
                 {
                   ch = '.';

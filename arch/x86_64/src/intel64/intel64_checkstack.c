@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/addrenv.h>
+
 #include "sched/sched.h"
 #include "x86_64_internal.h"
 

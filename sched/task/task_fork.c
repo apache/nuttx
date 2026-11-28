@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
 #include <nuttx/semaphore.h>

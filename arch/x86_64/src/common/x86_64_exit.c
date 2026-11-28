@@ -31,6 +31,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/addrenv.h>
 
 #include "task/task.h"
 #include "sched/sched.h"

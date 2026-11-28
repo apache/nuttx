@@ -35,6 +35,7 @@
 #include "arm64_internal.h"
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
+#  include <nuttx/addrenv.h>
 #  include <nuttx/pgalloc.h>
 #  include "pgalloc.h"
 #endif

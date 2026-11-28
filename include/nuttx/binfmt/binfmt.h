@@ -86,8 +86,8 @@ struct binary_s
    *   used to manage the tasks address space.
    */
 
-  FAR addrenv_t *addrenv;              /* Address environment */
-  FAR addrenv_t *oldenv;               /* Saved address environment */
+  FAR struct addrenv_s *addrenv;       /* Address environment */
+  FAR struct addrenv_s *oldenv;        /* Saved address environment */
 #endif
 
   size_t mapsize;                      /* Size of the mapped address region (needed for munmap) */
