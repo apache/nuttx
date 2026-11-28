@@ -158,7 +158,7 @@ void pm_idle(pm_idle_handler_t handler)
   newstate = pm_checkstate(domain);
 
   ret = pm_changestate(domain, newstate);
-  if (ret != OK)
+  if (ret < 0)
     {
       newstate = oldstate;
     }
@@ -185,7 +185,7 @@ void pm_idle(pm_idle_handler_t handler)
     {
       systemstate = pm_checkstate(PM_IDLE_DOMAIN);
       ret         = pm_changestate(PM_IDLE_DOMAIN, systemstate);
-      if (ret != OK)
+      if (ret < 0)
         {
           systemstate = PM_NORMAL;
         }
@@ -241,7 +241,7 @@ void pm_idle(pm_idle_handler_t handler)
 
   newstate = pm_checkstate(PM_IDLE_DOMAIN);
   ret      = pm_changestate(PM_IDLE_DOMAIN, newstate);
-  if (ret != OK)
+  if (ret < 0)
     {
       newstate = PM_NORMAL;
     }
