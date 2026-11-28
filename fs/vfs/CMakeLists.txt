@@ -23,6 +23,7 @@
 set(SRCS
     fs_chstat.c
     fs_close.c
+    fs_cwd.c
     fs_dup.c
     fs_dup2.c
     fs_dup3.c

@@ -15562,7 +15562,6 @@ libs/libc/uio/lib_pwritev.c yamamoto@midokura.com alin.jerpelea@sony.com
 libs/libc/unistd/Kconfig xiaoxiang@xiaomi.com anchao.archer@bytedance.com code@bje.id.au anchao@xiaomi.com
 libs/libc/unistd/lib_access.c dongjiuzhu1@xiaomi.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com chenrun1@xiaomi.com
 libs/libc/unistd/lib_alarm.c liuhaitao@xiaomi.com xiaoxiang@xiaomi.com abdelatif.guettouche@gmail.com alin.jerpelea@sony.com gustavo.nihei@espressif.com
-libs/libc/unistd/lib_chdir.c xiaoxiang@xiaomi.com alin.jerpelea@sony.com anchao@lixiang.com anjiahao@xiaomi.com
 libs/libc/unistd/lib_confstr.c p-szafonimateusz@xiaomi.com
 libs/libc/unistd/lib_crypt.c chenzhijia@xiaomi.com
 libs/libc/unistd/lib_crypt_r.c chenzhijia@xiaomi.com
@@ -15570,7 +15569,6 @@ libs/libc/unistd/lib_daemon.c xiaoxiang@xiaomi.com alin.jerpelea@sony.com 592300
 libs/libc/unistd/lib_execl.c xiaoxiang@xiaomi.com alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com anchao@pinecone.net
 libs/libc/unistd/lib_execle.c xiaoxiang@xiaomi.com alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com
 libs/libc/unistd/lib_execv.c xiaoxiang@xiaomi.com alin.jerpelea@sony.com
-libs/libc/unistd/lib_fchdir.c dongjiuzhu1@xiaomi.com chenrun1@xiaomi.com anchao@lixiang.com alin.jerpelea@sony.com
 libs/libc/unistd/lib_fchownat.c dongjiuzhu1@xiaomi.com chenrun1@xiaomi.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 libs/libc/unistd/lib_flock.c zhanghongyu@xiaomi.com alin.jerpelea@sony.com
 libs/libc/unistd/lib_fork.c guoshichao@xiaomi.com liwenxiang1@xiaomi.com alin.jerpelea@sony.com
@@ -15605,7 +15603,6 @@ libs/libc/unistd/lib_nice.c xiaoxiang@xiaomi.com alin.jerpelea@sony.com
 libs/libc/unistd/lib_pathconf.c xiaoxiang@xiaomi.com dongjiuzhu1@xiaomi.com 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com
 libs/libc/unistd/lib_posix_fallocate.c xiaoxiang@xiaomi.com alin.jerpelea@sony.com
 libs/libc/unistd/lib_readlinkat.c dongjiuzhu1@xiaomi.com chenrun1@xiaomi.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-libs/libc/unistd/lib_restoredir.c xiaoxiang@xiaomi.com alin.jerpelea@sony.com anchao@xiaomi.com
 libs/libc/unistd/lib_setegid.c mijung@gmx.net fangxinyong@xiaomi.com alin.jerpelea@sony.com
 libs/libc/unistd/lib_seteuid.c mijung@gmx.net fangxinyong@xiaomi.com alin.jerpelea@sony.com
 libs/libc/unistd/lib_setgid.c mijung@gmx.net alin.jerpelea@sony.com

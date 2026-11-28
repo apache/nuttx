@@ -32,6 +32,8 @@
 #include <string.h>
 #include <limits.h>
 
+#include <nuttx/lib/lib.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -39,19 +41,20 @@
  ****************************************************************************/
 
 static int
-call_nftw(FAR char *path, nftw_cb_t fn, int flags, int base,
+call_nftw(FAR char *path, size_t off, nftw_cb_t fn, int flags, int base,
           int level, FAR const struct stat *buf, int info)
 {
   struct FTW ftw =
   {
-    base, level
+    base - off, level
   };
 
   int r;
 
-#ifndef CONFIG_DISABLE_ENVIRON
   if (flags & FTW_CHDIR)
     {
+      /* The directory of the object.  The path is absolute: see nftw() */
+
       if (base > 1)
         {
           path[base - 1] = '\0';
@@ -68,22 +71,13 @@ call_nftw(FAR char *path, nftw_cb_t fn, int flags, int base,
           return r;
         }
     }
-#endif
 
-  r = fn(path, buf, info, &ftw);
-
-#ifndef CONFIG_DISABLE_ENVIRON
-  if (flags & FTW_CHDIR)
-    {
-      lib_restoredir();
-    }
-#endif
-
-  return r;
+  return fn(path + off, buf, info, &ftw);
 }
 
 static int
-do_nftw(FAR char *path, nftw_cb_t fn, int fdlimit, int flags, int level)
+do_nftw(FAR char *path, size_t off, nftw_cb_t fn, int fdlimit, int flags,
+        int level)
 {
   FAR DIR *dir = NULL;
   struct stat buf;
@@ -171,7 +165,7 @@ do_nftw(FAR char *path, nftw_cb_t fn, int fdlimit, int flags, int level)
 
   if (!(flags & FTW_DEPTH))
     {
-      r = call_nftw(path, fn, flags, base, level, &buf, info);
+      r = call_nftw(path, off, fn, flags, base, level, &buf, info);
       if (r)
         {
           return r;
@@ -204,7 +198,7 @@ do_nftw(FAR char *path, nftw_cb_t fn, int fdlimit, int flags, int level)
             }
 
           strlcpy(path + j, de->d_name, PATH_MAX - j);
-          r = do_nftw(path, fn, fdlimit - 1, flags, level + 1);
+          r = do_nftw(path, off, fn, fdlimit - 1, flags, level + 1);
           if (r)
             {
               closedir(dir);
@@ -218,7 +212,7 @@ do_nftw(FAR char *path, nftw_cb_t fn, int fdlimit, int flags, int level)
 
   if (flags & FTW_DEPTH)
     {
-      r = call_nftw(path, fn, flags, base, level, &buf, info);
+      r = call_nftw(path, off, fn, flags, base, level, &buf, info);
       if (r)
         {
           return r;
@@ -235,8 +229,59 @@ do_nftw(FAR char *path, nftw_cb_t fn, int fdlimit, int flags, int level)
 int nftw(FAR const char *path, nftw_cb_t fn, int fdlimit, int flags)
 {
   char pathbuf[PATH_MAX + 1];
+  FAR char *cwd = NULL;
+  size_t off = 0;
+  int r;
 
-  strlcpy(pathbuf, path, sizeof(pathbuf));
+  if (flags & FTW_CHDIR)
+    {
+      /* The walk changes the current directory and goes back to it at the
+       * end.  A relative path gets the current directory in front of it.
+       */
 
-  return do_nftw(pathbuf, fn, fdlimit, flags, 0);
+      cwd = lib_get_tempbuffer(PATH_MAX);
+      if (cwd == NULL)
+        {
+          set_errno(ENOMEM);
+          return -1;
+        }
+
+      if (getcwd(cwd, PATH_MAX) == NULL)
+        {
+          lib_put_tempbuffer(cwd);
+          return -1;
+        }
+
+      if (path[0] != '/' && path[0] != '\0')
+        {
+          off = strlcpy(pathbuf, cwd, sizeof(pathbuf));
+          if (off > 1)
+            {
+              pathbuf[off++] = '/';
+            }
+        }
+    }
+
+  if (strlcpy(pathbuf + off, path, sizeof(pathbuf) - off) >=
+      sizeof(pathbuf) - off)
+    {
+      set_errno(ENAMETOOLONG);
+      r = -1;
+    }
+  else
+    {
+      r = do_nftw(pathbuf, off, fn, fdlimit, flags, 0);
+    }
+
+  if (cwd != NULL)
+    {
+      if (chdir(cwd) < 0 && r == 0)
+        {
+          r = -1;
+        }
+
+      lib_put_tempbuffer(cwd);
+    }
+
+  return r;
 }

@@ -114,17 +114,13 @@ int daemon(int nochdir, int noclose)
   setsid();
 #endif
 
-#ifndef CONFIG_DISABLE_ENVIRON
   if (nochdir == 0)
     {
-      int ret = chdir("/");
-
-      if (ret < 0)
+      if (chdir("/") < 0)
         {
           return -1;  /* chdir() will set the errno variable */
         }
     }
-#endif
 
   if (noclose == 0)
     {

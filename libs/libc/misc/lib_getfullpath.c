@@ -74,20 +74,14 @@ int lib_getfullpath(int dirfd, FAR const char *path,
     {
       /* The dirfd is the special value AT_FDCWD, then pathname is
        * interpreted relative to the current working directory of the
-       * calling process.
+       * calling process: the kernel does it with the relative path.
        */
 
-      FAR char *pwd = "";
-
-#ifndef CONFIG_DISABLE_ENVIRON
-      pwd = getenv("PWD");
-      if (pwd == NULL)
+      if (strlcpy(fullpath, path, fulllen) >= fulllen)
         {
-          pwd = CONFIG_LIBC_HOMEDIR;
+          return -ENAMETOOLONG;
         }
-#endif
 
-      snprintf(fullpath, fulllen, "%s/%s", pwd, path);
       return 0;
     }
   else

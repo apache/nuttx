@@ -192,6 +192,20 @@ config FS_CHROOT
 		root.  When SCHED_USER_IDENTITY is enabled, chroot() requires
 		effective UID 0.
 
+config FS_CWD_TRACKING
+	bool "Follow rename(), rmdir() and umount() of a current directory"
+	default !DEFAULT_SMALL
+	---help---
+		The kernel keeps the current directory of a task group as a path.
+		With this option, rename() of the directory or of a directory
+		above it gives the current directory the new name, rmdir() of it
+		makes getcwd() and relative paths fail with ENOENT, and umount()
+		of a file system that holds it fails with EBUSY.  Without it, the
+		current directory keeps its path: after rename() relative paths
+		use the old name, and after rmdir() and mkdir() of the same name
+		they use the new directory.  The option costs 1 to 2 KiB of code.
+		See Documentation/os/filesystem/current_directory.rst.
+
 config FS_PERMISSION
 	bool "Enable UNIX Filesystem Permission Support"
 	default n

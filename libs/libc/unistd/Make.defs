@@ -36,7 +36,7 @@ CSRCS += lib_domainname.c
 CSRCS += lib_fchownat.c lib_linkat.c lib_readlinkat.c lib_symlinkat.c
 CSRCS += lib_unlinkat.c lib_usleep.c lib_getpgrp.c lib_setpgrp.c
 CSRCS += lib_lockf.c lib_flock.c lib_getpass.c
-CSRCS += lib_chdir.c lib_fchdir.c lib_confstr.c lib_ulimit.c
+CSRCS += lib_confstr.c lib_ulimit.c
 
 # With process groups, the kernel has getpgid(), getsid(), setpgid() and
 # setsid().
@@ -63,10 +63,6 @@ else
 ifeq ($(CONFIG_SCHED_NGROUPS),0)
 CSRCS += lib_getgroups.c lib_setgroups.c
 endif
-endif
-
-ifneq ($(CONFIG_DISABLE_ENVIRON),y)
-CSRCS += lib_restoredir.c
 endif
 
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)

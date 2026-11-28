@@ -627,5 +627,6 @@ array in ``fs/mount/fs_mount.c``.
 .. toctree::
    :maxdepth: 1
 
+   current_directory.rst
    file_descriptors.rst
    file_permission.rst
