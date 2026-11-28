@@ -285,6 +285,7 @@ struct stm32_ep_s
   uint8_t                halted:1;      /* true: Endpoint feature halted */
   uint8_t                txbusy:1;      /* true: TX endpoint FIFO full */
   uint8_t                txnullpkt:1;   /* Null packet needed at end of transfer */
+  uint8_t                rxpending:1;   /* 1: OUT data in PMA, but no read requests */
 };
 
 struct stm32_usbdev_s
@@ -305,7 +306,6 @@ struct stm32_usbdev_s
   uint8_t                ep0state;      /* State of EP0 (see enum stm32_ep0state_e) */
   uint8_t                rsmstate;      /* Resume state (see enum stm32_rsmstate_e) */
   uint8_t                nesofs;        /* ESOF counter (for resume support) */
-  uint8_t                rxpending:1;   /* 1: OUT data in PMA, but no read requests */
   uint8_t                selfpowered:1; /* 1: Device is self powered */
   uint8_t                epavail;       /* Bitset of available endpoints */
   uint16_t               bufavail;      /* Bitset of available buffers */
@@ -1614,8 +1614,8 @@ static void stm32_epdone(struct stm32_usbdev_s *priv, uint8_t epno)
            * the transaction until it succeeds."
            */
 
-          priv->rxstatus  = USB_EPR_STATRX_NAK;
-          priv->rxpending = true;
+          priv->rxstatus    = USB_EPR_STATRX_NAK;
+          privep->rxpending = true;
         }
 
       /* Clear the interrupt status and set the new RX status */
@@ -3042,7 +3042,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
       /* This there a incoming data pending the availability of a request? */
 
-      if (priv->rxpending)
+      if (privep->rxpending)
         {
           /* Set STAT_RX bits to '11' in the USB_EPnR, enabling further
            * transactions. "While the STAT_RX bits are equal to '10'
@@ -3056,7 +3056,7 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
           /* Data is no longer pending */
 
-          priv->rxpending = false;
+          privep->rxpending = false;
         }
     }
 
@@ -3516,7 +3516,6 @@ static void stm32_reset(struct stm32_usbdev_s *priv)
 
   priv->ep0state  = EP0STATE_IDLE;
   priv->rsmstate  = RSMSTATE_IDLE;
-  priv->rxpending = false;
 
   /* Reset endpoints */
 
@@ -3540,6 +3539,7 @@ static void stm32_reset(struct stm32_usbdev_s *priv)
       privep->halted    = false;
       privep->txbusy    = false;
       privep->txnullpkt = false;
+      privep->rxpending = false;
     }
 
   /* Re-configure the USB controller in its initial, unconnected state */
