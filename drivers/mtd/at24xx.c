@@ -2,8 +2,8 @@
  * drivers/mtd/at24xx.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2013, 2016 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2011 Li Zhuoyi. All rights reserved.
+ * SPDX-FileCopyrightText: 2013, 2016 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2011 Li Zhuoyi.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
