@@ -31,6 +31,7 @@
 #include <assert.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/syslog/syslog.h>
 
@@ -186,6 +187,9 @@ void xtensa_user_panic(int exccause, uint32_t *regs)
 
   _alert("User Exception: EXCCAUSE=%04x task: %s\n",
          exccause, get_task_name(running_task()));
+
+  _alert("Original exception context:\n");
+  up_dump_register(regs);
 
   PANIC_WITH_REGS("user panic", regs); /* Should not return */
   for (; ; );
