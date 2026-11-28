@@ -184,6 +184,34 @@ remove_symbol_prefix() {
     done < <($READELF -W -S "$input" | awk '/^\s*\[[0-9]+/{print $2, $1}')
 }
 
+# Extract every member of a static library to its own file.  ar x
+# overwrites members that share a name, so number the duplicates as
+# they are extracted; the archive is rebuilt with the same names in
+# the original order.
+
+extract_lib_files() {
+    local lib="$1"
+    local path="$2"
+    local file
+    local count
+    local instances
+
+    cd "$path" || return
+    for file in $(ar t "$lib" | sort | uniq -c | awk '{print $2}'); do
+        instances=$(ar t "$lib" | grep -c "^$file$")
+        if [ "$instances" -eq 1 ]; then
+            ar xN 1 "$lib" "$file"
+        else
+            for ((count = 1; count <= instances; count++)); do
+                ar xN $count "$lib" "$file"
+                mv "$file" "${file}.${count}"
+            done
+        fi
+    done
+
+    cd - || return
+}
+
 # Handle all file
 for input in "${inputs[@]}"; do
     if [ "$is_output_dir" -eq 1 ]; then
@@ -197,20 +225,32 @@ for input in "${inputs[@]}"; do
         echo "[$(basename "$input")] lib Processing $input -> $final_output"
         temp_dir=$(mktemp -d)
         lib=$(realpath "$input")
-        cd "$temp_dir"
-        ar x "$lib"
-        cd "$OLDPWD"
+        extract_lib_files "$lib" "$temp_dir"
         if [ -z "$(ls -A "$temp_dir")" ]; then
             cp "$lib" "$final_output"
         else
-            for objfile in "$temp_dir"/*.o; do
-                process_one "$objfile" "$objfile" "$prefix"
-                remove_symbol_prefix "$objfile" "$objfile" "$prefix"
+            for objfile in "$temp_dir"/*; do
+                if file "$objfile" | grep -q "relocatable"; then
+                    process_one "$objfile" "$objfile" "$prefix"
+                    remove_symbol_prefix "$objfile" "$objfile" "$prefix"
+                fi
             done
 
-            # keep the order of the file in the archive
+            # keep the order of the file in the archive; only members
+            # that were numbered during extraction carry a suffix
             final_output=$(realpath "$final_output")
-            ar t "$lib" > "$temp_dir/file_list.txt"
+            ar t "$lib" | awk '
+                { line[NR] = $0; total[$0]++ }
+                END {
+                    for (i = 1; i <= NR; i++)
+                    {
+                        name = line[i]; seen[name]++
+                        if (total[name] == 1)
+                            print name
+                        else
+                            print name "." seen[name]
+                    }
+                }' > "$temp_dir/file_list.txt"
             cd "$temp_dir"
             ar rcs "$final_output" $(cat "$temp_dir/file_list.txt")
             cd "$OLDPWD"
