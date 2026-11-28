@@ -1,0 +1,20 @@
+--- a/arch/riscv/boot/dts/spacemit/k1-x.dtsi
++++ b/arch/riscv/boot/dts/spacemit/k1-x.dtsi
+@@ -1039,7 +1039,8 @@
+ 			reg =  <0 0xc088c000 0 0x1000>,
+ 				<0 0xc0880000 0 0x200>;
+ 			ddr-remap-base = <0x100000>;
+-			esos-entry-point = <0x30300114>;
++			esos-entry-point = <0x30300000>;
++			firmware-name = "nuttx.elf";
+ 			clocks = <&ccu CLK_AUDIO>, <&ccu CLK_AUDIO_APB>;
+ 			clock-names = "core", "apb";
+ 			apb-clk-rate = <122880000>;
+@@ -1047,7 +1048,6 @@
+ 			reset-names = "core_reset";
+ 			mboxes = <&mailbox 0>, <&mailbox 1>;
+ 			mbox-names = "vq0", "vq1";
+-			firmware-name = "esos.elf";
+ 			power-domains = <&power K1X_PMU_AUD_PWR_DOMAIN>;
+ 			interconnects = <&dram_range8>;
+ 			interconnect-names = "dma-mem";

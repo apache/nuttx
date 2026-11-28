@@ -157,6 +157,13 @@ config ARCH_BOARD_GD_XD_W515_EVAL
 		(GD32W515PIQ6, Cortex-M33, 2 MB flash, 448 KB SRAM, Wi-Fi, LCD,
 		fingerprint sensor and touch key).
 
+config ARCH_BOARD_SPACEMIT_K1X_RCPU_MUSE_PI_PRO
+	bool "SpacemiT MUSE Pi Pro (K1 RCPU)"
+	depends on ARCH_CHIP_SPACEMIT_K1X_RCPU
+	---help---
+		This is the RCPU configuration for the SpacemiT MUSE Pi Pro, a
+		Key Stone K1 board.
+
 config ARCH_BOARD_GD32VW553K_START
 	bool "GigaDevice GD32VW553K-START Board"
 	depends on ARCH_CHIP_GD32VW55X
@@ -4332,6 +4339,7 @@ config ARCH_BOARD
 	default "gd32f470ik-eval"              if ARCH_BOARD_GD32F470IK_EVAL
 	default "gd-xd-w515-eval"              if ARCH_BOARD_GD_XD_W515_EVAL
 	default "gd32vw553k-start"             if ARCH_BOARD_GD32VW553K_START
+	default "muse-pi-pro"                  if ARCH_BOARD_SPACEMIT_K1X_RCPU_MUSE_PI_PRO
 	default "gd32vw553-hmq"                if ARCH_BOARD_GD32VW553_HMQ
 	default "ab32vg1-generic"              if ARCH_BOARD_AB32VG1_GENERIC
 	default "hifive1-revb"                 if ARCH_BOARD_HIFIVE1_REVB
@@ -5924,6 +5932,9 @@ source "boards/risc-v/gd32vw55x/gd32vw553k-start/Kconfig"
 endif
 if ARCH_BOARD_GD_XD_W515_EVAL
 source "boards/arm/gd32w51x/gd-xd-w515-eval/Kconfig"
+endif
+if ARCH_BOARD_SPACEMIT_K1X_RCPU_MUSE_PI_PRO
+source "boards/risc-v/spacemit-k1x-rcpu/muse-pi-pro/Kconfig"
 endif
 if ARCH_BOARD_GD32VW553_HMQ
 source "boards/risc-v/gd32vw55x/gd32vw553-hmq/Kconfig"

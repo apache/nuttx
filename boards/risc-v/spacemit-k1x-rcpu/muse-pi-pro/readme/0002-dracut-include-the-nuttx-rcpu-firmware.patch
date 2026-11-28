@@ -1,0 +1,8 @@
+--- a/buildroot-ext/board/spacemit/k1/dracut-modules/99custom/module-setup.sh
++++ b/buildroot-ext/board/spacemit/k1/dracut-modules/99custom/module-setup.sh
+@@ -18,4 +18,5 @@
+         fsck fsck.ext2 fsck.ext4 fsck.ext3 fsck.ext4dev fsck.f2fs fsck.vfat e2fsck resize2fs mount
+ 
+     inst_multiple /lib/firmware/esos.elf
++    inst_multiple /lib/firmware/nuttx.elf
+ }
