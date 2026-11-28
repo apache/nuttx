@@ -115,6 +115,13 @@ static void exec_ctors(void)
 {
   for (initializer_t *ctor = _sctors; ctor != _ectors; ctor++)
     {
+      /* Skip padding entries the toolchain may leave in the section. */
+
+      if (*ctor == NULL)
+        {
+          continue;
+        }
+
       /* Under FDPIC the entry is a code address, not a descriptor */
 
       fdpic_call(0, *ctor, fdpic_base());
@@ -133,6 +140,13 @@ static void exec_dtors(void)
 {
   for (initializer_t *dtor = _sdtors; dtor != _edtors; dtor++)
     {
+      /* Skip padding entries the toolchain may leave in the section. */
+
+      if (*dtor == NULL)
+        {
+          continue;
+        }
+
       /* Under FDPIC the entry is a code address, not a descriptor */
 
       fdpic_call(0, *dtor, fdpic_base());
