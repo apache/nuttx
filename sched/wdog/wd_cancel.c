@@ -43,7 +43,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wd_cancel
+ * Name: wd_cancel_internal
  *
  * Description:
  *   This function cancels a currently running watchdog timer. Watchdog
@@ -56,60 +56,54 @@
  *   Zero (OK) is returned on success;  A negated errno value is returned to
  *   indicate the nature of any failure.
  *
+ * Assumptions:
+ *   The wdog and wdentry is not NULL.
+ *
  ****************************************************************************/
 
-int wd_cancel(FAR struct wdog_s *wdog)
+int wd_cancel_internal(FAR struct wdog_s *wdog)
 {
   FAR struct wdog_s *first;
-  irqstate_t         flags;
   int                  ret = -EINVAL;
+  irqstate_t         flags = enter_critical_section();
 
-  if (wdog != NULL)
+  /* Make sure that the watchdog is valid and still active. */
+
+  if (WDOG_ISACTIVE(wdog))
     {
-      /* Prohibit timer interactions with the timer queue until the
-       * cancellation is complete
-       */
+      first = list_first_entry(&g_wdactivelist, struct wdog_s, node);
 
-      flags = enter_critical_section();
+      /* Now, remove the watchdog from the timer queue */
 
-      /* Make sure that the watchdog is valid and still active. */
+      list_delete_fast(&wdog->node);
 
-      if (WDOG_ISACTIVE(wdog))
+      /* Mark the watchdog inactive */
+
+      wdog->func = NULL;
+
+      if (first == wdog && !wd_in_callback())
         {
-          first = list_first_entry(&g_wdactivelist, struct wdog_s, node);
+          /* If the watchdog is at the head of the timer queue, then
+           * we will need to re-adjust the interval timer that will
+           * generate the next interval event.
+           */
 
-          /* Now, remove the watchdog from the timer queue */
-
-          list_delete_fast(&wdog->node);
-
-          /* Mark the watchdog inactive */
-
-          wdog->func = NULL;
-
-          if (first == wdog && !wd_in_callback())
+          if (!list_is_empty(&g_wdactivelist))
             {
-              /* If the watchdog is at the head of the timer queue, then
-               * we will need to re-adjust the interval timer that will
-               * generate the next interval event.
-               */
-
-              if (!list_is_empty(&g_wdactivelist))
-                {
-                  wd_timer_start(wd_next_expire(), false);
-                }
-              else
-                {
-                  wd_timer_cancel();
-                }
+              wd_timer_start(wd_next_expire());
             }
-
-          ret = OK;
+          else
+            {
+              wd_timer_cancel();
+            }
         }
 
-      leave_critical_section(flags);
-      sched_note_wdog_cancel((FAR void *)wdog->func,
-                             (FAR void *)(uintptr_t)wdog->expired);
+      ret = OK;
     }
+
+  leave_critical_section(flags);
+  sched_note_wdog_cancel((FAR void *)wdog->func,
+                         (FAR void *)(uintptr_t)wdog->expired);
 
   return ret;
 }

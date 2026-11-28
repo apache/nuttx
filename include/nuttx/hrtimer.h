@@ -32,6 +32,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/list_type.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <sys/tree_type.h>
 
@@ -241,6 +242,35 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
  ****************************************************************************/
 
 uint64_t hrtimer_gettime(FAR const hrtimer_t *timer);
+
+/****************************************************************************
+ * Name: hrtimer_is_active
+ *
+ * Description:
+ *   Check whether the hrtimer is armed.  The test is defined by the
+ *   remaining time reported by hrtimer_gettime(): a non-zero remainder
+ *   means the timer is pending and has not expired yet.  A timer whose
+ *   expiration time has been reached reports inactive even if it has
+ *   not been processed yet, and a zero-delay timer is inactive at the
+ *   moment it is queued.
+ *
+ * Input Parameters:
+ *   timer - Pointer to the high-resolution timer instance.
+ *
+ * Returned Value:
+ *   true if the timer is armed and has not expired yet.
+ *
+ ****************************************************************************/
+
+static inline_function
+bool hrtimer_is_active(FAR const hrtimer_t *timer)
+{
+  /* A non-zero remainder means the timer is pending and has not expired
+   * yet.  Evaluate the argument once.
+   */
+
+  return hrtimer_gettime(timer) != 0;
+}
 
 #ifdef __cplusplus
 }

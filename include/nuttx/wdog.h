@@ -133,13 +133,23 @@ extern "C"
  *   indicate the nature of any failure.
  *
  * Assumptions:
+ *   The wdog and wdentry should not be NULL.
  *   The watchdog routine runs in the context of the timer interrupt handler
  *   and is subject to all ISR restrictions.
  *
  ****************************************************************************/
 
+int wd_start_abstick_internal(FAR struct wdog_s *wdog, clock_t ticks,
+                              wdentry_t wdentry, wdparm_t arg);
+
+static inline_function
 int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
-                     wdentry_t wdentry, wdparm_t arg);
+                     wdentry_t wdentry, wdparm_t arg)
+{
+  return wdog && wdentry ?
+         wd_start_abstick_internal(wdog, ticks, wdentry, arg) :
+         -EINVAL;
+}
 
 /****************************************************************************
  * Name: wd_start
@@ -181,16 +191,11 @@ static inline_function
 int wd_start(FAR struct wdog_s *wdog, clock_t delay,
              wdentry_t wdentry, wdparm_t arg)
 {
-  int ret = -EINVAL;
-
   /* Ensure delay is within the range the wdog can handle. */
 
-  if (delay >= 0 && delay <= WDOG_MAX_DELAY)
-    {
-      ret = wd_start_abstick(wdog, clock_delay2abstick(delay), wdentry, arg);
-    }
-
-  return ret;
+  return (uint64_t)delay <= WDOG_MAX_DELAY ?
+         wd_start_abstick(wdog, clock_delay2abstick(delay), wdentry, arg) :
+         -EINVAL;
 }
 
 /****************************************************************************
@@ -328,12 +333,9 @@ int wd_start_next(FAR struct wdog_s *wdog, clock_t delay,
 {
   /* Ensure delay is within the range the wdog can handle. */
 
-  if (delay <= 0 || delay > WDOG_MAX_DELAY)
-    {
-      return -EINVAL;
-    }
-
-  return wd_start_abstick(wdog, wdog->expired + delay, wdentry, arg);
+  return (uint64_t)delay > 0 && (uint64_t)delay <= WDOG_MAX_DELAY ?
+         wd_start_abstick(wdog, wdog->expired + delay, wdentry, arg) :
+         -EINVAL;
 }
 
 /****************************************************************************
@@ -350,9 +352,17 @@ int wd_start_next(FAR struct wdog_s *wdog, clock_t delay,
  *   Zero (OK) is returned on success;  A negated errno value is returned to
  *   indicate the nature of any failure.
  *
+ * Assumptions:
+ *   The wdog is not NULL.
+ *
  ****************************************************************************/
 
-int wd_cancel(FAR struct wdog_s *wdog);
+int wd_cancel_internal(FAR struct wdog_s *wdog);
+
+static inline_function int wd_cancel(FAR struct wdog_s *wdog)
+{
+  return wdog ? wd_cancel_internal(wdog) : -EINVAL;
+}
 
 /****************************************************************************
  * Name: wd_gettime

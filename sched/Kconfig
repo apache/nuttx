@@ -2327,17 +2327,9 @@ config CUSTOM_SEMAPHORE_MAXVALUE
 		Enable to support custom max value for semaphores.
 		When this option is enabled, the max value of a semaphore can be set
 
-config HRTIMER
-	bool "High resolution timer support"
-	default n
-	---help---
-		Enable to support high resolution timer
-
-if HRTIMER
-
 choice
 	prompt "HRTimer management data structure type"
-	default HRTIMER_TREE
+	default HRTIMER_LIST
 
 config HRTIMER_LIST
 	bool "List-based timer management"
@@ -2374,5 +2366,3 @@ config HRTIMER_PRECISION_SHIFT
 		  10 - 1024 ns (~1 us) precision
 		  15 - 32768 ns (~32 us) precision
 		  20 - 1048576 ns (~1 ms) precision
-
-endif # HRTIMER

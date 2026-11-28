@@ -77,7 +77,7 @@ static int work_qqueue(FAR struct kwork_wqueue_s *wqueue,
   bool retimer;
 
   if (wqueue == NULL || work == NULL || worker == NULL ||
-      delay < 0 || delay > WDOG_MAX_DELAY)
+      (uint64_t)delay > WQUEUE_MAX_DELAY)
     {
       return -EINVAL;
     }
@@ -133,8 +133,9 @@ static int work_qqueue(FAR struct kwork_wqueue_s *wqueue,
           /* Start the timer if the work is the earliest expired work. */
 
           retimer = false;
-          wd_start_abstick(&wqueue->timer, work->qtime,
-                           work_timer_expired, (wdparm_t)wqueue);
+          hrtimer_start(&wqueue->timer, work_timer_expired,
+                        TICK2NSEC((uint64_t)work->qtime),
+                        HRTIMER_MODE_ABS);
         }
     }
   else

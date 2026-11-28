@@ -168,6 +168,8 @@ static inline void nxsched_process_scheduler(void)
 
 void nxsched_process_timer(void)
 {
+  clock_t now;
+
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   /* Process wall time */
 
@@ -177,6 +179,7 @@ void nxsched_process_timer(void)
   /* Increment the system time (if in the link) */
 
   clock_increase_sched_ticks(1);
+  now = clock_get_sched_ticks();
 
   /* Check if the currently executing task has exceeded its
    * timeslice.
@@ -186,11 +189,7 @@ void nxsched_process_timer(void)
 
   /* Process watchdogs */
 
-#ifdef CONFIG_HRTIMER
-  hrtimer_process(clock_systime_nsec());
-#else
-  wd_timer(clock_systime_ticks());
-#endif
+  hrtimer_process(TICK2NSEC((uint64_t)now));
 
 #ifdef CONFIG_SYSTEMTICK_HOOK
   /* Call out to a user-provided function in order to perform board-specific,

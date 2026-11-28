@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/nuttx.h>
 
 #include <unistd.h>
 #include <sched.h>
@@ -142,7 +143,7 @@ static inline_function bool work_dispatch(FAR struct kwork_wqueue_s *wqueue,
    * there might be expired work in the pending queue.
    */
 
-  if (!WDOG_ISACTIVE(&wqueue->timer))
+  if (!list_is_empty(&wqueue->pending))
     {
       /* Wake up the worker thread once there is expired work.
        * If some worker threads are busy, here the callback will
@@ -160,8 +161,9 @@ static inline_function bool work_dispatch(FAR struct kwork_wqueue_s *wqueue,
 
           if (!clock_compare(work->qtime, ticks))
             {
-              wd_start_abstick(&wqueue->timer, work->qtime,
-                               work_timer_expired, (wdparm_t)wqueue);
+              hrtimer_start(&wqueue->timer, work_timer_expired,
+                            TICK2NSEC((uint64_t)work->qtime),
+                            HRTIMER_MODE_ABS);
               break;
             }
 
@@ -438,15 +440,17 @@ void work_queue_dispatch(FAR struct kwork_wqueue_s *wqueue)
  *
  ****************************************************************************/
 
-void work_timer_expired(wdparm_t arg)
+uint64_t work_timer_expired(FAR const hrtimer_t *timer, uint64_t expired)
 {
   /* The work time expired callback will wake up at least one worker thread
    * to dispatch the expired work.
    */
 
-  FAR struct kwork_wqueue_s *wq = (FAR struct kwork_wqueue_s *)arg;
+  FAR struct kwork_wqueue_s *wq = container_of(timer, struct kwork_wqueue_s,
+                                               timer);
 
   nxsem_post(&wq->sem);
+  return 0;
 }
 
 /****************************************************************************
@@ -495,7 +499,7 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
 
   list_initialize(&wqueue->expired);
   list_initialize(&wqueue->pending);
-  wqueue->timer.func = NULL;
+  hrtimer_init(&wqueue->timer);
   nxsem_init(&wqueue->sem, 0, 0);
   nxsem_init(&wqueue->exsem, 0, 0);
   wqueue->nthreads = nthreads;
@@ -582,7 +586,7 @@ int work_queue_free(FAR struct kwork_wqueue_s *wqueue)
 
   /* Stop delayed dispatch after new submissions have been disabled. */
 
-  wd_cancel(&wqueue->timer);
+  hrtimer_cancel_sync(&wqueue->timer);
 
   /* Queue a exit work for all threads */
 
