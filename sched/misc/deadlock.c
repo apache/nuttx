@@ -90,7 +90,13 @@ static FAR struct tcb_s *deadlock_next(FAR struct tcb_s *tcb)
       return NULL;
     }
 
-  return nxsched_get_tcb(holder);
+  /* The caller runs in the critical section of nxsched_foreach(), which
+   * keeps the TCB in the pid hash, so it stays valid without a reference.
+   */
+
+  tcb = nxsched_get_tcb(holder);
+  nxsched_put_tcb(tcb);
+  return tcb;
 }
 
 /****************************************************************************

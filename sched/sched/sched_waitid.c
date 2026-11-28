@@ -127,7 +127,18 @@ static void report_child(FAR struct tcb_s *rtcb,
 static void child_handler(FAR struct tcb_s *tcb, FAR void *arg)
 {
   FAR struct child_search_s *search = arg;
-  FAR struct task_group_s *group = tcb->group;
+  FAR struct task_group_s *group;
+
+  /* An exiting task may already have lost its task group; the reference
+   * nxsched_foreach() holds keeps the TCB alive, not the group.
+   */
+
+  if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      return;
+    }
+
+  group = tcb->group;
 
   if (group == NULL || group == search->group ||
       group->tg_ppid != search->group->tg_pid)
@@ -179,7 +190,7 @@ static bool child_running(FAR struct tcb_s *rtcb, idtype_t idtype, pid_t id)
 
   if (idtype == P_PID)
     {
-      return nxsched_get_tcb(id) != NULL;
+      return nxsched_verify_pid(id);
     }
 #endif
 
@@ -275,11 +286,20 @@ static int check_children(FAR struct tcb_s *rtcb, idtype_t idtype, pid_t id)
 
   if (idtype == P_PID)
     {
+      bool child;
+
       ctcb = nxsched_get_tcb(id);
-      if (ctcb == NULL || ctcb->group == NULL ||
-          ctcb->group->tg_ppid != rtcb->group->tg_pid ||
-          (atomic_read(&ctcb->shared_flags) &
-           TCB_FLAG_EXIT_PROCESSING) != 0)
+      if (ctcb == NULL)
+        {
+          return -ECHILD;
+        }
+
+      child = ctcb->group != NULL &&
+              ctcb->group->tg_ppid == rtcb->group->tg_pid &&
+              (atomic_read(&ctcb->shared_flags)
+               & TCB_FLAG_EXIT_PROCESSING) == 0;
+      nxsched_put_tcb(ctcb);
+      if (!child)
         {
           return -ECHILD;
         }

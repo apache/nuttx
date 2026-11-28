@@ -251,6 +251,8 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   nxtask_joininit(ptcb);
 
+  nxsem_init(&ptcb->exit_sem, 0, 0);
+
   /* Bind the parent's group to the new TCB (we have not yet joined the
    * group).
    */
@@ -502,6 +504,15 @@ errout_with_tcb:
   /* Since we do not join the group, assign group to NULL to clear binding */
 
   ptcb->group = NULL;
+
+  /* The pid hash slot still holds the only reference: release it
+   * before the TCB, nxsched_release_tcb() no longer does it.
+   */
+
+  if (ptcb->pid)
+    {
+      nxsched_releasepid(ptcb->pid);
+    }
 
   nxsched_release_tcb(ptcb, TCB_FLAG_TTYPE_PTHREAD);
   return -ret;

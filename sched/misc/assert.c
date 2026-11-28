@@ -609,11 +609,6 @@ static void dump_lockholder(pid_t tid)
   int depth = 0;
   pid_t holder = INVALID_PROCESS_ID;
 
-  /* nxsched_get_tcb() holds no reference on the TCB once it returns, so
-   * use it as an inherently racy snapshot and read what we need from it
-   * immediately.
-   */
-
   tcb = nxsched_get_tcb(tid);
   DEBUGASSERT(tcb != NULL);
 
@@ -635,6 +630,8 @@ static void dump_lockholder(pid_t tid)
       holder = spinlock_get_holder(info);
     }
 #  endif
+
+  nxsched_put_tcb(tcb);
 
   backtrace_format(buf, sizeof(buf), stack, depth);
 
@@ -770,6 +767,8 @@ static void dump_assert_info(FAR struct tcb_s *rtcb,
          get_task_name(rtcb),
          ptcb ? get_task_name(ptcb) : "Kernel",
          rtcb->entry.main);
+
+  nxsched_put_tcb(ptcb);
 
   /* Dump current CPU registers, running task stack and backtrace. */
 

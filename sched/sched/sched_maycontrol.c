@@ -62,5 +62,9 @@ bool nxsched_may_control(pid_t pid)
     }
 
   tcb = nxsched_get_tcb(pid);
-  return tcb == NULL || tcb->group == nxsched_self()->group;
+  bool may_control = (tcb == NULL ||
+                      tcb->group == nxsched_self()->group);
+
+  nxsched_put_tcb(tcb);
+  return may_control;
 }

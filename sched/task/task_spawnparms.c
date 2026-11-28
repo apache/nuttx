@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
 
 #include <fcntl.h>
 #include <spawn.h>
@@ -161,6 +162,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
       if (tcb)
         {
           tcb->sigprocmask = attr->sigmask;
+          nxsched_put_tcb(tcb);
         }
     }
 #endif
@@ -176,6 +178,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
         {
           tcb->group->tg_pgid = tcb->group->tg_pid;
           tcb->group->tg_sid  = tcb->group->tg_pid;
+          nxsched_put_tcb(tcb);
         }
     }
 

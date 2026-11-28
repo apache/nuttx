@@ -27,6 +27,8 @@
 #include <sys/types.h>
 
 #include <sched.h>
+#include <signal.h>
+#include <stdbool.h>
 
 #include "nuttx/irq.h"
 
@@ -37,18 +39,40 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsched_park_task
+ *
+ * Description:
+ *   Stop a task that found itself already inside a termination flow.  It
+ *   must not touch its stack again: it removes itself from the ready-to-run
+ *   list, blocks on the signal wait list and switches away for good.  The
+ *   termination path already handles a task blocked in TSTATE_WAIT_SIG.
+ *
+ ****************************************************************************/
+
+void nxsched_park_task(FAR struct tcb_s *tcb)
+{
+  enter_critical_section();
+
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  sigemptyset(&tcb->sigwaitmask);
+#endif
+
+  for (; ; )
+    {
+      nxsched_remove_self(tcb);
+      nxsched_add_blocked(tcb, TSTATE_WAIT_SIG);
+      up_switch_context(this_task(), tcb);
+    }
+
+  PANIC();
+}
+
+/****************************************************************************
  * Name: nxsched_get_tcb
  *
  * Description:
- *   Given a task ID, this function will return the a pointer to the
- *   corresponding TCB (or NULL if there is no such task ID).
- *
- *   NOTE:  This function holds a critical section while examining TCB data
- *   data structures but releases that critical section before returning.
- *   When it is released, the TCB may become unstable.  If the caller
- *   requires absolute stability while using the TCB, then the caller
- *   should establish the critical section BEFORE calling this function and
- *   hold that critical section as long as necessary.
+ *   Given a task ID, obtain a valid TCB and increment the corresponding
+ *   reference count to prevent it from being released.
  *
  ****************************************************************************/
 
@@ -59,10 +83,6 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
   int hash_ndx;
 
   flags = enter_critical_section();
-
-  /* Verify whether g_pidhash hash table has already been allocated and
-   * whether the PID is within range.
-   */
 
   if (g_pidhash != NULL && pid >= 0)
     {
@@ -86,9 +106,103 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
         }
     }
 
-  leave_critical_section(flags);
+  if (ret && ret != running_task())
+    {
+      if (!up_interrupt_context())
+        {
+          /* If we are in the thread context, after obtaining a reference to
+           * another task, we may not be able to release this reference
+           * immediately. The purpose of refs is also to prevent the
+           * situation where this_task is killed and thus unable to release
+           * the references to other tasks. We need to record the total
+           * number of references that this_task makes to other tasks.
+           */
 
-  /* Return the TCB. */
+          atomic_add(&this_task()->holds, 1);
+        }
+
+      atomic_add(&ret->refs, 1);
+    }
+
+  leave_critical_section(flags);
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: nxsched_put_tcb
+ *
+ * Description:
+ *   Drop a reference taken with nxsched_get_tcb(); each successful get
+ *   must be paired with a put.
+ *
+ ****************************************************************************/
+
+void nxsched_put_tcb(FAR struct tcb_s *tcb)
+{
+  FAR struct tcb_s *rtcb;
+#ifdef CONFIG_SMP
+  irqstate_t flags;
+
+  flags = up_irq_save();
+  rtcb = running_task();
+  up_irq_restore(flags);
+#else
+  rtcb = running_task();
+#endif
+
+  if (!tcb || tcb == rtcb)
+    {
+      return;
+    }
+
+  DEBUGASSERT(atomic_read(&tcb->refs) > 0);
+
+  /* tcb may in EXIT_PROCESSING */
+
+  if (atomic_sub(&tcb->refs, 1) == 1)
+    {
+      nxsem_post(&tcb->exit_sem);
+    }
+
+  if (up_interrupt_context())
+    {
+      return;
+    }
+
+  tcb = this_task();
+
+  DEBUGASSERT(atomic_read(&tcb->holds) > 0);
+
+  /* this_task may be killed and in KILL_PROCESSING: nxtask_terminate()
+   * sets the flag before it reads holds, so order our decrement before
+   * the flag read.
+   */
+
+  bool last = atomic_sub(&tcb->holds, 1) == 1;
+
+  SMP_MB();
+
+  if (last &&
+      (atomic_read(&tcb->shared_flags) &
+       (TCB_FLAG_KILL_PROCESSING | TCB_FLAG_EXIT_PROCESSING)) != 0)
+    {
+      /* Wake nxtask_terminate() or nxtask_restart() waiting for the
+       * references to be dropped.
+       */
+
+      nxsem_post(&tcb->exit_sem);
+
+      /* A killed task stops here: if it kept running it could take the
+       * TCB again and be killed again.  A restarted task must keep
+       * running until it is reset.
+       */
+
+      if ((atomic_read(&tcb->shared_flags) &
+           TCB_FLAG_KILL_PROCESSING) != 0)
+        {
+          nxsched_park_task(tcb);
+        }
+    }
+}
+

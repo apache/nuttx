@@ -89,6 +89,17 @@ sigset_t nxsig_pendingset(FAR struct tcb_s *stcb)
       stcb = this_task();
     }
 
+  /* An exiting thread may already have lost its task group; its signal
+   * queues are gone, so report no pending signal and leave the group alone.
+   */
+
+  if ((atomic_read(&stcb->shared_flags) &
+       (TCB_FLAG_EXIT_PROCESSING | TCB_FLAG_KILL_PROCESSING)) != 0)
+    {
+      sigemptyset(&sigpendset);
+      return sigpendset;
+    }
+
   group = stcb->group;
   DEBUGASSERT(group);
 

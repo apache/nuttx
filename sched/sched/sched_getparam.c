@@ -173,6 +173,7 @@ int nxsched_get_param(pid_t pid, FAR struct sched_param *param)
             }
 
           leave_critical_section(flags);
+          nxsched_put_tcb(tcb);
         }
     }
 

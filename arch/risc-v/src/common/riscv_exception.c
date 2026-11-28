@@ -118,6 +118,8 @@ static void riscv_fault_handler(uintreg_t cause, void *regs)
       _alert("Segmentation fault in %s (PID %d: %s)\n", get_task_name(ptcb),
              tcb->pid, get_task_name(tcb));
 
+      nxsched_put_tcb(ptcb);
+
 #ifdef CONFIG_SCHED_BACKTRACE
       sched_dumpstack(tcb->pid);
 #endif

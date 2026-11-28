@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
 
 #include <nuttx/init.h>
 
@@ -91,6 +92,7 @@ static int sched_backtrace_handler(FAR void *cookie)
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
       leave_critical_section(flags);
+      nxsched_put_tcb(tcb);
       return -ESRCH;
     }
 
@@ -102,6 +104,7 @@ static int sched_backtrace_handler(FAR void *cookie)
   leave_critical_section(flags);
 
   arg->stacksize = up_backtrace(tcb, arg->buffer, arg->size, arg->skip);
+  nxsched_put_tcb(tcb);
 
   return OK;
 }
@@ -146,6 +149,7 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
               (atomic_read(&tcb->shared_flags) &
                TCB_FLAG_EXIT_PROCESSING) != 0)
             {
+              nxsched_put_tcb(tcb);
               leave_critical_section(flags);
               return 0;
             }
@@ -156,6 +160,7 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
             {
               struct backtrace_arg_s arg;
               bool need_restore;
+              int cpu = tcb->cpu;
 #ifdef CONFIG_ARCH_ADDRENV
               FAR void *scratch[BACKTRACE_SCRATCH_DEPTH];
 #endif
@@ -190,7 +195,7 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
                   arg.need_restore = need_restore &&
                                       arg.size == size - ret;
 
-                  if (nxsched_smp_call_single(tcb->cpu,
+                  if (nxsched_smp_call_single(cpu,
                                               sched_backtrace_handler,
                                               &arg) < 0)
                     {
@@ -225,15 +230,19 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
                 {
                   arg.size = 0;
                   arg.need_restore = true;
-                  nxsched_smp_call_single(tcb->cpu, sched_backtrace_handler,
+                  nxsched_smp_call_single(cpu, sched_backtrace_handler,
                                           &arg);
                 }
+
+              nxsched_put_tcb(tcb);
 #else
               arg.need_restore = need_restore;
               arg.buffer = buffer;
               arg.size = size;
               arg.skip = skip;
-              ret = nxsched_smp_call_single(tcb->cpu,
+
+              nxsched_put_tcb(tcb);
+              ret = nxsched_smp_call_single(cpu,
                                             sched_backtrace_handler,
                                             &arg) < 0 ? 0 : arg.stacksize;
 #endif
@@ -242,6 +251,7 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
 #endif
             {
               ret = up_backtrace(tcb, buffer, size, skip);
+              nxsched_put_tcb(tcb);
             }
         }
 

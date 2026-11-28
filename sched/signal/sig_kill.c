@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
 
 #include <sys/types.h>
 #include <sched.h>
@@ -210,7 +211,11 @@ int nxsig_kill(pid_t pid, int signo)
 
   if (signo == 0)
     {
-      return (nxsched_get_tcb(pid) != NULL) ? 0 : -ESRCH;
+      FAR struct tcb_s *stcb = nxsched_get_tcb(pid);
+
+      ret = (stcb != NULL) ? 0 : -ESRCH;
+      nxsched_put_tcb(stcb);
+      return ret;
     }
 
 #ifdef CONFIG_DISABLE_ALL_SIGNALS

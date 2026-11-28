@@ -65,6 +65,7 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
   FAR sigq_t *sigq;
   sigset_t    savesigprocmask;
   sigset_t    newsigprocmask;
+  uint32_t    tcbflags;
   sigset_t    tmpset1;
   sigset_t    tmpset2;
   irqstate_t  flags;
@@ -73,11 +74,37 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
 
   for (; ; )
     {
+      flags = enter_critical_section();
+      tcbflags = atomic_read(&stcb->shared_flags);
+
+      /* An exiting thread must not run signal actions: its task group may
+       * already be released.  Unlink the action queue under the lock and
+       * release it after unlocking, so that the trampoline cannot retry.
+       */
+
+      if ((tcbflags & (TCB_FLAG_EXIT_PROCESSING |
+                       TCB_FLAG_KILL_PROCESSING)) != 0)
+        {
+          FAR sigq_t *next = (FAR sigq_t *)stcb->sigpendactionq.head;
+
+          sq_init(&stcb->sigpendactionq);
+          leave_critical_section(flags);
+
+          while (next != NULL)
+            {
+              FAR sigq_t *rest = (FAR sigq_t *)next->flink;
+
+              nxsig_release_pendingsigaction(next);
+              next = rest;
+            }
+
+          break;
+        }
+
       /* Test if this task is already handling a signal (we don't permit
        * nested signals on the same thread).
        */
 
-      flags = enter_critical_section();
       if ((stcb->flags & TCB_FLAG_SIGNAL_ACTION) != 0)
         {
           /* Yes.. then we must wait for the signal handler to return */

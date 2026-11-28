@@ -68,7 +68,11 @@ void nxsched_foreach(nxsched_foreach_t handler, FAR void *arg)
   sched_lock();
   for (ndx = 0; ndx < g_npidhash; ndx++)
     {
-      /* This test and the function call must be atomic */
+      /* This test and the function call must be atomic.  The handler
+       * runs in the critical section and must not block: the reference
+       * count cannot be taken and dropped here, nxsched_put_tcb()
+       * posts a semaphore and would allow a context switch.
+       */
 
       if (g_pidhash[ndx])
         {

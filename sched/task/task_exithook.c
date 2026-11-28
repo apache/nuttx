@@ -388,6 +388,7 @@ static inline void nxtask_signalparent(FAR struct tcb_s *ctcb, int status)
    */
 
   nxtask_sigchild(ptcb, ctcb, status);
+  nxsched_put_tcb(ptcb);
 #endif
 }
 #else

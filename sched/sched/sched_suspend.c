@@ -68,6 +68,7 @@ static int nxsched_suspend_handler(FAR void *cookie)
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
       leave_critical_section(flags);
+      nxsched_put_tcb(tcb);
       return OK;
     }
 
@@ -82,6 +83,7 @@ static int nxsched_suspend_handler(FAR void *cookie)
   dq_addlast((FAR dq_entry_t *)tcb, &g_stoppedtasks);
 
   leave_critical_section(flags);
+  nxsched_put_tcb(tcb);
   return OK;
 }
 #endif
@@ -110,6 +112,16 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
   DEBUGASSERT(tcb != NULL);
 
   flags = enter_critical_section();
+
+  /* A task being terminated must not stop: nxtask_terminate() waits for
+   * it to drop its TCB references.
+   */
+
+  if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      leave_critical_section(flags);
+      return;
+    }
 
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* Check if received SIGCONT */

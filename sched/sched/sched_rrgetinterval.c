@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
 
 #include <sys/types.h>
 #include <sched.h>
@@ -69,7 +70,7 @@
 
 int sched_rr_get_interval(pid_t pid, struct timespec *interval)
 {
-  FAR struct tcb_s *rrtcb;
+  FAR struct tcb_s *rrtcb = NULL;
   int status = OK;
 
   /* If pid is zero, the timeslice for the calling process is written
@@ -129,6 +130,11 @@ int sched_rr_get_interval(pid_t pid, struct timespec *interval)
     {
       set_errno(EINVAL);
       status = ERROR;
+    }
+
+  if (pid > 0 && rrtcb != NULL)
+    {
+      nxsched_put_tcb(rrtcb);
     }
 
   return status;

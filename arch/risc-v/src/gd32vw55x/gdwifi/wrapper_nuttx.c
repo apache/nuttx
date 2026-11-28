@@ -585,8 +585,10 @@ char *sys_task_name_get(void *task)
 #if CONFIG_TASK_NAME_SIZE > 0
   struct tcb_s *tcb = nxsched_get_tcb(task == NULL ? nxsched_gettid() :
                                       (pid_t)(uintptr_t)task - 1);
+  char *name = tcb ? tcb->name : NULL;
 
-  return tcb ? tcb->name : NULL;
+  nxsched_put_tcb(tcb);
+  return name;
 #else
   return NULL;
 #endif

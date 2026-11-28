@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
 
 #include <inttypes.h>
 #include <string.h>
@@ -131,8 +132,11 @@ int nxsig_event_valid(FAR const struct sigevent *event)
   target = nxsched_get_tcb(event->sigev_notify_thread_id);
   if (target == NULL || target->group != nxsched_self()->group)
     {
+      nxsched_put_tcb(target);
       return -EINVAL;
     }
+
+  nxsched_put_tcb(target);
 
   return OK;
 }

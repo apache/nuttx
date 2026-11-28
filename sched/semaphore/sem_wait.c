@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
 
 #include <stdbool.h>
 #include <errno.h>
@@ -151,6 +152,7 @@ int nxsem_wait_slow(FAR sem_t *sem)
         }
 
       unlocked = htcb == NULL;
+      nxsched_put_tcb(htcb);
     }
   else
     {

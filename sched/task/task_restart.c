@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
 
 #include <sys/types.h>
 #include <sched.h>
@@ -66,12 +67,12 @@ static int restart_handler(FAR void *cookie)
   /* tcb that we want restart */
 
   tcb = nxsched_get_tcb(arg->pid);
-  if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
-      (atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
+  if (!tcb || tcb->task_state == TSTATE_TASK_INVALID)
     {
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
       leave_critical_section(flags);
+      nxsched_put_tcb(tcb);
       return -ESRCH;
     }
 
@@ -83,6 +84,8 @@ static int restart_handler(FAR void *cookie)
   nxsched_remove_readytorun(tcb);
 
   leave_critical_section(flags);
+
+  nxsched_put_tcb(tcb);
 
   return OK;
 }
@@ -187,7 +190,7 @@ static void nxtask_reset_task(FAR struct tcb_s *tcb, bool remove)
 static int nxtask_restart(pid_t pid)
 {
   FAR struct tcb_s *rtcb;
-  FAR struct tcb_s *tcb;
+  FAR struct tcb_s *tcb = NULL;
   irqstate_t flags;
   int ret;
 
@@ -227,11 +230,54 @@ static int nxtask_restart(pid_t pid)
       goto errout_with_lock;
     }
 
+  if ((atomic_read(&tcb->shared_flags) & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      ret = -ESRCH;
+      goto errout_with_lock;
+    }
+
+  /* As in nxtask_terminate(), keep others from ending the task and let it
+   * drop the references it holds before it is reset.
+   */
+
+  /* EXIT_PROCESSING only: KILL_PROCESSING would park the target in
+   * nxsched_put_tcb() at its next put, but a restarted task must keep
+   * running until it is reset.  The references it holds are still dropped
+   * by the task itself; a task blocked indefinitely between get and put
+   * delays the restart, as before.  A reference taken between
+   * nxtask_wait_holds() returning and the removal below is lost with
+   * the discarded context: a known limitation of not parking here.
+   */
+
+  /* Set-and-test: if nxtask_terminate() won the arbitration in the
+   * same window, it owns the teardown and this restart must fail
+   * instead of resetting a TCB being released.
+   */
+
+  if ((atomic_or(&tcb->shared_flags, TCB_FLAG_EXIT_PROCESSING) &
+       TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      ret = -ESRCH;
+      goto errout_with_lock;
+    }
+
+  nxsched_put_tcb(tcb);
+  leave_critical_section(flags);
+  nxtask_wait_holds(tcb);
+  flags = enter_critical_section();
+  tcb = nxsched_get_tcb(pid);
+  if (tcb == NULL)
+    {
+      ret = -ESRCH;
+      goto errout_with_lock;
+    }
+
 #ifdef CONFIG_SMP
   if (tcb->task_state == TSTATE_TASK_RUNNING &&
       tcb->cpu != this_cpu())
     {
       struct restart_arg_s arg;
+      int cpu = tcb->cpu;
 
       arg.pid = tcb->pid;
       if (atomic_or(&tcb->shared_flags, TCB_FLAG_CPU_LOCKED) &
@@ -244,25 +290,25 @@ static int nxtask_restart(pid_t pid)
           arg.need_restore = true;
         }
 
-      nxsched_smp_call_single(tcb->cpu, restart_handler, &arg);
+      nxsched_put_tcb(tcb);
+      nxsched_smp_call_single(cpu, restart_handler, &arg);
 
       tcb = nxsched_get_tcb(pid);
-      if (!tcb || tcb->task_state != TSTATE_TASK_INVALID ||
-          (atomic_read(&tcb->shared_flags) &
-           TCB_FLAG_EXIT_PROCESSING) != 0)
+      if (!tcb || tcb->task_state != TSTATE_TASK_INVALID)
         {
           ret = -ESRCH;
-          goto errout_with_lock;
+          goto errout_with_flags;
         }
 
       DEBUGASSERT(tcb->task_state != TSTATE_TASK_RUNNING);
       nxtask_reset_task(tcb, false);
+      atomic_and(&tcb->shared_flags, ~TCB_FLAG_EXIT_PROCESSING);
       leave_critical_section(flags);
 
       /* Activate the task. */
 
       nxtask_activate(tcb);
-
+      nxsched_put_tcb(tcb);
       return OK;
     }
 #endif /* CONFIG_SMP */
@@ -298,14 +344,25 @@ static int nxtask_restart(pid_t pid)
 #endif
 
   nxtask_reset_task(tcb, true);
+  atomic_and(&tcb->shared_flags, ~TCB_FLAG_EXIT_PROCESSING);
   leave_critical_section(flags);
 
   /* Activate the task. */
 
   nxtask_activate(tcb);
+  nxsched_put_tcb(tcb);
   return OK;
 
+#ifdef CONFIG_SMP
+errout_with_flags:
+  if (tcb != NULL)
+    {
+      atomic_and(&tcb->shared_flags, ~TCB_FLAG_EXIT_PROCESSING);
+    }
+
+#endif
 errout_with_lock:
+  nxsched_put_tcb(tcb);
   leave_critical_section(flags);
   return ret;
 }
