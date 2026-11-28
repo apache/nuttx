@@ -35,7 +35,7 @@
 #include <arpa/inet.h>
 
 #include <net/route.h>
-#include <netpacket/netlink.h>
+#include <netpacket/rtnetlink.h>
 #include <netinet/if_ether.h>
 
 #include <nuttx/kmalloc.h>
@@ -281,6 +281,15 @@ static_assert(nitems(g_ifa_ipv6_policy) ==
  * Description:
  *   Generate one device response.
  *
+ * Input Parameters:
+ *   dev  - The network device to report on.
+ *   type - The netlink message type to report, either RTM_NEWLINK or
+ *          RTM_DELLINK.  The caller decides this because the meaning
+ *          differs per usage:  a RTM_GETLINK dump always reports
+ *          RTM_NEWLINK (link state is carried by ifi_flags), while an
+ *          RTNLGRP_LINK broadcast reports the actual link event.
+ *   req  - The originating request, or NULL for an unsolicited broadcast.
+ *
  ****************************************************************************/
 
 #ifndef CONFIG_NETLINK_DISABLE_GETLINK
@@ -323,12 +332,11 @@ static uint16_t netlink_convert_device_type(uint8_t lltype)
 }
 
 static FAR struct netlink_response_s *
-netlink_get_device(FAR struct net_driver_s *dev,
+netlink_get_device(FAR struct net_driver_s *dev, int type,
                    FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct getlink_recvfrom_rsplist_s *alloc;
   FAR struct getlink_recvfrom_response_s *resp;
-  int up = IFF_IS_UP(dev->d_flags);
 
   /* Allocate the response buffer */
 
@@ -345,7 +353,7 @@ netlink_get_device(FAR struct net_driver_s *dev,
   resp                   = &alloc->payload;
 
   resp->hdr.nlmsg_len    = sizeof(struct getlink_recvfrom_response_s);
-  resp->hdr.nlmsg_type   = up ? RTM_NEWLINK : RTM_DELLINK;
+  resp->hdr.nlmsg_type   = type;
   resp->hdr.nlmsg_flags  = req ? req->hdr.nlmsg_flags : 0;
   resp->hdr.nlmsg_seq    = req ? req->hdr.nlmsg_seq : 0;
   resp->hdr.nlmsg_pid    = req ? req->hdr.nlmsg_pid : 0;
@@ -485,7 +493,9 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
   FAR struct nlroute_info_s *info = arg;
   FAR struct netlink_response_s * resp;
 
-  resp = netlink_get_device(dev, info->req);
+  /* A RTM_GETLINK dump always reports RTM_NEWLINK */
+
+  resp = netlink_get_device(dev, RTM_NEWLINK, info->req);
   if (resp == NULL)
     {
       return -ENOMEM;
@@ -1554,10 +1564,16 @@ void netlink_device_notify(FAR struct net_driver_s *dev)
 
   DEBUGASSERT(dev != NULL);
 
-  resp = netlink_get_device(dev, NULL);
+  /* report the link event itself, RTM_NEWLINK when the device came up and
+   * RTM_DELLINK when it went down.
+   */
+
+  resp = netlink_get_device(dev, IFF_IS_UP(dev->d_flags) ? RTM_NEWLINK :
+                                                           RTM_DELLINK,
+                            NULL);
   if (resp != NULL)
     {
-      netlink_add_broadcast(RTNLGRP_LINK, resp);
+      netlink_add_broadcast(NETLINK_ROUTE, RTNLGRP_LINK, resp);
       netlink_add_terminator(NULL, NULL, RTNLGRP_LINK);
     }
 }
@@ -1606,7 +1622,7 @@ void netlink_device_notify_ipaddr(FAR struct net_driver_s *dev,
           return;
         }
 
-      netlink_add_broadcast(group, resp);
+      netlink_add_broadcast(NETLINK_ROUTE, group, resp);
       netlink_add_terminator(NULL, NULL, group);
     }
 }
@@ -1659,7 +1675,7 @@ void netlink_route_notify(FAR const void *route, int type, int domain)
 
   if (resp != NULL)
     {
-      netlink_add_broadcast(group, resp);
+      netlink_add_broadcast(NETLINK_ROUTE, group, resp);
       netlink_add_terminator(NULL, NULL, group);
     }
 }
@@ -1684,7 +1700,7 @@ void netlink_neigh_notify(FAR const void *neigh, int type, int domain)
       return;
     }
 
-  netlink_add_broadcast(RTNLGRP_NEIGH, resp);
+  netlink_add_broadcast(NETLINK_ROUTE, RTNLGRP_NEIGH, resp);
   netlink_add_terminator(NULL, NULL, RTNLGRP_NEIGH);
 }
 #endif
@@ -1709,7 +1725,7 @@ void netlink_ipv6_prefix_notify(FAR struct net_driver_s *dev, int type,
       return;
     }
 
-  netlink_add_broadcast(RTNLGRP_IPV6_PREFIX, resp);
+  netlink_add_broadcast(NETLINK_ROUTE, RTNLGRP_IPV6_PREFIX, resp);
   netlink_add_terminator(NULL, NULL, RTNLGRP_IPV6_PREFIX);
 }
 #endif

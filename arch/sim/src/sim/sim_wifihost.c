@@ -332,12 +332,12 @@ static const char *get_auth_algstr(uint32_t auth_alg)
 {
   switch (auth_alg)
     {
-    case IW_ENCODE_ALG_TKIP:
-    case IW_ENCODE_ALG_CCMP:
-      return "OPEN";
-    default:
-      nerr("ERROR: Failed to transfer wireless auth alg: %u", auth_alg);
-      return NULL;
+      case IW_ENCODE_ALG_TKIP:
+      case IW_ENCODE_ALG_CCMP:
+        return "OPEN";
+      default:
+        nerr("ERROR: Failed to transfer wireless auth alg: %u", auth_alg);
+        return NULL;
     }
 }
 
@@ -345,17 +345,17 @@ static const char *get_authstr(int auth)
 {
   switch (auth)
     {
-    case IW_AUTH_WPA_VERSION_DISABLED:
-      return NULL;
+      case IW_AUTH_WPA_VERSION_DISABLED:
+        return NULL;
 
-    case IW_AUTH_WPA_VERSION_WPA:
-      return "WPA";
+      case IW_AUTH_WPA_VERSION_WPA:
+        return "WPA";
 
-    case IW_AUTH_WPA_VERSION_WPA2:
-      return "RSN";
-    default:
-      nerr("ERROR: Failed to transfer wifi auth: %d", auth);
-      return NULL;
+      case IW_AUTH_WPA_VERSION_WPA2:
+        return "RSN";
+      default:
+        nerr("ERROR: Failed to transfer wifi auth: %d", auth);
+        return NULL;
     }
 }
 
@@ -363,27 +363,27 @@ static const char *get_cipherstr(int cipher)
 {
   switch (cipher)
     {
-    case IW_AUTH_CIPHER_NONE:
-      return "NONE";
+      case IW_AUTH_CIPHER_NONE:
+        return "NONE";
 
-    case IW_AUTH_CIPHER_WEP40:
-      return "WEP40";
+      case IW_AUTH_CIPHER_WEP40:
+        return "WEP40";
 
-    case IW_AUTH_CIPHER_WEP104:
-      return "WEP104";
+      case IW_AUTH_CIPHER_WEP104:
+        return "WEP104";
 
-    case IW_AUTH_CIPHER_TKIP:
-      return "TKIP";
+      case IW_AUTH_CIPHER_TKIP:
+        return "TKIP";
 
-    case IW_AUTH_CIPHER_CCMP:
-      return "CCMP";
+      case IW_AUTH_CIPHER_CCMP:
+        return "CCMP";
 
-    case IW_AUTH_CIPHER_AES_CMAC:
-      return "AES-128-CMAC";
+      case IW_AUTH_CIPHER_AES_CMAC:
+        return "AES-128-CMAC";
 
-    default:
-      nerr("ERROR: Failed to transfer wifi cipher: %d", cipher);
-      return NULL;
+      default:
+        nerr("ERROR: Failed to transfer wifi cipher: %d", cipher);
+        return NULL;
     }
 }
 
@@ -487,12 +487,12 @@ static int utf8_escape(char *outp, int out_size,
               }
 
           case '\"':
-            if (res_size++ >= out_size)
-              {
-                return -EINVAL;
-              }
+          if (res_size++ >= out_size)
+            {
+              return -EINVAL;
+            }
 
-            *outp++ = '\\';
+          *outp++ = '\\';
 
           default:
             *outp++ = *inp++;
@@ -607,80 +607,80 @@ static size_t wpa_ssid_decode(char *buf, size_t maxlen, const char *str)
       switch (*pos)
         {
           case '\\':
-            pos++;
-            switch (*pos)
-              {
-                case '\\':
-                    buf[len++] = '\\';
-                    pos++;
-                    break;
-                case '"':
-                    buf[len++] = '"';
-                    pos++;
-                    break;
-                case 'n':
-                    buf[len++] = '\n';
-                    pos++;
-                    break;
-                case 'r':
-                    buf[len++] = '\r';
-                    pos++;
-                    break;
-                case 't':
-                    buf[len++] = '\t';
-                    pos++;
-                    break;
-                case 'e':
-                    buf[len++] = '\033';
-                    pos++;
-                    break;
-                case 'x':
-                    pos++;
-                    val = hex2byte(pos);
-                    if (val < 0)
-                      {
-                        val = hex2nibble(*pos);
-                        if (val < 0)
-                            break;
-                        buf[len++] = val;
-                        pos++;
-                      }
-                    else
-                      {
-                        buf[len++] = val;
-                        pos += 2;
-                      }
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                    val = *pos++ - '0';
-                    if (*pos >= '0' && *pos <= '7')
-                      {
-                        val = val * 8 + (*pos++ - '0');
-                      }
+          pos++;
+          switch (*pos)
+            {
+              case '\\':
+                  buf[len++] = '\\';
+                  pos++;
+                  break;
+              case '"':
+                  buf[len++] = '"';
+                  pos++;
+                  break;
+              case 'n':
+                  buf[len++] = '\n';
+                  pos++;
+                  break;
+              case 'r':
+                  buf[len++] = '\r';
+                  pos++;
+                  break;
+              case 't':
+                  buf[len++] = '\t';
+                  pos++;
+                  break;
+              case 'e':
+                  buf[len++] = '\033';
+                  pos++;
+                  break;
+              case 'x':
+                  pos++;
+                  val = hex2byte(pos);
+                  if (val < 0)
+                    {
+                      val = hex2nibble(*pos);
+                      if (val < 0)
+                          break;
+                      buf[len++] = val;
+                      pos++;
+                    }
+                  else
+                    {
+                      buf[len++] = val;
+                      pos += 2;
+                    }
+                  break;
+              case '0':
+              case '1':
+              case '2':
+              case '3':
+              case '4':
+              case '5':
+              case '6':
+              case '7':
+                  val = *pos++ - '0';
+                  if (*pos >= '0' && *pos <= '7')
+                    {
+                      val = val * 8 + (*pos++ - '0');
+                    }
 
-                    if (*pos >= '0' && *pos <= '7')
-                      {
-                        val = val * 8 + (*pos++ - '0');
-                      }
+                  if (*pos >= '0' && *pos <= '7')
+                    {
+                      val = val * 8 + (*pos++ - '0');
+                    }
 
-                    buf[len++] = val;
-                    break;
-                default:
-                    break;
-              }
+                  buf[len++] = val;
+                  break;
+              default:
+                  break;
+            }
             break;
         default:
             buf[len++] = *pos++;
             break;
-      }
-  }
+        }
+    }
 
   return len;
 }
@@ -1073,7 +1073,7 @@ static int wifi_send_event(struct net_driver_s *dev, unsigned int cmd,
   memset(&wev->event.u, 0, sizeof(union iwreq_data));
   memcpy(&wev->event.u, ((char *)wrqu), sizeof(union iwreq_data));
 
-  netlink_add_broadcast(RTNLGRP_LINK,
+  netlink_add_broadcast(NETLINK_ROUTE, RTNLGRP_LINK,
                         (struct netlink_response_s *)alloc);
   return OK;
 }
@@ -1278,7 +1278,7 @@ static int wifidriver_set_psk(struct sim_wifi_s *wifidev,
       break;
     case IW_MODE_MASTER:
 
-       /* set wpa_passphrase psk_buf */
+      /* set wpa_passphrase psk_buf */
 
       ret = set_cmd(wifidev, "set wpa_passphrase %s", wifidev->password);
       wifidev->psk_flag = 1;
@@ -1391,22 +1391,21 @@ static int wifidriver_get_essid(struct sim_wifi_s *wifidev,
   switch (wifidev->mode)
     {
     case IW_MODE_INFRA:
-      {
-        /* get essid */
 
-        get_wpa_ssid(wifidev, essid);
+      /* get essid */
 
-        /* get wpa_state */
+      get_wpa_ssid(wifidev, essid);
 
-        if (get_wpa_state(wifidev))
-          {
-            essid->flags = IW_ESSID_ON;
-          }
-        else
-          {
-            essid->flags = IW_ESSID_OFF;
-          }
-      }
+      /* get wpa_state */
+
+      if (get_wpa_state(wifidev))
+        {
+          essid->flags = IW_ESSID_ON;
+        }
+      else
+        {
+          essid->flags = IW_ESSID_OFF;
+        }
       break;
     case IW_MODE_MASTER:
       break;
@@ -1466,14 +1465,14 @@ static int wifidriver_get_bssid(struct sim_wifi_s *wifidev,
   switch (wifidev->mode)
     {
       case IW_MODE_INFRA:
-        if (get_wpa_state(wifidev) && get_wpa_bssid(wifidev, bssid))
-          {
-            ret = OK;
-          }
-        else
-          {
-            ret = -ENOTTY;
-          }
+      if (get_wpa_state(wifidev) && get_wpa_bssid(wifidev, bssid))
+        {
+          ret = OK;
+        }
+      else
+        {
+          ret = -ENOTTY;
+        }
         break;
 
       case IW_MODE_MASTER:
@@ -1513,20 +1512,20 @@ static int wifidriver_start_connect(struct sim_wifi_s *wifidev)
 
       while (timeout--)
         {
-           if (get_wpa_state(wifidev))
-             {
-               unsigned char bssid[ETH_ALEN];
-               union iwreq_data wrqu;
+          if (get_wpa_state(wifidev))
+            {
+              unsigned char bssid[ETH_ALEN];
+              union iwreq_data wrqu;
 
-               get_wpa_bssid(wifidev, bssid);
+              get_wpa_bssid(wifidev, bssid);
 
-               memset(&wrqu, 0, sizeof(wrqu));
-               memcpy(wrqu.ap_addr.sa_data, bssid, ETH_ALEN);
-               wifi_send_event(&wifidev->dev->netdev, SIOCGIWAP, &wrqu);
-               return OK;
-             }
+              memset(&wrqu, 0, sizeof(wrqu));
+              memcpy(wrqu.ap_addr.sa_data, bssid, ETH_ALEN);
+              wifi_send_event(&wifidev->dev->netdev, SIOCGIWAP, &wrqu);
+              return OK;
+            }
 
-           sleep(1);
+          sleep(1);
         }
 
       return ERROR;
@@ -1597,8 +1596,8 @@ static int wifidriver_set_mode(struct sim_wifi_s *wifidev,
       if (ret == 0)
         {
           /* Check the network number, if no network, should add new network.
-          * Then, set the new network id to network_id.
-          */
+           * Then, set the new network id to network_id.
+           */
 
           int num;
 

@@ -124,6 +124,11 @@ static int validate_nla(FAR const struct nlattr *nla, int maxtype,
       return -EINVAL;
     }
 
+  if (policy == NULL)
+    {
+      return 0;
+    }
+
   pt = &policy[type];
 
   DEBUGASSERT(pt->type <= NLA_TYPE_MAX);

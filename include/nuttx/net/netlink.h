@@ -101,20 +101,23 @@ void netlink_add_response(NETLINK_HANDLE handle,
  * Name: netlink_add_broadcast
  *
  * Description:
- *   Add broadcast data to all interested netlink connections.
+ *   Add broadcast data to interested netlink connections that match both
+ *   the specified protocol and multicast group.
  *
  *   Note:  The network will be momentarily locked to support exclusive
  *   access to the pending response list.
  *
  * Input Parameters:
- *   group - The broadcast group index.
- *   data  - The broadcast data.  The memory referenced by 'data'
- *           must have been allocated via kmm_malloc().  It will be freed
- *           using kmm_free() after it has been consumed.
+ *   protocol - The netlink protocol to match (NETLINK_ROUTE, etc).
+ *   group    - The broadcast group index.
+ *   data     - The broadcast data.  The memory referenced by 'data'
+ *              must have been allocated via kmm_malloc().  It will be freed
+ *              using kmm_free() after it has been consumed.
  *
  ****************************************************************************/
 
-void netlink_add_broadcast(int group, FAR struct netlink_response_s *data);
+void netlink_add_broadcast(int protocol, int group,
+                           FAR struct netlink_response_s *data);
 
 #ifdef __cplusplus
 }

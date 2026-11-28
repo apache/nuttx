@@ -34,6 +34,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
 
+#include <netpacket/nfnetlink.h>
+
 #include "inet/inet.h"
 #include "nat/nat.h"
 #include "netlink/netlink.h"
@@ -113,6 +115,7 @@ ipv6_nat_entry_create(uint8_t protocol, const net_ipv6addr_t external_ip,
                       uint16_t peer_port)
 {
   FAR ipv6_nat_entry_t *entry = kmm_malloc(sizeof(ipv6_nat_entry_t));
+
   if (entry == NULL)
     {
       nwarn("WARNING: Failed to allocate IPv6 NAT entry\n");

@@ -33,6 +33,7 @@
 #include <poll.h>
 
 #include <netpacket/netlink.h>
+#include <netpacket/rtnetlink.h>
 #include <nuttx/queue.h>
 #include <nuttx/net/icmpv6.h>
 #include <nuttx/net/netlink.h>
@@ -55,17 +56,6 @@
 #endif
 
 #ifdef CONFIG_NET_NETLINK
-
-/* nla_for_each_attr - iterate over a stream of attributes
- * pos: loop counter, set to current attribute
- * head: head of attribute stream
- * len: length of attribute stream
- * rem: initialized to len, holds bytes currently remaining in stream
- */
-
-#define nla_for_each_attr(pos, head, len, rem)  \
-  for (pos = head, rem = len; nla_ok(pos, rem); \
-       pos = nla_next(pos, &(rem)))
 
 /* Always use this macro, this allows later putting the
  * message into a separate section or such for things
@@ -193,6 +183,7 @@ struct netlink_conn_s
   uint32_t dst_pid;                  /* Destination port ID */
   uint32_t dst_groups;               /* Destination multicast groups mask */
   uint8_t crefs;                     /* Reference counts on this instance */
+  uint8_t protocol;                  /* Netlink protocol (NETLINK_ROUTE, etc) */
 
   /* poll() support */
 
@@ -202,30 +193,6 @@ struct netlink_conn_s
   /* Queued response data */
 
   sq_queue_t resplist;               /* Singly linked list of responses */
-};
-
-/* Standard attribute types to specify validation policy */
-
-enum
-{
-  NLA_UNSPEC,
-  NLA_U8,
-  NLA_U16,
-  NLA_U32,
-  NLA_U64,
-  NLA_STRING,
-  NLA_FLAG,
-  NLA_MSECS,
-  NLA_NESTED,
-  NLA_NESTED_COMPAT,
-  NLA_NUL_STRING,
-  NLA_BINARY,
-  NLA_S8,
-  NLA_S16,
-  NLA_S32,
-  NLA_S64,
-  NLA_BITFIELD32,
-  NLA_TYPE_MAX = NLA_BITFIELD32,
 };
 
 /* struct netlink_ext_ack - netlink extended ACK report struct
@@ -583,6 +550,8 @@ void netlink_ipv6_prefix_notify(FAR struct net_driver_s *dev, int type,
                                 FAR const struct icmpv6_prefixinfo_s *pinfo);
 #endif
 
+#endif /* CONFIG_NETLINK_ROUTE */
+
 /****************************************************************************
  * Name: nla_next
  *
@@ -614,7 +583,22 @@ int nla_parse(FAR struct nlattr **tb, int maxtype,
               FAR const struct nlattr *head,
               int len, FAR const struct nla_policy *policy,
               FAR struct netlink_ext_ack *extack);
-#endif /* CONFIG_NETLINK_ROUTE */
+
+/****************************************************************************
+ * Name: netlink_generic_sendto
+ *
+ * Description:
+ *   Perform the sendto() operation for the NETLINK_GENERIC protocol.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETLINK_GENERIC
+ssize_t netlink_generic_sendto(FAR struct netlink_conn_s *conn,
+                               FAR const struct nlmsghdr *msg,
+                               size_t len, int flags,
+                               FAR const struct sockaddr_nl *to,
+                               socklen_t tolen);
+#endif
 
 /****************************************************************************
  * Name: netlink_netfilter_sendto

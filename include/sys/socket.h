@@ -280,6 +280,7 @@
 #define SOL_RFCOMM      18 /* See options in include/netpacket/bluetooth.h */
 
 #define SOL_PACKET      19
+#define SOL_NETLINK     20
 
 /* Values for the 'how' argument of shutdown() */
 
