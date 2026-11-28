@@ -3,13 +3,11 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2007-2010, 2012, 2015, 2018-2019 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
- *
- *   Original author Adam Dunkels <adam@dunkels.com>
- *   Copyright () 2001-2003, Adam Dunkels.
- *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

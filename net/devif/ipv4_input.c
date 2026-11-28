@@ -3,21 +3,11 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2007-2009, 2013-2015, 2018-2019 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2001-2003 Adam Dunkels.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
- *
- * uIP is an implementation of the TCP/IP protocol stack intended for
- * small 8-bit and 16-bit microcontrollers.
- *
- * uIP provides the necessary protocols for Internet communication,
- * with a very small code footprint and RAM requirements - the uIP
- * code size is on the order of a few kilobytes and RAM usage is on
- * the order of a few hundred bytes.
- *
- *   Original author Adam Dunkels <adam@dunkels.com>
- *   Copyright () 2001-2003, Adam Dunkels.
- *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
