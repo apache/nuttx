@@ -27,52 +27,112 @@
 #include <nuttx/config.h>
 
 #include <limits.h>
+#include <string.h>
 #include <unistd.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/irq.h>
 #include <nuttx/sched.h>
 
 #include "inode/inode.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The number of task IDs that one walk of the task list collects */
+
+#define SYNC_NPIDS 16
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct sync_pids_s
+{
+  pid_t last;                /* Collect only the IDs above this one */
+  int   npids;               /* The number of IDs in pids[] */
+  pid_t pids[SYNC_NPIDS];    /* The smallest IDs above last, in order */
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_fssync
+ * Name: sync_collect
  *
  * Description:
- *   nxsched_foreach() callback that fsyncs every open file of one task.
+ *   nxsched_foreach() callback that keeps the SYNC_NPIDS smallest task IDs
+ *   above sp->last, in order.  It runs in the critical section, so it only
+ *   reads the TCB.
  *
  ****************************************************************************/
 
-static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
+static void sync_collect(FAR struct tcb_s *tcb, FAR void *arg)
 {
-  FAR struct tcb_s *ctcb;
-  int pid = tcb->pid;
-  int count;
-  int fd;
+  FAR struct sync_pids_s *sp = arg;
+  pid_t pid = tcb->pid;
+  int n;
+  int i;
 
-  if (tcb->group == NULL)
+  if (pid <= sp->last ||
+      (sp->npids == SYNC_NPIDS && pid > sp->pids[SYNC_NPIDS - 1]))
     {
       return;
     }
 
-  count = fdlist_count(&tcb->group->tg_fdlist);
+  /* Insert the ID in order.  If the array is full, the greatest ID drops
+   * out, and a later walk collects it again.
+   */
 
-  for (fd = 0; fd < count; fd++)
+  n = sp->npids < SYNC_NPIDS ? sp->npids++ : SYNC_NPIDS - 1;
+  i = 0;
+  while (i < n && sp->pids[i] < pid)
     {
-      FAR struct file *filep;
+      i++;
+    }
 
-      /* file_fsync() may block and let the task exit meanwhile */
+  memmove(&sp->pids[i + 1], &sp->pids[i], (n - i) * sizeof(sp->pids[0]));
+  sp->pids[i] = pid;
+}
 
-      ctcb = nxsched_get_tcb(pid);
-      if (ctcb == NULL || ctcb->group == NULL || ctcb != tcb)
+/****************************************************************************
+ * Name: task_fssync
+ *
+ * Description:
+ *   Fsync every open file of one task.  This runs outside the critical
+ *   section.
+ *
+ ****************************************************************************/
+
+static void task_fssync(pid_t pid)
+{
+  FAR struct tcb_s *tcb;
+  FAR struct file *filep;
+  irqstate_t flags;
+  int ret;
+  int fd;
+
+  for (fd = 0; ; fd++)
+    {
+      /* The TCB and the descriptor list are valid only in the critical
+       * section that finds the task.  The file reference keeps the file.
+       */
+
+      flags = enter_critical_section();
+      tcb = nxsched_get_tcb(pid);
+      if (tcb == NULL || tcb->group == NULL ||
+          fd >= fdlist_count(&tcb->group->tg_fdlist))
         {
-          return;
+          leave_critical_section(flags);
+          break;
         }
 
-      if (fdlist_get(&ctcb->group->tg_fdlist, fd, &filep) >= 0)
+      ret = fdlist_get(&tcb->group->tg_fdlist, fd, &filep);
+      leave_critical_section(flags);
+
+      if (ret >= 0)
         {
           file_fsync(filep);
           file_put(filep);
@@ -118,7 +178,31 @@ static int mountpt_syncfs(FAR struct inode *inode,
 
 void sync(void)
 {
-  nxsched_foreach(task_fssync, NULL);
+  struct sync_pids_s sp;
+  int i;
+
+  /* A file method can take a driver spinlock whose holder enters the
+   * critical section (a pipe posts a semaphore with d_bflock held).  So
+   * each walk only collects task IDs, and the fsyncs come after the walk.
+   */
+
+  sp.last = -1;
+  do
+    {
+      sp.npids = 0;
+      nxsched_foreach(sync_collect, &sp);
+
+      for (i = 0; i < sp.npids; i++)
+        {
+          task_fssync(sp.pids[i]);
+        }
+
+      if (sp.npids > 0)
+        {
+          sp.last = sp.pids[sp.npids - 1];
+        }
+    }
+  while (sp.npids == SYNC_NPIDS);
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   foreach_inode(mountpt_syncfs, NULL, true);
