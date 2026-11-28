@@ -1,4 +1,5 @@
 /****************************************************************************
+
  * boards/arm/rzv2h/rzv2h-evk/src/rzv2h-evk.h
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -84,6 +85,32 @@ void board_button_initialize(void);
 #endif
 
 /****************************************************************************
+
+ * Name: board_spi_initialize
+ *
+ * Description:
+ *   Initialize SPI buses
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV2H_SPI_B
+int board_spi_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: board_sci_spi_initialize
+ *
+ * Description:
+ *   Initialize SCI_B SPI buses
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV2H_SCI_SPI
+int board_sci_spi_initialize(void);
+#endif
+
+/****************************************************************************
+
  * Name: rzv2h_appexamples
  *
  * Description:
