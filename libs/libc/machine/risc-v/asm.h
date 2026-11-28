@@ -11,6 +11,7 @@
  * including the implied warranties of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE.  A copy of this license is available at
  *  http://www.opensource.org/licenses.
+ *
  ****************************************************************************/
 
 #ifndef __LIBS_LIBC_MACHINE_RISCV_GNU_ASM_H
