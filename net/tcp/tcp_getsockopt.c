@@ -129,6 +129,7 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
         else
           {
             FAR int *keepalive = (FAR int *)value;
+
             *keepalive         = conn->keepalive;
             *value_len         = sizeof(int);
             ret                = OK;
@@ -168,6 +169,7 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
           else if (*value_len == sizeof(int))
             {
               FAR int *pdsecs = (FAR int *)value;
+
               *pdsecs         = dsecs;
               ret             = OK;
             }
@@ -196,6 +198,7 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
         else
           {
             FAR int *keepcnt = (FAR int *)value;
+
             *keepcnt         = conn->keepcnt;
             *value_len       = sizeof(int);
             ret              = OK;
@@ -213,9 +216,11 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
           {
             FAR int *nodelay   = (FAR int *)value;
 
-            /* Always true here since we do not support Nagle. */
+            /* TCP_NODELAY is always on (no Nagle algorithm).  TCP_CORK is
+             * only a hint: report what setsockopt() stored.
+             */
 
-            *nodelay           = option == TCP_NODELAY ? 1 : 0;
+            *nodelay           = option == TCP_NODELAY ? 1 : conn->cork;
             *value_len         = sizeof(int);
             ret                = OK;
           }
@@ -234,6 +239,7 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
         else
           {
             FAR int *mss = (FAR int *)value;
+
             *mss         = conn->mss;
             *value_len   = sizeof(int);
             ret          = OK;
