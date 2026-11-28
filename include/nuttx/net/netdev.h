@@ -2,9 +2,9 @@
  * include/nuttx/net/netdev.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2007,2009 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2011-2018 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels. All rights reserved.
+ * SPDX-FileCopyrightText: 2007,2009 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2011-2018 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

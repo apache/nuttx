@@ -2,8 +2,8 @@
  * include/sys/uio.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2017 Grefory Nutt. All rights reserved.
- * SPDX-FileCopyrightText 2015 Stavros Polymenis. All rights reserved.
+ * SPDX-FileCopyrightText: 2017 Grefory Nutt.
+ * SPDX-FileCopyrightText 2015 Stavros Polymenis.
  * SPDX-FileContributor: Stavros Polymenis <sp@orbitalfox.com>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

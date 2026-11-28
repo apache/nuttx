@@ -2,8 +2,8 @@
  * include/nuttx/video/edid.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2006 Itronix Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2006 Itronix Inc.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Garrett D'Amore for Itronix Inc.
  *

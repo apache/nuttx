@@ -2,8 +2,8 @@
  * include/nuttx/net/igmp.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2010, 2012, 2014, 2019 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: Copyright (c) 2002 CITEL Technologies Ltd. All rights reserved.
+ * SPDX-FileCopyrightText: 2010, 2012, 2014, 2019 Gregory Nutt.
+ * SPDX-FileCopyrightText: Copyright (c) 2002 CITEL Technologies Ltd.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

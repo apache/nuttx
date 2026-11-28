@@ -2,11 +2,11 @@
  * include/nuttx/net/dns.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2018 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2014-2015 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2011-2012 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2007-2009 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2002-2003, Adam Dunkels. All rights reserved.
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2014-2015 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2011-2012 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2007-2009 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2002-2003, Adam Dunkels.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
  *
