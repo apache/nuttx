@@ -2,8 +2,8 @@
  * boards/arm/stm32f4/nucleo-f412zg/src/stm32_usb.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2017 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2017 Brian Webb. All rights reserved.
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2017 Brian Webb.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Brian Webb <webbbn@gmail.com>
  *

@@ -2,7 +2,7 @@
  * boards/arm/tiva/tm4c123g-launchpad/src/tm4c_can.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt.
  * SPDX-FileCopyrightText: 2020 Matthew Trescott
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

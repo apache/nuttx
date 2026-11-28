@@ -2,7 +2,7 @@
  * boards/arm/stm32l4/stm32l476-mdk/include/board.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt.
  * SPDX-FileCopyrightText: 2016 Motorola Mobility, LLC.
  *
  * Redistribution and use in source and binary forms, with or without
