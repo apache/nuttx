@@ -1004,6 +1004,8 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
   FAR epoll_head_t *eph;
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
   sigset_t oldsigmask;
+  sigset_t tmpsigmask;
+  FAR sigset_t *saved = &oldsigmask;
   irqstate_t flags;
 #endif
   int ret;
@@ -1026,26 +1028,31 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
       goto out;
     }
 
-  /* Set the mask for the whole wait.  Without signals, there is no mask to
-   * set.  A pending signal that the mask unblocks stops the call at once.
-   * The critical section closes the window from this test to the wait.
-   */
-
-#ifndef CONFIG_DISABLE_ALL_SIGNALS
-  flags = enter_critical_section();
-  if (nxsig_waitmask_set(sigmask, &oldsigmask))
-    {
-      ret = -EINTR;
-      goto err;
-    }
-#endif
-
 retry:
   ret = epoll_setup(eph);
   if (ret < 0)
     {
       goto err;
     }
+
+  /* Set the mask after the setup, as nx_poll() does: the poll methods can
+   * take a spinlock of their driver, so they must not run in the critical
+   * section.  The section closes the window from the test of the pending
+   * signals to the wait.  Without signals, there is no mask to set.  Save
+   * the old mask only once: in a system call, the temporary mask stays set
+   * after nxsig_waitmask_restore().
+   */
+
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  flags = enter_critical_section();
+  if (nxsig_waitmask_set(sigmask, saved))
+    {
+      ret = -EINTR;
+      goto err_with_mask;
+    }
+
+  saved = &tmpsigmask;
+#endif
 
   /* Wait the poll ready */
 
@@ -1061,6 +1068,11 @@ retry:
     {
       ret = nxsem_wait(&eph->sem);
     }
+
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  nxsig_waitmask_restore(&oldsigmask);
+  leave_critical_section(flags);
+#endif
 
   if (ret < 0 && ret != -ETIMEDOUT)
     {
@@ -1078,19 +1090,17 @@ retry:
       ret = num;
     }
 
-#ifndef CONFIG_DISABLE_ALL_SIGNALS
-  nxsig_waitmask_restore(&oldsigmask);
-  leave_critical_section(flags);
-#endif
   epoll_filep_close(filep);
 
   return ret;
 
-err:
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
+err_with_mask:
   nxsig_waitmask_restore(&oldsigmask);
   leave_critical_section(flags);
 #endif
+
+err:
   epoll_filep_close(filep);
   set_errno(-ret);
 out:
