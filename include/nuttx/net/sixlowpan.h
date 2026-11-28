@@ -2,7 +2,7 @@
  * include/nuttx/net/sixlowpan.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2017, Gregory Nutt, all rights reserved
+ * SPDX-FileCopyrightText: 2017, Gregory Nutt
  * SPDX-FileCopyrightText: 2008, Swedish Institute of Computer Science.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Adam Dunkels <adam@sics.se>
@@ -10,8 +10,6 @@
  * SPDX-FileContributor: Niclas Finne <nfi@sics.se>
  * SPDX-FileContributor: Mathilde Durvy <mdurvy@cisco.com>
  * SPDX-FileContributor: Julien Abeille <jabeille@cisco.com>
- *
- *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
