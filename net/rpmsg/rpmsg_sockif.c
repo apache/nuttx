@@ -705,6 +705,19 @@ static void rpmsg_socket_ns_unbind(FAR struct rpmsg_endpoint *ept)
   FAR struct rpmsg_socket_conn_s *server;
   irqstate_t flags;
 
+  /* A non-blocking connect learns the result from SO_ERROR once polled,
+   * so a peer that rejects the pending connect (NS_DESTROY, no server
+   * listening yet) must leave an error there.
+   */
+
+  flags = spin_lock_irqsave_nopreempt(&conn->sendlock);
+  if (_SS_ISCONNECTING(conn->sconn.s_flags))
+    {
+      _SO_CONN_SETERRNO(conn, ECONNRESET);
+    }
+
+  spin_unlock_irqrestore_nopreempt(&conn->sendlock, flags);
+
   flags = spin_lock_irqsave_nopreempt(&conn->recvlock);
   server = conn->server;
   conn->server = NULL;
