@@ -1,3 +1,25 @@
+/****************************************************************************
+ * libs/libc/locale/jis0208.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
 12288,12289,12290,65292,65294,12539,65306,65307,65311,65281,12443,12444,180,
 65344,168,65342,65507,65343,12541,12542,12445,12446,12291,20189,12293,12294,
 12295,12540,8213,8208,65295,92,12316,8214,65372,8230,8229,8216,8217,8220,8221,

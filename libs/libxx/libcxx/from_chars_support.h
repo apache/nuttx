@@ -1,18 +1,22 @@
-//===-- from_chars_support.h - from_chars float support -------- -*- C++ -*-===//
-//
-// Minimal self-contained replacement for LLVM libc's shared/ headers:
-//   shared/fp_bits.h, shared/str_to_float.h, shared/str_to_integer.h
-//
-// Delegates actual string-to-float conversion to system strtof/strtod,
-// providing the API surface that libcxx's from_chars_floating_point.h expects.
-//
-// Supports float and double only. No long double, no wchar_t.
-//
-// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
-// See https://llvm.org/LICENSE.txt for license information.
-// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-//
-//===----------------------------------------------------------------------===//
+/****************************************************************************
+ * libs/libxx/libcxx/from_chars_support.h
+ *
+ * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ *
+ * from_chars_support.h - from_chars float support -------- -*- C++ -*-===//
+ *
+ * Minimal self-contained replacement for LLVM libc's shared/ headers:
+ *   shared/fp_bits.h, shared/str_to_float.h, shared/str_to_integer.h
+ *
+ * Delegates actual string-to-float conversion to system strtof/strtod,
+ * providing the API surface that libcxx's from_chars_floating_point.h expects.
+ *
+ * Supports float and double only. No long double, no wchar_t.
+ *
+ * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+ * See https://llvm.org/LICENSE.txt for license information.
+ *
+ ****************************************************************************/
 
 #ifndef LIBCXX_SRC_INCLUDE_FROM_CHARS_SUPPORT_H
 #define LIBCXX_SRC_INCLUDE_FROM_CHARS_SUPPORT_H

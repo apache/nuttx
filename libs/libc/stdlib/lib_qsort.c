@@ -2,8 +2,9 @@
  * libs/libc/stdlib/lib_qsort.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2007, 2009, 2011 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 1992, 1993 The Regents of the University of California.  All rights reserved.
+ * SPDX-FileCopyrightText: 2007, 2009, 2011 Gregory Nutt
+ * SPDX-FileCopyrightText: 1993 The Regents of the University of California
+ * SPDX-FileCopyrightText: 1992 The Regents of the University of California
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

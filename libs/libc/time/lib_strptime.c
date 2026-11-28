@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/time/lib_strptime.c
  *
+ * SPDX-License-Identifier: MIT
+ *
  * musl as a whole is licensed under the following standard MIT license:
  *
  * Copyright © 2005-2020 Rich Felker, et al.

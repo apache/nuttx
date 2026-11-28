@@ -1,3 +1,25 @@
+/****************************************************************************
+ * libs/libc/locale/ksc.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
 12288,12289,12290,183,8229,8230,168,12291,173,8213,8741,65340,8764,8216,8217,
 8220,8221,12308,12309,12296,12297,12298,12299,12300,12301,12302,12303,12304,
 12305,177,215,247,8800,8804,8805,8734,8756,176,8242,8243,8451,8491,65504,

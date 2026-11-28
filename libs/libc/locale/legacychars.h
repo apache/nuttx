@@ -1,3 +1,25 @@
+/****************************************************************************
+ * libs/libc/locale/legacychars.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
 256,257,258,259,260,261,262,263,264,265,266,267,268,269,270,271,272,273,274,
 275,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,
 296,297,298,299,302,303,304,305,308,309,310,311,312,313,314,315,316,317,318,
