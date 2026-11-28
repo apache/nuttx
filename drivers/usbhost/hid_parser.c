@@ -2,7 +2,7 @@
  * drivers/usbhost/hid_parser.c
  *
  * SPDX-License-Identifier: X11
- * SPDX-FileCopyrightText: 2011 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Gregory Nutt.
  * SPDX-FileCopyrightText: 2011 Dean Camera (dean@fourwalledcubicle.com)
  * SPDX-FileContributor: dean@fourwalledcubicle.com, www.lufa-lib.org
  *

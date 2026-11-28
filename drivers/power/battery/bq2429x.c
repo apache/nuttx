@@ -2,9 +2,9 @@
  * drivers/power/battery/bq2429x.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2017 Neil Hancock. All rights reserved.
- * SPDX-FileCopyrightText: 2017 Haltian Ltd. All rights reserved.
- * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2017 Neil Hancock.
+ * SPDX-FileCopyrightText: 2017 Haltian Ltd.
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Juha Niskanen <juha.niskanen@haltian.com>
  *
