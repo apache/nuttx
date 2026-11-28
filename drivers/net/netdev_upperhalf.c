@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <nuttx/debug.h>
 #include <errno.h>
 #include <stdbool.h>
@@ -114,6 +115,12 @@ struct netdev_upperhalf_s
    */
 
   atomic_t txdone;
+
+  /* netdev_upper_ifdown() takes the device down: the worker does no
+   * receive() and no transmit.  netdev_upper_ifup() clears it.
+   */
+
+  bool ifdown;
 
   /* Deferring process to work queue or thread */
 
@@ -360,7 +367,7 @@ static void netdev_upper_txavail_work(FAR struct netdev_upperhalf_s *upper)
   /* Ignore the notification if the interface is not yet up */
 
   netdev_lock(dev);
-  if (IFF_IS_UP(dev->d_flags) && !upper->txing)
+  if (IFF_IS_UP(dev->d_flags) && !upper->txing && !upper->ifdown)
     {
       DEBUGASSERT(dev->d_buf == NULL); /* Make sure: IOB only. */
       upper->txing = true;
@@ -792,9 +799,11 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
   FAR struct net_driver_s       *dev   = &lower->netdev;
   FAR netpkt_t                  *pkt;
 
-  /* Loop while receive() successfully retrieves valid Ethernet frames. */
+  /* Loop while receive() successfully retrieves valid Ethernet frames.
+   * Stop when netdev_upper_ifdown() takes the device down.
+   */
 
-  while ((pkt = lower->ops->receive(lower)) != NULL)
+  while (!upper->ifdown && (pkt = lower->ops->receive(lower)) != NULL)
     {
 #if defined(CONFIG_NET_VLAN) && defined(CONFIG_NET_ETHERNET)
       /* If this is a VLAN tagged frame, dispatch it to the VLAN device's
@@ -1335,11 +1344,16 @@ static void netdev_upper_exit_thread(FAR struct netdev_upperhalf_s *upper)
 
             if (t->tid >= 0)
               {
-                /* Try to tear down the dedicated thread for work. */
+                /* Try to tear down the dedicated thread for work.  Wait
+                 * until it has ended: it can still be in receive().  The
+                 * wait is short, as the thread needs only t->sem and the
+                 * device lock, which the caller does not hold
+                 * (netdev_upper_stop_worker()).
+                 */
 
                 t->tid = INVALID_PROCESS_ID;
                 nxsem_post(&t->sem);
-                nxsem_wait(&t->sem_exit);
+                nxsem_wait_uninterruptible(&t->sem_exit);
               }
           }
         break;
@@ -1347,18 +1361,69 @@ static void netdev_upper_exit_thread(FAR struct netdev_upperhalf_s *upper)
 }
 
 /****************************************************************************
- * Name: netdev_upper_ifup/ifdown/addmac/rmmac/ioctl
+ * Name: netdev_upper_stop_worker
  *
  * Description:
- *   Called by net stack and relayed to lower half driver.
+ *   Stop the worker (the work or the dedicated threads) and wait until no
+ *   callback of it runs.  From now on the worker does no receive() and no
+ *   transmit, also when it runs again later, until netdev_upper_ifup()
+ *   clears upper->ifdown.
+ *
+ *   The worker takes the device lock (netdev_upper_rxpoll_work() and
+ *   netdev_upper_txavail_work()), and the caller can hold it (SIOCSIFFLAGS
+ *   holds it in netdev_ifr_ioctl()).  So wait for the worker without the
+ *   lock, else neither can continue.  The lock is taken again before the
+ *   return.
  *
  ****************************************************************************/
 
-static int netdev_upper_ifup(FAR struct net_driver_s *dev)
+static void netdev_upper_stop_worker(FAR struct netdev_upperhalf_s *upper)
 {
-  FAR struct netdev_upperhalf_s *upper = dev->d_private;
-  int cpu = 1;
+  FAR struct net_driver_s *dev = &upper->lower->netdev;
+  unsigned int count;
   int ret;
+
+  upper->ifdown = true;
+  netdev_breaklock(dev, &count);
+
+  switch (upper->lower->rxtype)
+    {
+      case NETDEV_RX_WORK:
+        work_cancel_sync(upper->lower->priority, upper->work);
+        break;
+      case NETDEV_RX_THREAD:
+      case NETDEV_RX_THREAD_RSS:
+        netdev_upper_exit_thread(upper);
+        break;
+    }
+
+  /* Take d_lock again, also when a signal ends the wait for it: the
+   * caller holds it as before (the lower ifdown() runs under it, and the
+   * caller unlocks it).
+   */
+
+  do
+    {
+      ret = netdev_restorelock(dev, count);
+    }
+  while (ret == -EINTR);
+
+  DEBUGASSERT(ret >= 0);
+}
+
+/****************************************************************************
+ * Name: netdev_upper_start_thread
+ *
+ * Description:
+ *   Start the dedicated threads of a NETDEV_RX_THREAD or
+ *   NETDEV_RX_THREAD_RSS device.  Nothing to do for the other types.
+ *
+ ****************************************************************************/
+
+static int netdev_upper_start_thread(FAR struct netdev_upperhalf_s *upper)
+{
+  FAR struct net_driver_s *dev = &upper->lower->netdev;
+  int cpu = 1;
 
   switch (upper->lower->rxtype)
     {
@@ -1391,61 +1456,120 @@ static int netdev_upper_ifup(FAR struct net_driver_s *dev)
                                     netdev_upper_loop, argv);
             if (t->tid < 0)
               {
-                netdev_upper_exit_thread(upper);
-                return t->tid;
+                int ret = t->tid;
+
+                netdev_upper_stop_worker(upper);
+                return ret;
               }
           }
         break;
     }
 
-  if (upper->lower->ops->ifup)
+  return OK;
+}
+
+/****************************************************************************
+ * Name: netdev_upper_ifup/ifdown/addmac/rmmac/ioctl
+ *
+ * Description:
+ *   Called by net stack and relayed to lower half driver.
+ *
+ ****************************************************************************/
+
+static int netdev_upper_ifup(FAR struct net_driver_s *dev)
+{
+  FAR struct netdev_upperhalf_s *upper = dev->d_private;
+  int ret;
+
+  ret = netdev_upper_start_thread(upper);
+  if (ret < 0)
     {
-      ret = upper->lower->ops->ifup(upper->lower);
-
-#ifdef CONFIG_DRIVERS_NOTENET
-      /* Bind the netdev drivers.  The interface is already up, so a
-       * failure here must not fail ifup.
-       */
-
-      if (ret >= 0 && netdev_drivers_init(upper->lower) < 0)
-        {
-          nwarn("WARNING: failed to bind netdev drivers to %s\n",
-                dev->d_ifname);
-        }
-#endif
-
       return ret;
     }
 
-  return -ENOSYS;
+  ret = -ENOSYS;
+  if (upper->lower->ops->ifup)
+    {
+      ret = upper->lower->ops->ifup(upper->lower);
+    }
+
+  if (ret < 0)
+    {
+      /* The device stays down: stop the threads that started above */
+
+      netdev_upper_stop_worker(upper);
+      return ret;
+    }
+
+  /* The worker may touch the lower half only now that it is up.  A work
+   * that was queued meanwhile returned without it: queue it again.
+   */
+
+  upper->ifdown = false;
+  netdev_upper_queue_work(dev);
+
+#ifdef CONFIG_DRIVERS_NOTENET
+  /* Bind the netdev drivers.  The interface is already up, so a failure
+   * here must not fail ifup.
+   */
+
+  if (netdev_drivers_init(upper->lower) < 0)
+    {
+      nwarn("WARNING: failed to bind netdev drivers to %s\n",
+            dev->d_ifname);
+    }
+#endif
+
+  return ret;
 }
 
 static int netdev_upper_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
+  int ret = -ENOSYS;
+
+  /* Another thread takes the device down now and waits for the worker.
+   * IFF_UP stays set until netdev_ifdown() clears it after this function,
+   * so netdev_ifup() does not start while the device lock is free.
+   */
+
+  if (upper->ifdown)
+    {
+      return -EBUSY;
+    }
+
+  netdev_upper_stop_worker(upper);
 
   /* Drain the TX queue before tearing down the interface. */
 
   iob_free_queue(&upper->txq);
   atomic_set(&upper->txdone, 0);
 
-  switch (upper->lower->rxtype)
-    {
-      case NETDEV_RX_WORK:
-        work_cancel_sync(upper->lower->priority, upper->work);
-        break;
-      case NETDEV_RX_THREAD:
-      case NETDEV_RX_THREAD_RSS:
-        netdev_upper_exit_thread(upper);
-        break;
-    }
-
   if (upper->lower->ops->ifdown)
     {
-      return upper->lower->ops->ifdown(upper->lower);
+      ret = upper->lower->ops->ifdown(upper->lower);
     }
 
-  return -ENOSYS;
+  if (ret != OK)
+    {
+      /* The device stays up: start the worker again */
+
+      upper->ifdown = false;
+      if (netdev_upper_start_thread(upper) < 0)
+        {
+          /* netdev_upper_start_thread() failed and stopped the threads
+           * again, which set the flag (netdev_upper_stop_worker()).  The
+           * device stays up: clear the flag again, as above.
+           */
+
+          nerr("ERROR: no worker thread for %s\n", dev->d_ifname);
+          upper->ifdown = false;
+        }
+
+      netdev_upper_queue_work(dev);
+    }
+
+  return ret;
 }
 
 #ifdef CONFIG_NET_MCASTGROUP
