@@ -6811,5 +6811,47 @@ config RZV2H_RTC_CARRY_INTSEL
 	range 353 479
 
 endif # RZV2H_RTC
+menuconfig RZV2H_RPTUN
+	bool "OpenAMP RPTUN support"
+	default n
+	depends on RZV2H_CORTEXR8_0
+	depends on ARM_MPU && ARM_MPU_NREGIONS >= 8
+	select DEV_SIMPLE_ADDRENV
+	select RPTUN
+	select SCHED_HPWORK
+	---help---
+		Enable the RZ/V2H RPTUN lower half for communication between
+		Linux on the Cortex-A55 and NuttX on Cortex-R8 core 0.  The
+		transport uses an FSP MHU_B_NS instance supplied by the board.
+
+if RZV2H_RPTUN
+
+choice
+	prompt "RPMsg channel"
+	default RZV2H_RPTUN_CHANNEL0
+	---help---
+		Select the Multi-OS RPMsg channel owned by the NuttX RPTUN
+		device.  Both shared resource-table entries are initialized so
+		the Linux sample can inspect both, but one channel is active in
+		NuttX at a time.
+
+config RZV2H_RPTUN_CHANNEL0
+	bool "Channel 0"
+
+config RZV2H_RPTUN_CHANNEL1
+	bool "Channel 1"
+
+endchoice
+
+config RZV2H_RPTUN_ECHO
+	bool "Multi-OS RPMsg echo service"
+	default y
+	---help---
+		Create the endpoint for the selected channel used by the Renesas RZ
+		Multi-OS Package Linux rpmsg-sample application. The endpoint
+		echoes ordinary payloads and recognizes the reference
+		application's shutdown word.
+
+endif # RZV2H_RPTUN
 
 endmenu # "RZ/V2H Configuration Options"
