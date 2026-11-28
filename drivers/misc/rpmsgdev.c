@@ -669,46 +669,32 @@ static ssize_t rpmsgdev_ioctl_arglen(int cmd, unsigned long arg)
 {
   switch (cmd)
     {
-      case FIONWRITE:
-      case FIONREAD:
-      case FIONSPACE:
-      case FBIOSET_POWER:
-      case FBIOGET_POWER:
-      case BATIOC_CURRENT:
-      case BATIOC_VOLTAGE:
-      case BATIOC_TEMPERATURE:
-      case BATIOC_INPUT_CURRENT:
-      case BATIOC_STATE:
-      case BATIOC_ONLINE:
-      case BATIOC_CAPACITY:
-      case BATIOC_CHIPID:
-        return sizeof(int);
-      case TUNSETIFF:
-      case TUNGETIFF:
-        return sizeof(struct ifreq);
-      case FIOC_FILEPATH:
-        return PATH_MAX;
-      case BATIOC_GET_PROTOCOL:
-      case BATIOC_OPERATE:
-        return sizeof(struct batio_operate_msg_s);
-      case MSIOC_VENDOR:
-        return sizeof(struct mouse_vendor_cmd_s) +
-               ((FAR struct mouse_vendor_cmd_s *)(uintptr_t)arg)->len;
-      case MSIOC_GRAB:
-        return 0;
       case CFGDIOC_GETCONFIG:
       case CFGDIOC_SETCONFIG:
       case CFGDIOC_FIRSTCONFIG:
       case CFGDIOC_NEXTCONFIG:
-        return sizeof(struct config_data_s) +
-               ((FAR struct config_data_s *)(uintptr_t)arg)->len;
+        {
+          FAR const struct config_data_s *cfg =
+            (FAR const struct config_data_s *)(uintptr_t)arg;
+
+          if (cfg == NULL)
+            {
+              return -EINVAL;
+            }
+
+          if (cfg->len > SSIZE_MAX - sizeof(*cfg))
+            {
+              return -EOVERFLOW;
+            }
+
+          return sizeof(*cfg) + cfg->len;
+        }
+
       case CFGDIOC_DELCONFIG:
         return sizeof(struct config_data_s);
-      case RPMSGDEV_PRIVATE_IOCTL:
-        return sizeof(struct rpmsgdev_private_ioctl) +
-               ((FAR struct rpmsgdev_private_ioctl *)(uintptr_t)arg)->len;
+
       default:
-        return -ENOTTY;
+        return ioctl_arglen(cmd, arg);
     }
 }
 
@@ -771,12 +757,14 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return -ENOMEM;
     }
 
-  msglen = sizeof(*msg) + arglen - 1;
-  if (space < msglen)
+  if (space < sizeof(*msg) - 1 ||
+      arglen > space - (sizeof(*msg) - 1))
     {
       rpmsg_release_tx_buffer(&dev->ept, msg);
       return -EMSGSIZE;
     }
+
+  msglen = sizeof(*msg) - 1 + arglen;
 
   msg->filep   = priv->filep;
   msg->request = cmd;

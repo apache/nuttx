@@ -493,31 +493,6 @@ fail:
   return ret;
 }
 
-static ssize_t rpmsgfs_ioctl_arglen(int cmd)
-{
-  switch (cmd)
-    {
-      case FIONBIO:
-      case FIONWRITE:
-      case FIONREAD:
-        return sizeof(int);
-      case FIOC_FILEPATH:
-        return PATH_MAX;
-      case TCDRN:
-      case TCFLSH:
-        return 0;
-      case TCGETS:
-      case TCSETS:
-        return sizeof(struct termios);
-      case FIOC_SETLK:
-      case FIOC_GETLK:
-      case FIOC_SETLKW:
-        return sizeof(struct flock);
-      default:
-        return -ENOTTY;
-    }
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -699,7 +674,7 @@ off_t rpmsgfs_client_lseek(FAR void *handle, int fd,
 int rpmsgfs_client_ioctl(FAR void *handle, int fd,
                          int request, unsigned long arg)
 {
-  ssize_t arglen = rpmsgfs_ioctl_arglen(request);
+  ssize_t arglen = ioctl_arglen(request, arg);
   FAR struct rpmsgfs_s *priv = handle;
   FAR struct rpmsgfs_ioctl_s *msg;
   uint32_t space;
@@ -710,15 +685,19 @@ int rpmsgfs_client_ioctl(FAR void *handle, int fd,
       return arglen;
     }
 
-  len = sizeof(*msg) + arglen;
-
   msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
   if (msg == NULL)
     {
       return -ENOMEM;
     }
 
-  DEBUGASSERT(len <= space);
+  if (space < sizeof(*msg) || arglen > space - sizeof(*msg))
+    {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
+      return -EMSGSIZE;
+    }
+
+  len = sizeof(*msg) + arglen;
 
   msg->fd      = fd;
   msg->request = request;

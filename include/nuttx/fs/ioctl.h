@@ -953,6 +953,29 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: ioctl_arglen
+ *
+ * Description:
+ *   Get the contiguous argument buffer size at the device ioctl entry point.
+ *   Requests requiring nested pointer marshalling are not supported.
+ *
+ * Input Parameters:
+ *   cmd - The ioctl command
+ *   arg - The ioctl argument.  For variable-size requests, the caller must
+ *         provide an accessible header or a terminated string.
+ *
+ * Returned Value:
+ *   >0: arg points to a buffer of this size.
+ *    0: arg is passed by value or ignored, with no buffer to copy.
+ *   <0: Negated errno for an unsupported command or an invalid size.
+ *   The result excludes transport headers and does not validate memory
+ *   accessibility or guarantee that a particular transport supports cmd.
+ *
+ ****************************************************************************/
+
+ssize_t ioctl_arglen(int cmd, unsigned long arg);
+
 #ifdef __cplusplus
 }
 #endif
