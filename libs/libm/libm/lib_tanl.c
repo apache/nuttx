@@ -2,13 +2,13 @@
  * libs/libm/libm/lib_tanl.c
  *
  * SPDX-License-Identifier: ISC
- * SPDX-FileCopyrightText: Copyright (C) 2012 Gregory Nutt.
- * SPDX-FileContributor: Ported by: Darcy Gong
+ * SPDX-FileCopyrightText: 2012 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2009, 2010 Nick Johnson
+ * SPDX-FileContributor: Darcy Gong
+ * SPDX-FileContributor: Nick Johnson <nickbjohnson4224 at gmail.com>
  *
  * It derives from the Rhombus OS math library by Nick Johnson which has
  * a compatible, MIT-style license:
- *
- * Copyright (C) 2009, 2010 Nick Johnson <nickbjohnson4224 at gmail.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

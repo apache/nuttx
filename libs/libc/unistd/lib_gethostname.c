@@ -2,8 +2,8 @@
  * libs/libc/unistd/lib_gethostname.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2015 Stavros Polymenis. All rights reserved.
- * SPDX-FileCopyrightText: 2015, 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2015 Stavros Polymenis.
+ * SPDX-FileCopyrightText: 2015, 2016 Gregory Nutt.
  * SPDX-FileContributor: Stavros Polymenis <sp@orbitalfox.com>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

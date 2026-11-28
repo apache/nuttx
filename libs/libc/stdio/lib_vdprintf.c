@@ -2,7 +2,7 @@
  * libs/libc/stdio/lib_vdprintf.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2012 Andrew Tridgell. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Andrew Tridgell.
  * SPDX-FileContributor: Andrew Tridgell <andrew@tridgell.net>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
