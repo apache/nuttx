@@ -2752,7 +2752,7 @@ static inline void
 stm32_epfreepma(struct stm32_usbdev_s *priv, struct stm32_ep_s *privep)
 {
   irqstate_t flags = enter_critical_section();
-  priv->epavail   |= STM32_ENDP_BIT(privep->bufno);
+  priv->bufavail  |= STM32_BUFFER_BIT(privep->bufno);
   leave_critical_section(flags);
 }
 
