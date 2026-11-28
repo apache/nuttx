@@ -141,9 +141,13 @@ void env_release(FAR struct task_info_s *info);
  *   Remove environment variables that must not be inherited by a secure
  *   (set-user-ID or set-group-ID) executable.
  *
+ * Returned Value:
+ *   Zero on success, or a negated errno value if the lock of the
+ *   environment failed: then the environment is not changed.
+ *
  ****************************************************************************/
 
-void env_sanitize_secure(FAR struct task_info_s *info);
+int env_sanitize_secure(FAR struct task_info_s *info);
 #endif
 
 #ifdef __cplusplus

@@ -63,6 +63,23 @@ If, on the other hand, the asynchronous mode is enabled (and the thread is
 in a cancelable state), ``pthread_cancel()`` will, instead,
 kill the thread immediately.
 
+When a thread ends the process (``exit()``, ``_exit()`` or a signal), the
+kernel cancels the other threads of the process.  In the PROTECTED and KERNEL
+builds on an architecture that ends a system call in the context of the
+thread (``CONFIG_ARCH_HAVE_SYSCALL_THREAD_RETURN``: ARM64 and RISC-V), a
+thread that is in a system call is not killed immediately: there it can hold
+locks and references, and kernel objects can be on its stack.  The kernel
+marks the thread and wakes it, with ``ECANCELED``, from a wait that a signal
+ends and from a wait for a mutex in the memory of the process (its holder can
+have ended).  A wait that no signal ends (``nxsem_wait_uninterruptible()``)
+and a wait for a mutex of the kernel go on until they are complete.  The
+thread does not start a wait that the cancellation ends again.  It ends when
+the system call returns, whatever its cancellation state and type are.  No
+cleanup handler runs: the process ends as with ``_exit()``.  Kernel code that
+needs a mutex in the memory of the process (the lock of the environment in
+``getenv()``, for example) fails, and the system call returns an error that
+the process does not see.
+
 .. note:: For pthreads, the cancelable state is controlled by the interface
           ``pthread_setcancelstate().`` This allows the pthread to disable or
           re-enable cancellation. If the thread is not cancelable when

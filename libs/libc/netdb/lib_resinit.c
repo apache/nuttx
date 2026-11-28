@@ -98,7 +98,7 @@ int res_init(void)
  * Description:
  *   Give the resolver state of the process (the _res of <resolv.h>): the
  *   state of the task group, which is allocated at the first call.  NULL
- *   if it cannot be allocated.
+ *   if it cannot be allocated, or if the lock of the task group failed.
  *
  ****************************************************************************/
 
@@ -109,7 +109,11 @@ FAR struct __res_state *__res_state(void)
 
   DEBUGASSERT(info != NULL);
 
-  nxrmutex_lock(&info->ta_lock);
+  if (nxrmutex_lock(&info->ta_lock) < 0)
+    {
+      return NULL;
+    }
+
   if (info->ta_res == NULL)
     {
       info->ta_res = lib_zalloc(sizeof(struct __res_state));

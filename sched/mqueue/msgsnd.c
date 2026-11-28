@@ -30,6 +30,7 @@
 
 #include "sched/sched.h"
 #include "mqueue/msg.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Private Functions
@@ -59,6 +60,15 @@ static int msgsnd_wait(FAR struct msgq_s *msgq, size_t msgsz, int msgflg)
       return -ECANCELED;
     }
 #endif
+
+  /* A thread that the end of its process canceled in a system call does
+   * not start the wait (nxnotify_kcancel()).
+   */
+
+  if (nxtask_kcanceled(this_task()))
+    {
+      return -ECANCELED;
+    }
 
   /* Loop until the queue has room for msgsz more bytes and the pool has
    * a free message.  Wait in the list of the queue or in the list of the

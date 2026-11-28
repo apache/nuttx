@@ -100,13 +100,18 @@ static bool env_is_unsafe(FAR const char *pair)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_USER_IDENTITY
-void env_sanitize_secure(FAR struct task_info_s *info)
+int env_sanitize_secure(FAR struct task_info_s *info)
 {
   size_t index;
+  int ret;
 
   DEBUGASSERT(info != NULL);
 
-  nxrmutex_lock(&info->ta_lock);
+  ret = nxrmutex_lock(&info->ta_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   if (env_reserve(info, 0) < 0)
     {
@@ -136,6 +141,7 @@ void env_sanitize_secure(FAR struct task_info_s *info)
     }
 
   nxrmutex_unlock(&info->ta_lock);
+  return OK;
 }
 #endif
 

@@ -44,6 +44,11 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
+struct terminat_arg_s
+{
+  pid_t pid;
+  bool need_restore;
+};
 
 /****************************************************************************
  * Private Functions
@@ -51,7 +56,8 @@
 
 static int terminat_handler(FAR void *cookie)
 {
-  pid_t pid = (pid_t)(uintptr_t)cookie;
+  FAR struct terminat_arg_s *arg = cookie;
+  pid_t pid = arg->pid;
   FAR struct tcb_s *tcb;
   irqstate_t flags;
 
@@ -64,6 +70,28 @@ static int terminat_handler(FAR void *cookie)
 
       leave_critical_section(flags);
       return -ESRCH;
+    }
+
+  /* The thread can have entered a system call meanwhile: then it ends
+   * when the call is over.  It does not run now, so its flags can change.
+   * A thread in its own end keeps TCB_FLAG_EXIT_PROCESSING: it can have
+   * set the flag itself.
+   */
+
+  if (nxtask_kcancel_notify(tcb))
+    {
+      if (!nxtask_kcancel_exiting(tcb))
+        {
+          atomic_and(&tcb->shared_flags, ~TCB_FLAG_EXIT_PROCESSING);
+        }
+
+      if (arg->need_restore)
+        {
+          atomic_and(&tcb->shared_flags, ~TCB_FLAG_CPU_LOCKED);
+        }
+
+      leave_critical_section(flags);
+      return -EINPROGRESS;
     }
 
   nxsched_remove_readytorun(tcb);
@@ -129,6 +157,22 @@ int nxtask_terminate(pid_t pid)
       return -ESRCH;
     }
 
+  /* The thread can have entered a system call since the caller looked at
+   * it (pthread_completejoin() can block): it ends when the call is over.
+   * A thread in its own end keeps TCB_FLAG_EXIT_PROCESSING.
+   */
+
+  if (nxtask_kcancel_notify(dtcb))
+    {
+      if (!nxtask_kcancel_exiting(dtcb))
+        {
+          atomic_and(&dtcb->shared_flags, ~TCB_FLAG_EXIT_PROCESSING);
+        }
+
+      leave_critical_section(flags);
+      return OK;
+    }
+
   /* Remove dtcb from tasklist, let remove_readtorun() do the job */
 
   task_state = dtcb->task_state;
@@ -136,15 +180,25 @@ int nxtask_terminate(pid_t pid)
   if (task_state == TSTATE_TASK_RUNNING &&
       dtcb->cpu != this_cpu())
     {
+      struct terminat_arg_s arg;
       int32_t tcb_flags;
       int ret;
 
       tcb_flags = atomic_or(&dtcb->shared_flags, TCB_FLAG_CPU_LOCKED);
+      arg.pid = pid;
+      arg.need_restore = (tcb_flags & TCB_FLAG_CPU_LOCKED) == 0;
 
-      ret = nxsched_smp_call_single(dtcb->cpu, terminat_handler,
-                                    (FAR void *)(uintptr_t)pid);
+      ret = nxsched_smp_call_single(dtcb->cpu, terminat_handler, &arg);
+      if (ret == -EINPROGRESS)
+        {
+          /* It entered a system call meanwhile, and it ends when the call
+           * is over (terminat_handler()).
+           */
 
-      if (ret < 0)
+          leave_critical_section(flags);
+          return OK;
+        }
+      else if (ret < 0)
         {
           /* Already terminate */
 

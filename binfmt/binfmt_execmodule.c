@@ -395,7 +395,12 @@ int exec_module(FAR struct binary_s *binp,
       group->tg_flags |= GROUP_FLAG_SECURE_EXEC;
       group->tg_flags &= ~(GROUP_FLAG_FD_BACKTRACE | GROUP_FLAG_DUMPABLE);
 #ifndef CONFIG_DISABLE_ENVIRON
-      env_sanitize_secure(group->tg_info);
+      ret = env_sanitize_secure(group->tg_info);
+      if (ret < 0)
+        {
+          berr("ERROR: env_sanitize_secure() failed: %d\n", ret);
+          goto errout_with_tcbinit;
+        }
 #endif
     }
 #endif

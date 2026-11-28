@@ -66,6 +66,56 @@ void nxtask_recover(FAR struct tcb_s *tcb);
 
 bool nxnotify_cancellation(FAR struct tcb_s *tcb);
 
+/* The end of a process cancels a thread that is in a system call only when
+ * the call is over (nxtask_kcancel_notify()).  The architecture must end
+ * the call in the context of the thread for that.
+ */
+
+#if defined(CONFIG_LIB_SYSCALL) && \
+    defined(CONFIG_ARCH_HAVE_SYSCALL_THREAD_RETURN)
+#  define HAVE_TASK_KCANCEL 1
+
+/* Values of tcb->kcancel */
+
+#  define TASK_KCANCEL       (1 << 0) /* Ends when the system call is over */
+#  define TASK_KCANCEL_UWAIT (1 << 1) /* Waits for a mutex of user code */
+#  define TASK_KCANCEL_EXIT  (1 << 2) /* In its own end, as _exit() */
+
+bool nxtask_kcancel_notify(FAR struct tcb_s *tcb);
+void nxtask_kcancel(void);
+bool nxtask_kcancel_wait(FAR struct tcb_s *tcb, FAR sem_t *sem);
+
+/* A thread that was canceled in a system call does not start a wait that
+ * the cancellation ends.  Not once it ends: its end must wait for locks.
+ */
+
+#  define nxtask_kcanceled(tcb) \
+     (((tcb)->kcancel & TASK_KCANCEL) != 0 && \
+      (atomic_read(&(tcb)->shared_flags) & TCB_FLAG_EXIT_PROCESSING) == 0)
+
+/* Such a thread waits for a mutex of user code: the wait ends */
+
+#  define nxtask_kcancel_uwait(tcb) \
+     (((tcb)->kcancel & (TASK_KCANCEL | TASK_KCANCEL_UWAIT)) == \
+      (TASK_KCANCEL | TASK_KCANCEL_UWAIT))
+
+/* The calling thread starts its own end.  The end of its process leaves it
+ * to that end (nxtask_kcancel_notify()).
+ */
+
+#  define nxtask_kcancel_exit(tcb) ((tcb)->kcancel |= TASK_KCANCEL_EXIT)
+#  define nxtask_kcancel_exiting(tcb) \
+     (((tcb)->kcancel & TASK_KCANCEL_EXIT) != 0)
+#else
+#  define nxtask_kcancel_notify(tcb) false
+#  define nxtask_kcancel()
+#  define nxtask_kcancel_wait(tcb, sem) false
+#  define nxtask_kcanceled(tcb) false
+#  define nxtask_kcancel_uwait(tcb) false
+#  define nxtask_kcancel_exit(tcb)
+#  define nxtask_kcancel_exiting(tcb) false
+#endif
+
 /* Task Join */
 
 #ifndef CONFIG_DISABLE_PTHREAD

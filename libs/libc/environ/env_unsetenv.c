@@ -68,7 +68,12 @@ int unsetenv(FAR const char *name)
       return ERROR;
     }
 
-  nxrmutex_lock(&info->ta_lock);
+  ret = nxrmutex_lock(&info->ta_lock);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
 
   /* Check if the variable exists */
 

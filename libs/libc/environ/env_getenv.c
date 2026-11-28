@@ -47,7 +47,10 @@
  *   name - The name of the variable to find.
  *
  * Returned Value:
- *   The value of the variable (read-only) or NULL on failure
+ *   The value of the variable (read-only) or NULL on failure.  errno is
+ *   ENOENT if the variable is not set.  It is ECANCELED if the lock of the
+ *   environment failed: in the kernel, a thread of a process that ends does
+ *   not wait for the lock.  Then the value is not known.
  *
  * Assumptions:
  *   Not called from an interrupt handler
@@ -72,7 +75,12 @@ FAR char *getenv(FAR const char *name)
       goto errout;
     }
 
-  nxrmutex_lock(&info->ta_lock);
+  ret = nxrmutex_lock(&info->ta_lock);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
   ret = env_findvar(info, name, strlen(name));
   if (ret < 0)
     {

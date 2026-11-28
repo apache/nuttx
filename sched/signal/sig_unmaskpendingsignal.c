@@ -137,6 +137,8 @@ static bool nxsig_dispatch_unmasked(FAR struct tcb_s *rtcb)
  *   does not block.  At the end of a system call, also restore the mask
  *   that nxsig_restoremask() saved, after the signals that the temporary
  *   mask of pselect(), ppoll() or sigsuspend() unblocks are dispatched.
+ *   Before all of that, end the thread if the end of its process canceled
+ *   it in the system call that is over now (nxtask_kcancel()).
  *
  * Returned Value:
  *   true if one or more signals were dispatched.
@@ -147,6 +149,8 @@ bool nxsig_unmask_pendingsignal(void)
 {
   FAR struct tcb_s *rtcb = this_task();
   bool dispatched;
+
+  nxtask_kcancel();
 
   dispatched = nxsig_dispatch_unmasked(rtcb);
 

@@ -36,8 +36,35 @@
 #include <nuttx/mm/kmap.h>
 #include <nuttx/signal.h>
 
+#ifdef CONFIG_BUILD_PROTECTED
+#  include <nuttx/mm/mm.h>
+#  include <nuttx/userspace.h>
+#endif
+
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
+#include "task/task.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* A semaphore in the memory of user code */
+
+#ifdef HAVE_TASK_KCANCEL
+#  if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+#    define NXSEM_USER(s) up_addrenv_user_vaddr((uintptr_t)(s))
+#  elif defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+#    define NXSEM_USER(s) \
+       (((uintptr_t)(s) >= USERSPACE->us_datastart && \
+         (uintptr_t)(s) < USERSPACE->us_dataend) || \
+        ((uintptr_t)(s) >= USERSPACE->us_bssstart && \
+         (uintptr_t)(s) < USERSPACE->us_bssend) || \
+        umm_heapmember(s))
+#  else
+#    define NXSEM_USER(s) false
+#  endif
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -115,6 +142,19 @@ int nxsem_wait_slow(FAR sem_t *sem)
           leave_critical_section(flags);
           return -EINTR;
         }
+    }
+#endif
+
+#ifdef HAVE_TASK_KCANCEL
+  /* A thread that the end of its process canceled in a system call does
+   * not start a wait that the cancellation ends (nxnotify_kcancel()).
+   */
+
+  if (nxtask_kcanceled(rtcb) &&
+      (mutex ? NXSEM_USER(sem) : nxtask_kcancel_wait(rtcb, sem)))
+    {
+      leave_critical_section(flags);
+      return -ECANCELED;
     }
 #endif
 
@@ -204,6 +244,15 @@ int nxsem_wait_slow(FAR sem_t *sem)
        */
 
       DEBUGASSERT(rtcb->waitobj == NULL);
+
+#ifdef HAVE_TASK_KCANCEL
+      /* The end of the process ends this wait (nxnotify_kcancel()) */
+
+      if (mutex && NXSEM_USER(sem))
+        {
+          rtcb->kcancel |= TASK_KCANCEL_UWAIT;
+        }
+#endif
 
 #ifdef CONFIG_MM_KMAP
       usem = sem;
@@ -300,6 +349,10 @@ int nxsem_wait_slow(FAR sem_t *sem)
        */
 
       ret = rtcb->errcode != OK ? -rtcb->errcode : OK;
+
+#ifdef HAVE_TASK_KCANCEL
+      rtcb->kcancel &= ~TASK_KCANCEL_UWAIT;
+#endif
 
 #ifdef CONFIG_MM_KMAP
       /* Use the address of the caller after the unmap */

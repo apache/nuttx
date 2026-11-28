@@ -241,7 +241,12 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                * perhaps, the wait was cancelled.
                */
 
-#ifdef CONFIG_CANCELLATION_POINTS
+              /* A cancellation: pthread_cancel() at a cancellation point,
+               * or the end of the process in a system call
+               * (nxnotify_kcancel(), also without
+               * CONFIG_CANCELLATION_POINTS).
+               */
+
               if (unbinfo.si_signo == SIG_CANCEL_TIMEOUT)
                 {
                   /* The wait was canceled */
@@ -250,7 +255,6 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                   DEBUGASSERT(ret < 0);
                 }
               else
-#endif
                 {
                   /* We were awakened by a timeout.  Set EAGAIN and return
                    * an error.
