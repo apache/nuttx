@@ -7,14 +7,6 @@
  * SPDX-FileCopyrightText: Copyright 2016-2017 NXP
  * SPDX-FileCopyrightText: Copyright 2015, Freescale Semiconductor, Inc.
  *
- * This file was leveraged from the NuttX S32K1 port.  Portions of that eDMA
- * logic derived from NXP sample code which has a compatible BSD 3-clause
- * license:
- *
- *   Copyright (c) 2015, Freescale Semiconductor, Inc.
- *   Copyright 2016-2017 NXP
- *   All rights reserved
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:

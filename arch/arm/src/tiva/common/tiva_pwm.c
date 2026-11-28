@@ -2,8 +2,8 @@
  * arch/arm/src/tiva/common/tiva_pwm.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2016 Young Mu. All rights reserved.
- * SPDX-FileCopyrightText: 2013 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Young Mu.
+ * SPDX-FileCopyrightText: 2013 Gregory Nutt.
  * SPDX-FileContributor: Young Mu <young.mu@aliyun.com>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

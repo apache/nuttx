@@ -2,7 +2,7 @@
  * arch/arm/src/sama5/sam_pmecc.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2013 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2013 Gregory Nutt.
  * SPDX-FileCopyrightText: 2010 Atmel Corporation
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.orgr>
  *

@@ -2,7 +2,7 @@
  * arch/arm/src/lpc54xx/lpc54_emc.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt.
  * SPDX-FileCopyrightText: 2016 Freescale Semiconductor Inc.
  * SPDX-FileCopyrightText: 2016 - 2017, NXP
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>

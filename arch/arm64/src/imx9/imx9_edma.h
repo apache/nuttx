@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2019, 2021, 2023 Gregory Nutt.
  * SPDX-FileCopyrightText: 2022 NXP
  * SPDX-FileCopyrightText: 2016-2017 NXP
- * SPDX-FileCopyrightText: 2015, Freescale Semiconductor, Inc.
+ * SPDX-FileCopyrightText: 2015 Freescale Semiconductor, Inc.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: David Sidrane <david.sidrane@nscdg.com>
  * SPDX-FileContributor: Peter van der Perk <peter.vanderperk@nxp.com>

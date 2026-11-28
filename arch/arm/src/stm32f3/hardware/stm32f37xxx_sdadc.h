@@ -2,9 +2,9 @@
  * arch/arm/src/stm32f3/hardware/stm32f37xxx_sdadc.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2016 Studelec SA. All rights reserved.
- * SPDX-FileCopyrightText: 2011, 2013 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2009 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Studelec SA.
+ * SPDX-FileCopyrightText: 2011, 2013 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2009 Gregory Nutt.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Marc Rechté <mrechte@studelec-sa.com>
  *

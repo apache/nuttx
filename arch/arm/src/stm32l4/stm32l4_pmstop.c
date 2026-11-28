@@ -2,8 +2,8 @@
  * arch/arm/src/stm32l4/stm32l4_pmstop.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2012, 2017 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2015 Motorola Mobility LLC. All rights reserved.
+ * SPDX-FileCopyrightText: 2012, 2017 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2015 Motorola Mobility LLC.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

@@ -2,7 +2,7 @@
  * arch/xtensa/src/common/xtensa_window_vector.S
  *
  * SPDX-License-Identifier: MIT
- * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt.
  * SPDX-FileCopyrightText: 2006-2015 Cadence Design Systems Inc.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

@@ -3,9 +3,9 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2020 Falker Automacao Agricola LTDA.
- * SPDX-FileCopyrightText: 2018 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2015 Filament - www.filament.com
- * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2015 Filament
+ * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Matt Thompson <mthompson@hexwave.com>
  * SPDX-FileContributor: Alan Carvalho de Assis <acassis@gmail.com>

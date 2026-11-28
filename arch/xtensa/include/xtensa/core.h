@@ -2,7 +2,7 @@
  * arch/xtensa/include/xtensa/core.h
  *
  * SPDX-License-Identifier: MIT
- * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt.
  * SPDX-FileCopyrightText: 2005-2014 Cadence Design Systems, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining

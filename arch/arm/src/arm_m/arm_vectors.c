@@ -2,8 +2,8 @@
  * arch/arm/src/arm_m/arm_vectors.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2013 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2012 Michael Smith. All rights reserved.
+ * SPDX-FileCopyrightText: 2013 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2012 Michael Smith.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

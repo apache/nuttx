@@ -2,7 +2,7 @@
  * arch/arm/src/samv7/sam_freerun.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2015 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2015 Gregory Nutt.
  * SPDX-FileCopyrightText: 2011 Atmel Corporation
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

@@ -2,8 +2,8 @@
  * arch/arm/src/common/stm32/stm32_tickless.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2017 Ansync Labs. All rights reserved.
+ * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2017 Ansync Labs.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Konstantin Berezenko <kpberezenko@gmail.com>
  *

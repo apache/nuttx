@@ -2,8 +2,8 @@
  * arch/arm/src/samv7/sam_usbdevhs.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2015-2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2015-2016 Gregory Nutt.
  * SPDX-FileCopyrightText: 2009,2014 Atmel Corporation
  *
  * Redistribution and use in source and binary forms, with or without

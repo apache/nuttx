@@ -2,7 +2,7 @@
  * arch/arm/src/s32k1xx/s32k1xx_clockconfig.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt.
  * SPDX-FileCopyrightText: 2016-2018 NXP
  * SPDX-FileCopyrightText: 2013 - 2015, Freescale Semiconductor, Inc.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>

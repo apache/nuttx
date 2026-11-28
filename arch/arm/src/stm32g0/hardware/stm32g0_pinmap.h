@@ -2,8 +2,8 @@
  * arch/arm/src/stm32g0/hardware/stm32g0_pinmap.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2019 Fundação CERTI. All rights reserved.
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2019 Fundação CERTI.
  * SPDX-FileContributor: Mateusz Szafoni <raiden00@railab.me>
  * SPDX-FileContributor: Daniel Pereira Volpato <dpo@certi.org.br>
  *

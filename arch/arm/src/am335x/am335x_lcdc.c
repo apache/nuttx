@@ -2,7 +2,7 @@
  * arch/arm/src/am335x/am335x_lcdc.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt.
  * SPDX-FileCopyrightText: 2013 Oleksandr Tymoshenko <gonzo@freebsd.org>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

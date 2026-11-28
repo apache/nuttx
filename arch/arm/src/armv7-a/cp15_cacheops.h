@@ -2,7 +2,7 @@
  * arch/arm/src/armv7-a/cp15_cacheops.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt.
  * SPDX-FileCopyrightText: Copyright (c) 2012, Atmel Corporation
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

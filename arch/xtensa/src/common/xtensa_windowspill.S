@@ -2,7 +2,7 @@
  * arch/xtensa/src/common/xtensa_windowspill.S
  *
  * SPDX-License-Identifier: MIT
- * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt.
  * SPDX-FileCopyrightText: 1999-2010 Tensilica Inc.
  * SPDX-FileContributor:Gregory Nutt <gnutt@nuttx.org>
  *
