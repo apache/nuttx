@@ -2497,7 +2497,7 @@ int mtdconfig_register_by_path(FAR struct mtd_dev_s *mtd,
   FAR struct nvs_fs *fs;
   int rc;
 
-  fs = kmm_malloc(sizeof(struct nvs_fs));
+  fs = kmm_zalloc(sizeof(struct nvs_fs));
   if (fs == NULL)
     {
       return -ENOMEM;
