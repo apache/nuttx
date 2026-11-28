@@ -31,9 +31,7 @@
 
 #if !(defined(CONFIG_STM32_HAVE_IP_SPI_V1) || \
       defined(CONFIG_STM32_HAVE_IP_SPI_V2) || \
-      defined(CONFIG_STM32_HAVE_IP_SPI_V3) || \
-      defined(CONFIG_STM32_HAVE_IP_SPI_V4) || \
-      defined(CONFIG_STM32_HAVE_IP_SPI_V5))
+      defined(CONFIG_STM32_HAVE_IP_SPI_V3))
 #  error "Unsupported STM32 SPI"
 #endif
 
@@ -78,6 +76,22 @@ struct spi_dev_s;
  ****************************************************************************/
 
 struct spi_dev_s *stm32_spibus_initialize(int bus);
+
+/****************************************************************************
+ * Name: stm32_spi_slave_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI bus for slave operation
+ *
+ * Input Parameters:
+ *   bus number
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+struct spi_slave_ctrlr_s *stm32_spi_slave_initialize(int bus);
 
 /****************************************************************************
  * Name:  stm32_spi1/2/...select and stm32_spi1/2/...status

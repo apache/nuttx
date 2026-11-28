@@ -47,7 +47,7 @@ RNG         Yes      Through the common driver.
 RTC         Yes      Calendar, sub-seconds, Alarm A/B and wakeup timer
                      through the common RTC driver.
 SDMMC       Yes      SDMMC1-2 through the common IDMA SDMMC driver.
-SPI         Yes      SPI1-6 through the common SPI v5 driver, master
+SPI         Yes      SPI1-6 through the common SPI v3 driver, master
                      mode, optional GPDMA.
 USART       Yes      USART1-3, UART4-5, USART6, UART7-9, USART10 and
                      LPUART1 through the common U(S)ART driver.

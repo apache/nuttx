@@ -56,4 +56,8 @@
 #define ARMV7M_DCACHE_LINESIZE 32  /* 32 bytes (4 x 64 bits) */
 #define ARMV7M_ICACHE_LINESIZE 32  /* 32 bytes (4 x 64 bits) */
 
+/* Maximum SPI clock as per specifications for all SPIs */
+
+#define STM32_SPI_CLK_MAX      32000000UL
+
 #endif /* __ARCH_ARM_SRC_STM32WB_CHIP_H */

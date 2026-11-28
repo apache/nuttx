@@ -29,7 +29,6 @@ set(SRCS
     stm32wb_irq.c
     stm32wb_lowputc.c
     stm32wb_rcc.c
-    stm32wb_spi.c
     stm32wb_serial.c
     stm32wb_i2c.c
     stm32wb_start.c

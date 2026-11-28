@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_spi_slave.c
+ * arch/arm/src/common/stm32/stm32_spi_v3_slave.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -46,18 +47,17 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "chip.h"
-#include "stm32_rcc.h"
-#include "stm32_gpio.h"
+#include "stm32.h"
 #include "stm32_spi.h"
+#include "stm32_spi_clk.h"
 #include "stm32_dma.h"
 
-#if defined(CONFIG_STM32H7_SPI1_SLAVE) ||                               \
-  defined(CONFIG_STM32H7_SPI2_SLAVE) ||                                 \
-  defined(CONFIG_STM32H7_SPI3_SLAVE) ||                                 \
-  defined(CONFIG_STM32H7_SPI4_SLAVE) ||                                 \
-  defined(CONFIG_STM32H7_SPI5_SLAVE) ||                                 \
-  defined(CONFIG_STM32H7_SPI6_SLAVE)
+#if defined(CONFIG_STM32_SPI1_SLAVE) ||                               \
+  defined(CONFIG_STM32_SPI2_SLAVE) ||                                 \
+  defined(CONFIG_STM32_SPI3_SLAVE) ||                                 \
+  defined(CONFIG_STM32_SPI4_SLAVE) ||                                 \
+  defined(CONFIG_STM32_SPI5_SLAVE) ||                                 \
+  defined(CONFIG_STM32_SPI6_SLAVE)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -102,48 +102,79 @@
                                      DMA_SCR_PSIZE_8BITS | DMA_SCR_MINC|DMA_SCR_DIR_M2P)
 #endif
 
-/* Kernel clock configuration
- * TODO:
- *  - support for all kernel clock configuration
+/* Kernel clock configuration.  The kernel clock limit of an instance is
+ * STM32_SPIn_MAX_KER_CK from chip.h, else STM32_SPI_MAX_KER_CK.
  */
 
-#if defined(CONFIG_STM32H7_SPI1_SLAVE) || defined(CONFIG_STM32H7_SPI2_SLAVE) || \
-  defined(CONFIG_STM32H7_SPI3_SLAVE)
-#  if STM32_RCC_D2CCIP1R_SPI123SRC == RCC_D2CCIP1R_SPI123SEL_PLL1
-#    define SPI123_KERNEL_CLOCK_FREQ STM32_PLL1Q_FREQUENCY
-#  else
-#    error Not supported yet
+#ifdef CONFIG_STM32_SPI1_SLAVE
+#  ifndef STM32_SPI1_FREQUENCY
+#    error Must define STM32_SPI1_FREQUENCY in board.h
 #  endif
-#  if SPI123_KERNEL_CLOCK_FREQ > 200000000
-#    error Not supported SPI123 frequency
+#  ifndef STM32_SPI1_MAX_KER_CK
+#    define STM32_SPI1_MAX_KER_CK STM32_SPI_MAX_KER_CK
 #  endif
-#endif /* SPI123 */
+#  if STM32_SPI1_FREQUENCY > STM32_SPI1_MAX_KER_CK
+#    error Not supported SPI1 frequency
+#  endif
+#endif
 
-#if defined(CONFIG_STM32H7_SPI4_SLAVE) || defined(CONFIG_STM32H7_SPI5_SLAVE)
-#  if STM32_RCC_D2CCIP1R_SPI45SRC == RCC_D2CCIP1R_SPI45SEL_APB
-#    define SPI45_KERNEL_CLOCK_FREQ STM32_PCLK2_FREQUENCY
-#  else
-#    error Not supported yet
+#ifdef CONFIG_STM32_SPI2_SLAVE
+#  ifndef STM32_SPI2_FREQUENCY
+#    error Must define STM32_SPI2_FREQUENCY in board.h
 #  endif
-#  if SPI45_KERNEL_CLOCK_FREQ > 100000000
-#    error Not supported SPI45 frequency
+#  ifndef STM32_SPI2_MAX_KER_CK
+#    define STM32_SPI2_MAX_KER_CK STM32_SPI_MAX_KER_CK
 #  endif
-#endif /* SPI45 */
+#  if STM32_SPI2_FREQUENCY > STM32_SPI2_MAX_KER_CK
+#    error Not supported SPI2 frequency
+#  endif
+#endif
 
-#if defined(CONFIG_STM32H7_SPI6_SLAVE)
-#  if STM32_RCC_D3CCIPR_SPI6SRC == RCC_D3CCIPR_SPI6SEL_PCLK4
-#    define SPI6_KERNEL_CLOCK_FREQ STM32_PCLK4_FREQUENCY
-#  else
-#    error Not supported yet
+#ifdef CONFIG_STM32_SPI3_SLAVE
+#  ifndef STM32_SPI3_FREQUENCY
+#    error Must define STM32_SPI3_FREQUENCY in board.h
 #  endif
-#  if SPI6_KERNEL_CLOCK_FREQ > 100000000
+#  ifndef STM32_SPI3_MAX_KER_CK
+#    define STM32_SPI3_MAX_KER_CK STM32_SPI_MAX_KER_CK
+#  endif
+#  if STM32_SPI3_FREQUENCY > STM32_SPI3_MAX_KER_CK
+#    error Not supported SPI3 frequency
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_SPI4_SLAVE
+#  ifndef STM32_SPI4_FREQUENCY
+#    error Must define STM32_SPI4_FREQUENCY in board.h
+#  endif
+#  ifndef STM32_SPI4_MAX_KER_CK
+#    define STM32_SPI4_MAX_KER_CK STM32_SPI_MAX_KER_CK
+#  endif
+#  if STM32_SPI4_FREQUENCY > STM32_SPI4_MAX_KER_CK
+#    error Not supported SPI4 frequency
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_SPI5_SLAVE
+#  ifndef STM32_SPI5_FREQUENCY
+#    error Must define STM32_SPI5_FREQUENCY in board.h
+#  endif
+#  ifndef STM32_SPI5_MAX_KER_CK
+#    define STM32_SPI5_MAX_KER_CK STM32_SPI_MAX_KER_CK
+#  endif
+#  if STM32_SPI5_FREQUENCY > STM32_SPI5_MAX_KER_CK
+#    error Not supported SPI5 frequency
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_SPI6_SLAVE
+#  ifndef STM32_SPI6_FREQUENCY
+#    error Must define STM32_SPI6_FREQUENCY in board.h
+#  endif
+#  ifndef STM32_SPI6_MAX_KER_CK
+#    define STM32_SPI6_MAX_KER_CK STM32_SPI_MAX_KER_CK
+#  endif
+#  if STM32_SPI6_FREQUENCY > STM32_SPI6_MAX_KER_CK
 #    error Not supported SPI6 frequency
-#  endif
-#endif /* SPI6 */
-
-#if defined (CONFIG_STM32H7_SPI_SLAVE_QSIZE)
-#  if CONFIG_STM32H7_SPI_SLAVE_QSIZE > 65535
-#    error CONFIG_STM32H7_SPI_SLAVE_QSIZE too large
 #  endif
 #endif
 
@@ -151,7 +182,7 @@
  * support is in place
  */
 
-#if defined (CONFIG_STM32H7_SPI6_SLAVE)
+#if defined (CONFIG_STM32_SPI6_SLAVE)
 #    error SPI6 slave not supported yet
 #endif
 
@@ -193,6 +224,7 @@ struct stm32_spidev_s
   uint32_t         txccr;        /* DMA control register for TX transfers */
   uint32_t         rxccr;        /* DMA control register for RX transfers */
   bool             dmarunning;   /* DMA is started */
+  volatile bool    txbusy;       /* TX DMA is in progress */
 #endif
   bool             initialized;  /* Has SPI interface been initialized */
   mutex_t          lock;         /* Held while chip is selected for mutual
@@ -257,7 +289,7 @@ static inline void spi_dmarxstart(struct stm32_spidev_s *priv);
 static inline void spi_dmatxstart(struct stm32_spidev_s *priv);
 #endif
 
-/* Interrupt handler detecting nss status changes */
+/* NSS rising edge: end of a transfer */
 
 static int  spi_nssinterrupt(int irq, void *context, void *arg);
 
@@ -328,7 +360,7 @@ static const struct spi_slave_ctrlrops_s g_ctrlr_ops =
   .ctrlr.ops     = &g_ctrlr_ops,                        \
   .dev           = NULL,                                \
   .spibase       = STM32_SPI##x##_BASE,                 \
-  .spiclock      = SPI45_KERNEL_CLOCK_FREQ,             \
+  .spiclock      = STM32_SPI##x##_FREQUENCY,            \
   .irq           = STM32_IRQ_SPI##x,                    \
   SPI_SLAVE_INIT_DMA(x)                                 \
   .initialized   = false,                               \
@@ -337,75 +369,75 @@ static const struct spi_slave_ctrlrops_s g_ctrlr_ops =
   .config        = CONFIG_STM32_SPI##x##_COMMTYPE,    \
 }
 
-#ifdef CONFIG_STM32H7_SPI1_SLAVE
+#ifdef CONFIG_STM32_SPI1_SLAVE
 
 static
-uint8_t SPI_SLAVE_OUTQ(1)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
+uint8_t SPI_SLAVE_OUTQ(1)[DMA_ALIGN_UP(CONFIG_STM32_SPI_SLAVE_QSIZE)]
 aligned_data(ARMV7M_DCACHE_LINESIZE);
 static
-uint8_t SPI_SLAVE_INQ(1)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
+uint8_t SPI_SLAVE_INQ(1)[DMA_ALIGN_UP(CONFIG_STM32_SPI_SLAVE_QSIZE)]
 aligned_data(ARMV7M_DCACHE_LINESIZE);
 static struct stm32_spidev_s g_spi1ctrlr = SPI_SLAVE_INIT(1);
 
 #endif
 
-#ifdef CONFIG_STM32H7_SPI2_SLAVE
+#ifdef CONFIG_STM32_SPI2_SLAVE
 
 static
-uint8_t SPI_SLAVE_OUTQ(2)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
+uint8_t SPI_SLAVE_OUTQ(2)[DMA_ALIGN_UP(CONFIG_STM32_SPI_SLAVE_QSIZE)]
 aligned_data(ARMV7M_DCACHE_LINESIZE);
 static
-uint8_t SPI_SLAVE_INQ(2)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
+uint8_t SPI_SLAVE_INQ(2)[DMA_ALIGN_UP(CONFIG_STM32_SPI_SLAVE_QSIZE)]
 aligned_data(ARMV7M_DCACHE_LINESIZE);
 static struct stm32_spidev_s g_spi2ctrlr = SPI_SLAVE_INIT(2);
 
 #endif
 
-#ifdef CONFIG_STM32H7_SPI3_SLAVE
+#ifdef CONFIG_STM32_SPI3_SLAVE
 
 static
-uint8_t SPI_SLAVE_OUTQ(3)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
+uint8_t SPI_SLAVE_OUTQ(3)[DMA_ALIGN_UP(CONFIG_STM32_SPI_SLAVE_QSIZE)]
 aligned_data(ARMV7M_DCACHE_LINESIZE);
 static
-uint8_t SPI_SLAVE_INQ(3)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
+uint8_t SPI_SLAVE_INQ(3)[DMA_ALIGN_UP(CONFIG_STM32_SPI_SLAVE_QSIZE)]
 aligned_data(ARMV7M_DCACHE_LINESIZE);
 static struct stm32_spidev_s g_spi3ctrlr = SPI_SLAVE_INIT(3);
 
 #endif
 
-#ifdef CONFIG_STM32H7_SPI4_SLAVE
+#ifdef CONFIG_STM32_SPI4_SLAVE
 
 static
-uint8_t SPI_SLAVE_OUTQ(4)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
+uint8_t SPI_SLAVE_OUTQ(4)[DMA_ALIGN_UP(CONFIG_STM32_SPI_SLAVE_QSIZE)]
 aligned_data(ARMV7M_DCACHE_LINESIZE);
 static
-uint8_t SPI_SLAVE_INQ(4)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
+uint8_t SPI_SLAVE_INQ(4)[DMA_ALIGN_UP(CONFIG_STM32_SPI_SLAVE_QSIZE)]
 aligned_data(ARMV7M_DCACHE_LINESIZE);
 static struct stm32_spidev_s g_spi4ctrlr = SPI_SLAVE_INIT(4);
 
 #endif
 
-#ifdef CONFIG_STM32H7_SPI5_SLAVE
+#ifdef CONFIG_STM32_SPI5_SLAVE
 
 static
-uint8_t SPI_SLAVE_OUTQ(5)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
+uint8_t SPI_SLAVE_OUTQ(5)[DMA_ALIGN_UP(CONFIG_STM32_SPI_SLAVE_QSIZE)]
 aligned_data(ARMV7M_DCACHE_LINESIZE);
 static
-uint8_t SPI_SLAVE_INQ(5)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
+uint8_t SPI_SLAVE_INQ(5)[DMA_ALIGN_UP(CONFIG_STM32_SPI_SLAVE_QSIZE)]
 aligned_data(ARMV7M_DCACHE_LINESIZE);
 static struct stm32_spidev_s g_spi5ctrlr = SPI_SLAVE_INIT(5);
 
 #endif
 
-#ifdef CONFIG_STM32H7_SPI6_SLAVE
+#ifdef CONFIG_STM32_SPI6_SLAVE
 
 /* TODO: these needs to be located in SRAM3 for SPI6 */
 
 static
-uint8_t SPI_SLAVE_OUTQ(6)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
+uint8_t SPI_SLAVE_OUTQ(6)[DMA_ALIGN_UP(CONFIG_STM32_SPI_SLAVE_QSIZE)]
 aligned_data(ARMV7M_DCACHE_LINESIZE);
 static
-uint8_t SPI_SLAVE_INQ(6)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
+uint8_t SPI_SLAVE_INQ(6)[DMA_ALIGN_UP(CONFIG_STM32_SPI_SLAVE_QSIZE)]
 aligned_data(ARMV7M_DCACHE_LINESIZE);
 static struct stm32_spidev_s g_spi6ctrlr = SPI_SLAVE_INIT(6);
 
@@ -728,6 +760,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
   /* Wake-up the SPI driver */
 
   priv->txresult = isr | 0x080;  /* OR'ed with 0x80 to assure non-zero */
+  priv->txbusy   = false;
   SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_TX_COMPLETE);
 }
 #endif
@@ -773,7 +806,7 @@ static void spi_dmarxsetup(struct stm32_spidev_s *priv, size_t nwords)
 
   dmacfg.paddr = priv->spibase + STM32_SPI_RXDR_OFFSET;
   dmacfg.maddr = (uint32_t)priv->inq;
-  dmacfg.ndata = CONFIG_STM32H7_SPI_SLAVE_QSIZE;
+  dmacfg.ndata = CONFIG_STM32_SPI_SLAVE_QSIZE;
   dmacfg.cfg1  = priv->rxccr;
   dmacfg.cfg2  = 0;
 
@@ -792,47 +825,26 @@ static void spi_dmarxsetup(struct stm32_spidev_s *priv, size_t nwords)
 #ifdef CONFIG_STM32_SPI_DMA
 static void spi_dmatxsetup(struct stm32_spidev_s *priv, size_t nwords)
 {
-  /* TODO: set up dma to transfer out the new data from priv->outq,
-   * which is set up in spi_enqueue
-   * When the transfer is complete, update outq indexies accordingly
-   */
-
-#if 0
   stm32_dmacfg_t dmacfg;
-
-  /* Can't transmit in rx only mode */
-
-  if (priv->config == SIMPLEX_RX)
-    {
-      return;
-    }
 
   /* 8- or 16-bit mode? */
 
   if (spi_9to16bitmode(priv))
     {
-      /* 16-bit mode */
-
       priv->txccr = SPI_TXDMA16_CONFIG;
     }
   else
     {
-      /* 8-bit mode */
-
       priv->txccr = SPI_TXDMA8_CONFIG;
     }
 
   dmacfg.paddr = priv->spibase + STM32_SPI_TXDR_OFFSET;
-  dmacfg.maddr = (uint32_t)priv->outq[0];
+  dmacfg.maddr = (uint32_t)priv->outq;
   dmacfg.ndata = nwords;
   dmacfg.cfg1  = priv->txccr;
   dmacfg.cfg2  = 0;
 
-  /* Setup the TX DMA */
-
   stm32_dmasetup(priv->txdma, &dmacfg);
-
-#endif // 0
 }
 #endif
 
@@ -872,14 +884,8 @@ static void spi_dmarxstart(struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32_SPI_DMA
 static void spi_dmatxstart(struct stm32_spidev_s *priv)
 {
-  /* Can't transmit in rx only mode */
-
-  if (priv->config == SIMPLEX_RX)
-    {
-      return;
-    }
-
   priv->txresult = 0;
+  priv->txbusy   = true;
   stm32_dmastart(priv->txdma, spi_dmatxcallback, priv, false);
   spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_TXDMAEN);
 }
@@ -1101,9 +1107,8 @@ static void spi_bind(struct spi_slave_ctrlr_s *ctrlr,
                      int nbits)
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)ctrlr;
-  uint32_t nss_gpio;
 
-  spiinfo("dev=%p mode=%d nbits=%d\n", sdv, mode, nbits);
+  spiinfo("dev=%p mode=%d nbits=%d\n", dev, mode, nbits);
 
   DEBUGASSERT(priv != NULL && priv->dev == NULL && dev != NULL);
 
@@ -1123,7 +1128,7 @@ static void spi_bind(struct spi_slave_ctrlr_s *ctrlr,
   /* invalidate the whole rx buffer */
 
   up_flush_dcache((uintptr_t)priv->inq,
-                  (uintptr_t)priv->inq + CONFIG_STM32H7_SPI_SLAVE_QSIZE);
+                  (uintptr_t)priv->inq + CONFIG_STM32_SPI_SLAVE_QSIZE);
 
   /* Bind the SPI slave device interface instance to the SPI slave
    * controller interface.
@@ -1140,16 +1145,24 @@ static void spi_bind(struct spi_slave_ctrlr_s *ctrlr,
   spi_setmode(ctrlr, mode);
   spi_setbits(ctrlr, nbits);
 
-  /* First, configure NSS as GPIO EXTI input */
+  /* The hardware NSS input frames each transfer, its rising edge reports
+   * the end of a transfer.
+   */
 
-  nss_gpio = priv->nss_pin & (GPIO_PORT_MASK | GPIO_PIN_MASK);
-  nss_gpio |= (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI);
-  stm32_configgpio(nss_gpio);
-
-  /* Bind to NSS interrupt */
-
-  stm32_gpiosetevent(priv->nss_pin, false, true, false,
+  stm32_configgpio(priv->nss_pin);
+  stm32_gpiosetevent(priv->nss_pin, true, false, false,
                      spi_nssinterrupt, priv);
+
+#ifdef CONFIG_STM32_SPI_DMA
+  /* Start the circular RX DMA */
+
+  spi_dmarxsetup(priv, 0);
+  spi_dmarxstart(priv);
+  priv->txbusy     = false;
+  priv->dmarunning = true;
+#endif
+
+  spi_enable(priv, true);
 
 #ifdef CONFIG_PM
   /* Register to receive power management callbacks */
@@ -1166,15 +1179,7 @@ static void spi_bind(struct spi_slave_ctrlr_s *ctrlr,
  * Name: spi_nssinterrupt
  *
  * Description:
- *   SPI slave NSS interrupt handler
- *
- * Input Parameters:
- *   irq     - not used
- *   context - not used
- *   arg     - pointer to controller
- *
- * Returned Value:
- *   OK
+ *   NSS rising edge: the master ended a transfer, report the received data.
  *
  ****************************************************************************/
 
@@ -1182,59 +1187,10 @@ static int spi_nssinterrupt(int irq, void *context, void *arg)
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)arg;
 
-  /* If the pin is low, just enable rising edge interrupt */
-
-  if (!stm32_gpioread(priv->nss_pin))
+  if (priv->dev != NULL)
     {
-      /* Bind to NSS rising edge interrupt */
-
-      stm32_gpiosetevent(priv->nss_pin, true, false, false,
-                         spi_nssinterrupt, priv);
-      return OK;
+      SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_RX_COMPLETE);
     }
-
-  /* Disable NSS interrupt */
-
-  stm32_gpiosetevent(priv->nss_pin, false, false, false,
-                     NULL, priv);
-
-  /* Re-configure nss pin */
-
-  stm32_configgpio(priv->nss_pin);
-
-  /* Enable spi peripheral */
-
-  spi_enable(priv, true);
-
-  /* Flush SPI read FIFO */
-
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXPLVL_MASK) != 0)
-    {
-      spi_getreg(priv, STM32_SPI_RXDR_OFFSET);
-    }
-
-  /* Disable spi before dma setup */
-
-  spi_enable(priv, false);
-
-#ifdef CONFIG_STM32_SPI_DMA
-
-  /* Setup DMAs */
-
-  spi_dmarxsetup(priv, 0);
-  spi_dmatxsetup(priv, 0);
-
-  /* Start the DMAs */
-
-  spi_dmarxstart(priv);
-  spi_dmatxstart(priv);
-
-  priv->dmarunning = true;
-#endif
-
-  /* Enable spi peripheral */
-
-  spi_enable(priv, true);
 
   return OK;
 }
@@ -1270,16 +1226,32 @@ static void spi_unbind(struct spi_slave_ctrlr_s *ctrlr)
 
   /* Unbind the SPI slave interface */
 
+  stm32_gpiosetevent(priv->nss_pin, false, false, false, NULL, NULL);
   priv->dev = NULL;
 
-  /* Disable DMA */
+  /* Disable the SPI peripheral and DMA */
 
+  spi_enable(priv, false);
   spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET,
                 SPI_CFG1_RXDMAEN | SPI_CFG1_TXDMAEN, 0);
 
-  /* Disable the SPI peripheral */
+#ifdef CONFIG_STM32_SPI_DMA
+  if (priv->dmarunning)
+    {
+      if (priv->config != SIMPLEX_TX)
+        {
+          stm32_dmastop(priv->rxdma);
+        }
 
-  spi_enable(priv, false);
+      if (priv->config != SIMPLEX_RX)
+        {
+          stm32_dmastop(priv->txdma);
+        }
+
+      priv->txbusy     = false;
+      priv->dmarunning = false;
+    }
+#endif
 
   spi_lock(ctrlr, false);
 }
@@ -1311,7 +1283,50 @@ static void spi_unbind(struct spi_slave_ctrlr_s *ctrlr)
 static int spi_enqueue(struct spi_slave_ctrlr_s *ctrlr,
                        const void *data, size_t len)
 {
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)ctrlr;
+  size_t wordsize = spi_9to16bitmode(priv) ? 2 : 1;
+  irqstate_t flags;
+
+  DEBUGASSERT(priv != NULL && priv->dev != NULL);
+
+#ifdef CONFIG_STM32_SPI_DMA
+  if (priv->config == SIMPLEX_RX || !priv->dmarunning || priv->txbusy)
+    {
+      return 0;
+    }
+
+  len = MIN(len, CONFIG_STM32_SPI_SLAVE_QSIZE / wordsize);
+  if (len == 0)
+    {
+      return 0;
+    }
+
+  spi_lock(ctrlr, true);
+
+  memcpy(priv->outq, data, len * wordsize);
+  up_clean_dcache((uintptr_t)priv->outq,
+                  (uintptr_t)priv->outq + DMA_ALIGN_UP(len * wordsize));
+
+  /* CFG1 is writable only with SPE=0.  Disabling SPI also drops the old
+   * TX FIFO content, the circular RX DMA keeps running.
+   */
+
+  flags = enter_critical_section();
+  spi_enable(priv, false);
+  spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, SPI_CFG1_TXDMAEN, 0);
+  spi_putreg(priv, STM32_SPI_IFCR_OFFSET, SPI_IFCR_UDRC);
+
+  spi_dmatxsetup(priv, len);
+  spi_dmatxstart(priv);
+
+  spi_enable(priv, true);
+  leave_critical_section(flags);
+
+  spi_lock(ctrlr, false);
+  return len;
+#else
   return 0;
+#endif
 }
 
 /****************************************************************************
@@ -1331,7 +1346,13 @@ static int spi_enqueue(struct spi_slave_ctrlr_s *ctrlr,
 
 static bool spi_qfull(struct spi_slave_ctrlr_s *ctrlr)
 {
+#ifdef CONFIG_STM32_SPI_DMA
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)ctrlr;
+
+  return priv->txbusy;
+#else
   return false;
+#endif
 }
 
 /****************************************************************************
@@ -1373,13 +1394,24 @@ static void spi_qflush(struct spi_slave_ctrlr_s *ctrlr)
 
 #ifdef CONFIG_STM32_SPI_DMA
   priv->ihead =
-    CONFIG_STM32H7_SPI_SLAVE_QSIZE - stm32_dmaresidual(priv->rxdma);
+    CONFIG_STM32_SPI_SLAVE_QSIZE - stm32_dmaresidual(priv->rxdma);
 #else
   priv->ihead = 0;
   priv->itail = 0;
 #endif
 
   /* Flush the output buffers */
+
+#ifdef CONFIG_STM32_SPI_DMA
+  if (priv->txbusy)
+    {
+      spi_enable(priv, false);
+      spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, SPI_CFG1_TXDMAEN, 0);
+      stm32_dmastop(priv->txdma);
+      priv->txbusy = false;
+      spi_enable(priv, true);
+    }
+#endif
 
   priv->ohead = 0;
   priv->otail = 0;
@@ -1409,11 +1441,11 @@ static inline int spi_rx_buffer_free(uint8_t *ptr, int start, int end)
    * returns garbage
    */
 
-  if (end >= CONFIG_STM32H7_SPI_SLAVE_QSIZE)
+  if (end >= CONFIG_STM32_SPI_SLAVE_QSIZE)
     {
       end = 0;
       up_invalidate_dcache((uintptr_t)&ptr[start],
-                           (uintptr_t)&ptr[CONFIG_STM32H7_SPI_SLAVE_QSIZE]);
+                           (uintptr_t)&ptr[CONFIG_STM32_SPI_SLAVE_QSIZE]);
     }
   else
     {
@@ -1446,7 +1478,7 @@ static size_t spi_qpoll(struct spi_slave_ctrlr_s *ctrlr)
   uint16_t bytes_left;
 
   DEBUGASSERT(priv != NULL && priv->dev != NULL);
-  DEBUGASSERT(priv->ihead < CONFIG_STM32H7_SPI_SLAVE_QSIZE);
+  DEBUGASSERT(priv->ihead < CONFIG_STM32_SPI_SLAVE_QSIZE);
 
 #ifdef CONFIG_STM32_SPI_DMA
   if (!priv->dmarunning)
@@ -1460,7 +1492,7 @@ static size_t spi_qpoll(struct spi_slave_ctrlr_s *ctrlr)
   spi_lock(ctrlr, true);
 
 #ifdef CONFIG_STM32_SPI_DMA
-  itail = CONFIG_STM32H7_SPI_SLAVE_QSIZE - stm32_dmaresidual(priv->rxdma);
+  itail = CONFIG_STM32_SPI_SLAVE_QSIZE - stm32_dmaresidual(priv->rxdma);
 #else
   #error Support only simplex mode rx with dma
 #endif
@@ -1474,7 +1506,7 @@ static size_t spi_qpoll(struct spi_slave_ctrlr_s *ctrlr)
 
       priv->ihead += SPIS_DEV_RECEIVE(priv->dev,
                                       (const uint16_t *)&priv->inq[ihead],
-                                      CONFIG_STM32H7_SPI_SLAVE_QSIZE -
+                                      CONFIG_STM32_SPI_SLAVE_QSIZE -
                                         ihead);
 
       /* Invalidate dcache and wrap around the priv->ihead */
@@ -1499,7 +1531,7 @@ static size_t spi_qpoll(struct spi_slave_ctrlr_s *ctrlr)
   /* Calculate the number of bytes left in the buffer */
 
   bytes_left = itail < priv->ihead
-    ? CONFIG_STM32H7_SPI_SLAVE_QSIZE - priv->ihead + itail
+    ? CONFIG_STM32_SPI_SLAVE_QSIZE - priv->ihead + itail
     : itail - priv->ihead;
 
   spi_lock(ctrlr, false);
@@ -1603,10 +1635,10 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
 
   /* Configure CR1, CFG1 and CFG2. Default configuration:
    *   Mode 0:                        CFG2.CPHA=0 and CFG2.CPOL=0
-   *   Master:                        CFG2.MSTR=1
+   *   Slave:                         CFG2.MASTER=0
    *   8-bit:                         CFG1.DSIZE=7
    *   MSB transmitted first:         CFG2.LSBFRST=0
-   *   Replace NSS with SSI & SSI=1:  CR1.SSI=1 CFG2.SSM=1 (prevent MODF err)
+   *   Hardware NSS input:            CFG2.SSM=0
    *   Two lines full duplex:         CFG2.COMM=0
    */
 
@@ -1624,8 +1656,8 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
   /* CFG2 */
 
   clrbits = SPI_CFG2_CPHA | SPI_CFG2_CPOL | SPI_CFG2_LSBFRST |
-    SPI_CFG2_COMM_MASK;
-  setbits = SPI_CFG2_SSM;
+    SPI_CFG2_COMM_MASK | SPI_CFG2_SSM;
+  setbits = 0;
 
   switch (priv->config)
     {
@@ -1657,9 +1689,7 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
   spi_putreg(priv, STM32_SPI_CRCPOLY_OFFSET, 7);
 
 #ifdef CONFIG_STM32_SPI_DMA
-  /* DMA will be started in the interrupt handler, synchronized to the master
-   * nss
-   */
+  /* DMA is started in bind */
 
   priv->dmarunning = false;
 
@@ -1734,7 +1764,7 @@ struct spi_slave_ctrlr_s *stm32_spi_slave_initialize(int bus)
   struct stm32_spidev_s *priv = NULL;
   irqstate_t flags = enter_critical_section();
 
-#ifdef CONFIG_STM32H7_SPI1_SLAVE
+#ifdef CONFIG_STM32_SPI1_SLAVE
   if (bus == 1)
     {
       SPI_SLAVE_INIT_BUS(1);
@@ -1742,7 +1772,7 @@ struct spi_slave_ctrlr_s *stm32_spi_slave_initialize(int bus)
   else
 #endif
 
-#ifdef CONFIG_STM32H7_SPI2_SLAVE
+#ifdef CONFIG_STM32_SPI2_SLAVE
   if (bus == 2)
     {
       SPI_SLAVE_INIT_BUS(2);
@@ -1750,7 +1780,7 @@ struct spi_slave_ctrlr_s *stm32_spi_slave_initialize(int bus)
   else
 #endif
 
-#ifdef CONFIG_STM32H7_SPI3_SLAVE
+#ifdef CONFIG_STM32_SPI3_SLAVE
   if (bus == 3)
     {
       SPI_SLAVE_INIT_BUS(3);
@@ -1758,7 +1788,7 @@ struct spi_slave_ctrlr_s *stm32_spi_slave_initialize(int bus)
   else
 #endif
 
-#ifdef CONFIG_STM32H7_SPI4_SLAVE
+#ifdef CONFIG_STM32_SPI4_SLAVE
   if (bus == 4)
     {
       SPI_SLAVE_INIT_BUS(4);
@@ -1766,7 +1796,7 @@ struct spi_slave_ctrlr_s *stm32_spi_slave_initialize(int bus)
   else
 #endif
 
-#ifdef CONFIG_STM32H7_SPI5_SLAVE
+#ifdef CONFIG_STM32_SPI5_SLAVE
   if (bus == 5)
     {
       SPI_SLAVE_INIT_BUS(5);
@@ -1774,7 +1804,7 @@ struct spi_slave_ctrlr_s *stm32_spi_slave_initialize(int bus)
   else
 #endif
 
-#ifdef CONFIG_STM32H7_SPI6_SLAVE
+#ifdef CONFIG_STM32_SPI6_SLAVE
   if (bus == 6)
     {
       SPI_SLAVE_INIT_BUS(6);

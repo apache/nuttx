@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f7/stm32_dma.h
+ * arch/arm/src/stm32h7/stm32_dma_h7.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_STM32_DMA_H
-#define __ARCH_ARM_SRC_STM32F7_STM32_DMA_H
+#ifndef __ARCH_ARM_SRC_STM32H7_STM32_DMA_H7_H
+#define __ARCH_ARM_SRC_STM32H7_STM32_DMA_H7_H
 
 /****************************************************************************
  * Included Files
@@ -31,6 +31,7 @@
 #include <sys/types.h>
 
 #include "hardware/stm32_dma.h"
+#include "hardware/stm32_dmamux.h"
 
 /* These definitions provide the bit encoding of the 'status' parameter
  * passed to the DMA callback function (see dma_callback_t).
@@ -48,6 +49,27 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* DMA channel configuration - common for DMA1 DMA2 MDMA and BDMA */
+
+struct stm32_dma_config_s
+{
+  uint32_t paddr;      /* Peripheral address */
+  uint32_t maddr;      /* Memory address */
+  uint32_t cfg1;       /* DMA transfer configuration 1.
+                        * Its function depends on DMA controller:
+                        *   - DMA1 and DMA2 - SCR register configuration
+                        *   - BDMA - CCR register configuration
+                        *   - MDMA - CCR register configuration
+                        */
+  uint32_t cfg2;       /* DMA transfer configuration 2.
+                        * Its function depends on DMA controller:
+                        *   - MDMA - CTCR register configuration
+                        */
+  uint32_t ndata;      /* Number of data to transfer */
+};
+
+typedef struct stm32_dma_config_s stm32_dmacfg_t;
 
 /* DMA_HANDLE Provides an opaque reference that can be used to represent a
  * DMA stream.
@@ -71,18 +93,6 @@ typedef void *DMA_HANDLE;
 
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 
-struct stm32_dmaregs_s
-{
-  uint32_t lisr;
-  uint32_t hisr;
-  uint32_t scr;
-  uint32_t sndtr;
-  uint32_t spar;
-  uint32_t sm0ar;
-  uint32_t sm1ar;
-  uint32_t sfcr;
-};
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -103,30 +113,19 @@ extern "C"
  *
  * Description:
  *   Allocate a DMA channel.  This function gives the caller mutually
- *   exclusive access to the DMA channel specified by the 'chan' argument.
- *   DMA channels are shared on the STM32:  Devices sharing the same DMA
- *   channel cannot do DMA concurrently!  See the DMACHAN_* definitions in
- *   stm32_dma.h.
- *
- *   If the DMA channel is not available, then stm32_dmachannel() will wait
- *   until the holder of the channel relinquishes the channel by calling
- *   stm32_dmafree().  WARNING: If you have two devices sharing a DMA
- *   channel and the code never releases the channel, the stm32_dmachannel
- *   call for the other will hang forever in this function!  Don't let your
- *   design do that!
- *
- *   Hmm.. I suppose this interface could be extended to make a non-blocking
- *   version.  Feel free to do that if that is what you need.
+ *   exclusive access to the DMA channel specified by the 'dmamap' argument.
+ *   It is common for standard DMA (DMA1, DMA2), master DMA (MDMA) and
+ *   basic DMA (BDMA) controllers.
  *
  * Input Parameters:
- *   chan - Identifies the stream/channel resource
- *     For the STM32 F7, this is a bit encoded value as provided by the
- *     the DMAMAP_* definitions  in chip/stm32f7xxxxxxx_dma.h
+ *   dmamap - Identifies the stream/channel resource. For the STM32 H7, this
+ *     is a bit-encoded  value as provided by the DMAMAP_* definitions
+ *     in chip/stm32h7xxxxxxx_dmamux.h
  *
  * Returned Value:
- *   Provided that 'chan' is valid, this function ALWAYS returns a non-NULL,
- *   void* DMA channel handle.  (If 'chan' is invalid, the function will
- *   assert if debug is enabled or do something ignorant otherwise).
+ *   On success, this function returns a non-NULL, void* DMA channel handle.
+ *   NULL is returned on any failure.  This function can fail only if no DMA
+ *   channel is available.
  *
  * Assumptions:
  *   - The caller does not hold he DMA channel.
@@ -135,19 +134,17 @@ extern "C"
  *
  ****************************************************************************/
 
-DMA_HANDLE stm32_dmachannel(unsigned int chan);
+DMA_HANDLE stm32_dmachannel(unsigned int dmamap);
 
 /****************************************************************************
  * Name: stm32_dmafree
  *
  * Description:
- *   Release a DMA channel.  If another thread is waiting for this DMA
- *   channel in a call to stm32_dmachannel, then this function will re-
- *   assign the DMA channel to that thread and wake it up.
+ *   Release a DMA channel and unmap DMAMUX if required.
  *
  *   NOTE:  The 'handle' used in this argument must NEVER be used again
- *          until stm32_dmachannel() is called again to re-gain access to
- *          the channel.
+ *   until stm32_dmachannel() is called again to re-gain access to the
+ *   channel.
  *
  * Returned Value:
  *   None
@@ -168,21 +165,10 @@ void stm32_dmafree(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                    size_t ntransfers, uint32_t ccr);
+void stm32_dmasetup(DMA_HANDLE handle, stm32_dmacfg_t *cfg);
 
 /****************************************************************************
  * Name: stm32_dmastart
- *
- * Description:
- *   Start the DMA transfer.  NOTE:  The DMA module does *NOT* perform any
- *   cache operations.  It is the responsibility of the DMA client to clean
- *   DMA buffers after staring of the DMA TX operations.
- *
- * Assumptions:
- *   - DMA handle allocated by stm32_dmachannel()
- *   - No DMA in progress
- *
  ****************************************************************************/
 
 void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
@@ -190,93 +176,34 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
 
 /****************************************************************************
  * Name: stm32_dmastop
- *
- * Description:
- *   Cancel the DMA.  After stm32_dmastop() is called, the DMA channel is
- *   reset and stm32_dmasetup() must be called before stm32_dmastart() can be
- *   called again
- *
- * Assumptions:
- *   - DMA handle allocated by stm32_dmachannel()
- *
  ****************************************************************************/
 
 void stm32_dmastop(DMA_HANDLE handle);
 
 /****************************************************************************
  * Name: stm32_dmaresidual
- *
- * Description:
- *   Returns the number of bytes remaining to be transferred
- *
- * Assumptions:
- *   - DMA handle allocated by stm32_dmachannel()
- *
  ****************************************************************************/
 
 size_t stm32_dmaresidual(DMA_HANDLE handle);
 
 /****************************************************************************
  * Name: stm32_dmacapable
- *
- * Description:
- *   Check if the DMA controller can transfer data to/from given memory
- *   address with the given configuration. This depends on the internal
- *   connections in the ARM bus matrix of the processor. Note that this only
- *   applies to memory addresses, it will return false for any peripheral
- *   address.
- *
- * Input Parameters:
- *
- *   maddr - starting memory address
- *   count - number of unit8 or uint16 or uint32 items as defined by MSIZE
- *           of ccr.
- *   ccr   - DMA stream configuration register
- *
- * Returned Value:
- *   True, if transfer is possible.
- *
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_DMACAPABLE
-bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
+bool stm32_dmacapable(DMA_HANDLE handle, stm32_dmacfg_t *cfg);
 #else
-#  define stm32_dmacapable(maddr, count, ccr) (true)
-#endif
-
-/****************************************************************************
- * Name: stm32_dmasample
- *
- * Description:
- *   Sample DMA register contents
- *
- * Assumptions:
- *   - DMA handle allocated by stm32_dmachannel()
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_DMA_INFO
-void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
-#else
-#  define stm32_dmasample(handle,regs)
+#  define stm32_dmacapable(handle, cfg) (true)
 #endif
 
 /****************************************************************************
  * Name: stm32_dmadump
- *
- * Description:
- *   Dump previously sampled DMA register contents
- *
- * Assumptions:
- *   - DMA handle allocated by stm32_dmachannel()
- *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
-                   const char *msg);
+void stm32_dmadump(DMA_HANDLE handle, const char *msg);
 #else
-#  define stm32_dmadump(handle,regs,msg)
+#  define stm32_dmadump(handle,msg)
 #endif
 
 #if defined(__cplusplus)
@@ -284,4 +211,4 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32F7_STM32_DMA_H */
+#endif /* __ARCH_ARM_SRC_STM32H7_STM32_DMA_H7_H */

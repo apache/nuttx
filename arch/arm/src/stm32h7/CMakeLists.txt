@@ -107,14 +107,6 @@ if(CONFIG_STM32_RTC)
   endif()
 endif()
 
-if(CONFIG_STM32_SPI)
-  list(APPEND SRCS stm32_spi.c)
-endif()
-
-if(CONFIG_SPI_SLAVE)
-  list(APPEND SRCS stm32_spi_slave.c)
-endif()
-
 if(CONFIG_STM32_TIMX_CAP)
   list(APPEND SRCS stm32_capture.c)
 endif()

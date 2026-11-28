@@ -88,7 +88,7 @@
 #define STM32_IRQ_I2C2EV            (STM32_IRQ_FIRST + 32) /* 32: I2C2 event interrupt */
 #define STM32_IRQ_I2C2ER            (STM32_IRQ_FIRST + 33) /* 33: I2C2 error interrupt */
 #define STM32_IRQ_SPI1              (STM32_IRQ_FIRST + 34) /* 34: SPI1 global interrupt */
-#define STM32_IRQ_SPI2S2            (STM32_IRQ_FIRST + 35) /* 35: SPI2S2 global interrupt */
+#define STM32_IRQ_SPI2              (STM32_IRQ_FIRST + 35) /* 35: SPI2 global interrupt */
 #define STM32_IRQ_USART1            (STM32_IRQ_FIRST + 36) /* 36: USART1 global interrupt */
 #define STM32_IRQ_USART2            (STM32_IRQ_FIRST + 37) /* 37: USART2 global interrupt */
 #define STM32_IRQ_LPUART1           (STM32_IRQ_FIRST + 38) /* 38: LPUART1 global interrupt */

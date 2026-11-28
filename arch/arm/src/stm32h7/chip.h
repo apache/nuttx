@@ -55,6 +55,24 @@
 #define ARMV7M_DCACHE_LINESIZE 32  /* 32 bytes (8 words) */
 #define ARMV7M_ICACHE_LINESIZE 32  /* 32 bytes (8 words) */
 
+/* SPI kernel clock and SPI clock limits.  On the H7R/S (RM0477) SPI1 is
+ * limited to 130 MHz and the others to 200 MHz, SPI6 has a 16-byte FIFO
+ * and no SCK limit is applied below the kernel clock.
+ */
+
+#ifdef CONFIG_STM32_STM32H7RSXX
+#  define STM32_SPI_MAX_KER_CK   200000000UL
+#  define STM32_SPI1_MAX_KER_CK  130000000UL
+#  define STM32_SPI_CLK_MAX      200000000UL
+#  define STM32_SPI6_FIFOSIZE    16
+#else
+#  define STM32_SPI_MAX_KER_CK   200000000UL
+#  define STM32_SPI4_MAX_KER_CK  100000000UL
+#  define STM32_SPI5_MAX_KER_CK  100000000UL
+#  define STM32_SPI6_MAX_KER_CK  100000000UL
+#  define STM32_SPI_CLK_MAX      150000000UL
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

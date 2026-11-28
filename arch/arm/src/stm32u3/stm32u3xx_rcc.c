@@ -215,9 +215,14 @@ void stm32_rcc_enableperipherals(void)
   modifyreg32(STM32_PWR_SVMCR, 0, PWR_SVMCR_ASV);
 #endif
 
+  regval = 0;
 #ifdef CONFIG_STM32_USART1
-  modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_USART1EN);
+  regval |= RCC_APB2ENR_USART1EN;
 #endif
+#ifdef CONFIG_STM32_SPI1
+  regval |= RCC_APB2ENR_SPI1EN;
+#endif
+  modifyreg32(STM32_RCC_APB2ENR, 0, regval);
 
   regval = 0;
 #ifdef CONFIG_STM32_USART2
@@ -234,6 +239,15 @@ void stm32_rcc_enableperipherals(void)
 #endif
 #ifdef CONFIG_STM32_WWDG
   regval |= RCC_APB1ENR1_WWDGEN;
+#endif
+#ifdef CONFIG_STM32_SPI2
+  regval |= RCC_APB1ENR1_SPI2EN;
+#endif
+#ifdef CONFIG_STM32_SPI3
+  regval |= RCC_APB1ENR1_SPI3EN;
+#endif
+#ifdef CONFIG_STM32_SPI4
+  regval |= RCC_APB1ENR1_SPI4EN;
 #endif
   modifyreg32(STM32_RCC_APB1ENR1, 0, regval);
 

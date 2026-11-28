@@ -50,4 +50,8 @@
 
 #define ARMV8M_PERIPHERAL_INTERRUPTS STM32_IRQ_NEXTINTS
 
+/* Maximum SPI clock as per specifications for all SPIs */
+
+#define STM32_SPI_CLK_MAX            55000000UL
+
 #endif /* __ARCH_ARM_SRC_STM32L5_CHIP_H */

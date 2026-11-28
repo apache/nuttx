@@ -49,7 +49,7 @@
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NUSART                   2   /* USART 1-2 */
 #  define STM32_NLPUART                  1   /* LPUART 1 */
-#  define STM32_NSPI                     2   /* SPI1 and SPI2S2 (spi2 shared with i2s) */
+#  define STM32_NSPI                     2   /* SPI1 and SPI2 (spi2 shared with i2s) */
 #  define STM32_NI2C                     3   /* I2C1-3 */
 #  define STM32_NDMA                     2   /* Two DMA channels DMA1-2 */
 #  define STM32_NPORTS                   4   /* GPIO{A,B,C,H} */

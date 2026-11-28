@@ -294,7 +294,7 @@ IWDG          v2            arch/arm/src/common/stm32/stm32_iwdg.c
 PWR           G0            arch/arm/src/common/stm32/stm32_pwr_m0_g0.c      
 RCC           to be done    arch/arm/src/stm32c0/stm32_rcc.c                 
 RTC           RTCC M0       not supported                                    
-SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m0_v1.c      
+SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m0_v1v2.c      
 SYSCFG        to be done    not supported                                    
 TIM           v1            arch/arm/src/common/stm32/stm32_tim.c            
 USART/LPUART  v4            arch/arm/src/common/stm32/stm32_serial_m0_v4.c   
@@ -334,7 +334,7 @@ RCC           C5            arch/arm/src/stm32c5/stm32c5xx_rcc.c
 RNG           to be done    not supported
 RTC           to be done    not supported
 SBS           to be done    not supported
-SPI/I2S       to be done    not supported
+SPI           v3            arch/arm/src/common/stm32/stm32_spi_v3.c
 TAMP          to be done    not supported
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 USART/UART    M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
@@ -362,7 +362,7 @@ IWDG          v1            arch/arm/src/common/stm32/stm32_iwdg.c
 PWR           v1            arch/arm/src/common/stm32/stm32_pwr_m0_v1.c      
 RCC           to be done    arch/arm/src/stm32f0/stm32_rcc.c                 
 RTC           RTCC M0       not supported                                    
-SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m0_v1.c      
+SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m0_v1v2.c      
 SYSCFG        to be done    not supported                                    
 TIM           v1            arch/arm/src/common/stm32/stm32_tim.c            
 USART/LPUART  v3            arch/arm/src/common/stm32/stm32_serial_m0_v3.c   
@@ -423,7 +423,7 @@ RCC           to be done    arch/arm/src/stm32f2/stm32_rcc.c
 RNG           v1            arch/arm/src/common/stm32/stm32_rng_v1.c          
 RTC           RTCC v1       arch/arm/src/common/stm32/stm32_rtc_m3m4_v1_lowerhalf.c
 SDIO          v1            arch/arm/src/common/stm32/stm32_sdio_m3m4_v1.c         
-SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m3m4_v2v3v4.c      
+SPI/I2S       v1            arch/arm/src/common/stm32/stm32_spi_v1v2.c      
 TIM           v1            arch/arm/src/common/stm32/stm32_tim.c                  
 USART/LPUART  v2            arch/arm/src/common/stm32/stm32_serial_m3m4_v1v2v3v4.c 
 USB           OTG FS/HS     arch/arm/src/common/stm32/stm32_otgfsdev_m3m4_v1.c     
@@ -452,7 +452,7 @@ OPAMP         v1              arch/arm/src/common/stm32/stm32_opamp_m3m4_v1.c
 RCC           to be done      arch/arm/src/stm32f3/stm32_rcc.c                       
 RTC           RTCC v1         arch/arm/src/common/stm32/stm32_rtc_m3m4_v1_lowerhalf.c
 SDADC         v1              arch/arm/src/common/stm32/stm32_sdadc_m3m4_v1.c        
-SPI/I2S       v3              arch/arm/src/common/stm32/stm32_spi_m3m4_v2v3v4.c      
+SPI/I2S       v2              arch/arm/src/common/stm32/stm32_spi_v1v2.c      
 SYSCFG        v1              not supported                                          
 TIM           v1 or v2        arch/arm/src/common/stm32/stm32_tim.c                  
 USART/LPUART  v3              arch/arm/src/common/stm32/stm32_serial_m3m4_v1v2v3v4.c 
@@ -487,7 +487,7 @@ RCC           to be done    arch/arm/src/stm32f4/stm32_rcc.c
 RNG           v1            arch/arm/src/common/stm32/stm32_rng_v1.c         
 RTC           RTCC F4       arch/arm/src/common/stm32/stm32_rtcc_m3m4_f4.c        
 SDIO          v1            arch/arm/src/common/stm32/stm32_sdio_m3m4_v1.c        
-SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m3m4_v2v3v4.c     
+SPI/I2S       v1            arch/arm/src/common/stm32/stm32_spi_v1v2.c     
 TIM           v1            arch/arm/src/common/stm32/stm32_tim.c                 
 USART/LPUART  v2            arch/arm/src/common/stm32/stm32_serial_m3m4_v1v2v3v4.c
 USB           OTG FS/HS     arch/arm/src/common/stm32/stm32_otgfsdev_m3m4_v1.c    
@@ -519,7 +519,7 @@ OPAMP         v1            arch/arm/src/common/stm32/stm32_opamp_m3m4_v1.c
 RCC           to be done    arch/arm/src/stm32g4/stm32_rcc.c                       
 RNG           v1            arch/arm/src/common/stm32/stm32_rng_v1.c          
 RTC           RTCC v1       arch/arm/src/common/stm32/stm32_rtc_m3m4_v1_lowerhalf.c
-SPI/I2S       v3            arch/arm/src/common/stm32/stm32_spi_m3m4_v2v3v4.c      
+SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_v1v2.c      
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c                  
 USART/LPUART  v4            arch/arm/src/common/stm32/stm32_serial_m3m4_v1v2v3v4.c 
 USB           device        arch/arm/src/common/stm32/stm32_otgfsdev_m3m4_v1.c     
@@ -551,7 +551,7 @@ RNG           to be done    arch/arm/src/stm32l4/stm32l4_rng.c
 RTC           to be done    arch/arm/src/stm32l4/stm32l4_rtc.c       
 SAI           to be done    arch/arm/src/stm32l4/stm32l4_sai.c       
 SDMMC         to be done    arch/arm/src/stm32l4/stm32l4_sdmmc.c     
-SPI/I2S       to be done    arch/arm/src/stm32l4/stm32l4_spi.c       
+SPI           v2            arch/arm/src/common/stm32/stm32_spi_v1v2.c
 TIM           v2            arch/arm/src/common/stm32/stm32_tim.c    
 USART/LPUART  v3            arch/arm/src/stm32l4/stm32l4_serial.c    
 USB           OTG FS        arch/arm/src/stm32l4/stm32l4_otgfsdev.c  
@@ -588,6 +588,7 @@ RCC           to be done    arch/arm/src/stm32f7/stm32_rcc.c
 RNG           to be done    arch/arm/src/stm32f7/stm32_rng.c       
 RTC           to be done    arch/arm/src/stm32f7/stm32_rtc.c       
 SDMMC         to be done    arch/arm/src/stm32f7/stm32_sdmmc.c     
+SPI           v2            arch/arm/src/common/stm32/stm32_spi_v1v2.c
 SPI/I2S       to be done    arch/arm/src/stm32f7/stm32_i2s.c       
 TIM           v2            arch/arm/src/common/stm32/stm32_tim.c  
 USART/LPUART  v3            arch/arm/src/stm32f7/stm32_serial.c    
@@ -625,7 +626,7 @@ PWR           G0            not supported
 RCC           to be done    arch/arm/src/stm32g0/stm32_rcc.c                 
 RNG           v1            arch/arm/src/common/stm32/stm32_rng_m0_v1.c      
 RTC           RTCC M0       not supported                                    
-SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m0_v1.c      
+SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m0_v1v2.c      
 SYSCFG        to be done    not supported                                    
 TIM           v1            arch/arm/src/common/stm32/stm32_tim.c            
 USART/LPUART  v4            arch/arm/src/common/stm32/stm32_serial_m0_v4.c   
@@ -656,7 +657,7 @@ OCTOSPI       to be done    arch/arm/src/stm32h5/stm32_qspi.c
 PWR           to be done    arch/arm/src/stm32h5/stm32_pwr.c       
 RCC           to be done    arch/arm/src/stm32h5/stm32_rcc.c       
 RTC           M33M55 v1     arch/arm/src/common/stm32/stm32_rtcc_m33m55_v1.c
-SPI/I2S       v5            arch/arm/src/common/stm32/stm32_spi_v5.c
+SPI/I2S       v3            arch/arm/src/common/stm32/stm32_spi_v3.c
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c  
 USART/LPUART  M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 USB           FS            arch/arm/src/stm32h5/stm32_usbfs.c     
@@ -696,7 +697,7 @@ RCC           to be done    arch/arm/src/stm32h7/stm32_rcc.c
 RNG           v1            arch/arm/src/common/stm32/stm32_rng_v1.c
 RTC           to be done    arch/arm/src/stm32h7/stm32_rtc.c       
 SDMMC         v2            arch/arm/src/common/stm32/stm32_sdmmc_v2.c
-SPI/I2S       to be done    arch/arm/src/stm32h7/stm32_spi.c       
+SPI/I2S       v3            arch/arm/src/common/stm32/stm32_spi_v3.c
 TIM           v2, H7RS v3   arch/arm/src/common/stm32/stm32_tim.c  
 USART/LPUART  v4            arch/arm/src/stm32h7/stm32_serial.c    
 USB           OTG v2        arch/arm/src/common/stm32/stm32_otgdev_v2.c
@@ -731,7 +732,7 @@ PWR           v1            arch/arm/src/common/stm32/stm32_pwr_m0_v1.c
 RCC           to be done    arch/arm/src/stm32l0/stm32_rcc.c                 
 RNG           v1            arch/arm/src/common/stm32/stm32_rng_m0_v1.c      
 RTC           RTCC M0       not supported                                    
-SPI/I2S       v1            arch/arm/src/common/stm32/stm32_spi_m0_v1.c      
+SPI/I2S       v1            arch/arm/src/common/stm32/stm32_spi_m0_v1v2.c      
 TIM           v1            arch/arm/src/common/stm32/stm32_tim.c            
 USART/LPUART  v3            arch/arm/src/common/stm32/stm32_serial_m0_v3.c   
 USB           device v1     arch/arm/src/common/stm32/stm32_usbdev_m0_v1.c
@@ -790,7 +791,7 @@ RCC           to be done    arch/arm/src/stm32l5/stm32l5_rcc.c
 RNG           to be done    not supported                           
 RTC           to be done    not supported                           
 SDMMC         to be done    not supported                           
-SPI/I2S       to be done    arch/arm/src/stm32l5/stm32l5_spi.c      
+SPI           v2            arch/arm/src/common/stm32/stm32_spi_v1v2.c
 TIM           v2            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 USB           device        not supported                           
@@ -822,7 +823,7 @@ RCC           n6            arch/arm/src/stm32n6/stm32n6xx_rcc.c
 RNG           v1            arch/arm/src/common/stm32/stm32_rng_v1.c
 RTC           M33M55 v1     arch/arm/src/common/stm32/stm32_rtcc_m33m55_v1.c
 SDMMC         v2            arch/arm/src/common/stm32/stm32_sdmmc_v2.c
-SPI/I2S       v5            arch/arm/src/common/stm32/stm32_spi_v5.c
+SPI/I2S       v3            arch/arm/src/common/stm32/stm32_spi_v3.c
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
 USB           device        not supported
@@ -854,7 +855,7 @@ PWR           G0            arch/arm/src/common/stm32/stm32_pwr_m0_g0.c
 RCC           to be done    arch/arm/src/stm32u0/stm32_rcc.c
 RNG           v1            arch/arm/src/common/stm32/stm32_rng_m0_v1.c
 RTC           RTCC M0       not supported
-SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m0_v1.c
+SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m0_v1v2.c
 SYSCFG        to be done    not supported
 TIM           v1            arch/arm/src/common/stm32/stm32_tim.c
 TSC           to be done    not supported
@@ -904,7 +905,7 @@ RTC           to be done    not supported
 SAES          to be done    not supported
 SAI           to be done    not supported
 SDMMC         to be done    not supported
-SPI/I2S       to be done    not supported
+SPI           v3            arch/arm/src/common/stm32/stm32_spi_v3.c
 SYSCFG        to be done    not supported
 TAMP          to be done    not supported
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
@@ -939,7 +940,7 @@ RNG           to be done    not supported
 RTC           to be done    not supported                         
 SAES/AES      to be done    not supported                         
 SDMMC         to be done    not supported                         
-SPI/I2S       to be done    arch/arm/src/stm32u5/stm32_spi.c      
+SPI/I2S       v3            arch/arm/src/common/stm32/stm32_spi_v3.c
 TAMP          to be done    not supported                         
 TIM           v3            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  M33M55 v3     arch/arm/src/common/stm32/stm32_serial_m33m55_v3.c
@@ -968,7 +969,7 @@ Radio         to be done    not supported
 RCC           to be done    arch/arm/src/stm32wb/stm32wb_rcc.c      
 RNG           to be done    not supported                           
 RTC           to be done    arch/arm/src/stm32wb/stm32wb_rtc.c      
-SPI/I2S       to be done    arch/arm/src/stm32wb/stm32wb_spi.c      
+SPI           v2            arch/arm/src/common/stm32/stm32_spi_v1v2.c
 TIM           v2            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  v4            arch/arm/src/stm32wb/stm32wb_serial.c   
 USB           device        not supported                           
@@ -997,7 +998,7 @@ Radio         to be done    not supported
 RCC           to be done    arch/arm/src/stm32wl5/stm32wl5_rcc.c      
 RNG           to be done    not supported                             
 RTC           to be done    not supported                             
-SPI/I2S       to be done    arch/arm/src/stm32wl5/stm32wl5_spi.c      
+SPI           v2            arch/arm/src/common/stm32/stm32_spi_v1v2.c
 TIM           v2            arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  v3            arch/arm/src/stm32wl5/stm32wl5_serial.c   
 USB           to be done    not supported                             
@@ -1091,7 +1092,7 @@ of a peripheral on a given core is ``V1``.
 
 - Follow the same convention as headers: ``stm32_gpio_m3m4_v1v2.c``,
   ``stm32_adc_m0_v1.c``, ``stm32_gpio_m33m55_v1.c``,
-  ``stm32_serial_m33m55_v3.c``, ``stm32_spi_m0_v1.c``, and
+  ``stm32_serial_m33m55_v3.c``, ``stm32_spi_m0_v1v2.c``, and
   ``stm32_pwm_m3m4_v1v2v3.c``
 
 **Kconfig symbol naming** (``CONFIG_STM32_HAVE_IP_<PERIPH>_<CORE>_<VERSION>``):

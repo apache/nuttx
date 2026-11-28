@@ -487,7 +487,7 @@ M3 Wildfire-specific Configuration Options
    support. Non-interrupt-driven, poll-waiting is recommended if the
    interrupt rate would be to high in the interrupt driven case.
    CONFIG_STM32_SPIx_DMA - Use DMA to improve SPIx transfer performance.
-   Cannot be used with CONFIG_STM32_SPI_INTERRUPT.
+   Cannot be used with CONFIG_STM32_SPI_INTERRUPTS.
 
    CONFIG_STM32_SDIO_DMA - Support DMA data transfers.  Requires
    CONFIG_STM32_SDIO and CONFIG_STM32_DMA2.

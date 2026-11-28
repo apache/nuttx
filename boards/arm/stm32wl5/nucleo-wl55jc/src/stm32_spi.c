@@ -40,7 +40,7 @@
 #include "stm32.h"
 #include "nucleo-wl55jc.h"
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2S2)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
 
 /****************************************************************************
  * Public Data
@@ -51,7 +51,7 @@
 #ifdef CONFIG_STM32_SPI1
 struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32_SPI2S2
+#ifdef CONFIG_STM32_SPI2
 struct spi_dev_s *g_spi2;
 #endif
 
@@ -90,7 +90,7 @@ void weak_function stm32_spidev_initialize(void)
 
 #endif
 
-#ifdef CONFIG_STM32_SPI2S2
+#ifdef CONFIG_STM32_SPI2
   /* Configure SPI-based devices */
 
   g_spi2 = stm32_spibus_initialize(2);
@@ -178,24 +178,24 @@ int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 
 #endif
 
-#ifdef CONFIG_STM32_SPI2S2
-void stm32_spi2s2select(struct spi_dev_s *dev, uint32_t devid,
+#ifdef CONFIG_STM32_SPI2
+void stm32_spi2select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" :
           "de-assert");
 }
 
-uint8_t stm32_spi2s2status(struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 
-int stm32_spi2s2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }
 
 #endif
 
-#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2S2 */
+#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 */

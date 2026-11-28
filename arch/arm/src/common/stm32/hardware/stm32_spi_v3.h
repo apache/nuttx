@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/hardware/stm32h7x3xx_spi.h
+ * arch/arm/src/common/stm32/hardware/stm32_spi_v3.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_SPI_H
-#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_SPI_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V3_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V3_H
 
 /****************************************************************************
  * Included Files
@@ -29,19 +29,19 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32_STM32H7X0XX) || \
-    defined(CONFIG_STM32_STM32H7X3XX) || \
-    defined(CONFIG_STM32_STM32H7B3XX) || \
-    defined(CONFIG_STM32_STM32H7X5XX) || \
-    defined(CONFIG_STM32_STM32H7X7XX)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Maximum allowed speed as per data sheet for all SPIs */
+/* SPI version **************************************************************/
 
-#  define STM32_SPI_CLK_MAX      150000000UL
+/* The STM32H7 SPI cannot bypass the baud rate prescaler (no CFG1.BPASS),
+ * the STM32H7R/S SPI can.
+ */
+
+#if !defined(CONFIG_ARCH_CHIP_STM32H7) || defined(CONFIG_STM32_STM32H7RSXX)
+#  define HAVE_SPI_BPASS
+#endif
 
 /* Register Offsets *********************************************************/
 
@@ -185,8 +185,6 @@
 
 #define SPI_CR2_TSIZE_SHIFT       (0)         /* Bits 0-15 */
 #define SPI_CR2_TSIZE_MASK        (0xff << SPI_CR2_TSIZE_SHIFT)
-#define SPI_CR2_TSER_SHIFT        (16)        /* Bits 16-31 */
-#define SPI_CR2_TSER_MASK         (0xff << SPI_CR2_TSER_SHIFT)
 
 /* SPI configuration register 1 */
 
@@ -242,20 +240,10 @@
 #  define SPI_CFG1_FTHLV_14DATA   (13 << SPI_CFG1_FTHLV_SHIFT)
 #  define SPI_CFG1_FTHLV_15DATA   (14 << SPI_CFG1_FTHLV_SHIFT)
 #  define SPI_CFG1_FTHLV_16DATA   (15 << SPI_CFG1_FTHLV_SHIFT)
-#define SPI_CFG1_UDRCFG_SHIFT     (9) /* Bits 9-10: behavior of slave transmitter at underrun condition */
-#define SPI_CFG1_UDRCFG_MASK      (0x3 << SPI_CFG1_UDRCFG_SHIFT)
+#define SPI_CFG1_UDRCFG_SHIFT     (9) /* Bit 9: behavior of slave transmitter at underrun condition */
+#define SPI_CFG1_UDRCFG_MASK      (0x1 << SPI_CFG1_UDRCFG_SHIFT)
 #  define SPI_CFG1_UDRCFG_CONST   (0 << SPI_CFG1_UDRCFG_SHIFT)
 #  define SPI_CFG1_UDRCFG_LASTRX  (1 << SPI_CFG1_UDRCFG_SHIFT)
-#  define SPI_CFG1_UDRCFG_LASTTX  (2 << SPI_CFG1_UDRCFG_SHIFT)
-
-                                       /* 11: Reserved */
-#define SPI_CFG1_UDRDET_SHIFT     (11) /* Bits 11-12: detection of underrun condition at slave transmitter */
-#define SPI_CFG1_UDRDET_MASK      (0x3 << SPI_CFG1_UDRDET_SHIFT)
-#  define SPI_CFG1_UDRDET_BEG     (0 << SPI_CFG1_UDRDET_SHIFT)
-#  define SPI_CFG1_UDRDET_END     (1 << SPI_CFG1_UDRDET_SHIFT)
-#  define SPI_CFG1_UDRDET_SS      (2 << SPI_CFG1_UDRDET_SHIFT)
-
-                                            /* 11: Reserved */
 
                                             /* Bit 13: Reserved */
 #define SPI_CFG1_RXDMAEN          (1 << 14) /* Bit 14: RX-DMA stream enable */
@@ -310,7 +298,7 @@
 #  define SPI_CFG1_MBR_FPCLKd128  (6 << SPI_CFG1_MBR_SHIFT)
 #  define SPI_CFG1_MBR_FPCLKd256  (7 << SPI_CFG1_MBR_SHIFT)
 
-                                       /* Bit 31: Reserved */
+#define SPI_CFG1_BPASS            (1 << 31) /* Bit 31: Bypass the Prescaler at MBR */
 
 /* SPI configuration register 2 */
 
@@ -351,7 +339,9 @@
 #  define SPI_CFG2_MIDI_14CLK     (14 << SPI_CFG2_MIDI_SHIFT)
 #  define SPI_CFG2_MIDI_15CLK     (15 << SPI_CFG2_MIDI_SHIFT)
 
-                                            /* Bits 8-14: Reserved */
+                                            /* Bits 8-12: Reserved */
+#define SPI_CFG2_RDIOM            (1 << 13) /* Bit 13: RDY Signal I/O Management */
+#define SPI_CFG2_RDIOP            (1 << 14) /* Bit 14: RDY Signal I/O Polarity */
 #define SPI_CFG2_IOSWP            (1 << 15) /* Bit 15: swap functionality of MISO and MOSI pins */
 
                                             /* Bit 16: Reserved */
@@ -390,7 +380,6 @@
 #define SPI_SR_CRCE              (1 << 7)  /* Bit 7: CRC error */
 #define SPI_SR_TIFRE             (1 << 8)  /* Bit 8: TI frame format error */
 #define SPI_SR_MODF              (1 << 9)  /* Bit 9: mode fault */
-#define SPI_SR_TSERF             (1 << 10) /* Bit 10: additional number of SPI data to be transacted was reload */
 #define SPI_SR_SUSP              (1 << 11) /* Bit 11: suspend */
 #define SPI_SR_TXC               (1 << 12) /* Bit 12: TxFIFO transmission complete */
 #define SPI_SR_RXPLVL_SHIFT      (13)      /* Bits 13-14: RxFIFO packing level */
@@ -411,8 +400,6 @@
 #define SPI_IER_CRCEIE           (1 << 7)  /* Bit 7: CRC error interrupt enable */
 #define SPI_IER_TIFREIE          (1 << 8)  /* Bit 8: TIFRE interrupt enable */
 #define SPI_IER_MODFIE           (1 << 9)  /* Bit 9: mode fault interrupt enable */
-#define SPI_IER_TSERFIE          (1 << 10) /* Bit 10: additional number of transactions
-                                            * reload interrupt enable */
 
 /* SPI/I2S interrupt/status flags clear register */
 
@@ -424,7 +411,6 @@
 #define SPI_IFCR_CRCEC           (1 << 7)  /* Bit 7: CRC error flag clear */
 #define SPI_IFCR_TIFREC          (1 << 8)  /* Bit 8: TI frame format error flag clear */
 #define SPI_IFCR_MODFC           (1 << 9)  /* Bit 9: mode fault flag clear */
-#define SPI_IFCR_TSERFC          (1 << 10) /* Bit 10: TSERF flag clear*/
 #define SPI_IFCR_SUSPC           (1 << 11) /* Bit 11: suspend flag clear */
                                            /* Bits 12-31: Reserved */
 
@@ -464,7 +450,45 @@
 #define SPI_UDRDR_UDRDR_MASK       (0xffff << SPI_UDRDR_UDRDR_SHIFT)
                                        /* Bits 16-31: read zero */
 
-/* TODO: SPI/I2S configuration register */
+/* SPI/I2S configuration register */
 
-#endif /* CONFIG_STM32_STM32H7X3XX || CONFIG_STM32_STM32H7B3XX */
-#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_SPI_H */
+#define SPI_I2SCFGR_I2SMOD         (1 << 0)  /* Bit 0:  I2S Mode Selection */
+
+#define SPI_I2SCFGR_I2SCFG_SHIFT   (1) /* Bits 3:1: I2S Configuration Mode */
+#define SPI_I2SCFGR_I2SCFG_MASK    (0x7 << SPI_I2SCFGR_I2SCFG_SHIFT)
+#define SPI_I2SCFGR_I2SCFG_STX     (0 << SPI_I2SCFGR_I2SCFG_SHIFT)
+#define SPI_I2SCFGR_I2SCFG_SRX     (1 << SPI_I2SCFGR_I2SCFG_SHIFT)
+#define SPI_I2SCFGR_I2SCFG_MTX     (2 << SPI_I2SCFGR_I2SCFG_SHIFT)
+#define SPI_I2SCFGR_I2SCFG_MRX     (3 << SPI_I2SCFGR_I2SCFG_SHIFT)
+#define SPI_I2SCFGR_I2SCFG_SFD     (4 << SPI_I2SCFGR_I2SCFG_SHIFT)
+#define SPI_I2SCFGR_I2SCFG_MFD     (5 << SPI_I2SCFGR_I2SCFG_SHIFT)
+
+#define SPI_I2SCFGR_I2SSTD_SHIFT   (4) /* Bits 5:4: I2S Standard Selection */
+#define SPI_I2SCFGR_I2SSTD_MASK    (0x3 << SPI_I2SCFGR_I2SSTD_SHIFT)
+#define SPI_I2SCFGR_I2SCFG_PHIL    (0 << SPI_I2SCFGR_I2SCFG_SHIFT)
+#define SPI_I2SCFGR_I2SCFG_MSB     (1 << SPI_I2SCFGR_I2SCFG_SHIFT)
+#define SPI_I2SCFGR_I2SCFG_LSB     (2 << SPI_I2SCFGR_I2SCFG_SHIFT)
+#define SPI_I2SCFGR_I2SCFG_PCM     (3 << SPI_I2SCFGR_I2SCFG_SHIFT)
+
+#define SPI_I2SCFGR_PCMSYNC        (1 << 7)  /* Bit 7:  PCM Frame Synchronization */
+
+#define SPI_I2SCFGR_DATLEN_SHIFT   (8) /* Bits 9:8: Data Length to be Transferred */
+#define SPI_I2SCFGR_DATLEN_MASK    (0x3 << SPI_I2SCFGR_DATLEN_SHIFT)
+#define SPI_I2SCFGR_DATLEN_16      (0 << SPI_I2SCFGR_DATLEN_SHIFT)
+#define SPI_I2SCFGR_DATLEN_24      (1 << SPI_I2SCFGR_DATLEN_SHIFT)
+#define SPI_I2SCFGR_DATLEN_32      (2 << SPI_I2SCFGR_DATLEN_SHIFT)
+
+#define SPI_I2SCFGR_CHLEN          (1 << 10) /* Bit 10: Channel Length (n-bits / audio channel) */
+#define SPI_I2SCFGR_CKPOL          (1 << 11) /* Bit 11: Serial Audio CLock Polarity */
+#define SPI_I2SCFGR_FIXCH          (1 << 12) /* Bit 12: Fixed Channel Length in Slave */
+#define SPI_I2SCFGR_WSINV          (1 << 13) /* Bit 13: Word Select Inversion */
+#define SPI_I2SCFGR_DATAFMT        (1 << 14) /* Bit 14: Data Format */
+
+#define SPI_I2SCFGR_I2SDIV_SHIFT   (16) /* Bits 23:16: I2S Linear Prescaler */
+#define SPI_I2SCFGR_I2SDIV_MASK    (0xff << SPI_I2SCFGR_I2SDIV_SHIFT)
+#define SPI_I2SCFGR_I2SDIV(n)      (n << SPI_I2SCFGR_I2SDIV_SHIFT)
+
+#define SPI_I2SCFGR_ODD            (1 << 24) /* Bit 24: Odd Factor for the Prescaler */
+#define SPI_I2SCFGR_MCKOE          (1 << 25) /* Bit 24: Master Clock Output Enable */
+
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SPI_V3_H */

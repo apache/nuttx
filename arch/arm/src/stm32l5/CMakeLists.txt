@@ -22,14 +22,7 @@
 
 # Required STM32L5 files
 
-list(
-  APPEND
-  SRCS
-  stm32l5_rcc.c
-  stm32l5_spi.c
-  stm32l5_lse.c
-  stm32l5_pwr.c
-  stm32l5_flash.c)
+list(APPEND SRCS stm32l5_rcc.c stm32l5_lse.c stm32l5_pwr.c stm32l5_flash.c)
 
 if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS stm32l5_userspace.c stm32l5_mpuinit.c)

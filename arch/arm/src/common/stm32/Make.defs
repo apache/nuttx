@@ -106,8 +106,8 @@ ifeq ($(CONFIG_STM32_DMA2D)$(CONFIG_STM32_HAVE_IP_DMA2D_V1),yy)
 CHIP_CSRCS += stm32_dma2d_v1.c
 endif
 
-ifeq ($(CONFIG_STM32_SPI)$(CONFIG_STM32_HAVE_IP_SPI_V5),yy)
-CHIP_CSRCS += stm32_spi_v5.c
+ifeq ($(CONFIG_STM32_SPI)$(CONFIG_STM32_HAVE_IP_SPI_V3),yy)
+CHIP_CSRCS += stm32_spi_v3.c
 endif
 
 ifeq ($(CONFIG_STM32_DAC)$(CONFIG_STM32_HAVE_IP_DAC_M33_V1),yy)
@@ -116,6 +116,18 @@ endif
 
 ifeq ($(CONFIG_STM32_ETHMAC)$(CONFIG_STM32_HAVE_IP_ETHMAC_M3M4_V1),yy)
 CHIP_CSRCS += stm32_eth_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_SPI),y)
+ifneq ($(filter y,$(CONFIG_ARCH_CHIP_STM32F7) $(CONFIG_ARCH_CHIP_STM32L4) \
+                 $(CONFIG_ARCH_CHIP_STM32L5) $(CONFIG_ARCH_CHIP_STM32WB) \
+                 $(CONFIG_ARCH_CHIP_STM32WL5)),)
+CHIP_CSRCS += stm32_spi_v1v2.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_SPI_SLAVE),y)
+CHIP_CSRCS += stm32_spi_v3_slave.c
 endif
 
 ifeq ($(CONFIG_STM32_ETHMAC)$(CONFIG_STM32_HAVE_IP_ETHMAC_V2),yy)
@@ -252,10 +264,8 @@ else ifeq ($(CONFIG_STM32_HAVE_IP_FLASH_M3M4_G4),y)
 CHIP_CSRCS += stm32_flash_m3m4_g4.c
 endif
 ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_SPI_V1) \
-            $(CONFIG_STM32_HAVE_IP_SPI_V2) \
-            $(CONFIG_STM32_HAVE_IP_SPI_V3) \
-            $(CONFIG_STM32_HAVE_IP_SPI_V4)),)
-CHIP_CSRCS += stm32_spi_m3m4_v2v3v4.c
+            $(CONFIG_STM32_HAVE_IP_SPI_V2)),)
+CHIP_CSRCS += stm32_spi_v1v2.c
 endif
 ifeq ($(CONFIG_STM32_HAVE_IP_I2S_M3M4_V1),y)
 CHIP_CSRCS += stm32_i2s_m3m4_v1.c
@@ -573,7 +583,7 @@ CHIP_CSRCS += stm32_i2c_m0_v1.c
 endif
 
 ifeq ($(CONFIG_STM32_SPI),y)
-CHIP_CSRCS += stm32_spi_m0_v1.c
+CHIP_CSRCS += stm32_spi_m0_v1v2.c
 endif
 
 ifeq ($(CONFIG_STM32_PWM),y)

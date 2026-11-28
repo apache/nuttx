@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32l5/stm32l5_spi.c
+ * arch/arm/src/common/stm32/stm32_spi_v1v2.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,34 +21,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status
- * must be provided by board-specific logic.  They are implementations of the
+ * The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status must
+ * be provided by board-specific logic.  They are implementations of the
  * select and status methods of the SPI interface defined by struct spi_ops_s
- * (see include/nuttx/spi/spi.h). All other methods (including
- * stm32_spibus_initialize()) are provided by common STM32 logic.  To use
- * this common SPI logic on your board:
+ * (see include/nuttx/spi/spi.h).
+ * All other methods (including stm32_spibus_initialize())  are provided by
+ * common STM32 logic.  To use this common SPI logic on your board:
  *
- *  1. Provide logic in stm32_board_initialize() to configure SPI chip
- *     select pins.
- *  2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status()
- *     functions in your board-specific logic.  These functions will perform
- *     chip selection and status operations using GPIOs in the way your board
- *     is configured.
- *  3. Add a calls to stm32_spibus_initialize() in your low level
- *     application initialization logic
- *  4. The handle returned by stm32_spibus_initialize() may then be used to
- *     bind the SPI driver to higher level logic (e.g., calling
- *     mmcsd_spislotinitialize(), for example, will bind the SPI driver to
- *     the SPI MMC/SD driver).
+ *   1. Provide logic in stm32_boardinitialize() to configure SPI chip select
+ *      pins.
+ *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions
+ *      in your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
+ *   3. Add a calls to stm32_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by stm32_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
+ *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
+ *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
-
-/* This driver is ported from the stm32 one, which only supports 8 and 16
- * bits transfers. The STM32L5 family supports frame size from 4 to 16 bits,
- * but we do not support that yet. For the moment, we replace uses of the
- * CR1_DFF bit with a check of the CR2_DS[0..3] bits. If the value is
- * SPI_CR2_DS_16BIT it means 16 bits, else 8 bits.
- */
 
 /****************************************************************************
  * Included Files
@@ -61,7 +54,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <semaphore.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -72,19 +65,19 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/power/pm.h>
 
+#include <arch/board/board.h>
+
 #include "arm_internal.h"
 #include "chip.h"
 #include "stm32.h"
-#include "stm32_gpio.h"
 #ifdef CONFIG_STM32_SPI_DMA
-#  include "stm32l5_dma.h"
+#  include "stm32_dma.h"
 #endif
-#include "stm32l5_spi.h"
-
-#include <arch/board/board.h>
+#include "stm32_spi.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
-    defined(CONFIG_STM32_SPI3)
+    defined(CONFIG_STM32_SPI3) || defined(CONFIG_STM32_SPI4) || \
+    defined(CONFIG_STM32_SPI5) || defined(CONFIG_STM32_SPI6)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -107,19 +100,109 @@
 /* SPI DMA priority */
 
 #ifdef CONFIG_STM32_SPI_DMA
-#  define SPI_DMA_PRIO  DMA_CCR_PRIMED
+
+#  if defined(CONFIG_STM32_HAVE_IP_DMA_V1) || \
+      defined(CONFIG_ARCH_CHIP_STM32L4) || defined(CONFIG_ARCH_CHIP_STM32WB)
+#    define SPI_DMA_PRIO  DMA_CCR_PRIMED
+#  elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
+#    define SPI_DMA_PRIO  DMA_SCR_PRIMED
+#  elif defined(CONFIG_ARCH_CHIP_STM32F7)
+#    define SPI_DMA_PRIO  DMA_SCR_PRILO
+#  else
+#    error "Unknown STM32 DMA"
+#  endif
+
+/* DMA channel configuration.  The STM32L4, STM32WB and STM32F7 have their
+ * own drivers for the channel DMA of the IP v1 and the stream DMA of the
+ * IP v2.
+ */
+
+#if defined(CONFIG_STM32_HAVE_IP_DMA_V1) || \
+    defined(CONFIG_ARCH_CHIP_STM32L4) || defined(CONFIG_ARCH_CHIP_STM32WB)
+#  define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC            )
+#  define SPI_RXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC            )
+#  define SPI_RXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS                         )
+#  define SPI_RXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS                          )
+#  define SPI_TXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC|DMA_CCR_DIR)
+#  define SPI_TXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC|DMA_CCR_DIR)
+#  define SPI_TXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS             |DMA_CCR_DIR)
+#  define SPI_TXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS              |DMA_CCR_DIR)
+#elif defined(CONFIG_STM32_HAVE_IP_DMA_V2) || defined(CONFIG_ARCH_CHIP_STM32F7)
+#  define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_SCR_MSIZE_16BITS|DMA_SCR_PSIZE_16BITS|DMA_SCR_MINC|DMA_SCR_DIR_P2M)
+#  define SPI_RXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS |DMA_SCR_MINC|DMA_SCR_DIR_P2M)
+#  define SPI_RXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_16BITS             |DMA_SCR_DIR_P2M)
+#  define SPI_RXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS              |DMA_SCR_DIR_P2M)
+#  define SPI_TXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_SCR_MSIZE_16BITS|DMA_SCR_PSIZE_16BITS|DMA_SCR_MINC|DMA_SCR_DIR_M2P)
+#  define SPI_TXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS |DMA_SCR_MINC|DMA_SCR_DIR_M2P)
+#  define SPI_TXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_16BITS             |DMA_SCR_DIR_M2P)
+#  define SPI_TXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS              |DMA_SCR_DIR_M2P)
+#else
+#  error "Unknown STM32 DMA"
 #endif
 
-/* DMA channel configuration */
+/* Maximum number of data items per single DMA descriptor.
+ *
+ * Both the STM32 DMA IPv1 (CNDTR on F0/F1/F3/G4/L0/L1/L4) and IPv2 (SxNDTR
+ * on F2/F4/F7/H7) transfer-count registers are 16 bits wide, so each call
+ * to stm32_dmasetup() can program at most 65535 transfers.  spi_exchange()
+ * below chunks larger requests to stay within this limit; without it a
+ * single SPI_EXCHANGE() of >= 64 KiB silently programs NDTR to 0 (low 16
+ * bits of nwords) and the driver blocks forever waiting on a DMA-complete
+ * IRQ that never fires.
+ */
 
-#define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC            )
-#define SPI_RXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC            )
-#define SPI_RXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS                         )
-#define SPI_RXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS                          )
-#define SPI_TXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC|DMA_CCR_DIR)
-#define SPI_TXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC|DMA_CCR_DIR)
-#define SPI_TXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS             |DMA_CCR_DIR)
-#define SPI_TXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS              |DMA_CCR_DIR)
+#  define STM32_SPI_DMA_MAX_XFER  65535u
+
+/* With CONFIG_ARMV7M_DCACHE the DMA buffers must be aligned to and a
+ * multiple of the D-cache line size
+ */
+
+#  ifdef CONFIG_ARMV7M_DCACHE
+#    define SPIDMA_BUFFER_MASK   (ARMV7M_DCACHE_LINESIZE - 1)
+#    define SPIDMA_BUF_ALIGN     aligned_data(ARMV7M_DCACHE_LINESIZE)
+#  else
+#    define SPIDMA_BUFFER_MASK   (4 - 1)
+#    define SPIDMA_BUF_ALIGN     aligned_data(4)
+#  endif
+#  define SPIDMA_SIZE(b) (((b) + SPIDMA_BUFFER_MASK) & ~SPIDMA_BUFFER_MASK)
+
+#  if defined(CONFIG_STM32_SPI1_DMA_BUFFER) && \
+            CONFIG_STM32_SPI1_DMA_BUFFER > 0
+#    define SPI1_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI1_DMA_BUFFER)
+#    define SPI1_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  endif
+
+#  if defined(CONFIG_STM32_SPI2_DMA_BUFFER) && \
+            CONFIG_STM32_SPI2_DMA_BUFFER > 0
+#    define SPI2_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI2_DMA_BUFFER)
+#    define SPI2_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  endif
+
+#  if defined(CONFIG_STM32_SPI3_DMA_BUFFER) && \
+            CONFIG_STM32_SPI3_DMA_BUFFER > 0
+#    define SPI3_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI3_DMA_BUFFER)
+#    define SPI3_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  endif
+
+#  if defined(CONFIG_STM32_SPI4_DMA_BUFFER) && \
+            CONFIG_STM32_SPI4_DMA_BUFFER > 0
+#    define SPI4_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI4_DMA_BUFFER)
+#    define SPI4_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  endif
+
+#  if defined(CONFIG_STM32_SPI5_DMA_BUFFER) && \
+            CONFIG_STM32_SPI5_DMA_BUFFER > 0
+#    define SPI5_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI5_DMA_BUFFER)
+#    define SPI5_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  endif
+
+#  if defined(CONFIG_STM32_SPI6_DMA_BUFFER) && \
+            CONFIG_STM32_SPI6_DMA_BUFFER > 0
+#    define SPI6_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI6_DMA_BUFFER)
+#    define SPI6_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  endif
+
+#endif
 
 /****************************************************************************
  * Private Types
@@ -142,6 +225,9 @@ struct stm32_spidev_s
 #endif
   uint16_t         rxch;         /* The RX DMA channel number */
   uint16_t         txch;         /* The TX DMA channel number */
+  uint8_t          *rxbuf;       /* The RX DMA buffer */
+  uint8_t          *txbuf;       /* The TX DMA buffer */
+  size_t           buflen;       /* The DMA buffer length */
   DMA_HANDLE       rxdma;        /* DMA channel handle for RX transfers */
   DMA_HANDLE       txdma;        /* DMA channel handle for TX transfers */
   sem_t            rxsem;        /* Wait for RX DMA to complete */
@@ -168,18 +254,27 @@ struct stm32_spidev_s
 
 static inline uint16_t spi_getreg(struct stm32_spidev_s *priv,
                                   uint8_t offset);
+#ifdef HAVE_SPI_ARB_DATA_SIZE
+static inline uint8_t spi_getreg8(struct stm32_spidev_s *priv,
+                                  uint8_t offset);
+#endif
 static inline void spi_putreg(struct stm32_spidev_s *priv,
-                              uint8_t offset, uint16_t value);
+                              uint8_t offset,
+                              uint16_t value);
+#ifdef HAVE_SPI_ARB_DATA_SIZE
+static inline void spi_putreg8(struct stm32_spidev_s *priv,
+                               uint8_t offset,
+                               uint8_t value);
+#endif
 static inline uint16_t spi_readword(struct stm32_spidev_s *priv);
 static inline void spi_writeword(struct stm32_spidev_s *priv,
                                  uint16_t byte);
-static inline bool spi_16bitmode(struct stm32_spidev_s *priv);
 
 /* DMA support */
 
 #ifdef CONFIG_STM32_SPI_DMA
-static void        spi_dmarxwait(struct stm32_spidev_s *priv);
-static void        spi_dmatxwait(struct stm32_spidev_s *priv);
+static int         spi_dmarxwait(struct stm32_spidev_s *priv);
+static int         spi_dmatxwait(struct stm32_spidev_s *priv);
 static inline void spi_dmarxwakeup(struct stm32_spidev_s *priv);
 static inline void spi_dmatxwakeup(struct stm32_spidev_s *priv);
 static void        spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr,
@@ -187,11 +282,13 @@ static void        spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr,
 static void        spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr,
                                      void *arg);
 static void        spi_dmarxsetup(struct stm32_spidev_s *priv,
-                                  void *rxbuffer, void *rxdummy,
+                                  void *rxbuffer,
+                                  void *rxdummy,
                                   size_t nwords);
 static void        spi_dmatxsetup(struct stm32_spidev_s *priv,
                                   const void *txbuffer,
-                                  const void *txdummy, size_t nwords);
+                                  const void *txdummy,
+                                  size_t nwords);
 static inline void spi_dmarxstart(struct stm32_spidev_s *priv);
 static inline void spi_dmatxstart(struct stm32_spidev_s *priv);
 #endif
@@ -217,9 +314,11 @@ static int         spi_trigger(struct spi_dev_s *dev);
 #endif
 #ifndef CONFIG_SPI_EXCHANGE
 static void        spi_sndblock(struct spi_dev_s *dev,
-                                const void *txbuffer, size_t nwords);
+                                const void *txbuffer,
+                                size_t nwords);
 static void        spi_recvblock(struct spi_dev_s *dev,
-                                 void *rxbuffer, size_t nwords);
+                                 void *rxbuffer,
+                                 size_t nwords);
 #endif
 
 /* Initialization */
@@ -238,7 +337,7 @@ static int         spi_pm_prepare(struct pm_callback_s *cb, int domain,
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-static const struct spi_ops_s g_spi1ops =
+static const struct spi_ops_s g_sp1iops =
 {
   .lock              = spi_lock,
   .select            = stm32_spi1select,
@@ -269,11 +368,16 @@ static const struct spi_ops_s g_spi1ops =
 #endif
 };
 
+#if defined(SPI1_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi1_txbuf[SPI1_DMABUFSIZE_ADJUSTED] SPI1_DMABUFSIZE_ALGN;
+static uint8_t g_spi1_rxbuf[SPI1_DMABUFSIZE_ADJUSTED] SPI1_DMABUFSIZE_ALGN;
+#endif
+
 static struct stm32_spidev_s g_spi1dev =
 {
   .spidev   =
   {
-    .ops    = &g_spi1ops,
+    .ops    = &g_sp1iops
   },
   .spibase  = STM32_SPI1_BASE,
   .spiclock = STM32_PCLK2_FREQUENCY,
@@ -281,10 +385,18 @@ static struct stm32_spidev_s g_spi1dev =
   .spiirq   = STM32_IRQ_SPI1,
 #endif
 #ifdef CONFIG_STM32_SPI_DMA
-  /* lines must be configured in board.h */
-
+#  ifdef CONFIG_STM32_SPI1_DMA
   .rxch     = DMACHAN_SPI1_RX,
   .txch     = DMACHAN_SPI1_TX,
+#    ifdef SPI1_DMABUFSIZE_ADJUSTED
+  .rxbuf    = g_spi1_rxbuf,
+  .txbuf    = g_spi1_txbuf,
+  .buflen   = SPI1_DMABUFSIZE_ADJUSTED,
+#    endif
+#  else
+  .rxch     = 0,
+  .txch     = 0,
+#  endif
   .rxsem    = SEM_INITIALIZER(0),
   .txsem    = SEM_INITIALIZER(0),
 #endif
@@ -296,7 +408,7 @@ static struct stm32_spidev_s g_spi1dev =
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-static const struct spi_ops_s g_spi2ops =
+static const struct spi_ops_s g_sp2iops =
 {
   .lock              = spi_lock,
   .select            = stm32_spi2select,
@@ -323,15 +435,20 @@ static const struct spi_ops_s g_spi2ops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi2register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
+
+#if defined(SPI2_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi2_txbuf[SPI2_DMABUFSIZE_ADJUSTED] SPI2_DMABUFSIZE_ALGN;
+static uint8_t g_spi2_rxbuf[SPI2_DMABUFSIZE_ADJUSTED] SPI2_DMABUFSIZE_ALGN;
+#endif
 
 static struct stm32_spidev_s g_spi2dev =
 {
   .spidev   =
   {
-    .ops    = &g_spi2ops,
+    .ops    = &g_sp2iops
   },
   .spibase  = STM32_SPI2_BASE,
   .spiclock = STM32_PCLK1_FREQUENCY,
@@ -339,8 +456,18 @@ static struct stm32_spidev_s g_spi2dev =
   .spiirq   = STM32_IRQ_SPI2,
 #endif
 #ifdef CONFIG_STM32_SPI_DMA
+#  ifdef CONFIG_STM32_SPI2_DMA
   .rxch     = DMACHAN_SPI2_RX,
   .txch     = DMACHAN_SPI2_TX,
+#    ifdef SPI2_DMABUFSIZE_ADJUSTED
+  .rxbuf    = g_spi2_rxbuf,
+  .txbuf    = g_spi2_txbuf,
+  .buflen   = SPI2_DMABUFSIZE_ADJUSTED,
+#    endif
+#  else
+  .rxch     = 0,
+  .txch     = 0,
+#  endif
   .rxsem    = SEM_INITIALIZER(0),
   .txsem    = SEM_INITIALIZER(0),
 #endif
@@ -352,7 +479,7 @@ static struct stm32_spidev_s g_spi2dev =
 #endif
 
 #ifdef CONFIG_STM32_SPI3
-static const struct spi_ops_s g_spi3ops =
+static const struct spi_ops_s g_sp3iops =
 {
   .lock              = spi_lock,
   .select            = stm32_spi3select,
@@ -379,15 +506,20 @@ static const struct spi_ops_s g_spi3ops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi3register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
+
+#if defined(SPI3_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi3_txbuf[SPI3_DMABUFSIZE_ADJUSTED] SPI3_DMABUFSIZE_ALGN;
+static uint8_t g_spi3_rxbuf[SPI3_DMABUFSIZE_ADJUSTED] SPI3_DMABUFSIZE_ALGN;
+#endif
 
 static struct stm32_spidev_s g_spi3dev =
 {
   .spidev   =
   {
-    .ops    = &g_spi3ops,
+    .ops    = &g_sp3iops
   },
   .spibase  = STM32_SPI3_BASE,
   .spiclock = STM32_PCLK1_FREQUENCY,
@@ -395,8 +527,231 @@ static struct stm32_spidev_s g_spi3dev =
   .spiirq   = STM32_IRQ_SPI3,
 #endif
 #ifdef CONFIG_STM32_SPI_DMA
+#  ifdef CONFIG_STM32_SPI3_DMA
   .rxch     = DMACHAN_SPI3_RX,
   .txch     = DMACHAN_SPI3_TX,
+#    ifdef SPI3_DMABUFSIZE_ADJUSTED
+  .rxbuf    = g_spi3_rxbuf,
+  .txbuf    = g_spi3_txbuf,
+  .buflen   = SPI3_DMABUFSIZE_ADJUSTED,
+#    endif
+#  else
+  .rxch     = 0,
+  .txch     = 0,
+#  endif
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
+#endif
+  .lock     = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
+};
+#endif
+
+#ifdef CONFIG_STM32_SPI4
+static const struct spi_ops_s g_sp4iops =
+{
+  .lock              = spi_lock,
+  .select            = stm32_spi4select,
+  .setfrequency      = spi_setfrequency,
+  .setmode           = spi_setmode,
+  .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
+  .status            = stm32_spi4status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata           = stm32_spi4cmddata,
+#endif
+  .send              = spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = spi_exchange,
+#else
+  .sndblock          = spi_sndblock,
+  .recvblock         = spi_recvblock,
+#endif
+#ifdef CONFIG_SPI_TRIGGER
+  .trigger           = spi_trigger,
+#endif
+#ifdef CONFIG_SPI_CALLBACK
+  .registercallback  = stm32_spi4register,  /* provided externally */
+#else
+  .registercallback  = 0,                   /* not implemented */
+#endif
+};
+
+#if defined(SPI4_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi4_txbuf[SPI4_DMABUFSIZE_ADJUSTED] SPI4_DMABUFSIZE_ALGN;
+static uint8_t g_spi4_rxbuf[SPI4_DMABUFSIZE_ADJUSTED] SPI4_DMABUFSIZE_ALGN;
+#endif
+
+static struct stm32_spidev_s g_spi4dev =
+{
+  .spidev   =
+  {
+    .ops    = &g_sp4iops
+  },
+  .spibase  = STM32_SPI4_BASE,
+  .spiclock = STM32_PCLK2_FREQUENCY,
+#ifdef CONFIG_STM32_SPI_INTERRUPTS
+  .spiirq   = STM32_IRQ_SPI4,
+#endif
+#ifdef CONFIG_STM32_SPI_DMA
+#  ifdef CONFIG_STM32_SPI4_DMA
+  .rxch     = DMACHAN_SPI4_RX,
+  .txch     = DMACHAN_SPI4_TX,
+#    ifdef SPI4_DMABUFSIZE_ADJUSTED
+  .rxbuf    = g_spi4_rxbuf,
+  .txbuf    = g_spi4_txbuf,
+  .buflen   = SPI4_DMABUFSIZE_ADJUSTED,
+#    endif
+#  else
+  .rxch     = 0,
+  .txch     = 0,
+#  endif
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
+#endif
+  .lock     = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
+};
+#endif
+
+#ifdef CONFIG_STM32_SPI5
+static const struct spi_ops_s g_sp5iops =
+{
+  .lock              = spi_lock,
+  .select            = stm32_spi5select,
+  .setfrequency      = spi_setfrequency,
+  .setmode           = spi_setmode,
+  .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
+  .status            = stm32_spi5status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata           = stm32_spi5cmddata,
+#endif
+  .send              = spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = spi_exchange,
+#else
+  .sndblock          = spi_sndblock,
+  .recvblock         = spi_recvblock,
+#endif
+#ifdef CONFIG_SPI_TRIGGER
+  .trigger           = spi_trigger,
+#endif
+#ifdef CONFIG_SPI_CALLBACK
+  .registercallback  = stm32_spi5register,  /* provided externally */
+#else
+  .registercallback  = 0,                   /* not implemented */
+#endif
+};
+
+#if defined(SPI5_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi5_txbuf[SPI5_DMABUFSIZE_ADJUSTED] SPI5_DMABUFSIZE_ALGN;
+static uint8_t g_spi5_rxbuf[SPI5_DMABUFSIZE_ADJUSTED] SPI5_DMABUFSIZE_ALGN;
+#endif
+
+static struct stm32_spidev_s g_spi5dev =
+{
+  .spidev   =
+  {
+    .ops    = &g_sp5iops
+  },
+  .spibase  = STM32_SPI5_BASE,
+  .spiclock = STM32_PCLK2_FREQUENCY,
+#ifdef CONFIG_STM32_SPI_INTERRUPTS
+  .spiirq   = STM32_IRQ_SPI5,
+#endif
+#ifdef CONFIG_STM32_SPI_DMA
+#  ifdef CONFIG_STM32_SPI5_DMA
+  .rxch     = DMACHAN_SPI5_RX,
+  .txch     = DMACHAN_SPI5_TX,
+#    ifdef SPI5_DMABUFSIZE_ADJUSTED
+  .rxbuf    = g_spi5_rxbuf,
+  .txbuf    = g_spi5_txbuf,
+  .buflen   = SPI5_DMABUFSIZE_ADJUSTED,
+#    endif
+#  else
+  .rxch     = 0,
+  .txch     = 0,
+#  endif
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
+#endif
+  .lock     = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
+};
+#endif
+
+#ifdef CONFIG_STM32_SPI6
+static const struct spi_ops_s g_sp6iops =
+{
+  .lock              = spi_lock,
+  .select            = stm32_spi6select,
+  .setfrequency      = spi_setfrequency,
+  .setmode           = spi_setmode,
+  .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
+  .status            = stm32_spi6status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata           = stm32_spi6cmddata,
+#endif
+  .send              = spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = spi_exchange,
+#else
+  .sndblock          = spi_sndblock,
+  .recvblock         = spi_recvblock,
+#endif
+#ifdef CONFIG_SPI_TRIGGER
+  .trigger           = spi_trigger,
+#endif
+#ifdef CONFIG_SPI_CALLBACK
+  .registercallback  = stm32_spi6register,  /* provided externally */
+#else
+  .registercallback  = 0,                   /* not implemented */
+#endif
+};
+
+#if defined(SPI6_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi6_txbuf[SPI6_DMABUFSIZE_ADJUSTED] SPI6_DMABUFSIZE_ALGN;
+static uint8_t g_spi6_rxbuf[SPI6_DMABUFSIZE_ADJUSTED] SPI6_DMABUFSIZE_ALGN;
+#endif
+
+static struct stm32_spidev_s g_spi6dev =
+{
+  .spidev   =
+  {
+    .ops    = &g_sp6iops
+  },
+  .spibase  = STM32_SPI6_BASE,
+  .spiclock = STM32_PCLK2_FREQUENCY,
+#ifdef CONFIG_STM32_SPI_INTERRUPTS
+  .spiirq   = STM32_IRQ_SPI6,
+#endif
+#ifdef CONFIG_STM32_SPI_DMA
+#  ifdef CONFIG_STM32_SPI6_DMA
+  .rxch     = DMACHAN_SPI6_RX,
+  .txch     = DMACHAN_SPI6_TX,
+#    ifdef SPI6_DMABUFSIZE_ADJUSTED
+  .rxbuf    = g_spi6_rxbuf,
+  .txbuf    = g_spi6_txbuf,
+  .buflen   = SPI6_DMABUFSIZE_ADJUSTED,
+#    endif
+#  else
+  .rxch     = 0,
+  .txch     = 0,
+#  endif
   .rxsem    = SEM_INITIALIZER(0),
   .txsem    = SEM_INITIALIZER(0),
 #endif
@@ -433,6 +788,29 @@ static inline uint16_t spi_getreg(struct stm32_spidev_s *priv,
 }
 
 /****************************************************************************
+ * Name: spi_getreg8
+ *
+ * Description:
+ *   Get the contents of the SPI register at offset
+ *
+ * Input Parameters:
+ *   priv   - private SPI device structure
+ *   offset - offset to the register of interest
+ *
+ * Returned Value:
+ *   The contents of the 16-bit register
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_SPI_ARB_DATA_SIZE
+static inline uint8_t spi_getreg8(struct stm32_spidev_s *priv,
+                                  uint8_t offset)
+{
+  return getreg8(priv->spibase + offset);
+}
+#endif
+
+/****************************************************************************
  * Name: spi_putreg
  *
  * Description:
@@ -449,78 +827,39 @@ static inline uint16_t spi_getreg(struct stm32_spidev_s *priv,
  ****************************************************************************/
 
 static inline void spi_putreg(struct stm32_spidev_s *priv,
-                              uint8_t offset, uint16_t value)
+                              uint8_t offset,
+                              uint16_t value)
 {
   putreg16(value, priv->spibase + offset);
-}
-
-/****************************************************************************
- * Name: spi_getreg8
- *
- * Description:
- *   Get the contents of the SPI register at offset
- *
- * Input Parameters:
- *   priv   - private SPI device structure
- *   offset - offset to the register of interest
- *
- * Returned Value:
- *   The contents of the 8-bit register
- *
- ****************************************************************************/
-
-static inline uint8_t spi_getreg8(struct stm32_spidev_s *priv,
-                                  uint8_t offset)
-{
-  return getreg8(priv->spibase + offset);
 }
 
 /****************************************************************************
  * Name: spi_putreg8
  *
  * Description:
- *   Write a 8-bit value to the SPI register at offset
+ *   Write an 8-bit value to the SPI register at offset
  *
  * Input Parameters:
  *   priv   - private SPI device structure
  *   offset - offset to the register of interest
- *   value  - the 8-bit value to be written
+ *   value  - the 16-bit value to be written
+ *
+ * Returned Value:
+ *   The contents of the 16-bit register
  *
  ****************************************************************************/
 
+#ifdef HAVE_SPI_ARB_DATA_SIZE
 static inline void spi_putreg8(struct stm32_spidev_s *priv,
-                               uint8_t offset, uint8_t value)
+                               uint8_t offset,
+                               uint8_t value)
 {
   putreg8(value, priv->spibase + offset);
 }
+#endif
 
 /****************************************************************************
  * Name: spi_readword
- *
- * Description:
- *   Read one word (TWO bytes!) from SPI
- *
- * Input Parameters:
- *   priv - Device-specific state data
- *
- * Returned Value:
- *   Word as read
- *
- ****************************************************************************/
-
-static inline uint16_t spi_readword(struct stm32_spidev_s *priv)
-{
-  /* Wait until the receive buffer is not empty */
-
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
-
-  /* Then return the received byte */
-
-  return spi_getreg(priv, STM32_SPI_DR_OFFSET);
-}
-
-/****************************************************************************
- * Name: spi_readbyte
  *
  * Description:
  *   Read one byte from SPI
@@ -533,26 +872,50 @@ static inline uint16_t spi_readword(struct stm32_spidev_s *priv)
  *
  ****************************************************************************/
 
-static inline uint8_t spi_readbyte(struct stm32_spidev_s *priv)
+static inline uint16_t spi_readword(struct stm32_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0)
+    {
+    }
 
   /* Then return the received byte */
 
-  return spi_getreg8(priv, STM32_SPI_DR_OFFSET);
+#ifdef HAVE_SPI_ARB_DATA_SIZE
+  /* "When the data frame size fits into one byte
+   * (less than or equal to 8 bits),
+   *  data packing is used automatically when any read or write 16-bit access
+   *  is performed on the SPIx_DR register. The double data frame pattern is
+   *  handled in parallel in this case. At first, the SPI operates using the
+   *  pattern stored in the LSB of the accessed word, then with the other
+   *  half stored in the MSB.... The receiver then has to access both data
+   *  frames by a single 16-bit read of SPIx_DR as a response to this single
+   *  RXNE event. The RxFIFO threshold setting and the following read access
+   *  must be always kept aligned at the receiver side, as data can be lost
+   *  if it is not in line."
+   */
+
+  if (priv->nbits < 9)
+    {
+      return (uint16_t)spi_getreg8(priv, STM32_SPI_DR_OFFSET);
+    }
+  else
+#endif
+    {
+      return spi_getreg(priv, STM32_SPI_DR_OFFSET);
+    }
 }
 
 /****************************************************************************
  * Name: spi_writeword
  *
  * Description:
- *   Write one 16-bit frame to the SPI FIFO
+ *   Write one byte to SPI
  *
  * Input Parameters:
  *   priv - Device-specific state data
- *   byte - Word to send
+ *   byte - Byte to send
  *
  * Returned Value:
  *   None
@@ -564,61 +927,43 @@ static inline void spi_writeword(struct stm32_spidev_s *priv,
 {
   /* Wait until the transmit buffer is empty */
 
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0)
+    {
+    }
 
-  /* Then send the byte */
+  /* Then send the word */
 
-  spi_putreg(priv, STM32_SPI_DR_OFFSET, word);
+#ifdef HAVE_SPI_ARB_DATA_SIZE
+  /* "When the data frame size fits into one byte (less than or equal to 8
+   *  bits), data packing is used automatically when any read or write 16-bit
+   *  access is performed on the SPIx_DR register. The double data frame
+   *  pattern is handled in parallel in this case. At first, the SPI operates
+   *  using the pattern stored in the LSB of the accessed word, then with the
+   *  other half stored in the MSB...
+   *
+   *  "A specific problem appears if an odd number of such "fit into one
+   *   byte" data frames must be handled. On the transmitter side, writing
+   *   the last data frame of any odd sequence with an 8-bit access to
+   *   SPIx_DR is enough. ..."
+   *
+   * REVISIT: "...The receiver has to change the Rx_FIFO threshold level for
+   * the last data frame received in the odd sequence of frames in order to
+   * generate the RXNE event."
+   */
+
+  if (priv->nbits < 9)
+    {
+      spi_putreg8(priv, STM32_SPI_DR_OFFSET, (uint8_t)word);
+    }
+  else
+#endif
+    {
+      spi_putreg(priv, STM32_SPI_DR_OFFSET, word);
+    }
 }
 
 /****************************************************************************
- * Name: spi_writebyte
- *
- * Description:
- *   Write one 8-bit frame to the SPI FIFO
- *
- * Input Parameters:
- *   priv - Device-specific state data
- *   byte - Byte to send
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void spi_writebyte(struct stm32_spidev_s *priv,
-                                 uint8_t byte)
-{
-  /* Wait until the transmit buffer is empty */
-
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
-
-  /* Then send the byte */
-
-  spi_putreg8(priv, STM32_SPI_DR_OFFSET, byte);
-}
-
-/****************************************************************************
- * Name: spi_16bitmode
- *
- * Description:
- *   Check if the SPI is operating in 16-bit mode
- *
- * Input Parameters:
- *   priv     - Device-specific state data
- *
- * Returned Value:
- *   true: 16-bit mode, false: 8-bit mode
- *
- ****************************************************************************/
-
-static inline bool spi_16bitmode(struct stm32_spidev_s *priv)
-{
-  return (priv->nbits > 8);
-}
-
-/****************************************************************************
- * Name: spi_dmarxwaitw
+ * Name: spi_dmarxwait
  *
  * Description:
  *   Wait for DMA to complete.
@@ -626,7 +971,7 @@ static inline bool spi_16bitmode(struct stm32_spidev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI_DMA
-static void spi_dmarxwait(struct stm32_spidev_s *priv)
+static int spi_dmarxwait(struct stm32_spidev_s *priv)
 {
   int ret;
 
@@ -636,15 +981,17 @@ static void spi_dmarxwait(struct stm32_spidev_s *priv)
 
   do
     {
-      ret = nxsem_wait(&priv->rxsem);
+      ret = nxsem_wait_uninterruptible(&priv->rxsem);
 
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
        */
 
-      DEBUGASSERT(ret == OK || ret == -EINTR);
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
-  while (ret == -EINTR || priv->rxresult == 0);
+  while (priv->rxresult == 0 && ret == OK);
+
+  return ret;
 }
 #endif
 
@@ -657,7 +1004,7 @@ static void spi_dmarxwait(struct stm32_spidev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI_DMA
-static void spi_dmatxwait(struct stm32_spidev_s *priv)
+static int spi_dmatxwait(struct stm32_spidev_s *priv)
 {
   int ret;
 
@@ -667,15 +1014,17 @@ static void spi_dmatxwait(struct stm32_spidev_s *priv)
 
   do
     {
-      ret = nxsem_wait(&priv->txsem);
+      ret = nxsem_wait_uninterruptible(&priv->txsem);
 
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
        */
 
-      DEBUGASSERT(ret == OK || ret == -EINTR);
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
-  while (ret == -EINTR || priv->txresult == 0);
+  while (priv->txresult == 0 && ret == OK);
+
+  return ret;
 }
 #endif
 
@@ -759,12 +1108,12 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
 #ifdef CONFIG_STM32_SPI_DMA
 static void spi_dmarxsetup(struct stm32_spidev_s *priv,
-                           void *rxbuffer, void *rxdummy,
-                           size_t nwords)
+                           void *rxbuffer,
+                           void *rxdummy, size_t nwords)
 {
   /* 8- or 16-bit mode? */
 
-  if (spi_16bitmode(priv))
+  if (priv->nbits > 8)
     {
       /* 16-bit mode -- is there a buffer to receive data in? */
 
@@ -810,12 +1159,12 @@ static void spi_dmarxsetup(struct stm32_spidev_s *priv,
 
 #ifdef CONFIG_STM32_SPI_DMA
 static void spi_dmatxsetup(struct stm32_spidev_s *priv,
-                           const void *txbuffer, const void *txdummy,
-                           size_t nwords)
+                           const void *txbuffer,
+                           const void *txdummy, size_t nwords)
 {
   /* 8- or 16-bit mode? */
 
-  if (spi_16bitmode(priv))
+  if (priv->nbits > 8)
     {
       /* 16-bit mode -- is there a buffer to transfer data from? */
 
@@ -884,10 +1233,10 @@ static inline void spi_dmatxstart(struct stm32_spidev_s *priv)
 #endif
 
 /****************************************************************************
- * Name: spi_modifycr
+ * Name: spi_modifycr1
  *
  * Description:
- *   Clear and set bits in the CR1 or CR2 register
+ *   Clear and set bits in the CR1 register
  *
  * Input Parameters:
  *   priv    - Device-specific state data
@@ -899,15 +1248,83 @@ static inline void spi_dmatxstart(struct stm32_spidev_s *priv)
  *
  ****************************************************************************/
 
-static void spi_modifycr(uint32_t addr, struct stm32_spidev_s *priv,
-                         uint16_t setbits, uint16_t clrbits)
+static void spi_modifycr1(struct stm32_spidev_s *priv,
+                          uint16_t setbits,
+                          uint16_t clrbits)
 {
-  uint16_t cr;
+  uint16_t cr1;
 
-  cr  = spi_getreg(priv, addr);
-  cr &= ~clrbits;
-  cr |= setbits;
-  spi_putreg(priv, addr, cr);
+  cr1 = spi_getreg(priv, STM32_SPI_CR1_OFFSET);
+  cr1 &= ~clrbits;
+  cr1 |= setbits;
+  spi_putreg(priv, STM32_SPI_CR1_OFFSET, cr1);
+}
+
+/****************************************************************************
+ * Name: spi_modifycr2
+ *
+ * Description:
+ *   Clear and set bits in the CR2 register
+ *
+ * Input Parameters:
+ *   priv    - Device-specific state data
+ *   clrbits - The bits to clear
+ *   setbits - The bits to set
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(HAVE_SPI_TI_MODE) || defined(HAVE_SPI_ARB_DATA_SIZE) || \
+    defined(CONFIG_STM32_SPI_DMA)
+static void spi_modifycr2(struct stm32_spidev_s *priv, uint16_t setbits,
+                          uint16_t clrbits)
+{
+  uint16_t cr2;
+
+  cr2 = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
+  cr2 &= ~clrbits;
+  cr2 |= setbits;
+  spi_putreg(priv, STM32_SPI_CR2_OFFSET, cr2);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_enable
+ *
+ * Description:
+ *   Enable the SPI after a configuration change.  With FIFOs a mode change
+ *   can leave a spurious frame in the RX FIFO, so the RX FIFO is drained
+ *   with the DMA requests disabled.
+ *
+ ****************************************************************************/
+
+static void spi_enable(struct stm32_spidev_s *priv)
+{
+#ifdef HAVE_SPI_FIFOS
+#  ifdef CONFIG_STM32_SPI_DMA
+  uint16_t cr2 = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
+
+  spi_modifycr2(priv, 0, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
+#  endif
+
+  spi_modifycr1(priv, SPI_CR1_SPE, 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_FRLVL_MASK) != 0)
+    {
+      spi_getreg(priv, STM32_SPI_DR_OFFSET);
+    }
+
+#  ifdef CONFIG_STM32_SPI_DMA
+  /* Restore the DMA requests with the SPI disabled */
+
+  spi_modifycr1(priv, 0, SPI_CR1_SPE);
+  spi_modifycr2(priv, cr2 & (SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN), 0);
+  spi_modifycr1(priv, SPI_CR1_SPE, 0);
+#  endif
+#else
+  spi_modifycr1(priv, SPI_CR1_SPE, 0);
+#endif
 }
 
 /****************************************************************************
@@ -938,14 +1355,11 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      /* Take the mutex (perhaps waiting) */
-
       ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      nxmutex_unlock(&priv->lock);
-      ret = OK;
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -973,7 +1387,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
   uint16_t setbits;
   uint32_t actual;
 
-  /* Limit to max possible (if STM32_SPI_CLK_MAX is defined in board.h) */
+  /* Limit to the maximum SPI clock of the chip */
 
   if (frequency > STM32_SPI_CLK_MAX)
     {
@@ -1043,15 +1457,15 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
           actual = priv->spiclock >> 8;
         }
 
-      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, SPI_CR1_BR_MASK);
-      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr1(priv, setbits, SPI_CR1_BR_MASK);
+      spi_modifycr1(priv, SPI_CR1_SPE, 0);
 
       /* Save the frequency selection so that subsequent reconfigurations
        * will be faster.
        */
 
-      spiinfo("Frequency %" PRId32 "->%" PRId32 "\n", frequency, actual);
+      spiinfo("Frequency %" PRIu32 "->%" PRIu32 "\n", frequency, actual);
 
       priv->frequency = frequency;
       priv->actual    = actual;
@@ -1111,13 +1525,45 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
             clrbits = 0;
             break;
 
+#ifdef SPI_CR2_FRF    /* If MCU supports TI Synchronous Serial Frame Format */
+          case SPIDEV_MODETI:
+            setbits = 0;
+            clrbits = SPI_CR1_CPOL | SPI_CR1_CPHA;
+            break;
+#endif
+
           default:
             return;
         }
 
-      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, clrbits);
-      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr1(priv, setbits, clrbits);
+      spi_enable(priv);
+
+#ifdef SPI_CR2_FRF    /* If MCU supports TI Synchronous Serial Frame Format */
+      switch (mode)
+        {
+          case SPIDEV_MODE0:
+          case SPIDEV_MODE1:
+          case SPIDEV_MODE2:
+          case SPIDEV_MODE3:
+            setbits = 0;
+            clrbits = SPI_CR2_FRF;
+            break;
+
+          case SPIDEV_MODETI:
+            setbits = SPI_CR2_FRF;
+            clrbits = 0;
+            break;
+
+          default:
+            return;
+        }
+
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr2(priv, setbits, clrbits);
+      spi_enable(priv);
+#endif
 
       /* Save the mode so that subsequent re-configurations will be
        * faster
@@ -1131,12 +1577,11 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
  * Name: spi_setbits
  *
  * Description:
- *   Set the number of bits per word. With STM32L5, this is not restricted to
- *   8 or 16, but can be any value between 4 and 16.
+ *   Set the number of bits per word.
  *
  * Input Parameters:
  *   dev   - Device-specific state data
- *   nbits - The number of bits requested, negative value means LSB first.
+ *   nbits - The number of bits requested
  *
  * Returned Value:
  *   None
@@ -1148,7 +1593,6 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
   uint16_t setbits;
   uint16_t clrbits;
-  int savbits = nbits;
 
   spiinfo("nbits=%d\n", nbits);
 
@@ -1156,6 +1600,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
+#ifdef HAVE_SPI_ARB_DATA_SIZE
       /* Yes... Set CR2 appropriately */
 
       /* Set the number of bits (valid range 4-16) */
@@ -1167,9 +1612,9 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
         }
 
       clrbits = SPI_CR2_DS_MASK;
-      setbits = SPI_CR2_DS_VAL(nbits);
+      setbits = SPI_CR2_DS(nbits);
 
-      /* If nbits is <=8, then we are in byte mode and FRXTH shall be set
+      /* If nbits is <=8, then we are in byte mode and FRXTH must be set
        * (else, transaction will not complete).
        */
 
@@ -1182,15 +1627,37 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
           clrbits |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 2 bytes */
         }
 
-      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-      spi_modifycr(STM32_SPI_CR2_OFFSET, priv, setbits, clrbits);
-      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr2(priv, setbits, clrbits);
+      spi_modifycr1(priv, SPI_CR1_SPE, 0);
+#else
+      /* Yes... Set CR1 appropriately */
 
-      /* Save the selection so the subsequence re-configurations will be
-       * faster
+      switch (nbits)
+        {
+          case 8:
+            setbits = 0;
+            clrbits = SPI_CR1_DFF;
+            break;
+
+          case 16:
+            setbits = SPI_CR1_DFF;
+            clrbits = 0;
+            break;
+
+          default:
+            return;
+        }
+
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr1(priv, setbits, clrbits);
+      spi_modifycr1(priv, SPI_CR1_SPE, 0);
+#endif
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
        */
 
-      priv->nbits = savbits; /* nbits has been clobbered... */
+      priv->nbits = nbits;
     }
 }
 
@@ -1214,7 +1681,8 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 static int spi_hwfeatures(struct spi_dev_s *dev,
                           spi_hwfeatures_t features)
 {
-#if defined(CONFIG_SPI_BITORDER) || defined(CONFIG_SPI_TRIGGER)
+#if defined(CONFIG_SPI_BITORDER) || \
+    (defined(CONFIG_SPI_TRIGGER) && defined(CONFIG_STM32_SPI_DMA))
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
 #endif
 
@@ -1237,14 +1705,14 @@ static int spi_hwfeatures(struct spi_dev_s *dev,
       clrbits = SPI_CR1_LSBFIRST;
     }
 
-  spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-  spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, clrbits);
-  spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+  spi_modifycr1(priv, 0, SPI_CR1_SPE);
+  spi_modifycr1(priv, setbits, clrbits);
+  spi_modifycr1(priv, SPI_CR1_SPE, 0);
 
   features &= ~HWFEAT_LSBFIRST;
 #endif
 
-#ifdef CONFIG_SPI_TRIGGER
+#if defined(CONFIG_SPI_TRIGGER) && defined(CONFIG_STM32_SPI_DMA)
 /* Turn deferred trigger mode on or off.  Only applicable for DMA mode. If a
  * transfer is deferred then the DMA will not actually be triggered until a
  * subsequent call to SPI_TRIGGER to set it off. The thread will be waiting
@@ -1285,40 +1753,19 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 
   DEBUGASSERT(priv && priv->spibase);
 
-  /* According to the number of bits, access data register as word or byte
-   * This is absolutely required because of packing. With <=8 bit frames,
-   * two bytes are received by a 16-bit read of the data register!
-   */
+  spi_writeword(priv, (uint32_t)(wd & 0xffff));
+  ret = (uint32_t)spi_readword(priv);
 
-  if (spi_16bitmode(priv))
-    {
-      spi_writeword(priv, (uint16_t)(wd & 0xffff));
-      ret = (uint32_t)spi_readword(priv);
-    }
-  else
-    {
-      spi_writebyte(priv, (uint8_t)(wd & 0xff));
-      ret = (uint32_t)spi_readbyte(priv);
-    }
-
-  /* Check and clear any error flags (Reading from the SR clears the error
-   * flags).
+  /* Check and clear any error flags
+   * (Reading from the SR clears the error flags)
    */
 
   regval = spi_getreg(priv, STM32_SPI_SR_OFFSET);
 
-  if (spi_16bitmode(priv))
-    {
-      spiinfo("Sent: %04" PRIx32 " Return: %04" PRIx32
-              " Status: %02" PRIx32 "\n", wd, ret, regval);
-    }
-  else
-    {
-      spiinfo("Sent: %02" PRIx32 " Return: %02" PRIx32
-              " Status: %02" PRIx32 "\n", wd, ret, regval);
-    }
-
+  spiinfo("Sent: %04" PRIx32 " Return: %04" PRIx32
+          " Status: %02" PRIx32 "\n", wd, ret, regval);
   UNUSED(regval);
+
   return ret;
 }
 
@@ -1327,6 +1774,10 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
  *
  * Description:
  *   Exchange a block of data on SPI without using DMA
+ *
+ *   REVISIT:
+ *   This function could be much more efficient by exploiting (1) RX and TX
+ *   FIFOs and (2) the STM32 F3 data packing.
  *
  * Input Parameters:
  *   dev      - Device-specific state data
@@ -1343,7 +1794,8 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32_SPI_DMA) || defined(CONFIG_STM32_DMACAPABLE)
+#if !defined(CONFIG_STM32_SPI_DMA) || defined(CONFIG_STM32_DMACAPABLE) || \
+     defined(CONFIG_STM32_SPI_DMATHRESHOLD)
 #if !defined(CONFIG_STM32_SPI_DMA)
 static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
@@ -1361,13 +1813,13 @@ static int  spi_exchange_nodma(struct spi_dev_s *dev,
 
   /* 8- or 16-bit mode? */
 
-  if (spi_16bitmode(priv))
+  if (priv->nbits > 8)
     {
       /* 16-bit mode */
 
       const uint16_t *src  = (const uint16_t *)txbuffer;
       uint16_t *dest = (uint16_t *)rxbuffer;
-      uint16_t  word;
+      uint16_t word;
 
       while (nwords-- > 0)
         {
@@ -1384,7 +1836,7 @@ static int  spi_exchange_nodma(struct spi_dev_s *dev,
 
           /* Exchange one word */
 
-          word = spi_send(dev, word);
+          word = (uint16_t)spi_send(dev, (uint32_t)word);
 
           /* Is there a buffer to receive the return value? */
 
@@ -1400,7 +1852,7 @@ static int  spi_exchange_nodma(struct spi_dev_s *dev,
 
       const uint8_t *src  = (const uint8_t *)txbuffer;
       uint8_t *dest = (uint8_t *)rxbuffer;
-      uint8_t  word;
+      uint8_t word;
 
       while (nwords-- > 0)
         {
@@ -1417,7 +1869,7 @@ static int  spi_exchange_nodma(struct spi_dev_s *dev,
 
           /* Exchange one word */
 
-          word = (uint8_t)spi_send(dev, (uint16_t)word);
+          word = (uint8_t)spi_send(dev, (uint32_t)word);
 
           /* Is there a buffer to receive the return value? */
 
@@ -1430,7 +1882,7 @@ static int  spi_exchange_nodma(struct spi_dev_s *dev,
 
   return OK;
 }
-#endif /* !CONFIG_STM32_SPI_DMA || CONFIG_STM32_DMACAPABLE */
+#endif /* !CONFIG_STM32_SPI_DMA || CONFIG_STM32_DMACAPABLE || CONFIG_STM32_SPI_DMATHRESHOLD */
 
 /****************************************************************************
  * Name: spi_exchange (with DMA capability)
@@ -1458,14 +1910,43 @@ static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
+  void *xbuffer = rxbuffer;
+  int ret;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Convert the number of word to a number of bytes */
+
+  size_t nbytes = (priv->nbits > 8) ? nwords << 1 : nwords;
+
+#ifdef CONFIG_STM32_SPI_DMATHRESHOLD
+  /* If this is a small SPI transfer, then let spi_exchange_nodma() do the
+   * work.
+   */
+
+  if (nbytes <= CONFIG_STM32_SPI_DMATHRESHOLD)
+    {
+      return spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
+    }
+#endif
+
+  if ((priv->rxdma == NULL) || (priv->txdma == NULL) ||
+      up_interrupt_context())
+    {
+      /* Invalid DMA channels, or interrupt context, fall
+       * back to non-DMA method.
+       */
+
+      return spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
+    }
 
 #ifdef CONFIG_STM32_DMACAPABLE
-  if ((txbuffer &&
-       !stm32_dmacapable((uint32_t)txbuffer, nwords, priv->txccr)) ||
-      (rxbuffer &&
-       !stm32_dmacapable((uint32_t)rxbuffer, nwords, priv->rxccr)))
+  if ((txbuffer && priv->txbuf == 0 &&
+      !stm32_dmacapable((uintptr_t)txbuffer, nwords, priv->txccr)) ||
+      (rxbuffer && priv->rxbuf == 0 &&
+       !stm32_dmacapable((uintptr_t)rxbuffer, nwords, priv->rxccr)))
     {
-      /* Unsupported memory region, fall back to non-DMA method. */
+      /* Unsupported memory region fall back to non-DMA method. */
 
       spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
     }
@@ -1474,43 +1955,140 @@ static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       static uint16_t rxdummy = 0xffff;
       static const uint16_t txdummy = 0xffff;
+      const size_t word_size = (priv->nbits > 8) ? 2u : 1u;
+      const uint8_t *txp;
+      uint8_t       *rxp;
 
-      spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer,
-              nwords);
+      spiinfo("txbuffer=%p rxbuffer=%p nwords=%zu\n",
+               txbuffer, rxbuffer, nwords);
       DEBUGASSERT(priv && priv->spibase);
 
       /* Setup DMAs */
 
-      spi_dmarxsetup(priv, rxbuffer, &rxdummy, nwords);
-      spi_dmatxsetup(priv, txbuffer, &txdummy, nwords);
+      /* If this bus uses an in-driver buffer we will incur 2 copies,
+       * The copy cost is << less the non DMA transfer time and having
+       * the buffer in the driver ensures DMA can be used. This is because
+       * the API does not support passing the buffer extent so the only
+       * extent is buffer + the transfer size. These can sizes be less than
+       * the cache line size, and not aligned and typically greater then 4
+       * bytes, which is about the break even point for the DMA IO overhead.
+       */
+
+      if (priv->txbuf != NULL && (txbuffer != NULL || rxbuffer != NULL))
+        {
+          if (nbytes > priv->buflen)
+            {
+              nbytes = priv->buflen;
+            }
+
+          if (txbuffer != NULL)
+            {
+              memcpy(priv->txbuf, txbuffer, nbytes);
+              txbuffer = priv->txbuf;
+            }
+
+          rxbuffer = rxbuffer ? priv->rxbuf : rxbuffer;
+
+          /* Rescale nwords to match the (possibly clamped) nbytes. */
+
+          nwords = (priv->nbits > 8) ? nbytes >> 1 : nbytes;
+        }
+
+      /* Flush the TX data to memory */
+
+      if (txbuffer != NULL)
+        {
+          up_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + nbytes);
+        }
+
+      txp = (const uint8_t *)txbuffer;
+      rxp = (uint8_t *)rxbuffer;
+      ret = OK;
+
+      /* Walk the request in chunks of at most STM32_SPI_DMA_MAX_XFER words.
+       * The STM32 DMA NDTR/CNDTR transfer-count register is only 16 bits
+       * wide; submitting more than 65535 transfers in a single descriptor
+       * silently programs NDTR to (nwords & 0xffff) and on most paths
+       * results in a stream that never raises transfer-complete, causing
+       * the SPI driver to block forever in spi_dmarxwait().  Splitting the
+       * request keeps each descriptor within the hardware limit and lets
+       * the W25/SD/etc. driver remain agnostic of this constraint.
+       */
+
+      while (nwords > 0)
+        {
+          size_t chunk = (nwords > STM32_SPI_DMA_MAX_XFER)
+                         ? STM32_SPI_DMA_MAX_XFER
+                         : nwords;
+
+          spi_dmarxsetup(priv, rxp, &rxdummy, chunk);
+          spi_dmatxsetup(priv, txp, &txdummy, chunk);
 
 #ifdef CONFIG_SPI_TRIGGER
-      /* Is deferred triggering in effect? */
+          /* Is deferred triggering in effect? */
 
-      if (!priv->defertrig)
-        {
-          /* No.. Start the DMAs */
+          if (!priv->defertrig)
+            {
+              /* No.. Start the DMAs */
+
+              spi_dmarxstart(priv);
+              spi_dmatxstart(priv);
+            }
+          else
+            {
+              /* Yes.. indicate that we are ready to be started.  Deferred
+               * triggering is only meaningful for the first (often only)
+               * chunk; subsequent chunks must run unconditionally or the
+               * caller would have to re-arm between chunks.
+               */
+
+              priv->trigarmed = true;
+            }
+#else
+          /* Start the DMAs */
 
           spi_dmarxstart(priv);
           spi_dmatxstart(priv);
-        }
-      else
-        {
-          /* Yes.. indicated that we are ready to be started */
-
-          priv->trigarmed = true;
-        }
-#else
-      /* Start the DMAs */
-
-      spi_dmarxstart(priv);
-      spi_dmatxstart(priv);
 #endif
 
-      /* Then wait for each to complete */
+          /* Then wait for each to complete */
 
-      spi_dmarxwait(priv);
-      spi_dmatxwait(priv);
+          ret = spi_dmarxwait(priv);
+          if (ret >= 0)
+            {
+              ret = spi_dmatxwait(priv);
+            }
+
+          if (ret < 0)
+            {
+              break;
+            }
+
+          if (txp != NULL)
+            {
+              txp += chunk * word_size;
+            }
+
+          if (rxp != NULL)
+            {
+              rxp += chunk * word_size;
+            }
+
+          nwords -= chunk;
+        }
+
+      if (rxbuffer != NULL && ret >= 0)
+        {
+          /* Force the RX data to be re-read from memory */
+
+          up_invalidate_dcache((uintptr_t)rxbuffer,
+                               (uintptr_t)rxbuffer + nbytes);
+
+          if (rxbuffer != xbuffer)
+            {
+              memcpy(xbuffer, priv->rxbuf, nbytes);
+            }
+        }
 
 #ifdef CONFIG_SPI_TRIGGER
       priv->trigarmed = false;
@@ -1568,10 +2146,11 @@ static int spi_trigger(struct spi_dev_s *dev)
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
  *   nwords   - the length of data to send from the buffer in number of
- *              words. The wordsize is determined by the number of
- *              bits-per-word selected for the SPI interface.  If nbits <= 8,
- *              the data is packed into uint8_t's; if nbits >8, the data is
- *              packed into uint16_t's
+ *              words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1579,7 +2158,8 @@ static int spi_trigger(struct spi_dev_s *dev)
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer,
+static void spi_sndblock(struct spi_dev_s *dev,
+                         const void *txbuffer,
                          size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
@@ -1597,10 +2177,10 @@ static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer,
  *   dev      - Device-specific state data
  *   rxbuffer - A pointer to the buffer in which to receive data
  *   nwords   - the length of data that can be received in the buffer in
- *              number of words.  The wordsize is determined by the number of
- *              bits-per-word selected for the SPI interface.  If nbits <= 8,
- *              the data is packed into uint8_t's; if nbits >8, the data is
- *              packed into uint16_t's
+ *              number of words.  The wordsize is determined by the number
+ *              of bits-per-word selected for the SPI interface.  If
+ *              nbits <= 8, the data is packed into uint8_t's; if nbits >8,
+ *              the data is packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -1608,7 +2188,8 @@ static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
+static void spi_recvblock(struct spi_dev_s *dev,
+                          void *rxbuffer,
                           size_t nwords)
 {
   spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
@@ -1650,8 +2231,8 @@ static int spi_pm_prepare(struct pm_callback_s *cb, int domain,
                           enum pm_state_e pmstate)
 {
   struct stm32_spidev_s *priv =
-                      (struct stm32_spidev_s *)((char *)cb -
-                       offsetof(struct stm32_spidev_s, pm_cb));
+      (struct stm32_spidev_s *)((char *)cb -
+                                    offsetof(struct stm32_spidev_s, pm_cb));
 
   /* Logic to prepare for a reduced power state goes here. */
 
@@ -1668,8 +2249,8 @@ static int spi_pm_prepare(struct pm_callback_s *cb, int domain,
 
         if (nxmutex_is_locked(&priv->lock))
           {
-            /* Exclusive lock is held, do not allow entry to deeper PM
-             * states.
+            /* Exclusive lock is held, do not allow entry to deeper
+             * PM states.
              */
 
             return -EBUSY;
@@ -1711,26 +2292,44 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
   int ret;
 #endif
 
+#ifdef HAVE_SPI_ARB_DATA_SIZE
   /* Configure CR1 and CR2. Default configuration:
    *   Mode 0:                        CR1.CPHA=0 and CR1.CPOL=0
    *   Master:                        CR1.MSTR=1
    *   8-bit:                         CR2.DS=7
    *   MSB transmitted first:         CR1.LSBFIRST=0
    *   Replace NSS with SSI & SSI=1:  CR1.SSI=1 CR1.SSM=1
-   *                                  (prevents MODF error)
+   *                                     (prevents MODF error)
    *   Two lines full duplex:         CR1.BIDIMODE=0 CR1.BIDIOIE=(Don't care)
    *                                  and CR1.RXONLY=0
    */
 
-  clrbits = SPI_CR1_CPHA | SPI_CR1_CPOL |
-            SPI_CR1_BR_MASK | SPI_CR1_LSBFIRST |
-            SPI_CR1_RXONLY | SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
+  clrbits = SPI_CR1_CPHA | SPI_CR1_CPOL | SPI_CR1_BR_MASK |
+            SPI_CR1_LSBFIRST | SPI_CR1_RXONLY | SPI_CR1_CRCL |
+            SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
   setbits = SPI_CR1_MSTR | SPI_CR1_SSI | SPI_CR1_SSM;
-  spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, clrbits);
+  spi_modifycr1(priv, setbits, clrbits);
 
   clrbits = SPI_CR2_DS_MASK;
   setbits = SPI_CR2_DS_8BIT | SPI_CR2_FRXTH; /* FRXTH must be high in 8-bit mode */
-  spi_modifycr(STM32_SPI_CR2_OFFSET, priv, setbits, clrbits);
+  spi_modifycr2(priv, setbits, clrbits);
+#else
+  /* Configure CR1. Default configuration:
+   *   Mode 0:                        CPHA=0 and CPOL=0
+   *   Master:                        MSTR=1
+   *   8-bit:                         DFF=0
+   *   MSB transmitted first:         LSBFIRST=0
+   *   Replace NSS with SSI & SSI=1:  SSI=1 SSM=1 (prevents MODF error)
+   *   Two lines full duplex:         BIDIMODE=0 BIDIOIE=(Don't care)
+   *                                  and RXONLY=0
+   */
+
+  clrbits = SPI_CR1_CPHA | SPI_CR1_CPOL | SPI_CR1_BR_MASK |
+            SPI_CR1_LSBFIRST | SPI_CR1_RXONLY | SPI_CR1_DFF |
+            SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
+  setbits = SPI_CR1_MSTR | SPI_CR1_SSI | SPI_CR1_SSM;
+  spi_modifycr1(priv, setbits, clrbits);
+#endif
 
   priv->frequency = 0;
   priv->nbits     = 8;
@@ -1745,27 +2344,34 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
   spi_putreg(priv, STM32_SPI_CRCPR_OFFSET, 7);
 
 #ifdef CONFIG_STM32_SPI_DMA
-  /* Get DMA channels.
-   * NOTE: stm32_dmachannel() will always assign the DMA channel.
-   * If the channel is not available, then stm32_dmachannel() will
-   * block and wait until the channel becomes available.
-   * WARNING: If you have another device sharing a DMA channel with SPI and
-   * the code never releases that channel, then the call to
-   * stm32_dmachannel()  will hang forever in this function!
-   * Don't let your design do that!
-   */
+  if (priv->rxch && priv->txch)
+    {
+      /* Get DMA channels.  NOTE: stm32_dmachannel() will always assign the
+       * DMA channel.  If the channel is not available, then
+       * stm32_dmachannel() will block and wait until the channel becomes
+       * available.
+       * WARNING: If you have another device sharing a DMA channel with
+       * SPI and the code never releases that channel, then the call to
+       * stm32_dmachannel()  will hang forever in this function!
+       *  Don't let your design do that!
+       */
 
-  priv->rxdma = stm32_dmachannel(priv->rxch);
-  priv->txdma = stm32_dmachannel(priv->txch);
-  DEBUGASSERT(priv->rxdma && priv->txdma);
+      priv->rxdma = stm32_dmachannel(priv->rxch);
+      priv->txdma = stm32_dmachannel(priv->txch);
+      DEBUGASSERT(priv->rxdma && priv->txdma);
 
-  spi_modifycr(STM32_SPI_CR2_OFFSET, priv,
-               SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
+      spi_modifycr2(priv, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
+    }
+  else
+    {
+      priv->rxdma = NULL;
+      priv->txdma = NULL;
+    }
 #endif
 
-  /* Enable spi */
+  /* Enable SPI */
 
-  spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+  spi_modifycr1(priv, SPI_CR1_SPE, 0);
 
 #ifdef CONFIG_PM
   /* Register to receive power management callbacks */
@@ -1875,6 +2481,81 @@ struct spi_dev_s *stm32_spibus_initialize(int bus)
     }
   else
 #endif
+#ifdef CONFIG_STM32_SPI4
+  if (bus == 4)
+    {
+      /* Select SPI4 */
+
+      priv = &g_spi4dev;
+
+      /* Only configure if the bus is not already configured */
+
+      if (!priv->initialized)
+        {
+          /* Configure SPI4 pins: SCK, MISO, and MOSI */
+
+          stm32_configgpio(GPIO_SPI4_SCK);
+          stm32_configgpio(GPIO_SPI4_MISO);
+          stm32_configgpio(GPIO_SPI4_MOSI);
+
+          /* Set up default configuration: Master, 8-bit, etc. */
+
+          spi_bus_initialize(priv);
+          priv->initialized = true;
+        }
+    }
+  else
+#endif
+#ifdef CONFIG_STM32_SPI5
+  if (bus == 5)
+    {
+      /* Select SPI5 */
+
+      priv = &g_spi5dev;
+
+      /* Only configure if the bus is not already configured */
+
+      if (!priv->initialized)
+        {
+          /* Configure SPI5 pins: SCK, MISO, and MOSI */
+
+          stm32_configgpio(GPIO_SPI5_SCK);
+          stm32_configgpio(GPIO_SPI5_MISO);
+          stm32_configgpio(GPIO_SPI5_MOSI);
+
+          /* Set up default configuration: Master, 8-bit, etc. */
+
+          spi_bus_initialize(priv);
+          priv->initialized = true;
+        }
+    }
+  else
+#endif
+#ifdef CONFIG_STM32_SPI6
+  if (bus == 6)
+    {
+      /* Select SPI6 */
+
+      priv = &g_spi6dev;
+
+      /* Only configure if the bus is not already configured */
+
+      if (!priv->initialized)
+        {
+          /* Configure SPI6 pins: SCK, MISO, and MOSI */
+
+          stm32_configgpio(GPIO_SPI6_SCK);
+          stm32_configgpio(GPIO_SPI6_MISO);
+          stm32_configgpio(GPIO_SPI6_MOSI);
+
+          /* Set up default configuration: Master, 8-bit, etc. */
+
+          spi_bus_initialize(priv);
+          priv->initialized = true;
+        }
+    }
+  else
+#endif
     {
       spierr("ERROR: Unsupported SPI bus: %d\n", bus);
     }
@@ -1883,4 +2564,6 @@ struct spi_dev_s *stm32_spibus_initialize(int bus)
   return (struct spi_dev_s *)priv;
 }
 
-#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 || CONFIG_STM32_SPI3 */
+#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 || CONFIG_STM32_SPI3 ||
+        * CONFIG_STM32_SPI4 || CONFIG_STM32_SPI5 || CONFIG_STM32_SPI6
+        */

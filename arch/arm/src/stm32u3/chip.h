@@ -55,4 +55,13 @@
 #define STM32_DMA1_NCHAN      12
 #define STM32_DMA1_IRQ_FIRST  STM32_IRQ_GPDMA1_CH0
 
+/* SPI kernel clock and SPI clock limits (96 MHz maximum system clock).
+ * SPI3 and SPI4 are the limited instances with an 8-byte FIFO (RM0487).
+ */
+
+#define STM32_SPI_MAX_KER_CK  96000000UL
+#define STM32_SPI_CLK_MAX     96000000UL
+#define STM32_SPI3_FIFOSIZE   8
+#define STM32_SPI4_FIFOSIZE   8
+
 #endif /* __ARCH_ARM_SRC_STM32U3_CHIP_H */

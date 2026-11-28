@@ -41,6 +41,7 @@ config STM32_U3_PERIPHERALS
 	select STM32_HAVE_IP_TIMERS_V3
 	select STM32_HAVE_IP_DBGMCU_V5
 	select STM32_HAVE_IP_LPTIM_V2
+	select STM32_HAVE_IP_SPI_V3
 	select STM32_HAVE_IP_WDG_V3
 	select STM32_HAVE_LPTIM1
 	select STM32_HAVE_LPTIM2
@@ -56,6 +57,9 @@ config STM32_U3_PERIPHERALS
 	select STM32_HAVE_LPUART1
 	select STM32_HAVE_IP_DAC_M33_V1
 	select STM32_HAVE_DAC1
+	select STM32_HAVE_SPI1
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
 
 choice
 	prompt "STM32U3 Chip Selection"
@@ -73,6 +77,7 @@ endchoice
 config STM32_STM32U3C5XX
 	bool
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_SPI4
 	select STM32_HAVE_TIM1
 	select STM32_HAVE_TIM2
 	select STM32_HAVE_TIM3
