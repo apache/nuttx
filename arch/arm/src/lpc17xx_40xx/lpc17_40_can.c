@@ -2,8 +2,8 @@
  * arch/arm/src/lpc17xx_40xx/lpc17_40_can.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2010,2012 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2011 Li Zhuoyi. All rights reserved.
+ * SPDX-FileCopyrightText: 2010,2012 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2011 Li Zhuoyi.
  * SPDX-FileContributor: Li Zhuoyi <lzyy.cn@gmail.com>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

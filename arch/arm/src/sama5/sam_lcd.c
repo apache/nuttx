@@ -2,8 +2,8 @@
  * arch/arm/src/sama5/sam_lcd.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt.
  * SPDX-FileCopyrightText: 2012 Atmel Corporation
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.orgr>
  *

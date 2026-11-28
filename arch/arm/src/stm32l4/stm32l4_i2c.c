@@ -2,10 +2,10 @@
  * arch/arm/src/stm32l4/stm32l4_i2c.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2016-2018 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2011-2013 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2016 Doug Vetter.  All rights reserved.
- * SPDX-FileCopyrightText: 2011 Uros Platise. All rights reserved.
+ * SPDX-FileCopyrightText: 2016-2018 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2011-2013 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2016 Doug Vetter.
+ * SPDX-FileCopyrightText: 2011 Uros Platise.
  * SPDX-FileContributor: Uros Platise <uros.platise@isotel.eu>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: John Wharington

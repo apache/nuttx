@@ -2,8 +2,8 @@
  * arch/arm/src/tiva/hardware/tm4c/tm4c_ethernet.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2014 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2014 TRD2 Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2014 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2014 TRD2 Inc.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Calvin Maguranis <calvin.maguranis@trd2inc.com>
  *

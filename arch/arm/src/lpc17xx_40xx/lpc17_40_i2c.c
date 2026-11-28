@@ -2,10 +2,10 @@
  * arch/arm/src/lpc17xx_40xx/lpc17_40_i2c.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2012, 2014-2016 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2011 Li Zhuoyi. All rights reserved.
- * SPDX-FileCopyrightText: 2010-2011 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2012, 2014-2016 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2011 Li Zhuoyi.
+ * SPDX-FileCopyrightText: 2010-2011 Gregory Nutt.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Li Zhuoyi <lzyy.cn@gmail.com> (Original author)
  * SPDX-FileContributor: David Hewson

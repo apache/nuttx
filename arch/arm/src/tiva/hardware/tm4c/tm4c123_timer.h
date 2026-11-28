@@ -2,9 +2,9 @@
  * arch/arm/src/tiva/hardware/tm4c/tm4c123_timer.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2015, 2018 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2014 TRD2 Inc. All rights reserved.
- * SPDX-FileCopyrightText: 2012, 2014 Max Nekludov. All rights reserved.
+ * SPDX-FileCopyrightText: 2015, 2018 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2014 TRD2 Inc.
+ * SPDX-FileCopyrightText: 2012, 2014 Max Nekludov.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Max Nekludov <macscomp@gmail.com>
  * SPDX-FileContributor: Calvin Maguranis <calvin.maguranis@trd2inc.com>

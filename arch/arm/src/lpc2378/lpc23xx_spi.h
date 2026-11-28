@@ -2,9 +2,9 @@
  * arch/arm/src/lpc2378/lpc23xx_spi.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2010,2014 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2013 Li Zhuoyi. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2010,2014 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2013 Li Zhuoyi.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Li Zhuoyi <lzyy.cn@gmail.com>
  *

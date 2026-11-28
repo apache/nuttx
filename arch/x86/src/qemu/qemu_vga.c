@@ -2,8 +2,8 @@
  * arch/x86/src/qemu/qemu_vga.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2011 Li Zhuoyi. All rights reserved.
- * SPDX-FileCopyrightText: 2008-2009 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Li Zhuoyi.
+ * SPDX-FileCopyrightText: 2008-2009 Gregory Nutt.
  * SPDX-FileContributor: Li Zhuoyi <lzyy.cn@gmail.com>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

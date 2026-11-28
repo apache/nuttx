@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2009-2013, 2015-2016, 2018 Gregory Nutt.
- * SPDX-FileCopyrightText: 2012 Michael Smith. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Michael Smith.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

@@ -2,7 +2,7 @@
  * arch/arm/src/kinetis/kinetis_edma.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2019, 2021 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2019, 2021 Gregory Nutt.
  * SPDX-FileCopyrightText: 2016-2017 NXP
  * SPDX-FileCopyrightText: 2015, Freescale Semiconductor, Inc.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>

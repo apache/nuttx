@@ -2,7 +2,7 @@
  * arch/arm/src/tms570/tms570_boot.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2015 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2015 Gregory Nutt.
  * SPDX-FileCopyrightText: 2012 Texas Instruments Incorporated
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

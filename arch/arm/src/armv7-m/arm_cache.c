@@ -2,8 +2,8 @@
  * arch/arm/src/armv7-m/arm_cache.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2015, 2018-2019 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2009 - 2014 ARM LIMITED.  All rights reserved.
+ * SPDX-FileCopyrightText: 2015, 2018-2019 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2009 - 2014 ARM LIMITED.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Bob Feretich <bob.feretich@rafresearch.com>
  *

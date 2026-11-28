@@ -2,11 +2,9 @@
  * arch/arm/src/lpc2378/lpc23xx_i2c.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2011 Li Zhuoyi. All rights reserved.
- * SPDX-FileCopyrightText: 2010 Rommel Marcelo. All rights reserved.
- * SPDX-FileCopyrightText: 2014-2016 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2012,2013 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2010-2011 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Li Zhuoyi.
+ * SPDX-FileCopyrightText: 2010 Rommel Marcelo.
+ * SPDX-FileCopyrightText: 2010-2011,2012,2013,2014-2016 Gregory Nutt.
  * SPDX-FileContributor: David Hewson
  * SPDX-FileContributor: Rommel Marcelo
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>

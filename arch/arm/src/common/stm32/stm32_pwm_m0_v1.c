@@ -2,7 +2,7 @@
  * arch/arm/src/common/stm32/stm32_pwm_m0_v1.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2019 Fundação CERTI. All rights reserved.
+ * SPDX-FileCopyrightText: 2019 Fundação CERTI.
  * SPDX-FileContributor: Daniel Pereira Volpato <dpo@certi.org.br>
  * SPDX-FileContributor: Guillherme da Silva Amaral <gvr@certi.org.br>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>

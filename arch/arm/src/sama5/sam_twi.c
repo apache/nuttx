@@ -2,8 +2,8 @@
  * arch/arm/src/sama5/sam_twi.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt.
  * SPDX-FileCopyrightText: 2011 Atmel Corporation
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.orgr>
  *

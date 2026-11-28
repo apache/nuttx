@@ -2,8 +2,8 @@
  * arch/arm/src/imxrt/imxrt_edma.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2018 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2016-2017 NXP. All rights reserved
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2016-2017 NXP.
  * SPDX-FileCopyrightText: 2015, Freescale Semiconductor, Inc.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

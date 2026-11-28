@@ -2,9 +2,9 @@
  * arch/arm/src/stm32h7/stm32_adc.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2017, 2019 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2015 Motorola Mobility, LLC. All rights reserved.
- * SPDX-FileCopyrightText: 2015 Omni Hoverboards Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2017, 2019 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2015 Motorola Mobility, LLC.
+ * SPDX-FileCopyrightText: 2015 Omni Hoverboards Inc.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Diego Sanchez <dsanchez@nx-engineering.com>
  * SPDX-FileContributor: Paul Alexander Patience <paul-a.patience@polymtl.ca>

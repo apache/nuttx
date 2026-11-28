@@ -2,9 +2,9 @@
  * arch/arm/src/stm32h7/stm32h7b3xx_flash.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2018 Wolpike LLC. All rights reserved.
- * SPDX-FileCopyrightText: 2011 Uros Platise. All rights reserved.
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2018 Wolpike LLC.
+ * SPDX-FileCopyrightText: 2011 Uros Platise.
  * SPDX-FileContributor: Evgeniy Bobkov <evgen@wolpike.com>
  * SPDX-FileContributor: Uros Platise <uros.platise@isotel.eu>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>

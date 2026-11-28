@@ -2,9 +2,9 @@
  * arch/arm/src/lpc43xx/lpc43_adc.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2015,2016 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2010-2012 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2011 Li Zhuoyi. All rights reserved.
+ * SPDX-FileCopyrightText: 2015,2016 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2010-2012 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2011 Li Zhuoyi.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Li Zhuoyi <lzyy.cn@gmail.com>
  *

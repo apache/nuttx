@@ -2,9 +2,9 @@
  * arch/arm/src/common/stm32/stm32_sdadc_m3m4_v1.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2015 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2009, 2011 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2016 Studelec. All rights reserved.
+ * SPDX-FileCopyrightText: 2015 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2009, 2011 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2016 Studelec.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Marc Rechté <mrechte@studelec-sa.com>
  *

@@ -2,9 +2,9 @@
  * arch/arm/src/arm/lpc2378/lpc23xx_head.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2010 Rommel Marcelo. All rights reserved.
- * SPDX-FileCopyrightText: 2014 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2010,2012 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2010 Rommel Marcelo.
+ * SPDX-FileCopyrightText: 2014 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2010,2012 Gregory Nutt.
  * SPDX-FileContributor: Rommel Marcelo
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

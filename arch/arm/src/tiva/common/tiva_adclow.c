@@ -2,8 +2,8 @@
  * arch/arm/src/tiva/common/tiva_adclow.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2016-2018 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2015 TRD2 Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2016-2018 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2015 TRD2 Inc.
  * SPDX-FileCopyrightText: 2005-2014 Texas Instruments Incorporated.
  * SPDX-FileContributor: Calvin Maguranis <calvin.maguranis@trd2inc.com>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>

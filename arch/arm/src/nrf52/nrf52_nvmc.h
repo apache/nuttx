@@ -2,7 +2,7 @@
  * arch/arm/src/nrf52/nrf52_nvmc.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt.
  * SPDX-FileCopyrightText: 2012 - 2018, Nordic Semiconductor ASA
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

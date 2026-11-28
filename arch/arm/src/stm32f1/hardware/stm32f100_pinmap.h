@@ -2,9 +2,9 @@
  * arch/arm/src/stm32f1/hardware/stm32f100_pinmap.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2009 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2011 Uros Platise. All rights reserved.
- * SPDX-FileCopyrightText: 2012 Michael Smith. All Rights reserved.
+ * SPDX-FileCopyrightText: 2009 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2011 Uros Platise.
+ * SPDX-FileCopyrightText: 2012 Michael Smith.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Uros Platise <uros.platise@isotel.eu>
  * SPDX-FileContributor: Michael Smith

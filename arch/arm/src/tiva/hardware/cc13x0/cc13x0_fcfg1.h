@@ -2,8 +2,8 @@
  * arch/arm/src/tiva/hardware/cc13x0/cc13x0_fcfg1.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2018 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2015-2017, Texas Instruments Incorporated
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2015-2017 Texas Instruments Incorporated
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

@@ -2,9 +2,9 @@
  * arch/arm/src/samd2l2/sam_i2c_master.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2017 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2015 Filament - www.filament.com
- * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2015 Filament
+ * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt.
  * SPDX-FileCopyrightText: 2011 Atmel Corporation
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Matt Thompson <mthompson@hexwave.com>

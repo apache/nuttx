@@ -2,7 +2,7 @@
  * arch/xtensa/include/xtensa/xtensa_corebits.h
  *
  * SPDX-License-Identifier: MIT
- * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt.
  * SPDX-FileCopyrightText: 2005-2011 Tensilica Inc.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

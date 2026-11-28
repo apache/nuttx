@@ -2,7 +2,7 @@
  * arch/xtensa/include/xtensa/xtensa_coproc.h
  *
  * SPDX-License-Identifier: MIT
- * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt.
  * SPDX-FileCopyrightText: 2005-2015 Cadence Design Systems, Inc.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *

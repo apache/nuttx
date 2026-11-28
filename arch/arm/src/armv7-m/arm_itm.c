@@ -2,8 +2,8 @@
  * arch/arm/src/armv7-m/arm_itm.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2014 Pierre-noel Bouteville. All rights reserved.
- * SPDX-FileCopyrightText: 2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2014 Pierre-noel Bouteville.
+ * SPDX-FileCopyrightText: 2014 Gregory Nutt.
  * SPDX-FileCopyrightText: 2009 - 2013 ARM LIMITED
  * SPDX-FileContributor: Pierre-noel Bouteville <pnb990@gmail.com>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
