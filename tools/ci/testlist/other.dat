@@ -13,6 +13,7 @@
 
 # rh850 Boards build by CMake
 CMake,qemu-rh850-u2c:nsh
+CMake,qemu-rh850-u2c:citest
 
 /x86
 

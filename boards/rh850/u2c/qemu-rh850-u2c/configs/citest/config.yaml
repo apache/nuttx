@@ -1,0 +1,14 @@
+config:
+  cwd: './'
+
+product:
+  name: "qemu-rh850-u2c"
+  cores:
+    core0:
+      name: 'main'
+      device: 'qemu'
+      line_buffered: true
+      exec_path: 'qemu-system-rh850'
+      exec_args: '-M rh850-u2c,test-exit=on -icount shift=4,sleep=on -nographic'
+      conf_path: './build/.config'
+      elf_path: './build/nuttx'

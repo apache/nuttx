@@ -100,7 +100,7 @@ void rh850_clockconfig(void);
 void rh850_lowsetup(void);
 void rh850_lowputc(int ch);
 void rh850_serialinit(void);
-void u2c_rlin3_setup(uintptr_t base, uint32_t baud);
+int u2c_rlin3_setup(uintptr_t base, uint32_t baud);
 void u2c_rlin3_putc(uintptr_t base, int ch);
 bool u2c_irq_pending(int irq);
 void u2c_irq_raise(int irq);

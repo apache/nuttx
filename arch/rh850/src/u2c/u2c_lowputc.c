@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <stdint.h>
 
 #include <nuttx/arch.h>
@@ -43,6 +44,28 @@
 #  define CONSOLE_BAUD  CONFIG_UART0_BAUD
 #endif
 
+/* LBRP01 = round(clock / (16 x baud)) - 1 with LWBR = 0.  A rate whose
+ * divider is out of range, or that is more than RLIN3_BAUD_TOL percent off,
+ * is rejected.
+ */
+
+#define RLIN3_CLK       CONFIG_RH850_CLK_HSB_FREQUENCY
+#define RLIN3_BAUD_TOL  3
+#define RLIN3_DIV(b)    ((RLIN3_CLK + RLIN3_SAMPLES * (b) / 2) / \
+                         (RLIN3_SAMPLES * (b)))
+#define RLIN3_REAL(b)   (RLIN3_SAMPLES * (b) * RLIN3_DIV(b))
+#define RLIN3_DIFF(b)   (RLIN3_REAL(b) > RLIN3_CLK ? \
+                         RLIN3_REAL(b) - RLIN3_CLK : \
+                         RLIN3_CLK - RLIN3_REAL(b))
+#define RLIN3_BAUD_OK(b) \
+  ((b) > 0 && RLIN3_SAMPLES * (b) <= RLIN3_CLK && \
+   RLIN3_DIV(b) <= 0x10000 && \
+   RLIN3_DIFF(b) * 100 <= RLIN3_REAL(b) * RLIN3_BAUD_TOL)
+
+#if defined(CONSOLE_BAUD) && !RLIN3_BAUD_OK(CONSOLE_BAUD)
+#  error CONFIG_UART0_BAUD does not fit CONFIG_RH850_CLK_HSB_FREQUENCY
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -52,24 +75,27 @@
  *
  * Description:
  *   RLIN3 UART mode, 8N1, LSB first, no error detection.  The unit clock
- *   and module stop are set up by rh850_clockconfig().
+ *   and module stop are set up by rh850_clockconfig().  Returns -EINVAL
+ *   for a rate that RLIN3_BAUD_OK() rejects.
  *
  ****************************************************************************/
 
-void u2c_rlin3_setup(uintptr_t base, uint32_t baud)
+int u2c_rlin3_setup(uintptr_t base, uint32_t baud)
 {
-  uint32_t samples = RLIN3_SAMPLES * baud;
+  uint64_t b = baud;
+
+  if (!RLIN3_BAUD_OK(b))
+    {
+      return -EINVAL;
+    }
 
   putreg8(0, base + RLIN3_LCUC_OFFSET);
   while ((getreg8(base + RLIN3_LMST_OFFSET) & RLIN3_LMST_OMM0) != 0)
     {
     }
 
-  /* LBRP01 = round(clock / (16 x baud)) - 1 */
-
   putreg8(0, base + RLIN3_LWBR_OFFSET);
-  putreg16((CONFIG_RH850_CLK_HSB_FREQUENCY + samples / 2) / samples - 1,
-           base + RLIN3_LBRP01_OFFSET);
+  putreg16((uint16_t)(RLIN3_DIV(b) - 1), base + RLIN3_LBRP01_OFFSET);
   putreg8(RLIN3_LMD_UART, base + RLIN3_LMD_OFFSET);
   putreg8(0, base + RLIN3_LBFC_OFFSET);
   putreg8(0, base + RLIN3_LEDE_OFFSET);
@@ -81,6 +107,7 @@ void u2c_rlin3_setup(uintptr_t base, uint32_t baud)
     }
 
   putreg8(RLIN3_LUOER_UTOE | RLIN3_LUOER_UROE, base + RLIN3_LUOER_OFFSET);
+  return OK;
 }
 
 /****************************************************************************
