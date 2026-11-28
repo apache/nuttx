@@ -133,8 +133,7 @@ static int work_qqueue(FAR struct kwork_wqueue_s *wqueue,
           /* Start the timer if the work is the earliest expired work. */
 
           retimer = false;
-          wd_start_abstick(&wqueue->timer, work->qtime,
-                           work_timer_expired, (wdparm_t)wqueue);
+          work_timer_start(wqueue, work->qtime);
         }
     }
   else
@@ -142,6 +141,12 @@ static int work_qqueue(FAR struct kwork_wqueue_s *wqueue,
       /* Insert to the expired list of the wqueue. */
 
       list_add_tail(&wqueue->expired, &work->node);
+
+#ifdef CONFIG_SMP
+      /* Keep the semaphore alive until the post below is done. */
+
+      atomic_add(&wqueue->nposting, 1);
+#endif
     }
 
   if (retimer)
@@ -149,14 +154,22 @@ static int work_qqueue(FAR struct kwork_wqueue_s *wqueue,
       work_timer_reset(wqueue);
     }
 
+  /* nxsem_post() can enter the critical section, and code in the critical
+   * section calls work_queue().  So post after the unlock.  Preemption
+   * stays disabled until the post is done.
+   */
+
+  spin_unlock_irqrestore(&wqueue->lock, flags);
+
   if (delay == 0)
     {
-      /* Post while the queue lock keeps the semaphore alive. */
-
       nxsem_post(&wqueue->sem);
+#ifdef CONFIG_SMP
+      atomic_sub(&wqueue->nposting, 1);
+#endif
     }
 
-  spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+  sched_unlock();
   return OK;
 }
 
