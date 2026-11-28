@@ -2,15 +2,13 @@
  * fs/nfs/nfs_vfsops.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2012-2018 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2012 Jose Pablo Rojas Vargas. All rights reserved.
+ * SPDX-FileCopyrightText: 2012-2018 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2012 Jose Pablo Rojas Vargas.
+ * SPDX-FileCopyrightText: 1995 The Regents of the University of California.
+ * SPDX-FileCopyrightText: 1993 The Regents of the University of California.
+ * SPDX-FileCopyrightText: 1989 The Regents of the University of California.
  * SPDX-FileContributor: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
- *
- * Leveraged from OpenBSD:
- *
- *   Copyright (c) 1989, 1993, 1995
- *   The Regents of the University of California.  All rights reserved.
  *
  * This code is derived from software contributed to Berkeley by
  * Rick Macklem at The University of Guelph.

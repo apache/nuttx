@@ -2,16 +2,13 @@
  * fs/nfs/rpc.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2012 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2012 Jose Pablo Rojas Vargas. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2012 Jose Pablo Rojas Vargas.
+ * SPDX-FileCopyrightText: 2003 the regents of the university of michigan
+ * SPDX-FileCopyrightText: 1993 The Regents of the University of California.
+ * SPDX-FileCopyrightText: 1989 The Regents of the University of California.
  * SPDX-FileContributor: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
- *
- * Leveraged from OpenBSD:
- *
- *   copyright (c) 2003
- *   the regents of the university of michigan
- *   all rights reserved
  *
  * permission is granted to use, copy, create derivative works and
  * redistribute this software and such derivative works for any purpose, so
@@ -32,9 +29,6 @@
  * any claim arising out of or in connection with the use of the software,
  * even if it has been or is hereafter advised of the possibility of such
  * damages.
- *
- *   Copyright (c) 1989, 1993
- *   The Regents of the University of California.  All rights reserved.
  *
  * This code is derived from software contributed to Berkeley by
  * Rick Macklem at The University of Guelph.

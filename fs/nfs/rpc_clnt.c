@@ -4,17 +4,15 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2012-2018 Gregory Nutt. All rights reserved.
  * SPDX-FileCopyrightText: 2012 Jose Pablo Rojas Vargas. All rights reserved.
+ * SPDX-FileCopyrightText: 2004 The Regents of the University of Michigan.
+ * SPDX-FileCopyrightText: 2004 Weston Andros Adamson <muzzle@umich.edu>.
+ * SPDX-FileCopyrightText: 2004 Marius Aamodt Eriksen <marius@umich.edu>.
+ * SPDX-FileCopyrightText: 1995 The Regents of the University of California.
+ * SPDX-FileCopyrightText: 1993 The Regents of the University of California.
+ * SPDX-FileCopyrightText: 1991 The Regents of the University of California.
+ * SPDX-FileCopyrightText: 1989 The Regents of the University of California.
  * SPDX-FileContributor: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
- *
- * Leveraged from OpenBSD:
- *
- *   Copyright (c) 2004 The Regents of the University of Michigan.
- *   All rights reserved.
- *
- *   Copyright (c) 2004 Weston Andros Adamson <muzzle@umich.edu>.
- *   Copyright (c) 2004 Marius Aamodt Eriksen <marius@umich.edu>.
- *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,9 +38,6 @@
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *   Copyright (c) 1989, 1991, 1993, 1995 The Regents of the University of
- *   California.  All rights reserved.
  *
  * This code is derived from software contributed to Berkeley by Rick Macklem
  * at The University of Guelph.
