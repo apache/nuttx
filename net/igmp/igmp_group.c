@@ -2,10 +2,8 @@
  * net/igmp/igmp_group.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- *
- *   Copyright (C) 2010, 2013-2014, 2016, 2018 Gregory Nutt.
- *   All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileCopyrightText: 2010, 2013-2014, 2016, 2018 Gregory Nutt.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
  * lwIP TCP/IP stack by Steve Reynolds:
