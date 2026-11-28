@@ -188,6 +188,7 @@ void pm_runtime_init(FAR struct pm_runtime_s *rpm, rpm_state_e state,
   DEBUGASSERT(rpm != NULL && ops != NULL);
   DEBUGASSERT(state == RPM_ACTIVE || state == RPM_SUSPENDED);
   nxrmutex_init(&rpm->lock);
+  memset(&rpm->suspend_work, 0, sizeof(rpm->suspend_work));
   rpm->use_count     = 0;
   rpm->suspend_delay = 0;
   rpm->state         = state;
