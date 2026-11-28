@@ -95,6 +95,22 @@
 #  define _SO_TIMEOUT(t) (UINT_MAX)
 #endif /* CONFIG_NET_SOCKOPTS */
 
+/* In a kernel build, psock_recvmsg_user() and psock_sendmsg_user() copy
+ * the data through kernel memory: a stream in parts of up to
+ * SOCKET_COPY_SIZE bytes, a datagram whole.  No datagram is longer than
+ * SOCKET_DGRAM_MAX: the IP length field has 16 bits, and a local datagram
+ * fits in one pipe.
+ */
+
+#ifdef CONFIG_BUILD_KERNEL
+#  define SOCKET_COPY_SIZE 16384
+#  if defined(CONFIG_DEV_PIPE_MAXSIZE) && CONFIG_DEV_PIPE_MAXSIZE > UINT16_MAX
+#    define SOCKET_DGRAM_MAX CONFIG_DEV_PIPE_MAXSIZE
+#  else
+#    define SOCKET_DGRAM_MAX UINT16_MAX
+#  endif
+#endif
+
 /* Macro to set socket errors */
 
 #ifdef CONFIG_NET_SOCKOPTS

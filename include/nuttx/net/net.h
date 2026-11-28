@@ -941,6 +941,39 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                       int flags);
 
 /****************************************************************************
+ * Name: psock_sendmsg_user and psock_recvmsg_user
+ *
+ * Description:
+ *   psock_sendmsg() and psock_recvmsg() for a message in user memory, for
+ *   the socket interfaces of the user.  In a kernel build, they copy the
+ *   data through kernel memory, because the network can complete the I/O
+ *   in another task, where the memory of the caller is not mapped.  In the
+ *   other builds, they are psock_sendmsg() and psock_recvmsg().  Kernel
+ *   code calls psock_sendmsg() and psock_recvmsg() directly.
+ *
+ * Input Parameters:
+ *   psock     A pointer to a NuttX-specific, internal socket structure
+ *   msg       Message to send, or buffer to receive data
+ *   flags     Send or receive flags
+ *
+ * Returned Value:
+ *   The same as psock_sendmsg() and psock_recvmsg().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+ssize_t psock_sendmsg_user(FAR struct socket *psock,
+                           FAR const struct msghdr *msg, int flags);
+ssize_t psock_recvmsg_user(FAR struct socket *psock, FAR struct msghdr *msg,
+                           int flags);
+#else
+#  define psock_sendmsg_user(psock, msg, flags) \
+     psock_sendmsg(psock, msg, flags)
+#  define psock_recvmsg_user(psock, msg, flags) \
+     psock_recvmsg(psock, msg, flags)
+#endif
+
+/****************************************************************************
  * Name: psock_send
  *
  * Description:

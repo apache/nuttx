@@ -29,13 +29,11 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdint.h>
-#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/cancelpt.h>
-#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
@@ -202,66 +200,44 @@ ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
 {
   FAR struct socket *psock;
   FAR struct file *filep;
+  struct msghdr msg;
+  struct iovec iov;
   ssize_t ret;
-#ifdef CONFIG_BUILD_KERNEL
-  struct sockaddr_storage kaddr;
-  FAR void *kbuf;
-#endif
 
   /* sendto() is a cancellation point */
 
   enter_cancellation_point();
 
-#ifdef CONFIG_BUILD_KERNEL
-  /* The kernel copy of the address has a fixed size */
-
-  if (to != NULL && tolen > sizeof(kaddr))
-    {
-      ret = -EINVAL;
-      goto errout_with_cancelpt;
-    }
-
-  /* Allocate memory and copy user buffer to kernel */
-
-  kbuf = kmm_malloc(len);
-  if (!kbuf)
-    {
-      /* Out of memory */
-
-      ret = -ENOMEM;
-      goto errout_with_cancelpt;
-    }
-
-  memcpy(kbuf, buf, len);
-  buf = kbuf;
-
-  /* Copy the address data to kernel */
-
-  if (to)
-    {
-      memcpy(&kaddr, to, tolen);
-      to = (FAR const struct sockaddr *)&kaddr;
-    }
-#endif
+  iov.iov_base = (FAR void *)buf;
+  iov.iov_len = len;
+  msg.msg_name = (FAR struct sockaddr *)to;
+  msg.msg_namelen = tolen;
+  msg.msg_iov = &iov;
+  msg.msg_iovlen = 1;
+  msg.msg_control = NULL;
+  msg.msg_controllen = 0;
+  msg.msg_flags = 0;
 
   /* Get the underlying socket structure */
 
   ret = sockfd_socket(sockfd, &filep, &psock);
 
-  /* And let psock_sendto do all of the work */
+  /* And let psock_sendmsg_user() do all of the work */
 
   if (ret == OK)
     {
-      ret = psock_sendto(psock, buf, len, flags, to, tolen);
-      psock_sigpipe(psock, ret, flags);
+      if (tolen != 0 && to == NULL)
+        {
+          ret = -EINVAL;
+        }
+      else
+        {
+          ret = psock_sendmsg_user(psock, &msg, flags);
+          psock_sigpipe(psock, ret, flags);
+        }
+
       file_put(filep);
     }
-
-#ifdef CONFIG_BUILD_KERNEL
-  kmm_free(kbuf);
-
-errout_with_cancelpt:
-#endif
 
   leave_cancellation_point();
 
