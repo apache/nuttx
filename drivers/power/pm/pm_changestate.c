@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
 
 #include <nuttx/power/pm.h>
@@ -119,7 +120,7 @@ static void pm_stats_preparefail(int domain,
       pf->state = PM_RESTORE;
     }
 
-  if (ret < 0)
+  if (ret != OK)
     {
       clock_systime_timespec(&pf->start);
       pf->state = newstate;
@@ -368,6 +369,17 @@ int pm_changestate(int domain, enum pm_state_e newstate)
   /* Restore the interrupt state */
 
   pm_domain_unlock(domain, flags);
+
+  /* A prepare() callback may reject the transition with any non-zero value.
+   * Normalize a positive rejection to a negative errno so that the return
+   * value always follows the NuttX convention of OK or -errno.
+   */
+
+  if (ret > 0)
+    {
+      ret = -EBUSY;
+    }
+
   return ret;
 }
 
