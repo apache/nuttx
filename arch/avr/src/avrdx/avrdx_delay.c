@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/avr/src/avrdx/avrdx_delay.c
- * Custom implementation of up_udelay
  *
  * SPDX-License-Identifier: Apache-2.0
  *

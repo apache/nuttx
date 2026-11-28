@@ -3,24 +3,6 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * NuttX backend for the GigaDevice GD32VW55x SDK OS wrapper (the sys_*
- * facade declared in rtos/rtos_wrapper/wrapper_os.h).
- *
- * Validated HAL: SDK V1.0.3g (2026-04-23, commit 945c6e2).  ilp32f ABI.
- *
- * The prebuilt Wi-Fi and BLE libraries link exclusively against these
- * symbols; semantics follow wrapper_freertos.c, including its quirks:
- *
- *  - task stack sizes are in 32-bit WORDS (converted to bytes here)
- *  - sys_sema_down()/sys_task_wait()/blocking sys_queue_fetch() treat
- *    timeout 0 as "wait forever", while the int-timeout APIs
- *    (sys_mutex_try_get, sys_queue_write/read, sys_task_wait_notification)
- *    use -1 = forever and 0 = no wait
- *  - sys_queue_write/read return 0 on success, 1 on failure;
- *    sys_timer_stop returns 1 on success
- *  - sys_task_create returns the task handle; the per-task mailbox
- *    wrapper is looked up internally (pid table here, TLS in FreeRTOS)
- *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +19,25 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* NuttX backend for the GigaDevice GD32VW55x SDK OS wrapper (the sys_*
+ * facade declared in rtos/rtos_wrapper/wrapper_os.h).
+ *
+ * Validated HAL: SDK V1.0.3g (2026-04-23, commit 945c6e2).  ilp32f ABI.
+ *
+ * The prebuilt Wi-Fi and BLE libraries link exclusively against these
+ * symbols; semantics follow wrapper_freertos.c, including its quirks:
+ *
+ *  - task stack sizes are in 32-bit WORDS (converted to bytes here)
+ *  - sys_sema_down()/sys_task_wait()/blocking sys_queue_fetch() treat
+ *    timeout 0 as "wait forever", while the int-timeout APIs
+ *    (sys_mutex_try_get, sys_queue_write/read, sys_task_wait_notification)
+ *    use -1 = forever and 0 = no wait
+ *  - sys_queue_write/read return 0 on success, 1 on failure;
+ *    sys_timer_stop returns 1 on success
+ *  - sys_task_create returns the task handle; the per-task mailbox
+ *    wrapper is looked up internally (pid table here, TLS in FreeRTOS)
+ */
 
 /****************************************************************************
  * Included Files

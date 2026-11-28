@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/avr/src/avrdx/avrdx_swint.c
- * AVR DA/DB software interrupt emulation
  *
  * SPDX-License-Identifier: Apache-2.0
  *

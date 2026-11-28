@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/avr/src/avrdx/avrdx_ws2812.c
- * Driver for programmable RGB LED WS12812
  *
  * SPDX-License-Identifier: Apache-2.0
  *

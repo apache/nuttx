@@ -3,15 +3,6 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * Implements the network functions that the SDK wifi_manager expects from
- * the lwIP port (wifi_netif.c), now on top of the NuttX network stack.
- * Only what the SDK actually calls -- the binary seam with the prebuilt
- * library lives in gdwifi_netdev.c.
- *
- * The IP address is no longer configured by the SDK: NuttX is in charge
- * (dhcpc / ifconfig / renew).  The DHCP functions become no-ops that report
- * the netdev state.
- *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +19,16 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* Implements the network functions that the SDK wifi_manager expects from
+ * the lwIP port (wifi_netif.c), now on top of the NuttX network stack.
+ * Only what the SDK actually calls -- the binary seam with the prebuilt
+ * library lives in gdwifi_netdev.c.
+ *
+ * The IP address is no longer configured by the SDK: NuttX is in charge
+ * (dhcpc / ifconfig / renew).  The DHCP functions become no-ops that report
+ * the netdev state.
+ */
 
 /****************************************************************************
  * Included Files
