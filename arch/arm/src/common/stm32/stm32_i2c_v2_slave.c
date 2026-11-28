@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/common/stm32/stm32_i2c_v2_slave.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -16,9 +18,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- * TODO
- *  - DMA
- *  - SMBus adaptation
  ****************************************************************************/
 
 /****************************************************************************

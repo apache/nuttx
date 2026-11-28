@@ -17,6 +17,7 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
  * License for the specific language governing permissions and limitations
  * under the License.
+ *
  ****************************************************************************/
 
 #ifndef __ARCH_ARM64_SRC_AM62X_HARDWARE_AM62X_GPIO_H

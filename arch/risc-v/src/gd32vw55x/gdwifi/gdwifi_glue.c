@@ -3,10 +3,6 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * Platform glue for the GD32VW55x SDK Wi-Fi stack running on NuttX:
- * console output for dbg_print, the Wi-Fi interrupt attach, and the SNTP
- * system-time hook.
- *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,6 +19,11 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* Platform glue for the GD32VW55x SDK Wi-Fi stack running on NuttX:
+ * console output for dbg_print, the Wi-Fi interrupt attach, and the SNTP
+ * system-time hook.
+ */
 
 /****************************************************************************
  * Included Files

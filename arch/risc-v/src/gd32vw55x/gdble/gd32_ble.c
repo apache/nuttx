@@ -3,24 +3,6 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * BLE 5.3 bring-up for the GD32VW55x, using the vendor's own BLE host.
- *
- * The prebuilt libble is an all-in-one controller + RivieraWaves host: the
- * full GAP/GATT/SMP stack is inside the blob (ble_adp_*, ble_adv_*,
- * ble_gap_*, ble_gatts_*), and the controller talks to it internally, not
- * over HCI.  The blob is built WITHOUT any HCI transport layer (its h4tl.o
- * is empty), so the NuttX native Bluetooth host, which speaks HCI, cannot
- * drive this controller.  This port therefore uses the vendor host directly,
- * the same way every GigaDevice BLE example does.
- *
- * Validated vendor HAL: SDK V1.0.3g (2026-04-23, commit 945c6e2).
- *
- * Init order (from the SDK ble_ibeacon example) is mandatory:
- *   ble_power_on() -> ble_sw_init() -> ble_adp_callback_register()
- *   -> ble_irq_enable() (only after ble_sw_init).
- * Advertising is then created from the adapter "enable complete" event and
- * started from the advertising "created" event.
- *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +19,25 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* BLE 5.3 bring-up for the GD32VW55x, using the vendor's own BLE host.
+ *
+ * The prebuilt libble is an all-in-one controller + RivieraWaves host: the
+ * full GAP/GATT/SMP stack is inside the blob (ble_adp_*, ble_adv_*,
+ * ble_gap_*, ble_gatts_*), and the controller talks to it internally, not
+ * over HCI.  The blob is built WITHOUT any HCI transport layer (its h4tl.o
+ * is empty), so the NuttX native Bluetooth host, which speaks HCI, cannot
+ * drive this controller.  This port therefore uses the vendor host directly,
+ * the same way every GigaDevice BLE example does.
+ *
+ * Validated vendor HAL: SDK V1.0.3g (2026-04-23, commit 945c6e2).
+ *
+ * Init order (from the SDK ble_ibeacon example) is mandatory:
+ *   ble_power_on() -> ble_sw_init() -> ble_adp_callback_register()
+ *   -> ble_irq_enable() (only after ble_sw_init).
+ * Advertising is then created from the adapter "enable complete" event and
+ * started from the advertising "created" event.
+ */
 
 /****************************************************************************
  * Included Files

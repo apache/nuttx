@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm64/include/bcm2711/irq.h
  *
- * Author: Matteo Golin <matteo.golin@gmail.com>
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
