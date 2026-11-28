@@ -194,6 +194,7 @@ struct netlink_conn_s
   uint32_t dst_pid;                  /* Destination port ID */
   uint32_t dst_groups;               /* Destination multicast groups mask */
   uint8_t crefs;                     /* Reference counts on this instance */
+  uint8_t protocol;                  /* NETLINK_xxx of the socket */
 
   /* poll() support */
 
@@ -366,6 +367,25 @@ void netlink_notifier_teardown(FAR void *conn);
  ****************************************************************************/
 
 void netlink_notifier_signal(FAR struct netlink_conn_s *conn);
+
+/****************************************************************************
+ * Name: netlink_add_protocol_broadcast
+ *
+ * Description:
+ *   Add broadcast data to the netlink connections of one protocol that are
+ *   bound to the group.  netlink_add_broadcast() is this for NETLINK_ROUTE.
+ *
+ * Input Parameters:
+ *   protocol - The protocol of the sockets that get it (NETLINK_xxx).
+ *   group    - The broadcast group index.
+ *   data     - The broadcast data.  The memory referenced by 'data'
+ *              must have been allocated via kmm_malloc().  It will be freed
+ *              using kmm_free() after it has been consumed.
+ *
+ ****************************************************************************/
+
+void netlink_add_protocol_broadcast(int protocol, int group,
+                                    FAR struct netlink_response_s *data);
 
 /****************************************************************************
  * Name: netlink_add_terminator

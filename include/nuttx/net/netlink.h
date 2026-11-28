@@ -101,7 +101,8 @@ void netlink_add_response(NETLINK_HANDLE handle,
  * Name: netlink_add_broadcast
  *
  * Description:
- *   Add broadcast data to all interested netlink connections.
+ *   Add broadcast data to the NETLINK_ROUTE connections that are bound to
+ *   the group.
  *
  *   Note:  The network will be momentarily locked to support exclusive
  *   access to the pending response list.
