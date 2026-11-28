@@ -358,6 +358,61 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
                                              int stack_size, int nthreads);
 
 /****************************************************************************
+ * Name: work_queue_init
+ *
+ * Description:
+ *   Create a custom work queue without worker threads and return its
+ *   handle.  Work can be queued at once; it runs when the threads that the
+ *   caller creates call work_queue_run().  The caller chooses the kind of
+ *   thread, its priority and its stack, so in the flat build the work can
+ *   run in a pthread of the calling task.
+ *   User-mode custom queues require pthread support.
+ *
+ *   Exactly nthreads threads must call work_queue_run(), because
+ *   work_queue_free() waits for all of them.
+ *
+ * Input Parameters:
+ *   nthreads - Number of threads that serve the queue
+ *
+ * Returned Value:
+ *   The work queue handle returned on success.  Otherwise, NULL
+ *
+ ****************************************************************************/
+
+FAR struct kwork_wqueue_s *work_queue_init(int nthreads);
+
+/****************************************************************************
+ * Name: work_queue_run
+ *
+ * Description:
+ *   Make the calling thread a worker of a queue created by
+ *   work_queue_init(), and run the work of the queue until the queue is
+ *   freed.  Each of the nthreads threads of the queue calls it once.  A
+ *   thread may call it after work_queue_free() was called; it then returns
+ *   -ESHUTDOWN at once, and work_queue_free() also waits for it.
+ *
+ *   The worker must stay in work_queue_run() until it returns.  If it ends
+ *   earlier, because its task exits, or a work callback calls
+ *   pthread_exit() or is cancelled, work_queue_free() blocks forever.
+ *
+ * Input Parameters:
+ *   wqueue - The work queue handle
+ *
+ * Returned Value:
+ *   Zero after the queue was freed, a negated errno value on failure.
+ *
+ *   -EBUSY      - nthreads threads already serve the queue.  Only a thread
+ *                 beyond the nthreads ones gets it; such a call must not
+ *                 race with work_queue_free().
+ *   -EINVAL     - The handle is NULL or was not created by
+ *                 work_queue_init().
+ *   -ESHUTDOWN  - The queue is being freed.
+ *
+ ****************************************************************************/
+
+int work_queue_run(FAR struct kwork_wqueue_s *wqueue);
+
+/****************************************************************************
  * Name: work_queue_dispatch
  *
  * Description:
@@ -381,8 +436,9 @@ void work_queue_dispatch(FAR struct kwork_wqueue_s *wqueue);
  * Description:
  *   Destroy a custom work queue.  All worker threads are stopped and the
  *   queue is freed.  The handle is invalid after this function returns.
- *   Only a custom queue returned by work_queue_create() may be destroyed;
- *   the predefined HPWORK, LPWORK, and USRWORK queues cannot be destroyed.
+ *   Only a custom queue returned by work_queue_create() or
+ *   work_queue_init() may be destroyed; the predefined HPWORK, LPWORK, and
+ *   USRWORK queues cannot be destroyed.
  *   This function must only be called from task context and must not be
  *   called by one of the queue's own worker threads.
  *
@@ -506,7 +562,9 @@ int work_queue_next_wq(FAR struct kwork_wqueue_s *wqueue,
  * Name: work_queue_priority/work_queue_priority_wq
  *
  * Description: Get priority of the wqueue. We believe that all worker
- *   threads have the same priority.
+ *   threads have the same priority.  For a queue created by
+ *   work_queue_init(), this is the priority of the first thread that
+ *   called work_queue_run(); -ESRCH is returned before any thread did.
  *
  * Input Parameters:
  *  wqueue - The work queue handle
@@ -524,7 +582,10 @@ int work_queue_priority_wq(FAR struct kwork_wqueue_s *wqueue);
  * Name: work_queue_setpriority/work_queue_setpriority_wq
  *
  * Description:
- *   Set priority of all worker threads in the work queue.
+ *   Set priority of all worker threads in the work queue.  For a queue
+ *   created by work_queue_init(), only the threads already in
+ *   work_queue_run() are changed; threads that join later keep their own
+ *   priority.
  *
  * Input Parameters:
  *   qid      - The work queue ID (must be HPWORK or LPWORK)

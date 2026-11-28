@@ -241,6 +241,28 @@ static inline_function bool work_dispatch(FAR struct kwork_wqueue_s *wqueue,
 }
 
 /****************************************************************************
+ * Name: work_loop
+ *
+ * Description:
+ *   Run the work of a queue on one of its workers until the queue is
+ *   freed.
+ *
+ ****************************************************************************/
+
+static void work_loop(FAR struct kwork_wqueue_s *wqueue,
+                      FAR struct kworker_s *kworker)
+{
+  while (!work_dispatch(wqueue, kworker))
+    {
+      /* Wait for the semaphore to be posted by the wqueue timer. */
+
+      nxsem_wait_uninterruptible(&wqueue->sem);
+    }
+
+  nxsem_post(&wqueue->exsem);
+}
+
+/****************************************************************************
  * Name: work_thread
  *
  * Description:
@@ -274,14 +296,7 @@ static int work_thread(int argc, FAR char *argv[])
   kworker = (FAR struct kworker_s *)
             ((uintptr_t)strtoul(argv[2], NULL, 16));
 
-  while (!work_dispatch(wqueue, kworker))
-    {
-      /* Wait for the semaphore to be posted by the wqueue timer. */
-
-      nxsem_wait_uninterruptible(&wqueue->sem);
-    }
-
-  nxsem_post(&wqueue->exsem);
+  work_loop(wqueue, kworker);
   return OK;
 }
 
@@ -450,6 +465,55 @@ void work_timer_expired(wdparm_t arg)
 }
 
 /****************************************************************************
+ * Name: work_queue_alloc
+ *
+ * Description:
+ *   Allocate a custom work queue with nthreads worker slots and no worker.
+ *
+ ****************************************************************************/
+
+static FAR struct kwork_wqueue_s *work_queue_alloc(int nthreads)
+{
+  FAR struct kwork_wqueue_s *wqueue;
+  FAR struct kworker_s *worker;
+  int wndx;
+
+  if (nthreads < 1 ||
+      nthreads > (SIZE_MAX - sizeof(*wqueue)) / sizeof(struct kworker_s))
+    {
+      return NULL;
+    }
+
+  /* Allocate a new work queue */
+
+  wqueue = kmm_zalloc(sizeof(struct kwork_wqueue_s) +
+                      nthreads * sizeof(struct kworker_s));
+  if (wqueue == NULL)
+    {
+      return NULL;
+    }
+
+  /* Initialize the work queue structure */
+
+  list_initialize(&wqueue->expired);
+  list_initialize(&wqueue->pending);
+  wqueue->timer.func = NULL;
+  nxsem_init(&wqueue->sem, 0, 0);
+  nxsem_init(&wqueue->exsem, 0, 0);
+  wqueue->nthreads = nthreads;
+  wqueue->dynamic = true;
+  spin_lock_init(&wqueue->lock);
+
+  worker = wq_get_worker(wqueue);
+  for (wndx = 0; wndx < nthreads; wndx++)
+    {
+      worker[wndx].pid = INVALID_PROCESS_ID;
+    }
+
+  return wqueue;
+}
+
+/****************************************************************************
  * Name: work_queue_create
  *
  * Description:
@@ -476,31 +540,16 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
   FAR struct kwork_wqueue_s *wqueue;
   int ret;
 
-  if (name == NULL || stack_size <= 0 || nthreads < 1 ||
-      nthreads > (SIZE_MAX - sizeof(*wqueue)) / sizeof(struct kworker_s))
+  if (name == NULL || stack_size <= 0)
     {
       return NULL;
     }
 
-  /* Allocate a new work queue */
-
-  wqueue = kmm_zalloc(sizeof(struct kwork_wqueue_s) +
-                      nthreads * sizeof(struct kworker_s));
+  wqueue = work_queue_alloc(nthreads);
   if (wqueue == NULL)
     {
       return NULL;
     }
-
-  /* Initialize the work queue structure */
-
-  list_initialize(&wqueue->expired);
-  list_initialize(&wqueue->pending);
-  wqueue->timer.func = NULL;
-  nxsem_init(&wqueue->sem, 0, 0);
-  nxsem_init(&wqueue->exsem, 0, 0);
-  wqueue->nthreads = nthreads;
-  wqueue->dynamic = true;
-  spin_lock_init(&wqueue->lock);
 
   /* Create the work queue thread pool */
 
@@ -514,6 +563,108 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
     }
 
   return wqueue;
+}
+
+/****************************************************************************
+ * Name: work_queue_init
+ *
+ * Description:
+ *   Create a custom work queue without workers.  Up to nthreads threads
+ *   that the caller creates then serve it with work_queue_run().
+ *
+ * Input Parameters:
+ *   nthreads - Number of threads that may serve the queue
+ *
+ * Returned Value:
+ *   The work queue handle returned on success.  Otherwise, NULL
+ *
+ ****************************************************************************/
+
+FAR struct kwork_wqueue_s *work_queue_init(int nthreads)
+{
+  FAR struct kwork_wqueue_s *wqueue;
+  FAR struct kworker_s *worker;
+  int wndx;
+
+  wqueue = work_queue_alloc(nthreads);
+  if (wqueue == NULL)
+    {
+      return NULL;
+    }
+
+  worker = wq_get_worker(wqueue);
+  for (wndx = 0; wndx < nthreads; wndx++)
+    {
+      nxsem_init(&worker[wndx].wait, 0, 0);
+    }
+
+  wqueue->run = true;
+  return wqueue;
+}
+
+/****************************************************************************
+ * Name: work_queue_run
+ *
+ * Description:
+ *   Serve a queue created by work_queue_init() on the calling thread until
+ *   the queue is freed.
+ *
+ * Input Parameters:
+ *   wqueue - The work queue handle
+ *
+ * Returned Value:
+ *   Zero after the queue was freed, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int work_queue_run(FAR struct kwork_wqueue_s *wqueue)
+{
+  FAR struct kworker_s *worker;
+  irqstate_t flags;
+  int wndx;
+
+  if (wqueue == NULL || !wqueue->run)
+    {
+      return -EINVAL;
+    }
+
+  worker = wq_get_worker(wqueue);
+
+  /* Take a free worker slot, unless the queue is being freed */
+
+  flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
+
+  if (wqueue->exit)
+    {
+      spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+
+      /* Count this thread as returned.  work_queue_free() may release the
+       * queue as soon as exsem is posted, so do not touch it afterwards.
+       */
+
+      nxsem_post(&wqueue->exsem);
+      return -ESHUTDOWN;
+    }
+
+  for (wndx = 0; wndx < wqueue->nthreads; wndx++)
+    {
+      if (worker[wndx].pid == INVALID_PROCESS_ID)
+        {
+          break;
+        }
+    }
+
+  if (wndx == wqueue->nthreads)
+    {
+      spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+      return -EBUSY;
+    }
+
+  worker[wndx].pid = nxsched_gettid();
+  spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+
+  work_loop(wqueue, &worker[wndx]);
+  return OK;
 }
 
 /****************************************************************************
@@ -590,6 +741,11 @@ int work_queue_free(FAR struct kwork_wqueue_s *wqueue)
     {
       nxsem_post(&wqueue->sem);
     }
+
+  /* Wait for all nthreads workers.  A work_queue_run() thread that arrives
+   * after the exit request posts exsem too, so no thread touches the queue
+   * once it is released.
+   */
 
   for (wndx = 0; wndx < wqueue->nthreads; wndx++)
     {
@@ -714,6 +870,13 @@ int work_queue_setpriority_wq(FAR struct kwork_wqueue_s *wqueue,
 
       for (i = 0; i < wqueue->nthreads; i++)
         {
+          /* Skip the slots that no work_queue_run() thread took yet */
+
+          if (worker[i].pid == INVALID_PROCESS_ID)
+            {
+              continue;
+            }
+
           param.sched_priority = priority;
           ret = nxsched_set_param(worker[i].pid, &param);
           if (ret < 0)

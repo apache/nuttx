@@ -81,6 +81,7 @@ struct kwork_wqueue_s
   int              nthreads;  /* Number of worker threads */
   bool             exit;      /* A flag to request the thread to exit */
   bool             dynamic;   /* Dynamically allocated queue */
+  bool             run;       /* Served by work_queue_run() */
   struct wdog_s    timer;     /* Timer to pending. */
 };
 

@@ -262,6 +262,39 @@ Work Queue Interfaces
 
   :return: A work queue handle on success; ``NULL`` on failure.
 
+.. c:function:: FAR struct kwork_wqueue_s *work_queue_init(int nthreads)
+
+  Create a custom work queue without worker threads. Work can be queued
+  at once; it runs when the ``nthreads`` threads that the caller creates
+  call ``work_queue_run()``. The caller chooses the kind of thread, its
+  name, priority and stack. In the flat build, for example, the workers
+  can be pthreads of the calling task, so that the work runs with the file
+  descriptors and the other resources of that task.
+
+  Exactly ``nthreads`` threads must call ``work_queue_run()``, because
+  ``work_queue_free()`` waits for all of them.
+
+  :return: A work queue handle on success; ``NULL`` on failure.
+
+.. c:function:: int work_queue_run(FAR struct kwork_wqueue_s *wqueue)
+
+  Make the calling thread a worker of a queue created by
+  ``work_queue_init()`` and run the work of the queue until the queue is
+  freed. Each of the ``nthreads`` threads calls it once. A thread may call
+  it after ``work_queue_free()`` was called; it then returns
+  ``-ESHUTDOWN`` at once, and ``work_queue_free()`` waits for it too.
+
+  The worker must stay in ``work_queue_run()`` until it returns. If it
+  ends earlier, ``work_queue_free()`` blocks forever: for example when its
+  task exits, or when a work callback calls ``pthread_exit()`` or is
+  cancelled. If the workers end with their task, free the queue before
+  the task exits.
+
+  :return: Zero after the queue was freed, ``-EBUSY`` when ``nthreads``
+    threads already serve the queue, ``-EINVAL`` for a queue not created
+    by ``work_queue_init()``, or ``-ESHUTDOWN`` when the queue is being
+    freed.
+
 .. c:function:: int work_queue_free(FAR struct kwork_wqueue_s *wqueue)
 
   Destroy a custom queue, discard pending work, and wait for all running
@@ -350,15 +383,20 @@ Work Queue Interfaces
                FAR struct kwork_wqueue_s *wqueue)
 
   Return the common scheduling priority of a custom queue's worker pool.
+  For a queue created by ``work_queue_init()``, this is the priority of
+  the first thread that called ``work_queue_run()``.
 
-  :return: The worker priority on success or a negated errno on failure.
+  :return: The worker priority on success or a negated errno on failure,
+    ``-ESRCH`` for a ``work_queue_init()`` queue that has no worker yet.
 
 .. c:function:: int work_queue_setpriority_wq( \
                FAR struct kwork_wqueue_s *wqueue, int priority)
 
   Set the scheduling priority of every worker of a custom queue.
   ``work_queue_setpriority(qid, priority)`` does the same for ``HPWORK``
-  or ``LPWORK``. Kernel only.
+  or ``LPWORK``. Kernel only. For a queue created by ``work_queue_init()``,
+  only the threads already in ``work_queue_run()`` are changed; threads
+  that join later keep their own priority.
 
   :return: Zero on success or ``-EINVAL`` for an invalid queue or
     priority.

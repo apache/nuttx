@@ -36,6 +36,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/list.h>
+#include <nuttx/sched.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
@@ -386,29 +387,21 @@ errout_with_attr:
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: work_queue_create
+ * Name: work_queue_alloc
  *
  * Description:
- *   Create a user-mode custom work queue.  This function must only be
- *   called from task context.
+ *   Allocate a user-mode custom work queue with nthreads worker slots and
+ *   no worker.
  *
  ****************************************************************************/
 
-FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
-                                             int priority,
-                                             FAR void *stack_addr,
-                                             int stack_size, int nthreads)
+static FAR struct usr_wqueue_s *work_queue_alloc(int nthreads)
 {
   FAR struct usr_wqueue_s *wqueue;
   size_t allocsize;
-  int ret;
   int wndx;
 
-  if (name == NULL || stack_size <= 0 || nthreads < 1 ||
+  if (nthreads < 1 ||
       nthreads > (SIZE_MAX - sizeof(*wqueue)) / sizeof(struct usr_worker_s))
     {
       return NULL;
@@ -435,21 +428,173 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
       nxsem_init(&wqueue->worker[wndx].wait, 0, 0);
     }
 
+  return wqueue;
+}
+
+/****************************************************************************
+ * Name: work_queue_release
+ *
+ * Description:
+ *   Release a queue whose workers have all returned.
+ *
+ ****************************************************************************/
+
+static void work_queue_release(FAR struct usr_wqueue_s *wqueue)
+{
+  int wndx;
+
+  for (wndx = 0; wndx < wqueue->nthreads; wndx++)
+    {
+      nxsem_destroy(&wqueue->worker[wndx].wait);
+    }
+
+  if (wqueue->run)
+    {
+      nxsem_destroy(&wqueue->exsem);
+    }
+
+  nxsem_destroy(&wqueue->wake);
+  nxmutex_destroy(&wqueue->lock);
+  free(wqueue);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: work_queue_create
+ *
+ * Description:
+ *   Create a user-mode custom work queue.  This function must only be
+ *   called from task context.
+ *
+ ****************************************************************************/
+
+FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
+                                             int priority,
+                                             FAR void *stack_addr,
+                                             int stack_size, int nthreads)
+{
+  FAR struct usr_wqueue_s *wqueue;
+  int ret;
+
+  if (name == NULL || stack_size <= 0)
+    {
+      return NULL;
+    }
+
+  wqueue = work_queue_alloc(nthreads);
+  if (wqueue == NULL)
+    {
+      return NULL;
+    }
+
   ret = work_thread_create(name, priority, stack_addr, stack_size, wqueue);
   if (ret < 0)
     {
-      for (wndx = 0; wndx < nthreads; wndx++)
-        {
-          nxsem_destroy(&wqueue->worker[wndx].wait);
-        }
-
-      nxsem_destroy(&wqueue->wake);
-      nxmutex_destroy(&wqueue->lock);
-      free(wqueue);
+      work_queue_release(wqueue);
       return NULL;
     }
 
   return (FAR struct kwork_wqueue_s *)wqueue;
+}
+
+/****************************************************************************
+ * Name: work_queue_init
+ *
+ * Description:
+ *   Create a user-mode custom work queue that threads of the caller serve
+ *   with work_queue_run().
+ *
+ ****************************************************************************/
+
+FAR struct kwork_wqueue_s *work_queue_init(int nthreads)
+{
+  FAR struct usr_wqueue_s *wqueue;
+  int wndx;
+
+  wqueue = work_queue_alloc(nthreads);
+  if (wqueue == NULL)
+    {
+      return NULL;
+    }
+
+  for (wndx = 0; wndx < nthreads; wndx++)
+    {
+      wqueue->worker[wndx].tid = INVALID_PROCESS_ID;
+    }
+
+  nxsem_init(&wqueue->exsem, 0, 0);
+  wqueue->run = true;
+  return (FAR struct kwork_wqueue_s *)wqueue;
+}
+
+/****************************************************************************
+ * Name: work_queue_run
+ *
+ * Description:
+ *   Serve a queue created by work_queue_init() on the calling thread until
+ *   the queue is freed.
+ *
+ ****************************************************************************/
+
+int work_queue_run(FAR struct kwork_wqueue_s *handle)
+{
+  FAR struct usr_wqueue_s *wqueue = (FAR struct usr_wqueue_s *)handle;
+  FAR struct usr_worker_s *worker = NULL;
+  int ret;
+  int wndx;
+
+  if (wqueue == NULL || !wqueue->run)
+    {
+      return -EINVAL;
+    }
+
+  do
+    {
+      ret = nxmutex_lock(&wqueue->lock);
+    }
+  while (ret < 0);
+
+  /* Take a free worker slot, unless the queue is being freed */
+
+  if (wqueue->exit)
+    {
+      ret = -ESHUTDOWN;
+    }
+  else
+    {
+      ret = -EBUSY;
+      for (wndx = 0; wndx < wqueue->nthreads; wndx++)
+        {
+          if (wqueue->worker[wndx].tid == INVALID_PROCESS_ID)
+            {
+              worker = &wqueue->worker[wndx];
+              worker->tid = gettid();
+              ret = OK;
+              break;
+            }
+        }
+    }
+
+  nxmutex_unlock(&wqueue->lock);
+
+  /* Count this thread as returned.  work_queue_free() may release the
+   * queue as soon as exsem is posted, so do not touch it afterwards.
+   */
+
+  if (ret == OK)
+    {
+      work_pthread(worker);
+      nxsem_post(&wqueue->exsem);
+    }
+  else if (ret == -ESHUTDOWN)
+    {
+      nxsem_post(&wqueue->exsem);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -505,15 +650,27 @@ int work_queue_free(FAR struct kwork_wqueue_s *handle)
       nxsem_post(&wqueue->wake);
     }
 
-  for (wndx = 0; wndx < wqueue->nthreads; wndx++)
+  if (wqueue->run)
     {
-      pthread_join(wqueue->worker[wndx].tid, NULL);
-      nxsem_destroy(&wqueue->worker[wndx].wait);
+      /* The threads belong to the caller and cannot be joined here.  Each
+       * of the nthreads work_queue_run() threads posts exsem, also one
+       * that arrives after the exit request.
+       */
+
+      for (wndx = 0; wndx < wqueue->nthreads; wndx++)
+        {
+          nxsem_wait_uninterruptible(&wqueue->exsem);
+        }
+    }
+  else
+    {
+      for (wndx = 0; wndx < wqueue->nthreads; wndx++)
+        {
+          pthread_join(wqueue->worker[wndx].tid, NULL);
+        }
     }
 
-  nxsem_destroy(&wqueue->wake);
-  nxmutex_destroy(&wqueue->lock);
-  free(wqueue);
+  work_queue_release(wqueue);
   return OK;
 }
 #endif
