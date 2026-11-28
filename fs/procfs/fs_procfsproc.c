@@ -212,9 +212,8 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
 static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
-static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
-                 FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
-                 off_t offset);
+static ssize_t proc_groupfd(FAR struct proc_file_s *procfile, int count,
+                 FAR char *buffer, size_t buflen, off_t offset);
 #if !defined(CONFIG_DISABLE_ENVIRON) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ENVIRON)
 static int     proc_groupenv_callback(FAR void *arg, FAR const char *pair);
 static ssize_t proc_groupenv(FAR struct proc_file_s *procfile,
@@ -1355,22 +1354,22 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
  * Name: proc_groupfd
  ****************************************************************************/
 
-static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
-                            FAR struct tcb_s *tcb, FAR char *buffer,
-                            size_t buflen, off_t offset)
+static ssize_t proc_groupfd(FAR struct proc_file_s *procfile, int count,
+                            FAR char *buffer, size_t buflen, off_t offset)
 {
-  FAR struct task_group_s *group = tcb->group;
+  FAR struct tcb_s *tcb;
   FAR char *path;
+#if CONFIG_FS_BACKTRACE > 0
+  FAR void *backtrace[CONFIG_FS_BACKTRACE];
+#endif
+  irqstate_t flags;
   size_t remaining;
   size_t linesize;
   size_t copysize;
   size_t totalsize;
-  int count;
+  int ret;
   int i;
 
-  DEBUGASSERT(group != NULL);
-
-  count = fdlist_count(&group->tg_fdlist);
   if (count == 0)
     {
       return 0;
@@ -1413,9 +1412,28 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
       FAR struct file *filep;
       FAR struct fd *fdp;
 
-      /* Is there an inode associated with the file descriptor? */
+      /* Find the task again and take a reference to the file.  The TCB
+       * and the descriptor row are valid only in the critical section.
+       */
 
-      if (fdlist_get2(&group->tg_fdlist, i, &filep, &fdp) < 0)
+      flags = enter_critical_section();
+      tcb = nxsched_get_tcb(procfile->pid);
+      if (tcb == NULL || tcb->group == NULL)
+        {
+          leave_critical_section(flags);
+          break;
+        }
+
+      ret = fdlist_get2(&tcb->group->tg_fdlist, i, &filep, &fdp);
+#if CONFIG_FS_BACKTRACE > 0
+      if (ret >= 0)
+        {
+          memcpy(backtrace, fdp->f_backtrace, sizeof(backtrace));
+        }
+#endif
+
+      leave_critical_section(flags);
+      if (ret < 0)
         {
           continue;
         }
@@ -1435,8 +1453,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 #if CONFIG_FS_BACKTRACE > 0
           linesize += backtrace_format(procfile->line + linesize,
                                        STATUS_LINELEN - linesize,
-                                       fdp->f_backtrace,
-                                       CONFIG_FS_BACKTRACE);
+                                       backtrace, CONFIG_FS_BACKTRACE);
 #endif
           procfile->line[linesize - 1] = '\n';
         }
@@ -1753,6 +1770,7 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
   FAR struct tcb_s *tcb;
   irqstate_t flags;
   ssize_t ret;
+  int count = 0;
 
   finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
@@ -1812,8 +1830,13 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
         ret = proc_groupstatus(procfile, tcb, buffer, buflen, filep->f_pos);
         break;
 
-      case PROC_GROUP_FD: /* Group file descriptors */
-        ret = proc_groupfd(procfile, tcb, buffer, buflen, filep->f_pos);
+      case PROC_GROUP_FD: /* Group file descriptors: see below */
+        if (tcb->group != NULL)
+          {
+            count = fdlist_count(&tcb->group->tg_fdlist);
+          }
+
+        ret = 0;
         break;
 
 #if !defined(CONFIG_DISABLE_ENVIRON) && !defined(CONFIG_FS_PROCFS_EXCLUDE_ENVIRON)
@@ -1828,6 +1851,17 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
     }
 
   leave_critical_section(flags);
+
+  /* A pipe holds its d_bflock when it posts a semaphore, and the post
+   * enters the critical section.  So the file methods of the group file
+   * descriptors run after the critical section, or two CPUs can wait for
+   * each other.
+   */
+
+  if (procfile->node->node == PROC_GROUP_FD)
+    {
+      ret = proc_groupfd(procfile, count, buffer, buflen, filep->f_pos);
+    }
 
   /* Update the file offset */
 
