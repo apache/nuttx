@@ -132,7 +132,8 @@ process_one() {
     local output_file="$2"
     local prefix="$3"
 
-    local rename_args=()
+    local rename_args
+    rename_args=$(mktemp)
 
     # search all alloc section to rename
     while read -r section flags; do
@@ -143,7 +144,8 @@ process_one() {
             fi
 
             newname=".${prefix}${section#.}"
-            rename_args+=(--rename-section "$section=$newname")
+            printf -- '--rename-section\n%s=%s\n' "$section" "$newname" \
+                   >> "$rename_args"
         fi
     done < <($READELF -W -S "$input" | awk '
             /^\s*\[[[:space:]]*[0-9]+[[:space:]]*\]/ {
@@ -155,7 +157,8 @@ process_one() {
             }
             ' | sort -u)
 
-    $OBJCOPY "${rename_args[@]}" --prefix-symbols=$prefix "$input" "$output_file"
+    $OBJCOPY "@$rename_args" --prefix-symbols=$prefix "$input" "$output_file"
+    rm -f "$rename_args"
 }
 
 remove_prefix_args=()
