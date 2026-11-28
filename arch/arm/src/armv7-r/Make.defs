@@ -34,7 +34,7 @@ HEAD_ASRC += arm_vectortab.S
 
 CMN_CSRCS += arm_cache.c arm_cpuinfo.c
 CMN_CSRCS += arm_gicv2.c arm_gicv2_dump.c
-CMN_CSRCS += arm_perf.c cp15_cacheops.c
+CMN_CSRCS += cp15_cacheops.c
 
 # Common C source files
 
@@ -61,12 +61,6 @@ ifeq ($(CONFIG_SMP),y)
   CMN_ASRCS += arm_cpuhead.S
   CMN_CSRCS += arm_cpustart.c arm_smpcall.c
   CMN_CSRCS += arm_scu.c
-endif
-
-ifeq ($(CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS),y)
-  ifneq ($(CONFIG_BUILD_FLAT),y)
-    CMN_UCSRCS += arm_perf.c
-  endif
 endif
 
 VPATH += arm_a_r
