@@ -60,7 +60,7 @@ int file_truncate(FAR struct file *filep, off_t length)
   if ((filep->f_oflags & O_ACCMODE) == O_RDONLY)
     {
       fwarn("WARNING: Cannot truncate a file opened read-only\n");
-      return -EINVAL;
+      return -EBADF;
     }
 
   /* Is this inode a registered mountpoint? Does it support the
@@ -144,15 +144,14 @@ int file_truncate(FAR struct file *filep, off_t length)
  *    EIO
  *      - An I/O error occurred while reading from or writing to a file
  *        system.
- *    EBADF or EINVAL
- *       - the fd argument is not a file descriptor open for writing.
+ *    EBADF
+ *       - The fd argument is not a file descriptor open for writing.
  *    EFBIG
  *       - The file is a regular file and length is greater than the offset
  *         maximum established in the open file description associated with
  *         fd.
  *    EINVAL
- *       - The fd argument references a file that was opened without write
- *         permission.
+ *       - The length argument was less than 0.
  *    EROFS
  *       - The named file resides on a read-only file system.
  *
@@ -173,7 +172,7 @@ int ftruncate(int fd, off_t length)
   ret = file_get(fd, &filep);
   if (ret < 0)
     {
-      ferr("ERROR: Could no get file structure: %d\n", ret);
+      ferr("ERROR: Could not get file structure: %d\n", ret);
       goto errout;
     }
 
