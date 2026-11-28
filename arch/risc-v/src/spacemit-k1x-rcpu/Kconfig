@@ -1,0 +1,56 @@
+# ##############################################################################
+# arch/risc-v/src/spacemit-k1x-rcpu/Kconfig
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# ##############################################################################
+
+comment "SpacemiT K1 RCPU Configuration Options"
+
+config SPACEMIT_K1X_RCPU_CONSOLE_BAUD
+	int "RCPU console baud rate"
+	default 115200
+	depends on ARCH_CHIP_SPACEMIT_K1X_RCPU
+	---help---
+		Line speed of the RCPU console UART.
+
+
+config SPACEMIT_K1X_RCPU_CONSOLE_CLOCK
+	int "RCPU console UART functional clock (Hz)"
+	default 24000000
+	depends on ARCH_CHIP_SPACEMIT_K1X_RCPU
+	---help---
+		Functional clock of the RCPU console UART in Hz.  The baud
+		divisor is computed from this value.
+
+
+config SPACEMIT_K1X_RCPU_SYSTIMER_FREQ
+	int "RCPU system timer frequency (Hz)"
+	default 120000
+	depends on ARCH_CHIP_SPACEMIT_K1X_RCPU
+	---help---
+		Frequency of the machine timer that drives the system tick.
+
+config SPACEMIT_K1X_RCPU_ECLIC_NUM_IRQS
+	int "Number of ECLIC interrupt sources"
+	default 84
+	depends on ARCH_CHIP_SPACEMIT_K1X_RCPU
+	---help---
+		Number of interrupt sources in the Nuclei ECLIC.  The ECLIC
+		reports the id of its highest source in INFO.NUMINT, so this is
+		NUMINT + 1.

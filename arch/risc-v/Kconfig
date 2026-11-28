@@ -75,6 +75,27 @@ config ARCH_CHIP_LITEX
 	---help---
 		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA or RV64GC).
 
+config ARCH_CHIP_SPACEMIT_K1X_RCPU
+	bool "SpacemiT K1 RCPU (Nuclei N308)"
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
+	select ALARM_ARCH
+	---help---
+		SpacemiT Key Stone K1 real-time CPU subsystem.
+
+		A Nuclei N308 32-bit RISC-V core (RV32IMAFDC, ILP32F) sitting
+		next to the eight X60 RV64 application cores of the K1.  It has
+		its own Nuclei ECLIC interrupt controller, its own private 64-bit
+		machine timer, 256 KB of private SRAM at address zero and no
+		flash.  Firmware is loaded into SRAM by a debugger, or into
+		shared DDR by the application processor through remoteproc.
+
 config ARCH_CHIP_GD32VW55X
 	bool "GigaDevice GD32VW55x"
 	select ARCH_RV32
@@ -760,6 +781,7 @@ config ARCH_CHIP
 	default "fe310"                 if ARCH_CHIP_FE310
 	default "k210"                  if ARCH_CHIP_K210
 	default "litex"                 if ARCH_CHIP_LITEX
+	default "spacemit-k1x-rcpu"                   if ARCH_CHIP_SPACEMIT_K1X_RCPU
 	default "gd32vw55x"             if ARCH_CHIP_GD32VW55X
 	default "ab32vg1"               if ARCH_CHIP_AB32VG1
 	default "bl602"                 if ARCH_CHIP_BL602
@@ -1027,6 +1049,9 @@ source "arch/risc-v/src/gd32vw55x/Kconfig"
 endif
 if ARCH_CHIP_AB32VG1
 source "arch/risc-v/src/ab32vg1/Kconfig"
+endif
+if ARCH_CHIP_SPACEMIT_K1X_RCPU
+source "arch/risc-v/src/spacemit-k1x-rcpu/Kconfig"
 endif
 if ARCH_CHIP_BL602
 source "arch/risc-v/src/bl602/Kconfig"

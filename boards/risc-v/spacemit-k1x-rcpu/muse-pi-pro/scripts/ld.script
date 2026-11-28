@@ -1,0 +1,163 @@
+/****************************************************************************
+ * boards/risc-v/spacemit-k1x-rcpu/muse-pi-pro/scripts/ld.script
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* Linker script for the SpacemiT K1 RCPU, DDR image loaded by remoteproc.
+ *
+ * MEMORY
+ * ======
+ *
+ * This is the delivery configuration: the application processor loads the
+ * image through the remoteproc interface instead of a debugger loading it
+ * into SRAM.  The addresses are fixed by the K1 device tree and cannot be
+ * moved without also changing it:
+ *
+ *   0x30300000 .. 0x303fffff  rcpu_mem_0, 2 MB, where the image runs
+ *   0x302fc000 .. 0x302fffff  rsc_table, 16 KB, where the resource table goes
+ *
+ * The RCPU reaches these through a 256 MB window at 0x30000000 which the
+ * application processor translates to DDR with DDR_REMAP_BASE.  The values
+ * above are the window addresses, which is what the device tree publishes as
+ * dma-ranges and what remoteproc hands to the firmware.
+ *
+ * ENTRY POINT
+ * ===========
+ *
+ * The entry point is not taken from this file.  spacemit_rproc_get_boot_addr()
+ * reads the "esos-entry-point" property of the rcpu device tree node and
+ * writes it to the boot entry register, ignoring the ELF entry entirely, so
+ * that property has to name the first instruction of the image.  The matching
+ * device tree patch sets it to 0x30300000, which is also ORIGIN(ddr) below.
+ *
+ * RESOURCE TABLE
+ * ==============
+ *
+ * Linux remoteproc refuses to boot a firmware that has no ".resource_table"
+ * section: rproc_elf_load_rsc_table() looks for that section by name.  It is
+ * placed in its own memory region because the device tree reserves a separate
+ * carveout for it, and because the application processor reads it directly.
+ */
+
+ENTRY(_stext)
+
+/* Nothing refers to the resource table, so without this the linker would not
+ * pull its archive member in and the section would silently disappear.
+ */
+
+EXTERN(g_spacemit_k1x_rcpu_rsc)
+
+MEMORY
+{
+  ddr  (rwx) : ORIGIN = 0x30300000, LENGTH = 2M
+  sram (rwx) : ORIGIN = 0x00000000, LENGTH = 256K
+  rsc  (rwx) : ORIGIN = 0x302fc000, LENGTH = 16K
+}
+
+/* Loadable segments are split by permission so that the image does not end up
+ * with a single writable and executable segment, which linkers warn about and
+ * which is worth avoiding in a firmware that a loader maps for us.
+ */
+
+PHDRS
+{
+  text PT_LOAD FLAGS(5);   /* Read and execute */
+  rsc  PT_LOAD FLAGS(4);   /* Read only */
+  data PT_LOAD FLAGS(6);   /* Read and write */
+}
+
+SECTIONS
+{
+  .text : {
+      _stext = ABSOLUTE(.);
+      *(.text .text.*)
+      *(.fixup)
+      *(.gnu.warning)
+      *(.rodata .rodata.*)
+      *(.srodata .srodata.*)
+      *(.gnu.linkonce.t.*)
+      *(.glue_7)
+      *(.glue_7t)
+      *(.got)
+      *(.gcc_except_table)
+      *(.gnu.linkonce.r.*)
+      _etext = ABSOLUTE(.);
+  } > ddr :text
+
+  .init_section : ALIGN(4) {
+      _sinit = ABSOLUTE(.);
+      KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+      KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
+      _einit = ABSOLUTE(.);
+  } > ddr :text
+
+  /* The resource table has to be in the carveout the device tree reserves for
+   * it, not with the rest of the image.
+   */
+
+  .resource_table : {
+      KEEP(*(.resource_table))
+  } > rsc :rsc
+
+  .data : ALIGN(8) {
+      _sdata = ABSOLUTE(.);
+      *(.data .data.*)
+      *(.sdata .sdata.* .sdata2.*)
+      *(.gnu.linkonce.d.*)
+      *(.gnu.linkonce.s.*)
+      CONSTRUCTORS
+      . = ALIGN(4);
+      _edata = ABSOLUTE(.);
+  } > ddr :data
+
+  _eronly = LOADADDR(.data);
+
+  PROVIDE(__global_pointer$ = _sdata + ((_edata - _sdata) / 2));
+
+  .bss : ALIGN(4) {
+      _sbss = ABSOLUTE(.);
+      *(.bss .bss.*)
+      *(.sbss .sbss.*)
+      *(.gnu.linkonce.b.*)
+      *(.gnu.linkonce.sb.*)
+      *(COMMON)
+      . = ALIGN(32);
+      _ebss = ABSOLUTE(.);
+  } > ddr :data
+
+  /* The heap starts at the end of BSS and runs to the top of rcpu_mem_0 */
+
+  _eheap = ORIGIN(ddr) + LENGTH(ddr);
+
+  /* Stabs debugging sections. */
+
+  .stab 0 : { *(.stab) }
+  .stabstr 0 : { *(.stabstr) }
+  .stab.excl 0 : { *(.stab.excl) }
+  .stab.exclstr 0 : { *(.stab.exclstr) }
+  .stab.index 0 : { *(.stab.index) }
+  .stab.indexstr 0 : { *(.stab.indexstr) }
+  .comment 0 : { *(.comment) }
+  .debug_abbrev 0 : { *(.debug_abbrev) }
+  .debug_info 0 : { *(.debug_info) }
+  .debug_line 0 : { *(.debug_line) }
+  .debug_pubnames 0 : { *(.debug_pubnames) }
+  .debug_aranges 0 : { *(.debug_aranges) }
+}
