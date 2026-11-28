@@ -38,6 +38,20 @@
 #include "mm_heap/mm.h"
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+static DEFINE_PER_CPU_BSS(FAR struct mm_delaynode_s *, g_mm_delay_list);
+#  define g_mm_delay_list this_cpu_var(g_mm_delay_list)
+
+#  if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+static DEFINE_PER_CPU_BSS(size_t, g_mm_delay_count);
+#    define g_mm_delay_count this_cpu_var(g_mm_delay_count)
+#  endif
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -45,14 +59,12 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem,
                           mm_delaycb_t cb, bool asan_check)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  FAR struct mm_delayhead_s *delay;
   FAR struct mm_delaynode_s *tmp = mem;
   irqstate_t flags;
 
   /* Delay the deallocation until a more appropriate time. */
 
-  flags = mm_lock_irq(heap);
-  delay = get_delayhead(heap);
+  flags = up_irq_save();
   kasan_bypass(true);
 
 #ifdef CONFIG_DEBUG_ASSERTIONS
@@ -78,17 +90,84 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem,
       kasan_poison(mem, size);
     }
 
-  tmp->flink  = delay->head;
-  tmp->cb     = cb;
-  delay->head = tmp;
+  tmp->flink      = g_mm_delay_list;
+  tmp->cb         = cb;
+  tmp->heap       = heap;
+  g_mm_delay_list = tmp;
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  delay->delaycount++;
+  g_mm_delay_count++;
 #endif
 
   kasan_bypass(false);
-  mm_unlock_irq(heap, flags);
+  up_irq_restore(flags);
 #endif
+}
+
+/****************************************************************************
+ * Name: free_delaylist
+ *
+ * Description:
+ *  Free the memory in delay list either added because of mm_lock failed or
+ *  added because of CONFIG_MM_FREE_DELAYCOUNT_MAX.
+ *  Set force to true to free all the memory in delay list immediately, set
+ *  to false will only free delaylist when time is up if
+ *  CONFIG_MM_FREE_DELAYCOUNT_MAX is enabled.
+ *
+ *  Return true if there is memory freed.
+ *
+ ****************************************************************************/
+
+bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
+{
+  bool ret = false;
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  FAR struct mm_delaynode_s *tmp;
+  irqstate_t flags;
+  bool bypass;
+
+  /* Move the delay list to local */
+
+  flags = up_irq_save();
+  bypass = kasan_bypass(true);
+
+  tmp = g_mm_delay_list;
+
+#  if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  if (tmp == NULL || (!force &&
+      g_mm_delay_count < CONFIG_MM_FREE_DELAYCOUNT_MAX))
+    {
+      up_irq_restore(flags);
+      return false;
+    }
+
+  g_mm_delay_count = 0;
+#  endif
+
+  g_mm_delay_list = NULL;
+
+  kasan_bypass(bypass);
+  up_irq_restore(flags);
+
+  /* Test if the delayed is empty */
+
+  ret = !!tmp;
+
+  while (tmp)
+    {
+      FAR struct mm_delaynode_s *next = tmp->flink;
+
+      if (tmp->cb)
+        {
+          tmp->cb(tmp);
+        }
+
+      mm_forcefree(tmp->heap, tmp);
+      tmp = next;
+    }
+
+#endif
+  return ret;
 }
 
 /****************************************************************************
@@ -262,6 +341,30 @@ void mm_delayfreecb(FAR struct mm_heap_s *heap, FAR void *mem,
 
   DEBUGASSERT(mm_heapmember(heap, mem));
   add_delaylist(heap, mem, cb, false);
+}
+
+/****************************************************************************
+ * Name: mm_free_delaylist
+ *
+ * Description:
+ *   force freeing the delaylist of this heap.
+ *
+ ****************************************************************************/
+
+void mm_free_delaylist(FAR struct mm_heap_s *heap)
+{
+  if (heap)
+    {
+      free_delaylist(heap, true);
+    }
+}
+
+void mm_try_free_delaylist(FAR struct mm_heap_s *heap)
+{
+  if (heap)
+    {
+      free_delaylist(heap, false);
+    }
 }
 
 /****************************************************************************

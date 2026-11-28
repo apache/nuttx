@@ -28,6 +28,7 @@
 #include <stdint.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 #include "mqueue/msg.h"
 #include "sched/sched.h"
 
@@ -41,14 +42,24 @@
  * Private Data
  ****************************************************************************/
 
-static int                 g_nmsgq; /* The number of entries in g_msgqs */
-static FAR struct msgq_s **g_msgqs; /* The queues; the index is the id - 1 */
+/* The number of entries in g_msgqs */
+
+static DEFINE_PER_CPU_BSS_BMP(int, g_nmsgq);
+#define g_nmsgq this_cpu_var_bmp(g_nmsgq)
+
+/* The queues; the index is the id - 1 */
+
+static DEFINE_PER_CPU_BSS_BMP(FAR struct msgq_s **, g_msgqs);
+#define g_msgqs this_cpu_var_bmp(g_msgqs)
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-struct list_node g_msgfreelist;
+#undef g_msgfreelist
+DEFINE_PER_CPU_BSS_BMP(struct list_node, g_msgfreelist);
+#define g_msgfreelist this_cpu_var_bmp(g_msgfreelist)
+
 struct mqueue_cmn_s g_msgpoolwait;
 
 /****************************************************************************

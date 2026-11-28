@@ -36,7 +36,10 @@
  * Private Data
  ****************************************************************************/
 
-static ATOMIC_NOTIFIER_HEAD(g_panic_notifier_list);
+static
+DEFINE_PER_CPU_BMP(struct atomic_notifier_head, g_panic_notifier_list) =
+ATOMIC_NOTIFIER_INIT(g_panic_notifier_list);
+#define g_panic_notifier_list this_cpu_var_bmp(g_panic_notifier_list)
 
 /****************************************************************************
  * Public Functions

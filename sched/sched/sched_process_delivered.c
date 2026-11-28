@@ -84,8 +84,8 @@ void nxsched_process_delivered(int cpu)
       g_cpu_irqset |= (1 << cpu);
     }
 
-  priority = g_delivertasks[cpu];
-  g_delivertasks[cpu] = SWITCH_NONE;
+  priority = per_cpu_var_smp(g_delivertasks, cpu);
+  per_cpu_var_smp(g_delivertasks, cpu) = SWITCH_NONE;
 
   if (priority != SWITCH_NONE &&
       !nxsched_switch_running(cpu, priority == SWITCH_EQUAL))

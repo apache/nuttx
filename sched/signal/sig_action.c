@@ -50,19 +50,24 @@
  * Preprocessor definitions
  ****************************************************************************/
 
-/* judges if a sigaction instance is a preallocated one */
-
-#if CONFIG_SIG_PREALLOC_ACTIONS > 0
-#  define IS_PREALLOC_ACTION(x) ( \
-          (uintptr_t)(x) >= (uintptr_t)g_sigactions && \
-          (uintptr_t)(x) < ((uintptr_t)g_sigactions) + sizeof(g_sigactions))
-#else
-#  define IS_PREALLOC_ACTION(x) false
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/* judges if a sigaction instance is a preallocated one */
+
+#if CONFIG_SIG_PREALLOC_ACTIONS > 0
+static inline_function bool is_prealloc_action(FAR sigactq_t *sigact)
+{
+  uintptr_t prealloc_base = (uintptr_t)&g_sigactions;
+  uintptr_t ptr           = (uintptr_t)(sigact);
+
+  return ptr >= prealloc_base &&
+         ptr < prealloc_base + sizeof(sigaction_prealloc_t);
+}
+#else
+#  define is_prealloc_action(sigact) false
+#endif
 
 /****************************************************************************
  * Name: nxsig_alloc_actionblock
@@ -607,7 +612,7 @@ void nxsig_release_action(FAR sigactq_t *sigact)
 {
   irqstate_t flags;
 
-  if (CONFIG_SIG_ALLOC_ACTIONS > 1 || IS_PREALLOC_ACTION(sigact))
+  if (CONFIG_SIG_ALLOC_ACTIONS > 1 || is_prealloc_action(sigact))
     {
       /* Non-preallocated instances will never return to heap! */
 

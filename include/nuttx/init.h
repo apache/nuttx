@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/sched.h>
 
 #include <stdint.h>
 
@@ -91,7 +92,10 @@ extern "C"
  * hardware resources may not yet be available to the OS-internal logic.
  */
 
-extern volatile enum nx_initstate_e g_nx_initstate;  /* See enum nx_initstate_e */
+/* See enum nx_initstate_e */
+
+DECLARE_PER_CPU_BMP(volatile enum nx_initstate_e, g_nx_initstate);
+#define g_nx_initstate this_cpu_var_bmp(g_nx_initstate)
 
 /****************************************************************************
  * Public Function Prototypes

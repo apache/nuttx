@@ -50,11 +50,9 @@
 
 /* This is the interrupt vector table */
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
-#else
-struct irq_info_s g_irqvector[NR_IRQS];
-#endif
+#undef g_irqvector
+DEFINE_PER_CPU_BSS_BMP(irqveor_t, g_irqvector);
+#define g_irqvector this_cpu_var_bmp(g_irqvector)
 
 /****************************************************************************
  * Public Functions

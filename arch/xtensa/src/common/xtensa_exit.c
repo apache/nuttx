@@ -62,7 +62,7 @@ void up_exit(int status)
 
   /* Update g_running_tasks */
 
-  g_running_tasks[this_cpu()] = this_task();
+  g_running_task = this_task();
 
   /* Then switch contexts */
 

@@ -60,7 +60,7 @@
 
 #define list_readytorun()        (&g_readytorun)
 #ifndef CONFIG_SMP
-#define list_pendingtasks()      (&g_pendingtasks)
+#  define list_pendingtasks()      (&g_pendingtasks)
 #endif
 #define list_waitingforsignal()  (&g_waitingforsignal)
 #define list_waitingforfill()    (&g_waitingforfill)
@@ -73,7 +73,7 @@
  */
 
 #ifdef CONFIG_SMP
-#  define current_task(cpu)      (g_assignedtasks[cpu])
+#  define current_task(cpu)      (per_cpu_var_smp(g_assignedtasks, cpu))
 #else
 #  define current_task(cpu)      ((FAR struct tcb_s *)list_readytorun()->head)
 #endif
@@ -83,7 +83,7 @@
  */
 
 #define running_task() \
-  (up_interrupt_context() ? g_running_tasks[this_cpu()] : this_task())
+  (up_interrupt_context() ? g_running_task : this_task())
 
 /* List attribute flags */
 
@@ -148,6 +148,8 @@ enum task_deliver_e
                       */
 };
 
+typedef struct tasklist_s tasklist_table_t[NUM_TASK_STATES];
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -169,7 +171,8 @@ enum task_deliver_e
  * task, is always the IDLE task.
  */
 
-extern dq_queue_t g_readytorun;
+DECLARE_PER_CPU_BMP(dq_queue_t, g_readytorun);
+#define g_readytorun this_cpu_var_bmp(g_readytorun)
 
 #ifdef CONFIG_SMP
 /* In order to support SMP, the function of the g_readytorun list changes,
@@ -191,17 +194,17 @@ extern dq_queue_t g_readytorun;
  *    is made to run.
  */
 
-extern FAR struct tcb_s *g_assignedtasks[CONFIG_SMP_NCPUS];
+DECLARE_PER_CPU_SMP(FAR struct tcb_s *, g_assignedtasks);
 
 /* g_delivertasks is used to indicate that a task switch is scheduled for
  * another cpu to be processed.
  */
 
-extern enum task_deliver_e g_delivertasks[CONFIG_SMP_NCPUS];
+DECLARE_PER_CPU_SMP(enum task_deliver_e, g_delivertasks);
 
 /* This is the list of idle tasks */
 
-extern struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+DECLARE_PER_CPU(FAR struct tcb_s, g_idletcb);
 
 #endif
 
@@ -212,17 +215,20 @@ extern struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
  */
 
 #ifndef CONFIG_SMP
-extern dq_queue_t g_pendingtasks;
+DECLARE_PER_CPU_BMP(dq_queue_t, g_pendingtasks);
+#define g_pendingtasks this_cpu_var_bmp(g_pendingtasks)
 #endif
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
-extern dq_queue_t g_waitingforsignal;
+DECLARE_PER_CPU_BMP(dq_queue_t, g_waitingforsignal);
+#define g_waitingforsignal this_cpu_var_bmp(g_waitingforsignal)
 
 /* This is the list of all tasks that are blocking waiting for a page fill */
 
 #ifdef CONFIG_LEGACY_PAGING
-extern dq_queue_t g_waitingforfill;
+DECLARE_PER_CPU_BMP(dq_queue_t, g_waitingforfill);
+#define g_waitingforfill this_cpu_var_bmp(g_waitingforfill)
 #endif
 
 /* This is the list of all tasks that have been stopped
@@ -230,18 +236,21 @@ extern dq_queue_t g_waitingforfill;
  */
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
-extern dq_queue_t g_stoppedtasks;
+DECLARE_PER_CPU_BMP(dq_queue_t, g_stoppedtasks);
+#define g_stoppedtasks this_cpu_var_bmp(g_stoppedtasks)
 #endif
 
 /* This the list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
  */
 
-extern dq_queue_t g_inactivetasks;
+DECLARE_PER_CPU_BMP(dq_queue_t, g_inactivetasks);
+#define g_inactivetasks this_cpu_var_bmp(g_inactivetasks)
 
 /* This is the value of the last process ID assigned to a task */
 
-extern volatile pid_t g_lastpid;
+DECLARE_PER_CPU_BMP(volatile pid_t, g_lastpid);
+#define g_lastpid this_cpu_var_bmp(g_lastpid)
 
 /* The following hash table is used for two things:
  *
@@ -250,8 +259,12 @@ extern volatile pid_t g_lastpid;
  * 2. Is used to quickly map a process ID into a TCB.
  */
 
-extern FAR struct tcb_s **g_pidhash;
-extern volatile int g_npidhash;
+DECLARE_PER_CPU_BMP(FAR struct tcb_s **, g_pidhash);
+DECLARE_PER_CPU_BMP(volatile int, g_npidhash);
+DECLARE_PER_CPU_BMP(spinlock_t, g_pidhashlock);
+#define g_pidhash this_cpu_var_bmp(g_pidhash)
+#define g_npidhash this_cpu_var_bmp(g_npidhash)
+#define g_pidhashlock this_cpu_var_bmp(g_pidhashlock)
 
 /* This is a table of task lists.  This table is indexed by the task stat
  * enumeration type (tstate_t) and provides a pointer to the associated
@@ -260,14 +273,16 @@ extern volatile int g_npidhash;
  * ordered list or not.
  */
 
-extern const struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
+DECLARE_PER_CPU_BMP(tasklist_table_t, g_tasklisttable);
+#define g_tasklisttable this_cpu_var_bmp(g_tasklisttable)
 
 #ifndef CONFIG_SCHED_CPULOAD_NONE
 /* This is the total number of clock tick counts.  Essentially the
  * 'denominator' for all CPU load calculations.
  */
 
-extern volatile clock_t g_cpuload_total;
+DECLARE_PER_CPU_BMP(volatile clock_t, g_cpuload_total);
+#define g_cpuload_total this_cpu_var_bmp(g_cpuload_total)
 #endif
 
 /* Declared in sched_lock.c *************************************************/
@@ -609,7 +624,7 @@ nxsched_deliver_task(int cpu, int target_cpu,
    * no need to do anything now.
    */
 
-  if (g_delivertasks[target_cpu] != priority)
+  if (per_cpu_var_smp(g_delivertasks, target_cpu) != priority)
     {
       if (cpu == target_cpu)
         {
@@ -617,7 +632,7 @@ nxsched_deliver_task(int cpu, int target_cpu,
         }
       else
         {
-          g_delivertasks[target_cpu] = priority;
+          per_cpu_var_smp(g_delivertasks, target_cpu) = priority;
           up_send_smp_sched(target_cpu);
         }
     }

@@ -49,7 +49,10 @@
  * Private Data
  ****************************************************************************/
 
-static struct task_group_s  g_kthread_group;   /* Shared among kthreads     */
+/* Shared among kthreads */
+
+static DEFINE_PER_CPU_BSS_BMP(struct task_group_s, g_kthread_group);
+#define g_kthread_group this_cpu_var_bmp(g_kthread_group)
 
 /****************************************************************************
  * Private Functions

@@ -34,7 +34,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_MM_BACKTRACE_SEQNO
-unsigned long g_mm_seqno;
+#  undef g_mm_seqno
+DEFINE_PER_CPU_BSS_BMP(unsigned long, g_mm_seqno);
+#  define g_mm_seqno this_cpu_var_bmp(g_mm_seqno)
 #endif
 
 /****************************************************************************

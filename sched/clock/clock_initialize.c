@@ -53,8 +53,14 @@
  ****************************************************************************/
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
-struct timespec   g_basetime;
-spinlock_t g_basetime_lock = SP_UNLOCKED;
+#  undef g_basetime
+#  undef g_basetime_lock
+
+DEFINE_PER_CPU_BSS_BMP(struct timespec, g_basetime);
+DEFINE_PER_CPU_BMP(spinlock_t, g_basetime_lock) = SP_UNLOCKED;
+
+#  define g_basetime this_cpu_var_bmp(g_basetime)
+#  define g_basetime_lock this_cpu_var_bmp(g_basetime_lock)
 #endif
 
 /****************************************************************************

@@ -203,7 +203,7 @@ bool nxsched_switch_running(int cpu, bool switch_equal)
               rtcb->task_state = TSTATE_TASK_ASSIGNED;
             }
 
-          g_assignedtasks[cpu] = btcb;
+          per_cpu_var_smp(g_assignedtasks, cpu) = btcb;
           up_update_task(btcb);
 
           btcb->cpu = cpu;

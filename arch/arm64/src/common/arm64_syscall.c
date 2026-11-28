@@ -177,8 +177,7 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
 
 uint64_t *arm64_syscall(uint64_t *regs)
 {
-  int cpu = this_cpu();
-  struct tcb_s **running_task = &g_running_tasks[cpu];
+  struct tcb_s **running_task = &g_running_task;
   struct tcb_s *tcb = this_task();
   uint64_t cmd;
 #if (defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_BUILD_PROTECTED)) \
@@ -224,7 +223,7 @@ uint64_t *arm64_syscall(uint64_t *regs)
 
         /* Restore the cpu lock */
 
-        restore_critical_section(tcb, cpu);
+        restore_critical_section(tcb, this_cpu());
 #ifdef CONFIG_ARCH_ADDRENV
         addrenv_switch(tcb);
         tcb = this_task();
@@ -246,7 +245,7 @@ uint64_t *arm64_syscall(uint64_t *regs)
 
         /* Restore the cpu lock */
 
-        restore_critical_section(tcb, cpu);
+        restore_critical_section(tcb, this_cpu());
         break;
 
 #if (defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_BUILD_PROTECTED)) \

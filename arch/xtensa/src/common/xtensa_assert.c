@@ -67,7 +67,7 @@
 
 void xtensa_panic(int xptcode, uint32_t *regs)
 {
-  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  struct tcb_s **running_task = &g_running_task;
 
   (*running_task)->xcp.regs = regs;
 
@@ -170,7 +170,7 @@ void xtensa_panic(int xptcode, uint32_t *regs)
 
 void xtensa_user_panic(int exccause, uint32_t *regs)
 {
-  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  struct tcb_s **running_task = &g_running_task;
 
   (*running_task)->xcp.regs = regs;
 

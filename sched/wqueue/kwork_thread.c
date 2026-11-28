@@ -82,15 +82,19 @@
 #if defined(CONFIG_SCHED_HPWORK)
 /* The state of the kernel mode, high priority work queue(s). */
 
-struct hp_wqueue_s g_hpwork;
+#undef g_hpwork
+DEFINE_PER_CPU_BSS_BMP(struct hp_wqueue_s, g_hpwork);
 
+#  define g_hpwork this_cpu_var_bmp(g_hpwork)
 #endif /* CONFIG_SCHED_HPWORK */
 
 #if defined(CONFIG_SCHED_LPWORK)
 /* The state of the kernel mode, low priority work queue(s). */
 
-struct lp_wqueue_s g_lpwork;
+#undef g_lpwork
+DEFINE_PER_CPU_BSS_BMP(struct lp_wqueue_s, g_lpwork);
 
+#  define g_lpwork this_cpu_var_bmp(g_lpwork)
 #endif /* CONFIG_SCHED_LPWORK */
 
 /****************************************************************************
@@ -774,24 +778,26 @@ void work_initialize(void)
 #ifdef CONFIG_SCHED_HPWORK
 int work_start_highpri(void)
 {
+  FAR struct kwork_wqueue_s *wq = &g_hpwork.wq;
+
   /* Start the high-priority, kernel mode worker thread(s) */
 
   sinfo("Starting high-priority kernel worker thread(s)\n");
 
 #ifdef SCHED_HPWORKSTACKSECTION
-  static uint8_t hp_work_stack[CONFIG_SCHED_HPNTHREADS]
-                              [CONFIG_SCHED_HPWORKSTACKSIZE]
-  locate_data(CONFIG_SCHED_HPWORKSTACKSECTION);
+  typedef uint8_t hp_work_stack_t[CONFIG_SCHED_HPNTHREADS]
+                                 [CONFIG_SCHED_HPWORKSTACKSIZE];
+  static locate_data(CONFIG_SCHED_HPWORKSTACKSECTION)
+  DEFINE_PER_CPU_BSS_BMP(hp_work_stack_t, hp_work_stack);
+#  define hp_work_stack this_cpu_var_bmp(hp_work_stack)
 
   return work_thread_create(HPWORKNAME,
                             CONFIG_SCHED_HPWORKPRIORITY,
                             hp_work_stack,
-                            CONFIG_SCHED_HPWORKSTACKSIZE,
-                            (FAR struct kwork_wqueue_s *)&g_hpwork);
+                            CONFIG_SCHED_HPWORKSTACKSIZE, wq);
 #else
   return work_thread_create(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY, NULL,
-                            CONFIG_SCHED_HPWORKSTACKSIZE,
-                            (FAR struct kwork_wqueue_s *)&g_hpwork);
+                            CONFIG_SCHED_HPWORKSTACKSIZE, wq);
 #endif
 }
 #endif /* CONFIG_SCHED_HPWORK */
@@ -814,25 +820,26 @@ int work_start_highpri(void)
 #ifdef CONFIG_SCHED_LPWORK
 int work_start_lowpri(void)
 {
+  FAR struct kwork_wqueue_s *wq = &g_lpwork.wq;
+
   /* Start the low-priority, kernel mode worker thread(s) */
 
   sinfo("Starting low-priority kernel worker thread(s)\n");
 
 #ifdef SCHED_LPWORKSTACKSECTION
-  static uint8_t lp_work_stack[CONFIG_SCHED_LPNTHREADS]
-                              [CONFIG_SCHED_LPWORKSTACKSIZE]
-  locate_data(CONFIG_SCHED_LPWORKSTACKSECTION);
+  typedef uint8_t lp_work_stack_t[CONFIG_SCHED_LPNTHREADS]
+                                 [CONFIG_SCHED_LPWORKSTACKSIZE];
+  static locate_data(CONFIG_SCHED_LPWORKSTACKSECTION)
+  DEFINE_PER_CPU_BSS_BMP(lp_work_stack_t, lp_work_stack);
+#  define lp_work_stack this_cpu_var_bmp(lp_work_stack)
 
   return work_thread_create(LPWORKNAME,
                             CONFIG_SCHED_LPWORKPRIORITY,
                             lp_work_stack,
-                            CONFIG_SCHED_LPWORKSTACKSIZE,
-                            (FAR struct kwork_wqueue_s *)&g_lpwork);
+                            CONFIG_SCHED_LPWORKSTACKSIZE, wq);
 #else
-  return work_thread_create(LPWORKNAME,
-                            CONFIG_SCHED_LPWORKPRIORITY, NULL,
-                            CONFIG_SCHED_LPWORKSTACKSIZE,
-                            (FAR struct kwork_wqueue_s *)&g_lpwork);
+  return work_thread_create(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY, NULL,
+                            CONFIG_SCHED_LPWORKSTACKSIZE, wq);
 #endif
 }
 #endif /* CONFIG_SCHED_LPWORK */

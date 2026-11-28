@@ -228,7 +228,7 @@ static inline uint64_t get_dr7(void)
 
 static void x86_64_debug_step(bool enable)
 {
-  uint64_t *regs = g_running_tasks[this_cpu()]->xcp.regs;
+  uint64_t *regs = g_running_task->xcp.regs;
 
   /* Reset or set Trap flag */
 
