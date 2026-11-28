@@ -631,6 +631,11 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 
       while (src_offset < dev->erasesize)
         {
+          if (src_offset + sizeof(hdr) > dev->erasesize)
+            {
+              break;
+            }
+
           phdr = (FAR struct mtdconfig_header_s *) &pbuf[src_offset];
 #ifdef CONFIG_MTD_CONFIG_NAMED
           if (phdr->name[0] == MTD_ERASED_ID(dev))
@@ -642,6 +647,14 @@ static off_t mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 
               src_offset = dev->erasesize;
               continue;
+            }
+
+          /* Validate the payload length before copying the entry. */
+
+          if (phdr->len > dev->erasesize - src_offset - sizeof(hdr))
+            {
+              ret = -EINVAL;
+              goto errout;
             }
 
           if (phdr->flags == MTD_ERASED_FLAGS(dev))
@@ -1316,7 +1329,12 @@ retry_find:
                   goto errout;
                 }
 
-              mtdconfig_ramconsolidate(dev);
+              if (mtdconfig_ramconsolidate(dev) == 0)
+                {
+                  ret = -EIO;
+                  goto errout;
+                }
+
               retrycount++;
               goto retry_find;
             }
