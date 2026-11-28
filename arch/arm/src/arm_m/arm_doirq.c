@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/arm_doirq.c
+ * arch/arm/src/arm_m/arm_doirq.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -40,6 +40,7 @@
 #include "arm_internal.h"
 #include "exc_return.h"
 #include "nvic.h"
+#include "psr.h"
 
 /****************************************************************************
  * Private Functions
@@ -75,6 +76,17 @@ static inline bool arm_pendsv_attached(void)
 void exception_direct(void)
 {
   int irq = getipsr();
+
+#if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARM_HAVE_MVE)
+  __asm__ __volatile__
+    (
+      "mov r0, %0\n"
+      "vmsr fpscr, r0\n"
+      :
+      : "i" (ARM_FPSCR_LTPSIZE_NONE)
+      : "r0"
+    );
+#endif
 
   arm_ack_irq(irq);
   irq_dispatch(irq, NULL);
@@ -129,30 +141,47 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   tcb = this_task();
 
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
-  if (tcb->sigdeliver)
+  if (tcb->sigdeliver && !tcb->xcp.saved_regs)
     {
       up_schedule_sigaction(tcb);
     }
 #endif
 
-  /* Update scheduler parameters.
-   * The arm-m architecture svc call will trigger an interrupt,
-   * and the actual context switch is executed after doirq is completed,
-   * so only the scheduling information needs to be updated in doirq.
-   */
+  if (*running_task != tcb)
+    {
+      /* Update scheduler parameters.
+       * The arm-m architecture svc call will trigger an interrupt,
+       * and the actual context switch is executed after doirq is completed,
+       * so only the scheduling information needs to be updated in doirq.
+       */
 
-  nxsched_switch_context(*running_task, tcb);
+      nxsched_switch_context(*running_task, tcb);
 
-  /* Record the new "running" task when context switch occurred.
-   * g_running_tasks[] is only used by assertion logic for reporting
-   * crashes.
-   */
+      /* Record the new "running" task when context switch occurred.
+       * g_running_tasks[] is only used by assertion logic for reporting
+       * crashes.
+       */
 
-  *running_task = tcb;
+      *running_task = tcb;
+    }
+
   regs = tcb->xcp.regs;
 #endif
 
   board_autoled_off(LED_INIRQ);
+
+#ifdef CONFIG_ARMV8M_TRUSTZONE_HYBRID
+  if (((1 << this_cpu()) & CONFIG_ARMV8M_TRUSTZONE_CPU_BITMASK) == 0)
+    {
+      regs[REG_EXC_RETURN] &=
+        ~(EXC_RETURN_EXC_SECURE | EXC_RETURN_SECURE_STACK);
+    }
+  else
+    {
+      regs[REG_EXC_RETURN] |=
+        (EXC_RETURN_EXC_SECURE | EXC_RETURN_SECURE_STACK);
+    }
+#endif
 
   /* (*running_task)->xcp.regs is about to become invalid
    * and will be marked as NULL to avoid misusage.

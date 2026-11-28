@@ -21,6 +21,7 @@
 # Common ARM_M files
 
 CMN_ASRCS += arm_exception.S arm_saveusercontext.S
+CMN_CSRCS += arm_cpuinfo.c
 
 ifeq ($(CONFIG_ARM_SYSTICK),y)
   CMN_CSRCS += arm_systick.c
@@ -31,7 +32,7 @@ ifeq ($(CONFIG_LIB_SYSCALL),y)
 endif
 
 CMN_CSRCS += arm_tcbinfo.c arm_busfault.c arm_hardfault.c arm_initialstate.c
-CMN_CSRCS += arm_systemreset.c arm_trigger_irq.c arm_svcall.c
+CMN_CSRCS += arm_systemreset.c arm_trigger_irq.c arm_svcall.c arm_doirq.c
 
 ifeq ($(CONFIG_ARM_STACKCHECK),y)
   CMN_CSRCS += arm_stackcheck.c
@@ -42,7 +43,7 @@ ifneq ($(CONFIG_ARCH_ARMV6M),y)
 endif
 
 ifeq ($(CONFIG_ARCH_ARMV8M),y)
-  CMN_CSRCS += arm_securefault.c
+  CMN_CSRCS += arm_securefault.c arm_sau.c arm_secure_irq.c
 endif
 
 ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
