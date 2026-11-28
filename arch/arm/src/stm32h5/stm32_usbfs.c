@@ -2726,7 +2726,7 @@ static int stm32_epallocpma(struct stm32_usbdev_s *priv)
     {
       /* Check if this buffer is available */
 
-      uint8_t bit = STM32_BUFFER_BIT(bufndx);
+      uint16_t bit = STM32_BUFFER_BIT(bufndx);
       if ((priv->bufavail & bit) != 0)
         {
           /* Yes.. Mark the buffer no longer available */
