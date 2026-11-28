@@ -28,6 +28,32 @@ system. Built in support is provided for character, block, and MTD
 (Memory Technology Device) drivers in the ``/dev`` pseudo file system 
 directory.
 
+File Modes
+----------
+
+Pseudo-filesystem inodes always retain the mode supplied when a node is
+created or a driver is registered.  ``stat()`` and ``lstat()`` report those
+mode bits independently of ``CONFIG_PSEUDOFS_ATTRIBUTES``; ``chmod()`` and
+``fchmod()`` update them, and ``rename()`` preserves them.
+
+``CONFIG_PSEUDOFS_ATTRIBUTES`` controls the additional owner, group and
+timestamp fields.  Runtime ownership and access checks still require
+``CONFIG_FS_PERMISSION`` and its existing prerequisites.
+
+With extended attributes disabled, permissions are no longer inferred from
+the presence of driver read and write callbacks.  An ioctl-only device
+registered with mode ``0666`` therefore reports ``0666``.  A pseudo-file
+intended to be executable must be created with execute bits or have them
+set with ``chmod()``.  Mounted filesystems and the special block/MTD proxy
+handling in ``fstat()`` keep their own metadata behavior.
+
+Static anonymous inodes also carry an initial mode: ``0666`` for eventfd
+and cryptodev descriptors,
+``0600`` for OP-TEE shared memory, ``0444`` for timerfd and signalfd, and ``0444``
+for inotify (``0666`` when notification injection is enabled).  These
+defaults apply with or without extended attributes.  They describe the
+inode; they do not change a descriptor's open flags or supported operations.
+
 Special Files
 -------------
 

@@ -527,8 +527,8 @@ struct inode
   union inode_ops_u u;          /* Inode operations */
   ino_t             i_ino;      /* Inode serial number */
   size_t            i_size;     /* The size of per inode driver */
-#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
   mode_t            i_mode;     /* Access mode flags */
+#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
   uid_t             i_owner;    /* Owner */
   gid_t             i_group;    /* Group */
   struct timespec   i_atime;    /* Time of last access */

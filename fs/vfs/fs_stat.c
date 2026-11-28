@@ -346,7 +346,6 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
   if (INODE_IS_SHM(inode))
     {
       buf->st_mode = S_IFSHM;
-      buf->st_mode |= S_IRUSR | S_IWUSR;
       buf->st_size = inode->i_size;
     }
   else
@@ -359,8 +358,6 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
       struct mtd_geometry_s mtdgeo;
 
       buf->st_mode  = S_IFMTD;
-      buf->st_mode |= S_IROTH | S_IRGRP | S_IRUSR;
-      buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
 
       if (inode->u.i_mtd != NULL &&
           MTD_IOCTL(inode->u.i_mtd, MTDIOC_GEOMETRY,
@@ -419,7 +416,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
         {
           /* Make sure the caller knows that this is a symbolic link. */
 
-          buf->st_mode = S_IRWXO | S_IRWXG | S_IRWXU | S_IFLNK;
+          buf->st_mode = S_IFLNK;
         }
     }
   else
@@ -429,7 +426,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 
   if (INODE_IS_PIPE(inode))
     {
-      buf->st_mode = S_IRWXO | S_IRWXG | S_IRWXU | S_IFIFO;
+      buf->st_mode = S_IFIFO;
     }
   else
 #endif
@@ -437,27 +434,13 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 
   if (inode->u.i_ops != NULL)
     {
-      /* Determine read/write privileges based on the existence of read
-       * and write methods.
-       */
-
-      if (inode->u.i_ops->readv || inode->u.i_ops->read)
-        {
-          buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
-        }
-
-      if (inode->u.i_ops->writev || inode->u.i_ops->write)
-        {
-          buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
-        }
-
       /* Determine the type of the inode */
 
       /* Check for a mountpoint and a pseudo dir */
 
       if (INODE_IS_MOUNTPT(inode) || INODE_IS_PSEUDODIR(inode))
         {
-          buf->st_mode |= S_IFDIR | S_IXOTH | S_IXGRP | S_IXUSR;
+          buf->st_mode |= S_IFDIR;
         }
 
       /* Check for a block driver */
@@ -494,9 +477,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 #ifdef CONFIG_PSEUDOFS_FILE
           if (inode_is_pseudofile(inode))
             {
-              /* A file in the pseudo file system can be a program */
-
-              buf->st_mode |= S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
+              buf->st_mode |= S_IFREG;
             }
           else
 #endif
@@ -507,18 +488,13 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
     }
   else
     {
-      /* If it has no operations, then it must just be a intermediate
-       * node in the inode tree.  It is something like a directory.
-       * We'll say that all pseudo-directories are read-able and
-       * searchable but not write-able.
-       */
+      /* An operationless inode represents an intermediate directory. */
 
-      buf->st_mode |= S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR | S_IXOTH |
-                      S_IXGRP | S_IXUSR;
+      buf->st_mode |= S_IFDIR;
     }
 
+  buf->st_mode |= inode->i_mode;
 #ifdef CONFIG_PSEUDOFS_ATTRIBUTES
-  buf->st_mode = (buf->st_mode & S_IFMT) | inode->i_mode;
   buf->st_uid   = inode->i_owner;
   buf->st_gid   = inode->i_group;
   buf->st_atim  = inode->i_atime;

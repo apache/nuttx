@@ -19,11 +19,14 @@ Configuration
 Option                          Role
 =============================== =============================================
 ``CONFIG_SCHED_USER_IDENTITY``  Per-task-group UID/GID credentials
-``CONFIG_PSEUDOFS_ATTRIBUTES``  Store ``i_mode`` / ``i_owner`` / ``i_group``
+``CONFIG_PSEUDOFS_ATTRIBUTES``  Store owner, group and timestamps
                                 on pseudoFS inodes
 ``CONFIG_FS_PERMISSION``        Enable DAC helpers and VFS enforcement
                                 (depends on the two options above)
 =============================== =============================================
+
+PseudoFS inodes always retain ``i_mode``, including configurations without
+extended attributes.
 
 Without ``CONFIG_FS_PERMISSION``, the helpers described here return success
 and no mode-based checks are performed.

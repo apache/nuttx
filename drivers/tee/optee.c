@@ -171,7 +171,8 @@ static struct inode g_optee_shm_inode =
 {
   .i_flags = FSNODEFLAG_TYPE_SHM, /* could also be DRIVER; doesn't matter */
   .i_crefs = 1,                   /* inode never to be released */
-  .u.i_ops = &g_optee_shm_ops
+  .u.i_ops = &g_optee_shm_ops,
+  .i_mode  = 0600
 };
 
 /****************************************************************************

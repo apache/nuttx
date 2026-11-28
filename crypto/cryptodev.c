@@ -189,7 +189,8 @@ static struct inode g_cryptoinode =
 {
   .i_flags = FSNODEFLAG_TYPE_DRIVER,
   .i_crefs = 1,
-  .u.i_ops = &g_cryptofops
+  .u.i_ops = &g_cryptofops,
+  .i_mode  = 0666
 };
 
 /****************************************************************************

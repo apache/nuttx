@@ -89,8 +89,8 @@ static void inode_init(FAR struct inode *inode, mode_t mode)
 
   inode->i_ino = ++g_ino;
   atomic_set(&inode->i_crefs, 1);
-#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
   inode->i_mode = mode;
+#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
   clock_gettime(CLOCK_REALTIME, &inode->i_atime);
   inode->i_mtime = inode->i_atime;
   inode->i_ctime = inode->i_atime;
