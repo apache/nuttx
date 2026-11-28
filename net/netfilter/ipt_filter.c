@@ -171,6 +171,7 @@ static uint8_t convert_target(FAR const struct xt_entry_target *target)
   if (strcmp(target->u.user.name, XT_STANDARD_TARGET) == 0)
     {
       int verdict = ((FAR const struct xt_standard_target *)target)->verdict;
+
       verdict = -verdict - 1;
 
       if (verdict == NF_ACCEPT)
@@ -209,6 +210,7 @@ convert_ipv4entry(FAR const struct ipt_entry *entry)
   FAR const struct xt_entry_target *target;
   FAR struct ipv4_filter_entry_s *filter =
               (FAR struct ipv4_filter_entry_s *)ipfilter_cfg_alloc(PF_INET);
+
   if (filter == NULL)
     {
       return NULL;
@@ -245,6 +247,7 @@ convert_ipv4entry(FAR const struct ipt_entry *entry)
         if (strcmp(match->u.user.name, XT_MATCH_NAME_TCP) == 0)
           {
             FAR struct xt_tcp *tcp = (FAR struct xt_tcp *)(match + 1);
+
             convert_tcpudp(&filter->common, tcp->spts, tcp->dpts,
                            tcp->invflags);
           }
@@ -254,6 +257,7 @@ convert_ipv4entry(FAR const struct ipt_entry *entry)
         if (strcmp(match->u.user.name, XT_MATCH_NAME_UDP) == 0)
           {
             FAR struct xt_udp *udp = (FAR struct xt_udp *)(match + 1);
+
             convert_tcpudp(&filter->common, udp->spts, udp->dpts,
                            udp->invflags);
           }
@@ -263,6 +267,7 @@ convert_ipv4entry(FAR const struct ipt_entry *entry)
         if (strcmp(match->u.user.name, XT_MATCH_NAME_ICMP) == 0)
           {
             FAR struct ipt_icmp *icmp = (FAR struct ipt_icmp *)(match + 1);
+
             convert_icmp(&filter->common, icmp->type, icmp->invflags);
           }
         break;
@@ -284,6 +289,7 @@ convert_ipv6entry(FAR const struct ip6t_entry *entry)
   FAR const struct xt_entry_target *target;
   FAR struct ipv6_filter_entry_s *filter =
               (FAR struct ipv6_filter_entry_s *)ipfilter_cfg_alloc(PF_INET6);
+
   if (filter == NULL)
     {
       return NULL;
@@ -320,6 +326,7 @@ convert_ipv6entry(FAR const struct ip6t_entry *entry)
         if (strcmp(match->u.user.name, XT_MATCH_NAME_TCP) == 0)
           {
             FAR struct xt_tcp *tcp = (FAR struct xt_tcp *)(match + 1);
+
             convert_tcpudp(&filter->common, tcp->spts, tcp->dpts,
                            tcp->invflags);
           }
@@ -329,6 +336,7 @@ convert_ipv6entry(FAR const struct ip6t_entry *entry)
         if (strcmp(match->u.user.name, XT_MATCH_NAME_UDP) == 0)
           {
             FAR struct xt_udp *udp = (FAR struct xt_udp *)(match + 1);
+
             convert_tcpudp(&filter->common, udp->spts, udp->dpts,
                            udp->invflags);
           }
@@ -339,6 +347,7 @@ convert_ipv6entry(FAR const struct ip6t_entry *entry)
           {
             FAR struct ip6t_icmp *icmp6 =
                                         (FAR struct ip6t_icmp *)(match + 1);
+
             convert_icmp(&filter->common, icmp6->type, icmp6->invflags);
           }
         break;
@@ -368,16 +377,17 @@ static void adjust_ipv4filter(FAR const struct ipt_replace *repl)
 {
   FAR const struct ipt_entry *entry;
   FAR const uint8_t *head;
+  sq_queue_t queues[IPFILTER_CHAIN_MAX];
   enum ipfilter_chain_e chain;
   enum nf_inet_hooks hook;
   size_t size;
 
   for (hook = NF_INET_LOCAL_IN; hook <= NF_INET_LOCAL_OUT; hook++)
     {
-      /* Clear all filter config first. */
+      /* Build the new chains aside, the old chains stay in use. */
 
       chain = convert_chain(hook);
-      ipfilter_cfg_clear(PF_INET, chain);
+      sq_init(&queues[chain]);
 
       /* Set filter config according to iptables config. */
 
@@ -391,9 +401,10 @@ static void adjust_ipv4filter(FAR const struct ipt_replace *repl)
       ipt_entry_for_every(entry, head, size)
         {
           FAR struct ipv4_filter_entry_s *filter = convert_ipv4entry(entry);
+
           if (filter != NULL)
             {
-              ipfilter_cfg_add(&filter->common, PF_INET, chain);
+              ipfilter_cfg_add(&filter->common, &queues[chain]);
             }
           else
             {
@@ -401,6 +412,10 @@ static void adjust_ipv4filter(FAR const struct ipt_replace *repl)
             }
         }
     }
+
+  /* Replace all chains at once and free the old entries. */
+
+  ipfilter_cfg_replace(PF_INET, queues);
 }
 #endif
 
@@ -409,16 +424,17 @@ static void adjust_ipv6filter(FAR const struct ip6t_replace *repl)
 {
   FAR const struct ip6t_entry *entry;
   FAR const uint8_t *head;
+  sq_queue_t queues[IPFILTER_CHAIN_MAX];
   enum ipfilter_chain_e chain;
   enum nf_inet_hooks hook;
   size_t size;
 
   for (hook = NF_INET_LOCAL_IN; hook <= NF_INET_LOCAL_OUT; hook++)
     {
-      /* Clear all filter config first. */
+      /* Build the new chains aside, the old chains stay in use. */
 
       chain = convert_chain(hook);
-      ipfilter_cfg_clear(PF_INET6, chain);
+      sq_init(&queues[chain]);
 
       /* Set filter config according to iptables config. */
 
@@ -432,9 +448,10 @@ static void adjust_ipv6filter(FAR const struct ip6t_replace *repl)
       ip6t_entry_for_every(entry, head, size)
         {
           FAR struct ipv6_filter_entry_s *filter = convert_ipv6entry(entry);
+
           if (filter != NULL)
             {
-              ipfilter_cfg_add(&filter->common, PF_INET6, chain);
+              ipfilter_cfg_add(&filter->common, &queues[chain]);
             }
           else
             {
@@ -442,6 +459,10 @@ static void adjust_ipv6filter(FAR const struct ip6t_replace *repl)
             }
         }
     }
+
+  /* Replace all chains at once and free the old entries. */
+
+  ipfilter_cfg_replace(PF_INET6, queues);
 }
 #endif
 

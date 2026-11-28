@@ -33,6 +33,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/queue.h>
 
 #ifdef CONFIG_NET_IPFILTER
 
@@ -148,13 +149,12 @@ FAR struct ipfilter_entry_s *ipfilter_cfg_alloc(sa_family_t family);
  * Name: ipfilter_cfg_add
  *
  * Description:
- *   Add a new filter configuration entry for the given address family to the
- *   end of specified chain.
+ *   Add a new filter configuration entry to the end of a chain that the
+ *   caller builds.  The chain becomes active with ipfilter_cfg_replace().
  *
  * Input Parameters:
- *   entry  - The filter entry to add
- *   family - The address family of the filter entry
- *   chain  - The chain to add the filter entry to
+ *   entry - The filter entry to add
+ *   queue - The chain to add the filter entry to
  *
  * Returned Value:
  *   None
@@ -162,25 +162,27 @@ FAR struct ipfilter_entry_s *ipfilter_cfg_alloc(sa_family_t family);
  ****************************************************************************/
 
 void ipfilter_cfg_add(FAR struct ipfilter_entry_s *entry,
-                      sa_family_t family, enum ipfilter_chain_e chain);
+                      FAR sq_queue_t *queue);
 
 /****************************************************************************
- * Name: ipfilter_cfg_clear
+ * Name: ipfilter_cfg_replace
  *
  * Description:
- *   Clear all filter configuration entries for the given address family from
- *   the specified chain.
+ *   Replace all chains of the given address family with the chains that
+ *   the caller built with ipfilter_cfg_add(), and free the old entries.
  *
  * Input Parameters:
- *   family - The address family of the filter entry to clear
- *   chain  - The chain to clear the filter entries from
+ *   family - The address family of the filter entries
+ *   queues - The new chains, one for each ipfilter_chain_e.  They are
+ *            empty on return.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void ipfilter_cfg_clear(sa_family_t family, enum ipfilter_chain_e chain);
+void ipfilter_cfg_replace(sa_family_t family,
+                          FAR sq_queue_t queues[IPFILTER_CHAIN_MAX]);
 
 /****************************************************************************
  * Name: ipv4_filter_in / ipv6_filter_in

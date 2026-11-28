@@ -33,6 +33,7 @@
 #include <sys/param.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 
 #include "netfilter/iptables.h"
 
@@ -78,6 +79,13 @@ struct ipt_error_entry_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* The socket options run under the lock of their own socket only.  This
+ * lock keeps a replace from freeing the table while another socket reads
+ * or replaces it.
+ */
+
+static mutex_t g_ipt_lock = NXMUTEX_INITIALIZER;
 
 static struct ipt_table_s g_tables[] =
 {
@@ -420,14 +428,23 @@ FAR struct ipt_replace *ipt_alloc_table(FAR const char *table,
 int ipt_setsockopt(FAR struct socket *psock, int option,
                    FAR const void *value, socklen_t value_len)
 {
+  int ret;
+
+  nxmutex_lock(&g_ipt_lock);
+
   switch (option)
     {
       case IPT_SO_SET_REPLACE:
-        return replace_entries(value, value_len);
+        ret = replace_entries(value, value_len);
+        break;
 
       default:
-        return -ENOPROTOOPT;
+        ret = -ENOPROTOOPT;
+        break;
     }
+
+  nxmutex_unlock(&g_ipt_lock);
+  return ret;
 }
 
 /****************************************************************************
@@ -441,15 +458,25 @@ int ipt_setsockopt(FAR struct socket *psock, int option,
 int ipt_getsockopt(FAR struct socket *psock, int option,
                    FAR void *value, FAR socklen_t *value_len)
 {
+  int ret;
+
+  nxmutex_lock(&g_ipt_lock);
+
   switch (option)
     {
       case IPT_SO_GET_INFO:
-        return get_info(value, value_len);
+        ret = get_info(value, value_len);
+        break;
 
       case IPT_SO_GET_ENTRIES:
-        return get_entries(value, value_len);
+        ret = get_entries(value, value_len);
+        break;
 
       default:
-        return -ENOPROTOOPT;
+        ret = -ENOPROTOOPT;
+        break;
     }
+
+  nxmutex_unlock(&g_ipt_lock);
+  return ret;
 }
