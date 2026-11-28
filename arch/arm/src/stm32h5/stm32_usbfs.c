@@ -1779,11 +1779,11 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
     {
     case USB_REQ_GETSTATUS:
       {
-        /* type:  device-to-host; recipient = device, interface, endpoint
-         * value: 0
-         * index: zero interface endpoint
-         * len:   2; data = status
-         */
+      /* type:  device-to-host; recipient = device, interface, endpoint
+       * value: 0
+       * index: zero interface endpoint
+       * len:   2; data = status
+       */
 
         usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSTATUS),
                  priv->ctrl.type);
@@ -1824,7 +1824,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
 
                               response.b[LSB] = 1; /* Stalled */
                             }
-                          }
+                        }
                       else
                         {
                           /* OUT endpoint */
@@ -1885,20 +1885,20 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
 
     case USB_REQ_CLEARFEATURE:
       {
-        /* type:  host-to-device; recipient = device, interface or endpoint
-         * value: feature selector
-         * index: zero interface endpoint;
-         * len:   zero, data = none
-         */
+      /* type:  host-to-device; recipient = device, interface or endpoint
+       * value: feature selector
+       * index: zero interface endpoint;
+       * len:   zero, data = none
+       */
 
         usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_CLEARFEATURE),
                  priv->ctrl.type);
         if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) !=
              USB_REQ_RECIPIENT_ENDPOINT)
           {
-            /* Let the class implementation handle all recipients
-             * (except for the endpoint recipient)
-             */
+          /* Let the class implementation handle all recipients
+           * (except for the endpoint recipient)
+           */
 
             stm32_dispatchrequest(priv);
             handled = true;
@@ -1926,11 +1926,11 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
 
     case USB_REQ_SETFEATURE:
       {
-        /* type:  host-to-device; recipient = device, interface, endpoint
-         * value: feature selector
-         * index: zero interface endpoint;
-         * len:   0; data = none
-         */
+      /* type:  host-to-device; recipient = device, interface, endpoint
+       * value: feature selector
+       * index: zero interface endpoint;
+       * len:   0; data = none
+       */
 
         usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_SETFEATURE),
                  priv->ctrl.type);
@@ -1945,9 +1945,9 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
         else if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) !=
                   USB_REQ_RECIPIENT_ENDPOINT)
           {
-            /* The class driver handles all recipients except
-             * recipient=endpoint
-             */
+          /* The class driver handles all recipients except
+           * recipient=endpoint
+           */
 
             stm32_dispatchrequest(priv);
             handled = true;
@@ -1975,11 +1975,11 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
 
     case USB_REQ_SETADDRESS:
       {
-        /* type:  host-to-device; recipient = device
-         * value: device address
-         * index: 0
-         * len:   0; data = none
-         */
+      /* type:  host-to-device; recipient = device
+       * value: device address
+       * index: 0
+       * len:   0; data = none
+       */
 
         usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EP0SETUPSETADDRESS),
                  value.w);
@@ -1990,10 +1990,10 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
             usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BADSETADDRESS), 0);
             priv->ep0state = EP0STATE_STALLED;
           }
-        /* Note that setting of the device address will be deferred.
-         * A zero-length packet will be sent and the device address
-         * will be set when the zero- length packet transfer completes.
-         */
+      /* Note that setting of the device address will be deferred.
+       * A zero-length packet will be sent and the device address
+       * will be set when the zero- length packet transfer completes.
+       */
       }
       break;
 
@@ -2015,9 +2015,9 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
         usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSETDESC),
                  priv->ctrl.type);
 
-        /* The request seems valid...
-         * let the class implementation handle it
-         */
+      /* The request seems valid...
+       * let the class implementation handle it
+       */
 
         stm32_dispatchrequest(priv);
         handled = true;
@@ -2038,9 +2038,9 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
              USB_REQ_RECIPIENT_DEVICE &&
              value.w == 0 && index.w == 0 && len.w == 1)
           {
-            /* The request seems valid...
-             * let the class implementation handle it
-             */
+          /* The request seems valid...
+           * let the class implementation handle it
+           */
 
             stm32_dispatchrequest(priv);
             handled = true;
@@ -2067,9 +2067,9 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
              USB_REQ_RECIPIENT_DEVICE &&
              index.w == 0 && len.w == 0)
           {
-             /* The request seems valid...
-              * let the class implementation handle it
-              */
+          /* The request seems valid...
+           * let the class implementation handle it
+           */
 
              stm32_dispatchrequest(priv);
              handled = true;
@@ -2236,9 +2236,9 @@ static void stm32_ep0out(struct stm32_usbdev_s *priv)
         break;
 
       default:
-        /* Unexpected state OR host aborted the OUT transfer before it
-         * completed, STALL the endpoint in either case
-         */
+      /* Unexpected state OR host aborted the OUT transfer before it
+       * completed, STALL the endpoint in either case
+       */
 
         priv->ep0state = EP0STATE_STALLED;
         break;
