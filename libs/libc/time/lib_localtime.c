@@ -2,8 +2,8 @@
  * libs/libc/time/lib_localtime.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2014 Gregory Nutt. All rights reserved.
- * SPDX-FileContributor: Ported to NuttX by Max Neklyudov
+ * SPDX-FileCopyrightText: 2014 Gregory Nutt.
+ * SPDX-FileContributor: Max Neklyudov
  * SPDX-FileContributor: Guy Harris
  * SPDX-FileContributor: Bradley White
  * SPDX-FileContributor: Arthur David Olson

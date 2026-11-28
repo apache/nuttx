@@ -2,8 +2,8 @@
  * libs/libc/net/lib_inetaddr.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2011 Yu Qiang. All rights reserved.
- * SPDX-FileCopyrightText: 2012 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Yu Qiang.
+ * SPDX-FileCopyrightText: 2012 Gregory Nutt.
  * SPDX-FileContributor: Yu Qiang <yuq825@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without

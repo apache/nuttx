@@ -2,8 +2,8 @@
  * libs/libc/net/lib_inetntop.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2012, 2015 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: HWPORT.COM. All rights reserved.
+ * SPDX-FileCopyrightText: 2012, 2015 Gregory Nutt.
+ * SPDX-FileCopyrightText: HWPORT.COM.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: JAEHYUK CHO <mailto:minzkn@minzkn.com>
  *

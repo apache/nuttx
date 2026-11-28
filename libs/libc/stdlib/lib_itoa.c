@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2010-2011 Gregory Nutt
- * SPDX-FileCopyrightText: 2013 Brooks Automation, Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2013 Brooks Automation, Inc.
  * SPDX-FileContributor: Ryan Sundberg <ryan.sundberg@brooks.com>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
