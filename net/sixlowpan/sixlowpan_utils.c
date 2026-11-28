@@ -2,9 +2,8 @@
  * net/sixlowpan/sixlowpan_utils.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derives from logic in Contiki:
  *

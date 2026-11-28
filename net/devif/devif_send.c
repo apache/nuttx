@@ -2,9 +2,8 @@
  * net/devif/devif_send.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileCopyrightText: 2007, 2008 Gregory Nutt.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based in part on uIP which also has a BSD stylie license:
  *

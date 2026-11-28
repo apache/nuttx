@@ -2,10 +2,8 @@
  * net/arp/arp_out.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- *
- *   Copyright (C) 2007-2011, 2014-2015, 2017-2018 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileCopyrightText: 2007-2011, 2014-2015, 2017-2018 Gregory Nutt.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based on uIP which also has a BSD style license:
  *

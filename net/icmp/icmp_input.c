@@ -2,10 +2,9 @@
  * net/icmp/icmp_input.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- *
- *   Copyright (C) 2007-2009, 2012, 2014-2015, 2017, 2019 Gregory Nutt. All
- *     rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileCopyrightText:  2017, 2019 Gregory Nutt.
+ * SPDX-FileCopyrightText:  2007-2009, 2012, 2014-2015 Gregory Nutt.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
  *
