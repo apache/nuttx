@@ -43,6 +43,7 @@
 
 #include "tricore_internal.h"
 #include "tricore_asclin.h"
+#include "tricore_gpio.h"
 
 #if defined(CONFIG_ARCH_CHIP_TC3X)
 #  include "hardware/tc3x_port.h"
@@ -222,39 +223,6 @@ static void asclin_modify(uintptr_t reg, uint32_t clear, uint32_t set)
 }
 
 /****************************************************************************
- * Name: asclin_pin_config
- *
- * Description:
- *   Set up a UART pin: RX as input with pull-up, TX as push-pull alternate
- *   output 2, both with the speed 1 pad driver.  On TC3xx the mode is in
- *   IOCR and the pad driver in PDR, under the CPU ENDINIT; on TC4xx both
- *   are in the PADCFG DRVCFG register of the pin.
- *
- ****************************************************************************/
-
-static void asclin_pin_config(uintptr_t port, int pin, bool tx)
-{
-#if defined(CONFIG_ARCH_CHIP_TC3X)
-  int shift = TC3X_PORT_IOCR_SHIFT(pin);
-
-  asclin_modify(TC3X_PORT_IOCR(port, pin), TC3X_PORT_IOCR_MASK << shift,
-                (tx ? TC3X_PORT_OUT_ALT2 : TC3X_PORT_IN_PULLUP) << shift);
-
-  shift = TC3X_PORT_PDR_SHIFT(pin);
-  tc3x_wdt_cpu_endinit(false);
-  asclin_modify(TC3X_PORT_PDR(port, pin), TC3X_PORT_PDR_MASK << shift,
-                TC3X_PORT_PAD_SPEED1 << shift);
-  tc3x_wdt_cpu_endinit(true);
-#elif defined(CONFIG_ARCH_CHIP_TC4X)
-  uintptr_t drvcfg = TC4X_PORT_DRVCFG(port, pin);
-
-  asclin_modify(drvcfg, TC4X_PORT_DRVCFG_MODE_MASK,
-                tx ? TC4X_PORT_OUT_ALT2 : TC4X_PORT_IN_PULLUP);
-  asclin_modify(drvcfg, TC4X_PORT_DRVCFG_PAD_MASK, TC4X_PORT_PAD_SPEED1);
-#endif
-}
-
-/****************************************************************************
  * Name: asclin_set_clock
  *
  * Description:
@@ -391,9 +359,9 @@ static void asclin_init(struct up_dev_s *priv)
 
   /* Pins, RX on input A */
 
-  asclin_pin_config(UART_PIN_PORT, UART_PIN_RX, false);
+  tricore_gpio_config(UART0_PIN_RX);
   asclin_modify(ASCLIN_REG(priv, IOCR), ASCLIN_IOCR_ALTI_MASK, 0);
-  asclin_pin_config(UART_PIN_PORT, UART_PIN_TX, true);
+  tricore_gpio_config(UART0_PIN_TX);
 
   /* Clock on, error flags enabled, FIFOs enabled and flushed */
 

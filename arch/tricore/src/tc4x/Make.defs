@@ -23,6 +23,7 @@
 CHIP_CSRCS += tc4x_timerisr.c
 CHIP_CSRCS += tc4x_wdt.c
 CHIP_CSRCS += tc4x_clockconfig.c
+CHIP_CSRCS += tc4x_gpio.c
 CHIP_CSRCS += tc4x_ram.c
 
 include common/aurix/Make.defs

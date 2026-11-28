@@ -31,9 +31,18 @@
 
 #include <stdint.h>
 
+#include "aurix/tricore_gpio.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* User LEDs LED1 on P00.5 and LED2 on P00.6, on when low */
+
+#define GPIO_LED1        (GPIO_PORT(0) | GPIO_PIN(5) | GPIO_OUTPUT | \
+                          GPIO_OUTPUT_SET)
+#define GPIO_LED2        (GPIO_PORT(0) | GPIO_PIN(6) | GPIO_OUTPUT | \
+                          GPIO_OUTPUT_SET)
 
 /****************************************************************************
  * Public Types

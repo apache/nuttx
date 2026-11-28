@@ -24,3 +24,7 @@
 # of each family
 
 target_sources(arch PRIVATE tricore_serial.c)
+
+if(CONFIG_DEV_GPIO)
+  target_sources(arch PRIVATE tricore_gpio_lower.c)
+endif()

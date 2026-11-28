@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS tc3x_timerisr.c tc3x_wdt.c tc3x_clockconfig.c)
+set(SRCS tc3x_timerisr.c tc3x_wdt.c tc3x_clockconfig.c tc3x_gpio.c)
 
 target_sources(arch PRIVATE ${SRCS})
 

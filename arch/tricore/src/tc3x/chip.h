@@ -28,12 +28,16 @@
  ****************************************************************************/
 
 #include "hardware/tc3x_cpu.h"
+#include "aurix/tricore_gpio.h"
 
-/* UART0 pins: ASCLIN0 RXA on P14.1, TX on P14.0 (alternate output 2) */
+/* UART0 pins: ASCLIN0 RXA on P14.1 with pull-up, TX on P14.0 as alternate
+ * output 2
+ */
 
-#define UART_PIN_PORT              0xf003ae00  /* P14 */
-#define UART_PIN_RX                1
-#define UART_PIN_TX                0
+#define UART0_PIN_RX               (GPIO_PORT(14) | GPIO_PIN(1) | \
+                                    GPIO_INPUT | GPIO_PULLUP)
+#define UART0_PIN_TX               (GPIO_PORT(14) | GPIO_PIN(0) | \
+                                    GPIO_OUTPUT | GPIO_ALT(2))
 
 /****************************************************************************
  * Pre-processor Definitions
