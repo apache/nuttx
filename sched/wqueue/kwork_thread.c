@@ -130,11 +130,11 @@ static inline_function bool work_dispatch(FAR struct kwork_wqueue_s *wqueue,
    * so ourselves, and (2) there will be no changes to the work queue
    */
 
-  flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
+  flags = work_lock();
 
   if (wqueue->exit)
     {
-      spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+      work_unlock(flags);
       return true;
     }
 
@@ -206,14 +206,14 @@ static inline_function bool work_dispatch(FAR struct kwork_wqueue_s *wqueue,
 
       kworker->work = work;
 
-      spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+      work_unlock(flags);
 
       /* Do the work.  Re-enable interrupts while the work is being
        * performed... we don't have any idea how long this will take!
        */
 
       CALL_WORKER(worker, arg);
-      flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
+      flags = work_lock();
 
       /* Back to the callback that called work_queue_dispatch(), if any,
        * so work_cancel_sync() still finds it running.
@@ -231,12 +231,12 @@ static inline_function bool work_dispatch(FAR struct kwork_wqueue_s *wqueue,
 
       if (wqueue->exit)
         {
-          spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+          work_unlock(flags);
           return true;
         }
     }
 
-  spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+  work_unlock(flags);
   return false;
 }
 
@@ -365,9 +365,9 @@ static int work_thread_create(FAR const char *name, int priority,
   return OK;
 
 errout_with_threads:
-  flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
+  flags = work_lock();
   wqueue->exit = true;
-  spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+  work_unlock(flags);
 
   sched_unlock();
 
@@ -500,7 +500,6 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
   nxsem_init(&wqueue->exsem, 0, 0);
   wqueue->nthreads = nthreads;
   wqueue->dynamic = true;
-  spin_lock_init(&wqueue->lock);
 
   /* Create the work queue thread pool */
 
@@ -560,7 +559,7 @@ int work_queue_free(FAR struct kwork_wqueue_s *wqueue)
    * to their owners before the queue storage is released.
    */
 
-  flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
+  flags = work_lock();
 
   wqueue->exit = true;
 
@@ -578,7 +577,7 @@ int work_queue_free(FAR struct kwork_wqueue_s *wqueue)
       work->worker = NULL;
     }
 
-  spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+  work_unlock(flags);
 
   /* Stop delayed dispatch after new submissions have been disabled. */
 

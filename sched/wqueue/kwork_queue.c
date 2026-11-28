@@ -93,11 +93,11 @@ static int work_qqueue(FAR struct kwork_wqueue_s *wqueue,
    * logic or interrupt handling logic.
    */
 
-  flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
+  flags = work_lock();
 
   if (wqueue->exit)
     {
-      spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+      work_unlock(flags);
       return -ESHUTDOWN;
     }
 
@@ -156,7 +156,7 @@ static int work_qqueue(FAR struct kwork_wqueue_s *wqueue,
       nxsem_post(&wqueue->sem);
     }
 
-  spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
+  work_unlock(flags);
   return OK;
 }
 
